@@ -132,7 +132,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @param  side         DOCUMENT ME!
      */
     public PrintTemplateFeature(final PrintTemplateFeature ptfTemplate, final Side side) {
-        this(ptfTemplate.template, ptfTemplate.resolution, ptfTemplate.scale, ptfTemplate.mappingComponent);
+        this(ptfTemplate.template, ptfTemplate.resolution, ptfTemplate.scale, ptfTemplate.mappingComponent, true);
         final Coordinate[] translationSide = ptfTemplate.getSideLineCoords(getTranslationSide(side));
         final AffineTransformation translationAT = AffineTransformation.translationInstance(translationSide[1].x
                         - translationSide[0].x,
@@ -154,6 +154,23 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             final Resolution resolution,
             final Scale scale,
             final MappingComponent mappingComponent) {
+        this(template, resolution, scale, mappingComponent, false);
+    }
+
+    /**
+     * Creates a new PrintTemplateFeature object.
+     *
+     * @param  template          DOCUMENT ME!
+     * @param  resolution        DOCUMENT ME!
+     * @param  scale             DOCUMENT ME!
+     * @param  mappingComponent  DOCUMENT ME!
+     * @param  cloning           DOCUMENT ME!
+     */
+    private PrintTemplateFeature(final Template template,
+            final Resolution resolution,
+            final Scale scale,
+            final MappingComponent mappingComponent,
+            final boolean cloning) {
         this.mappingComponent = mappingComponent;
         this.template = template;
         this.resolution = resolution;
@@ -163,7 +180,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                     .getCurrentBoundingBoxFromCamera();
         final double dimensionWidth = mappingComponent.getCamera().getViewBounds().getWidth();
         final double dimensionHeight = mappingComponent.getCamera().getViewBounds().getHeight();
-        init(boundingBoxToCalculateTheLocationOfTHeTemplate, dimensionWidth, dimensionHeight);
+        init(boundingBoxToCalculateTheLocationOfTHeTemplate, dimensionWidth, dimensionHeight, cloning);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -174,7 +191,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @param  boundingBoxToCalculateTheLocationOfTHeTemplate  DOCUMENT ME!
      */
     public final void init(final BoundingBox boundingBoxToCalculateTheLocationOfTHeTemplate) {
-        init(boundingBoxToCalculateTheLocationOfTHeTemplate, null, null);
+        init(boundingBoxToCalculateTheLocationOfTHeTemplate, null, null, false);
     }
 
     /**
@@ -183,10 +200,12 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @param  boundingBoxToCalculateTheLocationOfTHeTemplate  DOCUMENT ME!
      * @param  dimensionWidth                                  DOCUMENT ME!
      * @param  dimensionHeight                                 DOCUMENT ME!
+     * @param  cloning                                         DOCUMENT ME!
      */
     public final void init(final BoundingBox boundingBoxToCalculateTheLocationOfTHeTemplate,
             Double dimensionWidth,
-            Double dimensionHeight) {
+            Double dimensionHeight,
+            final boolean cloning) {
         if ((dimensionHeight == null) && (template != null)) {
             dimensionHeight = (double)template.getMapHeight();
         }
@@ -204,7 +223,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         double realWorldWidth = 0d;
 
         // calculate realworldsize
-        if (scaleDenominator == -1) {
+        if ((scaleDenominator == -1) && !cloning) {
             final String s = JOptionPane.showInputDialog(
                     StaticSwingTools.getParentFrame(mappingComponent),
                     org.openide.util.NbBundle.getMessage(
@@ -1030,7 +1049,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         public String getPTFString() {
             final String s = PrintTemplateFeature.this.template.getShortname() + "\n\n\n"
                         + "#" + PrintTemplateFeature.this.getNumber() + "\n\n\n"
-                        + PrintTemplateFeature.this.scale.getText() + "\n\n\n"
+                        + "1:" + PrintTemplateFeature.this.getRealScaleDenominator() + "\n\n\n"
                         + "Auflösung:" + PrintTemplateFeature.this.resolution.getResolution() + " dpi";
             return s;
         }
