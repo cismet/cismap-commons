@@ -745,6 +745,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     private void addFeatureToSelection(final FeatureCollection fc) {
         try {
+//            ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
             final Collection<Feature> features = fc.getSelectedFeatures();
             jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
             jxtFeatures.getSelectionModel().clearSelection();

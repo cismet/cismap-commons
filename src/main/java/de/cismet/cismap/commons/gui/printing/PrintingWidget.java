@@ -12,6 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import edu.umd.cs.piccolo.event.PInputEventListener;
+
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
@@ -24,7 +26,9 @@ import org.jdesktop.swingx.error.ErrorInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -34,11 +38,14 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
+
+import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -49,14 +56,15 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.HeadlessMapProvider;
 import de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.CismetThreadPool;
@@ -91,10 +99,10 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
     PDFCreatingWaitDialog pdfWait;
     private MappingComponent mappingComponent = null;
-    private String interactionModeAfterPrinting = "";            // NOI18N
     private AbstractPrintingInscriber inscriber = null;
     private ImageIcon errorImage = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/error.png")); // NOI18N
+    private BufferedImage northArrowImage = null;
     private Style styleTip;
     private Style styleSuccess;
     private Style styleInfo;
@@ -103,7 +111,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private Style styleError;
     private Style styleErrorReason;
     private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
-    private HeadlessMapProvider headlessMapProvider;
     private Future<Image> futureMapImage;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
@@ -149,6 +156,11 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     pdfWait = new PDFCreatingWaitDialog(StaticSwingTools.getParentFrame(mappingComponent), true);
                 }
             };
+        try {
+            northArrowImage = ImageIO.read(getClass().getResourceAsStream("/northarrow.png")); // NOI18N
+        } catch (Exception e) {
+            LOG.warn("Problems duroing the loading of the northarrow", e);
+        }
         CismetThreadPool.execute(t);
         this.mappingComponent = mappingComponent;
         initComponents();
@@ -189,8 +201,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
         StaticSwingTools.setNiftyScrollBars(scpLoadingStatus);
         // txpLoadingStatus.setContentType("text/html");
-
-        headlessMapProvider = HeadlessMapProvider.createHeadlessMapProviderAndAddLayers(mappingComponent);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -507,39 +517,55 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         panInscribe.add(inscriber, BorderLayout.CENTER);
 
         cmdOk.setEnabled(false);
-        final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
+//        final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
+//
+//        final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
 
-        final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.startLoading().msg",
-                new Object[] { r.getResolution() }),
-            EXPERT); // NOI18N
+        final PInputEventListener printing = mappingComponent.getInputListener(
+                MappingComponent.PRINTING_AREA_SELECTION);
 
-        headlessMapProvider.addPropertyChangeListener(this);
+        if (printing instanceof PrintingTemplatePreviewListener) {
+            for (final PrintTemplateFeature ptf
+                        : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
+                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                        PrintingWidget.class,
+                        "PrintingWidget.startLoading().msg",
+                        new Object[] { ptf.getResolution() }),
+                    EXPERT); // NOI18N
+                final HeadlessMapProvider headlessMapProvider = HeadlessMapProvider
+                            .createHeadlessMapProviderAndAddLayers(mappingComponent);
+                headlessMapProvider.setRequestingObject(ptf);
+                headlessMapProvider.addPropertyChangeListener(this);
 
-        final BoundingBox bb =
-            ((PrintingFrameListener)mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))
-                    .getPrintingBoundingBox();
-        // transform BoundingBox to XBoundingBox
-        final Crs crs = mappingComponent.getMappingModel().getSrs();
-        final boolean isMetric = crs.isMetric();
-        final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
-                bb.getY1(),
-                bb.getX2(),
-                bb.getY2(),
-                crs.getCode(),
-                isMetric);
-        headlessMapProvider.setBoundingBox(xbb);
-
-        futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
-                r.getResolution(),
-                t.getMapWidth(),
-                t.getMapHeight());
-
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("BoundingBox:" + bb); // NOI18N
+                if ((ptf.getRotationAngle() == 0)) {
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            ptf.getTemplate().getMapWidth(),
+                            ptf.getTemplate().getMapHeight()));
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("BoundingBox (auf " + ptf.getTemplate().getMapWidth() + ","
+                                    + ptf.getTemplate().getMapHeight() + "):" + xbb); // NOI18N
+                    }
+                } else {
+                    // Rotationpreparation
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry().getEnvelope());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    final Dimension newDimension = RotatedPrintingUtils
+                                .calculateNewImageDimensionToFitRotatedBoundingBox(ptf.getTemplate().getMapWidth(),
+                                    ptf.getTemplate().getMapHeight(),
+                                    ptf.getRotationAngle());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Extended BoundingBox (auf " + newDimension + "):" + xbb); // NOI18N
+                    }
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            newDimension.getWidth(),
+                            newDimension.getHeight()));
+                }
             }
         }
 
@@ -562,8 +588,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        mappingComponent.setInteractionMode(interactionModeAfterPrinting);
-        mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
@@ -587,49 +611,102 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                 }
                             });
                     }
-                    final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                    final Scale s = mappingComponent.getPrintingSettingsDialog().getSelectedScale();
-                    mappingComponent.getPrintingFrameLayer().removeAllChildren();
-                    mappingComponent.setInteractionMode(interactionModeAfterPrinting);
-                    if (DEBUG) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
-                        }
-                    }
 
-                    try {
-                        final HashMap param = new HashMap();
-                        param.put(t.getMapPlaceholder(), futureMapImage.get());
-                        String scaleDenomString = "" + s.getDenominator();                                            // NOI18N
-                        if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))                            // NOI18N
-                        {
-                            final int sd = (int)
-                                (((PrintingFrameListener)mappingComponent.getInputListener(
-                                            MappingComponent.PRINTING_AREA_SELECTION)).getScaleDenominator() + 0.5d); // +0.5=Runden
-                            scaleDenomString = "" + sd;                                                               // NOI18N
-                        }
-                        param.put(t.getScaleDemoninatorPlaceholder(), scaleDenomString);
-                        param.putAll(inscriber.getValues());
+                    final PrintingTemplatePreviewListener printingListener = ((PrintingTemplatePreviewListener)
+                            (mappingComponent.getInputListener(
+                                    MappingComponent.PRINTING_AREA_SELECTION)));
+                    final ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(
+                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size());
+                    for (final PrintTemplateFeature ptf
+                                : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
+                        final Template t = ptf.getTemplate();
+                        final Scale s = ptf.getScale();
+                        try {
+                            final HashMap param = new HashMap();
 
-                        final BoundingBox bbox =
-                            ((PrintingFrameListener)mappingComponent.getInputListener(
-                                    MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
-                        param.put(BB_MIN_X, bbox.getX1());
-                        param.put(BB_MIN_Y, bbox.getY1());
-                        param.put(BB_MAX_X, bbox.getX2());
-                        param.put(BB_MAX_Y, bbox.getY2());
+                            final Image i = ptf.getFutureMapImage().get();
 
-                        if (DEBUG) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Parameter:" + param); // NOI18N
+                            if (ptf.getRotationAngle() == 0) {
+                                param.put(t.getMapPlaceholder(), i);
+                                System.out.println("Imagedimension (raw - not rotated):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+                            } else {
+                                param.put(ptf.getTemplate().getNorthArrowPlaceholder(),
+                                    RotatedPrintingUtils.rotate(northArrowImage, -1 * ptf.getRotationAngle()));
+
+                                final BufferedImage correctedImage = RotatedPrintingUtils.rotateAndCrop(
+                                        i,
+                                        ptf.getRotationAngle(),
+                                        ptf.getTemplate().getMapWidth(),
+                                        ptf.getTemplate().getMapHeight(),
+                                        (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                                        ptf.getResolution().getResolution());
+                                param.put(t.getMapPlaceholder(), correctedImage);
+                                System.out.println("Imagedimension (raw):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+
+                                System.out.println("Imagedimension (corrected):" + correctedImage.getWidth() + ","
+                                            + correctedImage.getHeight());
+                            }
+
+                            param.put(t.getScaleDemoninatorPlaceholder(),
+                                String.valueOf(ptf.getRealScaleDenominator()));
+                            final HashMap<String, String> vals = inscriber.getValues();
+                            for (final String key : vals.keySet()) {
+                                vals.put(key, vals.get(key).replaceAll("##N##", String.valueOf(ptf.getNumber())));
+                                vals.put(
+                                    key,
+                                    vals.get(key).replaceAll(
+                                        "##G##",
+                                        String.valueOf(
+                                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)
+                                                        .size())));
+                            }
+                            param.putAll(vals);
+                            // Werte können nur gesetzt werden wenn das Template nicht gedreht wurde
+                            if (ptf.getRotationAngle() == 0) {
+                                final XBoundingBox bbox = new XBoundingBox(ptf.getGeometry());
+                                param.put(BB_MIN_X, bbox.getX1());
+                                param.put(BB_MIN_Y, bbox.getY1());
+                                param.put(BB_MAX_X, bbox.getX2());
+                                param.put(BB_MAX_Y, bbox.getY2());
+                            }
+                            if (DEBUG) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Parameter:" + param); // NOI18N
+                                }
+                            }
+
+                            final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
+                                            .getResourceAsStream(t.getFile()));
+                            final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
+                            prints.add(jasperPrint);
+                        } catch (Throwable tt) {
+                            LOG.error("Error during Jaspern", tt); // NOI18N
+
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.message"), // NOI18N
+                                    null,
+                                    null,
+                                    tt,
+                                    Level.ALL,
+                                    null);
+                            JXErrorPane.showDialog(PrintingWidget.this.mappingComponent, ei);
+
+                            if (pdfWait.isVisible()) {
+                                pdfWait.dispose();
                             }
                         }
-
-                        final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
-                                        .getResourceAsStream(t.getFile()));
-                        final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
-
-                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW)) {
+                    }
+                    try {
+                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() == 1)) {
+                            final JasperPrint jasperPrint = prints.get(0);
                             final JRViewer aViewer = new JRViewer(jasperPrint);
                             final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
                                         PrintingWidget.class,
@@ -645,7 +722,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                         + 20);
                             aFrame.setLocationRelativeTo(PrintingWidget.this);
                             aFrame.setVisible(true);
-                        } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
+                        } else if (a.getId().equalsIgnoreCase(Action.PDF)
+                                    || (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() > 1))) {
                             if (mappingComponent.getPrintingSettingsDialog().isChooseFileName()) {
                                 final File file = StaticSwingTools.chooseFile(DownloadManager.instance()
                                                 .getDestinationDirectory().getAbsolutePath(),
@@ -656,7 +734,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
                                 if (file != null) {
                                     final JasperDownload jd = new JasperDownload(
-                                            jasperPrint,
+                                            prints,
                                             file.getParent(),
                                             "Cismap-Druck",
                                             file.getName().substring(0, file.getName().indexOf(".")));
@@ -682,7 +760,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                             PrintingWidget.this.mappingComponent)) {
                                 final String jobname = DownloadManagerDialog.getInstance().getJobName();
                                 DownloadManager.instance()
-                                        .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
+                                        .add(new JasperDownload(prints, jobname, "Cismap-Druck", "cismap"));
                             }
 
                             java.awt.EventQueue.invokeLater(new Runnable() {
@@ -695,7 +773,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                     }
                                 });
                         } else if (a.getId().equalsIgnoreCase(Action.PRINT)) {
-                            JasperPrintManager.printReport(jasperPrint, true);
+                            for (final JasperPrint jasperPrint : prints) {
+                                JasperPrintManager.printReport(jasperPrint, true);
+                            }
                         }
                     } catch (Throwable tt) {
                         LOG.error("Error during Jaspern", tt); // NOI18N
@@ -717,9 +797,16 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                             pdfWait.dispose();
                         }
                     }
+                    final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
+                                PrintTemplateFeature.class));
+                    mappingComponent.getFeatureCollection().removeFeatures(ptfs);
+                    CismapBroker.getInstance()
+                            .setCheckForOverlappingGeometriesAfterFeatureRotation(
+                                mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
                 }
             };
         CismetThreadPool.execute(t);
+
         dispose();
     } //GEN-LAST:event_cmdOkActionPerformed
 
@@ -736,24 +823,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     // new PrintingWidget(new javax.swing.JFrame(), true).setVisible(true);
                 }
             });
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getInteractionModeAfterPrinting() {
-        return interactionModeAfterPrinting;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  interactionModeAfterPrinting  DOCUMENT ME!
-     */
-    public void setInteractionModeAfterPrinting(final String interactionModeAfterPrinting) {
-        this.interactionModeAfterPrinting = interactionModeAfterPrinting;
     }
 
     /**
@@ -811,23 +880,39 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof HeadlessMapProvider.NotificationMessage) {
-            final HeadlessMapProvider.NotificationMessage message = (HeadlessMapProvider.NotificationMessage)
-                evt.getNewValue();
-            addMessageToProgressPane(message.getMsg(), message.getLevel());
+        if (evt.getSource() instanceof HeadlessMapProvider) {
+            final HeadlessMapProvider source = (HeadlessMapProvider)evt.getSource();
 
-            if (message.getLevel().equals(UNLOCKED)) {
-                activateButton();
-            } else if (message.getLevel().equals(ERROR_REASON) && (evt.getOldValue() instanceof RetrievalEvent)) {
-                final RetrievalEvent e = (RetrievalEvent)evt.getOldValue();
-                if (e.getRetrievedObject() instanceof Image) {
-                    final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
-                    addIconToProgressPane(errorImage, i);
-                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                            PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
-                            new Object[] { e.getRetrievalService() }),
-                        ERROR_REASON); // NOI18N
+            if (evt.getNewValue() instanceof HeadlessMapProvider.NotificationMessage) {
+                final HeadlessMapProvider.NotificationMessage message = (HeadlessMapProvider.NotificationMessage)
+                    evt.getNewValue();
+                addMessageToProgressPane(message.getMsg(), message.getLevel());
+
+                if (message.getLevel().equals(UNLOCKED)) {
+                } else if (message.getLevel().equals(ERROR_REASON) && (evt.getOldValue() instanceof RetrievalEvent)) {
+                    final RetrievalEvent e = (RetrievalEvent)evt.getOldValue();
+                    if (e.getRetrievedObject() instanceof Image) {
+                        final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
+                        addIconToProgressPane(errorImage, i);
+                        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                                PrintingWidget.class,
+                                "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
+                                new Object[] { e.getRetrievalService() }),
+                            ERROR_REASON); // NOI18N
+                    }
+                }
+
+                final Collection<PrintTemplateFeature> prints = mappingComponent.getSpecialFeatureCollection(
+                        PrintTemplateFeature.class);
+                boolean allPrintsReady = true;
+                for (final PrintTemplateFeature ptf : prints) {
+                    if (!(ptf.getFutureMapImage().isDone() || ptf.getFutureMapImage().isCancelled())) {
+                        allPrintsReady = false;
+                        break;
+                    }
+                }
+                if (allPrintsReady) {
+                    activateButton();
                 }
             }
         }

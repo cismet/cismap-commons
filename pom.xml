@@ -156,7 +156,7 @@
             <artifactId>deegree-core-rendering-2d</artifactId>
             <version>3.2.0</version>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -174,6 +174,17 @@
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+        </plugins>
         <finalName>cismapCommons</finalName>
     </build>
 </project>

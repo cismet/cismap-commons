@@ -32,23 +32,19 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.raster.wms.AbstractWMS;
-import de.cismet.cismap.commons.raster.wms.AbstractWMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -115,6 +111,7 @@ public class HeadlessMapProvider {
     private double printingResolution = 0;
     private double resolution = 72.0;
     private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
+    private Object requestingObject;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -198,6 +195,24 @@ public class HeadlessMapProvider {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public Object getRequestingObject() {
+        return requestingObject;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  requestingObject  DOCUMENT ME!
+     */
+    public void setRequestingObject(final Object requestingObject) {
+        this.requestingObject = requestingObject;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  the featureResolutionFactor
      */
     public double getFeatureResolutionFactor() {
@@ -271,13 +286,15 @@ public class HeadlessMapProvider {
             // Features
             for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
                 final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
-                headlessMapProvider.addFeature(f);
+                if (!(f instanceof PrintTemplateFeature)) {
+                    headlessMapProvider.addFeature(f);
 
-                if (infoNodeExpanded) {
-                    final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
+                    if (infoNodeExpanded) {
+                        final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
 
-                    if (pf != null) {
-                        pf.setInfoNodeExpanded(true);
+                        if (pf != null) {
+                            pf.setInfoNodeExpanded(true);
+                        }
                     }
                 }
             }
@@ -945,11 +962,19 @@ public class HeadlessMapProvider {
         private void sendNotification(final String msg,
                 final HeadlessMapProvider.NotificationLevel level,
                 final RetrievalEvent e) {
+            String prefix;
+            if ((msg != null) && (msg.trim().length() > 0)
+                        && (HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature)
+                        && (map.getSpecialFeatureCollection(PrintTemplateFeature.class).size() > 1)) {
+                prefix = ((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName() + ": ";
+            } else {
+                prefix = "";
+            }
             final PropertyChangeEvent evt = new PropertyChangeEvent(
-                    this,
+                    HeadlessMapProvider.this,
                     "notification",
                     e,
-                    new HeadlessMapProvider.NotificationMessage(msg, level));
+                    new HeadlessMapProvider.NotificationMessage(prefix + msg, level));
 
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
