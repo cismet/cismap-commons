@@ -56,7 +56,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
     protected Point2D pressPoint;
     protected Point2D dragPoint;
     protected PDimension dragDim;
-    protected PFeature feature;
+    protected PFeature pFeature;
     protected MappingComponent mc;
     protected Vector features = new Vector();
 
@@ -93,32 +93,34 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             dragPoint = pressPoint;
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
 
-            if (((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
-                            && ((PFeature)o).getFeature().canBeSelected())
-                        || (((PFeature)o).getFeature() instanceof LinearReferencedLineFeature)) {
-                feature = (PFeature)(o);
-                feature.setStrokePaint(Color.red);
-                if (features.contains(feature)) {
-//                    features.remove(feature);
-//                    mc.reconsiderFeature(feature.getFeature());
-                } else {
-                    features.add(feature);
-                    feature.moveToFront();
-                }
-                if (!feature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) {
-                    mc.getFeatureCollection().unselectAll();
-                    mc.getFeatureCollection().select(feature.getFeature());
-                    postSelectionChanged();
+            if (o instanceof PFeature) {
+                pFeature = (PFeature)(o);
+                if ((pFeature.getFeature().isEditable() && pFeature.getFeature().canBeSelected())
+                            || (pFeature.getFeature() instanceof LinearReferencedLineFeature)) {
+                    pFeature = (PFeature)(o);
+                    pFeature.setStrokePaint(Color.red);
+                    if (features.contains(pFeature)) {
+//                    features.remove(pFeature);
+//                    mc.reconsiderFeature(pFeature.getFeature());
+                    } else {
+                        features.add(pFeature);
+                        pFeature.moveToFront();
+                    }
+                    if (!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) {
+                        mc.getFeatureCollection().unselectAll();
+                        mc.getFeatureCollection().select(pFeature.getFeature());
+                        postSelectionChanged();
+                    }
                 }
             } else {
-                feature = null;
+                pFeature = null;
             }
         }
     }
 
     @Override
     public void mouseDragged(final PInputEvent e) {
-        if (handleLayer.getChildrenCount() > 0) {
+        if ((pFeature != null) && (handleLayer.getChildrenCount() > 0)) {
             drag = true;
             final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
             if (moveListener != null) {
@@ -127,9 +129,9 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                 log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
             }
             super.mouseDragged(e);
-            if (feature != null) {
+            if (pFeature != null) {
                 dragPoint = e.getPosition();
-                final Feature feat = feature.getFeature();
+                final Feature feat = pFeature.getFeature();
                 // bestimmt selbst wie es bewegt wird?
                 if (feat instanceof SelfManipulatingFeature) {
                     final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
@@ -177,10 +179,10 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
         // endDrag
-        if (drag) {
+        if ((pFeature != null) && drag) {
             drag = false;
 
-            final Feature feat = feature.getFeature();
+            final Feature feat = pFeature.getFeature();
             if (feat instanceof SelfManipulatingFeature) {
                 ((SelfManipulatingFeature)feat).moveFinished();
             }

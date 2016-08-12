@@ -31,13 +31,18 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class PureNewFeature extends AbstractNewFeature implements Cloneable, XStyledFeature, Attachable {
+public class PureNewFeature extends AbstractNewFeature implements Cloneable,
+    XStyledFeature,
+    Attachable,
+    PreventNamingDuplicates {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PureNewFeature.class);
 
     //~ Instance fields --------------------------------------------------------
+
+    int number = 0;
 
     private Paint fillingPaint = new Color(1f, 0f, 0f, 0.4f);
 
@@ -140,7 +145,7 @@ public class PureNewFeature extends AbstractNewFeature implements Cloneable, XSt
      * @return  DOCUMENT ME!
      */
     @Override
-    public String getName() {
+    public String getOriginalName() {
         final String name = super.getName();
         if (getGeometryType() != null) {
             if ((name != null) && name.trim().equals("")) {
@@ -214,5 +219,23 @@ public class PureNewFeature extends AbstractNewFeature implements Cloneable, XSt
                 return "Error in getName()";                                  // NOI18N
             }
         }
+    }
+    @Override
+    public String getName() {
+        if (number == 1) {
+            return getOriginalName();
+        } else {
+            return getOriginalName() + " - " + number;
+        }
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public void setNumber(final int n) {
+        number = n;
     }
 }

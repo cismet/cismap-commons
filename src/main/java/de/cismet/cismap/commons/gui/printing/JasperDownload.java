@@ -13,28 +13,34 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 
 import java.io.File;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
- * A deprecated download for JasperReports. The disadvantage of this class is that it needs the already created
- * parameters and datasource for the report. This creation is often a time-consuming task, which has to happen before
- * the download can be added to DownloadManager. During this waiting time the user has no feedback or an extra dialog
- * has to be shown. This behavior should be avoided.
+ * A download for JasperReports. The disadvantage of this class is that it needs the already created parameters and
+ * datasource for the report. This creation is often a time-consuming task, which has to happen before the download can
+ * be added to DownloadManager. During this waiting time the user has no feedback or an extra dialog has to be shown.
+ * This behavior is needed for the Printing of maps with it own progress dialog with extra information about the loading
+ * of the maps.
  *
- * @author      jweintraut
- * @version     $Revision$, $Date$
- * @deprecated  Use the class {@link JasperReportDownload} instead.
+ * @author   jweintraut
+ * @version  $Revision$, $Date$
  */
 public class JasperDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
-    private JasperPrint print;
+    private ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(5);
     private JasperReport report;
     private Map parameters;
     private JRDataSource dataSource;
@@ -54,7 +60,29 @@ public class JasperDownload extends AbstractCancellableDownload {
             final String directory,
             final String title,
             final String filename) {
-        this.print = print;
+        prints.add(print);
+        this.directory = directory;
+        this.title = title;
+
+        status = State.WAITING;
+
+        determineDestinationFile(filename, ".pdf");
+    }
+
+    /**
+     * Constructor for Download.
+     *
+     * @param  prints     The JasperPrint to export.
+     * @param  directory  Specifies in which directory to save the file. This should be specified relative to the
+     *                    general download directory.
+     * @param  title      The title of the download.
+     * @param  filename   A String containing the filename.
+     */
+    public JasperDownload(final Collection<JasperPrint> prints,
+            final String directory,
+            final String title,
+            final String filename) {
+        this.prints.addAll(prints);
         this.directory = directory;
         this.title = title;
 
@@ -102,18 +130,25 @@ public class JasperDownload extends AbstractCancellableDownload {
 
         stateChanged();
 
-        if (print == null) {
+        if (prints.isEmpty() && (report != null)) {
             try {
-                print = JasperFillManager.fillReport(report, parameters, dataSource);
+                prints.add(JasperFillManager.fillReport(report, parameters, dataSource));
             } catch (JRException ex) {
                 error(ex);
             }
         }
 
-        if (print != null) {
+        if (prints.size() > 0) {
             try {
                 if (!Thread.interrupted()) {
-                    JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
+                    final JRPdfExporter exporter = new JRPdfExporter();
+
+                    exporter.setExporterInput(SimpleExporterInput.getInstance(prints));
+                    exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(fileToSaveTo.getPath()));
+                    final SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+                    configuration.setCreatingBatchModeBookmarks(true);
+                    exporter.setConfiguration(configuration);
+                    exporter.exportReport();
                 } else {
                     log.info("Download was interuppted");
                     deleteFile();

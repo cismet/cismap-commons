@@ -122,6 +122,10 @@ public class RotationPHandle extends PHandle {
                 aEvent,
                 pfeature.getXp(entityPosition, ringPosition)[coordPosition],
                 pfeature.getYp(entityPosition, ringPosition)[coordPosition]);
+
+        // No sense for stepping with discrete steps through the roatating process
+        // because of the restarting with 0 when a new rotation drag operation ist started
+
         if ((pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection)
                     && (((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).getSelectedFeatures()
                         .size() > 1)) {
@@ -261,17 +265,15 @@ public class RotationPHandle extends PHandle {
                             (Point2D)mid.clone(),
                             rotation);
                     a.doAction();
-                } else {
-                    if (rotation != 0.0d) {
-                        pfeature.getViewer()
-                                .getMemUndo()
-                                .addAction(new FeatureRotateAction(
-                                        pfeature.getViewer(),
-                                        selArr,
-                                        (Point2D)mid.clone(),
-                                        rotation));
-                        pfeature.getViewer().getMemRedo().clear();
-                    }
+                } else if (rotation != 0.0d) {
+                    pfeature.getViewer()
+                            .getMemUndo()
+                            .addAction(new FeatureRotateAction(
+                                    pfeature.getViewer(),
+                                    selArr,
+                                    (Point2D)mid.clone(),
+                                    rotation));
+                    pfeature.getViewer().getMemRedo().clear();
                 }
             } else {
                 if (log.isDebugEnabled()) {
