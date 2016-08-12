@@ -210,7 +210,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      */
     private void ensureVisibilityOfPrintingTemplates() {
         if (!mappingComponent.isFixedMapExtent()) {
-            mappingComponent.zoomToAFeatureCollection(mappingComponent.getPrintFeatureCollection(),
+            mappingComponent.zoomToAFeatureCollection(mappingComponent.getSpecialFeatureCollection(
+                    PrintTemplateFeature.class),
                 false,
                 mappingComponent.isFixedMapScale());
         }

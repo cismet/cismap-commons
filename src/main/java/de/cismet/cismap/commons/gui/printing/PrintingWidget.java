@@ -525,7 +525,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                 MappingComponent.PRINTING_AREA_SELECTION);
 
         if (printing instanceof PrintingTemplatePreviewListener) {
-            for (final PrintTemplateFeature ptf : mappingComponent.getPrintFeatureCollection()) {
+            for (final PrintTemplateFeature ptf
+                        : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
                 addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
                         PrintingWidget.class,
                         "PrintingWidget.startLoading().msg",
@@ -615,8 +616,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                             (mappingComponent.getInputListener(
                                     MappingComponent.PRINTING_AREA_SELECTION)));
                     final ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(
-                            mappingComponent.getPrintFeatureCollection().size());
-                    for (final PrintTemplateFeature ptf : mappingComponent.getPrintFeatureCollection()) {
+                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size());
+                    for (final PrintTemplateFeature ptf
+                                : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
                         final Template t = ptf.getTemplate();
                         final Scale s = ptf.getScale();
                         try {
@@ -658,7 +660,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                     key,
                                     vals.get(key).replaceAll(
                                         "##G##",
-                                        String.valueOf(mappingComponent.getPrintFeatureCollection().size())));
+                                        String.valueOf(
+                                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)
+                                                        .size())));
                             }
                             param.putAll(vals);
                             // Werte können nur gesetzt werden wenn das Template nicht gedreht wurde
@@ -793,8 +797,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                             pdfWait.dispose();
                         }
                     }
-                    final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent
-                                    .getPrintFeatureCollection());
+                    final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
+                                PrintTemplateFeature.class));
                     mappingComponent.getFeatureCollection().removeFeatures(ptfs);
                     CismapBroker.getInstance()
                             .setCheckForOverlappingGeometriesAfterFeatureRotation(
@@ -898,7 +902,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     }
                 }
 
-                final Collection<PrintTemplateFeature> prints = mappingComponent.getPrintFeatureCollection();
+                final Collection<PrintTemplateFeature> prints = mappingComponent.getSpecialFeatureCollection(
+                        PrintTemplateFeature.class);
                 boolean allPrintsReady = true;
                 for (final PrintTemplateFeature ptf : prints) {
                     if (!(ptf.getFutureMapImage().isDone() || ptf.getFutureMapImage().isCancelled())) {

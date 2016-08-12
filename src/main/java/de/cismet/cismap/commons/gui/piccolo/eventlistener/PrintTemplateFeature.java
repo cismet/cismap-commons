@@ -514,7 +514,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public String getName() {
-        if (number == 1) {
+        if (mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size() == 1) {
             return getOriginalName();
         } else {
             return getOriginalName() + " - " + number;

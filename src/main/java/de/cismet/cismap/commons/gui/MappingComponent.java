@@ -629,7 +629,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void ensureVisibilityOfPrintingTemplates() {
         if (!isFixedMapExtent()) {
-            zoomToAFeatureCollection(getPrintFeatureCollection(),
+            zoomToAFeatureCollection(getSpecialFeatureCollection(PrintTemplateFeature.class),
                 false,
                 isFixedMapScale());
         }
@@ -638,18 +638,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     /**
      * DOCUMENT ME!
      *
+     * @param   <T>           DOCUMENT ME!
+     * @param   featureclass  DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
-    public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
-        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
+    public <T extends Feature> Collection<T> getSpecialFeatureCollection(final Class<T> featureclass) {
+        final ArrayList<T> fc = new ArrayList<>();
         for (final Feature f : getFeatureCollection().getAllFeatures()) {
-            if (f instanceof PrintTemplateFeature) {
-                pfc.add((PrintTemplateFeature)f);
+            if (featureclass.isInstance(f)) {
+                fc.add((T)f);
             }
         }
-        return pfc;
+        return fc;
     }
-
     /**
      * DOCUMENT ME!
      *

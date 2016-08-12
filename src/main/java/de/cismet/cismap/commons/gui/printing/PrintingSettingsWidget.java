@@ -433,7 +433,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        if (mappingComponent.getPrintFeatureCollection().size() == 0) {
+        if (mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size() == 0) {
             CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
         }
         dispose();
