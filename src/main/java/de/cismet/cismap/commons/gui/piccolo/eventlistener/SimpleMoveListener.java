@@ -205,48 +205,48 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     }
                                 }
                             }
-                            xCoord = mappingComponent.getWtst()
-                                        .getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
-                            yCoord = mappingComponent.getWtst()
-                                        .getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
+                        }
+                        xCoord = mappingComponent.getWtst()
+                                    .getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
+                        yCoord = mappingComponent.getWtst()
+                                    .getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
 
-                            refreshPointerAnnotation(event);
+                        refreshPointerAnnotation(event);
 
-                            postCoordinateChanged();
-                            try {
-                                mappingComponent.getSnapHandleLayer().removeAllChildren();
-                            } catch (Exception e) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Fehler beim entfernen der SnappingVisualisierung", e); // NOI18N
-                                }
+                        postCoordinateChanged();
+                        try {
+                            mappingComponent.getSnapHandleLayer().removeAllChildren();
+                        } catch (Exception e) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Fehler beim entfernen der SnappingVisualisierung", e); // NOI18N
                             }
+                        }
 
-                            if (mappingComponent.isVisualizeSnappingEnabled()) {
-                                final Point2D nearestPoint = PFeatureTools.getNearestPointInArea(
-                                        mappingComponent,
-                                        event.getCanvasPosition(),
-                                        mappingComponent.isSnappingOnLineEnabled(),
-                                        true);
-                                if (nearestPoint != null) {
-                                    mappingComponent.getCamera().viewToLocal(nearestPoint);
-                                    final PPath show = PPath.createEllipse((float)(nearestPoint.getX() - 3),
-                                            (float)(nearestPoint.getY() - 3),
-                                            (float)(6),
-                                            (float)(6));
-                                    show.setPaint(new Color(0, 0, 0));
-                                    mappingComponent.getSnapHandleLayer().addChild(show);
-                                }
-                                if (mappingComponent.isVisualizeSnappingRectEnabled()) {
-                                    snapRect.setVisible(true);
-                                    snapRect.setPathToRectangle((int)event.getCanvasPosition().getX()
-                                                - (mappingComponent.getSnappingRectSize() / 2),
-                                        (int)event.getCanvasPosition().getY()
-                                                - (mappingComponent.getSnappingRectSize() / 2),
-                                        mappingComponent.getSnappingRectSize(),
-                                        mappingComponent.getSnappingRectSize());
-                                } else {
-                                    snapRect.setVisible(false);
-                                }
+                        if (mappingComponent.isVisualizeSnappingEnabled()) {
+                            final Point2D nearestPoint = PFeatureTools.getNearestPointInArea(
+                                    mappingComponent,
+                                    event.getCanvasPosition(),
+                                    mappingComponent.isSnappingOnLineEnabled(),
+                                    true);
+                            if (nearestPoint != null) {
+                                mappingComponent.getCamera().viewToLocal(nearestPoint);
+                                final PPath show = PPath.createEllipse((float)(nearestPoint.getX() - 3),
+                                        (float)(nearestPoint.getY() - 3),
+                                        (float)(6),
+                                        (float)(6));
+                                show.setPaint(new Color(0, 0, 0));
+                                mappingComponent.getSnapHandleLayer().addChild(show);
+                            }
+                            if (mappingComponent.isVisualizeSnappingRectEnabled()) {
+                                snapRect.setVisible(true);
+                                snapRect.setPathToRectangle((int)event.getCanvasPosition().getX()
+                                            - (mappingComponent.getSnappingRectSize() / 2),
+                                    (int)event.getCanvasPosition().getY()
+                                            - (mappingComponent.getSnappingRectSize() / 2),
+                                    mappingComponent.getSnappingRectSize(),
+                                    mappingComponent.getSnappingRectSize());
+                            } else {
+                                snapRect.setVisible(false);
                             }
                         }
                     } catch (Exception e) {
@@ -434,14 +434,16 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 leftNeighbour = p1;
                                 rightNeighbour = p0;
                             } else // Nachbar "0" und "1" liegen genau übereinander
-                            if (p0.getY() <= p1.getY()) {
-                                // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
-                                leftNeighbour = p0;
-                                rightNeighbour = p1;
-                            } else {
-                                // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
-                                leftNeighbour = p1;
-                                rightNeighbour = p0;
+                            {
+                                if (p0.getY() <= p1.getY()) {
+                                    // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
+                                    leftNeighbour = p0;
+                                    rightNeighbour = p1;
+                                } else {
+                                    // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
+                                    leftNeighbour = p1;
+                                    rightNeighbour = p0;
+                                }
                             }
 
                             // Abstand zum linken Nachbar berechnen
