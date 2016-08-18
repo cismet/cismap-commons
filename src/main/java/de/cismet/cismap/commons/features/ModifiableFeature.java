@@ -31,6 +31,13 @@ public interface ModifiableFeature extends Feature {
     FeatureServiceFeature saveChanges() throws Exception;
 
     /**
+     * Saves the feature.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    void saveChangesWithoutReload() throws Exception;
+
+    /**
      * Deletes the feature.
      *
      * @throws  Exception  DOCUMENT ME!
@@ -41,4 +48,11 @@ public interface ModifiableFeature extends Feature {
      * undo all changes since the last save.
      */
     void undoAll();
+
+    /**
+     * Determies, if the feature was changed during the current edit mode interval.
+     *
+     * @return  true, iff the features was changed since the edit mode was turned on
+     */
+    boolean isFeatureChanged();
 }

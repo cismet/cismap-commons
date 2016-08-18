@@ -60,6 +60,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private Color backgroundColor;
 
     private final JDBCFeatureInfo featureInfo;
+    private boolean modified = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -82,6 +83,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         super.setEditable(editable);
 
         if (oldEditableStatus != editable) {
+            modified = false;
+
             if (!editable && (stations != null)) {
                 for (final String key : stations.keySet()) {
                     stations.get(key).dispose();
@@ -220,13 +223,12 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             super.setProperties(getProperties());
         }
 
-        if (getProperty(propertyName.toUpperCase()) != null) {
-            super.addProperty(propertyName.toUpperCase(), propertyValue);
-        } else {
-            super.addProperty(propertyName, propertyValue);
-        }
+        super.addProperty(propertyName, propertyValue);
 
         featureInfo.clearCache();
+        if (isEditable()) {
+            modified = true;
+        }
     }
 
     /**
@@ -240,8 +242,16 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     @Override
     public FeatureServiceFeature saveChanges() throws Exception {
+        saveChangesWithoutReload();
+
+        return this;
+    }
+
+    @Override
+    public void saveChangesWithoutReload() throws Exception {
         if (!existProperties()) {
-            return this;
+            // no changes
+            return;
         }
 
         final String checkSql = "SELECT \"id\" FROM \"%1s\" WHERE \"id\" = %2s";
@@ -266,8 +276,6 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 st.close();
             }
         }
-
-        return this;
     }
 
     /**
@@ -323,7 +331,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             final Object value = map.get(name);
             String valueString;
 
-            if ((value instanceof String) || (value instanceof Geometry)) {
+            if ((value instanceof String) || (value instanceof Geometry) || (value instanceof java.sql.Timestamp)) {
                 valueString = "'" + value + "'";
             } else {
                 valueString = value.toString();
@@ -475,7 +483,17 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     public Geometry getGeometry() {
         if (existProperties()) {
             return (Geometry)super.getProperty(featureInfo.getGeoField());
+        } else {
+            return getOriginalGeometry();
         }
+    }
+
+    /**
+     * Provides the geometry from the database. The content of the property container will be ignored.
+     *
+     * @return  The geometry that is currently saved within the database
+     */
+    private Geometry getOriginalGeometry() {
         Geometry g = null;
         g = featureInfo.getGeometryFromCache(getId());
 
@@ -491,6 +509,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             rs = ps.executeQuery();
             if (rs.next()) {
                 g = (Geometry)rs.getObject(1);
+                g.setSRID(featureInfo.getSrid());
             }
         } catch (final Exception e) {
             logger.error("Cannot read geometry from the database.", e);
@@ -519,9 +538,17 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         if (!existProperties()) {
             super.setProperties(getProperties());
         }
+        final Geometry oldGeom = getGeometry();
 
-        featureInfo.clearCache();
-        super.addProperty(featureInfo.getGeoField(), geom);
+        if (((oldGeom == null) != (geom == null))
+                    || ((oldGeom != null) && (geom != null) && !oldGeom.equalsExact(geom))) {
+            // the old geometry and the new geometry are different
+            featureInfo.clearCache();
+            super.addProperty(featureInfo.getGeoField(), geom);
+            if (isEditable()) {
+                modified = true;
+            }
+        }
     }
 
     @Override
@@ -566,5 +593,19 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      */
     public void setBackgroundColor(final Color backgroundColor) {
         this.backgroundColor = backgroundColor;
+    }
+
+    @Override
+    public boolean isFeatureChanged() {
+        final Geometry geom = getGeometry();
+        final Geometry backupGeometry = getOriginalGeometry();
+
+        if (((backupGeometry == null) != (geom == null))
+                    || ((backupGeometry != null) && (geom != null) && !backupGeometry.equalsExact(geom))) {
+            // The geometry will not changed with the setGeometry() method, but also within the geometry object itself.
+            return true;
+        } else {
+            return modified;
+        }
     }
 }

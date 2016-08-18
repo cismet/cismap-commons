@@ -78,9 +78,12 @@ import java.awt.image.RGBImageFilter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import java.math.BigDecimal;
+
 import java.net.URL;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -484,7 +487,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().getAlpha();
         } else {
-            return 0;
+            // if 0 will be returned, the handles of editable features will not be connected (the lines between the
+            // handles are transparent)
+            return 0.5f;
         }
     }
 
@@ -1190,7 +1195,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         int polygonNr = -1;
         int textNr = 0;
         int imageNr = 0;
-        for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : stylings) {
+        final List<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> reverseList =
+            new ArrayList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>>(stylings);
+        if ((geom != null) && !geom.getGeometryType().equalsIgnoreCase("Point")) {
+            Collections.reverse(reverseList);
+        }
+        for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : reverseList) {
             if ((styling.first instanceof PolygonStyling)
                         && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
                 PPath path;
@@ -1891,7 +1901,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                 if (value == null) {
                     deegreeProperties.add(null);
                 } else {
-                    deegreeProperties.add(new DeegreeProperty(qname, value));
+                    if (value instanceof BigDecimal) {
+                        deegreeProperties.add(new DeegreeProperty(qname, ((BigDecimal)value).doubleValue()));
+                    } else {
+                        deegreeProperties.add(new DeegreeProperty(qname, value));
+                    }
                 }
             } else if (DefaultFeatureServiceFeature.this.getProperties().containsKey("app:" + qname.getLocalPart())) {
                 value = DefaultFeatureServiceFeature.this.getProperty("app:" + qname.getLocalPart());
