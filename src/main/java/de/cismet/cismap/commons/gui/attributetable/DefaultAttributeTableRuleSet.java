@@ -63,7 +63,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public boolean prepareForSave(final List<FeatureServiceFeature> features, final TableModel model) {
+    public boolean prepareForSave(final List<FeatureServiceFeature> features) {
         return true;
     }
 

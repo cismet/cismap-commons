@@ -139,11 +139,10 @@ public interface AttributeTableRuleSet {
      * Will be invoked before the service will be saved.
      *
      * @param   features  the modified features
-     * @param   model     A model with all features of the represented service
      *
      * @return  true, if the save operation should be executed
      */
-    boolean prepareForSave(final List<FeatureServiceFeature> features, final TableModel model);
+    boolean prepareForSave(final List<FeatureServiceFeature> features);
 
     /**
      * DOCUMENT ME!

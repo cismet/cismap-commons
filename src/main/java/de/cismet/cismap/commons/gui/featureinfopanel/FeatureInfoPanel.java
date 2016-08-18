@@ -697,7 +697,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
                         .getLockerForFeatureService(f.getLayerProperties().getFeatureService());
             final AttributeTableRuleSet tableRuleSet = f.getLayerProperties().getAttributeTableRuleSet();
-            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(lockedFeatures, currentTableModel)) {
+            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(lockedFeatures)) {
                 return;
             }
             if ((tableRuleSet != null) && modifiedFeature.contains(f)) {
@@ -936,7 +936,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         private final MappingComponent mappingComponent;
         private final ActiveLayerModel layerModel;
         private LayerFilter filter;
-        private final String root = "Features";
+        private final String root = NbBundle.getMessage(
+                LayerFilterTreeModel.class,
+                "FeatureInfoPanel.LayerFilterTreeModel.root");
         private final Map<MapService, List<Feature>> data = new HashMap<MapService, List<Feature>>();
         private final List<MapService> orderedDataKeys = new ArrayList<MapService>();
         private final List<TreeModelListener> listener = new ArrayList<TreeModelListener>();
