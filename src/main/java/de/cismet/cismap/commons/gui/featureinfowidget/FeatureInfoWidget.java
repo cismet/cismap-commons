@@ -162,7 +162,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 } catch (Exception ex) {
                     LOG.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex); // NOI18N I dont understand this
                 }
-            } else if ((display == null) && layer.isLayerQuerySelected()) {
+            } else if (((display == null) && layer.isLayerQuerySelected()) && !remove) {
                 try {
                     display = displayRepo.getDisplay(layer.getClass(), layer);
                     if (display == null) {
