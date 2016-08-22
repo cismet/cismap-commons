@@ -17,20 +17,18 @@ import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTargetDropEvent;
 
 import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.TransferHandler;
-import javax.swing.TransferHandler.TransferSupport;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.LayerConfig;
@@ -62,10 +60,34 @@ public class LayerDropUtils {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final Logger LOG = Logger.getLogger(LayerDropUtils.class);
-    private static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "tif", "tiff", "gif" };
+    public static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "jpeg", "tif", "tiff", "gif" };
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   data              DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   parent            DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean drop(final Collection<File> data,
+            final ActiveLayerModel activeLayerModel,
+            final JComponent parent) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Drag&Drop File List: " + data); // NOI18N
+        }
+        if (data != null) {
+            if (handleFiles(data, activeLayerModel, -1, parent)) {
+                return true;
+            }
+        } else {
+            LOG.warn("No files available");            // NOI18N
+        }
+        return false;
+    }
     /**
      * Handles a layer drop event.
      *
@@ -76,7 +98,7 @@ public class LayerDropUtils {
     public static void drop(final java.awt.dnd.DropTargetDropEvent dtde,
             final ActiveLayerModel activeLayerModel,
             final JComponent parent) {
-        drop(new TransferSupportWrapper(dtde), activeLayerModel, parent, -1);
+        drop(new DnDUtils.TransferSupportWrapper(dtde), activeLayerModel, parent, -1);
     }
 
     /**
@@ -93,7 +115,7 @@ public class LayerDropUtils {
             final ActiveLayerModel activeLayerModel,
             final int index,
             final JComponent parent) {
-        return drop(new TransferSupportWrapper(support), activeLayerModel, parent, index);
+        return drop(new DnDUtils.TransferSupportWrapper(support), activeLayerModel, parent, index);
     }
 
     /**
@@ -106,64 +128,23 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    private static boolean drop(final TransferSupportWrapper dtde,
+    private static boolean drop(final DnDUtils.TransferSupportWrapper dtde,
             final ActiveLayerModel activeLayerModel,
             final JComponent parent,
             final int index) {
         final DataFlavor TREEPATH_FLAVOR = new DataFlavor(
                 DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities");                                           // NOI18N
+                "SelectionAndCapabilities");                                                                            // NOI18N
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList()); // NOI18N
+            LOG.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList());                                  // NOI18N
         }
-        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                    || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+        if (DnDUtils.isFilesOrUriList(dtde)) {
             dtde.acceptDrop(DnDConstants.ACTION_COPY);
             try {
-                List<File> data = null;
-                final Transferable transferable = dtde.getTransferable();
-                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Drop is unix drop");                                // NOI18N
-                    }
-
-                    try {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Drop is Mac drop xxx"
-                                        + transferable.getTransferData(DataFlavor.javaFileListFlavor)); // NOI18N
-                        }
-
-                        data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    } catch (Exception e) {
-                        // transferable.getTransferData(DataFlavor.javaFileListFlavor) will throw an
-                        // UnsupportedFlavorException on Linux
-                        if (data == null) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Drop is Linux drop"); // NOI18N
-                            }
-                            data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
-                                        DnDUtils.URI_LIST_FLAVOR));
-                        }
-                    }
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Drop is windows drop");       // NOI18N
-                    }
-                    data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                }
-
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Drag&Drop File List: " + data);          // NOI18N
-                }
-                if (data != null) {
-                    if (handleFiles(data, activeLayerModel, index, parent)) {
-                        return true;
-                    }
-                } else {
-                    LOG.warn("No files available");                     // NOI18N
-                }
+                final List<File> data = DnDUtils.getFilesFrom(dtde);
+                drop(data, activeLayerModel, parent);
             } catch (final Exception ex) {
-                LOG.error("Failure during drag & drop opertation", ex); // NOI18N
+                LOG.error("Failure during drag & drop opertation", ex);                                                 // NOI18N
             }
         } else if (dtde.isDataFlavorSupported(TREEPATH_FLAVOR)) {
             try {
@@ -172,7 +153,7 @@ public class LayerDropUtils {
                 }
                 for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]); // NOI18N
+                        LOG.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]);       // NOI18N
                     }
                 }
                 final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
@@ -370,7 +351,7 @@ public class LayerDropUtils {
      *
      * @return  true, iff a service was added
      */
-    public static boolean handleFiles(final List<File> data,
+    public static boolean handleFiles(final Collection<File> data,
             final ActiveLayerModel activeLayerModel,
             final int index,
             final Component parent) {
@@ -451,7 +432,7 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    private static boolean isGeoImage(final String fileName) {
+    public static boolean isGeoImage(final String fileName) {
         for (final String ending : SUPPORTED_IMAGE_FORMATS) {
             if (fileName.endsWith(ending)) {
                 return true;
@@ -480,118 +461,5 @@ public class LayerDropUtils {
         final List<String> keywords = Arrays.asList(layer.getKeywords());
 
         return keywords.contains("cismapSlidingLayerGroup");
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * This class wraps a DropTargetDropEvent or TransferSupport.
-     *
-     * @version  $Revision$, $Date$
-     */
-    private static class TransferSupportWrapper {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private DropTargetDropEvent event;
-        private TransferHandler.TransferSupport transfer;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new TransferSupportWrapper object.
-         *
-         * @param  event  DOCUMENT ME!
-         */
-        public TransferSupportWrapper(final DropTargetDropEvent event) {
-            this.event = event;
-        }
-
-        /**
-         * Creates a new TransferSupportWrapper object.
-         *
-         * @param  transfer  DOCUMENT ME!
-         */
-        public TransferSupportWrapper(final TransferSupport transfer) {
-            this.transfer = transfer;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   df  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean isDataFlavorSupported(final DataFlavor df) {
-            if (event != null) {
-                return event.isDataFlavorSupported(df);
-            } else {
-                return transfer.isDataFlavorSupported(df);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  action  DOCUMENT ME!
-         */
-        public void acceptDrop(final int action) {
-            if (event != null) {
-                event.acceptDrop(action);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  success  DOCUMENT ME!
-         */
-        public void dropComplete(final boolean success) {
-            if (event != null) {
-                event.dropComplete(success);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public Transferable getTransferable() {
-            if (event != null) {
-                return event.getTransferable();
-            } else {
-                return transfer.getTransferable();
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public List<DataFlavor> getCurrentDataFlavorsAsList() {
-            if (event != null) {
-                return event.getCurrentDataFlavorsAsList();
-            } else {
-                return Arrays.asList(transfer.getDataFlavors());
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public DataFlavor[] getCurrentDataFlavors() {
-            if (event != null) {
-                return event.getCurrentDataFlavors();
-            } else {
-                return transfer.getDataFlavors();
-            }
-        }
     }
 }
