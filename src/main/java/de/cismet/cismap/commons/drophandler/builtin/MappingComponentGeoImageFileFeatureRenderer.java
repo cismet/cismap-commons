@@ -74,7 +74,7 @@ public class MappingComponentGeoImageFileFeatureRenderer extends DefaultXStyledF
             final Point geometry,
             final Double winkel) {
         super(
-            null,
+            new ImageIcon(ImageUtil.resizeOnScale(ARROW, 16, 16)),
             imageFile.getName(),
             "Bild-Datei",
             new MappingComponentGeoImageFileDropHandlerInfoComponent(imageFile),

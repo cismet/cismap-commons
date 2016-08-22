@@ -23,6 +23,8 @@ import javax.swing.ImageIcon;
 
 import de.cismet.tools.BrowserLauncher;
 
+import de.cismet.tools.gui.ImageUtil;
+
 /**
  * DOCUMENT ME!
  *
@@ -56,20 +58,10 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
      */
     public MappingComponentGeoImageFileDropHandlerInfoComponent(final File imageFile) {
         this.imageFile = imageFile;
-
         final Image origImage = new ImageIcon(imageFile.getAbsolutePath()).getImage();
-        final int origWidth = origImage.getWidth(null);
-        final int origHeight = origImage.getHeight(null);
-        final double ratio = origWidth / (double)origHeight;
-        if (ratio > (MAX_IMAGE_WIDTH / MAX_IMAGE_HEIGHT)) {
-            reducedWidth = MAX_IMAGE_WIDTH;
-            reducedHeight = (int)Math.round(MAX_IMAGE_WIDTH / ratio);
-        } else {
-            reducedWidth = (int)Math.round(MAX_IMAGE_HEIGHT * ratio);
-            reducedHeight = MAX_IMAGE_HEIGHT;
-        }
-        reducedIcon = new ImageIcon(origImage.getScaledInstance(reducedWidth, reducedHeight, Image.SCALE_SMOOTH));
-
+        reducedIcon = new ImageIcon(ImageUtil.resizeOnScale(origImage, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
+        reducedWidth = reducedIcon.getIconWidth();
+        reducedHeight = reducedIcon.getIconHeight();
         initComponents();
     }
 

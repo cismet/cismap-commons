@@ -42,9 +42,9 @@ public class MappingComponentShapeFileDropHandler implements MappingComponentDro
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Collection<String> EXTENSIONS = Arrays.asList(
-            DocumentFeatureServiceFactory.SHP_FILE_EXTENSION,
-            DocumentFeatureServiceFactory.SHP_DBF_FILE_EXTENSION,
-            DocumentFeatureServiceFactory.CSV_FILE_EXTENSION);
+            DocumentFeatureServiceFactory.SHP_FILE_EXTENSION.substring(1),
+            DocumentFeatureServiceFactory.SHP_DBF_FILE_EXTENSION.substring(1),
+            DocumentFeatureServiceFactory.CSV_FILE_EXTENSION.substring(1));
 
     //~ Instance fields --------------------------------------------------------
 
