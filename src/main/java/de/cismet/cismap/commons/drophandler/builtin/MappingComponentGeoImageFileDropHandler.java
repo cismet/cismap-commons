@@ -22,12 +22,18 @@ import org.openide.util.lookup.ServiceProvider;
 
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.filematcher.builtin.MappingComponentDropHandlerFileTypeMatcher;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.ExifReader;
@@ -56,6 +62,7 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
 
     @Override
     public void dropFiles(final Collection<File> files) {
+        final Collection<Feature> featuresToAdd = new ArrayList<>();
         for (final File file : files) {
             final GpsData gpsData = gpsDataMap.get(file);
             final Point point = gpsData.getPoint();
@@ -63,8 +70,22 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
             final MappingComponentGeoImageFileFeatureRenderer featureRenderer =
                 new MappingComponentGeoImageFileFeatureRenderer(file, point, direction);
             featureRenderer.setGeometry(point);
-            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(featureRenderer);
+            featuresToAdd.add(featureRenderer);
         }
+        CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeatures(featuresToAdd);
+        SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
+                    if (!mappingComponent.isFixedMapExtent()) {
+                        mappingComponent.zoomToAFeatureCollection(
+                            featuresToAdd,
+                            true,
+                            mappingComponent.isFixedMapScale());
+                    }
+                }
+            });
     }
 
     //~ Inner Classes ----------------------------------------------------------

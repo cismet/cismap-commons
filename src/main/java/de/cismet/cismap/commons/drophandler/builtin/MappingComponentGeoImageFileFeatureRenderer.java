@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import lombok.Getter;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import java.io.File;
@@ -42,15 +43,14 @@ public class MappingComponentGeoImageFileFeatureRenderer extends DefaultXStyledF
     //~ Static fields/initializers ---------------------------------------------
 
     public static final BufferedImage ARROW;
-    public static final FeatureAnnotationSymbol ARROW_NULL;
+    public static final BufferedImage ARROW_NULL;
 
     static {
         try {
-            final URL arrowUrl = MappingComponentGeoImageFileFeatureRenderer.class.getResource(
-                    "/de/cismet/cismap/commons/drophandler/builtin/angle.png");
-            ARROW = ImageIO.read(arrowUrl);
-            ARROW_NULL = new FeatureAnnotationSymbol(new ImageIcon(
-                        "/de/cismet/cismap/commons/drophandler/builtin/angle_null.png").getImage());
+            ARROW = ImageIO.read(MappingComponentGeoImageFileFeatureRenderer.class.getResource(
+                        "/de/cismet/cismap/commons/drophandler/builtin/angle.png"));
+            ARROW_NULL = ImageIO.read(MappingComponentGeoImageFileFeatureRenderer.class.getResource(
+                        "/de/cismet/cismap/commons/drophandler/builtin/angle_null.png"));
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -89,7 +89,7 @@ public class MappingComponentGeoImageFileFeatureRenderer extends DefaultXStyledF
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
         if (winkel == null) {
-            return new FeatureAnnotationSymbol(ARROW_NULL.getImage());
+            return new FeatureAnnotationSymbol(ARROW_NULL);
         } else {
             final BufferedImage rotatedArrow = ImageUtil.rotateImage(ARROW, -winkel);
             final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(rotatedArrow);
