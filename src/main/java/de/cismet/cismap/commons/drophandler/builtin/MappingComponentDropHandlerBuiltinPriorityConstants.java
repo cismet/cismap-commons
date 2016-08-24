@@ -22,6 +22,7 @@ public class MappingComponentDropHandlerBuiltinPriorityConstants {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    public static final int UNKNOWN = Integer.MIN_VALUE;
     public static final int GML = 10000;
     public static final int SHAPE = 10000;
     public static final int WORLD = 10000;
