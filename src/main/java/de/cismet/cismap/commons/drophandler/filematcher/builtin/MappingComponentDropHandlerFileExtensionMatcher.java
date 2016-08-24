@@ -61,7 +61,7 @@ public class MappingComponentDropHandlerFileExtensionMatcher implements MappingC
             final String matchingExtension = FilenameUtils.getExtension(file.getName());
 
             for (final String extension : extensions) {
-                if ((extension != null) && extension.equals(matchingExtension)) {
+                if ((extension != null) && extension.equalsIgnoreCase(matchingExtension)) {
                     return true;
                 }
             }
