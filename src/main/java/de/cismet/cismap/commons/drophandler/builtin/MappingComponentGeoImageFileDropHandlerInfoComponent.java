@@ -35,8 +35,8 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final int MAX_IMAGE_WIDTH = 500;
-    private static final int MAX_IMAGE_HEIGHT = 350;
+    private static final int MAX_IMAGE_WIDTH = 320;
+    private static final int MAX_IMAGE_HEIGHT = 240;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -47,6 +47,7 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -74,12 +75,18 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        final java.awt.GridBagConstraints gridBagConstraints;
+        java.awt.GridBagConstraints gridBagConstraints;
 
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
 
+        setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
+        jPanel1.setOpaque(false);
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setIcon(reducedIcon);
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel1,
@@ -103,7 +110,14 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        add(jLabel1, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel1.add(jLabel1, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jPanel1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
