@@ -16,12 +16,9 @@ import com.vividsolutions.jts.geom.Point;
 
 import lombok.Getter;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import java.io.File;
-
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 
@@ -88,14 +85,15 @@ public class MappingComponentGeoImageFileFeatureRenderer extends DefaultXStyledF
 
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
+        final FeatureAnnotationSymbol symb;
         if (winkel == null) {
-            return new FeatureAnnotationSymbol(ARROW_NULL);
+            symb = new FeatureAnnotationSymbol(ARROW_NULL);
         } else {
-            final BufferedImage rotatedArrow = ImageUtil.rotateImage(ARROW, -winkel);
-            final FeatureAnnotationSymbol symb = new FeatureAnnotationSymbol(rotatedArrow);
-            symb.setSweetSpotX(0.5);
-            symb.setSweetSpotY(0.5);
+            symb = new FeatureAnnotationSymbol(ImageUtil.rotateImage(ARROW, -winkel));
             return symb;
         }
+        symb.setSweetSpotX(0.5);
+        symb.setSweetSpotY(0.5);
+        return symb;
     }
 }
