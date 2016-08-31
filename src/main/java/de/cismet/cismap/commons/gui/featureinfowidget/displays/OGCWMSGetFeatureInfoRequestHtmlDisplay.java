@@ -19,6 +19,7 @@ import calpa.html.DefaultCalHTMLObserver;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.applet.AppletContext;
@@ -32,6 +33,7 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.swing.Icon;
@@ -240,7 +242,11 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
             if (fxIniterror) {
                 calpaHtmlPane.showHTMLDocument(e.getRetrievedObject().toString());
             } else {
-                fxBrowserPanel.getJfxPanel().loadContent(e.getRetrievedObject().toString());
+                try {
+                    fxBrowserPanel.getJfxPanel().loadContent(e.getRetrievedObject().toString());
+                } catch (final Exception loadContentEx) {
+                    LOG.error("Problem during loadContent of fxBrowserPanel.getJfxPanel():" + loadContentEx);
+                }
             }
 
             if (LOG.isDebugEnabled()) {
@@ -387,24 +393,20 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                         openUrlInExternalBrowser(wssRequest);
 
                         return;
-                    } else {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("No special handler --> default access via open URL"); // NOI18N
-                        }
+                    } else if (LOG.isDebugEnabled()) {
+                        LOG.debug("No special handler --> default access via open URL"); // NOI18N
                     }
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("no handler available for given url default access via openURL"); // NOI18N
-                    }
+                } else if (LOG.isDebugEnabled()) {
+                    LOG.debug("no handler available for given url default access via openURL"); // NOI18N
                 }
                 openUrlInExternalBrowser(urlBuffer);
             } catch (final Exception ex) {
-                LOG.error("Error while creating url for featureinfo", ex);                   // NOI18N
+                LOG.error("Error while creating url for featureinfo", ex);               // NOI18N
             }
         } else {
-            openUrlInExternalBrowser("http://www.cismet.de");                                // NOI18N
+            openUrlInExternalBrowser("http://www.cismet.de");                            // NOI18N
         }
-    }                                                                                        //GEN-LAST:event_cmdOpenExternalActionPerformed
+    }                                                                                    //GEN-LAST:event_cmdOpenExternalActionPerformed
 
     /**
      * DOCUMENT ME!
