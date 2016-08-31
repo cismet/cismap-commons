@@ -62,9 +62,11 @@ public class ImageFileRetrieval extends Thread {
 
     static {
         WORLD_FILE_ENDINGS.put("jpg", "jgw");
+        WORLD_FILE_ENDINGS.put("jpeg", "jgw");
         WORLD_FILE_ENDINGS.put("png", "pgw");
         WORLD_FILE_ENDINGS.put("gif", "gfw");
         WORLD_FILE_ENDINGS.put("tif", "tfw");
+        WORLD_FILE_ENDINGS.put("tiff", "tfw");
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -435,6 +437,17 @@ public class ImageFileRetrieval extends Thread {
      * @return  the world file of the <code>imageFile</code>
      */
     private File getWorldFile() {
+        return getWorldFile(imageFile);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   imageFile  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static File getWorldFile(final File imageFile) {
         final String name = imageFile.getAbsolutePath();
         final String ending = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
 
