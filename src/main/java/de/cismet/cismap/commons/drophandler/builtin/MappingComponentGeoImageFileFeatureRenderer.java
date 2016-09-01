@@ -90,7 +90,6 @@ public class MappingComponentGeoImageFileFeatureRenderer extends DefaultXStyledF
             symb = new FeatureAnnotationSymbol(ARROW_NULL);
         } else {
             symb = new FeatureAnnotationSymbol(ImageUtil.rotateImage(ARROW, -winkel));
-            return symb;
         }
         symb.setSweetSpotX(0.5);
         symb.setSweetSpotY(0.5);
