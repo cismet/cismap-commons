@@ -5231,9 +5231,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             for (final Feature f : new ArrayList<Feature>(list)) {
                                 if (f instanceof PrintTemplateFeature) {
                                     featureCollection.unholdFeature(f);
+                                    list.remove(f);
                                 }
                             }
                             featureCollection.removeAllFeatures();
+                            featureCollection.addFeatures(list);
 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("debug features added: " + list.size());
