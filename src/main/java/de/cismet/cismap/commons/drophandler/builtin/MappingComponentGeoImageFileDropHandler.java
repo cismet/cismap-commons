@@ -72,7 +72,7 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
             featureRenderer.setGeometry(point);
             featuresToAdd.add(featureRenderer);
         }
-        CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeatures(featuresToAdd);
+        CismapBroker.getInstance().getMappingComponent().getFeatureCollection().substituteFeatures(featuresToAdd);
         SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
