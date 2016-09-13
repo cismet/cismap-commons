@@ -17,7 +17,6 @@ import java.awt.image.BufferedImage;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -27,11 +26,11 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class SearchFeature extends AbstractNewFeature implements DoubleClickableFeature {
+public class SelectFeature extends AbstractNewFeature implements DoubleClickableFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SearchFeature.class);
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SelectFeature.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -40,45 +39,45 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new SearchFeature object.
+     * Creates a new SelectFeature object.
      *
      * @param  g                  DOCUMENT ME!
      * @param  inputListenerName  DOCUMENT ME!
      */
-    public SearchFeature(final Geometry g, final String inputListenerName) {
+    public SelectFeature(final Geometry g, final String inputListenerName) {
         super(g);
 
         this.inputListenerName = inputListenerName;
     }
 
     /**
-     * Creates a new SearchFeature object.
+     * Creates a new SelectFeature object.
      *
      * @param  point  DOCUMENT ME!
      * @param  wtst   DOCUMENT ME!
      */
-    public SearchFeature(final Point2D point, final WorldToScreenTransform wtst) {
+    public SelectFeature(final Point2D point, final WorldToScreenTransform wtst) {
         super(point, wtst);
     }
 
     /**
-     * Creates a new SearchFeature object.
+     * Creates a new SelectFeature object.
      *
      * @param  canvasPoints  DOCUMENT ME!
      * @param  wtst          DOCUMENT ME!
      */
-    public SearchFeature(final Point2D[] canvasPoints,
+    public SelectFeature(final Point2D[] canvasPoints,
             final WorldToScreenTransform wtst) {
         super(canvasPoints, wtst);
     }
 
     /**
-     * Creates a new SearchFeature object.
+     * Creates a new SelectFeature object.
      *
      * @param  coordArr  DOCUMENT ME!
      * @param  wtst      DOCUMENT ME!
      */
-    public SearchFeature(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
+    public SelectFeature(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
         super(coordArr, wtst);
     }
 
@@ -104,15 +103,10 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
 
     @Override
     public Paint getFillingPaint() {
-        final AbstractCreateSearchGeometryListener searchListener = ((AbstractCreateSearchGeometryListener)CismapBroker
-                        .getInstance().getMappingComponent().getInputListener(
-                    MappingComponent.CREATE_SEARCH_POLYGON));
-        final Color color = searchListener.getSearchColor();
-        return new Color(color.getRed(),
-                color.getGreen(),
-                color.getBlue(),
-                255
-                        - (int)(255f * searchListener.getSearchTransparency()));
+        final SelectionListener selectListener = ((SelectionListener)CismapBroker.getInstance().getMappingComponent()
+                        .getInputListener(
+                            MappingComponent.SELECT));
+        return selectListener.getSelectColor();
     }
 
     @Override
@@ -127,33 +121,33 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
             switch (getGeometryType()) {
                 case RECTANGLE: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchRectangle");    // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.etName().selectRectangle");     // NOI18N
                 }
                 case LINESTRING: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchPolyline");     // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPolyline");     // NOI18N
                 }
                 case ELLIPSE: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchEllipse");      // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectEllipse");      // NOI18N
                 }
                 case POINT: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchPoint");        // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPoint");        // NOI18N
                 }
                 case POLYGON: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchPOLYGON");      // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPOLYGON");      // NOI18N
                 }
                 case MULTIPOLYGON: {
                     return org.openide.util.NbBundle.getMessage(
-                            SearchFeature.class,
-                            "SearchFeature.getName().searchMULTIPOLYGON"); // NOI18N
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectMULTIPOLYGON"); // NOI18N
                 }
                 default: {
                     if (super.getName() != null) {
@@ -170,7 +164,7 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
 
     @Override
     public String getType() {
-        return "Suche";
+        return "Auswahl";
     }
 
     @Override
@@ -209,7 +203,6 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
         final MappingComponent mappingComponent = selectionListener.getMappingComponent();
         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
         mappingComponent.getHandleLayer().removeAllChildren();
-        // neue Suche mit Geometry auslösen
-        ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(getInteractionMode())).search(this);
+        selectionListener.select(this);
     }
 }

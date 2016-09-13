@@ -30,6 +30,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import java.text.DecimalFormat;
 
 import java.util.*;
@@ -46,10 +49,11 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.CommonFeaturePreciseAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.DoubleClickableFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureNameProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
-import de.cismet.cismap.commons.features.SearchFeature;
+import de.cismet.cismap.commons.features.SelectFeature;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -71,11 +75,16 @@ public class SelectionListener extends CreateGeometryListener {
     public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION"; // NOI18N
     public static final String DOUBLECLICK_POINT_NOTIFICATION = "DOUBLECLICK_POINT_NOTIFICATION"; // NOI18N
 
+    // Now some property change event types.
+    // We need to synchronize the mode and the last feature between AbstractCreateSelectGeometryListeners.
+    public static final String PROPERTY_LAST_FEATURE = "PROPERTY_LAST_FEATURE";
+    public static final String PROPERTY_MODE = "PROPERTY_MODE";
+
     //~ Instance fields --------------------------------------------------------
 
     Point doubleclickPoint = null;
     PFeature sel = null;
-    Vector<PFeature> pfVector = new Vector<PFeature>();
+    Collection<PFeature> pfVector = new ArrayList<>();
     ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
@@ -85,6 +94,10 @@ public class SelectionListener extends CreateGeometryListener {
     private boolean selectionInProgress = false;
     private boolean featureAdded = false;
     private List<Feature> lastUnselectedFeatures;
+    private boolean holdGeometries = false;
+    private SelectFeature lastFeature;
+    private SelectFeature selectFeature;
+    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -147,7 +160,7 @@ public class SelectionListener extends CreateGeometryListener {
                     pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
                 }
 
-                final List<PFeature> pFeatures = new ArrayList<PFeature>();
+                final List<PFeature> pFeatures = new ArrayList<>();
                 if (CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()) {
                     pFeatures.addAll((List)PFeatureTools.getAllValidObjectsUnderPointer(
                             pInputEvent,
@@ -184,7 +197,7 @@ public class SelectionListener extends CreateGeometryListener {
                         int commonActionCounter = 0;
                         if (commonFeatureActions != null) {
                             for (final CommonFeatureAction cfaTemplate : commonFeatureActions) {
-                                CommonFeatureAction cfa = null;
+                                final CommonFeatureAction cfa;
                                 try {
                                     cfa = cfaTemplate.getClass().newInstance();
                                 } catch (final Exception ex) {
@@ -219,7 +232,7 @@ public class SelectionListener extends CreateGeometryListener {
 
                         final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
                                     .lookupAll(MapPopupAction.class);
-                        final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
+                        final ArrayList<MapPopupAction> popupActions = new ArrayList<>(lookupResult);
                         Collections.sort(popupActions);
 
                         boolean first = true;
@@ -360,14 +373,10 @@ public class SelectionListener extends CreateGeometryListener {
                     }
 
                     if (pInputEvent.getClickCount() == 2) {
-                        if (sel.getFeature() instanceof SearchFeature) {
-                            final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+                        final Feature feature = sel.getFeature();
+                        if (feature instanceof DoubleClickableFeature) {
                             if (pInputEvent.isLeftMouseButton()) {
-                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                                mappingComponent.getHandleLayer().removeAllChildren();
-                                // neue Suche mit Geometry auslösen
-                                ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
-                                        searchFeature.getInteractionMode())).search(searchFeature);
+                                ((DoubleClickableFeature)feature).doubleClickPerformed(this);
                             }
                         }
                     }
@@ -381,6 +390,11 @@ public class SelectionListener extends CreateGeometryListener {
                 selectionInProgress = false;
             }
         }
+    }
+
+    @Override
+    public MappingComponent getMappingComponent() {
+        return mappingComponent;
     }
 
     /**
@@ -494,99 +508,291 @@ public class SelectionListener extends CreateGeometryListener {
         super.mouseReleased(event);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Color getSelectColor() {
+        return getFillingColor();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public float getSelectTransparency() {
+        return getFillingColor().getTransparency();
+    }
+
     @Override
     protected Color getFillingColor() {
         return new Color(20, 20, 20, 20);
     }
 
+    /**
+     * DOCUMENT ME!
+     */
+    public void redoLastSelect() {
+        select(lastFeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void showLastFeature() {
+        showFeature(lastFeature);
+        getMappingComponent().getFeatureCollection().holdFeature(lastFeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    protected void showFeature(final SelectFeature feature) {
+        if (feature != null) {
+            feature.setEditable(feature.getGeometryType() != AbstractNewFeature.geomTypes.MULTIPOLYGON);
+
+            getMappingComponent().getFeatureCollection().addFeature(feature);
+            if (isHoldingGeometries()) {
+                getMappingComponent().getFeatureCollection().holdFeature(feature);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newValue  DOCUMENT ME!
+     */
+    protected void setLastFeature(final SelectFeature newValue) {
+        final SelectFeature oldValue = this.lastFeature;
+        this.lastFeature = newValue;
+
+        // Notify other AbstractCreateSelectGeometryListeners about the change.
+        propertyChangeSupport.firePropertyChange(PROPERTY_LAST_FEATURE, oldValue, newValue);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public SelectFeature getLastSelectFeature() {
+        return lastFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectFeature  DOCUMENT ME!
+     */
+    public void select(final SelectFeature selectFeature) {
+        if (selectFeature != null) {
+            setSelectFeature(selectFeature);
+            final boolean selectExecuted = performSelect(selectFeature);
+            if (selectExecuted) {
+                setLastFeature(selectFeature);
+                showFeature(selectFeature);
+                cleanup(selectFeature);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    protected void cleanup(final SelectFeature feature) {
+        final PFeature pFeature = (PFeature)getMappingComponent().getPFeatureHM().get(feature);
+        if (isHoldingGeometries()) {
+            pFeature.moveToFront(); // funktioniert nicht?!
+            feature.setEditable(true);
+            getMappingComponent().getFeatureCollection().holdFeature(feature);
+        } else {
+            getMappingComponent().getTmpFeatureLayer().addChild(pFeature);
+
+            // Transparenz animieren
+            pFeature.animateToTransparency(0, 2500);
+            // warten bis Animation zu Ende ist um Feature aus Liste zu entfernen
+            new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        while (pFeature.getTransparency() > 0) {
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ex) {
+                            }
+                        }
+                        getMappingComponent().getFeatureCollection().removeFeature(feature);
+                    }
+                }).start();
+        }
+    }
+
+    @Override
+    public void setMode(final String newValue) throws IllegalArgumentException {
+        final String oldValue = getMode();
+        super.setMode(newValue);
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_MODE, oldValue, newValue);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   selectFeature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected boolean performSelect(final SelectFeature selectFeature) {
+        final Geometry geom = selectFeature.getGeometry();
+        mappingComponent.getHandleLayer().removeAllChildren();
+        if ((geom != null)) {
+            if (log.isDebugEnabled()) {
+                // Hole alle PFeatures die das Markierviereck schneiden
+                // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
+                log.debug("Markiergeometrie = " + geom.toText()); // NOI18N
+            }
+
+            if (!finishingEvent.isControlDown()) {
+                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                unselectAll();
+                featureAdded = false;
+            } else {
+                featureAdded = true;
+            }
+            final PFeature[] pfArr;
+
+            if (geom.getGeometryType().equalsIgnoreCase("point")) {
+                // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
+                // point
+                if (isSelectMultipleFeatures()) {
+                    pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
+                                finishingEvent,
+                                new Class[] { PFeature.class }).toArray(new PFeature[0]);
+                } else {
+                    final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                            finishingEvent,
+                            new Class[] { PFeature.class });
+                    pfArr = new PFeature[] { (PFeature)o };
+                }
+            } else {
+                // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
+                // intersects the given area. So it is almost impossible to match a point feature. Even if it is
+                // displayed by a big symbol. For this reason, getPFeaturesInArea should only be used, if geom is an
+                // area and not just a point.
+                pfArr = PFeatureTools.getPFeaturesInArea(
+                        mappingComponent,
+                        geom);
+            }
+            final List<Feature> toBeSelected = new ArrayList<>();
+            final List<Feature> toBeUnselected = new ArrayList<>();
+
+            for (final PFeature pf : pfArr) {
+                if (pf.getFeature().canBeSelected()) {
+                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                        if (
+                            !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
+                                        pf.getFeature())) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Feature markiert: " + pf); // NOI18N
+                            }
+                            toBeSelected.add(pf.getFeature());
+                        } else {
+                            toBeUnselected.add(pf.getFeature());
+                        }
+                        changeSelection(pf);
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Feature cannot be selected");      // NOI18N
+                    }
+                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                        toBeUnselected.add(pf.getFeature());
+                    }
+                }
+            }
+
+            // Hier passierts
+            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(toBeSelected);
+            lastUnselectedFeatures = toBeUnselected;
+            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
+
+            pfVector = new ArrayList(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                            .getSelectedFeatures());
+            postSelectionChanged();
+        }
+
+        setLastFeature(selectFeature);
+        return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isHoldingGeometries() {
+        return holdGeometries;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newValue  DOCUMENT ME!
+     */
+    public void setHoldGeometries(final boolean newValue) {
+        this.holdGeometries = newValue;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public SelectFeature getSelectFeature() {
+        return selectFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectFeature  DOCUMENT ME!
+     */
+    protected void setSelectFeature(final SelectFeature selectFeature) {
+        this.selectFeature = selectFeature;
+    }
+
     @Override
     protected void finishGeometry(final AbstractNewFeature feature) {
         super.finishGeometry(feature);
+
         selectionInProgress = true;
-        final Geometry geom = feature.getGeometry();
         try {
-            mappingComponent.getHandleLayer().removeAllChildren();
-            if ((geom != null)) {
-                if (log.isDebugEnabled()) {
-                    // Hole alle PFeatures die das Markierviereck schneiden
-                    // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
-                    log.debug("Markiergeometrie = " + geom.toText()); // NOI18N
-                }
-
-                if (!finishingEvent.isControlDown()) {
-                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                    unselectAll();
-                    featureAdded = false;
-                } else {
-                    featureAdded = true;
-                }
-                PFeature[] pfArr;
-
-                if (geom.getGeometryType().equalsIgnoreCase("point")) {
-                    // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
-                    // point
-                    if (isSelectMultipleFeatures()) {
-                        pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
-                                    finishingEvent,
-                                    new Class[] { PFeature.class }).toArray(new PFeature[0]);
-                    } else {
-                        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                                finishingEvent,
-                                new Class[] { PFeature.class });
-                        pfArr = new PFeature[] { (PFeature)o };
-                    }
-                } else {
-                    // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
-                    // intersects the given area. So it is almost impossible to match a point feature. Even if it is
-                    // displayed by a big symbol. For this reason, getPFeaturesInArea should only be used, if geom is an
-                    // area and not just a point.
-                    pfArr = PFeatureTools.getPFeaturesInArea(
-                            mappingComponent,
-                            geom);
-                }
-                final Vector<Feature> toBeSelected = new Vector<Feature>();
-                final Vector<Feature> toBeUnselected = new Vector<Feature>();
-
-                for (final PFeature pf : pfArr) {
-                    if (pf.getFeature().canBeSelected()) {
-                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                            if (
-                                !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
-                                            pf.getFeature())) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Feature markiert: " + pf); // NOI18N
-                                }
-                                toBeSelected.add(pf.getFeature());
-                            } else {
-                                toBeUnselected.add(pf.getFeature());
-                                // mappingComponent.getFeatureCollection().unselect(pf.getFeature()); //war vorher
-                                // unselectAll()
-                            }
-                            changeSelection(pf);
-                        }
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Feature cannot be selected");      // NOI18N
-                        }
-                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                            toBeUnselected.add(pf.getFeature());
-                            // ((DefaultFeatureCollection)
-                            // mappingComponent.getFeatureCollection()).unselect(pf.getFeature());//war vorher
-                            // unselectAll()
-                        }
-                    }
-                }
-
-                // Hier passierts
-                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
-                    toBeSelected);
-                lastUnselectedFeatures = toBeUnselected;
-                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
-
-                pfVector = new Vector(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                .getSelectedFeatures());
-                postSelectionChanged();
-            }
+            final Geometry geom = feature.getGeometry();
+            performSelect(new SelectFeature(geom, MappingComponent.SELECT));
         } finally {
             selectionInProgress = false;
         }
@@ -620,30 +826,9 @@ public class SelectionListener extends CreateGeometryListener {
      * @return  all currently selected PFeature object
      */
     public List<PFeature> getAllSelectedPFeatures() {
-        final List<PFeature> featureList = new ArrayList<PFeature>();
+        final List<PFeature> featureList = new ArrayList<>();
         featureList.addAll(selectedFeatures.values());
         return featureList;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return      DOCUMENT ME!
-     *
-     * @deprecated  the returned vector does not only contains pfeatures. Use getAllSelectedPFeatures instead
-     */
-    public Vector<PFeature> getSelectedPFeatures() {
-        return pfVector;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    @Deprecated
-    public PFeature getSelectedPFeature() {
-        return sel;
     }
 
     /**
