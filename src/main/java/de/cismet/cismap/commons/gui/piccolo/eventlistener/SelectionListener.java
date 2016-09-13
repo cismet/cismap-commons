@@ -250,7 +250,7 @@ public class SelectionListener extends CreateGeometryListener {
                                     pFeature.getFeature().getGeometry().getArea();
                                     if (cfa instanceof FeaturesProvider) {
                                         if (((FeaturesProvider)cfa).isResponsibleFor(pFeature.getFeature())) {
-                                            multipleCommonFeatureActionProvider.put(cfa, pFeature);
+                                            multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
                                         }
                                     } else {
                                         if (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature)) {
