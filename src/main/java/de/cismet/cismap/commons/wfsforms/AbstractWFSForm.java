@@ -103,8 +103,6 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
                 }
             });
         pMark.setVisible(false);
-        pMark.setSweetSpotX(0.5d);
-        pMark.setSweetSpotY(1d);
     }
 
     //~ Methods ----------------------------------------------------------------
