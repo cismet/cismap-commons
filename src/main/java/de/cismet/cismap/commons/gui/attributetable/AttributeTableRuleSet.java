@@ -217,4 +217,11 @@ public interface AttributeTableRuleSet {
      * @param  targetFeature  the values from the source feature will be copied in this feature
      */
     void copyProperties(FeatureServiceFeature sourceFeature, FeatureServiceFeature targetFeature);
+
+    /**
+     * This method can be used to use custom feature classes with a different styling.
+     *
+     * @return  The class that should be used to store the features
+     */
+    Class<? extends FeatureServiceFeature> getFeatureClass();
 }
