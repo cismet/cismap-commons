@@ -472,9 +472,9 @@ public class SelectionListener extends CreateGeometryListener {
      * unselect all currently selected features. If featuresFromServicesSelectable = false, this method does nothing
      */
     private void unselectAll() {
-        if (featuresFromServicesSelectable) {
-            final List<Feature> allKeys = new ArrayList(selectedFeatures.keySet());
-            for (final Feature f : allKeys) {
+        final List<Feature> allKeys = new ArrayList(selectedFeatures.keySet());
+        for (final Feature f : allKeys) {
+            if (featuresFromServicesSelectable || (f instanceof SelectableServiceFeature)) {
                 final PFeature pf = selectedFeatures.remove(f);
                 if (pf != null) {
                     pf.setSelected(false);
@@ -489,7 +489,7 @@ public class SelectionListener extends CreateGeometryListener {
      * @param  f  the feature that should be change its selection
      */
     private void changeSelection(final PFeature f) {
-        if (featuresFromServicesSelectable) {
+        if (featuresFromServicesSelectable || ((f != null) && (f.getFeature() instanceof SelectableServiceFeature))) {
             f.setSelected(!isSelected(f));
 
             if (f.isSelected()) {
@@ -518,7 +518,7 @@ public class SelectionListener extends CreateGeometryListener {
      * @param  pf  the feature to add
      */
     public void addSelectedFeature(final PFeature pf) {
-        if (featuresFromServicesSelectable) {
+        if (featuresFromServicesSelectable || ((pf != null) && (pf.getFeature() instanceof SelectableServiceFeature))) {
             selectedFeatures.put(pf.getFeature(), pf);
         }
     }
@@ -530,7 +530,7 @@ public class SelectionListener extends CreateGeometryListener {
      * @param  pf  the feature to remove
      */
     public void removeSelectedFeature(final PFeature pf) {
-        if (featuresFromServicesSelectable) {
+        if (featuresFromServicesSelectable || ((pf != null) && (pf.getFeature() instanceof SelectableServiceFeature))) {
             selectedFeatures.remove(pf.getFeature());
         }
     }
