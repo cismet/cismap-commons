@@ -11,6 +11,7 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.openide.util.Lookup;
 import org.openide.util.Lookup.Result;
+import org.openide.util.NbBundle;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -97,8 +98,12 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
     private Object value;
     private JTable table;
     private JComboBox cbbStyleChooser;
-    private StyleDialogInterface styleDialog;        // = new StyleDialog(new JFrame("XXX"), true);
-    private JButton moreButton = new JButton(". ."); // NOI18N
+    private StyleDialogInterface styleDialog;                                   // = new StyleDialog(new JFrame("XXX"),
+                                                                                // true);
+    private JButton moreButton = new JButton(". .");                            // NOI18N
+    private javax.swing.ImageIcon unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png")); // NOI18N
+
     private JButton wfsStyleButton = new JButton() {
 
             // paints the rectangle inside the button that creates the StyleDialog
@@ -106,7 +111,8 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             protected void paintComponent(final Graphics g) {
                 de.cismet.cismap.commons.featureservice.style.Style style = null;
 
-                final FeatureFactory ff = ((AbstractFeatureService)value).getFeatureFactory();
+                final AbstractFeatureService service = (AbstractFeatureService)value;
+                final FeatureFactory ff = service.getFeatureFactory();
                 BasicStyle basicStyle = null;
 
                 if (ff instanceof AbstractFeatureFactory) {
@@ -141,6 +147,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             }
         };
 
+    private JLabel customStyleLab = new JLabel();
     private DefaultCellEditor informationCellEditor;
     private DefaultCellEditor stylesCellEditor;
     private JProgressBar progress = new JProgressBar(0, 100);
@@ -292,46 +299,12 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                 }
             });
 
+        customStyleLab.addMouseListener(new StyleMouseListener());
         wfsStyleButton.setFocusPainted(false);
         wfsStyleButton.setEnabled(true);
         wfsStyleButton.setBorderPainted(false);
         wfsStyleButton.setContentAreaFilled(false);
-        wfsStyleButton.setIconTextGap(0);
-        wfsStyleButton.addMouseListener(new MouseAdapter() {
-
-                // creates and shows the StyleDialog on doubleclick
-                @Override
-                public void mouseClicked(final MouseEvent e) {
-                    // Event Dispatch Thread TERROR:
-                    // FIXME: ACHTUNG alle Exceptions die in dieser Operation auftreten und
-                    // nicht explizit gefangen werden, werden nicht auf der Console ausgegeben?!
-                    if (e.getClickCount() == 2) {
-                        final AbstractFeatureService selectedService = (AbstractFeatureService)value;
-                        /*
-                         * final JumpSLDEditor editor = new JumpSLDEditor();
-                         *
-                         * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
-                         * CismapBroker.getInstance().getMappingComponent());
-                         */
-                        final Frame parentFrame = StaticSwingTools.getParentFrame(wfsStyleButton);
-                        final ArrayList<String> args = new ArrayList<String>();
-                        args.add("Allgemein");
-                        args.add("Darstellung");
-                        args.add("Massstab");
-                        args.add("Thematische Farbgebung");
-                        args.add("Beschriftung");
-                        args.add("TextEditor");
-                        // args.add("Begleitsymbole");
-
-                        final StyleDialogStarter starter = new StyleDialogStarter(
-                                parentFrame,
-                                selectedService,
-                                args,
-                                500);
-                        starter.start();
-                    }
-                }
-            });
+        wfsStyleButton.addMouseListener(new StyleMouseListener());
 
         progress.add(slider, BorderLayout.CENTER);
         slider.setOpaque(false);
@@ -507,6 +480,21 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         logger.debug("StyleButton");                       // NOI18N
                     }
                 }
+
+                final AbstractFeatureService service = (AbstractFeatureService)value;
+
+                if ((service.getLayerProperties() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
+                    customStyleLab.setHorizontalAlignment(JLabel.LEFT);
+                    customStyleLab.setText(NbBundle.getMessage(
+                            ActiveLayerTableCellRenderer.class,
+                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
+                    customStyleLab.setIcon(unselectedStyleIcon);
+
+                    return customStyleLab;
+                }
+
                 return wfsStyleButton;
             }
         } else if (realColumn == 3) {
@@ -611,6 +599,51 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         } finally {
         }
         return retValue;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class StyleMouseListener extends MouseAdapter {
+
+        //~ Methods ------------------------------------------------------------
+
+        // creates and shows the StyleDialog on doubleclick
+        @Override
+        public void mouseClicked(final MouseEvent e) {
+            // Event Dispatch Thread TERROR:
+            // FIXME: ACHTUNG alle Exceptions die in dieser Operation auftreten und
+            // nicht explizit gefangen werden, werden nicht auf der Console ausgegeben?!
+            if (e.getClickCount() == 2) {
+                final AbstractFeatureService selectedService = (AbstractFeatureService)value;
+                /*
+                 * final JumpSLDEditor editor = new JumpSLDEditor();
+                 *
+                 * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
+                 * CismapBroker.getInstance().getMappingComponent());
+                 */
+                final Frame parentFrame = StaticSwingTools.getParentFrame(wfsStyleButton);
+                final ArrayList<String> args = new ArrayList<String>();
+                args.add("Allgemein");
+                args.add("Darstellung");
+                args.add("Massstab");
+                args.add("Thematische Farbgebung");
+                args.add("Beschriftung");
+                args.add("TextEditor");
+                // args.add("Begleitsymbole");
+
+                final StyleDialogStarter starter = new StyleDialogStarter(
+                        parentFrame,
+                        selectedService,
+                        args,
+                        500);
+                starter.start();
+            }
+        }
     }
 }
 
