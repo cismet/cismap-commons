@@ -122,38 +122,27 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                     basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
                 }
 
-                if ((service.getLayerProperties() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
-                    setHorizontalAlignment(JLabel.LEFT);
-                    setText(NbBundle.getMessage(
-                            ActiveLayerTableCellRenderer.class,
-                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
-                    setIcon(unselectedStyleIcon);
-                    super.paintComponent(g);
+                if (basicStyle != null) {
+                    style = basicStyle;
                 } else {
-                    if (basicStyle != null) {
-                        style = basicStyle;
-                    } else {
-                        if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                            style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
-                        }
+                    if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                        style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
                     }
+                }
 
-                    try {
-                        final Graphics2D g2d = (Graphics2D)g;
-                        if (style.isDrawFill() && (style.getFillColor() != null)) {
-                            g2d.setColor((Color)style.getFillColor());
-                            g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
-                        }
-                        if (style.isDrawLine() && (style.getLineColor() != null)) {
-                            g2d.setColor((Color)style.getLineColor());
-                            final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
-                            g2d.setStroke(new BasicStroke(width));
-                            g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
-                        }
-                    } catch (Exception ex) {
+                try {
+                    final Graphics2D g2d = (Graphics2D)g;
+                    if (style.isDrawFill() && (style.getFillColor() != null)) {
+                        g2d.setColor((Color)style.getFillColor());
+                        g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
                     }
+                    if (style.isDrawLine() && (style.getLineColor() != null)) {
+                        g2d.setColor((Color)style.getLineColor());
+                        final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
+                        g2d.setStroke(new BasicStroke(width));
+                        g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
+                    }
+                } catch (Exception ex) {
                 }
             }
         };
@@ -491,7 +480,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         logger.debug("StyleButton");                       // NOI18N
                     }
                 }
-                
+
                 final AbstractFeatureService service = (AbstractFeatureService)value;
 
                 if ((service.getLayerProperties() != null)
@@ -502,10 +491,10 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                             ActiveLayerTableCellRenderer.class,
                             "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
                     customStyleLab.setIcon(unselectedStyleIcon);
-                    
+
                     return customStyleLab;
-                }                
-                
+                }
+
                 return wfsStyleButton;
             }
         } else if (realColumn == 3) {
@@ -611,8 +600,17 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         }
         return retValue;
     }
-    
-    private class StyleMouseListener extends MouseAdapter{
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class StyleMouseListener extends MouseAdapter {
+
+        //~ Methods ------------------------------------------------------------
 
         // creates and shows the StyleDialog on doubleclick
         @Override
