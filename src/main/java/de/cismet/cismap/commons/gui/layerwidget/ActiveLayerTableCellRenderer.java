@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -350,7 +352,8 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     log.debug("is it null? " + ((AbstractFeatureService)value).getLayerProperties());
                 }
 
-                final FeatureFactory ff = ((AbstractFeatureService)value).getFeatureFactory();
+                final AbstractFeatureService service = (AbstractFeatureService)value;
+                final FeatureFactory ff = service.getFeatureFactory();
                 BasicStyle basicStyle = null;
 
                 if (ff instanceof AbstractFeatureFactory) {
@@ -360,16 +363,26 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
                 }
 
-                if (basicStyle != null) {
-                    styleLabel.style = basicStyle;
+                if ((service.getLayerProperties() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
+                    setHorizontalAlignment(JLabel.LEFT);
+                    setText(NbBundle.getMessage(
+                            ActiveLayerTableCellRenderer.class,
+                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
+                    setIcon(unselectedStyleIcon);
                 } else {
-                    if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                        styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                    if (basicStyle != null) {
+                        styleLabel.style = basicStyle;
+                    } else {
+                        if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                            styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                        }
                     }
-                }
 
-                styleLabel.repaint();
-                return styleLabel;
+                    styleLabel.repaint();
+                    return styleLabel;
+                }
             }
         } else if (realColumn == 3) {
             final WMSLayer wmsLayer = null;
