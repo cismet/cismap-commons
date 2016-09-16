@@ -133,296 +133,304 @@ public class SelectionListener extends CreateGeometryListener {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
+    private void handleRightClick(final PInputEvent pInputEvent) {
+        if (log.isDebugEnabled()) {
+            log.debug("right mouseclick"); // NOI18N
+        }
+        boolean clickOnSelection = false;
+        final boolean multiFeaturePopupEnabled = CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled();
+
+        final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class });
+
+        // COLLECT ALL PFEATURES UNDER THE POINTER
+        final Collection<PFeature> allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class });
+
+        // COLLECT ALL SELECTED PFEATURES
+        final Collection<PFeature> selectedPFeatures = new ArrayList<>(selectedFeatures.size());
+        for (final Feature selectedFeature : selectedFeatures.keySet()) {
+            final PFeature selectedPFeature = selectedFeatures.get(selectedFeature);
+            if (allClickedPFeatures.contains(selectedPFeature)) {
+                clickOnSelection = true;
+            }
+            selectedPFeatures.add(selectedPFeature);
+        }
+
+        final List<PFeature> pFeatures = new ArrayList<>();
+        // IS ONE OF THE SELECTED PFEATURES UNDER THE POINTER ?
+        if (clickOnSelection) {
+            pFeatures.addAll(selectedPFeatures);
+        } else {
+            if (multiFeaturePopupEnabled) {
+                pFeatures.addAll(allClickedPFeatures);
+            } else {
+                if (clickedPFeature != null) {
+                    pFeatures.add((PFeature)clickedPFeature);
+                }
+            }
+        }
+
+        // we build a popup menu from all the registered generic point actions
+        final Point point = createPointFromInput(pInputEvent);
+
+        final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault().lookupAll(MapPopupAction.class);
+        final ArrayList<MapPopupAction> allPopupActions = new ArrayList<>(lookupResult);
+        Collections.sort(allPopupActions);
+
+        ////
+        final MultiHashMap actionProviderMap = new MultiHashMap();
+        final MultiHashMap commonFeatureActionsMap = new MultiHashMap();
+        final MultiHashMap popupActionMap = new MultiHashMap();
+        final MultiHashMap multipleCommonFeatureActionProvider = new MultiHashMap();
+
+        for (final PFeature pFeature : pFeatures) {
+            if ((pFeature instanceof ActionsProvider)
+                        && (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature))) {
+                final Collection<? extends Action> actions = ((ActionsProvider)pFeature.getFeature()).getActions();
+                actionProviderMap.putAll(pFeature, actions);
+            }
+
+            if (allCommonFeatureActions != null) {
+                for (final CommonFeatureAction cfaTemplate : allCommonFeatureActions) {
+                    final CommonFeatureAction cfa;
+                    try {
+                        cfa = (cfaTemplate instanceof FeaturesProvider) ? cfaTemplate
+                                                                        : cfaTemplate.getClass().newInstance();
+                    } catch (final Exception ex) {
+                        break;
+                    }
+                    if (cfa.isActive()) {
+                        cfa.setSourceFeature(pFeature.getFeature());
+                        if (cfa instanceof CommonFeaturePreciseAction) {
+                            final Point2D pos = pInputEvent.getPosition();
+                            final WorldToScreenTransform wtst = getMappingComponent().getWtst();
+                            final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
+                                    wtst.getSourceY(pos.getY()));
+                            final Collection<Feature> allFeatures = new ArrayList();
+                            for (final PFeature feature : (Collection<PFeature>)pFeatures) {
+                                allFeatures.add(feature.getFeature());
+                            }
+                            ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
+                            ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
+                        }
+                        pFeature.getFeature().getGeometry().getArea();
+                        if (cfa instanceof FeaturesProvider) {
+                            if (((FeaturesProvider)cfa).isResponsibleFor(pFeature.getFeature())) {
+                                multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
+                            }
+                        } else if (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature)) {
+                            commonFeatureActionsMap.put(pFeature, cfa);
+                        }
+                    }
+                }
+            }
+
+            for (final MapPopupAction popupAction : allPopupActions) {
+                popupAction.setPoint(point);
+
+                if (popupAction.isActive(pFeature instanceof PFeature)
+                            && (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature))) {
+                    final JMenu submenu = popupAction.getSubmenu();
+                    popupActionMap.put(pFeature, (submenu != null) ? submenu : popupAction);
+                }
+            }
+        }
+
+        final MultiHashMap menuMap = new MultiHashMap();
+        for (final PFeature pFeature : pFeatures) {
+            final Collection<Action> actionProviders = actionProviderMap.getCollection(pFeature);
+            final Collection<CommonFeatureAction> commonFeatureActions = commonFeatureActionsMap.getCollection(
+                    pFeature);
+            final Collection<Object> popupActions = popupActionMap.getCollection(pFeature);
+
+            if (actionProviders != null) {
+                if (menuMap.getCollection(pFeature) != null) {
+                    menuMap.put(pFeature, new JSeparator());
+                }
+                menuMap.putAll(pFeature, actionProviders);
+            }
+            if (commonFeatureActions != null) {
+                if (menuMap.getCollection(pFeature) != null) {
+                    menuMap.put(pFeature, new JSeparator());
+                }
+                menuMap.putAll(pFeature, commonFeatureActions);
+            }
+
+            if ((popupActions != null) && (popupActions.size() > 0)) {
+                if (menuMap.getCollection(pFeature) != null) {
+                    menuMap.put(pFeature, new JSeparator());
+                }
+                menuMap.putAll(pFeature, popupActions);
+            }
+        }
+
+        final JPopupMenu popup = new JPopupMenu("MapPopup");
+        final Collection<PFeature> menuMapPFeatures = (Set<PFeature>)menuMap.keySet();
+        if (menuMapPFeatures.size() > 1) {
+            for (final PFeature pFeature : menuMapPFeatures) {
+                final String featureName;
+                if ((pFeature.getFeature() instanceof FeatureNameProvider)
+                            && (((FeatureNameProvider)pFeature.getFeature()).getName() != null)) {
+                    featureName = ((FeatureNameProvider)pFeature.getFeature()).getName();
+                } else {
+                    featureName = java.util.ResourceBundle.getBundle(
+                                "de/cismet/cismap/commons/gui/piccolo/eventlistener/Bundle")
+                                .getString("SelectionListener.unknown_featureName");
+                }
+                final JMenu featurePopup = new JMenu(featureName + " | "
+                                + new DecimalFormat("#.##").format(
+                                    pFeature.getFeature().getGeometry().getArea()) + " m²");
+                featurePopup.addMouseListener(new MouseAdapter() {
+
+                        @Override
+                        public void mouseClicked(final MouseEvent e) {
+                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
+                                pFeature.getFeature());
+                        }
+                    });
+                for (final Object menuItemComponent : menuMap.getCollection(pFeature)) {
+                    addItemToMenu(menuItemComponent, featurePopup);
+                }
+                if (featurePopup.getMenuComponentCount() > 0) {
+                    popup.add(featurePopup);
+                } else {
+                    final JMenuItem mi = new JMenuItem(featurePopup.getText());
+                    mi.addActionListener(new ActionListener() {
+
+                            @Override
+                            public void actionPerformed(final ActionEvent e) {
+                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
+                                    pFeature.getFeature());
+                            }
+                        });
+                    popup.add(mi);
+                }
+            }
+        } else if (menuMapPFeatures.size() > 0) {
+            final Object menuMapPFeature = menuMapPFeatures.iterator().next();
+            for (final Object menuItemComponent : menuMap.getCollection(menuMapPFeature)) {
+                addItemToMenu(menuItemComponent, popup);
+            }
+        }
+
+        if (!multipleCommonFeatureActionProvider.isEmpty() && (popup.getComponentCount() > 0)) {
+            popup.add(new JSeparator());
+        }
+        for (final FeaturesProvider action
+                    : (Collection<FeaturesProvider>)multipleCommonFeatureActionProvider.keySet()) {
+            final Collection<Feature> multipleCommonFeature = multipleCommonFeatureActionProvider.getCollection(action);
+            if (!multipleCommonFeature.isEmpty()) {
+                action.setSourceFeatures(new ArrayList<>(multipleCommonFeature));
+                addItemToMenu(action, popup);
+            }
+        }
+
+        if (popup.getComponentCount() > 0) {
+            popup.show(
+                mappingComponent,
+                (int)pInputEvent.getCanvasPosition().getX(),
+                (int)pInputEvent.getCanvasPosition().getY());
+        }
+    }
+
+    /**
      * Selektiere einen PNode.
      *
      * @param  pInputEvent  DOCUMENT ME!
      */
     @Override
-    public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mouseClicked(final PInputEvent pInputEvent) {
         setMappingComponent(pInputEvent);
         super.mouseClicked(pInputEvent);
-        if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
-            selectionInProgress = true;
 
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
-                }
-                clickCount = pInputEvent.getClickCount();
-                if (pInputEvent.getComponent() instanceof MappingComponent) {
-                    mappingComponent = (MappingComponent)pInputEvent.getComponent();
-                }
+        if (pInputEvent.isRightMouseButton()) {
+            if (!isInProgress()) {
+                handleRightClick(pInputEvent);
+            }
+        } else {
+            if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
+                selectionInProgress = true;
 
-                if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
-                    doubleclickPoint = createPointFromInput(pInputEvent);
-
-                    final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-                    pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
-                }
-
-                boolean clickOnSelection = false;
-                final boolean multiFeaturePopupEnabled = CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled();
-
-                final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                        pInputEvent,
-                        new Class[] { PFeature.class });
-
-                // COLLECT ALL PFEATURES UNDER THE POINTER
-                final Collection<PFeature> allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
-                        pInputEvent,
-                        new Class[] { PFeature.class });
-
-                // COLLECT ALL SELECTED PFEATURES
-                final Collection<PFeature> selectedPFeatures = new ArrayList<>(selectedFeatures.size());
-                for (final Feature selectedFeature : selectedFeatures.keySet()) {
-                    final PFeature selectedPFeature = selectedFeatures.get(selectedFeature);
-                    if (allClickedPFeatures.contains(selectedPFeature)) {
-                        clickOnSelection = true;
-                    }
-                    selectedPFeatures.add(selectedPFeature);
-                }
-
-                final List<PFeature> pFeatures = new ArrayList<>();
-                // IS ONE OF THE SELECTED PFEATURES UNDER THE POINTER ?
-                if (clickOnSelection) {
-                    pFeatures.addAll(selectedPFeatures);
-                } else {
-                    if (multiFeaturePopupEnabled) {
-                        pFeatures.addAll(allClickedPFeatures);
-                    } else {
-                        if (clickedPFeature != null) {
-                            pFeatures.add((PFeature)clickedPFeature);
-                        }
-                    }
-                }
-
-                if (pInputEvent.isRightMouseButton()) {
+                try {
                     if (log.isDebugEnabled()) {
-                        log.debug("right mouseclick"); // NOI18N
+                        log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
+                    }
+                    clickCount = pInputEvent.getClickCount();
+                    if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
+                        doubleclickPoint = createPointFromInput(pInputEvent);
+
+                        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                        pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
                     }
 
-                    // we build a popup menu from all the registered generic point actions
-                    final Point point = createPointFromInput(pInputEvent);
+                    if (pInputEvent.getComponent() instanceof MappingComponent) {
+                        mappingComponent = (MappingComponent)pInputEvent.getComponent();
+                    }
 
-                    final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
-                                .lookupAll(MapPopupAction.class);
-                    final ArrayList<MapPopupAction> allPopupActions = new ArrayList<>(lookupResult);
-                    Collections.sort(allPopupActions);
+                    final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
+                            pInputEvent,
+                            new Class[] { PFeature.class });
 
-                    ////
+                    if (clickedPFeature != null) {
+                        sel = clickedPFeature;
 
-                    final MultiHashMap actionProviderMap = new MultiHashMap();
-                    final MultiHashMap commonFeatureActionsMap = new MultiHashMap();
-                    final MultiHashMap popupActionMap = new MultiHashMap();
-                    final MultiHashMap multipleCommonFeatureActionProvider = new MultiHashMap();
+                        try {
+                            Point2D point = null;
+                            if (mappingComponent.isSnappingEnabled()) {
+                                final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                                point = PFeatureTools.getNearestPointInArea(
+                                        mappingComponent,
+                                        pInputEvent.getCanvasPosition(),
+                                        vertexRequired,
+                                        true);
+                            }
+                            if (point == null) {
+                                point = pInputEvent.getPosition();
+                            }
 
-                    for (final PFeature pFeature : pFeatures) {
-                        if ((pFeature instanceof ActionsProvider)
-                                    && (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature))) {
-                            final Collection<? extends Action> actions = ((ActionsProvider)pFeature.getFeature())
-                                        .getActions();
-                            actionProviderMap.putAll(pFeature, actions);
+                            final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
+
+                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance()
+                                            .getSrs().getCode());
+                            final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
+                            newFeature.setGeometryType(geomType);
+                            newFeature.getGeometry().setSRID(currentSrid);
+                            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                                    mappingComponent.getMappingModel().getSrs().getCode());
+                            newFeature.setGeometry(geom);
+
+                            finishingEvent = pInputEvent;
+                            finishGeometry(newFeature);
+                        } catch (Throwable throwable) {
+                            log.error("Error during the creation of the geometry", throwable); // NOI18N
                         }
 
-                        if (allCommonFeatureActions != null) {
-                            for (final CommonFeatureAction cfaTemplate : allCommonFeatureActions) {
-                                final CommonFeatureAction cfa;
-                                try {
-                                    cfa = (cfaTemplate instanceof FeaturesProvider)
-                                        ? cfaTemplate : cfaTemplate.getClass().newInstance();
-                                } catch (final Exception ex) {
-                                    break;
-                                }
-                                if (cfa.isActive()) {
-                                    cfa.setSourceFeature(pFeature.getFeature());
-                                    if (cfa instanceof CommonFeaturePreciseAction) {
-                                        final Point2D pos = pInputEvent.getPosition();
-                                        final WorldToScreenTransform wtst = getMappingComponent().getWtst();
-                                        final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
-                                                wtst.getSourceY(pos.getY()));
-                                        final Collection<Feature> allFeatures = new ArrayList();
-                                        for (final PFeature feature : (Collection<PFeature>)pFeatures) {
-                                            allFeatures.add(feature.getFeature());
-                                        }
-                                        ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
-                                        ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
-                                    }
-                                    pFeature.getFeature().getGeometry().getArea();
-                                    if (cfa instanceof FeaturesProvider) {
-                                        if (((FeaturesProvider)cfa).isResponsibleFor(pFeature.getFeature())) {
-                                            multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
-                                        }
-                                    } else {
-                                        if (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature)) {
-                                            commonFeatureActionsMap.put(pFeature, cfa);
-                                        }
-                                    }
+                        if (clickCount == 2) {
+                            final Feature feature = sel.getFeature();
+                            if (feature instanceof DoubleClickableFeature) {
+                                if (pInputEvent.isLeftMouseButton()) {
+                                    ((DoubleClickableFeature)feature).doubleClickPerformed(this);
                                 }
                             }
                         }
-
-                        for (final MapPopupAction popupAction : allPopupActions) {
-                            popupAction.setPoint(point);
-
-                            if (popupAction.isActive(pFeature instanceof PFeature)
-                                        && (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature))) {
-                                final JMenu submenu = popupAction.getSubmenu();
-                                popupActionMap.put(pFeature, (submenu != null) ? submenu : popupAction);
-                            }
+                    } else {
+                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                         }
+                        unselectAll();
                     }
-
-                    final MultiHashMap menuMap = new MultiHashMap();
-                    for (final PFeature pFeature : pFeatures) {
-                        final Collection<Action> actionProviders = actionProviderMap.getCollection(pFeature);
-                        final Collection<CommonFeatureAction> commonFeatureActions =
-                            commonFeatureActionsMap.getCollection(pFeature);
-                        final Collection<Object> popupActions = popupActionMap.getCollection(pFeature);
-
-                        if (actionProviders != null) {
-                            if (menuMap.getCollection(pFeature) != null) {
-                                menuMap.put(pFeature, new JSeparator());
-                            }
-                            menuMap.putAll(pFeature, actionProviders);
-                        }
-                        if (commonFeatureActions != null) {
-                            if (menuMap.getCollection(pFeature) != null) {
-                                menuMap.put(pFeature, new JSeparator());
-                            }
-                            menuMap.putAll(pFeature, commonFeatureActions);
-                        }
-
-                        if ((popupActions != null) && (popupActions.size() > 0)) {
-                            if (menuMap.getCollection(pFeature) != null) {
-                                menuMap.put(pFeature, new JSeparator());
-                            }
-                            menuMap.putAll(pFeature, popupActions);
-                        }
-                    }
-
-                    final JPopupMenu popup = new JPopupMenu("MapPopup");
-                    final Collection<PFeature> menuMapPFeatures = (Set<PFeature>)menuMap.keySet();
-                    if (menuMapPFeatures.size() > 1) {
-                        for (final PFeature pFeature : menuMapPFeatures) {
-                            final String featureName;
-                            if ((pFeature.getFeature() instanceof FeatureNameProvider)
-                                        && (((FeatureNameProvider)pFeature.getFeature()).getName() != null)) {
-                                featureName = ((FeatureNameProvider)pFeature.getFeature()).getName();
-                            } else {
-                                featureName = java.util.ResourceBundle.getBundle(
-                                            "de/cismet/cismap/commons/gui/piccolo/eventlistener/Bundle")
-                                            .getString("SelectionListener.unknown_featureName");
-                            }
-                            final JMenu featurePopup = new JMenu(featureName + " | "
-                                            + new DecimalFormat("#.##").format(
-                                                pFeature.getFeature().getGeometry().getArea()) + " m²");
-                            featurePopup.addMouseListener(new MouseAdapter() {
-
-                                    @Override
-                                    public void mouseClicked(final MouseEvent e) {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .unselectAll();
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .addToSelection(pFeature.getFeature());
-                                    }
-                                });
-                            for (final Object menuItemComponent : menuMap.getCollection(pFeature)) {
-                                addItemToMenu(menuItemComponent, featurePopup);
-                            }
-                            if (featurePopup.getMenuComponentCount() > 0) {
-                                popup.add(featurePopup);
-                            } else {
-                                final JMenuItem mi = new JMenuItem(featurePopup.getText());
-                                mi.addActionListener(new ActionListener() {
-
-                                        @Override
-                                        public void actionPerformed(final ActionEvent e) {
-                                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                    .unselectAll();
-                                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                    .addToSelection(pFeature.getFeature());
-                                        }
-                                    });
-                                popup.add(mi);
-                            }
-                        }
-                    } else if (menuMapPFeatures.size() > 0) {
-                        final Object menuMapPFeature = menuMapPFeatures.iterator().next();
-                        for (final Object menuItemComponent : menuMap.getCollection(menuMapPFeature)) {
-                            addItemToMenu(menuItemComponent, popup);
-                        }
-                    }
-
-                    if (!multipleCommonFeatureActionProvider.isEmpty()) {
-                        popup.add(new JSeparator());
-                    }
-                    for (final FeaturesProvider action
-                                : (Collection<FeaturesProvider>)multipleCommonFeatureActionProvider.keySet()) {
-                        final Collection<Feature> multipleCommonFeature =
-                            multipleCommonFeatureActionProvider.getCollection(action);
-                        if (!multipleCommonFeature.isEmpty()) {
-                            action.setSourceFeatures(new ArrayList<>(multipleCommonFeature));
-                            addItemToMenu(action, popup);
-                        }
-                    }
-
-                    if (popup.getComponentCount() > 0) {
-                        popup.show(
-                            mappingComponent,
-                            (int)pInputEvent.getCanvasPosition().getX(),
-                            (int)pInputEvent.getCanvasPosition().getY());
-                    }
-                } else if (!pFeatures.isEmpty()) {
-                    super.mouseClicked(pInputEvent);
-                    sel = pFeatures.get(0);
-
-                    try {
-                        Point2D point = null;
-                        if (mappingComponent.isSnappingEnabled()) {
-                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
-                            point = PFeatureTools.getNearestPointInArea(
-                                    mappingComponent,
-                                    pInputEvent.getCanvasPosition(),
-                                    vertexRequired,
-                                    true);
-                        }
-                        if (point == null) {
-                            point = pInputEvent.getPosition();
-                        }
-
-                        final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
-
-                        final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
-                                        .getCode());
-                        final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
-                        newFeature.setGeometryType(geomType);
-                        newFeature.getGeometry().setSRID(currentSrid);
-                        final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
-                                mappingComponent.getMappingModel().getSrs().getCode());
-                        newFeature.setGeometry(geom);
-
-                        finishingEvent = pInputEvent;
-                        finishGeometry(newFeature);
-                    } catch (Throwable throwable) {
-                        log.error("Error during the creation of the geometry", throwable); // NOI18N
-                    }
-
-                    if (pInputEvent.getClickCount() == 2) {
-                        final Feature feature = sel.getFeature();
-                        if (feature instanceof DoubleClickableFeature) {
-                            if (pInputEvent.isLeftMouseButton()) {
-                                ((DoubleClickableFeature)feature).doubleClickPerformed(this);
-                            }
-                        }
-                    }
-                } else {
-                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                    }
-                    unselectAll();
+                } finally {
+                    selectionInProgress = false;
                 }
-            } finally {
-                selectionInProgress = false;
             }
         }
     }
@@ -874,7 +882,7 @@ public class SelectionListener extends CreateGeometryListener {
      *
      * @param  pInputEvent  DOCUMENT ME!
      */
-    private void setMappingComponent(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    private void setMappingComponent(final PInputEvent pInputEvent) {
         if (getMappingComponent() == null) {
             super.setMappingComponent((MappingComponent)pInputEvent.getComponent());
         }
