@@ -69,7 +69,7 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.CismetThreadPool;
 
-import de.cismet.tools.gui.Static2DTools;
+import de.cismet.tools.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
@@ -491,9 +491,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -579,24 +579,24 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable t = new Thread("PrintingWidget actionPerformed") {
 
                 @Override
@@ -808,7 +808,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         CismetThreadPool.execute(t);
 
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
