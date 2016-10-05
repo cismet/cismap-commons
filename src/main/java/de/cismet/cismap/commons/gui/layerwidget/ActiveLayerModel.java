@@ -37,11 +37,11 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.PropertyEqualsProvider;
+import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 
-import de.cismet.tools.Static2DTools;
 import de.cismet.tools.gui.treetable.AbstractTreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
