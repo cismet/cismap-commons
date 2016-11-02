@@ -12,8 +12,6 @@
  */
 package de.cismet.cismap.commons.wfsforms;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -22,7 +20,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;

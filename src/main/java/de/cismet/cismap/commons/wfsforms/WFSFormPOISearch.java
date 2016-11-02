@@ -12,13 +12,9 @@
  */
 package de.cismet.cismap.commons.wfsforms;
 
-import com.vividsolutions.jts.geom.Point;
-
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.DefaultFeature;
 import org.deegree.model.feature.FeatureProperty;
-
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -37,8 +33,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -134,14 +128,11 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
                     }
                 });
 
-//        listComponents.put("cboAllLocationtypes",cboLocationtypes);
-//        listComponents.put("cboAllLocationtypesProgress",prbLocationtypes);
             listComponents.put("cboPois", cboPois);         // NOI18N
             listComponents.put("cboPoisProgress", prbPois); // NOI18N
 
             pMark.setVisible(false);
-            pMark.setSweetSpotX(0.5d);
-            pMark.setSweetSpotY(1d);
+
             txtSearch.getDocument().addDocumentListener(new DocumentListener() {
 
                     @Override

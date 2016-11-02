@@ -12,48 +12,32 @@
  */
 package de.cismet.cismap.commons.wfsforms;
 
-import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
-
-import com.vividsolutions.jts.geom.Point;
-
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.DefaultFeature;
 import org.deegree.model.feature.FeatureProperty;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 import java.net.URI;
 
 import java.util.HashMap;
-import java.util.Vector;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
  * DOCUMENT ME!
@@ -148,8 +132,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
                 });
 
             pMark.setVisible(false);
-            pMark.setSweetSpotX(0.5d);
-            pMark.setSweetSpotY(1d);
+
             txtSearch.getDocument().addDocumentListener(new DocumentListener() {
 
                     @Override
