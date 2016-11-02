@@ -89,10 +89,7 @@ public class WFSFormAdress extends AbstractWFSForm {
             listComponents.put("cboNumbersOfAStreetProgress", prbNr); // NOI18N
 
             pMark.setVisible(false);
-            pMark.setSweetSpotX(0.5d);
-            pMark.setSweetSpotY(1d);
 
-            // log.fatal(cboNr.getEditor().getEditorComponent());
             final JTextField nrEditor = (JTextField)cboNr.getEditor().getEditorComponent();
             nrEditor.getDocument().addDocumentListener(new DocumentListener() {
 
