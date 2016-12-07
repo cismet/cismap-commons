@@ -136,6 +136,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
     private PropertyChangeListener annotationListener;
+    private TexturePaintPropertyChangeListener tPropertyChange;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -237,6 +238,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // the scale must be checked, when the view scale wass changed
             final FeatureRenderer renderer = getFeatureRenderer();
 
+            if ((feature instanceof StyledFeature)
+                        && (((StyledFeature)feature).getFillingPaint() instanceof SelectionAwareTexturePaint)) {
+                tPropertyChange = new TexturePaintPropertyChangeListener();
+                viewer.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, tPropertyChange);
+            }
             if ((renderer instanceof ScaleAwareFeatureRenderer) && (viewer != null) && (viewer.getCamera() != null)) {
                 viewer.getCamera()
                         .addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
@@ -755,7 +761,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (CrsTransformer.isDefaultCrs(newCrs)) {
                 newGeom.setSRID(CismapBroker.getInstance().getDefaultCrsAlias());
             }
-            feature.setGeometry(newGeom);
+                feature.setGeometry(newGeom);
         } else {
             try {
                 final CrsTransformer transformer = new CrsTransformer(newCrs);
@@ -1090,6 +1096,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final java.awt.Paint paint = ((StyledFeature)feature).getFillingPaint();
                 final java.awt.Paint linePaint = ((StyledFeature)feature).getLinePaint();
                 if (paint != null) {
+                    if (paint instanceof SelectionAwareTexturePaint) {
+                        ((SelectionAwareTexturePaint)paint).setScale(viewer.getCamera().getViewScale(),
+                            CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode()));
+                    }
                     setPaint(paint);
                     nonHighlightingPaint = paint;
                 }
@@ -1697,7 +1707,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             Rectangle2D tmpBounds = getBounds().getBounds2D();
             for (final Object o : selectedFeatures) {
                 final PFeature pf = (PFeature)getViewer().getPFeatureHM().get(o);
-                if (!(selectedFeatures.contains(pf))) {
+                if ((pf != null) && !(selectedFeatures.contains(pf))) {
                     tmpBounds = pf.getBounds().getBounds2D().createUnion(tmpBounds);
                 }
             }
@@ -2394,6 +2404,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             viewer.getSwingWrapper().remove(infoPanel);
         }
         this.setVisible(false);
+
+        if ((tPropertyChange != null) && (viewer != null)) {
+            viewer.getCamera().removePropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, tPropertyChange);
+        }
     }
 
     /**
@@ -2533,6 +2547,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     final Color c = (Color)nonHighlightingPaint;
 
                     setPaintOnAllFeatures(getHighlightingColorFromColor(c));
+                } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
+                    final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)nonHighlightingPaint;
+                    final SelectionAwareTexturePaint highlightingPaint = (SelectionAwareTexturePaint)
+                        texturePaint.clone();
+                    highlightingPaint.setMode(SelectionAwareTexturePaint.SelectionMode.HIGHLIGHTED);
+
+                    setPaintOnAllFeatures(highlightingPaint);
                 } else {
                     setPaintOnAllFeatures(new Color(1f, 1f, 1f, 0.6f));
                 }
@@ -2726,7 +2747,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             if (selected) {
                 nonSelectedPaint = getPaint();
-                if (nonSelectedPaint instanceof Color) {
+                if ((nonSelectedPaint instanceof Color) && (nonHighlightingPaint instanceof Color)) {
                     final Color c = (Color)nonHighlightingPaint;
                     if (c != null) {
                         Color selectionColor = null;
@@ -2749,6 +2770,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         final int blue = (int)(selectionColor.getBlue());   // NOI18N
                         setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha() / 2));
                     }
+                } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
+                    final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)nonHighlightingPaint;
+                    final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint)texturePaint.clone();
+                    selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
+                    setPaintOnAllFeatures(selectedPaint);
                 } else {
                     setPaintOnAllFeatures(new Color(172, 210, 248, 178));
                 }
@@ -3624,9 +3650,39 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
         }
+
+        if ((tPropertyChange != null) && (viewer != null)) {
+            viewer.getCamera().removePropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, tPropertyChange);
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * Adjusts the scale of the SelectionAwareTexturePaint object
+     *
+     * @version  $Revision$, $Date$
+     */
+    class TexturePaintPropertyChangeListener implements PropertyChangeListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        double scale = 0;
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            if (scale != viewer.getCamera().getViewScale()) {
+                if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
+                    ((SelectionAwareTexturePaint)nonHighlightingPaint).setScale(viewer.getCamera().getViewScale(),
+                        CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode()));
+                    PFeature.this.repaint();
+                }
+                scale = viewer.getCamera().getViewScale();
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
