@@ -761,7 +761,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (CrsTransformer.isDefaultCrs(newCrs)) {
                 newGeom.setSRID(CismapBroker.getInstance().getDefaultCrsAlias());
             }
-                feature.setGeometry(newGeom);
+            feature.setGeometry(newGeom);
         } else {
             try {
                 final CrsTransformer transformer = new CrsTransformer(newCrs);
@@ -3659,7 +3659,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     //~ Inner Classes ----------------------------------------------------------
 
     /**
-     * Adjusts the scale of the SelectionAwareTexturePaint object
+     * Adjusts the scale of the SelectionAwareTexturePaint object.
      *
      * @version  $Revision$, $Date$
      */
