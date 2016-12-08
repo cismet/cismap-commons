@@ -521,7 +521,6 @@ public class SelectionListener extends CreateGeometryListener {
      * @param  f  the feature that should be change its selection
      */
     private void changeSelection(final PFeature f) {
-        final DefaultFeatureCollection dfc = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection());
         if (featuresFromServicesSelectable || ((f != null) && (f.getFeature() instanceof SelectableServiceFeature))) {
             f.setSelected(!isSelected(f));
 
@@ -551,8 +550,6 @@ public class SelectionListener extends CreateGeometryListener {
      * @param  pf  the feature to add
      */
     public void addSelectedFeature(final PFeature pf) {
-        final DefaultFeatureCollection dfc = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection());
-
         if (featuresFromServicesSelectable || ((pf != null) && (pf.getFeature() instanceof SelectableServiceFeature))) {
             selectedFeatures.put(pf.getFeature(), pf);
         }
