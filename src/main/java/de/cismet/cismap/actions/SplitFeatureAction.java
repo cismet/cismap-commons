@@ -73,7 +73,7 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
                 "SplitFeatureAction.SplitFeatureAction()"));
         super.putValue(
             Action.SMALL_ICON,
-            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raisePoly.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-split.png")));
     }
 
     //~ Methods ----------------------------------------------------------------

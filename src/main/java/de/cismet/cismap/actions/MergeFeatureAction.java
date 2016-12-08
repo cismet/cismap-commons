@@ -75,7 +75,7 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
                 "MergeFeatureAction.MergeFeatureAction()"));
         super.putValue(
             Action.SMALL_ICON,
-            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raisePoly.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-join.png")));
     }
 
     //~ Methods ----------------------------------------------------------------
