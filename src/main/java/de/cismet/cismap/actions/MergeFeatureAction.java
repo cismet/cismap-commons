@@ -24,12 +24,17 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.awt.event.ActionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -50,12 +55,14 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 @ServiceProvider(service = CommonFeatureAction.class)
 public class MergeFeatureAction extends AbstractAction implements CommonFeatureAction, FeaturesProvider {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(MergeFeatureAction.class);
+
     //~ Instance fields --------------------------------------------------------
 
     Feature f = null;
     List<Feature> features = new ArrayList<>();
-
-    private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     //~ Constructors -----------------------------------------------------------
 
@@ -63,10 +70,9 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
      * Creates a new DuplicateGeometryFeatureAction object.
      */
     public MergeFeatureAction() {
-//        super(NbBundle.getMessage(
-//                DuplicateGeometryFeatureAction.class,
-//                "DuplicateGeometryFeatureAction.DuplicateGeometryFeatureAction()"));
-        super("Merge");
+        super(NbBundle.getMessage(
+                MergeFeatureAction.class,
+                "MergeFeatureAction.MergeFeatureAction()"));
         super.putValue(
             Action.SMALL_ICON,
             new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raisePoly.png")));
@@ -139,7 +145,21 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
                     try {
                         get();
                     } catch (Exception e) {
-                        log.error("Problem during Union()", e);
+                        LOG.error("Problem while merging geometries.", e);
+
+                        final ErrorInfo errorInfo = new ErrorInfo(
+                                NbBundle.getMessage(
+                                    MergeFeatureAction.class,
+                                    "MergeFeatureAction.actionPerformed().done().title"),
+                                NbBundle.getMessage(
+                                    MergeFeatureAction.class,
+                                    "MergeFeatureAction.actionPerformed().done().message"),
+                                null,
+                                null,
+                                e,
+                                Level.ALL,
+                                null);
+                        JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
                     }
                 }
             });

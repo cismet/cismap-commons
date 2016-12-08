@@ -18,7 +18,11 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.apache.commons.collections.MultiHashMap;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -35,6 +39,7 @@ import java.beans.PropertyChangeSupport;
 import java.text.DecimalFormat;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
@@ -361,7 +366,21 @@ public class SelectionListener extends CreateGeometryListener {
 
         if (pInputEvent.isRightMouseButton()) {
             if (!isInProgress()) {
-                handleRightClick(pInputEvent);
+                try {
+                    handleRightClick(pInputEvent);
+                } catch (RuntimeException e) {
+                    log.error("Problem while creating context menu", e);
+
+                    final ErrorInfo errorInfo = new ErrorInfo(
+                            NbBundle.getMessage(SelectionListener.class, "SelectionListener.mouseClicked().title"),
+                            NbBundle.getMessage(SelectionListener.class, "SelectionListener.mouseClicked().message"),
+                            null,
+                            null,
+                            e,
+                            Level.ALL,
+                            null);
+                    JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
+                }
             }
         } else if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
             selectionInProgress = true;
