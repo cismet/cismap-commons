@@ -18,7 +18,11 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.apache.commons.collections.MultiHashMap;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -35,6 +39,7 @@ import java.beans.PropertyChangeSupport;
 import java.text.DecimalFormat;
 
 import java.util.*;
+import java.util.logging.Level;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
@@ -153,10 +158,20 @@ public class SelectionListener extends CreateGeometryListener {
                 pInputEvent,
                 new Class[] { PFeature.class });
 
-        // COLLECT ALL SELECTED PFEATURES
+        // COLLECT ALL SELECTED PFEATURES that are SelectableServiceFeatures
         final Collection<PFeature> selectedPFeatures = new ArrayList<>(selectedFeatures.size());
         for (final Feature selectedFeature : selectedFeatures.keySet()) {
             final PFeature selectedPFeature = selectedFeatures.get(selectedFeature);
+            if (allClickedPFeatures.contains(selectedPFeature)) {
+                clickOnSelection = true;
+            }
+            selectedPFeatures.add(selectedPFeature);
+        }
+
+        // COLLECT ALL SELECTED PFEATURES from the DefaultFeatureCollectipon
+        final DefaultFeatureCollection dfc = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection());
+        for (final Feature selectedFeature : ((LinkedHashSet<Feature>)dfc.getSelectedFeatures())) {
+            final PFeature selectedPFeature = mappingComponent.getPFeatureHM().get(selectedFeature);
             if (allClickedPFeatures.contains(selectedPFeature)) {
                 clickOnSelection = true;
             }
@@ -167,14 +182,10 @@ public class SelectionListener extends CreateGeometryListener {
         // IS ONE OF THE SELECTED PFEATURES UNDER THE POINTER ?
         if (clickOnSelection) {
             pFeatures.addAll(selectedPFeatures);
-        } else {
-            if (multiFeaturePopupEnabled) {
-                pFeatures.addAll(allClickedPFeatures);
-            } else {
-                if (clickedPFeature != null) {
-                    pFeatures.add((PFeature)clickedPFeature);
-                }
-            }
+        } else if (multiFeaturePopupEnabled) {
+            pFeatures.addAll(allClickedPFeatures);
+        } else if (clickedPFeature != null) {
+            pFeatures.add((PFeature)clickedPFeature);
         }
 
         // we build a popup menu from all the registered generic point actions
@@ -206,8 +217,9 @@ public class SelectionListener extends CreateGeometryListener {
                     } catch (final Exception ex) {
                         break;
                     }
+                    cfa.setSourceFeature(pFeature.getFeature());
+
                     if (cfa.isActive()) {
-                        cfa.setSourceFeature(pFeature.getFeature());
                         if (cfa instanceof CommonFeaturePreciseAction) {
                             final Point2D pos = pInputEvent.getPosition();
                             final WorldToScreenTransform wtst = getMappingComponent().getWtst();
@@ -354,83 +366,95 @@ public class SelectionListener extends CreateGeometryListener {
 
         if (pInputEvent.isRightMouseButton()) {
             if (!isInProgress()) {
-                handleRightClick(pInputEvent);
-            }
-        } else {
-            if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
-                selectionInProgress = true;
-
                 try {
-                    if (log.isDebugEnabled()) {
-                        log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
-                    }
-                    clickCount = pInputEvent.getClickCount();
-                    if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
-                        doubleclickPoint = createPointFromInput(pInputEvent);
+                    handleRightClick(pInputEvent);
+                } catch (RuntimeException e) {
+                    log.error("Problem while creating context menu", e);
 
-                        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-                        pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
-                    }
-
-                    if (pInputEvent.getComponent() instanceof MappingComponent) {
-                        mappingComponent = (MappingComponent)pInputEvent.getComponent();
-                    }
-
-                    final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                            pInputEvent,
-                            new Class[] { PFeature.class });
-
-                    if (clickedPFeature != null) {
-                        sel = clickedPFeature;
-
-                        try {
-                            Point2D point = null;
-                            if (mappingComponent.isSnappingEnabled()) {
-                                final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
-                                point = PFeatureTools.getNearestPointInArea(
-                                        mappingComponent,
-                                        pInputEvent.getCanvasPosition(),
-                                        vertexRequired,
-                                        true);
-                            }
-                            if (point == null) {
-                                point = pInputEvent.getPosition();
-                            }
-
-                            final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
-
-                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance()
-                                            .getSrs().getCode());
-                            final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
-                            newFeature.setGeometryType(geomType);
-                            newFeature.getGeometry().setSRID(currentSrid);
-                            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
-                                    mappingComponent.getMappingModel().getSrs().getCode());
-                            newFeature.setGeometry(geom);
-
-                            finishingEvent = pInputEvent;
-                            finishGeometry(newFeature);
-                        } catch (Throwable throwable) {
-                            log.error("Error during the creation of the geometry", throwable); // NOI18N
-                        }
-
-                        if (clickCount == 2) {
-                            final Feature feature = sel.getFeature();
-                            if (feature instanceof DoubleClickableFeature) {
-                                if (pInputEvent.isLeftMouseButton()) {
-                                    ((DoubleClickableFeature)feature).doubleClickPerformed(this);
-                                }
-                            }
-                        }
-                    } else {
-                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                        }
-                        unselectAll();
-                    }
-                } finally {
-                    selectionInProgress = false;
+                    final ErrorInfo errorInfo = new ErrorInfo(
+                            NbBundle.getMessage(SelectionListener.class, "SelectionListener.mouseClicked().title"),
+                            NbBundle.getMessage(SelectionListener.class, "SelectionListener.mouseClicked().message"),
+                            null,
+                            null,
+                            e,
+                            Level.ALL,
+                            null);
+                    JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
                 }
+            }
+        } else if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
+            selectionInProgress = true;
+
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
+                }
+                clickCount = pInputEvent.getClickCount();
+                if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
+                    doubleclickPoint = createPointFromInput(pInputEvent);
+
+                    final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                    pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
+                }
+
+                if (pInputEvent.getComponent() instanceof MappingComponent) {
+                    mappingComponent = (MappingComponent)pInputEvent.getComponent();
+                }
+
+                final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
+                        pInputEvent,
+                        new Class[] { PFeature.class });
+
+                if (clickedPFeature != null) {
+                    sel = clickedPFeature;
+
+                    try {
+                        Point2D point = null;
+                        if (mappingComponent.isSnappingEnabled()) {
+                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                            point = PFeatureTools.getNearestPointInArea(
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition(),
+                                    vertexRequired,
+                                    true);
+                        }
+                        if (point == null) {
+                            point = pInputEvent.getPosition();
+                        }
+
+                        final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
+
+                        final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
+                                        .getCode());
+                        final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
+                        newFeature.setGeometryType(geomType);
+                        newFeature.getGeometry().setSRID(currentSrid);
+                        final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                                mappingComponent.getMappingModel().getSrs().getCode());
+                        newFeature.setGeometry(geom);
+
+                        finishingEvent = pInputEvent;
+                        finishGeometry(newFeature);
+                    } catch (Throwable throwable) {
+                        log.error("Error during the creation of the geometry", throwable); // NOI18N
+                    }
+
+                    if (clickCount == 2) {
+                        final Feature feature = sel.getFeature();
+                        if (feature instanceof DoubleClickableFeature) {
+                            if (pInputEvent.isLeftMouseButton()) {
+                                ((DoubleClickableFeature)feature).doubleClickPerformed(this);
+                            }
+                        }
+                    }
+                } else {
+                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                    }
+                    unselectAll();
+                }
+            } finally {
+                selectionInProgress = false;
             }
         }
     }
@@ -604,6 +628,7 @@ public class SelectionListener extends CreateGeometryListener {
     public void removePropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
+
     /**
      * DOCUMENT ME!
      *
