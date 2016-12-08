@@ -172,10 +172,12 @@ public class SelectionListener extends CreateGeometryListener {
         final DefaultFeatureCollection dfc = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection());
         for (final Feature selectedFeature : ((LinkedHashSet<Feature>)dfc.getSelectedFeatures())) {
             final PFeature selectedPFeature = mappingComponent.getPFeatureHM().get(selectedFeature);
-            if (allClickedPFeatures.contains(selectedPFeature)) {
-                clickOnSelection = true;
+            if (selectedPFeature != null) {
+                if (allClickedPFeatures.contains(selectedPFeature)) {
+                    clickOnSelection = true;
+                }
+                selectedPFeatures.add(selectedPFeature);
             }
-            selectedPFeatures.add(selectedPFeature);
         }
 
         final List<PFeature> pFeatures = new ArrayList<>();
@@ -217,7 +219,9 @@ public class SelectionListener extends CreateGeometryListener {
                     } catch (final Exception ex) {
                         break;
                     }
+                    // if ((cfa != null) && (pFeature != null)) {
                     cfa.setSourceFeature(pFeature.getFeature());
+                    // }
 
                     if (cfa.isActive()) {
                         if (cfa instanceof CommonFeaturePreciseAction) {
@@ -232,7 +236,7 @@ public class SelectionListener extends CreateGeometryListener {
                             ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
                             ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
                         }
-                        pFeature.getFeature().getGeometry().getArea();
+
                         if (cfa instanceof FeaturesProvider) {
                             if (((FeaturesProvider)cfa).isResponsibleFor(pFeature.getFeature())) {
                                 multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
