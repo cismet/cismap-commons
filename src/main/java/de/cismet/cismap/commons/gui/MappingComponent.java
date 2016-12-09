@@ -2320,6 +2320,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * Refresh the info nodes of all features.
+     *
+     * <p>The node names are possibly changed after adding or removing a feature. See <code>
+     * DefaultFeatureCollection.checkForAndCorrectDoubleNaming()</code></p>
+     */
+    private void refreshAllInfoNodesRequested() {
+        EventQueue.invokeLater(new Thread("Refresh pfeature names") {
+
+                @Override
+                public void run() {
+                    for (final PFeature f : new ArrayList<PFeature>(pFeatureHM.values())) {
+                        if (f != null) {
+                            f.refreshName();
+                        }
+                    }
+                    repaint();
+                }
+            });
+    }
+
+    /**
      * Method is deprecated and deactivated. Does nothing!!
      *
      * @param  fce  FeatureCollectionEvent with features to add
@@ -2379,6 +2400,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         removeFeatures(fce.getEventFeatures());
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
         showHandles(false);
+        refreshAllInfoNodesRequested();
         EventQueue.invokeLater(new Thread("MappingComponent featuresRemoved()") {
 
                 @Override
@@ -2661,6 +2683,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
         }
+        refreshAllInfoNodesRequested();
 
         EventQueue.invokeLater(new Thread("MappingComponent movetofront search feature") {
 

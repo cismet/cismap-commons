@@ -2279,6 +2279,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
+     * synchronises the feature name with the infoPanel.
+     */
+    public void refreshName() {
+        if (log.isDebugEnabled()) {
+            log.debug("refreshInfoNodeName"); // NOI18N
+        }
+        if ((!(feature instanceof InfoNodeAwareFeature)
+                        || ((feature instanceof InfoNodeAwareFeature)
+                            && ((InfoNodeAwareFeature)feature).hasInfoNode()))
+                    && (feature instanceof XStyledFeature)) {
+            if (infoPanel != null) {
+                infoPanel.setTitleText(((XStyledFeature)feature).getName());
+            }
+        }
+    }
+
+    /**
      * Creates an InfoPanel which is located in a PSwingComponent. This component will be added as child of this
      * PFeature. The InfoPanel contains the featuretype as icon and the name of the PFeature.
      */
