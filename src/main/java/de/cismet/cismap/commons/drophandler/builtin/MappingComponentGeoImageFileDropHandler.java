@@ -33,7 +33,6 @@ import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.filematcher.builtin.MappingComponentDropHandlerFileTypeMatcher;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.ExifReader;

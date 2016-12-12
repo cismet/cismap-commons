@@ -13,7 +13,6 @@ package de.cismet.cismap.commons.rasterservice;
 
 import com.vividsolutions.jts.geom.Envelope;
 
-import org.apache.batik.ext.awt.image.codec.tiff.TIFFImage;
 import org.apache.log4j.Logger;
 
 import org.deegree.io.geotiff.GeoTiffException;
@@ -37,15 +36,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -60,18 +53,14 @@ public class ImageFileRetrieval extends Thread {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(ImageFileRetrieval.class);
-    private static final Map<String, String> WORLD_FILE_ENDINGS = new HashMap<String, String>();
-
-    static {
-        WORLD_FILE_ENDINGS.put("jpg", "jgw");
-        WORLD_FILE_ENDINGS.put("jpeg", "jgw");
-        WORLD_FILE_ENDINGS.put("png", "pgw");
-        WORLD_FILE_ENDINGS.put("gif", "gfw");
-        WORLD_FILE_ENDINGS.put("tif", "tfw");
-        WORLD_FILE_ENDINGS.put("tiff", "tfw");
-    }
 
     //~ Instance fields --------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
 
     private int width;
     private int height;
@@ -82,7 +71,8 @@ public class ImageFileRetrieval extends Thread {
     private File imageFile;
     private RetrievalListener listener = null;
     private volatile boolean youngerCall = false;
-    private ImageMetaData metaData;
+    private ImageFileMetaData metaData;
+    private final ImageFileUtils.Mode mode;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -91,11 +81,16 @@ public class ImageFileRetrieval extends Thread {
      *
      * @param  imageFile  DOCUMENT ME!
      * @param  listener   DOCUMENT ME!
+     * @param  mode       DOCUMENT ME!
      */
-    public ImageFileRetrieval(final File imageFile, final RetrievalListener listener) {
+    public ImageFileRetrieval(final File imageFile,
+            final RetrievalListener listener,
+            final ImageFileUtils.Mode mode) {
         super("ImageFileRetrieval");
         this.imageFile = imageFile;
         this.listener = listener;
+
+        this.mode = mode;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -213,7 +208,7 @@ public class ImageFileRetrieval extends Thread {
      * @throws  InterruptedException             DOCUMENT ME!
      * @throws  NoninvertibleTransformException  DOCUMENT ME!
      */
-    private BufferedImage createImage(final ImageMetaData metaData) throws IOException,
+    private BufferedImage createImage(final ImageFileMetaData metaData) throws IOException,
         InterruptedException,
         NoninvertibleTransformException {
         final AffineTransform worldFileTransform = metaData.getTransform();
@@ -343,16 +338,32 @@ public class ImageFileRetrieval extends Thread {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private ImageMetaData getImageMetaData() throws Exception {
-        final File worldFile = getWorldFile();
-
-        if (worldFile != null) {
-            return getWorldFileMetaData(worldFile);
-        } else if (imageFile.getName().toLowerCase().endsWith("tif")) {
-            return getTiffMetaData();
+    private ImageFileMetaData getImageMetaData() throws Exception {
+        switch (mode) {
+            case WORLDFILE: {
+                return getWorldFileMetaData(getWorldFile());
+            }
+            case TIFF: {
+                getTiffMetaData();
+            }
+            case GEO_REFERENCED: {
+                return getGeoReferencedMetaData();
+            }
+            default: {
+                return null;
+            }
         }
+    }
 
-        return null;
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private ImageFileMetaData getGeoReferencedMetaData() throws Exception {
+        return RasterGeoReferencingBackend.getInstance().getImageMetaData(imageFile);
     }
 
     /**
@@ -362,16 +373,8 @@ public class ImageFileRetrieval extends Thread {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private ImageMetaData getTiffMetaData() throws Exception {
-        GeoTiffReader r = new GeoTiffReader(imageFile);
-        final org.deegree.model.spatialschema.Envelope e = r.getBoundingBox();
-        final Envelope en = new Envelope(e.getMin().getX(), e.getMax().getX(), e.getMin().getY(), e.getMax().getY());
-        final TIFFImage tiffImage = r.getTIFFImage();
-        final Rectangle rec = tiffImage.getBounds();
-        r = null;
-        System.gc();
-
-        return new ImageMetaData(rec, en, null);
+    private ImageFileMetaData getTiffMetaData() throws Exception {
+        return ImageFileUtils.getTiffMetaData(imageFile);
     }
 
     /**
@@ -382,7 +385,7 @@ public class ImageFileRetrieval extends Thread {
      *
      * @return  the meta information about the image file
      */
-    private ImageMetaData getWorldFileMetaData(final File worldFile) {
+    private ImageFileMetaData getWorldFileMetaData(final File worldFile) {
         try {
             final BufferedReader br = new BufferedReader(new FileReader(worldFile));
             final double[] matrix = new double[6];
@@ -406,13 +409,13 @@ public class ImageFileRetrieval extends Thread {
                 matrix[1] = -matrix[1]; // don't know exactly why, but it doesn't work otherwise
                 final AffineTransform transform = new AffineTransform(matrix);
 
-                final Dimension imageDimension = getImageDimension(imageFile);
+                final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
                 final double imageWidth = imageDimension.getWidth();
                 final double imageHeight = imageDimension.getHeight();
                 final Rectangle bounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
 
                 final Rectangle transformedBounds = ((Path2D)transform.createTransformedShape(bounds)).getBounds();
-                return new ImageMetaData(
+                return new ImageFileMetaData(
                         bounds,
                         new Envelope(
                             transformedBounds.getX(),
@@ -431,77 +434,12 @@ public class ImageFileRetrieval extends Thread {
     }
 
     /**
-     * Determines the width and height of the given iamge file. This method does not completely read the image.
-     *
-     * @param   imgFile  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    public static Dimension getImageDimension(final File imgFile) throws IOException {
-        final int pos = imgFile.getName().lastIndexOf(".");
-
-        if (pos == -1) {
-            throw new IOException("The file " + imgFile.getAbsolutePath()
-                        + " has not extension, so no reader can be found.");
-        }
-
-        final String fileSuffix = imgFile.getName().substring(pos + 1);
-        final Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(fileSuffix);
-
-        if (iter.hasNext()) {
-            final ImageReader reader = iter.next();
-
-            try {
-                final ImageInputStream stream = new FileImageInputStream(imgFile);
-                reader.setInput(stream);
-                final int width = reader.getWidth(reader.getMinIndex());
-                final int height = reader.getHeight(reader.getMinIndex());
-
-                return new Dimension(width, height);
-            } catch (IOException e) {
-                LOG.warn("Error reading: " + imgFile.getAbsolutePath(), e);
-            } finally {
-                reader.dispose();
-            }
-        }
-
-        throw new IOException("No suitable reader found for file format: " + fileSuffix);
-    }
-
-    /**
      * Returns the world file or null, if it does not exist.
      *
      * @return  the world file of the <code>imageFile</code>
      */
     private File getWorldFile() {
-        return getWorldFile(imageFile);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   imageFile  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static File getWorldFile(final File imageFile) {
-        final String name = imageFile.getAbsolutePath();
-        final String ending = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
-
-        final String wfEnding = WORLD_FILE_ENDINGS.get(ending);
-
-        if (wfEnding != null) {
-            final String worldFileName = name.substring(0, name.lastIndexOf(".") + 1) + wfEnding;
-            final File worldFile = new File(worldFileName);
-
-            if (worldFile.exists()) {
-                return worldFile;
-            }
-        }
-
-        return null;
+        return ImageFileUtils.getWorldFile(imageFile);
     }
 
     /**
@@ -512,7 +450,7 @@ public class ImageFileRetrieval extends Thread {
     public Envelope getEnvelope() {
         try {
             if (metaData == null) {
-                final ImageMetaData metaData = getImageMetaData();
+                final ImageFileMetaData metaData = getImageMetaData();
 
                 if (metaData != null) {
                     return metaData.getImageEnvelope();
@@ -727,94 +665,5 @@ public class ImageFileRetrieval extends Thread {
      */
     public void copyMetaData(final ImageFileRetrieval other) {
         this.metaData = other.metaData;
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class ImageMetaData {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private Rectangle imageBounds;
-        private Envelope imageEnvelope;
-        private AffineTransform transform;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new ImageMetaData object.
-         *
-         * @param  imageBounds    DOCUMENT ME!
-         * @param  imageEnvelope  DOCUMENT ME!
-         * @param  transform      DOCUMENT ME!
-         */
-        public ImageMetaData(final Rectangle imageBounds,
-                final Envelope imageEnvelope,
-                final AffineTransform transform) {
-            this.imageBounds = imageBounds;
-            this.imageEnvelope = imageEnvelope;
-            this.transform = transform;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the imageBounds
-         */
-        public Rectangle getImageBounds() {
-            return imageBounds;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  imageBounds  the imageBounds to set
-         */
-        public void setImageBounds(final Rectangle imageBounds) {
-            this.imageBounds = imageBounds;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the imageEnvelope
-         */
-        public Envelope getImageEnvelope() {
-            return imageEnvelope;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  imageEnvelope  the imageEnvelope to set
-         */
-        public void setImageEnvelope(final Envelope imageEnvelope) {
-            this.imageEnvelope = imageEnvelope;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public AffineTransform getTransform() {
-            return transform;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  transform  DOCUMENT ME!
-         */
-        public void setTransform(final AffineTransform transform) {
-            this.transform = transform;
-        }
     }
 }
