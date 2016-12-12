@@ -24,7 +24,6 @@ import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.LayerInfoProvider;
@@ -52,6 +51,12 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
 
     //~ Instance fields --------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+
     private final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(this.getClass());
     private File imageFile;
     private ImageFileRetrieval ir;
@@ -66,6 +71,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
     private float translucency = 1.0f;
     private boolean visible = true;
     private Geometry envelope;
+    private ImageFileUtils.Mode mode;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -75,7 +81,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
      * @param  s  DOCUMENT ME!
      */
     public ImageRasterService(final ImageRasterService s) {
-        this(s.imageFile);
+        this(s.imageFile, s.mode);
         if ((BoundingBox)s.bb != null) {
             bb = (BoundingBox)s.bb.clone();
         }
@@ -89,20 +95,10 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
 // pNode = s.pNode;
         translucency = s.translucency;
         width = s.width;
-        ir = new ImageFileRetrieval(imageFile, this);
+        ir = new ImageFileRetrieval(s.imageFile, this, s.mode);
         listeners = new ArrayList<RetrievalListener>();
         listeners = Collections.synchronizedList(listeners);
         listeners.addAll(s.listeners);
-    }
-
-    /**
-     * Creates a new instance of SimpleWMS.
-     *
-     * @param  imageFile  gmUrl DOCUMENT ME!
-     */
-    public ImageRasterService(final File imageFile) {
-        this.imageFile = imageFile;
-        this.name = imageFile.getName();
     }
 
     /**
@@ -153,7 +149,28 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
         }
     }
 
+    /**
+     * Creates a new instance of SimpleWMS.
+     *
+     * @param  imageFile  gmUrl DOCUMENT ME!
+     * @param  mode       DOCUMENT ME!
+     */
+    public ImageRasterService(final File imageFile, final ImageFileUtils.Mode mode) {
+        this.imageFile = imageFile;
+        this.name = imageFile.getName();
+        this.mode = mode;
+    }
+
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ImageFileUtils.Mode getMode() {
+        return mode;
+    }
 
     /**
      * DOCUMENT ME!
@@ -179,7 +196,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
             LOG.debug("retrieve()"); // NOI18N
         }
 
-        final ImageFileRetrieval ifr = new ImageFileRetrieval(imageFile, this);
+        final ImageFileRetrieval ifr = new ImageFileRetrieval(imageFile, this, mode);
         ifr.setHeight(height);
         ifr.setWidth(width);
         ifr.setX1(bb.getX1());
@@ -317,7 +334,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
     public Geometry getEnvelope() {
         if (envelope == null) {
             final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING));
-            final Envelope en = new ImageFileRetrieval(imageFile, this).getEnvelope();
+            final Envelope en = new ImageFileRetrieval(imageFile, this, mode).getEnvelope();
 
             if (en != null) {
                 envelope = gf.toGeometry(en);
