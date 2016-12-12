@@ -43,6 +43,7 @@ import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -60,7 +61,6 @@ public class LayerDropUtils {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final Logger LOG = Logger.getLogger(LayerDropUtils.class);
-    public static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "jpeg", "tif", "tiff", "gif" };
 
     //~ Methods ----------------------------------------------------------------
 
@@ -342,104 +342,147 @@ public class LayerDropUtils {
     }
 
     /**
-     * Handel the given file. Every file, that is recognised by the DocumentFeatureServiceFactory can be handled.
+     * DOCUMENT ME!
      *
      * @param   data              DOCUMENT ME!
      * @param   activeLayerModel  DOCUMENT ME!
      * @param   index             DOCUMENT ME!
      * @param   parent            DOCUMENT ME!
      *
-     * @return  true, iff a service was added
+     * @return  DOCUMENT ME!
      */
     public static boolean handleFiles(final Collection<File> data,
             final ActiveLayerModel activeLayerModel,
             final int index,
             final Component parent) {
+        boolean success = false;
         for (final File currentFile : data) {
-            // NO HARDCODING
-            try {
-                LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
-
-                if (isGeoImage(currentFile.getName())) {
-                    final ImageRasterService irs = new ImageRasterService(currentFile);
-
-                    if (index != -1) {
-                        activeLayerModel.addLayer(irs, activeLayerModel.layers.size() - index);
-                    } else {
-                        activeLayerModel.addLayer(irs);
-                    }
-                } else {
-                    final AbstractFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(
-                            currentFile);
-                    if (index != -1) {
-                        activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
-                    } else {
-                        activeLayerModel.addLayer(dfs);
-                    }
-
-                    if (dfs instanceof ShapeFileFeatureService) {
-                        new Thread(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    do {
-                                        try {
-                                            Thread.sleep(500);
-                                        } catch (final InterruptedException e) {
-                                            // nothing to do
-                                        }
-                                    } while (!dfs.isInitialized());
-
-                                    if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
-                                        JOptionPane.showMessageDialog(
-                                            StaticSwingTools.getParentFrame(parent),
-                                            NbBundle.getMessage(
-                                                LayerWidget.class,
-                                                "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
-                                            NbBundle.getMessage(
-                                                LayerWidget.class,
-                                                "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
-                                            JOptionPane.ERROR_MESSAGE);
-                                    } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
-                                        JOptionPane.showMessageDialog(
-                                            StaticSwingTools.getParentFrame(parent),
-                                            NbBundle.getMessage(
-                                                LayerWidget.class,
-                                                "LayerWidget.drop().noGeometryFoundInShapeMessage"),
-                                            NbBundle.getMessage(
-                                                LayerWidget.class,
-                                                "LayerWidget.drop().noGeometryFoundInShapeTitle"),
-                                            JOptionPane.WARNING_MESSAGE);
-                                    }
-                                }
-                            }).start();
-
-                        return true;
-                    }
-                }
-            } catch (final Exception ex) {
-                LOG.error("Error during creation of a FeatureServices", ex); // NOI18N
+            if (handleFile(currentFile, activeLayerModel, index, parent)) {
+                success = true;
             }
         }
-
-        return false;
+        return success;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   fileName  DOCUMENT ME!
+     * @param   currentFile       DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   index             DOCUMENT ME!
+     * @param   parent            DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean isGeoImage(final String fileName) {
-        for (final String ending : SUPPORTED_IMAGE_FORMATS) {
-            if (fileName.endsWith(ending)) {
-                return true;
-            }
-        }
+    public static boolean handleFile(final File currentFile,
+            final ActiveLayerModel activeLayerModel,
+            final int index,
+            final Component parent) {
+        LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
 
-        return false;
+        if (ImageFileUtils.isImageFileEnding(currentFile.getName())) {
+            return handleImageFile(
+                    currentFile,
+                    activeLayerModel,
+                    index,
+                    parent,
+                    ImageFileUtils.determineMode(currentFile));
+        } else {
+            return handleFeatureServiceFile(currentFile, activeLayerModel, index, parent);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   currentFile       DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   index             DOCUMENT ME!
+     * @param   parent            DOCUMENT ME!
+     * @param   imageFileMode     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean handleImageFile(final File currentFile,
+            final ActiveLayerModel activeLayerModel,
+            final int index,
+            final Component parent,
+            final ImageFileUtils.Mode imageFileMode) {
+        final ImageRasterService irs = new ImageRasterService(currentFile, imageFileMode);
+
+        if (index != -1) {
+            activeLayerModel.addLayer(irs, activeLayerModel.layers.size() - index);
+        } else {
+            activeLayerModel.addLayer(irs);
+        }
+        return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   currentFile       DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   index             DOCUMENT ME!
+     * @param   parent            DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean handleFeatureServiceFile(final File currentFile,
+            final ActiveLayerModel activeLayerModel,
+            final int index,
+            final Component parent) {
+        try {
+            final AbstractFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(
+                    currentFile);
+            if (index != -1) {
+                activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
+            } else {
+                activeLayerModel.addLayer(dfs);
+            }
+
+            if (dfs instanceof ShapeFileFeatureService) {
+                new Thread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            do {
+                                try {
+                                    Thread.sleep(500);
+                                } catch (final InterruptedException e) {
+                                    // nothing to do
+                                }
+                            } while (!dfs.isInitialized());
+
+                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                JOptionPane.showMessageDialog(
+                                    StaticSwingTools.getParentFrame(parent),
+                                    NbBundle.getMessage(
+                                        LayerWidget.class,
+                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
+                                    NbBundle.getMessage(
+                                        LayerWidget.class,
+                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
+                                    JOptionPane.ERROR_MESSAGE);
+                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                JOptionPane.showMessageDialog(
+                                    StaticSwingTools.getParentFrame(parent),
+                                    NbBundle.getMessage(
+                                        LayerWidget.class,
+                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"),
+                                    NbBundle.getMessage(
+                                        LayerWidget.class,
+                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"),
+                                    JOptionPane.WARNING_MESSAGE);
+                            }
+                        }
+                    }).start();
+            }
+        } catch (final Exception ex) {
+            LOG.error("Error during creation of a FeatureServices", ex); // NOI18N
+            return false;
+        }
+        return true;
     }
 
     /**
