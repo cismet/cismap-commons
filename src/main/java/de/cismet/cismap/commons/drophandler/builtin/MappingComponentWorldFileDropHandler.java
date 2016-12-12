@@ -26,7 +26,9 @@ import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatch
 import de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidgetProvider;
-import de.cismet.cismap.commons.rasterservice.ImageFileRetrieval;
+import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
+
+import static de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils.handleImageFile;
 
 /**
  * DOCUMENT ME!
@@ -52,7 +54,14 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
 
     @Override
     public void dropFiles(final Collection<File> files) {
-        LayerDropUtils.drop(files, layerWidget.getMappingModel(), layerWidget);
+        for (final File file : files) {
+            LayerDropUtils.handleImageFile(
+                file,
+                layerWidget.getMappingModel(),
+                -1,
+                layerWidget,
+                ImageFileUtils.Mode.WORLDFILE);
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -68,7 +77,7 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
 
         @Override
         public boolean isMatching(final File file) {
-            return LayerDropUtils.isGeoImage(file.getName()) && (ImageFileRetrieval.getWorldFile(file) != null);
+            return ImageFileUtils.isImageFileEnding(file.getName()) && (ImageFileUtils.getWorldFile(file) != null);
         }
     }
 }
