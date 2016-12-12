@@ -38,7 +38,6 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -363,7 +362,7 @@ public class ImageFileRetrieval extends Thread {
      * @throws  Exception  DOCUMENT ME!
      */
     private ImageFileMetaData getGeoReferencedMetaData() throws Exception {
-        return RasterGeoReferencingBackend.getInstance().getImageMetaData(imageFile);
+        return null;
     }
 
     /**
