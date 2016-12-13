@@ -13,12 +13,9 @@ import java.awt.Point;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
-import de.cismet.cismap.commons.rasterservice.ImageFileRetrieval;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -38,8 +35,29 @@ public class RasterGeoReferencingHandler {
 
     private final List<PointCoordinatePair> pairs = new ArrayList<PointCoordinatePair>();
     private ListenerHandler listenerHandler = new ListenerHandler();
+    private final ImageFileMetaData metaData;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new RasterGeoReferencingHandler object.
+     *
+     * @param  metaData  DOCUMENT ME!
+     */
+    public RasterGeoReferencingHandler(final ImageFileMetaData metaData) {
+        this.metaData = metaData;
+    }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ImageFileMetaData getMetaData() {
+        return metaData;
+    }
 
     /**
      * DOCUMENT ME!

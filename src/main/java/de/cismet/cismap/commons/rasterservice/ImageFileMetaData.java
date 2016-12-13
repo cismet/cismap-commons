@@ -12,10 +12,17 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import com.sun.javafx.scene.control.skin.VirtualFlow;
+
 import com.vividsolutions.jts.geom.Envelope;
 
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+
+import java.util.Collection;
+import java.util.List;
+
+import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!
