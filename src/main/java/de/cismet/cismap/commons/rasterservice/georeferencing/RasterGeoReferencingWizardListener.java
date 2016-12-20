@@ -23,7 +23,7 @@ import java.awt.Point;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public interface RasterGeoReferencingHandlerListener {
+public interface RasterGeoReferencingWizardListener extends RasterGeoReferencingHandlerListener {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -32,19 +32,19 @@ public interface RasterGeoReferencingHandlerListener {
      *
      * @param  position  DOCUMENT ME!
      */
-    void positionAdded(final int position);
+    void pointSelected(final int position);
 
     /**
      * DOCUMENT ME!
      *
      * @param  position  DOCUMENT ME!
      */
-    void positionRemoved(final int position);
+    void coordinateSelected(final int position);
 
     /**
      * DOCUMENT ME!
      *
-     * @param  position  DOCUMENT ME!
+     * @param  handler  DOCUMENT ME!
      */
-    void positionChanged(final int position);
+    void handlerChanged(final RasterGeoReferencingHandler handler);
 }
