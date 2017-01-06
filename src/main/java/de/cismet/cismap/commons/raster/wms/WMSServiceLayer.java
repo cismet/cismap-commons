@@ -17,6 +17,8 @@ import org.jdom.Element;
 
 import org.openide.util.NbBundle;
 
+import java.awt.EventQueue;
+
 import java.beans.PropertyChangeSupport;
 
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
@@ -406,6 +409,15 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 wmsLayers.add(wmsLayer);
                 ogcLayers.add(wmsLayer.getOgcCapabilitiesLayer());
             }
+            EventQueue.invokeLater(new Thread("fireLayerInformationStatusChanged") {
+
+                    @Override
+                    public void run() {
+                        final ActiveLayerEvent ale = new ActiveLayerEvent();
+                        ale.setLayer(wmsLayer);
+                        CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+                    }
+                });
         }
 
         if (addSubLayer) {
