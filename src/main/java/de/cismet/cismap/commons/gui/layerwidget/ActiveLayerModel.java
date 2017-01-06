@@ -1717,11 +1717,25 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                     log.info(
                                         "addLayer  ("
                                                 + layer.getName()
-                                                + ")");                         // NOI18N
+                                                + ")"); // NOI18N
                                     if (layer instanceof ActiveLayerModelStore) {
                                         ((ActiveLayerModelStore)layer).setActiveLayerModel(ActiveLayerModel.this);
                                     }
                                     addLayer(layer, layers.size());
+                                    // without the following event, the featureInfoWidget does not know this layer
+                                    ActiveLayerEvent ale = new ActiveLayerEvent();
+                                    ale.setLayer(layer);
+                                    CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+
+                                    if (layer instanceof ChildrenProvider) {
+                                        final ChildrenProvider childrenProvider = (ChildrenProvider)layer;
+
+                                        for (final Object child : childrenProvider.getChildren()) {
+                                            ale = new ActiveLayerEvent();
+                                            ale.setLayer(child);
+                                            CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+                                        }
+                                    }
                                 } catch (IllegalArgumentException schonVorhanden) {
                                     log.warn(
                                         "Layer '"

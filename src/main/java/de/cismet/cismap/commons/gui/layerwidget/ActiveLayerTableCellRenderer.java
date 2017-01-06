@@ -404,25 +404,6 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
 //                }
 //            }
             if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider)value).isQueryable()) {
-                if (((LayerInfoProvider)value).isLayerQuerySelected()) {
-                    EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    if (value instanceof LayerInfoProvider) {
-                                        ((LayerInfoProvider)value).setLayerQuerySelected(true);
-                                        final ActiveLayerEvent ale = new ActiveLayerEvent();
-                                        ale.setLayer(value);
-                                        CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
-                                    }
-                                } catch (Exception ex) {
-                                    log.error("Error in actionPerformed of the informationCheckBos", ex);
-                                }
-                            }
-                        });
-                }
-
                 return booleanRenderer.getTableCellRendererComponent(
                         table,
                         ((LayerInfoProvider)value).isLayerQuerySelected(),
