@@ -18,8 +18,10 @@ import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -39,7 +41,6 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Dimension DIM = new Dimension(250, 16);
     private static int SINGLE = 4;
     private static int MULTI = 8;
     private static int INFO = 16;
@@ -52,6 +53,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
     private static int SIMPLEWMS = 224;
     private static int WFS = 256;
     private static int WFST = 288;
+    private static int H2 = 300;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -247,6 +249,16 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             final boolean leaf,
             final int row,
             final boolean hasFocus) {
+        if (value instanceof ModeLayer) {
+            return getTreeCellRendererComponent(
+                    tree,
+                    ((ModeLayer)value).getCurrentLayer(),
+                    isSelected,
+                    expanded,
+                    leaf,
+                    row,
+                    hasFocus);
+        }
         final JLabel ret = (JLabel)super.getTreeCellRendererComponent(
                 tree,
                 value,
@@ -255,10 +267,8 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 leaf,
                 row,
                 hasFocus);
-        ret.setMinimumSize(DIM);
-        ret.setMaximumSize(DIM);
-        ret.setPreferredSize(DIM);
         ret.setText(value.toString());
+
         if (value instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer layer = (RetrievalServiceLayer)value;
             ret.setText(layer.toString());
@@ -298,11 +308,37 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 ret.setIcon(getRightIcon(SHAPE, layer.getPNode().getVisible(), layer.isEnabled()));
             } else if (value instanceof SimplePostgisFeatureService) {
                 ret.setIcon(getRightIcon(POSTGIS, layer.getPNode().getVisible(), layer.isEnabled()));
+            } else if (value instanceof H2FeatureService) {
+                int type = 0;
+
+                if (layer.getPNode().getVisible()) {
+                    if (layer.isEnabled()) {
+                        type = H2FeatureService.LAYER_ENABLED_VISIBLE;
+                    } else {
+                        type = H2FeatureService.LAYER_DISABLED_VISIBLE;
+                    }
+                } else {
+                    if (layer.isEnabled()) {
+                        type = H2FeatureService.LAYER_ENABLED_INVISIBLE;
+                    } else {
+                        type = H2FeatureService.LAYER_DISABLED_INVISIBLE;
+                    }
+                }
+
+                ret.setIcon(((H2FeatureService)value).getLayerIcon(type));
             } else {
                 ret.setIcon(getRightIcon(SUPPORTER, layer.getPNode().getVisible(), layer.isEnabled()));
             }
         } else if (value instanceof WMSLayer) {
-            if (((WMSLayer)value).getOgcCapabilitiesLayer().isQueryable()) {
+            boolean queryable;
+
+            if (!((WMSLayer)value).isDummy()) {
+                queryable = ((WMSLayer)value).getOgcCapabilitiesLayer().isQueryable();
+            } else {
+                queryable = ((WMSLayer)value).isQueryable();
+            }
+
+            if (queryable) {
                 ret.setIcon(getRightIcon(SINGLE + INFO, true, ((WMSLayer)value).isEnabled()));
             } else {
                 ret.setIcon(getRightIcon(SINGLE, true, ((WMSLayer)value).isEnabled()));
@@ -406,6 +442,7 @@ class IconType {
         ret += type;
         return ret;
     }
+
     @Override
     public boolean equals(final Object o) {
         return ((o instanceof IconType) && (((IconType)o).type == type) && (((IconType)o).visible == visible)

@@ -31,6 +31,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cismap.commons.PNodeProvider;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.rasterservice.MapService;
@@ -48,7 +49,7 @@ import de.cismet.tools.gui.imagetooltip.ImageToolTip;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class LayerControl extends javax.swing.JPanel implements RetrievalListener {
+public class LayerControl extends javax.swing.JPanel implements RetrievalListener, PNodeProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -425,7 +426,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
 
     @Override
     public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        final Runnable t = new Runnable() {
+        final Runnable t = new Thread("LayerControl retrievalError()") {
 
                 @Override
                 public void run() {
@@ -616,9 +617,16 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public PNode getPNode() {
         return transparentable;
     }
+
+    @Override
+    public void setPNode(final PNode pNode) {
+        setTransparentable(pNode);
+    }
+
     /**
      * DOCUMENT ME!
      *

@@ -15,11 +15,10 @@ import org.apache.log4j.Logger;
 import java.awt.Color;
 import java.awt.EventQueue;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -32,8 +31,7 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  * @version  $Revision$, $Date$
  */
 public abstract class AbstractCreateSearchGeometryListener extends CreateGeometryListener
-        implements CreateSearchGeometryListener,
-            PropertyChangeListener {
+        implements CreateSearchGeometryListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -43,11 +41,6 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     // We need to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners.
     public static final String PROPERTY_LAST_FEATURE = "PROPERTY_LAST_FEATURE";
     public static final String PROPERTY_MODE = "PROPERTY_MODE";
-    // It's not enough to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners.
-    // Mostly they have a visualizing component (like the white m on a green ball button). They have to be notified of
-    // changes regarding mode or last feature.
-    public static final String PROPERTY_FORGUI_LAST_FEATURE = "PROPERTY_FORGUI_LAST_FEATURE";
-    public static final String PROPERTY_FORGUI_MODE = "PROPERTY_FORGUI_MODE";
 
     // Additionally we want an AbstractCreateSearchGeometryListener to be the same color, ... as the
     // MetaSearchCreateSearchGeometryListener, since it's the only one which can be set by its own option dialog.
@@ -61,22 +54,35 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     private boolean holdGeometries = false;
     private Color searchColor = Color.GREEN;
     private float searchTransparency = 0.5f;
-    private PureNewFeature lastFeature;
-    private PureNewFeature recentlyCreatedFeature;
+    private SearchFeature lastFeature;
+    private SearchFeature searchFeature;
+    private SearchFeature recentlyCreatedFeature;
     private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private final String inputListenerName;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new CreateSearchGeometryListener object.
      *
-     * @param  mc  DOCUMENT ME!
+     * @param  mc                 DOCUMENT ME!
+     * @param  inputListenerName  DOCUMENT ME!
      */
-    public AbstractCreateSearchGeometryListener(final MappingComponent mc) {
+    public AbstractCreateSearchGeometryListener(final MappingComponent mc, final String inputListenerName) {
         super(mc, SearchFeature.class);
+        this.inputListenerName = inputListenerName;
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getInputListenerName() {
+        return inputListenerName;
+    }
 
     /**
      * DOCUMENT ME!
@@ -85,6 +91,15 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      */
     public void addPropertyChangeListener(final PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
     /**
@@ -106,10 +121,11 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     }
 
     @Override
-    protected void finishGeometry(final PureNewFeature newFeature) {
+    protected void finishGeometry(final AbstractNewFeature newFeature) {
         super.finishGeometry(newFeature);
-
-        recentlyCreatedFeature = newFeature;
+        final SearchFeature newSearchFeature = (SearchFeature)newFeature;
+        newSearchFeature.setInputListenerName(inputListenerName);
+        recentlyCreatedFeature = newSearchFeature;
     }
 
     /**
@@ -117,7 +133,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @param  feature  DOCUMENT ME!
      */
-    protected void cleanup(final PureNewFeature feature) {
+    protected void cleanup(final SearchFeature feature) {
         final PFeature pFeature = (PFeature)getMappingComponent().getPFeatureHM().get(feature);
         if (isHoldingGeometries()) {
             pFeature.moveToFront(); // funktioniert nicht?!
@@ -150,16 +166,12 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @param  newValue  DOCUMENT ME!
      */
-    protected void setLastFeature(final PureNewFeature newValue) {
-        final PureNewFeature oldValue = this.lastFeature;
+    protected void setLastFeature(final SearchFeature newValue) {
+        final SearchFeature oldValue = this.lastFeature;
         this.lastFeature = newValue;
 
         // Notify other AbstractCreateSearchGeometryListeners about the change.
         propertyChangeSupport.firePropertyChange(PROPERTY_LAST_FEATURE, oldValue, newValue);
-        // And notify the visualizing component of this AbstractCreateSearchGeometryListener about the change.
-        // setLastFeature(PureNewFeature) is called by this AbstractCreateSearchGeometryListener itself so the
-        // visualizing component doesn't know about the new last feature.
-        propertyChangeSupport.firePropertyChange(PROPERTY_FORGUI_LAST_FEATURE, oldValue, newValue);
     }
 
     /**
@@ -176,6 +188,25 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     @Override
     public void showLastFeature() {
         showFeature(lastFeature);
+        getMappingComponent().getFeatureCollection().holdFeature(lastFeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public SearchFeature getSearchFeature() {
+        return searchFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  searchFeature  DOCUMENT ME!
+     */
+    protected void setSearchFeature(final SearchFeature searchFeature) {
+        this.searchFeature = searchFeature;
     }
 
     /**
@@ -183,9 +214,10 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @param  feature  DOCUMENT ME!
      */
-    protected void showFeature(final PureNewFeature feature) {
+    protected void showFeature(final SearchFeature feature) {
         if (feature != null) {
-            feature.setEditable(feature.getGeometryType() != PureNewFeature.geomTypes.MULTIPOLYGON);
+            feature.setInputListenerName(inputListenerName);
+            feature.setEditable(feature.getGeometryType() != AbstractNewFeature.geomTypes.MULTIPOLYGON);
 
             getMappingComponent().getFeatureCollection().addFeature(feature);
             if (isHoldingGeometries()) {
@@ -279,7 +311,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      * @return  DOCUMENT ME!
      */
     @Override
-    public PureNewFeature getLastSearchFeature() {
+    public SearchFeature getLastSearchFeature() {
         return lastFeature;
     }
 
@@ -289,8 +321,9 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      * @param  searchFeature  DOCUMENT ME!
      */
     @Override
-    public void search(final PureNewFeature searchFeature) {
+    public void search(final SearchFeature searchFeature) {
         if (searchFeature != null) {
+            setSearchFeature(searchFeature);
             final boolean searchExecuted = performSearch(searchFeature);
             if (searchExecuted) {
                 setLastFeature(searchFeature);
@@ -333,7 +366,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @param  feature  DOCUMENT ME!
      */
-    protected void handleUserFinishedSearchGeometry(final PureNewFeature feature) {
+    protected void handleUserFinishedSearchGeometry(final SearchFeature feature) {
         getMappingComponent().getFeatureCollection().addFeature(feature);
         setLastFeature(feature);
         performSearch(feature);
@@ -374,24 +407,8 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         // But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
         // the change, since this method is invoked by it. It already knows about the change.
 
-        generateAndShowPointerAnnotation();
-    }
-
-    @Override
-    public void propertyChange(final PropertyChangeEvent evt) {
-        if (MappingComponent.PROPERTY_MAP_INTERACTION_MODE.equals(evt.getPropertyName())) {
-            if (MappingComponent.CREATE_SEARCH_POLYGON.equals(evt.getNewValue())) {
-                generateAndShowPointerAnnotation();
-            }
-        } else if (PROPERTY_LAST_FEATURE.equals(evt.getPropertyName())) {
-            lastFeature = (PureNewFeature)evt.getNewValue();
-            propertyChangeSupport.firePropertyChange(
-                PROPERTY_FORGUI_LAST_FEATURE,
-                evt.getOldValue(),
-                evt.getNewValue());
-        } else if (PROPERTY_MODE.equals(evt.getPropertyName())) {
-            super.setMode(evt.getNewValue().toString());
-            propertyChangeSupport.firePropertyChange(PROPERTY_FORGUI_MODE, evt.getOldValue(), evt.getNewValue());
+        if (getMappingComponent().getInteractionMode().equals(MappingComponent.CREATE_SEARCH_POLYGON)) {
+            generateAndShowPointerAnnotation();
         }
     }
 
@@ -445,7 +462,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @return  DOCUMENT ME!
      */
-    protected abstract boolean performSearch(final PureNewFeature searchFeature);
+    protected abstract boolean performSearch(final SearchFeature searchFeature);
 
     /**
      * DOCUMENT ME!

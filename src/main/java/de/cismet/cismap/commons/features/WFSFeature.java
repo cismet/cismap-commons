@@ -18,4 +18,24 @@ package de.cismet.cismap.commons.features;
  * @version  $Revision$, $Date$
  */
 public class WFSFeature extends DefaultFeatureServiceFeature {
+
+    //~ Instance fields --------------------------------------------------------
+
+    private String name;
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  name  DOCUMENT ME!
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 }

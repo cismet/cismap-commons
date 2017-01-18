@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
-import edu.umd.cs.piccolo.PNode;
-
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
 /**
@@ -17,7 +15,7 @@ import de.cismet.cismap.commons.retrieval.RetrievalService;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface RetrievalServiceLayer extends ServiceLayer, RetrievalService {
+public interface RetrievalServiceLayer extends ServiceLayer, RetrievalService, PNodeProvider {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -39,16 +37,4 @@ public interface RetrievalServiceLayer extends ServiceLayer, RetrievalService {
      * @return  DOCUMENT ME!
      */
     boolean hasErrors();
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    PNode getPNode();
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  pNode  DOCUMENT ME!
-     */
-    void setPNode(PNode pNode);
 }

@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.preferences;
 
+import org.jdom.Attribute;
+import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 import java.util.Iterator;
@@ -29,6 +31,7 @@ public class CapabilitiesPreferences {
 
     private TreeMap<Integer, CapabilityLink> capabilities = new TreeMap<Integer, CapabilityLink>();
     private CapabilitiesListTreeNode capabilitiesListTree;
+    private boolean searchActivated;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -46,23 +49,57 @@ public class CapabilitiesPreferences {
     public CapabilitiesPreferences(final Element serverParent, final Element localParent) {
         final Element serverRoot = serverParent.getChild("cismapCapabilitiesPreferences"); // NOI18N
         final Element clientRoot = localParent.getChild("cismapCapabilitiesPreferences");  // NOI18N
-        final List caps = clientRoot.getChildren("capabilities");                          // NOI18N
-        final Iterator<Element> it = caps.iterator();
-        int counter = 0;
-        while (it.hasNext()) {
-            try {
-                final Element elem = it.next();
-                final String type = elem.getAttribute("type").getValue();                  // NOI18N
-                final String link = elem.getTextTrim();
-                final String subparent = elem.getAttributeValue("subparent");              // NOI18N
-                boolean active = false;
+
+        if (serverRoot != null) {
+            final Attribute searchActive = serverRoot.getAttribute("searchPanelActivated");
+
+            if (searchActive != null) {
                 try {
-                    active = elem.getAttribute("active").getBooleanValue();
-                } catch (Exception unhandled) {
-                }                                                                          // NOI18N
-                capabilities.put(new Integer(counter++), new CapabilityLink(type, link, active, subparent));
-            } catch (Throwable t) {
-                log.warn("Error while reading the CapabilityPreferences.", t);             // NOI18N
+                    searchActivated = searchActive.getBooleanValue();
+                } catch (DataConversionException e) {
+                    log.warn("Invalid value for attribute searchPanelActivated found", e);
+                }
+            }
+        }
+
+        if (clientRoot != null) {
+            final Attribute searchActive = clientRoot.getAttribute("searchPanelActivated");
+
+            if (searchActive != null) {
+                try {
+                    searchActivated = searchActive.getBooleanValue();
+                } catch (DataConversionException e) {
+                    log.warn("Invalid value for attribute searchPanelActivated found", e);
+                }
+            }
+
+            final List caps = clientRoot.getChildren("capabilities"); // NOI18N
+            final Iterator<Element> it = caps.iterator();
+            int counter = 0;
+
+            while (it.hasNext()) {
+                try {
+                    final Element elem = it.next();
+                    final String type = elem.getAttribute("type").getValue();     // NOI18N
+                    final String link = elem.getTextTrim();
+                    final String subparent = elem.getAttributeValue("subparent"); // NOI18N
+                    boolean active = false;
+                    try {
+                        active = elem.getAttribute("active").getBooleanValue();
+                    } catch (Exception unhandled) {
+                    }                                                             // NOI18N
+
+                    boolean reverseAxisOrder = false;
+                    try {
+                        reverseAxisOrder = elem.getAttribute("reverseAxisOrder").getBooleanValue();
+                    } catch (Exception unhandled) {
+                    } // NOI18N
+
+                    capabilities.put(new Integer(counter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent));
+                } catch (Throwable t) {
+                    log.warn("Error while reading the CapabilityPreferences.", t); // NOI18N
+                }
             }
         }
 
@@ -92,6 +129,12 @@ public class CapabilitiesPreferences {
             try {
                 final String type = elem.getAttribute("type").getValue();                   // NOI18N
                 final String title = elem.getAttribute("titlestring").getValue();           // NOI18N
+                boolean reverseAxisOrder = false;
+                final Attribute reverseAxisOrderElement = elem.getAttribute("reverseAxisOrder");
+
+                if (reverseAxisOrderElement != null) {
+                    reverseAxisOrder = reverseAxisOrderElement.getBooleanValue();
+                }
 
                 if (type.equals(CapabilityLink.MENU)) {
                     // Unterknoten erzeugen
@@ -100,7 +143,8 @@ public class CapabilitiesPreferences {
                     // CapabilitiesList-Eintrag erzeugen
                     final String link = elem.getTextTrim();
                     final String subparent = elem.getAttributeValue("subparent");  // NOI18N
-                    capabilitiesList.put(new Integer(listCounter++), new CapabilityLink(type, link, title, subparent));
+                    capabilitiesList.put(new Integer(listCounter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, title, subparent));
                 }
             } catch (Throwable t) {
                 log.warn("Error while reading the CapabilityListPreferences.", t); // NOI18N
@@ -139,5 +183,23 @@ public class CapabilitiesPreferences {
      */
     public CapabilitiesListTreeNode getCapabilitiesListTree() {
         return capabilitiesListTree;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the searchActivated
+     */
+    public boolean isSearchActivated() {
+        return searchActivated;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  searchActivated  the searchActivated to set
+     */
+    public void setSearchActivated(final boolean searchActivated) {
+        this.searchActivated = searchActivated;
     }
 }

@@ -15,10 +15,14 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import java.util.Map;
+
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
+import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
 
 /**
  * Default implementation of the LayerProperties Interface.
@@ -47,6 +51,8 @@ public class DefaultLayerProperties implements LayerProperties {
     // private String queryTemplate;
 
     private boolean idExpressionEnabled = true;
+    private AbstractFeatureService featureService;
+    private AttributeTableRuleSet attributeTableRuleSet;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -336,6 +342,8 @@ public class DefaultLayerProperties implements LayerProperties {
                 ex);
             this.setStyle(new BasicStyle());
         }
+
+        this.setFeatureService((AbstractFeatureService)layerProperties.getFeatureService());
     }
 
     @Override
@@ -351,5 +359,83 @@ public class DefaultLayerProperties implements LayerProperties {
     @Override
     public void setQueryType(final int queryType) {
         this.queryType = queryType;
+    }
+
+    @Override
+    public AbstractFeatureService getFeatureService() {
+        return featureService;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureService  DOCUMENT ME!
+     */
+    @Override
+    public void setFeatureService(final AbstractFeatureService featureService) {
+        this.featureService = featureService;
+    }
+
+    @Override
+    public AttributeTableRuleSet getAttributeTableRuleSet() {
+        if (attributeTableRuleSet != null) {
+            return attributeTableRuleSet;
+        }
+        if (featureService == null) {
+            return null;
+        }
+
+        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
+
+        try {
+            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
+            final Object o = ruleSetClass.newInstance();
+            if (o instanceof DefaultAttributeTableRuleSet) {
+                attributeTableRuleSet = (DefaultAttributeTableRuleSet)o;
+
+                return attributeTableRuleSet;
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+
+        return new DefaultAttributeTableRuleSet();
+    }
+
+    /**
+     * camelizes the given string.
+     *
+     * @param   toCamelize  string to camalize
+     *
+     * @return  the camalized string
+     */
+    public static String camelize(final String toCamelize) {
+        boolean upperCase = true;
+        final char[] result = new char[toCamelize.length()];
+        int resultPosition = 0;
+        for (int i = 0; i < toCamelize.length(); ++i) {
+            char current = toCamelize.charAt(i);
+            if (Character.isLetterOrDigit(current)) {
+                if (upperCase) {
+                    current = Character.toUpperCase(current);
+                    upperCase = false;
+                } else {
+                    current = Character.toLowerCase(current);
+                }
+                result[resultPosition++] = current;
+            } else {
+                upperCase = true;
+            }
+        }
+        return String.valueOf(result, 0, resultPosition);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  attributeTableRuleSet  the defaultAttributeTableRuleSet to set
+     */
+    public void setAttributeTableRuleSet(final AttributeTableRuleSet attributeTableRuleSet) {
+        this.attributeTableRuleSet = attributeTableRuleSet;
     }
 }

@@ -12,6 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import edu.umd.cs.piccolo.event.PInputEventListener;
+
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
@@ -22,20 +24,28 @@ import net.sf.jasperreports.view.JRViewer;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import java.io.File;
+
 import java.lang.reflect.Constructor;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
+
+import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -46,22 +56,27 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.HeadlessMapProvider;
+import de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.retrieval.RetrievalService;
 
 import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.Static2DTools;
 
-import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
+
+import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
 
 /**
  * DOCUMENT ME!
@@ -69,19 +84,12 @@ import de.cismet.tools.gui.imagetooltip.ImageToolTip;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class PrintingWidget extends javax.swing.JDialog implements RetrievalListener {
+public class PrintingWidget extends javax.swing.JDialog implements PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PrintingWidget.class);
     private static final boolean DEBUG = Debug.DEBUG;
-    public static final String TIP = "TIP";                   // NOI18N
-    public static final String INFO = "INFO";                 // NOI18N
-    public static final String SUCCESS = "SUCCESS";           // NOI18N
-    public static final String EXPERT = "EXPERT";             // NOI18N
-    public static final String WARN = "WARN";                 // NOI18N
-    public static final String ERROR = "ERROR";               // NOI18N
-    public static final String ERROR_REASON = "ERROR_REASON"; // NOI18N
-
     public static final String BB_MIN_X = "minX";
     public static final String BB_MIN_Y = "minY";
     public static final String BB_MAX_X = "maxX";
@@ -90,16 +98,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     //~ Instance fields --------------------------------------------------------
 
     PDFCreatingWaitDialog pdfWait;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mappingComponent = null;
-    private String interactionModeAfterPrinting = "";            // NOI18N
-    private BufferedImage map;
-    private TreeMap<Integer, RetrievalService> services;
-    private TreeMap<Integer, Object> results;
-    private TreeMap<Integer, Object> erroneous;
     private AbstractPrintingInscriber inscriber = null;
     private ImageIcon errorImage = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/error.png")); // NOI18N
+    private BufferedImage northArrowImage = null;
     private Style styleTip;
     private Style styleSuccess;
     private Style styleInfo;
@@ -107,9 +110,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     private Style styleWarn;
     private Style styleError;
     private Style styleErrorReason;
-    private HashMap<String, Style> styles = new HashMap<String, Style>();
-    private int imageWidth;
-    private int imageHeight;
+    private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
+    private Future<Image> futureMapImage;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
     private javax.swing.JButton cmdCancel;
@@ -147,47 +149,52 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      */
     public PrintingWidget(final boolean modal, final MappingComponent mappingComponent) {
         super(StaticSwingTools.getParentFrame(mappingComponent), modal);
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("PrintingWidget PDFCreatingWaitDialog()") {
 
                 @Override
                 public void run() {
                     pdfWait = new PDFCreatingWaitDialog(StaticSwingTools.getParentFrame(mappingComponent), true);
                 }
             };
-        CismetThreadPool.execute(r);
+        try {
+            northArrowImage = ImageIO.read(getClass().getResourceAsStream("/northarrow.png")); // NOI18N
+        } catch (Exception e) {
+            LOG.warn("Problems duroing the loading of the northarrow", e);
+        }
+        CismetThreadPool.execute(t);
         this.mappingComponent = mappingComponent;
         initComponents();
         panDesc.setBackground(new Color(216, 228, 248));
         getRootPane().setDefaultButton(cmdOk);
         txpLoadingStatus.setBackground(this.getBackground());
         prbLoading.setForeground(panDesc.getBackground());
-        styleTip = txpLoadingStatus.addStyle(TIP, null);
+        styleTip = txpLoadingStatus.addStyle(TIP.name(), null);
         StyleConstants.setForeground(styleTip, Color.blue);
         StyleConstants.setFontSize(styleTip, 10);
         styles.put(TIP, styleTip);
-        styleSuccess = txpLoadingStatus.addStyle(SUCCESS, null);
+        styleSuccess = txpLoadingStatus.addStyle(SUCCESS.name(), null);
         StyleConstants.setForeground(styleSuccess, Color.green.darker());
         StyleConstants.setFontSize(styleSuccess, 10);
 
         styles.put(SUCCESS, styleSuccess);
-        styleInfo = txpLoadingStatus.addStyle(INFO, null);
+        styleInfo = txpLoadingStatus.addStyle(INFO.name(), null);
         StyleConstants.setForeground(styleInfo, Color.DARK_GRAY);
         StyleConstants.setFontSize(styleInfo, 10);
         styles.put(INFO, styleInfo);
-        styleExpert = txpLoadingStatus.addStyle(EXPERT, null);
+        styleExpert = txpLoadingStatus.addStyle(EXPERT.name(), null);
         StyleConstants.setForeground(styleExpert, Color.gray);
         StyleConstants.setFontSize(styleExpert, 10);
         styles.put(EXPERT, styleExpert);
-        styleWarn = txpLoadingStatus.addStyle(WARN, null);
+        styleWarn = txpLoadingStatus.addStyle(WARN.name(), null);
         StyleConstants.setForeground(styleWarn, Color.orange.darker());
         StyleConstants.setFontSize(styleWarn, 10);
         styles.put(WARN, styleWarn);
-        styleError = txpLoadingStatus.addStyle(ERROR, null);
+        styleError = txpLoadingStatus.addStyle(NotificationLevel.ERROR.name(), null);
         StyleConstants.setForeground(styleError, Color.red);
         StyleConstants.setFontSize(styleError, 10);
         StyleConstants.setBold(styleError, true);
-        styles.put(ERROR, styleError);
-        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON, null);
+        styles.put(NotificationLevel.ERROR, styleError);
+        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON.name(), null);
         StyleConstants.setForeground(styleErrorReason, Color.red);
         StyleConstants.setFontSize(styleErrorReason, 10);
         styles.put(ERROR_REASON, styleErrorReason);
@@ -493,8 +500,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      */
     public void startLoading() {
         if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("startLoading()");                        // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("startLoading()");                        // NOI18N
             }
         }
         txpLoadingStatus.setText("");                               // NOI18N
@@ -504,45 +511,64 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             final Constructor constructor = c.getConstructor();
             inscriber = (AbstractPrintingInscriber)constructor.newInstance();
         } catch (Exception e) {
-            log.error("Error while loading the print template", e); // NOI18N
+            LOG.error("Error while loading the print template", e); // NOI18N
         }
         panInscribe.removeAll();
         panInscribe.add(inscriber, BorderLayout.CENTER);
 
         cmdOk.setEnabled(false);
-        final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
+//        final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
+//
+//        final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
 
-        final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.startLoading().msg",
-                new Object[] { r.getResolution() }),
-            EXPERT);                                                        // NOI18N
-        final BoundingBox bb =
-            ((PrintingFrameListener)mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))
-                    .getPrintingBoundingBox();
-        imageWidth = (int)((double)t.getMapWidth() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
-        imageHeight = (int)((double)t.getMapHeight() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("image size: " + imageWidth + "x" + imageHeight); // NOI18N
+        final PInputEventListener printing = mappingComponent.getInputListener(
+                MappingComponent.PRINTING_AREA_SELECTION);
+
+        if (printing instanceof PrintingTemplatePreviewListener) {
+            for (final PrintTemplateFeature ptf
+                        : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
+                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                        PrintingWidget.class,
+                        "PrintingWidget.startLoading().msg",
+                        new Object[] { ptf.getResolution() }),
+                    EXPERT); // NOI18N
+                final HeadlessMapProvider headlessMapProvider = HeadlessMapProvider
+                            .createHeadlessMapProviderAndAddLayers(mappingComponent);
+                headlessMapProvider.setRequestingObject(ptf);
+                headlessMapProvider.addPropertyChangeListener(this);
+
+                if ((ptf.getRotationAngle() == 0)) {
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            ptf.getTemplate().getMapWidth(),
+                            ptf.getTemplate().getMapHeight()));
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("BoundingBox (auf " + ptf.getTemplate().getMapWidth() + ","
+                                    + ptf.getTemplate().getMapHeight() + "):" + xbb); // NOI18N
+                    }
+                } else {
+                    // Rotationpreparation
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry().getEnvelope());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    final Dimension newDimension = RotatedPrintingUtils
+                                .calculateNewImageDimensionToFitRotatedBoundingBox(ptf.getTemplate().getMapWidth(),
+                                    ptf.getTemplate().getMapHeight(),
+                                    ptf.getRotationAngle());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Extended BoundingBox (auf " + newDimension + "):" + xbb); // NOI18N
+                    }
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            newDimension.getWidth(),
+                            newDimension.getHeight()));
+                }
             }
         }
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("BoundingBox:" + bb);                             // NOI18N
-            }
-        }
-        map = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-        map.getGraphics().setColor(Color.white);
-        map.getGraphics().fillRect(0, 0, imageWidth, imageHeight);
-        // map=Static2DTools.toCompatibleImage(map);
-        services = new TreeMap<Integer, RetrievalService>();
-        results = new TreeMap<Integer, Object>();
-        erroneous = new TreeMap<Integer, Object>();
-        mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
+
         prbLoading.setIndeterminate(true);
 
         super.pack();
@@ -562,8 +588,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        mappingComponent.setInteractionMode(interactionModeAfterPrinting);
-        mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
@@ -573,7 +597,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      * @param  evt  DOCUMENT ME!
      */
     private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("PrintingWidget actionPerformed") {
 
                 @Override
                 public void run() {
@@ -587,49 +611,102 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                 }
                             });
                     }
-                    final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                    final Scale s = mappingComponent.getPrintingSettingsDialog().getSelectedScale();
-                    mappingComponent.getPrintingFrameLayer().removeAllChildren();
-                    mappingComponent.setInteractionMode(interactionModeAfterPrinting);
-                    if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
-                        }
-                    }
 
-                    try {
-                        final HashMap param = new HashMap();
-                        param.put(t.getMapPlaceholder(), map);
-                        String scaleDenomString = "" + s.getDenominator();                                            // NOI18N
-                        if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))                            // NOI18N
-                        {
-                            final int sd = (int)
-                                (((PrintingFrameListener)mappingComponent.getInputListener(
-                                            MappingComponent.PRINTING_AREA_SELECTION)).getScaleDenominator() + 0.5d); // +0.5=Runden
-                            scaleDenomString = "" + sd;                                                               // NOI18N
-                        }
-                        param.put(t.getScaleDemoninatorPlaceholder(), scaleDenomString);
-                        param.putAll(inscriber.getValues());
+                    final PrintingTemplatePreviewListener printingListener = ((PrintingTemplatePreviewListener)
+                            (mappingComponent.getInputListener(
+                                    MappingComponent.PRINTING_AREA_SELECTION)));
+                    final ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(
+                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size());
+                    for (final PrintTemplateFeature ptf
+                                : mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)) {
+                        final Template t = ptf.getTemplate();
+                        final Scale s = ptf.getScale();
+                        try {
+                            final HashMap param = new HashMap();
 
-                        final BoundingBox bbox =
-                            ((PrintingFrameListener)mappingComponent.getInputListener(
-                                    MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
-                        param.put(BB_MIN_X, bbox.getX1());
-                        param.put(BB_MIN_Y, bbox.getY1());
-                        param.put(BB_MAX_X, bbox.getX2());
-                        param.put(BB_MAX_Y, bbox.getY2());
+                            final Image i = ptf.getFutureMapImage().get();
 
-                        if (DEBUG) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Parameter:" + param); // NOI18N
+                            if (ptf.getRotationAngle() == 0) {
+                                param.put(t.getMapPlaceholder(), i);
+                                System.out.println("Imagedimension (raw - not rotated):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+                            } else {
+                                param.put(ptf.getTemplate().getNorthArrowPlaceholder(),
+                                    RotatedPrintingUtils.rotate(northArrowImage, -1 * ptf.getRotationAngle()));
+
+                                final BufferedImage correctedImage = RotatedPrintingUtils.rotateAndCrop(
+                                        i,
+                                        ptf.getRotationAngle(),
+                                        ptf.getTemplate().getMapWidth(),
+                                        ptf.getTemplate().getMapHeight(),
+                                        (int)PrintTemplateFeature.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                                        ptf.getResolution().getResolution());
+                                param.put(t.getMapPlaceholder(), correctedImage);
+                                System.out.println("Imagedimension (raw):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+
+                                System.out.println("Imagedimension (corrected):" + correctedImage.getWidth() + ","
+                                            + correctedImage.getHeight());
+                            }
+
+                            param.put(t.getScaleDemoninatorPlaceholder(),
+                                String.valueOf(ptf.getRealScaleDenominator()));
+                            final HashMap<String, String> vals = inscriber.getValues();
+                            for (final String key : vals.keySet()) {
+                                vals.put(key, vals.get(key).replaceAll("##N##", String.valueOf(ptf.getNumber())));
+                                vals.put(
+                                    key,
+                                    vals.get(key).replaceAll(
+                                        "##G##",
+                                        String.valueOf(
+                                            mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class)
+                                                        .size())));
+                            }
+                            param.putAll(vals);
+                            // Werte können nur gesetzt werden wenn das Template nicht gedreht wurde
+                            if (ptf.getRotationAngle() == 0) {
+                                final XBoundingBox bbox = new XBoundingBox(ptf.getGeometry());
+                                param.put(BB_MIN_X, bbox.getX1());
+                                param.put(BB_MIN_Y, bbox.getY1());
+                                param.put(BB_MAX_X, bbox.getX2());
+                                param.put(BB_MAX_Y, bbox.getY2());
+                            }
+                            if (DEBUG) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Parameter:" + param); // NOI18N
+                                }
+                            }
+
+                            final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
+                                            .getResourceAsStream(t.getFile()));
+                            final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
+                            prints.add(jasperPrint);
+                        } catch (Throwable tt) {
+                            LOG.error("Error during Jaspern", tt); // NOI18N
+
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.message"), // NOI18N
+                                    null,
+                                    null,
+                                    tt,
+                                    Level.ALL,
+                                    null);
+                            JXErrorPane.showDialog(PrintingWidget.this.mappingComponent, ei);
+
+                            if (pdfWait.isVisible()) {
+                                pdfWait.dispose();
                             }
                         }
-
-                        final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
-                                        .getResourceAsStream(t.getFile()));
-                        final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
-
-                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW)) {
+                    }
+                    try {
+                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() == 1)) {
+                            final JasperPrint jasperPrint = prints.get(0);
                             final JRViewer aViewer = new JRViewer(jasperPrint);
                             final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
                                         PrintingWidget.class,
@@ -643,15 +720,47 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         + insets.top
                                         + insets.bottom
                                         + 20);
-                            aFrame.setLocation((screenSize.width - aFrame.getWidth()) / 2,
-                                (screenSize.height - aFrame.getHeight())
-                                        / 2);
+                            aFrame.setLocationRelativeTo(PrintingWidget.this);
                             aFrame.setVisible(true);
-                        } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this.mappingComponent)) {
-                                final String jobname = DownloadManagerDialog.getJobname();
+                        } else if (a.getId().equalsIgnoreCase(Action.PDF)
+                                    || (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() > 1))) {
+                            if (mappingComponent.getPrintingSettingsDialog().isChooseFileName()) {
+                                final File file = StaticSwingTools.chooseFile(DownloadManager.instance()
+                                                .getDestinationDirectory().getAbsolutePath(),
+                                        true,
+                                        new String[] { "pdf" },
+                                        "PDF (.pdf)",
+                                        PrintingWidget.this.mappingComponent);
+
+                                if (file != null) {
+                                    final JasperDownload jd = new JasperDownload(
+                                            prints,
+                                            file.getParent(),
+                                            "Cismap-Druck",
+                                            file.getName().substring(0, file.getName().indexOf(".")));
+
+                                    jd.setFileToSaveTo(file);
+
+                                    if (DownloadManager.instance().getDownloads().contains(jd)) {
+                                        // Previous downloads, that uses the same destination file, must be removed, so
+                                        // that the new download can be executed
+                                        final List<Download> downloads = new ArrayList(DownloadManager.instance()
+                                                        .getDownloads());
+                                        final int index = downloads.indexOf(jd);
+
+                                        if (index != -1) {
+                                            final Download d = downloads.get(index);
+                                            DownloadManager.instance().removeDownload(d);
+                                        }
+                                    }
+
+                                    DownloadManager.instance().add(jd);
+                                }
+                            } else if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(
+                                            PrintingWidget.this.mappingComponent)) {
+                                final String jobname = DownloadManagerDialog.getInstance().getJobName();
                                 DownloadManager.instance()
-                                        .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
+                                        .add(new JasperDownload(prints, jobname, "Cismap-Druck", "cismap"));
                             }
 
                             java.awt.EventQueue.invokeLater(new Runnable() {
@@ -664,10 +773,12 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                     }
                                 });
                         } else if (a.getId().equalsIgnoreCase(Action.PRINT)) {
-                            JasperPrintManager.printReport(jasperPrint, true);
+                            for (final JasperPrint jasperPrint : prints) {
+                                JasperPrintManager.printReport(jasperPrint, true);
+                            }
                         }
                     } catch (Throwable tt) {
-                        log.error("Error during Jaspern", tt); // NOI18N
+                        LOG.error("Error during Jaspern", tt); // NOI18N
 
                         final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
                                     PrintingWidget.class,
@@ -686,9 +797,16 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                             pdfWait.dispose();
                         }
                     }
+                    final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
+                                PrintTemplateFeature.class));
+                    mappingComponent.getFeatureCollection().removeFeatures(ptfs);
+                    CismapBroker.getInstance()
+                            .setCheckForOverlappingGeometriesAfterFeatureRotation(
+                                mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(t);
+
         dispose();
     } //GEN-LAST:event_cmdOkActionPerformed
 
@@ -708,262 +826,12 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     }
 
     /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
+     * set the progress bar to 100 percent and activates the ok button.
      */
-    public String getInteractionModeAfterPrinting() {
-        return interactionModeAfterPrinting;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  interactionModeAfterPrinting  DOCUMENT ME!
-     */
-    public void setInteractionModeAfterPrinting(final String interactionModeAfterPrinting) {
-        this.interactionModeAfterPrinting = interactionModeAfterPrinting;
-    }
-
-    @Override
-    public void retrievalStarted(final RetrievalEvent e) {
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
-            }
-        }
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalStarted ignored, initialisation event"); // NOI18N
-            return;
-        }
-
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalStarted(RetrievalEvent).msg",
-                new Object[] { e.getRetrievalService() }),
-            INFO); // NOI18N
-        if (e.getRetrievalService() instanceof ServiceLayer) {
-            final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-            services.put(num, e.getRetrievalService());
-        }
-    }
-
-    @Override
-    public void retrievalProgress(final RetrievalEvent e) {
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrieval progress: "
-                            + e.getPercentageDone()); // NOI18N
-            }
-        }
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalProgress ignored, initialisation event"); // NOI18N
-            return;
-        }
-    }
-
-    @Override
-    public void retrievalError(final RetrievalEvent e) {
-        log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalError ignored, initialisation event"); // NOI18N
-            return;
-        }
-
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalError(RetrievalEvent).msg1",
-                new Object[] { e.getRetrievalService() }),
-            ERROR);        // NOI18N
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
-            ERROR_REASON); // NOI18N
-        retrievalComplete(e);
-//        if (e.getRetrievalService() instanceof  ServiceLayer) {
-//            int num=((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-//            erroneous.put(num,e);
-//        }
-//        for (Object error:e.getErrors()) {
-//            addMessageToProgressPane(error.getClass().toString(),ERROR_REASON);
-//            addMessageToProgressPane(error.toString(),ERROR_REASON);
-//        }
-//        log.error("retrievalError"+e.getRetrievalService());
-    }
-
-    @Override
-    public void retrievalComplete(final RetrievalEvent e) {
-        if (log.isInfoEnabled()) {
-            log.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete"); // NOI18N
-        }
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalComplete ignored, initialisation event");                         // NOI18N
-            return;
-        }
-
-        if (e.getRetrievalService() instanceof ServiceLayer) {
-            final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-            if (!e.isHasErrors()) {
-                results.put(num, e.getRetrievedObject());
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
-                        new Object[] { e.getRetrievalService() }),
-                    SUCCESS); // NOI18N
-            } else {
-                erroneous.put(num, e);
-                if (e.getRetrievedObject() instanceof Image) {
-                    // Image scaled=Static2DTools.scaleImage((Image)e.getRetrievedObject(),0.7);
-                    final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
-                    addIconToProgressPane(errorImage, i);
-                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                            PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
-                            new Object[] { e.getRetrievalService() }),
-                        ERROR_REASON); // NOI18N
-                }
-            }
-        }
-
-        if ((results.size() + erroneous.size()) == services.size()) {
-            if (results.size() == services.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"),
-                    SUCCESS); // NOI18N
-            } else if (erroneous.size() == services.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"),
-                    WARN);    // NOI18N
-            } else {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg8"),
-                    WARN);    // NOI18N
-            }
-
-            for (final Integer i : results.keySet()) {
-                final Graphics2D g2d = (Graphics2D)map.getGraphics();
-                // Transparency
-                final RetrievalService rs = services.get(i);
-
-                float transparency = 0f;
-                if (rs instanceof ServiceLayer) {
-                    transparency = ((ServiceLayer)rs).getTranslucency();
-                }
-                final Composite alphaComp = AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER,
-                        transparency);
-                g2d.setComposite(alphaComp);
-                final Object o = results.get(i);
-
-                log.info("processing results of type '" + o.getClass().getSimpleName() + "' from service #" + i + " '"
-                            + rs + "' (" + rs.getClass().getSimpleName() + ")");                       // NOI18N
-                if (o instanceof Image) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("service '" + rs + "' returned an image, must be a raster service"); // NOI18N
-                    }
-                    final Image image2add = (Image)o;
-                    g2d.drawImage(image2add, 0, 0, null);
-                } else if (Collection.class.isAssignableFrom(o.getClass())) {
-                    final Collection featureCollection = (Collection)o;
-                    if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("service '" + rs + "' returned a collection, must be a feature service ("
-                                        + featureCollection.size() + " features retrieved)");          // NOI18N
-                        }
-                    }
-                    final Image image2add = mappingComponent.getImageOfFeatures(
-                            featureCollection,
-                            imageWidth,
-                            imageHeight);
-                    g2d.drawImage(image2add, 0, 0, null);
-                } else {
-                    log.error("unknown results retrieved: " + o.getClass().getSimpleName());           // NOI18N
-                }
-            }
-
-            // Add Existing Features as TopLevelLayer
-            if (mappingComponent.isFeatureCollectionVisible()) {
-                try {
-                    final Graphics2D g2d = (Graphics2D)map.getGraphics();
-                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                            PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                        INFO); // NOI18N
-
-                    // Transparency
-                    float transparency = 0f;
-                    transparency = mappingComponent.getFeatureLayer().getTransparency();
-                    final Composite alphaComp = AlphaComposite.getInstance(
-                            AlphaComposite.SRC_OVER,
-                            transparency);
-                    g2d.setComposite(alphaComp);
-                    final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-                    final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                    imageWidth = (int)((double)t.getMapWidth()
-                                    / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                    * (double)r.getResolution());
-                    imageHeight = (int)((double)t.getMapHeight()
-                                    / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                    * (double)r.getResolution());
-                    final Image image2add = mappingComponent.getFeatureImage(imageWidth, imageHeight);
-                    g2d.drawImage(image2add, 0, 0, null);
-                } catch (Throwable t) {
-                    log.error("Error while adding local features to the map", t); // NOI18N
-                }
-            } else {
-                final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
-                addMessageToProgressPane(localFeaturesNotAddedMessage, INFO);     // NOI18N
-                if (log.isDebugEnabled()) {
-                    log.debug(localFeaturesNotAddedMessage);
-                }
-            }
-
-            if (erroneous.size() < results.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg4"),
-                    SUCCESS); // NOI18N
-            } else {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg5"),
-                    INFO);    // NOI18N
-            }
-
-            if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug("ALLE FERTIG");          // NOI18N
-                    log.debug("results:" + results);   // NOI18N
-                    log.debug("services:" + services); // NOI18N
-                }
-            }
-
-            final Graphics2D g2d = (Graphics2D)map.getGraphics();
-
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.drawRect(0, 0, map.getWidth() - 1, map.getHeight() - 1);
-
-            prbLoading.setIndeterminate(false);
-            prbLoading.setValue(100);
-            cmdOk.setEnabled(true);
-        }
-    }
-
-    @Override
-    public void retrievalAborted(final RetrievalEvent e) {
-        log.warn(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalAborted"); // NOI18N
+    private void activateButton() {
+        prbLoading.setIndeterminate(false);
+        prbLoading.setValue(100);
+        cmdOk.setEnabled(true);
     }
 
     /**
@@ -1003,10 +871,50 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         try {
                             doc.insertString(doc.getLength(), "ico", style);                                    // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("Error in addIconToProgressPane", ble);                                   // NOI18N
+                            LOG.error("Error in addIconToProgressPane", ble);                                   // NOI18N
                         }
                     }
                 });
+        }
+    }
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+        if (evt.getSource() instanceof HeadlessMapProvider) {
+            final HeadlessMapProvider source = (HeadlessMapProvider)evt.getSource();
+
+            if (evt.getNewValue() instanceof HeadlessMapProvider.NotificationMessage) {
+                final HeadlessMapProvider.NotificationMessage message = (HeadlessMapProvider.NotificationMessage)
+                    evt.getNewValue();
+                addMessageToProgressPane(message.getMsg(), message.getLevel());
+
+                if (message.getLevel().equals(UNLOCKED)) {
+                } else if (message.getLevel().equals(ERROR_REASON) && (evt.getOldValue() instanceof RetrievalEvent)) {
+                    final RetrievalEvent e = (RetrievalEvent)evt.getOldValue();
+                    if (e.getRetrievedObject() instanceof Image) {
+                        final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
+                        addIconToProgressPane(errorImage, i);
+                        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                                PrintingWidget.class,
+                                "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
+                                new Object[] { e.getRetrievalService() }),
+                            ERROR_REASON); // NOI18N
+                    }
+                }
+
+                final Collection<PrintTemplateFeature> prints = mappingComponent.getSpecialFeatureCollection(
+                        PrintTemplateFeature.class);
+                boolean allPrintsReady = true;
+                for (final PrintTemplateFeature ptf : prints) {
+                    if (!(ptf.getFutureMapImage().isDone() || ptf.getFutureMapImage().isCancelled())) {
+                        allPrintsReady = false;
+                        break;
+                    }
+                }
+                if (allPrintsReady) {
+                    activateButton();
+                }
+            }
         }
     }
 
@@ -1016,7 +924,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      * @param  msg     DOCUMENT ME!
      * @param  reason  DOCUMENT ME!
      */
-    private void addMessageToProgressPane(final String msg, final String reason) {
+    private void addMessageToProgressPane(final String msg, final NotificationLevel reason) {
         synchronized (this) {
             java.awt.EventQueue.invokeLater(new Runnable() {
 
@@ -1030,11 +938,10 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         + "\n",
                                         styles.get(reason));       // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("error during Insert", ble); // NOI18N
+                            LOG.error("error during Insert", ble); // NOI18N
                         }
                     }
                 });
         }
-//        // txpLoadingStatus.setCaretPosition(txpLoadingStatus.getText().length());
     }
 }

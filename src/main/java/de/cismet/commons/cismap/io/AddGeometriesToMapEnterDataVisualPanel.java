@@ -1,0 +1,643 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
+package de.cismet.commons.cismap.io;
+
+import org.apache.log4j.Logger;
+
+import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
+
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.io.File;
+
+import java.net.URI;
+
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import de.cismet.cismap.commons.util.DnDUtils;
+
+import de.cismet.commons.converter.Converter;
+import de.cismet.commons.converter.FormatHint;
+
+/**
+ * DOCUMENT ME!
+ *
+ * @author   mscholl
+ * @version  1.0
+ */
+public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(AddGeometriesToMapEnterDataVisualPanel.class);
+
+    //~ Instance fields --------------------------------------------------------
+
+    private final transient AddGeometriesToMapEnterDataWizardPanel model;
+    private final transient ChangeListener modelChangeL;
+    private final transient ActionListener openFileL;
+    private final transient JFileChooser fileChooser;
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private final transient javax.swing.JButton btnOpenFile = new DnDButton();
+    private final transient javax.swing.JEditorPane edpCoordinates = new DnDEditorPane();
+    private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
+    private final transient javax.swing.JLabel lblCoordinates = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblFile = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSelectedConverter = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSelectedConverterValue = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlSelectedConverter = new javax.swing.JPanel();
+    private final transient javax.swing.JSeparator sepSelectedConverter = new javax.swing.JSeparator();
+    private final transient javax.swing.JTextField txtFile = new DnDTextField();
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form AddGeometriesToMapEnterDataVisualPanel.
+     *
+     * @param  model  DOCUMENT ME!
+     */
+    public AddGeometriesToMapEnterDataVisualPanel(final AddGeometriesToMapEnterDataWizardPanel model) {
+        this.model = model;
+        this.modelChangeL = new ModelChangeListener();
+        this.openFileL = new OpenFileListener();
+        this.fileChooser = new JFileChooser();
+        fileChooser.setAcceptAllFileFilterUsed(true);
+        fileChooser.setMultiSelectionEnabled(false);
+
+        initComponents();
+
+        this.setName(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.<init>(AddGeomtriesToMapEnterDataWizardPanel).panelName")); // NOI18N
+
+        this.model.addChangeListener(WeakListeners.change(modelChangeL, model));
+        this.btnOpenFile.addActionListener(WeakListeners.create(ActionListener.class, openFileL, btnOpenFile));
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public AddGeometriesToMapEnterDataWizardPanel getModel() {
+        return model;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  input  DOCUMENT ME!
+     */
+    private void openFileChooser(final File input) {
+        if (input == null) {
+            fileChooser.setSelectedFile(model.getInputFile());
+        } else {
+            fileChooser.setSelectedFile(input);
+        }
+
+        final int answer = fileChooser.showOpenDialog(AddGeometriesToMapEnterDataVisualPanel.this);
+        if (JFileChooser.APPROVE_OPTION == answer) {
+            final File file = fileChooser.getSelectedFile();
+            model.setInputFile(file);
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
+
+        setOpaque(false);
+        setLayout(new java.awt.GridBagLayout());
+
+        lblCoordinates.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text"));        // NOI18N
+        lblCoordinates.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblCoordinates, gridBagConstraints);
+
+        edpCoordinates.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.edpCoordinates.toolTipText")); // NOI18N
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${model.coordinateData}"),
+                edpCoordinates,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        jScrollPane1.setViewportView(edpCoordinates);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(jScrollPane1, gridBagConstraints);
+
+        lblFile.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblFile.text"));        // NOI18N
+        lblFile.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblFile.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(lblFile, gridBagConstraints);
+
+        txtFile.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.txtFile.toolTipText")); // NOI18N
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                this,
+                org.jdesktop.beansbinding.ELProperty.create("${model.inputFile}"),
+                txtFile,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        binding.setConverter(new InputFileConverter());
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(txtFile, gridBagConstraints);
+
+        btnOpenFile.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text"));        // NOI18N
+        btnOpenFile.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.toolTipText")); // NOI18N
+        btnOpenFile.setMaximumSize(new java.awt.Dimension(50, 29));
+        btnOpenFile.setMinimumSize(new java.awt.Dimension(50, 29));
+        btnOpenFile.setPreferredSize(new java.awt.Dimension(50, 29));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnOpenFile, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+        add(sepSelectedConverter, gridBagConstraints);
+
+        pnlSelectedConverter.setOpaque(false);
+        pnlSelectedConverter.setLayout(new java.awt.GridBagLayout());
+
+        lblSelectedConverterValue.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text"));        // NOI18N
+        lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlSelectedConverter.add(lblSelectedConverterValue, gridBagConstraints);
+
+        lblSelectedConverter.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"));        // NOI18N
+        lblSelectedConverter.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlSelectedConverter.add(lblSelectedConverter, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        add(pnlSelectedConverter, gridBagConstraints);
+
+        bindingGroup.bind();
+    } // </editor-fold>//GEN-END:initComponents
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class OpenFileListener implements ActionListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            openFileChooser(null);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    // TODO: use property change listener for more fine grained control
+    private final class ModelChangeListener implements ChangeListener {
+
+        //~ Methods ------------------------------------------------------------
+
+        // subobtimal, propertychange would be better
+        @Override
+        public void stateChanged(final ChangeEvent e) {
+            if (e.getSource() instanceof AddGeometriesToMapEnterDataWizardPanel) {
+                lblCoordinates.setText(NbBundle.getMessage(
+                        AddGeometriesToMapEnterDataVisualPanel.class,
+                        "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", // NOI18N
+                        model.getCrsName()));
+                final String text = model.getCoordinateData();
+                if ((text == null) || !text.equals(edpCoordinates.getText())) {
+                    edpCoordinates.setText(text);
+                }
+
+                final Converter conv = model.getSelectedConverter();
+                if (conv instanceof FormatHint) {
+                    lblSelectedConverterValue.setText(((FormatHint)conv).getFormatDisplayName());
+                } else if (conv == null) {
+                    lblSelectedConverterValue.setText(NbBundle.getMessage(
+                            AddGeometriesToMapEnterDataVisualPanel.class,
+                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text")); // NOI18N
+                } else {
+                    lblSelectedConverterValue.setText(conv.toString());
+                }
+
+                lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                        AddGeometriesToMapEnterDataVisualPanel.class,
+                        "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText", // NOI18N
+                        model.getConverterPreselectionMode()));
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class InputFileConverter extends org.jdesktop.beansbinding.Converter<File, String> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public String convertForward(final File value) {
+            if (value == null) {
+                return null;
+            } else {
+                return value.getAbsolutePath();
+            }
+        }
+
+        @Override
+        public File convertReverse(final String value) {
+            if (value == null) {
+                return null;
+            } else {
+                return new File(value);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DnDButton extends JButton implements DropTargetListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient DropTarget dropTarget = new DropTarget(this, this);
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void dragEnter(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragOver(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dropActionChanged(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragExit(final DropTargetEvent dte) {
+            // noop
+        }
+
+        @Override
+        public void drop(final DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                final File file;
+                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    // unix drop
+                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String[] uris = uriList.split(System.getProperty("line.separator")); // NOI18N
+                    if (uris.length == 1) {
+                        file = new File(new URI(uris[0].replaceFirst("localhost", "")));       // NOI18N
+                        dtde.dropComplete(true);
+                    } else {
+                        file = null;
+                        dtde.dropComplete(false);
+                    }
+                } else {
+                    // win drop
+                    @SuppressWarnings("unchecked")
+                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (data.size() == 1) {
+                        file = data.get(0);
+                        dtde.dropComplete(true);
+                    } else {
+                        file = null;
+                        dtde.dropComplete(false);
+                    }
+                }
+
+                if (file != null) {
+                    openFileChooser(file);
+                }
+            } catch (final Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("reject drop: " + dtde, e); // NOI18N
+                }
+
+                dtde.dropComplete(false);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DnDEditorPane extends JEditorPane implements DropTargetListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient DropTarget dropTarget = new DropTarget(this, this);
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void dragEnter(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragOver(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dropActionChanged(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragExit(final DropTargetEvent dte) {
+            // noop
+        }
+
+        @Override
+        public void drop(final DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    // unix drop
+                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String[] uris = uriList.split(System.getProperty("line.separator"));      // NOI18N
+                    if (uris.length == 1) {
+                        final File file = new File(new URI(uris[0].replaceFirst("localhost", ""))); // NOI18N
+                        dtde.dropComplete(true);
+                        AddGeometriesToMapEnterDataVisualPanel.this.model.setInputFile(file);
+                    } else {
+                        dtde.dropComplete(false);
+                    }
+                } else if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    // win drop
+                    @SuppressWarnings("unchecked")
+                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (data.size() == 1) {
+                        final File file = data.get(0);
+                        dtde.dropComplete(true);
+                        AddGeometriesToMapEnterDataVisualPanel.this.model.setInputFile(file);
+                    } else {
+                        dtde.dropComplete(false);
+                    }
+                } else {
+                    final String data = (String)dtde.getTransferable().getTransferData(DataFlavor.stringFlavor);
+                    dtde.dropComplete(true);
+
+                    // String drop, empty file
+                    AddGeometriesToMapEnterDataVisualPanel.this.model.setInputFile(null);
+                    AddGeometriesToMapEnterDataVisualPanel.this.model.setCoordinateData(data);
+                }
+            } catch (final Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("reject drop: " + dtde, e); // NOI18N
+                }
+
+                dtde.dropComplete(false);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private final class DnDTextField extends JTextField implements DropTargetListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final transient DropTarget dropTarget = new DropTarget(this, this);
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void dragEnter(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragOver(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dropActionChanged(final DropTargetDragEvent dtde) {
+            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
+            } else {
+                dtde.rejectDrag();
+            }
+        }
+
+        @Override
+        public void dragExit(final DropTargetEvent dte) {
+            // noop
+        }
+
+        @Override
+        public void drop(final DropTargetDropEvent dtde) {
+            try {
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    // unix drop
+                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String[] uris = uriList.split(System.getProperty("line.separator"));      // NOI18N
+                    if (uris.length == 1) {
+                        final File file = new File(new URI(uris[0].replaceFirst("localhost", ""))); // NOI18N
+                        dtde.dropComplete(true);
+                        AddGeometriesToMapEnterDataVisualPanel.this.model.setInputFile(file);
+                    } else {
+                        dtde.dropComplete(false);
+                    }
+                } else {
+                    // win drop
+                    @SuppressWarnings("unchecked")
+                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    if (data.size() == 1) {
+                        final File file = data.get(0);
+                        dtde.dropComplete(true);
+                        AddGeometriesToMapEnterDataVisualPanel.this.model.setInputFile(file);
+                    } else {
+                        dtde.dropComplete(false);
+                    }
+                }
+            } catch (final Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("reject drop: " + dtde, e); // NOI18N
+                }
+
+                dtde.dropComplete(false);
+            }
+        }
+    }
+}

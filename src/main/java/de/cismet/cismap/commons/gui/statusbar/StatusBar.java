@@ -12,16 +12,14 @@
  */
 package de.cismet.cismap.commons.gui.statusbar;
 
-import org.deegree.model.crs.CRSFactory;
-import org.deegree.model.crs.CoordinateSystem;
-import org.deegree.model.crs.GeoTransformer;
-import org.deegree.model.spatialschema.GeometryFactory;
-import org.deegree.model.spatialschema.Point;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+
+import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,9 +34,9 @@ import java.util.HashSet;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -54,9 +52,11 @@ import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
+import de.cismet.tools.Static2DTools;
+import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
 
-import de.cismet.tools.gui.Static2DTools;
+import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener;
 
 /**
  * DOCUMENT ME!
@@ -75,8 +75,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
+    private CrsTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000000");  // NOI18N
     private int servicesCounter = 0;
     private int servicesErroneousCounter = 0;
     private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
@@ -88,8 +88,10 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
     private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
     private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
+    private boolean developerMode = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel exceptionNotificationStatusPanel;
     private javax.swing.Box.Filler gluFiller;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblCoordinates;
@@ -106,6 +108,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JPopupMenu pomScale;
     private javax.swing.JSeparator sepCoordinates;
     private javax.swing.JSeparator sepCrs;
+    private javax.swing.JSeparator sepExcNotStat;
     private javax.swing.JSeparator sepFeedbackIcons;
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
@@ -136,10 +139,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         try {
             // initialises the geo transformer that transforms the coordinates from the current
             // coordinate system to EPSG:4326
-            this.transformer = new GeoTransformer("EPSG:4326");
+            this.transformer = new CrsTransformer("EPSG:4326");
         } catch (Exception e) {
             log.error("cannot create a transformer for EPSG:4326.", e);
         }
+
+        developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -149,7 +154,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     public void addCrsPopups() {
         for (final Crs c : mappingComponent.getCrsList()) {
-            addCrsPopup(c);
+            if (!c.isHideInCrsSwitcher()) {
+                addCrsPopup(c);
+            }
         }
     }
 
@@ -176,12 +183,26 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 @Override
                 public void run() {
                     if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
-                        lblCoordinates.setText(e.getValue().toString());
-                        lblWgs84Coordinates.setText(transformToWGS84Coords(e.getValue().toString()));
+                        final Coordinate c = (Coordinate)e.getValue();
+                        final Crs crs = CismapBroker.getInstance().getSrs();
+                        final boolean showAdditionalWSG84Coords = !crs.getCode().equalsIgnoreCase("epsg:4326");
+
+                        if (crs.isMetric()) {
+                            lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
+                        } else {
+                            lblCoordinates.setText(transformToWGS84Coords(c));
+                        }
+
+                        if (showAdditionalWSG84Coords) {
+                            lblWgs84Coordinates.setText(transformToWGS84Coords(c));
+                        }
+
+                        lblWgs84Coordinates.setVisible(showAdditionalWSG84Coords);
+                        sepCoordinates.setVisible(showAdditionalWSG84Coords);
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                        lblStatus.setText("");         // NOI18N
+                        lblStatus.setText("");                                                                  // NOI18N
                     } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
                         if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
                                     && (((PFeature)e.getValue()).getFeature() != null)
@@ -216,15 +237,29 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                                 lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
                                             .getSecondaryAnnotation());
                             } else {
-                                lblStatus.setText(""); // NOI18N
+                                lblStatus.setText("");                                                          // NOI18N
                             }
                         } else {
-                            lblStatus.setText("");     // NOI18N
+                            lblStatus.setText("");                                                              // NOI18N
                             lblStatusImage.setIcon(defaultIcon);
                         }
                     } else if (e.getName().equals(StatusEvent.SCALE)) {
                         final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
-                        lblScale.setText("1:" + sd);   // NOI18N
+                        if (e.getValue().equals(StatusEvent.WINDOW_REMOVED) || (mappingComponent.getWidth() == 0)) {
+                            lblScale.setText(NbBundle.getMessage(
+                                    StatusBar.class,
+                                    "StatusBar.statusValueChanged(StatusEvent).mapHidden"));                    // NOI18N
+                        } else if (mappingComponent.getWidth() < 1) {
+                            lblScale.setText(NbBundle.getMessage(
+                                    StatusBar.class,
+                                    "StatusBar.statusValueChanged(StatusEvent).mapMinimized"));                 // NOI18N
+                        } else {
+                            if (developerMode) {
+                                lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                            } else {
+                                lblScale.setText("1:" + sd);                                                    // NOI18N
+                            }
+                        }
                     } else if (e.getName().equals(StatusEvent.CRS)) {
                         lblCrs.setText(((Crs)e.getValue()).getShortname());
                         lblCoordinates.setToolTipText(((Crs)e.getValue()).getShortname());
@@ -451,6 +486,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         lblCoordinates = new javax.swing.JLabel();
         sepCoordinates = new javax.swing.JSeparator();
         lblWgs84Coordinates = new javax.swing.JLabel();
+        exceptionNotificationStatusPanel =
+            new de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel();
+        sepExcNotStat = new javax.swing.JSeparator();
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -588,7 +626,19 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblWgs84Coordinates, gridBagConstraints);
-    }                                                          // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 17;
+        gridBagConstraints.gridy = 0;
+        add(exceptionNotificationStatusPanel, gridBagConstraints);
+
+        sepExcNotStat.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 16;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(sepExcNotStat, gridBagConstraints);
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -619,6 +669,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     private void addCrsPopup(final Crs crs) {
         final JMenuItem jmi = new JMenuItem(crs.getShortname());
+
+        if (crs.isSelected()) {
+            // the default srs should be bold
+            jmi.setText("<html><b>" + crs.getShortname() + "</b></html>");
+        }
+
         jmi.setToolTipText(crs.getName());
         jmi.addActionListener(new ActionListener() {
 
@@ -671,8 +727,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         double area = 0.0;
         for (final Feature f : cf) {
             if ((f != null) && (f.getGeometry() != null)) {
-                area += f.getGeometry().getArea();
-                umfang += f.getGeometry().getLength();
+                final Geometry geo = CrsTransformer.transformToMetricCrs(f.getGeometry());
+                area += geo.getArea();
+                umfang += geo.getLength();
             }
         }
         if (((area == 0.0) && (umfang == 0.0)) || (cf.size() == 0)) {
@@ -768,40 +825,44 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     /**
      * DOCUMENT ME!
      *
-     * @param   coords  DOCUMENT ME!
+     * @param   p  coords DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private String transformToWGS84Coords(final String coords) {
+    private String transformToWGS84Coords(final Coordinate p) {
         String result = "";
 
         try {
-            final String tmp = coords.substring(1, coords.length() - 1);
-            final int commaPosition = tmp.indexOf(",");
-
-            if ((commaPosition != -1) && (transformer != null)) {
-                final double xCoord = Double.parseDouble(tmp.substring(0, commaPosition));
-                final double yCoord = Double.parseDouble(tmp.substring(commaPosition + 1));
-
-                final CoordinateSystem coordSystem = CRSFactory.create(CismapBroker.getInstance().getSrs().getCode());
-                Point currentPoint = GeometryFactory.createPoint(xCoord, yCoord, coordSystem);
-                currentPoint = (Point)transformer.transform(currentPoint);
-                result = "(" + df.format(currentPoint.getX()) + "," + df.format(currentPoint.getY()) + ")"; // NOI18N
+            if (transformer != null) {
+                final Coordinate[] wgs84Coord = transformer.transformGeometry(CismapBroker.getInstance().getSrs()
+                                .getCode(),
+                        p);
+                result = "(" + df.format(wgs84Coord[0].x) + "," + df.format(wgs84Coord[0].y) + ")"; // NOI18N
             } else {
-                log.error("Cannot transform the current coordinates: " + coords);
+                log.error("Cannot transform the current coordinates: " + p);
             }
         } catch (Exception e) {
-            log.error("Cannot transform the current coordinates: " + coords, e);
+            log.error("Cannot transform the current coordinates: " + p, e);
         }
 
         return result;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerAdded(final ActiveLayerEvent e) {
         // TODO: Use this for counting starting retrievals?
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
@@ -809,16 +870,31 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerPositionChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerAvailabilityChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
@@ -829,13 +905,32 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         // NOP
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public DefaultExceptionHandlerListener getExceptionHandlerListener() {
+        return exceptionNotificationStatusPanel;
     }
 }

@@ -33,6 +33,9 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -50,39 +53,50 @@ public class RotationPHandle extends PHandle {
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private PFeature pfeature;
+    private final PFeature pfeature;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
     private double rotation = 0.0d;
     private PHandle pivotHandle;
     private Point2D mid;
-    private int position;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RotationPHandle object.
      *
-     * @param  pfeature     DOCUMENT ME!
-     * @param  mid          DOCUMENT ME!
-     * @param  pivotHandle  DOCUMENT ME!
-     * @param  position     DOCUMENT ME!
+     * @param  pfeature        DOCUMENT ME!
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  mid             DOCUMENT ME!
+     * @param  pivotHandle     DOCUMENT ME!
      */
-    public RotationPHandle(final PFeature pfeature, final Point2D mid, final PHandle pivotHandle, final int position) {
+    public RotationPHandle(final PFeature pfeature,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final Point2D mid,
+            final PHandle pivotHandle) {
         super(new PLocator() {
 
                 @Override
                 public double locateX() {
-                    return pfeature.getXp()[position];
+                    return pfeature.getXp(entityPosition, ringPosition)[coordPosition];
                 }
 
                 @Override
                 public double locateY() {
-                    return pfeature.getYp()[position];
+                    return pfeature.getYp(entityPosition, ringPosition)[coordPosition];
                 }
             }, pfeature.getViewer());
 
         this.mid = mid;
         this.pfeature = pfeature;
-        this.position = position;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.pivotHandle = pivotHandle;
     }
 
@@ -104,12 +118,19 @@ public class RotationPHandle extends PHandle {
             log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
         }
         pfeature.getViewer().getCamera().localToView(aLocalDimension);
-        final double dragRot = pfeature.calculateDrag(aEvent, pfeature.getXp()[position], pfeature.getYp()[position]);
+        final double dragRot = pfeature.calculateDrag(
+                aEvent,
+                pfeature.getXp(entityPosition, ringPosition)[coordPosition],
+                pfeature.getYp(entityPosition, ringPosition)[coordPosition]);
+
+        // No sense for stepping with discrete steps through the roatating process
+        // because of the restarting with 0 when a new rotation drag operation ist started
+
         if ((pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection)
                     && (((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).getSelectedFeatures()
                         .size() > 1)) {
             for (final Object o : pfeature.getViewer().getFeatureCollection().getSelectedFeatures()) {
-                final PFeature pf = (PFeature)pfeature.getViewer().getPFeatureHM().get(o);
+                final PFeature pf = (PFeature)pfeature.getViewer().getPFeatureHM().get((Feature)o);
                 if (pf.getFeature().isEditable()) {
                     pf.rotateAllPoints(dragRot, null);
                     relocateHandle();
@@ -195,27 +216,28 @@ public class RotationPHandle extends PHandle {
             }
 
             boolean overlap = false;
-
-            if (!(pfeature.getFeature() instanceof SearchFeature)) {
-                // Ewig aufwändiger Check nach Überschneidungen
-                for (final Object o : selArr) {
-                    final Geometry g = ((PFeature)pfeature.getViewer().getPFeatureHM().get(o)).getFeature()
-                                .getGeometry();
-                    if (!overlap) {
-                        for (final Feature f : all) {
-                            if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
-                                overlap = true;
-                                break;
+            if (CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation()) {
+                if (!(pfeature.getFeature() instanceof SearchFeature)) {
+                    // Ewig aufwändiger Check nach Überschneidungen
+                    for (final Object o : selArr) {
+                        final Geometry g = ((PFeature)pfeature.getViewer().getPFeatureHM().get(o)).getFeature()
+                                    .getGeometry();
+                        if (!overlap) {
+                            for (final Feature f : all) {
+                                if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
+                                    overlap = true;
+                                    break;
+                                }
                             }
+                        } else {
+                            break;
                         }
-                    } else {
-                        break;
                     }
                 }
-            }
-            if (log.isDebugEnabled()) {
-                // Falls ja, dann Abfrage "Sind Sie sicher?"
-                log.debug("Nach Overlap-Check");
+                if (log.isDebugEnabled()) {
+                    // Falls ja, dann Abfrage "Sind Sie sicher?"
+                    log.debug("Nach Overlap-Check");
+                }
             }
             if (overlap) {
                 if (log.isDebugEnabled()) {
@@ -226,7 +248,8 @@ public class RotationPHandle extends PHandle {
                         log.debug("\u00DCberschneidungen nach Drehung der PFeatures");
                     }
                 }
-                final int answer = JOptionPane.showConfirmDialog(pfeature.getViewer(),
+                final int answer = JOptionPane.showConfirmDialog(
+                        StaticSwingTools.getParentFrame(pfeature.getViewer()),
                         DIALOG_TEXT,
                         DIALOG_TITLE,
                         JOptionPane.YES_NO_OPTION,
@@ -242,17 +265,15 @@ public class RotationPHandle extends PHandle {
                             (Point2D)mid.clone(),
                             rotation);
                     a.doAction();
-                } else {
-                    if (rotation != 0.0d) {
-                        pfeature.getViewer()
-                                .getMemUndo()
-                                .addAction(new FeatureRotateAction(
-                                        pfeature.getViewer(),
-                                        selArr,
-                                        (Point2D)mid.clone(),
-                                        rotation));
-                        pfeature.getViewer().getMemRedo().clear();
-                    }
+                } else if (rotation != 0.0d) {
+                    pfeature.getViewer()
+                            .getMemUndo()
+                            .addAction(new FeatureRotateAction(
+                                    pfeature.getViewer(),
+                                    selArr,
+                                    (Point2D)mid.clone(),
+                                    rotation));
+                    pfeature.getViewer().getMemRedo().clear();
                 }
             } else {
                 if (log.isDebugEnabled()) {

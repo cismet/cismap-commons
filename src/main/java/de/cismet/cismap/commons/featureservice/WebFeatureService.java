@@ -20,9 +20,11 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,8 @@ import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
+import de.cismet.cismap.commons.interaction.DefaultXMLQueryButtonAction;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -94,6 +98,27 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     /** the version of the wfs. */
     private FeatureType feature;
     private String backupVersion = "";
+    private boolean reverseAxisOrder;
+
+    //~ Instance initializers --------------------------------------------------
+
+    {
+        queryButtons.clear();
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsEqualTo", "="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsNotEqualTo", "<>"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLike", "Like"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsGreaterThan", ">"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsGreaterThanOrEqualTo", ">="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("And", "And"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLessThan", "<"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLessThanOrEqualTo", "<="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Or", "Or"));
+        queryButtons.add(new DefaultQueryButtonAction("_", 1));
+        queryButtons.add(new DefaultQueryButtonAction("%", 1));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Not", "Not"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsNull", "Null"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Literal", "Lit"));
+    }
 
     //~ Constructors -----------------------------------------------------------
 
@@ -106,6 +131,14 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      */
     public WebFeatureService(final Element e) throws Exception {
         super(e);
+
+        if (e.getAttribute("reverseAxisOrder") != null) {
+            try {
+                this.reverseAxisOrder = e.getAttribute("reverseAxisOrder").getBooleanValue(); // NOI18N
+            } catch (DataConversionException ex) {
+                LOG.error("Invalid attribute value", ex);
+            }
+        }
     }
 
     /**
@@ -124,6 +157,28 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
             final Element query,
             final List<FeatureServiceAttribute> attributes,
             final FeatureType feature) throws Exception {
+        this(name, host, query, attributes, feature, false);
+    }
+
+    /**
+     * Create a new <b>uninitialised</b> AbstractFeatureService except for the attributes provided.
+     *
+     * @param   name              the name of this FeatureService
+     * @param   host              hostname of the WFS server
+     * @param   query             the request which will be send to the WFS
+     * @param   attributes        featureServiceAttributes vector with all FeatureServiceAttributes of the
+     *                            FeatureService
+     * @param   feature           version DOCUMENT ME!
+     * @param   reverseAxisOrder  if true, the axis order of the crs will be changed
+     *
+     * @throws  Exception  if something went wrong
+     */
+    public WebFeatureService(final String name,
+            final String host,
+            final Element query,
+            final List<FeatureServiceAttribute> attributes,
+            final FeatureType feature,
+            final boolean reverseAxisOrder) throws Exception {
         super(name, attributes);
         crs = CismapBroker.getInstance().getSrs();
         setFeature(feature);
@@ -132,6 +187,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         // defaults for new services
         this.setTranslucency(0.2f);
         this.setMaxFeatureCount(2900);
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     /**
@@ -148,10 +204,11 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         this.setQueryElement(wfs.getQueryElement());
         // overwrite with customised query if applicable
         this.setQuery(wfs.getQuery());
-        this.maxFeatureCount = 2500;
+        this.maxFeatureCount = Integer.MAX_VALUE;
         this.backupVersion = wfs.backupVersion;
         this.setInitialisationError(wfs.getInitialisationError());
         this.errorObject = wfs.errorObject;
+        this.reverseAxisOrder = wfs.reverseAxisOrder;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -177,7 +234,16 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     public Element toElement() {
         final Element parentElement = super.toElement();
 
-        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, getVersion(), false);
+        final CapabilityLink capLink = new CapabilityLink(
+                CapabilityLink.OGC,
+                hostname,
+                reverseAxisOrder,
+                getVersion(),
+                false);
+
+        if (reverseAxisOrder) {
+            parentElement.setAttribute("reverseAxisOrder", "true");
+        }
 
         try {
             parentElement.addContent(capLink.getElement());
@@ -211,7 +277,11 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
             element = this.getInitElement();
         }
 
-        super.initFromElement(element);
+        if (!initializedFromElement) {
+            // without the initializedFromElement check, the layer adjustments from the user will be overridden
+            // in some cases
+            super.initFromElement(element);
+        }
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
         String capLink = cp.getLink();
@@ -356,13 +426,19 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12));               // NOI18N
         defaultLayerProperties.setIdExpression("app:gid", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME); // NOI18N
         defaultLayerProperties.setQueryType(LayerProperties.QUERYTYPE_XML);
+        defaultLayerProperties.setFeatureService(this);
 
         return defaultLayerProperties;
     }
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.feature, getCrs());
+        return new WFSFeatureFactory(this.getLayerProperties(),
+                this.getHostname(),
+                this.feature,
+                getCrs(),
+                parseSLD(getSLDDefiniton()),
+                reverseAxisOrder);
     }
 
     /**
@@ -465,5 +541,15 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
 //        } catch (Exception e) {
 //            LOG.error("Error while creating a new feature factory.", e);
 //        }
+    }
+
+    @Override
+    public String decoratePropertyName(final String name) {
+        return "<PropertyName>" + name + "</PropertyName>";
+    }
+
+    @Override
+    public String decoratePropertyValue(final String column, final String value) {
+        return "<Literal>" + value + "</Literal>";
     }
 }

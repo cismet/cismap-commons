@@ -69,7 +69,12 @@ public class CreatePolygonFeatureListener extends PBasicInputEventHandler {
         if (inProgress) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                final boolean vertexRequired = mc.isSnappingOnLineEnabled();
+                point = PFeatureTools.getNearestPointInArea(
+                        mc,
+                        pInputEvent.getCanvasPosition(),
+                        vertexRequired,
+                        true);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -93,7 +98,12 @@ public class CreatePolygonFeatureListener extends PBasicInputEventHandler {
             if (pInputEvent.getClickCount() == 1) {
                 Point2D point = null;
                 if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                    final boolean vertexRequired = mc.isSnappingOnLineEnabled();
+                    point = PFeatureTools.getNearestPointInArea(
+                            mc,
+                            pInputEvent.getCanvasPosition(),
+                            vertexRequired,
+                            true);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();

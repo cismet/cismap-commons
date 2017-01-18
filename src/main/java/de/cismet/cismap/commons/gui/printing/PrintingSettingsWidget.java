@@ -14,15 +14,17 @@ package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
 
-import java.awt.Color;
-
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
 
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.configuration.Configurable;
 
@@ -38,7 +40,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
+    public static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -49,7 +51,8 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private Vector<Template> templates = new Vector<Template>();
     private Vector<Action> actions = new Vector<Action>();
     private MappingComponent mappingComponent = null;
-    private String interactionModeAfterPrinting = ""; // NOI18N
+    private boolean chooseFileName = false;
+    private boolean oldOverlappingCheck = true;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboAction;
@@ -89,6 +92,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         initComponents();
         getRootPane().setDefaultButton(cmdOk);
         this.mappingComponent = mappingComponent;
+        oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -108,7 +112,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         newWidget.resolutions = resolutions;
         newWidget.templates = templates;
         newWidget.actions = actions;
-        newWidget.interactionModeAfterPrinting = interactionModeAfterPrinting;
         newWidget.cboScales.setModel(cboScales.getModel());
         newWidget.cboResolution.setModel(cboResolution.getModel());
         newWidget.cboTemplates.setModel(cboTemplates.getModel());
@@ -400,17 +403,25 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         try {
-            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             final Scale selectedScale = (Scale)cboScales.getSelectedItem();
             final Resolution selectedResolution = (Resolution)cboResolution.getSelectedItem();
-            mappingComponent.setPrintingResolution(selectedResolution.getResolution() / FEATURE_RESOLUTION_FACTOR);
+            mappingComponent.setPrintingResolution(selectedResolution.getResolution()
+                        / mappingComponent.getFeaturePrintingDpi());
             final Template selectedTemplate = (Template)cboTemplates.getSelectedItem();
-            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
-            ((PrintingFrameListener)(mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))).init(
-                selectedScale.getDenominator(),
-                selectedTemplate.getMapWidth(),
-                selectedTemplate.getMapHeight(),
-                interactionModeAfterPrinting);
+            final PrintTemplateFeature printTemplateStyledFeature = new PrintTemplateFeature(
+                    selectedTemplate,
+                    selectedResolution,
+                    selectedScale,
+                    mappingComponent);
+            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                mappingComponent.getFeatureCollection();
+            mapFeatureCol.holdFeature(printTemplateStyledFeature);
+            mapFeatureCol.addFeature(printTemplateStyledFeature);
+            mappingComponent.adjustMapForPrintingTemplates();
+            mapFeatureCol.select(printTemplateStyledFeature);
+            mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
+            mappingComponent.showHandles(false);
+            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
             dispose();
         } catch (Exception e) {
             log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
@@ -422,7 +433,9 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        mappingComponent.setInteractionMode(interactionModeAfterPrinting);
+        if (mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size() == 0) {
+            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
+        }
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
     /**
@@ -432,6 +445,15 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboScalesActionPerformed
     }                                                                             //GEN-LAST:event_cboScalesActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean getOldOverlappingCheckEnabled() {
+        return oldOverlappingCheck;
+    }
 
     /**
      * DOCUMENT ME!
@@ -649,18 +671,78 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @param  chooseFileName  DOCUMENT ME!
      */
-    public String getInteractionModeAfterPrinting() {
-        return interactionModeAfterPrinting;
+    public void setChooseFileName(final boolean chooseFileName) {
+        this.chooseFileName = chooseFileName;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  interactionModeAfterPrinting  DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
-    public void setInteractionModeAfterPrinting(final String interactionModeAfterPrinting) {
-        this.interactionModeAfterPrinting = interactionModeAfterPrinting;
+    public boolean isChooseFileName() {
+        return chooseFileName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Scale> getScales() {
+        return new ArrayList<Scale>(scales);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Template> getTemplates() {
+        return new ArrayList<Template>(templates);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Resolution> getResolutions() {
+        return new ArrayList<Resolution>(resolutions);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTemplateString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel7.text");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getScaleString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel8.text");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getResolutionString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel9.text");
     }
 }

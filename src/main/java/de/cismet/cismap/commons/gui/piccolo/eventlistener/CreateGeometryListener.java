@@ -8,27 +8,31 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Frame;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import java.lang.reflect.Constructor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Stack;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -36,9 +40,13 @@ import de.cismet.cismap.commons.gui.piccolo.EllipsePHandle;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.RectangleFromLineDialog;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.NewTextDialog;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.StaticSwingTools;
+
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.POLYGON;
 
 /**
  * DOCUMENT ME!
@@ -46,8 +54,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class CreateGeometryListener extends PBasicInputEventHandler implements FeatureCollectionListener,
-    CreateGeometryListenerInterface {
+public class CreateGeometryListener extends PBasicInputEventHandler implements CreateGeometryListenerInterface {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -58,19 +65,29 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     //~ Instance fields --------------------------------------------------------
 
+    protected MappingComponent mappingComponent;
+    protected PInputEvent finishingEvent = null;
+    protected String mode = POLYGON;
+
+    protected ArrayList<Point2D> points;
+
     private Point2D startPoint;
     private PPath tempFeature;
-    private MappingComponent mc;
     private boolean inProgress;
     private int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
-
-    private ArrayList<Point2D> points;
     private Stack<Point2D> undoPoints;
     private SimpleMoveListener moveListener;
-    private String mode = POLYGON;
-    private Class<? extends PureNewFeature> geometryFeatureClass = null;
+    private Class<? extends AbstractNewFeature> geometryFeatureClass = null;
+    private AbstractNewFeature currentFeature = null;
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new CreateGeometryListener object.
+     */
+    public CreateGeometryListener() {
+        this(null, Feature.class);
+    }
 
     /**
      * Creates a new CreateGeometryListener object.
@@ -89,12 +106,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      */
     protected CreateGeometryListener(final MappingComponent mc, final Class geometryFeatureClass) {
         setGeometryFeatureClass(geometryFeatureClass);
-        this.mc = mc;
-        moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
+        this.mappingComponent = mc;
         undoPoints = new Stack<Point2D>();
-        // srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen
-        // geliefert! loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
-        mc.getFeatureCollection().addFeatureCollectionListener(this);
+
+        if (mc != null) {
+            moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -105,7 +122,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @return  DOCUMENT ME!
      */
     protected MappingComponent getMappingComponent() {
-        return mc;
+        return mappingComponent;
     }
 
     /**
@@ -128,7 +145,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     public void setMode(final String mode) throws IllegalArgumentException {
         if (modeEquals(LINESTRING) || modeEquals(POINT) || modeEquals(POLYGON) || modeEquals(ELLIPSE)
                     || modeEquals(RECTANGLE)
-                    || modeEquals(RECTANGLE_FROM_LINE)) {
+                    || modeEquals(RECTANGLE_FROM_LINE) || modeEquals(TEXT)) {
             if (!modeEquals(mode)) {
                 reset();
                 this.mode = mode;
@@ -153,12 +170,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * DOCUMENT ME!
      */
     protected void reset() {
-        mc.getTmpFeatureLayer().removeAllChildren();
+        if (mappingComponent != null) {
+            mappingComponent.getTmpFeatureLayer().removeAllChildren();
+        }
         inProgress = false;
     }
 
     @Override
-    public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
@@ -167,8 +186,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         }
         if (inProgress) {                                                           // && (!isInMode(POINT))) {
             Point2D point = null;
-            if (mc.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+            if (mappingComponent.isSnappingEnabled()) {
+                final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                point = PFeatureTools.getNearestPointInArea(
+                        mappingComponent,
+                        pInputEvent.getCanvasPosition(),
+                        vertexRequired,
+                        true);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -178,45 +202,62 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     }
 
     @Override
-    public void mousePressed(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mousePressed(final PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
-        if (mc.isReadOnly()) {
-            ((DefaultFeatureCollection)(mc.getFeatureCollection())).removeFeaturesByInstance(PureNewFeature.class);
+        if (mappingComponent.isReadOnly()) {
+            ((DefaultFeatureCollection)(mappingComponent.getFeatureCollection())).removeFeaturesByInstance(
+                PureNewFeature.class);
         }
-        if (isInMode(POINT)) {
+
+        if (isInMode(TEXT)) {
             if (pInputEvent.isLeftMouseButton()) {
                 Point2D point = null;
-                if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                if (point == null) {
+                    point = pInputEvent.getPosition();
+                }
+                points = new ArrayList<Point2D>();
+                points.add(point);
+                readyForFinishing(pInputEvent);
+            }
+        } else if (isInMode(POINT)) {
+            if (pInputEvent.isLeftMouseButton()) {
+                Point2D point = null;
+                if (mappingComponent.isSnappingEnabled()) {
+                    final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                    point = PFeatureTools.getNearestPointInArea(
+                            mappingComponent,
+                            pInputEvent.getCanvasPosition(),
+                            vertexRequired,
+                            true);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();
                 }
                 points = new ArrayList<Point2D>();
                 points.add(point);
-                createPureNewFeature(PureNewFeature.geomTypes.POINT);
+                readyForFinishing(pInputEvent);
             }
         } else if (isInMode(RECTANGLE)) {
             if (!inProgress) {
-                initTempFeature(true);
+                initTempFeature();
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(ELLIPSE)) {
             if (!inProgress) {
-                initTempFeature(true);
+                initTempFeature();
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
             // snappingpoint ermitteln falls snapping enabled
-            final Point2D snappingPoint = (mc.isSnappingEnabled())
-                ? PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition()) : null;
+            final Point2D snappingPoint = (mappingComponent.isSnappingEnabled())
+                ? PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition()) : null;
             // wenn snappingpoint vorhanden, dann den nehmen, ansonsten normalen punkt unter der maus ermitteln
             final Point2D point = (snappingPoint != null) ? snappingPoint : pInputEvent.getPosition();
 
             if (pInputEvent.isLeftMouseButton()) {
                 if (!inProgress) {
                     inProgress = true;
-                    initTempFeature(true);
+                    initTempFeature();
                     startPoint = point;
                     points = new ArrayList<Point2D>(5);
                     points.add(startPoint);
@@ -233,7 +274,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     final double length = startPoint.distance(stopPoint);
 
                     // Dialog erzeugen
-                    final Frame parentFrame = StaticSwingTools.getParentFrame(mc);
+                    final Frame parentFrame = StaticSwingTools.getParentFrame(mappingComponent);
                     final RectangleFromLineDialog dialog = new RectangleFromLineDialog(parentFrame, true, length);
 
                     // in der Karte dynamisch auf Eingaben im Dialog reagieren
@@ -269,58 +310,112 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     // Ergebnis des Dialogs auswerten
                     if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
                         // fertig
-                        createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
-                        inProgress = false;
+                        readyForFinishing(pInputEvent);
                     } else {
                         // abbrechen
-                        mc.getTmpFeatureLayer().removeChild(tempFeature);
+                        mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
                         inProgress = false;
                     }
                 }
             } else if (pInputEvent.isRightMouseButton()) {
                 // abbrechen
                 if (tempFeature != null) {
-                    mc.getTmpFeatureLayer().removeChild(tempFeature);
+                    mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
                 }
                 inProgress = false;
             }
         } else if (isInMode(POLYGON) || isInMode(LINESTRING)) {
-            if (pInputEvent.getClickCount() == 1) {
-                Point2D point = null;
-                undoPoints.clear();
-                if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
-                }
-                if (point == null) {
-                    point = pInputEvent.getPosition();
-                }
-
-                if (!inProgress) {
-                    inProgress = true;
-
-                    if (isInMode(POLYGON)) {
-                        initTempFeature(true);
-                    } else {
-                        initTempFeature(false);
+            if (pInputEvent.isLeftMouseButton()) {
+                if (pInputEvent.getClickCount() == 1) {
+                    Point2D point = null;
+                    undoPoints.clear();
+                    if (mappingComponent.isSnappingEnabled()) {
+                        final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                        point = PFeatureTools.getNearestPointInArea(
+                                mappingComponent,
+                                pInputEvent.getCanvasPosition(),
+                                vertexRequired,
+                                true);
+                    }
+                    if (point == null) {
+                        point = pInputEvent.getPosition();
                     }
 
-                    // Polygon erzeugen
-                    points = new ArrayList<Point2D>();
-                    // Ersten Punkt anlegen
-                    startPoint = point;
-                    points.add(startPoint);
-                } else {
-                    // Zus\u00E4tzlichen Punkt anlegen
-                    points.add(point);
-                    updatePolygon(null);
+                    if (!inProgress) {
+                        inProgress = true;
+                        initTempFeature();
+
+                        // Polygon erzeugen
+                        points = new ArrayList<Point2D>();
+                        // Ersten Punkt anlegen
+                        startPoint = point;
+                        points.add(startPoint);
+                    } else {
+                        // Zus\u00E4tzlichen Punkt anlegen
+                        points.add(point);
+                        updatePolygon(null);
+                    }
+                } else if (pInputEvent.getClickCount() == 2) {
+                    if (isInMode(POLYGON)) {
+                        if (points.size() == 2) { // bei polygonen mit nur 2 punkten
+                                                  // wird eine boundingbox angelegt
+                            //
+                            // Rectangle QuickSnap
+                            //
+                            // because of this code one is able to create a rectangular polygon with a click and a
+                            // following doubleclick
+                            //
+                            // .....P1--------------P2 .....|               | .....|               | .....|
+                            // | .....P3--------------P4
+                            //
+                            //
+
+                            final Point2D pointP1 = points.get(0);
+                            final Point2D pointP4 = points.get(1);
+                            points.remove(pointP4);
+
+                            // P2
+                            points.add(new Point2D.Double(pointP1.getX(), pointP4.getY()));
+
+                            // P4
+                            points.add(pointP4);
+
+                            // P3
+                            points.add(new Point2D.Double(pointP4.getX(), pointP1.getY()));
+
+                            // No need to add P1 to close the polygon, because the polygon part of the code will care
+                            // about that
+                        } else if (points.size() < 2) {
+                            return; // ignorieren, da weniger als 2 Punkte nicht ausreichen
+                        }
+                    }
+                    readyForFinishing(pInputEvent);
                 }
-            } else if (pInputEvent.getClickCount() == 2) {
-                if (isInMode(POLYGON)) {
-                    createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
-                } else if (isInMode(LINESTRING)) {
-                    createPureNewFeature(PureNewFeature.geomTypes.LINESTRING);
+            } else if (pInputEvent.isRightMouseButton()) {
+                if (inProgress) {
+                    if ((points.size() < 2) || (pInputEvent.getClickCount() == 2)) {
+                        // abbrechen
+                        if (tempFeature != null) {
+                            mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
+                        }
+                        inProgress = false;
+                    } else {
+                        points.remove(points.size() - 1);
+                        Point2D point = null;
+                        if (mappingComponent.isSnappingEnabled()) {
+                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                            point = PFeatureTools.getNearestPointInArea(
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition(),
+                                    vertexRequired,
+                                    true);
+                        }
+                        if (point == null) {
+                            point = pInputEvent.getPosition();
+                        }
+                        updatePolygon(point);
+                    }
                 }
-                inProgress = false;
             }
         }
     }
@@ -328,35 +423,136 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
-     * @param  geomType  DOCUMENT ME!
+     * @param  event  DOCUMENT ME!
      */
-    private void createPureNewFeature(final PureNewFeature.geomTypes geomType) {
+    private void readyForFinishing(final PInputEvent event) {
         try {
-            final Constructor<? extends PureNewFeature> c = geometryFeatureClass.getConstructor(
+            finishingEvent = event;
+            if ((currentFeature == null) || ((currentFeature != null) && currentFeature.getGeometry().isValid())) {
+                createCurrentNewFeature(null);
+                finishGeometry(currentFeature);
+                inProgress = false;
+            } else {
+                reset();
+            }
+        } catch (Throwable t) {
+            LOG.error("Error during the creation of the geometry", t); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+// protected PureNewFeature getCurrentPureNewFeature() {
+// return getCurrentPureNewFeature(null);
+// }
+
+    protected AbstractNewFeature getCurrentNewFeature() {
+        return currentFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  lastPoint  DOCUMENT ME!
+     */
+    protected void createCurrentNewFeature(final Point2D lastPoint) {
+        try {
+            final Point2D[] finalPoints = getPoints(lastPoint);
+            AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.UNKNOWN;
+            if (isInMode(ELLIPSE)) {
+                geomType = AbstractNewFeature.geomTypes.ELLIPSE;
+            } else if (isInMode(LINESTRING)) {
+                geomType = AbstractNewFeature.geomTypes.LINESTRING;
+            } else if (isInMode(POINT)) {
+                geomType = AbstractNewFeature.geomTypes.POINT;
+            } else if (isInMode(POLYGON)) {
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
+            } else if (isInMode(RECTANGLE)) {
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
+            } else if (isInMode(RECTANGLE_FROM_LINE)) {
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
+            } else if (isInMode(TEXT)) {
+                geomType = AbstractNewFeature.geomTypes.TEXT;
+            }
+
+            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+            final Constructor<? extends AbstractNewFeature> constructor = geometryFeatureClass.getConstructor(
                     Point2D[].class,
                     WorldToScreenTransform.class);
-            final Point2D[] p = getFinalPoints(null);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("point count:" + p.length + " (" + Arrays.deepToString(p) + ")"); // NOI18N
+            AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
+            newFeature.setGeometryType(geomType);
+            newFeature.getGeometry().setSRID(currentSrid);
+            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                    mappingComponent.getMappingModel().getSrs().getCode());
+            newFeature.setGeometry(geom);
+
+            if (isInMode(TEXT)) {
+                final AbstractNewFeature f = newFeature;
+
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            createTextNode(f);
+                        }
+                    });
+
+                newFeature = null;
             }
-            final PureNewFeature pnf = c.newInstance(p, mc.getWtst());
-            pnf.setGeometryType(geomType);
-            finishGeometry(pnf);
-        } catch (Throwable t) {
-            LOG.error("Error during the creation of the geometry", t);                      // NOI18N
+
+            currentFeature = newFeature;
+        } catch (Throwable throwable) {
+            LOG.error("Error during the creation of the geometry", throwable); // NOI18N
+            currentFeature = null;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newFeature  DOCUMENT ME!
+     */
+    private void createTextNode(final AbstractNewFeature newFeature) {
+        final NewTextDialog dialog = new NewTextDialog(StaticSwingTools.getParentFrame(mappingComponent), false);
+        dialog.setRunWhenFinish(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (dialog.isConfirmed()) {
+                        newFeature.setName(dialog.getText());
+
+                        if (!dialog.isAutoScaleEnabled()) {
+                            final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                            final Font f = new Font("sansserif", Font.PLAIN, fontSize);
+                            newFeature.setPrimaryAnnotationFont(f);
+                        } else {
+                            final Font f = new Font("sansserif", Font.PLAIN, 12);
+                            newFeature.setPrimaryAnnotationFont(f);
+                        }
+                        newFeature.setAutoScale(dialog.isAutoScaleEnabled());
+
+                        if (dialog.isHaloEnabled()) {
+                            newFeature.setPrimaryAnnotationHalo(Color.WHITE);
+                        }
+                        finishGeometry(newFeature);
+                    }
+                }
+            });
+
+        final Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+        dialog.setLocation((int)(mouseLocation.getX() + 10), (int)mouseLocation.getY());
+        dialog.setVisible(true);
     }
 
     @Override
     public void mouseReleased(final PInputEvent arg0) {
         super.mouseReleased(arg0);
         if (inProgress) {
-            if (isInMode(RECTANGLE)) {
-                createPureNewFeature(PureNewFeature.geomTypes.RECTANGLE);
-                inProgress = false;
-            } else if (isInMode(ELLIPSE)) {
-                createPureNewFeature(PureNewFeature.geomTypes.ELLIPSE);
-                inProgress = false;
+            if (isInMode(RECTANGLE) || isInMode(ELLIPSE)) {
+                readyForFinishing(arg0);
             }
         }
     }
@@ -370,7 +566,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 // keine Punkte mehr vorhanden? Stoppe erstellen
                 if (points.isEmpty()) {
                     startPoint = null;
-                    mc.getTmpFeatureLayer().removeAllChildren();
+                    mappingComponent.getTmpFeatureLayer().removeAllChildren();
                     inProgress = false;
                 }
                 if (LOG.isDebugEnabled()) {
@@ -391,7 +587,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
             }
 
-            initTempFeature(true);
+            initTempFeature();
 
             // Ersten Punkt anlegen
             startPoint = undoPoints.pop();
@@ -406,9 +602,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  m  DOCUMENT ME!
      * @param  f  DOCUMENT ME!
      */
-    private void createAction(final MappingComponent m, final PureNewFeature f) {
-        mc.getMemUndo().addAction(new FeatureDeleteAction(m, f));
-        mc.getMemRedo().clear();
+    private void createAction(final MappingComponent m, final AbstractNewFeature f) {
+        mappingComponent.getMemUndo().addAction(new FeatureDeleteAction(m, f));
+        mappingComponent.getMemRedo().clear();
     }
 
     /**
@@ -426,22 +622,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  lastPoint  DOCUMENT ME!
      */
     protected void updatePolygon(final Point2D lastPoint) {
-        final Point2D[] p = getPoints(lastPoint);
-        Feature pnf = null;
-        try {
-            final Constructor c = geometryFeatureClass.getConstructor(Point2D[].class, WorldToScreenTransform.class);
-            pnf = (Feature)c.newInstance(p, mc.getWtst());
-        } catch (Throwable t) {
-            LOG.error("Error during the creation of a geometry", t); // NOI18N
-        }
-        // pnf=new PureNewFeature(p,mc.getWtst());
-        final ArrayList<Feature> v = new ArrayList<Feature>();
-        v.add(pnf);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("added:" + pnf); // NOI18N
-        }
-        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
-        tempFeature.setPathToPolyline(p);
+        createCurrentNewFeature(lastPoint);
+        final ArrayList<Feature> features = new ArrayList<Feature>();
+        features.add(currentFeature);
+        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).fireFeaturesChanged(features);
+
+        tempFeature.setPathToPolyline(getPoints(lastPoint));
         tempFeature.repaint();
     }
 
@@ -452,33 +638,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
-    protected Point2D[] getFinalPoints(final Point2D lastPoint) {
-        return getPoints(true, lastPoint);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   lastPoint  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected Point2D[] getPoints(final Point2D lastPoint) {
-        return getPoints(false, lastPoint);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   isFinal    DOCUMENT ME!
-     * @param   lastPoint  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected Point2D[] getPoints(final boolean isFinal, final Point2D lastPoint) {
-        int plus;
-        boolean movin = false;
+    protected Point2D[] getPoints(Point2D lastPoint) {
         try {
+            final boolean movin;
+            int plus;
+            if (lastPoint == points.get(points.size() - 1)) {
+                lastPoint = null;
+            }
             if (lastPoint != null) {
                 plus = 2;
                 movin = true;
@@ -487,18 +653,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 movin = false;
             }
 
-            if (!isInMode(POLYGON) || (isInMode(POLYGON) && (points.size() == 2) && !movin)) {
+            if (!isInMode(POLYGON)) {
                 plus--;
-            }
-            if (isFinal && isInMode(POLYGON) && (points.size() == 2) && !movin) { // bei polygonen mit nur 2 punkten
-                                                                                  // wird eine boundingbox angelegt
-                final Point2D[] p = new Point2D[5];
-                p[0] = points.get(0);
-                p[2] = points.get(1);
-                p[1] = new Point2D.Double(p[0].getX(), p[2].getY());
-                p[3] = new Point2D.Double(p[2].getX(), p[0].getY());
-                p[4] = p[0];
-                return p;
             }
             final Point2D[] p = new Point2D[points.size() + plus];
             for (int i = 0; i < points.size(); ++i) {
@@ -518,7 +674,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("not movin"); // NOI18N
                 }
-                if ((points.size() > 2) && isInMode(POLYGON)) {
+                if (isInMode(POLYGON)) {
                     // close it
                     p[points.size()] = startPoint;
                 }
@@ -568,22 +724,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  geometryFeatureClass  DOCUMENT ME!
      */
     @Override
-    public final void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass) {
+    public final void setGeometryFeatureClass(final Class<? extends AbstractNewFeature> geometryFeatureClass) {
         this.geometryFeatureClass = geometryFeatureClass;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  newFeature  DOCUMENT ME!
-     */
-    private void postGeometryCreatedNotificaton(final PureNewFeature newFeature) {
-        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-        pn.postNotification(GEOMETRY_CREATED_NOTIFICATION, newFeature);
-    }
-
-    @Override
-    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
     }
 
     @Override
@@ -634,49 +776,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
-    @Override
-    public void featureCollectionChanged() {
-    }
-
-    @Override
-    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featuresAdded(final FeatureCollectionEvent fce) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Features added to map");                                                      // NOI18N
-        }
-        for (final Feature curFeature : fce.getEventFeatures()) {
-            if (curFeature instanceof PureNewFeature) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added Feature is PureNewFeature. PostingGeometryCreateNotification"); // NOI18N
-                }
-                postGeometryCreatedNotificaton((PureNewFeature)curFeature);
-                createAction(mc, (PureNewFeature)curFeature);
-            }
-        }
-    }
-
-    @Override
-    public void featuresChanged(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featuresRemoved(final FeatureCollectionEvent fce) {
-    }
-
     /**
      * DOCUMENT ME!
      *
      * @param  newFeature  DOCUMENT ME!
      */
-    protected void finishGeometry(final PureNewFeature newFeature) {
-        mc.getTmpFeatureLayer().removeAllChildren();
+    protected void finishGeometry(final AbstractNewFeature newFeature) {
+        mappingComponent.getTmpFeatureLayer().removeAllChildren();
     }
 
     /**
@@ -705,16 +811,35 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
-     * @param  filled  DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
-    private void initTempFeature(final boolean filled) {
-        tempFeature = new PPath();
-        tempFeature.setStroke(new FixedWidthStroke());
-        if (filled) {
+    protected PPath createNewTempFeature() {
+        final PPath newTempFeaturePath = new PPath();
+        newTempFeaturePath.setStroke(new FixedWidthStroke());
+        if (!isInMode(LINESTRING)) {
             final Color fillingColor = getFillingColor();
-            tempFeature.setStrokePaint(fillingColor.darker());
-            tempFeature.setPaint(fillingColor);
+            newTempFeaturePath.setStrokePaint(fillingColor.darker());
+            newTempFeaturePath.setPaint(fillingColor);
         }
-        mc.getTmpFeatureLayer().addChild(tempFeature);
+        return newTempFeaturePath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initTempFeature() {
+        tempFeature = createNewTempFeature();
+        mappingComponent.getTmpFeatureLayer().addChild(tempFeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mappingComponent  the mappingComponent to set
+     */
+    public void setMappingComponent(final MappingComponent mappingComponent) {
+        this.mappingComponent = mappingComponent;
+        this.mappingComponent = mappingComponent;
+        moveListener = (SimpleMoveListener)mappingComponent.getInputListener(MappingComponent.MOTION);
     }
 }

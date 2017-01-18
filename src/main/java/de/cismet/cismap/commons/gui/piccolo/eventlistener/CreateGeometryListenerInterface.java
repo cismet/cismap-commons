@@ -7,7 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 
 /**
  * DOCUMENT ME!
@@ -25,6 +25,7 @@ public interface CreateGeometryListenerInterface {
     String RECTANGLE = "BOUNDING_BOX";                  // NOI18N
     String RECTANGLE_FROM_LINE = "RECTANGLE_FROM_LINE"; // NOI18N
     String ELLIPSE = "ELLIPSE";                         // NOI18N
+    String TEXT = "TEXT";                               // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -72,7 +73,7 @@ public interface CreateGeometryListenerInterface {
      *
      * @param  geometryFeatureClass  DOCUMENT ME!
      */
-    void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass);
+    void setGeometryFeatureClass(final Class<? extends AbstractNewFeature> geometryFeatureClass);
 
     /**
      * DOCUMENT ME!

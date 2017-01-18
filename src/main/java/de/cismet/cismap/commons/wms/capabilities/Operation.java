@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.wms.capabilities;
 
 import java.net.URL;
 
+import java.util.List;
+
 /**
  * The operation interface represents a wms operation. This interface should be used to eliminate the deegree dependency
  * for the capabilities parsing.
@@ -32,4 +34,20 @@ public interface Operation {
      * @return  DOCUMENT ME!
      */
     URL getPost();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    List<Parameter> getParameters();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Parameter getParameter(String name);
 }

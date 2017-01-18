@@ -35,6 +35,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -77,8 +78,8 @@ public class WFSFormPOI extends AbstractWFSForm {
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
 
-            AutoCompleteDecorator.decorate(cboLocationtypes);
-            AutoCompleteDecorator.decorate(cboPois);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboLocationtypes);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboPois);
             prbLocationtypes.setPreferredSize(new java.awt.Dimension(1, 5));
             prbPois.setPreferredSize(new java.awt.Dimension(1, 5));
 

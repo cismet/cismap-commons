@@ -44,7 +44,7 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
     protected int layerPosition = 0;
     protected String name = null;
     protected float translucency = 1.0f;
-    private boolean visible = true;
+    protected boolean visible = true;
 
     //~ Constructors -----------------------------------------------------------
 

@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import edu.umd.cs.piccolo.PNode;
-
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
@@ -18,7 +16,7 @@ import de.cismet.cismap.commons.retrieval.RetrievalService;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface MapService extends RetrievalService {
+public interface MapService extends RetrievalService, PNodeProvider {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -47,16 +45,4 @@ public interface MapService extends RetrievalService {
      * @return  DOCUMENT ME!
      */
     boolean isVisible();
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    PNode getPNode();
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  imageObject  DOCUMENT ME!
-     */
-    void setPNode(PNode imageObject);
 }

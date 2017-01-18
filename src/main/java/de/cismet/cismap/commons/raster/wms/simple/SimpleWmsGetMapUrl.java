@@ -22,6 +22,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * Bsp:<br>
  * <code>
  * http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5</code>
+ * <br/>
+ * <br/>
+ * <b>WARNING: if you use the SRS_TOKEN be aware that the SRS is always fetched from the main mapping component!</b>
  *
  * @author   hell
  * @version  $Revision$, $Date$

@@ -7,11 +7,14 @@
 ****************************************************/
 package de.cismet.cismap.commons.wms.capabilities.deegree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.Extent;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Style;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!
@@ -24,16 +27,21 @@ public class DeegreeLayer implements Layer {
     //~ Instance fields --------------------------------------------------------
 
     private org.deegree.ogcwebservices.wms.capabilities.Layer layer;
+    private WMSCapabilities capabilities;
+    private String filterString;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new DeegreeLayer object.
      *
-     * @param  layer  DOCUMENT ME!
+     * @param  layer         DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
      */
-    public DeegreeLayer(final org.deegree.ogcwebservices.wms.capabilities.Layer layer) {
+    public DeegreeLayer(final org.deegree.ogcwebservices.wms.capabilities.Layer layer,
+            final WMSCapabilities capabilities) {
         this.layer = layer;
+        this.capabilities = capabilities;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -73,19 +81,55 @@ public class DeegreeLayer implements Layer {
         return layer.getSrs();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the scale hint not the scale denominator regardless of the service version
+     */
     @Override
     public double getScaleDenominationMax() {
         if (layer.getScaleHint() != null) {
-            return layer.getScaleHint().getMax();
+            final double maxScaleHint = layer.getScaleHint().getMax();
+
+            if (capabilities != null) {
+                final String version = capabilities.getVersion();
+
+                if (((version != null) && version.trim().equals("1.3")) || version.trim().equals("1.3.0")) {
+                    // version 1.3 uses a scaleDenominator instead of a scaleHint
+                    // See http://wiki.deegree.org/deegreeWiki/HowToUseScaleHintAndScaleDenominator
+                    final double pixelwidth = maxScaleHint * 0.00028;
+                    return Math.sqrt(pixelwidth * pixelwidth * 2);
+                }
+            }
+
+            return maxScaleHint;
         } else {
             return 0;
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the scale hint not the scale denominator regardless of the service version
+     */
     @Override
     public double getScaleDenominationMin() {
         if (layer.getScaleHint() != null) {
-            return layer.getScaleHint().getMin();
+            final double minScaleHint = layer.getScaleHint().getMin();
+
+            if (capabilities != null) {
+                final String version = capabilities.getVersion();
+
+                if (((version != null) && version.trim().equals("1.3")) || version.trim().equals("1.3.0")) {
+                    // version 1.3 uses a scaleDenominator instead of a scaleHint.
+                    // See http://wiki.deegree.org/deegreeWiki/HowToUseScaleHintAndScaleDenominator
+                    final double pixelwidth = minScaleHint * 0.00028;
+                    return Math.sqrt(pixelwidth * pixelwidth * 2);
+                }
+            }
+
+            return minScaleHint;
         } else {
             return 0;
         }
@@ -117,13 +161,60 @@ public class DeegreeLayer implements Layer {
             return null;
         }
         final org.deegree.ogcwebservices.wms.capabilities.Layer[] deegreeLayer = layer.getLayer();
-        final Layer[] result = new Layer[deegreeLayer.length];
+        final List<Layer> result = new ArrayList<Layer>();
 
         for (int i = 0; i < deegreeLayer.length; ++i) {
-            result[i] = new DeegreeLayer(deegreeLayer[i]);
+            if ((filterString == null) || fulfilFilterRequirements(deegreeLayer[i])) {
+                final Layer l = new DeegreeLayer(deegreeLayer[i], capabilities);
+                l.setFilterString(filterString);
+                result.add(l);
+            }
         }
 
-        return result;
+        return result.toArray(new Layer[result.size()]);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   l  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean fulfilFilterRequirements(final org.deegree.ogcwebservices.wms.capabilities.Layer l) {
+        if (((l.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1)
+                        || containsFilterString(l.getKeywordList()))
+                    && (l.getLayer().length == 0)) {
+            return true;
+        } else {
+            final org.deegree.ogcwebservices.wms.capabilities.Layer[] children = l.getLayer();
+            for (int i = 0; i < children.length; ++i) {
+                if (fulfilFilterRequirements(children[i])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   keywords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean containsFilterString(final String[] keywords) {
+        if (keywords != null) {
+            for (final String tmp : keywords) {
+                if ((tmp != null) && (tmp.toLowerCase().indexOf(filterString.toLowerCase()) != -1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -148,5 +239,20 @@ public class DeegreeLayer implements Layer {
             return null;
         }
         return new DeegreeEnvelope(this.layer.getLatLonBoundingBox());
+    }
+
+    @Override
+    public void setFilterString(final String filterString) {
+        this.filterString = filterString;
+    }
+
+    @Override
+    public WMSCapabilities getCapabilities() {
+        return capabilities;
+    }
+
+    @Override
+    public void setCapabilities(final WMSCapabilities capabilities) {
+        this.capabilities = capabilities;
     }
 }

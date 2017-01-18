@@ -17,6 +17,7 @@ import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PInputEventListener;
 import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
 
@@ -62,6 +63,7 @@ import javax.swing.Timer;
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.*;
@@ -74,6 +76,7 @@ import de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
+import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -86,6 +89,8 @@ import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -99,6 +104,8 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitDialog;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
 import de.cismet.tools.gui.historybutton.HistoryModel;
+
+import static java.lang.Thread.sleep;
 
 /**
  * DOCUMENT ME!
@@ -119,11 +126,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private static final boolean DEBUG = Debug.DEBUG;
     public static final String PROPERTY_MAP_INTERACTION_MODE = "INTERACTION_MODE";          // NOI18N
     public static final String MOTION = "MOTION";                                           // NOI18N
+    public static final String PERPENDICULAR_INTERSECTION = "PERPENDICULAR_INTERSECTION";   // NOI18N
     public static final String SELECT = "SELECT";                                           // NOI18N
     public static final String ZOOM = "ZOOM";                                               // NOI18N
     public static final String PAN = "PAN";                                                 // NOI18N
     public static final String ALKIS_PRINT = "ALKIS_PRINT";                                 // NOI18N
     public static final String FEATURE_INFO = "FEATURE_INFO";                               // NOI18N
+    public static final String FEATURE_INFO_MULTI_GEOM = "FEATURE_INFO_MULTI_GEOM";         // NOI18N
     public static final String CREATE_SEARCH_POLYGON = "SEARCH_POLYGON";                    // NOI18N
     public static final String CREATE_SIMPLE_GEOMETRY = "CREATE_SIMPLE_GEOMETRY";           // NOI18N
     public static final String MOVE_POLYGON = "MOVE_POLYGON";                               // NOI18N
@@ -133,6 +142,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String JOIN_POLYGONS = "JOIN_POLYGONS";                             // NOI18N
     public static final String RAISE_POLYGON = "RAISE_POLYGON";                             // NOI18N
     public static final String ROTATE_POLYGON = "ROTATE_POLYGON";                           // NOI18N
+    public static final String REFLECT_POLYGON = "REFLECT_POLYGON";                         // NOI18N
     public static final String ATTACH_POLYGON_TO_ALPHADATA = "ATTACH_POLYGON_TO_ALPHADATA"; // NOI18N
     public static final String MOVE_HANDLE = "MOVE_HANDLE";                                 // NOI18N
     public static final String REMOVE_HANDLE = "REMOVE_HANDLE";                             // NOI18N
@@ -143,6 +153,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String CUSTOM_FEATUREACTION = "CUSTOM_FEATUREACTION";               // NOI18N
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";                   // NOI18N
     public static final String OVERVIEW = "OVERVIEW";                                       // NOI18N
+    static final double OGC_DEGREE_TO_METERS = 6378137.0 * 2.0 * Math.PI / 360;
     private static MappingComponent THIS;
     /** Name of the internal Simple Layer Widget. */
     public static final String LAYERWIDGET = "SimpleInternalLayerWidget"; // NOI18N
@@ -184,10 +195,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PLayer highlightingLayer = new PLayer();
     private PLayer crosshairLayer = new PLayer();
     private PLayer stickyLayer = new PLayer();
-    private PLayer printingFrameLayer = new PLayer();
     private PLayer dragPerformanceImproverLayer = new PLayer();
     private boolean readOnly = true;
     private boolean snappingEnabled = true;
+    private boolean snappingOnLineEnabled = false;
     private boolean visualizeSnappingEnabled = true;
     private boolean visualizeSnappingRectEnabled = false;
     private int snappingRectSize = 20;
@@ -211,7 +222,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     // Panel zu fungieren
     // coooooooool, was ? ;-)
     private final PCanvas selectedObjectPresenter = new PCanvas();
-    private BoundingBox currentBoundingBox = null;
+//    private BoundingBox currentBoundingBox = null;
     private Rectangle2D newViewBounds;
     private int animationDuration = 500;
     private int taskCounter = 0;
@@ -225,7 +236,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     // Scalebar
     private double screenResolution = 100.0;
     private volatile boolean locked = true;
-    private final List<PNode> stickyPNodes = new ArrayList<PNode>();
+    private final List<PSticky> stickyPNodes = Collections.synchronizedList(new ArrayList<PSticky>());
     // Undo- & Redo-Stacks
     private final MementoInterface memUndo = new Memento();
     private final MementoInterface memRedo = new Memento();
@@ -249,6 +260,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private ButtonGroup interactionButtonGroup;
     private boolean mainMappingComponent = false;
+    private volatile boolean rescaleStickyNodesEnabled = true;
+    private volatile int retrievalCompleteInProgressCount = 0;
+    private double featurePrintingDpi = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
 
     /**
      * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
@@ -260,6 +274,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  features  array with features to add
      */
     private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
+    private BoundingBox initialBoundingBox;
+    private WaitDialog crsChangedWaitingDialog = null;
+
+    private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
+    private boolean resizeEventActivated = true;
+    private double stickyFeatureCorrectionFactor = 1d;
+    private volatile Coordinate currentCrosshairPoint;
+    private Thread printingTemplateZoomThread;
+    private long printingTemplateZoomTime;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -311,25 +334,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 @Override
                 public void componentResized(final ComponentEvent evt) {
-                    if (MappingComponent.this.delayedResizeEventTimer == null) {
-                        delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
+                    if (resizeEventActivated) {
+                        if (MappingComponent.this.delayedResizeEventTimer == null) {
+                            delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
 
-                                    @Override
-                                    public void actionPerformed(final ActionEvent e) {
-                                        delayedResizeEventTimer.stop();
-                                        delayedResizeEventTimer = null;
+                                        @Override
+                                        public void actionPerformed(final ActionEvent e) {
+                                            delayedResizeEventTimer.stop();
+                                            delayedResizeEventTimer = null;
 
-                                        // perform delayed resize:
-                                        // rescape map + move widgets + reload services
-                                        componentResizedDelayed();
-                                    }
-                                });
-                        delayedResizeEventTimer.start();
-                    } else {
-                        // perform intermediate resize:
-                        // rescape map + move widgets
-                        componentResizedIntermediate();
-                        delayedResizeEventTimer.restart();
+                                            // perform delayed resize:
+                                            // rescape map + move widgets + reload services
+                                            componentResizedDelayed();
+                                        }
+                                    });
+                            delayedResizeEventTimer.start();
+                        } else {
+                            // perform intermediate resize:
+                            // rescape map + move widgets
+                            componentResizedIntermediate();
+                            delayedResizeEventTimer.restart();
+                        }
                     }
                 }
             });
@@ -347,19 +372,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getLayer().addChild(featureLayer);
         getLayer().addChild(tmpFeatureLayer);
         getLayer().addChild(rubberBandLayer);
-        getLayer().addChild(highlightingLayer);
         getLayer().addChild(crosshairLayer);
+        getLayer().addChild(highlightingLayer);
         getLayer().addChild(dragPerformanceImproverLayer);
-        getLayer().addChild(printingFrameLayer);
 
         getCamera().addLayer(mapServicelayer);
         getCamera().addLayer(featureLayer);
         getCamera().addLayer(tmpFeatureLayer);
         getCamera().addLayer(rubberBandLayer);
-        getCamera().addLayer(highlightingLayer);
         getCamera().addLayer(crosshairLayer);
+        getCamera().addLayer(highlightingLayer);
         getCamera().addLayer(dragPerformanceImproverLayer);
-        getCamera().addLayer(printingFrameLayer);
 
         getCamera().addChild(snapHandleLayer);
         getCamera().addChild(handleLayer);
@@ -370,7 +393,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         initInputListener();
         initCursors();
-
         addInputEventListener(getInputListener(MOTION));
         addInputEventListener(getInputListener(CUSTOM_FEATUREACTION));
 
@@ -419,12 +441,22 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         this.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
 
+                private double lastScale = -1;
+
                 @Override
                 public void propertyChange(final PropertyChangeEvent evt) {
+                    final PAffineTransform transform = ((PAffineTransform)evt.getNewValue());
                     checkAndFixErroneousTransformation();
                     handleLayer.removeAllChildren();
                     showHandleDelay.restart();
-                    rescaleStickyNodes();
+
+                    if ((transform == null) || (lastScale != transform.getScale())) {
+                        rescaleStickyNodes();
+                    }
+
+                    if (transform != null) {
+                        lastScale = transform.getScale();
+                    }
                     CismapBroker.getInstance()
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
@@ -432,6 +464,28 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * If <code>resizeEventActivated</code> is true, then the mapping component makes a new query for its services, when
+     * it is resized. This happens for example if the window of the mapping component is resized. The default value for
+     * <code>resizeEventActivated</code> is true.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isResizeEventActivated() {
+        return resizeEventActivated;
+    }
+
+    /**
+     * Set <code>resizeEventActivated</code> to true so that the mapping component makes a query for its services on a
+     * resize event (Such an event is for example fired when the window of the mapping component is resized). The
+     * default value for <code>resizeEventActivated</code> is true.
+     *
+     * @param  resizeEventActivated  DOCUMENT ME!
+     */
+    public void setResizeEventActivated(final boolean resizeEventActivated) {
+        this.resizeEventActivated = resizeEventActivated;
+    }
 
     /**
      * DOCUMENT ME!
@@ -509,216 +563,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
-     * Creates an image with given width and height from all features in the given featurecollection. The image will be
-     * used for printing.
-     *
-     * @param   fc      FeatureCollection
-     * @param   width   desired width of the resulting image
-     * @param   height  desired height of the resulting image
-     *
-     * @return  Image of the featurecollection
-     */
-    public Image getImageOfFeatures(final Collection<Feature> fc, final int width, final int height) {
-        try {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("getImageOffFeatures (" + width + "x" + height + ")"); // NOI18N
-                }
-            }
-
-            final PrintingFrameListener pfl = ((PrintingFrameListener)getInputListener(PRINTING_AREA_SELECTION));
-            final PCanvas pc = new PCanvas();
-            pc.setSize(width, height);
-            final List<PFeature> list = new ArrayList<PFeature>();
-            final Iterator it = fc.iterator();
-            while (it.hasNext()) {
-                final Feature f = (Feature)it.next();
-                final PFeature p = new PFeature(f, wtst, clip_offset_x, clip_offset_y, MappingComponent.this);
-                if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                    list.add(p);
-                }
-            }
-            pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
-            final double scale = 1 / pc.getCamera().getViewScale();
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("subPCscale:" + scale); // NOI18N
-                }
-            }
-
-            // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-
-            int printingLineWidth = -1;
-            for (final PNode p : list) {
-                if (p instanceof PFeature) {
-                    final PFeature original = ((PFeature)p);
-                    original.setInfoNodeExpanded(false);
-
-                    if (printingLineWidth > 0) {
-                        ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                    } else if (StyledFeature.class.isAssignableFrom(original.getFeature().getClass())) {
-                        final int orginalLineWidth = ((StyledFeature)original.getFeature()).getLineWidth();
-                        printingLineWidth = (int)Math.round(orginalLineWidth * (getPrintingResolution() * 2));
-                        if (DEBUG) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("getImageOfFeatures: changed printingLineWidth from " + orginalLineWidth
-                                            + " to " + printingLineWidth + " (resolution=" + getPrintingResolution()
-                                            + ")"); // NOI18N
-                            }
-                        }
-                        ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                    }
-
-                    final PFeature copy = new PFeature(original.getFeature(),
-                            getWtst(),
-                            0,
-                            0,
-                            MappingComponent.this,
-                            true);
-                    pc.getLayer().addChild(copy);
-
-                    copy.setTransparency(original.getTransparency());
-                    copy.setStrokePaint(original.getStrokePaint());
-                    final boolean expanded = original.isInfoNodeExpanded();
-                    copy.addInfoNode();
-                    copy.setInfoNodeExpanded(false);
-                    copy.refreshInfoNode();
-
-                    original.refreshInfoNode();
-
-                    removeStickyNode(copy.getStickyChild());
-
-                    final PNode stickyChild = copy.getStickyChild();
-                    if (stickyChild != null) {
-                        stickyChild.setScale(scale * getPrintingResolution());
-                        if (copy.hasSecondStickyChild()) {
-                            copy.getSecondStickyChild().setScale(scale * getPrintingResolution());
-                        }
-                    }
-                }
-            }
-            final Image ret = pc.getCamera().toImage(width, height, new Color(255, 255, 255, 0));
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(ret);
-                }
-            }
-
-            return ret;
-        } catch (final Exception exception) {
-            LOG.error("Error during the creation of an image from features", exception); // NOI18N
-            return null;
-        }
-    }
-
-    /**
-     * Creates an image with given width and height from all features that intersects the printingframe.
-     *
-     * @param   width   desired width of the resulting image
-     * @param   height  desired height of the resulting image
-     *
-     * @return  Image of intersecting features
-     */
-    public Image getFeatureImage(final int width, final int height) {
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("getFeatureImage " + width + "x" + height);                              // NOI18N
-            }
-        }
-        final PrintingFrameListener pfl = ((PrintingFrameListener)getInputListener(PRINTING_AREA_SELECTION));
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("printing rectangle bounds: " + pfl.getPrintingRectangle().getBounds()); // NOI18N
-            }
-        }
-        final PCanvas pc = new PCanvas();
-        pc.setSize(width, height);
-        final List<PNode> list = new ArrayList<PNode>();
-        final Iterator it = featureLayer.getChildrenIterator();
-        while (it.hasNext()) {
-            final PNode p = (PNode)it.next();
-            if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                list.add(p);
-            }
-        }
-
-        /* Prüfe alle Features der Gruppen Layer (welche auch Kinder des Feature-Layers sind)
-         * und füge sie der Liste für alle zum malen anstehenden Features hinzu, wenn - der Gruppen-Layer sichtbar ist
-         * und - das Feature im Druckbereich liegt
-         */
-        final Collection<PLayer> groupLayers = this.featureGrpLayerMap.values();
-        List<PNode> grpMembers;
-        for (final PLayer layer : groupLayers) {
-            if (layer.getVisible()) {
-                grpMembers = layer.getChildrenReference();
-                for (final PNode p : grpMembers) {
-                    if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                        list.add(p);
-                    }
-                }
-            }
-        }
-
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("intersecting feature count: " + list.size()); // NOI18N
-            }
-        }
-        pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
-        final double scale = 1 / pc.getCamera().getViewScale();
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("subPCscale:" + scale);                        // NOI18N
-            }
-        }
-
-        // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-
-        for (final PNode p : list) {
-            if (p instanceof PFeature) {
-                final PFeature original = ((PFeature)p);
-                try {
-                    EventQueue.invokeAndWait(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    original.setInfoNodeExpanded(false);
-
-                                    final PFeature copy = new PFeature(
-                                            original.getFeature(),
-                                            getWtst(),
-                                            0,
-                                            0,
-                                            MappingComponent.this,
-                                            true);
-                                    pc.getLayer().addChild(copy);
-
-                                    copy.setTransparency(original.getTransparency());
-                                    copy.setStrokePaint(original.getStrokePaint());
-
-                                    copy.addInfoNode();
-                                    copy.setInfoNodeExpanded(false);
-
-                                    // Wenn mal irgendwas wegen Querformat kommt :
-                                    if (copy.getStickyChild() != null) {
-                                        copy.getStickyChild().setScale(scale * getPrintingResolution());
-                                    }
-                                } catch (final Exception t) {
-                                    LOG.error("Fehler beim erstellen des Featureabbildes", t); // NOI18N
-                                }
-                            }
-                        });
-                } catch (final Exception t) {
-                    LOG.error("Fehler beim erstellen des Featureabbildes", t);                 // NOI18N
-                    return null;
-                }
-            }
-        }
-        return pc.getCamera().toImage(width, height, new Color(255, 255, 255, 0));
-    }
-
-    /**
      * Adds the given PCamera to the PRoot of this MappingComponent.
      *
      * @param  cam  PCamera-object
@@ -732,9 +576,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  pn  PNode-object
      */
-    public void addStickyNode(final PNode pn) {
+    public void addStickyNode(final PSticky pn) {
         // if(DEBUG)log.debug("addStickyNode:" + pn);
-        stickyPNodes.add(pn);
+        if (pn != null) {
+            stickyPNodes.add(pn);
+        }
     }
 
     /**
@@ -742,16 +588,76 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  pn  PNode that should be removed
      */
-    public void removeStickyNode(final PNode pn) {
+    public void removeStickyNode(final PSticky pn) {
         stickyPNodes.remove(pn);
     }
 
     /**
      * DOCUMENT ME!
+     */
+    public void adjustMapForPrintingTemplates() {
+        final int delayTime = 500;
+        printingTemplateZoomTime = System.currentTimeMillis() + delayTime;
+        if ((printingTemplateZoomThread == null) || !printingTemplateZoomThread.isAlive()) {
+            printingTemplateZoomThread = new Thread("PrintFrameListener adjustMap()") {
+
+                    @Override
+                    public void run() {
+                        while (System.currentTimeMillis() < printingTemplateZoomTime) {
+                            try {
+                                sleep(100);
+                                // log.debug("WAIT");
+                            } catch (InterruptedException iex) {
+                            }
+                        }
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    ensureVisibilityOfPrintingTemplates();
+                                }
+                            });
+                    }
+                };
+            printingTemplateZoomThread.setPriority(Thread.NORM_PRIORITY);
+            CismetThreadPool.execute(printingTemplateZoomThread);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void ensureVisibilityOfPrintingTemplates() {
+        if (!isFixedMapExtent()) {
+            zoomToAFeatureCollection(getSpecialFeatureCollection(PrintTemplateFeature.class),
+                false,
+                isFixedMapScale());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   <T>           DOCUMENT ME!
+     * @param   featureclass  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public <T extends Feature> Collection<T> getSpecialFeatureCollection(final Class<T> featureclass) {
+        final ArrayList<T> fc = new ArrayList<>();
+        for (final Feature f : getFeatureCollection().getAllFeatures()) {
+            if (featureclass.isInstance(f)) {
+                fc.add((T)f);
+            }
+        }
+        return fc;
+    }
+    /**
+     * DOCUMENT ME!
      *
      * @return  Vector<PNode> with all sticky PNodes
      */
-    public List<PNode> getStickyNodes() {
+    public List<PSticky> getStickyNodes() {
         return stickyPNodes;
     }
 
@@ -760,17 +666,46 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  n  PNode to rescale
      */
-    public void rescaleStickyNode(final PNode n) {
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(new Runnable() {
+    public void rescaleStickyNode(final PSticky n) {
+        if (rescaleStickyNodesEnabled && (n != null)) {
+            if (!EventQueue.isDispatchThread()) {
+                EventQueue.invokeLater(new Thread("MappingComponent rescaleStickyNode()") {
 
-                    @Override
-                    public void run() {
-                        rescaleStickyNodeWork(n);
-                    }
-                });
-        } else {
-            rescaleStickyNodeWork(n);
+                        @Override
+                        public void run() {
+                            rescaleStickyNodeWork(n);
+                        }
+                    });
+            } else {
+                rescaleStickyNodeWork(n);
+            }
+        }
+    }
+
+    /**
+     * Calls private method rescaleStickyNodeWork(node) to rescale the sticky PNode. Forces the execution to the EDT.
+     *
+     * @param  nodes  n PNode to rescale
+     */
+    public void rescaleStickyNodes(final List<PSticky> nodes) {
+        if ((nodes != null) && !nodes.isEmpty()) {
+            if (!EventQueue.isDispatchThread()) {
+                EventQueue.invokeLater(new Thread("MappingComponent rescaleStickyNodes()") {
+
+                        @Override
+                        public void run() {
+                            final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                            for (final PSticky node : nodesCopy) {
+                                rescaleStickyNodeWork(node);
+                            }
+                        }
+                    });
+            } else {
+                final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                for (final PSticky node : nodesCopy) {
+                    rescaleStickyNodeWork(node);
+                }
+            }
         }
     }
 
@@ -793,28 +728,49 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getStickyFeatureCorrectionFactor() {
+        return stickyFeatureCorrectionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  stickyFeatureCorrectionFactor  DOCUMENT ME!
+     */
+    public void setStickyFeatureCorrectionFactor(final double stickyFeatureCorrectionFactor) {
+        this.stickyFeatureCorrectionFactor = stickyFeatureCorrectionFactor;
+    }
+
+    /**
      * Sets the scale of the given PNode to the value of the camera scale.
      *
      * @param  n  PNode to rescale
      */
-    private void rescaleStickyNodeWork(final PNode n) {
+    private void rescaleStickyNodeWork(final PSticky n) {
         final double s = MappingComponent.this.getCamera().getViewScale();
-        n.setScale(1 / s);
+        n.setScale(getStickyFeatureCorrectionFactor() / s);
     }
 
     /**
      * Rescales all nodes inside the StickyNode-vector.
      */
     public void rescaleStickyNodes() {
-        final List<PNode> stickyNodeCopy = new ArrayList<PNode>(getStickyNodes());
-        for (final PNode each : stickyNodeCopy) {
-            if ((each instanceof PSticky) && each.getVisible()) {
-                rescaleStickyNode(each);
-            } else {
-                if ((each instanceof PSticky) && (each.getParent() == null)) {
+        if (rescaleStickyNodesEnabled) {
+            final List<PSticky> stickyNodeList = new ArrayList<PSticky>();
+            final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
+            for (final PSticky each : stickyNodeCopy) {
+                if ((each instanceof PSticky) && each.getVisible()) {
+                    stickyNodeList.add(each);
+                } else if ((each.getParent() == null)) {
                     removeStickyNode(each);
                 }
             }
+
+            rescaleStickyNodes(stickyNodeList);
         }
     }
 
@@ -913,7 +869,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getCamera().addLayer(counter++, tmpFeatureLayer);
         getCamera().addLayer(counter++, rubberBandLayer);
         getCamera().addLayer(counter++, dragPerformanceImproverLayer);
-        getCamera().addLayer(counter++, printingFrameLayer);
     }
 
     /**
@@ -921,25 +876,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void initInputListener() {
         inputEventListener.put(MOTION, new SimpleMoveListener(this));
-        inputEventListener.put(CUSTOM_FEATUREACTION, new CustomFeatureActionListener(this));
+        inputEventListener.put(PERPENDICULAR_INTERSECTION, new PerpendicularIntersectionListener(this));
         inputEventListener.put(ZOOM, new RubberBandZoomListener());
         inputEventListener.put(PAN, new PanAndMousewheelZoomListener());
         inputEventListener.put(SELECT, new SelectionListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
+        inputEventListener.put(FEATURE_INFO_MULTI_GEOM, new GetFeatureInfoMultiGeomListener());
         inputEventListener.put(CREATE_SEARCH_POLYGON, new MetaSearchCreateSearchGeometryListener(this));
         inputEventListener.put(CREATE_SIMPLE_GEOMETRY, new CreateSimpleGeometryListener(this));
 
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
         inputEventListener.put(RAISE_POLYGON, new RaisePolygonListener(this));
-        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener());
+        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener(this));
         inputEventListener.put(ATTACH_POLYGON_TO_ALPHADATA, new AttachFeatureListener());
         inputEventListener.put(JOIN_POLYGONS, new JoinPolygonsListener());
         inputEventListener.put(SPLIT_POLYGON, new SplitPolygonListener(this));
         inputEventListener.put(LINEAR_REFERENCING, new CreateLinearReferencedMarksListener(this));
         inputEventListener.put(MEASUREMENT, new MeasurementListener(this));
-        inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingFrameListener(this));
+        // inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingFrameListener(this));
+        inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingTemplatePreviewListener(this));
         inputEventListener.put(CUSTOM_FEATUREINFO, new CustomFeatureInfoListener());
         inputEventListener.put(OVERVIEW, new OverviewModeListener());
     }
@@ -959,9 +916,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void initCursors() {
         putCursor(SELECT, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(PERPENDICULAR_INTERSECTION, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(ZOOM, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(PAN, new Cursor(Cursor.HAND_CURSOR));
         putCursor(FEATURE_INFO, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(FEATURE_INFO_MULTI_GEOM, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(CREATE_SEARCH_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));
 
         putCursor(MOVE_POLYGON, new Cursor(Cursor.HAND_CURSOR));
@@ -983,32 +942,54 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     /**
      * Shows the printingsetting-dialog that resets the interactionmode after printing.
-     *
-     * @param  oldInteractionMode  String-object
      */
-    public void showPrintingSettingsDialog(final String oldInteractionMode) {
-        printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
+    public void showPrintingSettingsDialog() {
+        showPrintingSettingsDialog(false);
+    }
 
-        printingSettingsDialog.setInteractionModeAfterPrinting(oldInteractionMode);
+    /**
+     * Shows the printingsetting-dialog that resets the interactionmode after printing.
+     *
+     * @param  chooseFile  DOCUMENT ME!
+     */
+    public void showPrintingSettingsDialog(final boolean chooseFile) {
+        printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
+        printingSettingsDialog.setChooseFileName(chooseFile);
         StaticSwingTools.showDialog(printingSettingsDialog);
     }
 
     /**
      * Shows the printing-dialog that resets the interactionmode after printing.
-     *
-     * @param  oldInteractionMode  String-object
      */
-    public void showPrintingDialog(final String oldInteractionMode) {
+    public void showPrintingDialog() {
         setPointerAnnotationVisibility(false);
         printingDialog = printingDialog.cloneWithNewParent(true, this);
 
         try {
-            printingDialog.setInteractionModeAfterPrinting(oldInteractionMode);
             printingDialog.startLoading();
             StaticSwingTools.showDialog(printingDialog);
         } catch (final Exception e) {
             LOG.error("Fehler beim Anzeigen des Printing Dialogs", e); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void printingAction() {
+        showPrintingSettingsDialog();
+    }
+
+    /**
+     * backward compatibility function.
+     *
+     * @param       ignoredHandlerString  DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
+     */
+
+    public void showPrintingSettingsDialog(final String ignoredHandlerString) {
+        showPrintingSettingsDialog();
     }
 
     /**
@@ -1041,9 +1022,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.warn("Fehler bei removeAllCHildren", e); // NOI18N
             }
             setPointerAnnotationVisibility(false);
-            if (getPrintingFrameLayer().getChildrenCount() > 1) {
-                getPrintingFrameLayer().removeAllChildren();
-            }
+
             if (this.interactionMode != null) {
                 if (interactionMode.equals(FEATURE_INFO)) {
                     ((GetFeatureInfoClickDetectionListener)this.getInputListener(interactionMode)).getPInfo()
@@ -1067,7 +1046,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     featureCollection.unselectAll();
                 }
                 if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEAR_REFERENCING)
-                                || interactionMode.equals(SPLIT_POLYGON))
+                                || interactionMode.equals(SPLIT_POLYGON) || interactionMode.equals(MOVE_POLYGON)
+                                || interactionMode.equals(PRINTING_AREA_SELECTION))
                             && (this.readOnly == false)) {
                     featureSelectionChanged(null);
                 }
@@ -1124,19 +1104,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
             if ((MappingComponent.this.getSize().height >= 0) && (MappingComponent.this.getSize().width >= 0)) {
                 if (mappingModel != null) {
-                    if (DEBUG) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("BB:" + MappingComponent.this.currentBoundingBox); // NOI18N
-                        }
-                    }
-                    if (MappingComponent.this.currentBoundingBox == null) {
-                        LOG.error("currentBoundingBox is null");                         // NOI18N
-                        currentBoundingBox = getCurrentBoundingBox();
-                    }
-
                     // rescale map
                     if (historyModel.getCurrentElement() != null) {
-                        final PBounds bounds = (PBounds)historyModel.getCurrentElement();
+                        PBounds bounds = (PBounds)historyModel.getCurrentElement();
+                        if (bounds == null) {
+                            bounds = initialBoundingBox.getPBounds(wtst);
+                        }
                         if (bounds.getWidth() < 0) {
                             bounds.setSize(bounds.getWidth() * (-1), bounds.getHeight());
                         }
@@ -1172,16 +1145,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
                 if ((MappingComponent.this.getSize().height >= 0) && (MappingComponent.this.getSize().width >= 0)) {
                     if (mappingModel != null) {
-                        if (DEBUG) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("BB:" + MappingComponent.this.currentBoundingBox);     // NOI18N
-                            }
+                        final PBounds bounds = (PBounds)historyModel.getCurrentElement();
+                        if (bounds != null) {
+                            gotoBoundsWithoutHistory(bounds);
+                        } else {
+                            gotoBoundsWithoutHistory(getInitialBoundingBox().getPBounds(wtst));
                         }
-                        if (MappingComponent.this.currentBoundingBox == null) {
-                            LOG.error("currentBoundingBox is null");                             // NOI18N
-                            currentBoundingBox = getCurrentBoundingBox();
-                        }
-                        gotoBoundsWithoutHistory((PBounds)historyModel.getCurrentElement());
 
                         // move internal widgets
                         for (final String internalWidget : this.internalWidgets.keySet()) {
@@ -1217,6 +1186,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } else {
             LOG.warn("in syncSelectedObjectPresenter(" + i + "): selectedFeature==null"); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public BoundingBox getInitialBoundingBox() {
+        if (initialBoundingBox == null) {
+            return mappingModel.getInitialBoundingBox();
+        } else {
+            return initialBoundingBox;
         }
     }
 
@@ -1267,7 +1249,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         try {
             PNode p = new PNode();
             if (mapService instanceof RasterMapService) {
-                LOG.info("adding RasterMapService '" + mapService + "' " + mapService.getClass().getSimpleName() + ")"); // NOI18N
+                LOG.info("adding RasterMapService '" + mapService + "' " + mapService.getClass().getSimpleName()
+                            + ")"); // NOI18N
                 if (mapService.getPNode() instanceof XPImage) {
                     p = (XPImage)mapService.getPNode();
                 } else {
@@ -1278,9 +1261,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         position,
                         p,
                         (ServiceLayer)mapService));
+            } else if (mapService instanceof ModeLayer) {
+                // skip
+                return;
+                    // a addMapService is called via a fireLAyerAdded when a Mode is selected
             } else {
                 LOG.info("adding FeatureMapService '" + mapService + "' (" + mapService.getClass().getSimpleName()
-                            + ")");                                                                                      // NOI18N
+                            + ")"); // NOI18N
                 p = new PLayer();
                 mapService.setPNode(p);
 
@@ -1312,15 +1299,51 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             LOG.error("FeatureMapService(" + mapService
                                         + "): The documentProgressListener is already in use by request '"
                                         + this.documentProgressListener.getRequestId()
-                                        + ", document progress cannot be tracked");                                      // NOI18N
+                                        + ", document progress cannot be tracked");      // NOI18N
                         } else {
                             if (DEBUG) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("FeatureMapService(" + mapService + "): adding documentProgressListener"); // NOI18N
+                                    LOG.debug("FeatureMapService(" + mapService
+                                                + "): adding documentProgressListener"); // NOI18N
                                 }
                             }
                             documentFeatureService.addRetrievalListener(this.documentProgressListener);
                         }
+                    }
+                }
+
+                if (JDBCFeatureService.class.isAssignableFrom(mapService.getClass())) {
+                    if (DEBUG) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("FeatureMapService(" + mapService
+                                        + "): isDocumentFeatureService, checking document size"); // NOI18N
+                        }
+                    }
+                    final JDBCFeatureService documentFeatureService = (JDBCFeatureService)mapService;
+
+                    if (this.documentProgressListener == null) {
+                        if (DEBUG) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("FeatureMapService(" + mapService
+                                            + "): lazy instantiation of documentProgressListener"); // NOI18N
+                            }
+                        }
+                        this.documentProgressListener = new DocumentProgressListener();
+                    }
+
+                    if (this.documentProgressListener.getRequestId() != -1) {
+                        LOG.error("FeatureMapService(" + mapService
+                                    + "): The documentProgressListener is already in use by request '"
+                                    + this.documentProgressListener.getRequestId()
+                                    + ", document progress cannot be tracked");      // NOI18N
+                    } else {
+                        if (DEBUG) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("FeatureMapService(" + mapService
+                                            + "): adding documentProgressListener"); // NOI18N
+                            }
+                        }
+                        documentFeatureService.addRetrievalListener(this.documentProgressListener);
                     }
                 }
 
@@ -1365,8 +1388,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 });
         }
         mappingModel = mm;
-        currentBoundingBox = mm.getInitialBoundingBox();
-        final Runnable r = new Runnable() {
+//        currentBoundingBox = mm.getInitialBoundingBox();
+        final Runnable r = new Thread("MappingComponent setMappingModel()") {
 
                 @Override
                 public void run() {
@@ -1378,7 +1401,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final Iterator it = rs.keySet().iterator();
                     while (it.hasNext()) {
                         final Object key = it.next();
-                        final int rsi = ((Integer)key).intValue();
+                        final int rsi = (Integer)key;
                         final Object o = rs.get(key);
                         if (o instanceof MapService) {
                             addMapService(((MapService)o), rsi);
@@ -1394,7 +1417,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "MappingComponent adjustLayers()"));
     }
 
     /**
@@ -1459,7 +1482,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 + toX + ", toY=" + toY); // NOI18N
                 }
             }
-            final Thread timer = new Thread() {
+            final Thread timer = new Thread("MappingComponent timer") {
 
                     @Override
                     public void run() {
@@ -1468,7 +1491,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 sleep(sleepy);
                             } catch (final Exception iex) {
                             }
-                            EventQueue.invokeLater(new Runnable() {
+                            EventQueue.invokeLater(new Thread("MappingComponent updateBounds") {
 
                                     @Override
                                     public void run() {
@@ -1486,7 +1509,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                             if ((c.getBounds().getY() == toY) && (c.getBounds().getX() == toX)) {
                                 if (hideAfterAnimation) {
-                                    EventQueue.invokeLater(new Runnable() {
+                                    EventQueue.invokeLater(new Thread("MappingComponent hide") {
 
                                             @Override
                                             public void run() {
@@ -1564,6 +1587,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     /**
      * Removes an existing internal widget from the map.
      *
+     * <p><b>Note:</b> the internalFrame will be disposed and then removed from the mappingComponent. This has to be
+     * done because of a Java Bug, as otherwise a memory leak will be created. See
+     * https://bugs.openjdk.java.net/browse/JDK-8041452 for a similar problem.</p>
+     *
      * @param   name  name of the widget to be removed
      *
      * @return  {@code true} id the widget was found and removed, {@code false} otherwise
@@ -1577,6 +1604,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             return false;
         }
 
+        this.getInternalWidget(name).dispose();
         this.remove(this.getInternalWidget(name));
         this.internalWidgets.remove(name);
         this.internalWidgetPositions.remove(name);
@@ -1638,12 +1666,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 } else {
                     toY = positionY - internalWidget.getHeight() - 1;
                 }
+            } else if (isHigher) {
+                toY = getHeight() + 1;
             } else {
-                if (isHigher) {
-                    toY = getHeight() + 1;
-                } else {
-                    toY = positionY + internalWidget.getHeight() + 1;
-                }
+                toY = positionY + internalWidget.getHeight() + 1;
             }
 
             internalWidget.setBounds(
@@ -1780,7 +1806,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             CismapBroker.getInstance().fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_RESET, this));
         }
         if (!locked) {
-            final Runnable r = new Runnable() {
+            final Runnable r = new Thread("MappingComponent queryServicesWithoutHistory()") {
 
                     @Override
                     public void run() {
@@ -1830,7 +1856,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         }
                     }
                 };
-            CismetThreadPool.execute(r);
+            CismetThreadPool.execute(new Thread(r, "MappingComponent queryServicesWithoutHistory()"));
         }
     }
 
@@ -1851,7 +1877,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.debug("queryServicesIndependentFromMap (" + width + "x" + height + ")"); // NOI18N
             }
         }
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("Mappingcompoenent queryServicesIndependentFromMap()") {
 
                 @Override
                 public void run() {
@@ -1928,7 +1954,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(t);
     }
 
     /**
@@ -1975,7 +2001,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             bb.setX2(x2);
             bb.setY2(y2);
         }
-        handleMapService(position, service, getWidth(), getHeight(), bb, forced);
+        if ((getWidth() > 0) && (getHeight() > 0)) {
+            // if width or height are negative or zero, a wms request makes no sense
+            handleMapService(position, service, getWidth(), getHeight(), bb, forced);
+        }
     }
 
     /**
@@ -2004,7 +2033,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             synchronized (serviceFuturesMap) {
                 final Future<?> sf = serviceFuturesMap.get(rs);
                 if ((sf == null) || sf.isDone()) {
-                    final Runnable serviceCall = new Runnable() {
+                    final Runnable serviceCall = new Thread("handleMapService") {
 
                             @Override
                             public void run() {
@@ -2028,6 +2057,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     synchronized (serviceFuturesMap) {
                         serviceFuturesMap.put(rs, CismetThreadPool.submit(serviceCall));
                     }
+                } else {
+                    LOG.warn("The wms request of the service \"" + rs.toString()
+                                + "\" was ignored. This can lead to a wrong "
+                                + "service image in the map and should not happen. The ignored bbox was "
+                                + bb.toString());
                 }
             }
         } else {
@@ -2156,6 +2190,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  the current view bounds
+     */
+    public Rectangle2D getViewBounds() {
+        return newViewBounds;
+    }
+
+    /**
      * Will be called if the selection of features changes. It selects the PFeatures connected to the selected features
      * of the featurecollectionevent and moves them to the front. Also repaints handles at the end.
      *
@@ -2165,6 +2208,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
         final Collection allChildren = featureLayer.getChildrenReference();
         final ArrayList<PFeature> all = new ArrayList<PFeature>();
+        final SelectionListener sl = (SelectionListener)getInputEventListener().get(MappingComponent.SELECT);
+        boolean selectionChangedBySelectionListener = false;
+
+        if (sl != null) {
+            selectionChangedBySelectionListener = sl.isSelectionInProgress();
+        }
 
         for (final Object o : allChildren) {
             if (o instanceof PFeature) {
@@ -2176,9 +2225,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
 
 //        final Collection<PFeature> all = featureLayer.getChildrenReference();
-
         for (final PFeature f : all) {
             f.setSelected(false);
+            if ((sl != null) && !selectionChangedBySelectionListener) {
+                sl.removeSelectedFeature(f);
+            }
         }
         Collection<Feature> c;
         if (fce != null) {
@@ -2207,7 +2258,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                     feature.setSelected(true);
                     feature.moveToFront();
-
+                    if ((sl != null) && !selectionChangedBySelectionListener) {
+                        sl.addSelectedFeature(feature);
+                    }
                     // Fuer den selectedObjectPresenter (Eigener PCanvas)
                     syncSelectedObjectPresenter(1000);
                 } else {
@@ -2257,12 +2310,34 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 if (node != null) {
                     node.syncGeometry();
                     node.visualize();
+                    node.refreshDesign(); // without this, sld styled points will not be shown properly
                     node.resetInfoNodePosition();
                     node.refreshInfoNode();
                     repaint();
                 }
             }
         }
+    }
+
+    /**
+     * Refresh the info nodes of all features.
+     *
+     * <p>The node names are possibly changed after adding or removing a feature. See <code>
+     * DefaultFeatureCollection.checkForAndCorrectDoubleNaming()</code></p>
+     */
+    private void refreshAllInfoNodesRequested() {
+        EventQueue.invokeLater(new Thread("Refresh pfeature names") {
+
+                @Override
+                public void run() {
+                    for (final PFeature f : new ArrayList<PFeature>(pFeatureHM.values())) {
+                        if (f != null) {
+                            f.refreshName();
+                        }
+                    }
+                    repaint();
+                }
+            });
     }
 
     /**
@@ -2325,6 +2400,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         removeFeatures(fce.getEventFeatures());
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
         showHandles(false);
+        refreshAllInfoNodesRequested();
+        EventQueue.invokeLater(new Thread("MappingComponent featuresRemoved()") {
+
+                @Override
+                public void run() {
+                    memUndo.featuresRemoved(fce.getEventFeatures());
+                    memRedo.featuresRemoved(fce.getEventFeatures());
+                }
+            });
     }
 
     /**
@@ -2391,8 +2475,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * public void showFeatureCollection(Feature[] features) { com.vividsolutions.jts.geom.Envelope
      * env=computeFeatureEnvelope(features); showFeatureCollection(features,env); } public void
      * showFeatureCollection(Feature[] f,com.vividsolutions.jts.geom.Envelope featureEnvelope) { selectedFeature=null;
-     * handleLayer.removeAllChildren(); //setRasterServiceLayerImagesVisibility(false); Envelope eSquare=null; HashSet<Feature>
-     * featureSet=new HashSet<Feature>(); featureSet.addAll(holdFeatures);
+     * handleLayer.removeAllChildren(); //setRasterServiceLayerImagesVisibility(false); Envelope eSquare=null;
+     * HashSet<Feature> featureSet=new HashSet<Feature>(); featureSet.addAll(holdFeatures);
      * featureSet.addAll(java.util.Arrays.asList(f)); Feature[] features=featureSet.toArray(new Feature[0]);
      * pFeatureHM.clear(); addFeaturesToMap(features); zoomToFullFeatureCollectionBounds(); }.
      *
@@ -2405,14 +2489,124 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             layer.setVisible(visible);
         }
     }
+
+    /**
+     * shows the given feature on the map (in the highlighting layer). The color of the feature is 40 percent darker as
+     * the style defines it.
+     *
+     * @param  feature   the feature that should be shown
+     * @param  duration  the feature will be shown for this duration (in ms)
+     */
+    public void highlightFeature(final Feature feature, final int duration) {
+        final double local_clip_offset_y = clip_offset_y;
+        final double local_clip_offset_x = clip_offset_x;
+        final PFeature p = new PFeature(
+                feature,
+                getWtst(),
+                local_clip_offset_x,
+                local_clip_offset_y,
+                MappingComponent.this);
+        Paint paint = p.getPaint();
+        Color color = Color.BLACK;
+
+        if (paint == null) {
+            paint = p.getStrokePaint();
+        }
+
+        if (paint instanceof Color) {
+            color = toHighlightingColor((Color)paint);
+        }
+
+        highlightFeature(feature, duration, color);
+    }
+
+    /**
+     * shows the given feature on the map (in the highlighting layer).
+     *
+     * @param  feature         the feature that should be shown
+     * @param  duration        the feature will be shown for this duration (in ms)
+     * @param  highlightColor  the color of the highlighted feature
+     */
+    public void highlightFeature(final Feature feature, final int duration, final Color highlightColor) {
+        final double local_clip_offset_y = clip_offset_y;
+        final double local_clip_offset_x = clip_offset_x;
+        final PFeature p = new PFeature(
+                feature,
+                getWtst(),
+                local_clip_offset_x,
+                local_clip_offset_y,
+                MappingComponent.this);
+
+        highlightingLayer.addChild(p);
+
+        if (highlightColor != null) {
+            if (p.getStrokePaint() != null) {
+                p.setStrokePaint(highlightColor);
+            }
+            if (p.getPaint() != null) {
+                p.setPaint(highlightColor);
+            }
+        }
+
+        p.moveToFront();
+
+        com.vividsolutions.jts.geom.Point centroid = feature.getGeometry().getCentroid();
+        centroid = CrsTransformer.transformToCurrentCrs(centroid);
+        currentCrosshairPoint = new Coordinate(centroid.getX(), centroid.getY());
+        crossHairPoint(currentCrosshairPoint, 2);
+        final Coordinate newCrosshairPoint = currentCrosshairPoint;
+
+        final Timer t = new Timer(duration, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        highlightingLayer.removeChild(p);
+                        if (newCrosshairPoint.equals(currentCrosshairPoint)) {
+                            crossHairPoint((Coordinate)null);
+                        }
+                    }
+                });
+        t.setRepeats(false);
+        t.start();
+    }
+
+    /**
+     * makes to given color 40 percent darker.
+     *
+     * @param   c  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Color toHighlightingColor(final Color c) {
+        int red = (int)(c.getRed() - 70);
+        int green = (int)(c.getGreen() - 70);
+        int blue = (int)(c.getBlue() - 70);
+
+        if (red < 0) {
+            red = 0;
+        }
+        if (green < 0) {
+            green = 0;
+        }
+        if (blue < 0) {
+            blue = 0;
+        }
+
+        return new Color(red, green, blue);
+    }
+
     /**
      * is called when new feature is added to FeatureCollection.
      *
-     * @param  features  DOCUMENT ME!
+     * @param   features  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public void addFeaturesToMap(final Feature[] features) {
+    public Collection<PFeature> addFeaturesToMap(final Feature[] features) {
         final double local_clip_offset_y = clip_offset_y;
         final double local_clip_offset_x = clip_offset_x;
+
+        final ArrayList<PFeature> newPFeatures = new ArrayList<>();
 
         /// Hier muss der layer bestimmt werdenn
         for (int i = 0; i < features.length; ++i) {
@@ -2424,6 +2618,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     local_clip_offset_x,
                     local_clip_offset_y,
                     MappingComponent.this);
+            newPFeatures.add(p);
+            if (feature instanceof ChildNodesProvider) {
+                p.addChildren(((ChildNodesProvider)feature).provideChildren(p));
+            }
             try {
                 if (feature instanceof StyledFeature) {
                     p.setTransparency(((StyledFeature)(feature)).getTransparency());
@@ -2431,7 +2629,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     p.setTransparency(cismapPrefs.getLayersPrefs().getAppFeatureLayerTranslucency());
                 }
 
-                EventQueue.invokeLater(new Runnable() {
+                EventQueue.invokeLater(new Thread("MappingCompoenent addFeaturesToMap()") {
 
                         @Override
                         public void run() {
@@ -2471,7 +2669,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 if (feature.getGeometry() != null) {
                     pFeatureHM.put(p.getFeature(), p);
                     final int ii = i;
-                    EventQueue.invokeLater(new Runnable() {
+                    EventQueue.invokeLater(new Thread("MappingComponent moveToFront after adding") {
 
                             @Override
                             public void run() {
@@ -2485,8 +2683,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
         }
+        refreshAllInfoNodesRequested();
 
-        EventQueue.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Thread("MappingComponent movetofront search feature") {
 
                 @Override
                 public void run() {
@@ -2495,7 +2694,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     fireFeaturesAddedToMap(Arrays.asList(features));
 
                     // SuchFeatures in den Vordergrund stellen
-                    for (final Feature feature : featureCollection.getAllFeatures()) {
+                    for (final Feature feature : new ArrayList<Feature>(featureCollection.getAllFeatures())) {
                         if (feature instanceof SearchFeature) {
                             final PFeature pFeature = pFeatureHM.get(feature);
                             pFeature.moveToFront();
@@ -2522,6 +2721,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
 
         showHandles(false);
+        return newPFeatures;
     }
 
     /**
@@ -2816,7 +3016,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  withHistory  should the zoomaction be undoable
      * @param  fixedScale   fixedScale
      */
-    public void zoomToAFeatureCollection(final Collection<Feature> collection,
+    public void zoomToAFeatureCollection(final Collection<? extends Feature> collection,
             final boolean withHistory,
             final boolean fixedScale) {
         if (DEBUG) {
@@ -2842,16 +3042,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                     first = false;
                 }
-            } else {
-                if (f.getGeometry() != null) {
-                    Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
-                                mappingModel.getSrs().getCode())
-                                .getEnvelope();
-                    if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
-                        geometry = geometry.buffer(((Bufferable)f).getBuffer() + 0.001);
-                    }
-                    g = g.getEnvelope().union(geometry);
+            } else if (f.getGeometry() != null) {
+                Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
+                            mappingModel.getSrs().getCode()).getEnvelope();
+                if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
+                    geometry = geometry.buffer(((Bufferable)f).getBuffer() + 0.001);
                 }
+                g = g.getEnvelope().union(geometry);
             }
         }
 
@@ -2900,12 +3097,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         // are there features selected?
         if (featureCollection.getSelectedFeatures().size() > 0) {
             // DANGER Mehrfachzeichnen von Handles durch parallelen Aufruf
-            final Runnable handle = new Runnable() {
+            final Runnable handle = new Thread("MappingComponent showHandles()") {
 
                     @Override
                     public void run() {
                         // alle bisherigen Handles entfernen
-                        EventQueue.invokeLater(new Runnable() {
+                        EventQueue.invokeLater(new Thread("MappingComponent showHandles(animated)") {
 
                                 @Override
                                 public void run() {
@@ -2925,6 +3122,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         }
                         if (featureCollection.areFeaturesEditable()
                                     && (getInteractionMode().equals(SELECT)
+                                        || getInteractionMode().equals(MOVE_POLYGON)
+                                        || getInteractionMode().equals(PRINTING_AREA_SELECTION)
                                         || getInteractionMode().equals(LINEAR_REFERENCING)
                                         || getInteractionMode().equals(PAN)
                                         || getInteractionMode().equals(ZOOM)
@@ -2936,18 +3135,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
-                                        if (pFeatureHM.get(selectedFeature) != null) {
-                                            // manipulates gui -> edt
-                                            EventQueue.invokeLater(new Runnable() {
+                                        // manipulates gui -> edt
+                                        EventQueue.invokeLater(new Thread("MappingComponent addRotationHandles") {
 
-                                                    @Override
-                                                    public void run() {
+                                                @Override
+                                                public void run() {
+                                                    if ((pFeatureHM.get(selectedFeature) != null)
+                                                                && pFeatureHM.get(selectedFeature).getVisible()) {
                                                         pFeatureHM.get(selectedFeature).addRotationHandles(handleLayer);
+                                                    } else {
+                                                        LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null"); // NOI18N
                                                     }
-                                                });
-                                        } else {
-                                            LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null"); // NOI18N
-                                        }
+                                                }
+                                            });
                                     }
                                 }
                             } else {
@@ -2955,9 +3155,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature != null) && selectedFeature.isEditable()) {
-                                        if (pFeatureHM.get(selectedFeature) != null) {
+                                        if ((pFeatureHM.get(selectedFeature) != null)
+                                                    && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
-                                            EventQueue.invokeLater(new Runnable() {
+                                            EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
 
                                                     @Override
                                                     public void run() {
@@ -2985,10 +3186,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     LOG.debug("showHandles", new CurrentStackTrace()); // NOI18N
                 }
             }
-            CismetThreadPool.execute(handle);
+            CismetThreadPool.execute(new Thread(handle, "MappingCompoenent showHandles()"));
         } else {
             // alle bisherigen Handles entfernen
-            EventQueue.invokeLater(new Runnable() {
+            EventQueue.invokeLater(new Thread("MappingComponent removeAllChildren") {
 
                     @Override
                     public void run() {
@@ -3202,6 +3403,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void setSnappingEnabled(final boolean snappingEnabled) {
         this.snappingEnabled = snappingEnabled;
         setVisualizeSnappingEnabled(snappingEnabled);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSnappingOnLineEnabled() {
+        return snappingOnLineEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappingOnLineEnabled  DOCUMENT ME!
+     */
+    public void setSnappingOnLineEnabled(final boolean snappingOnLineEnabled) {
+        this.snappingOnLineEnabled = snappingOnLineEnabled;
     }
 
     /**
@@ -3581,7 +3800,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  internalLayerWidgetAvailable  true, if available
      */
-
     @Deprecated
     public void setInternalLayerWidgetAvailable(final boolean internalLayerWidgetAvailable) {
         if (!internalLayerWidgetAvailable && (this.getInternalWidget(LAYERWIDGET) != null)) {
@@ -3618,6 +3836,21 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 CismapBroker.getInstance()
                         .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, rasterService));
             }
+
+            if (rasterService instanceof FeatureAwareRasterService) {
+                final List<Feature> lf = new ArrayList<Feature>();
+                for (final Feature f : getFeatureCollection().getAllFeatures()) {
+                    if (f instanceof RasterLayerSupportedFeature) {
+                        final RasterLayerSupportedFeature rlsf = (RasterLayerSupportedFeature)f;
+                        if ((rlsf.getSupportingRasterService() != null)
+                                    && rlsf.getSupportingRasterService().equals(rasterService)) {
+                            lf.add(f);
+                        }
+                    }
+                }
+                getFeatureCollection().removeFeatures(lf);
+            }
+
             System.gc();
         } catch (final Exception e) {
             LOG.warn("Fehler bei mapServiceRemoved", e); // NOI18N
@@ -3635,7 +3868,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (mapService instanceof FeatureAwareRasterService) {
             ((FeatureAwareRasterService)mapService).setFeatureCollection(getFeatureCollection());
         }
-        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled()) {
+        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled() && !locked) {
             handleMapService(0, mapService, false);
         }
     }
@@ -3647,18 +3880,35 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public double getCurrentOGCScale() {
         // funktioniert nur bei metrischen SRS's
-        final double h = getCamera().getViewBounds().getHeight() / getHeight();
-        final double w = getCamera().getViewBounds().getWidth() / getWidth();
+
+        final double realWorldWidth = getCamera().getViewBounds().getWidth();
+        final double realWorldHeight = getCamera().getViewBounds().getHeight();
+
+        final double windowWidthInPixel = getWidth();
+        final double windowHeightInPixel = getHeight();
+
+        final double h = realWorldHeight / windowHeightInPixel;
+        final double w = realWorldWidth / windowWidthInPixel;
 
         return Math.sqrt((h * h) + (w * w));
     }
 
     /**
-     * Returns the current BoundingBox.
+     * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
+    @Deprecated
     public BoundingBox getCurrentBoundingBox() {
+        return getCurrentBoundingBoxFromCamera();
+    }
+
+    /**
+     * <p>Returns the current BoundingBox.</p>
+     *
+     * @return  DOCUMENT ME!
+     */
+    public BoundingBox getCurrentBoundingBoxFromCamera() {
         if (fixedBoundingBox != null) {
             return fixedBoundingBox;
         } else {
@@ -3670,22 +3920,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final double y2 = y1 - bounds.height;
 
                 final Crs currentCrs = CismapBroker.getInstance().getSrs();
-                final boolean metric;
-                // FIXME: this is a hack to overcome the "metric" issue for 4326 default srs
-                if (CrsTransformer.getCurrentSrid() == 4326) {
-                    metric = false;
-                } else {
-                    metric = currentCrs.isMetric();
-                }
-
-                currentBoundingBox = new XBoundingBox(x1, y1, x2, y2, currentCrs.getCode(), metric);
-
-                return currentBoundingBox;
+                return new XBoundingBox(x1, y1, x2, y2, currentCrs.getCode(), isInMetricSRS());
             } catch (final Exception e) {
                 LOG.error("cannot create bounding box from current view, return null", e); // NOI18N
 
                 return null;
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isInMetricSRS() {
+        final Crs currentCrs = CismapBroker.getInstance().getSrs();
+        // FIXME: this is a hack to overcome the "metric" issue for 4326 default srs
+        if (CrsTransformer.getCurrentSrid() == 4326) {
+            return false;
+        } else {
+            return currentCrs.isMetric();
         }
     }
 
@@ -3815,11 +4070,23 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  c  coordinate of the crosshair's venue
      */
     public void crossHairPoint(final Coordinate c) {
+        crossHairPoint(c, 1);
+    }
+
+    /**
+     * Paints a crosshair at the delivered coordinate. Calculates a Point from the coordinate and calls
+     * crossHairPoint(Point p) internally.
+     *
+     * @param  c          coordinate of the crosshair's venue
+     * @param  thickness  DOCUMENT ME!
+     */
+    public void crossHairPoint(final Coordinate c, final int thickness) {
         Point p = null;
         if (c != null) {
-            p = new Point((int)wtst.getScreenX(c.x), (int)wtst.getScreenY(c.y));
+            wtst = null;
+            p = new Point((int)getWtst().getScreenX(c.x), (int)getWtst().getScreenY(c.y));
         }
-        crossHairPoint(p);
+        crossHairPoint(p, thickness);
     }
 
     /**
@@ -3828,6 +4095,16 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  p  point of the crosshair's venue
      */
     public void crossHairPoint(final Point p) {
+        crossHairPoint(p, 1);
+    }
+
+    /**
+     * Paints a crosshair at the delivered point.
+     *
+     * @param  p          point of the crosshair's venue
+     * @param  thickness  DOCUMENT ME!
+     */
+    public void crossHairPoint(final Point p, final int thickness) {
         if (p == null) {
             if (crosshairLayer.getChildrenCount() > 0) {
                 crosshairLayer.removeAllChildren();
@@ -3837,19 +4114,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             crosshairLayer.setTransparency(1);
             final PPath lineX = new PPath();
             final PPath lineY = new PPath();
-            lineX.setStroke(new FixedWidthStroke());
+            lineX.setStroke(new CustomFixedWidthStroke(thickness, this));
             lineX.setStrokePaint(new Color(100, 100, 100, 255));
-            lineY.setStroke(new FixedWidthStroke());
+            lineY.setStroke(new CustomFixedWidthStroke(thickness, this));
             lineY.setStrokePaint(new Color(100, 100, 100, 255));
 
             final PBounds current = getCamera().getViewBounds();
-            final PBounds x = new PBounds(PBounds.OUT_LEFT - current.width, p.y, 2 * current.width, 1);
-            final PBounds y = new PBounds(p.x, PBounds.OUT_TOP - current.height, 1, current.height * 2);
+            final PBounds x = new PBounds(current.x, p.y, current.width, 1);
+            final PBounds y = new PBounds(p.x, current.y, 1, current.height);
             lineX.setPathTo(x);
             crosshairLayer.addChild(lineX);
             lineY.setPathTo(y);
             crosshairLayer.addChild(lineY);
         }
+        repaint();
     }
 
     /**
@@ -3879,7 +4157,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         // Position
         final Element currentPosition = new Element("Position"); // NOI18N
-        currentPosition.addContent(currentBoundingBox.getJDOMElement());
+        currentPosition.addContent(getCurrentBoundingBoxFromCamera().getJDOMElement());
         currentPosition.setAttribute("CRS", mappingModel.getSrs().getCode());
         ret.addContent(currentPosition);
 
@@ -3894,6 +4172,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (printingSettingsDialog != null) {
             ret.addContent(printingSettingsDialog.getConfiguration());
         }
+
+        if (CismapBroker.getInstance().getMinOpacityToStayEnabled() != null) {
+            final Element minOpacityToStayEnabled = new Element("minOpacityToStayEnabled");
+
+            minOpacityToStayEnabled.addContent(CismapBroker.getInstance().getMinOpacityToStayEnabled().toString());
+            ret.addContent(minOpacityToStayEnabled);
+        }
+
+        final Element multiFeaturePopupMenuEnabled = new Element("multiFeaturePopupMenuEnabled");
+
+        multiFeaturePopupMenuEnabled.addContent(Boolean.toString(
+                CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()));
+        ret.addContent(multiFeaturePopupMenuEnabled);
 
         // save internal widgets status
         final Element widgets = new Element("InternalWidgets");                                       // NOI18N
@@ -3928,7 +4219,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final Crs s = new Crs((Element)elem);
                     crsList.add(s);
 
-                    if (s.isSelected() && s.isMetric()) {
+                    if (s.isSelected() && (s.isMetric() || s.isDefaultCrs())) {
                         try {
                             if (defaultCrsFound) {
                                 LOG.warn("More than one default CRS is set. "
@@ -4040,6 +4331,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.error("Fehler beim Lesen von Scale", skip); // NOI18N
         }
 
+        try {
+            final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
+
+            if (minOpacity != null) {
+                CismapBroker.getInstance().setMinOpacityToStayEnabled(Float.parseFloat(minOpacity));
+            }
+        } catch (NumberFormatException ex) {
+            LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
+        }
+
+        try {
+            final String multiFeaturePopupMenuEnabled = prefs.getChildText("multiFeaturePopupMenuEnabled");
+
+            if (multiFeaturePopupMenuEnabled != null) {
+                CismapBroker.getInstance()
+                        .setMultiFeaturePopupMenuEnabled(Boolean.parseBoolean(multiFeaturePopupMenuEnabled));
+            }
+        } catch (final NumberFormatException ex) {
+            LOG.error("The MultiFeaturePopupMenu stays disabled, value is not valid", ex); // NOI18N
+        }
+
         // Und jetzt noch die PriningEinstellungen
         initPrintingDialogs();
         printingSettingsDialog.masterConfigure(prefs);
@@ -4060,14 +4372,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             for (final Object elem : crsElements) {
                 if (elem instanceof Element) {
                     final Crs s = new Crs((Element)elem);
-                    // the crs is equals to an other crs, if the code is equal. If a crs has in the
-                    // local configuration file an other name than in the master configuration file,
-                    // the old crs will be removed and the local one should be added to use the
-                    // local name and short name of the crs.
-                    if (crsList.contains(s)) {
-                        crsList.remove(s);
+                    // the crs is equals to an other crs, if the code is equal.
+                    // Only crs, which are not defined in the master configuration file will be added
+                    if (!crsList.contains(s)) {
+                        crsList.add(s);
                     }
-                    crsList.add(s);
                 }
             }
         } catch (final Exception skip) {
@@ -4140,10 +4449,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         || Double.isNaN(b.getY2())) {
                 LOG.warn("BUGFINDER:Es war ein Wert in der BoundingBox NaN. Setze auf HOME"); // NOI18N
 
-                this.currentBoundingBox = getMappingModel().getInitialBoundingBox();
                 final String crsCode = ((pos.getAttribute("CRS") != null) ? pos.getAttribute("CRS").getValue() : null);
                 addToHistory(new PBoundsWithCleverToString(
-                        new PBounds(currentBoundingBox.getPBounds(wtst)),
+                        new PBounds(getMappingModel().getInitialBoundingBox().getPBounds(wtst)),
                         wtst,
                         crsCode));
             } else {
@@ -4173,16 +4481,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     getWtst();
                 }
 
-                this.currentBoundingBox = b;
+                this.initialBoundingBox = b;
+                this.gotoBoundingBox(b, true, true, 0, false);
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("added to History" + b); // NOI18N
+                        LOG.fatal("added to History" + b); // NOI18N
                     }
                 }
             }
         } catch (final Exception ex) {
             LOG.warn("Fehler beim lesen der aktuellen Position", ex); // NOI18N
-            this.currentBoundingBox = getMappingModel().getInitialBoundingBox();
+            this.gotoBoundingBox(getMappingModel().getInitialBoundingBox(), true, true, 0, false);
         }
         if (printingSettingsDialog != null) {
             printingSettingsDialog.configure(prefs);
@@ -4199,6 +4508,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } catch (final Exception ex) {
             LOG.warn("could not enable internal widgets: " + ex, ex);                                    // NOI18N
+        }
+
+        try {
+            final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
+
+            if (minOpacity != null) {
+                CismapBroker.getInstance().setMinOpacityToStayEnabled(Float.parseFloat(minOpacity));
+            }
+        } catch (NumberFormatException ex) {
+            LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
+        }
+
+        try {
+            final String multiFeaturePopupMenuEnabled = prefs.getChildText("multiFeaturePopupMenuEnabled");
+
+            if (multiFeaturePopupMenuEnabled != null) {
+                CismapBroker.getInstance()
+                        .setMultiFeaturePopupMenuEnabled(Boolean.parseBoolean(multiFeaturePopupMenuEnabled));
+            }
+        } catch (final NumberFormatException ex) {
+            LOG.error("The MultiFeaturePopupMenu stays disabled, value is not valid", ex); // NOI18N
         }
     }
 
@@ -4253,7 +4583,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             final boolean scaleToFit,
             final int animationDuration,
             final boolean queryServices) {
-        if (bb != null) {
+        if ((bb != null) && bb.isValid()) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("gotoBoundingBox:" + bb, new CurrentStackTrace()); // NOI18N
@@ -4290,7 +4620,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.warn("gotoBoundingBox: Problem :-( mit getViewTransform"); // NOI18N
             }
             showHandles(true);
-            final Runnable handle = new Runnable() {
+            final Runnable handle = new Thread("MappingComponent gotoBoundingBox()") {
 
                     @Override
                     public void run() {
@@ -4310,16 +4640,14 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             if (queryServices) {
                                 queryServices();
                             }
-                        } else {
-                            if (queryServices) {
-                                queryServicesWithoutHistory();
-                            }
+                        } else if (queryServices) {
+                            queryServicesWithoutHistory();
                         }
                     }
                 };
             CismetThreadPool.execute(handle);
         } else {
-            LOG.warn("Seltsam: die BoundingBox war null", new CurrentStackTrace()); // NOI18N
+            LOG.warn("Seltsam: die BoundingBox war " + ((bb == null) ? "null" : "invalid"), new CurrentStackTrace()); // NOI18N
         }
     }
 
@@ -4359,7 +4687,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @return  DOCUMENT ME!
      */
     public BoundingBox getBoundingBoxFromScale(final double scaleDenominator) {
-        return getScaledBoundingBox(scaleDenominator, getCurrentBoundingBox());
+        return getScaledBoundingBox(scaleDenominator, getCurrentBoundingBoxFromCamera());
     }
 
     /**
@@ -4370,7 +4698,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return  DOCUMENT ME!
      */
-    public BoundingBox getScaledBoundingBox(final double scaleDenominator, BoundingBox bb) {
+    public BoundingBox getScaledBoundingBox(final double scaleDenominator, final BoundingBox bb) {
         final double screenWidthInInch = getWidth() / screenResolution;
         final double screenWidthInMeter = screenWidthInInch * 0.0254;
         final double screenHeightInInch = getHeight() / screenResolution;
@@ -4378,18 +4706,23 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         final double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator;
         final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
+        BoundingBox xbb = bb;
+        int metricSrid = 0;
 
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric()) {
             try {
                 // transform the given bounding box to a metric coordinate system
-                bb = transformer.transformBoundingBox(bb, mappingModel.getSrs().getCode());
+                final int srid = CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode());
+                final Geometry g = CrsTransformer.transformToMetricCrs(bb.getGeometry(srid));
+                metricSrid = g.getSRID();
+                xbb = new BoundingBox(g);
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
         }
 
-        final double midX = bb.getX1() + ((bb.getX2() - bb.getX1()) / 2);
-        final double midY = bb.getY1() + ((bb.getY2() - bb.getY1()) / 2);
+        final double midX = xbb.getX1() + ((xbb.getX2() - xbb.getX1()) / 2);
+        final double midY = xbb.getY1() + ((xbb.getY2() - xbb.getY1()) / 2);
         BoundingBox scaledBox = new BoundingBox(midX - (realWorldWidthInMeter / 2),
                 midY
                         - (realWorldHeightInMeter / 2),
@@ -4398,11 +4731,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 midY
                         + (realWorldHeightInMeter / 2));
 
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric()) {
             try {
                 // transform the scaled bounding box to the current coordinate system
                 final CrsTransformer trans = new CrsTransformer(mappingModel.getSrs().getCode());
-                scaledBox = trans.transformBoundingBox(scaledBox, transformer.getDestinationCrs());
+                scaledBox = trans.transformBoundingBox(scaledBox, CrsTransformer.createCrsFromSrid(metricSrid));
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
@@ -4417,17 +4750,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @return  DOCUMENT ME!
      */
     public double getScaleDenominator() {
-        BoundingBox boundingBox = getCurrentBoundingBox();
+        BoundingBox boundingBox = getCurrentBoundingBoxFromCamera();
         final double screenWidthInInch = getWidth() / screenResolution;
         final double screenWidthInMeter = screenWidthInInch * 0.0254;
         final double screenHeightInInch = getHeight() / screenResolution;
         final double screenHeightInMeter = screenHeightInInch * 0.0254;
 
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric()) {
             try {
-                boundingBox = transformer.transformBoundingBox(
-                        boundingBox,
-                        mappingModel.getSrs().getCode());
+                final Geometry g = CrsTransformer.transformToMetricCrs(boundingBox.getGeometry(
+                            CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode())));
+                boundingBox = new BoundingBox(g);
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
@@ -4659,15 +4992,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return  DOCUMENT ME!
      */
-    public PLayer getPrintingFrameLayer() {
-        return printingFrameLayer;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     public PrintingSettingsWidget getPrintingSettingsDialog() {
         return printingSettingsDialog;
     }
@@ -4755,7 +5079,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * DOCUMENT ME!
      *
      * @return  a transformer with the default crs as destination crs. The default crs is the first crs in the
-     *          configuration file that has set the selected attribut on true). This crs must be metric.
+     *          configuration file that has set the selected attribut on true. This crs is possiby not metric.
      */
     public CrsTransformer getMetricTransformer() {
         return transformer;
@@ -4774,16 +5098,28 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void unlock() {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("unlock");                                   // NOI18N
+                LOG.debug("unlock"); // NOI18N
             }
         }
         locked = false;
+//        if (DEBUG) {
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("currentBoundingBox:" + currentBoundingBox); // NOI18N
+//            }
+//        }
+        gotoBoundingBoxWithHistory(getInitialBoundingBox());
+    }
+
+    /**
+     * Unlocks the MappingComponent.
+     */
+    public void unlockWithoutReload() {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("currentBoundingBox:" + currentBoundingBox); // NOI18N
+                LOG.debug("unlock"); // NOI18N
             }
         }
-        gotoBoundingBoxWithHistory(currentBoundingBox);
+        locked = false;
     }
 
     /**
@@ -4844,6 +5180,25 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     /**
      * DOCUMENT ME!
      *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addGetFeatureInfoListener(final GetFeatureInfoListener l) {
+        ((GetFeatureInfoMultiGeomListener)inputEventListener.get(FEATURE_INFO_MULTI_GEOM)).addGetFeatureInfoListener(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeGetFeatureInfoListener(final GetFeatureInfoListener l) {
+        ((GetFeatureInfoMultiGeomListener)inputEventListener.get(FEATURE_INFO_MULTI_GEOM)).removeGetFeatureInfoListener(
+            l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  event  DOCUMENT ME!
      */
     @Override
@@ -4852,27 +5207,38 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (locked) {
                 return;
             }
-            final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(this),
-                    false,
-                    NbBundle.getMessage(
-                        MappingComponent.class,
-                        "MappingComponent.crsChanged(CrsChangedEvent).wait"),
-                    null);
 
-            StaticSwingTools.showDialog(dialog);
-
-            EventQueue.invokeLater(new Runnable() {
+            if (crsChangedWaitingDialog == null) {
+                crsChangedWaitingDialog = new WaitDialog(StaticSwingTools.getParentFrame(MappingComponent.this),
+                        false,
+                        NbBundle.getMessage(
+                            MappingComponent.class,
+                            "MappingComponent.crsChanged(CrsChangedEvent).wait"),
+                        null);
+            }
+            final Runnable r = new Thread("MappingComponent crsChanged()") {
 
                     @Override
                     public void run() {
+                        final BoundingBox formerBBox = getCurrentBoundingBoxFromCamera();
+
+                        if (formerBBox instanceof XBoundingBox) {
+                            ((XBoundingBox)formerBBox).setSrs(event.getFormerCrs().getCode());
+                        }
                         try {
+                            StaticSwingTools.showDialog(crsChangedWaitingDialog);
+
                             // the wtst object should not be null, so the getWtst method will be invoked
                             final WorldToScreenTransform oldWtst = getWtst();
-                            final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
+                            final BoundingBox bbox = getCurrentBoundingBoxFromCamera(); // getCurrentBoundingBox();
                             final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
                             final BoundingBox newBbox = crsTransformer.transformBoundingBox(
                                     bbox,
                                     event.getFormerCrs().getCode());
+
+                            if (!newBbox.isValid()) {
+                                throw new Exception("Transformation failed");
+                            }
 
                             if (getMappingModel() instanceof ActiveLayerModel) {
                                 final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
@@ -4883,8 +5249,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             gotoBoundingBoxWithoutHistory(newBbox, 0);
 
                             final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
+
+                            // remove all PrintTemplateFeatures
+                            for (final Feature f : new ArrayList<Feature>(list)) {
+                                if (f instanceof PrintTemplateFeature) {
+                                    featureCollection.unholdFeature(f);
+                                    list.remove(f);
+                                }
+                            }
                             featureCollection.removeAllFeatures();
                             featureCollection.addFeatures(list);
+
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("debug features added: " + list.size());
                             }
@@ -4905,11 +5280,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     event.getCurrentCrs().getCode(),
                                     oldWtst,
                                     getWtst());
-                                rescaleStickyNode(node);
+                                if (node instanceof PSticky) {
+                                    rescaleStickyNode((PSticky)node);
+                                }
                             }
                         } catch (final Exception e) {
+                            LOG.error(
+                                "Cannot transform the current bounding box to the CRS "
+                                        + event.getCurrentCrs(),
+                                e);
                             JOptionPane.showMessageDialog(
-                                MappingComponent.this,
+                                StaticSwingTools.getParentFrame(MappingComponent.this),
                                 org.openide.util.NbBundle.getMessage(
                                     MappingComponent.class,
                                     "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.message"),
@@ -4917,22 +5298,38 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     MappingComponent.class,
                                     "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.title"),
                                 JOptionPane.ERROR_MESSAGE);
-                            LOG.error(
-                                "Cannot transform the current bounding box to the CRS "
-                                        + event.getCurrentCrs(),
-                                e);
-                            resetCrs = true;
-                            final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
-                            alm.setSrs(event.getCurrentCrs());
-                            CismapBroker.getInstance().setSrs(event.getFormerCrs());
+                            EventQueue.invokeLater(new Thread("crsReset") {
+
+                                    @Override
+                                    public void run() {
+                                        resetCrs = true;
+                                        final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                                        alm.setSrs(event.getFormerCrs());
+                                        CismapBroker.getInstance().setSrs(event.getFormerCrs());
+                                        wtst = null;
+                                        getWtst();
+                                        gotoBoundingBoxWithoutHistory(formerBBox, 0);
+                                    }
+                                });
                         } finally {
-                            if (dialog != null) {
-                                dialog.setVisible(false);
+                            if (crsChangedWaitingDialog != null) {
+                                crsChangedWaitingDialog.setVisible(false);
+                                crsChangedWaitingDialog.dispose();
+                            } else {
+                                LOG.error("crsChangedWaitingDialog == null");
                             }
                         }
                     }
-                });
-        } else {
+                };
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        }
+        ;
+
+        {
             resetCrs = false;
         }
     }
@@ -4969,6 +5366,103 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void addRepaintListener(final RepaintListener repaintListener) {
+        synchronized (repaintListeners) {
+            repaintListeners.add(repaintListener);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void removeRepaintListener(final RepaintListener repaintListener) {
+        synchronized (repaintListeners) {
+            repaintListeners.remove(repaintListener);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintStart(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintStart(e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintComplete(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintComplete(e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintError(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintError(e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private synchronized void increaseRetrievalCompleteInProgressCount() {
+        retrievalCompleteInProgressCount++;
+        rescaleStickyNodesEnabled = false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private synchronized void decreaseRetrievalCompleteInProgressCount() {
+        retrievalCompleteInProgressCount--;
+        if (retrievalCompleteInProgressCount == 0) {
+            rescaleStickyNodesEnabled = true;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getFeaturePrintingDpi() {
+        return featurePrintingDpi;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featurePrintingDpi  DOCUMENT ME!
+     */
+    public void setFeaturePrintingDpi(final double featurePrintingDpi) {
+        this.featurePrintingDpi = featurePrintingDpi;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -4981,10 +5475,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         //~ Instance fields ----------------------------------------------------
 
         private final transient Logger log = Logger.getLogger(this.getClass());
-
         private final transient ServiceLayer rasterService;
         private final XPImage pi;
-
         private int position = -1;
 
         //~ Constructors -------------------------------------------------------
@@ -5019,6 +5511,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
             if (DEBUG) {
                 if (this.log.isDebugEnabled()) {
                     this.log.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5051,6 +5544,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         + " Errors: "      // NOI18N
                         + e.getErrors() + " Cause: " + e.getRetrievedObject()); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5079,7 +5573,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     this.log.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
                 }
             }
-            final Runnable paintImageOnMap = new Runnable() {
+            final Runnable paintImageOnMap = new Thread("Mappingcompopnent retrievalComplete()") {
 
                     @Override
                     public void run() {
@@ -5101,6 +5595,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     MappingComponent.this.repaint();
                                 }
                             }
+                            fireRepaintComplete(new RepaintEvent(e));
+                        } else {
+                            fireRepaintError(new RepaintEvent(e));
                         }
                     }
                 };
@@ -5124,6 +5621,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             this.log.warn(rasterService + ": retrievalAborted: " + e.getRequestIdentifier()); // NOI18N
+            fireRepaintError(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5160,7 +5658,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         //~ Instance fields ----------------------------------------------------
 
         private final transient Logger log = Logger.getLogger(this.getClass());
-
         /** Displays the loading progress of Documents, e.g. SHP Files */
         private final transient DocumentProgressWidget documentProgressWidget;
         private transient long requestId = -1;
@@ -5328,11 +5825,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         private final transient Logger log = Logger.getLogger(this.getClass());
         private final transient ServiceLayer featureService;
         private final transient PLayer parent;
-
-        private long requestIdentifier;
+        private volatile long requestIdentifier;
         private Thread completionThread;
-        private final List deletionCandidates;
-        private final List twins;
 
         //~ Constructors -------------------------------------------------------
 
@@ -5345,8 +5839,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         public MappingComponentFeatureServiceListener(final ServiceLayer featureService, final PLayer parent) {
             this.featureService = featureService;
             this.parent = parent;
-            this.deletionCandidates = new ArrayList();
-            this.twins = new ArrayList();
         }
 
         //~ Methods ------------------------------------------------------------
@@ -5369,6 +5861,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5406,6 +5899,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             this.log.error(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier + ")]: "
                         + (e.isInitialisationEvent() ? "initialisation" : "retrieval") + " error"); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5431,37 +5925,41 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 this.log.info(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier
                             + ")]: initialisation complete"); // NOI18N
                 fireActivityChanged();
+                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
             if ((completionThread != null) && completionThread.isAlive() && !completionThread.isInterrupted()) {
                 this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier
                             + ")]: retrievalComplete: old completion thread still running, trying to interrupt thread"); // NOI18N
-                completionThread.interrupt();
+                if (e.getRequestIdentifier() != this.requestIdentifier) {
+                    return;
+                } else {
+                    completionThread.interrupt();
+                }
             }
 
             if (e.getRequestIdentifier() < requestIdentifier) {
-                if (DEBUG) {
-                    this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + requestIdentifier
-                                + ")]: retrievalComplete: another retrieval process is still running, aborting retrievalComplete"); // NOI18N
-                }
-                ((RetrievalServiceLayer)featureService).setProgress(-1);
-                fireActivityChanged();
+                this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + requestIdentifier
+                            + ")]: retrievalComplete: another retrieval process is still running, aborting retrievalComplete"); // NOI18N
+//                ((RetrievalServiceLayer)featureService).setProgress(-1);
+//                fireActivityChanged();
+//                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
-            final List newFeatures = new ArrayList();
-            EventQueue.invokeLater(new Runnable() {
+            int initialCapacity = parent.getChildrenReference().size();
 
-                    @Override
-                    public void run() {
-                        ((RetrievalServiceLayer)featureService).setProgress(-1);
-                        parent.setVisible(isBackgroundEnabled() && featureService.isEnabled() && parent.getVisible());
-                    }
-                });
+            if (initialCapacity < 100) {
+                initialCapacity = 100;
+            }
+
+            final List newFeatures = new ArrayList(initialCapacity);
+            ((RetrievalServiceLayer)featureService).setProgress(-1);
+            parent.setVisible(isBackgroundEnabled() && featureService.isEnabled() && parent.getVisible());
+
             // clear all old data to delete twins
-            deletionCandidates.clear();
-            twins.clear();
+            final List deletionCandidates = new ArrayList(parent.getChildrenReference().size());
 
             // if it's a refresh, add all old features which should be deleted in the
             // newly acquired featurecollection
@@ -5477,15 +5975,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
             // only start parsing the features if there are no errors and a correct collection
             if ((e.isHasErrors() == false) && (e.getRetrievedObject() instanceof Collection)) {
-                completionThread = new Thread() {
+                completionThread = new Thread("completition") {
 
                         @Override
                         public void run() {
                             // this is the collection with the retrieved features
+                            increaseRetrievalCompleteInProgressCount();
                             final List features = new ArrayList((Collection)e.getRetrievedObject());
                             final int size = features.size();
                             int counter = 0;
                             final Iterator it = features.iterator();
+
                             if (DEBUG) {
                                 if (log.isDebugEnabled()) {
                                     log.debug(featureService + "[" + e.getRequestIdentifier() + " ("
@@ -5493,51 +5993,47 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 }
                             }
 
+                            // Neue Suche
+                            final Feature[] deletionCandidatesFeature = new Feature[deletionCandidates.size()];
+                            final Map<Feature, PFeature> featureMap = new HashMap<Feature, PFeature>(
+                                    deletionCandidates.size()
+                                            * (101 / 75));
+                            for (int i = 0; i < deletionCandidates.size(); ++i) {
+                                final PFeature pf = (PFeature)deletionCandidates.get(i);
+                                deletionCandidatesFeature[i] = pf.getFeature();
+                                featureMap.put(pf.getFeature(), pf);
+                            }
+
+                            final PFeatureComparable comp = new PFeatureComparable();
+                            Arrays.sort(deletionCandidatesFeature, comp);
                             while ((requestIdentifier == e.getRequestIdentifier()) && !isInterrupted()
                                         && it.hasNext()) {
                                 counter++;
                                 final Object o = it.next();
                                 if (o instanceof Feature) {
-                                    final PFeature p = new PFeature(((Feature)o),
-                                            wtst,
-                                            clip_offset_x,
-                                            clip_offset_y,
-                                            MappingComponent.this);
-                                    PFeature twin = null;
-                                    for (final Object tester : deletionCandidates) {
-                                        // if tester and PFeature are FeatureWithId-objects
-                                        if ((((PFeature)tester).getFeature() instanceof FeatureWithId)
-                                                    && (p.getFeature() instanceof FeatureWithId)) {
-                                            final int id1 = ((FeatureWithId)((PFeature)tester).getFeature()).getId();
-                                            final int id2 = ((FeatureWithId)(p.getFeature())).getId();
-                                            if ((id1 != -1) && (id2 != -1)) { // check if they've got the same id
-                                                if (id1 == id2) {
-                                                    twin = ((PFeature)tester);
-                                                    break;
-                                                }
-                                            } else {                          // else test the geometry for equality
-                                                if (((PFeature)tester).getFeature().getGeometry().equals(
-                                                                p.getFeature().getGeometry())) {
-                                                    twin = ((PFeature)tester);
-                                                    break;
-                                                }
-                                            }
-                                        } else {                              // no FeatureWithId, test geometries for
-                                            // equality
-                                            if (((PFeature)tester).getFeature().getGeometry().equals(
-                                                            p.getFeature().getGeometry())) {
-                                                twin = ((PFeature)tester);
-                                                break;
-                                            }
-                                        }
-                                    }
+                                    final int index = Arrays.binarySearch(deletionCandidatesFeature, (Feature)o, comp);
 
-                                    // if a twin is found remove him from the deletion candidates
-                                    // and add him to the twins
-                                    if (twin != null) {
-                                        deletionCandidates.remove(twin);
-                                        twins.add(twin);
+                                    if (index >= 0) {
+                                        final PFeature noCand = featureMap.get(deletionCandidatesFeature[index]);
+
+                                        if (noCand.hasSameGeometry(((Feature)o).getGeometry())) {
+                                            noCand.setFeature((Feature)o);
+                                            noCand.refreshDesign();
+                                            deletionCandidates.remove(noCand);
+                                        } else {
+                                            final PFeature p = new PFeature((Feature)o,
+                                                    wtst,
+                                                    clip_offset_x,
+                                                    clip_offset_y,
+                                                    MappingComponent.this);
+                                            newFeatures.add(p);
+                                        }
                                     } else { // else add the PFeature to the new features
+                                        final PFeature p = new PFeature((Feature)o,
+                                                wtst,
+                                                clip_offset_x,
+                                                clip_offset_y,
+                                                MappingComponent.this);
                                         newFeatures.add(p);
                                     }
 
@@ -5545,16 +6041,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     // fire event only wheen needed
                                     final int currentProgress = (int)((double)counter / (double)size * 100d);
 
-                                    if ((currentProgress >= 10) && ((currentProgress % 10) == 0)) {
+                                    if ((((RetrievalServiceLayer)featureService).getProgress() != currentProgress)
+                                                && (currentProgress >= 10)
+                                                && ((currentProgress % 10) == 0)) {
                                         ((RetrievalServiceLayer)featureService).setProgress(currentProgress);
                                         fireActivityChanged();
                                     }
                                 }
                             }
 
+                            decreaseRetrievalCompleteInProgressCount();
                             if ((requestIdentifier == e.getRequestIdentifier()) && !isInterrupted()) {
                                 // after all features are computed do stuff on the EDT
-                                EventQueue.invokeLater(new Runnable() {
+                                EventQueue.invokeLater(new Thread("MappingComponent retrievalComplete") {
 
                                         @Override
                                         public void run() {
@@ -5570,12 +6069,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                     + ")]: MappingComponentFeaturelistener.retrievalComplete()"); // NOI18N
                                                     }
                                                 }
-
+                                                if (requestIdentifier != e.getRequestIdentifier()) {
+                                                    ((RetrievalServiceLayer)featureService).setProgress(100);
+                                                    fireActivityChanged();
+                                                    return;
+                                                }
                                                 // if it's a refresh, delete all previous features
                                                 if (e.isRefreshExisting()) {
                                                     parent.removeAllChildren();
                                                 }
-                                                final List deleteFeatures = new ArrayList();
                                                 for (final Object o : newFeatures) {
                                                     parent.addChild((PNode)o);
                                                 }
@@ -5604,9 +6106,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     if (o instanceof PFeature) {
                                                         final PNode p = ((PFeature)o).getPrimaryAnnotationNode();
                                                         if (p != null) {
-                                                            removeStickyNode(p);
+                                                            if (p instanceof PSticky) {
+                                                                removeStickyNode((PSticky)p);
+                                                            }
                                                         }
-                                                        deleteFeatures.add(o);
+                                                        ((PFeature)o).releaseResources();
                                                     }
                                                 }
                                                 if (DEBUG) {
@@ -5630,11 +6134,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                     + " ("
                                                                     + requestIdentifier
                                                                     + ")]: deleteFeatures="
-                                                                    + deleteFeatures.size());     // + " :" +
+                                                                    + deletionCandidates.size()); // + " :" +
                                                         // deleteFeatures);//NOI18N
                                                     }
                                                 }
-                                                parent.removeChildren(deleteFeatures);
+                                                parent.removeChildren(deletionCandidates);
+                                                deletionCandidates.clear();
 
                                                 if (DEBUG) {
                                                     if (log.isDebugEnabled()) {
@@ -5660,6 +6165,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                 + " features retrieved or updated"); // NOI18N
                                                 }
                                                 rescaleStickyNodes();
+                                                fireRepaintComplete(new RepaintEvent(e));
                                             } catch (final Exception exception) {
                                                 log.warn(
                                                     featureService
@@ -5669,6 +6175,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                             + requestIdentifier
                                                             + ")]: Fehler beim Aufr\u00E4umen",
                                                     exception);                                      // NOI18N
+                                                fireRepaintError(new RepaintEvent(e));
                                             }
                                         }
                                     });
@@ -5680,6 +6187,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                                     }
                                 }
+                                EventQueue.invokeLater(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            ((RetrievalServiceLayer)featureService).setProgress(100);
+                                            fireActivityChanged();
+                                            fireRepaintError(new RepaintEvent(e));
+//                                        fireRepaintComplete(new RepaintEvent(e));
+                                        }
+                                    });
+//                                if (requestIdentifier == e.getRequestIdentifier()) {
+//                                    fireRepaintError(new RepaintEvent(e));
+//                                }
                             }
                         }
                     };
@@ -5693,6 +6213,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                         }
                     }
+                    fireRepaintError(new RepaintEvent(e));
                 }
             }
 
@@ -5744,6 +6265,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 }
+
 /**
  * DOCUMENT ME!
  *
@@ -5777,6 +6299,7 @@ class ImageSelection implements Transferable {
     public DataFlavor[] getTransferDataFlavors() {
         return new DataFlavor[] { DataFlavor.imageFlavor };
     }
+
     /**
      * Returns true if flavor is supported.
      *
@@ -5788,6 +6311,7 @@ class ImageSelection implements Transferable {
     public boolean isDataFlavorSupported(final DataFlavor flavor) {
         return DataFlavor.imageFlavor.equals(flavor);
     }
+
     /**
      * Returns image.
      *

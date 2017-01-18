@@ -20,10 +20,11 @@ public class CapabilityLink {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String OGC = "OGC";                // NOI18N
-    public static final String OGC_DEPRECATED = "OGC-WMS"; // NOI18N
-    public static final String SEPARATOR = "SEPARATOR";    // NOI18N
-    public static final String MENU = "MENU";              // NOI18N
+    public static final String OGC = "OGC";                 // NOI18N
+    public static final String OGC_DEPRECATED = "OGC-WMS";  // NOI18N
+    public static final String SEPARATOR = "SEPARATOR";     // NOI18N
+    public static final String MENU = "MENU";               // NOI18N
+    public static final String INTERNAL_DB = "INTERNAL-DB"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -34,6 +35,7 @@ public class CapabilityLink {
     // contains the version of the represented capabilities document
     private String version;
     private boolean active = false;
+    private boolean reverseAxisOrder = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -43,64 +45,82 @@ public class CapabilityLink {
      * @param  parent  DOCUMENT ME!
      */
     public CapabilityLink(final Element parent) {
-        final Element e = parent.getChild("capabilities");       // NOI18N
-        type = e.getAttribute("type").getValue();                // NOI18N
+        final Element e = parent.getChild("capabilities");                           // NOI18N
+        type = e.getAttribute("type").getValue();                                    // NOI18N
         try {
-            active = e.getAttribute("active").getBooleanValue(); // NOI18N
+            active = e.getAttribute("active").getBooleanValue();                     // NOI18N
         } catch (Exception notHandled) {
+        }
+        try {
+            reverseAxisOrder = e.getAttribute("reverseAxisOrder").getBooleanValue(); // NOI18N
+        } catch (Exception notHandled) {
+            // nothing to do
         }
         link = e.getTextTrim();
         if (e.getAttribute("version") != null) {
-            version = e.getAttribute("version").getValue();      // NOI18N
+            version = e.getAttribute("version").getValue();                          // NOI18N
         }
     }
 
     /**
      * Creates a new CapabilityLink object.
      *
-     * @param  type    DOCUMENT ME!
-     * @param  link    DOCUMENT ME!
-     * @param  active  DOCUMENT ME!
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  active            DOCUMENT ME!
      */
-    public CapabilityLink(final String type, final String link, final boolean active) {
-        this(type, link, active, null);
+    public CapabilityLink(final String type, final String link, final boolean reverseAxisOrder, final boolean active) {
+        this(type, link, reverseAxisOrder, active, null);
     }
 
     /**
      * Creates a new CapabilityLink object.
      *
-     * @param  type   DOCUMENT ME!
-     * @param  link   DOCUMENT ME!
-     * @param  title  DOCUMENT ME!
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  title             DOCUMENT ME!
      */
-    public CapabilityLink(final String type, final String link, final String title) {
-        this(type, link, title, null);
+    public CapabilityLink(final String type, final String link, final boolean reverseAxisOrder, final String title) {
+        this(type, link, reverseAxisOrder, title, null);
     }
 
     /**
      * Creates a new CapabilityLink object.
      *
-     * @param  type       DOCUMENT ME!
-     * @param  link       DOCUMENT ME!
-     * @param  active     DOCUMENT ME!
-     * @param  subparent  DOCUMENT ME!
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  active            DOCUMENT ME!
+     * @param  subparent         DOCUMENT ME!
      */
-    public CapabilityLink(final String type, final String link, final boolean active, final String subparent) {
+    public CapabilityLink(final String type,
+            final String link,
+            final boolean reverseAxisOrder,
+            final boolean active,
+            final String subparent) {
         this.type = type;
         this.link = link;
         this.active = active;
         this.subparent = subparent;
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     /**
      * Creates a new CapabilityLink object.
      *
-     * @param  type     DOCUMENT ME!
-     * @param  link     DOCUMENT ME!
-     * @param  version  DOCUMENT ME!
-     * @param  active   DOCUMENT ME!
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  version           DOCUMENT ME!
+     * @param  active            DOCUMENT ME!
      */
-    public CapabilityLink(final String type, final String link, final String version, final boolean active) {
+    public CapabilityLink(final String type,
+            final String link,
+            final boolean reverseAxisOrder,
+            final String version,
+            final boolean active) {
         this(type, link, active, null);
         this.version = version;
     }
@@ -108,16 +128,22 @@ public class CapabilityLink {
     /**
      * Creates a new CapabilityLink object.
      *
-     * @param  type       DOCUMENT ME!
-     * @param  link       DOCUMENT ME!
-     * @param  title      DOCUMENT ME!
-     * @param  subparent  DOCUMENT ME!
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  title             DOCUMENT ME!
+     * @param  subparent         DOCUMENT ME!
      */
-    public CapabilityLink(final String type, final String link, final String title, final String subparent) {
+    public CapabilityLink(final String type,
+            final String link,
+            final boolean reverseAxisOrder,
+            final String title,
+            final String subparent) {
         this.type = type;
         this.link = link;
         this.title = title;
         this.subparent = subparent;
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -164,16 +190,19 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element elem = new Element("capabilities");                           // NOI18N
+        final Element elem = new Element("capabilities");                                // NOI18N
         final CDATA cd = new CDATA(link);
         elem.addContent(cd);
-        elem.setAttribute(new Attribute("type", type));                             // NOI18N
-        if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent));               // NOI18N
+        elem.setAttribute(new Attribute("type", type));                                  // NOI18N
+        if (isReverseAxisOrder()) {
+            elem.setAttribute("reverseAxisOrder", String.valueOf(isReverseAxisOrder())); // NOI18N
         }
-        elem.setAttribute(new Attribute("active", new Boolean(active).toString())); // NOI18N
+        if (subparent != null) {
+            elem.setAttribute(new Attribute("subparent", subparent));                    // NOI18N
+        }
+        elem.setAttribute(new Attribute("active", new Boolean(active).toString()));      // NOI18N
         if (version != null) {
-            elem.setAttribute(new Attribute("version", version));                   // NOI18N
+            elem.setAttribute(new Attribute("version", version));                        // NOI18N
         }
         return elem;
     }
@@ -184,16 +213,19 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public Element getElementAsListEntry() {
-        final Element elem = new Element("capabilitiesList");         // NOI18N
+        final Element elem = new Element("capabilitiesList");                            // NOI18N
         final CDATA cd = new CDATA(link);
         elem.addContent(cd);
-        elem.setAttribute("titlestring", title);                      // NOI18N
-        elem.setAttribute(new Attribute("type", type));               // NOI18N
+        elem.setAttribute("titlestring", title);                                         // NOI18N
+        if (!isReverseAxisOrder()) {
+            elem.setAttribute("reverseAxisOrder", String.valueOf(isReverseAxisOrder())); // NOI18N
+        }
+        elem.setAttribute(new Attribute("type", type));                                  // NOI18N
         if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent)); // NOI18N
+            elem.setAttribute(new Attribute("subparent", subparent));                    // NOI18N
         }
         if (version != null) {
-            elem.setAttribute(new Attribute("version", version));     // NOI18N
+            elem.setAttribute(new Attribute("version", version));                        // NOI18N
         }
         return elem;
     }
@@ -268,5 +300,23 @@ public class CapabilityLink {
      */
     public void setVersion(final String version) {
         this.version = version;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the reverseAxisOrder
+     */
+    public boolean isReverseAxisOrder() {
+        return reverseAxisOrder;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  reverseAxisOrder  the reverseAxisOrder to set
+     */
+    public void setReverseAxisOrder(final boolean reverseAxisOrder) {
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 }

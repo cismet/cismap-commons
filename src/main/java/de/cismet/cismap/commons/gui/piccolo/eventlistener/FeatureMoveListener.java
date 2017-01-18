@@ -15,10 +15,12 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import com.vividsolutions.jts.geom.Coordinate;
 
 import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
+import edu.umd.cs.piccolox.util.PLocator;
 
 import java.awt.Color;
 import java.awt.event.InputEvent;
@@ -27,11 +29,13 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.Vector;
 
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.PHandle;
+import de.cismet.cismap.commons.gui.piccolo.PivotPHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
@@ -52,7 +56,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
     protected Point2D pressPoint;
     protected Point2D dragPoint;
     protected PDimension dragDim;
-    protected PFeature feature;
+    protected PFeature pFeature;
     protected MappingComponent mc;
     protected Vector features = new Vector();
 
@@ -82,71 +86,92 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         if (!ctrlPressed(e)) {
             unmarkFeatures();
         }
-        if (e.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht inden
+        if (e.isLeftMouseButton()) {
             // Initialize the locations.
             pressPoint = e.getPosition();
             dragDim = e.getCanvasDelta();
             dragPoint = pressPoint;
-            handleLayer.removeAllChildren();
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
 
-            if ((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
-                        && ((PFeature)o).getFeature().canBeSelected()) {
-                feature = (PFeature)(o);
-                feature.setStrokePaint(Color.red);
-                if (features.contains(feature)) {
-//                    features.remove(feature);
-//                    mc.reconsiderFeature(feature.getFeature());
-                } else {
-                    features.add(feature);
-                    feature.moveToFront();
+            if (o instanceof PFeature) {
+                pFeature = (PFeature)(o);
+                if ((pFeature.getFeature().isEditable() && pFeature.getFeature().canBeSelected())
+                            || (pFeature.getFeature() instanceof LinearReferencedLineFeature)) {
+                    pFeature = (PFeature)(o);
+                    pFeature.setStrokePaint(Color.red);
+                    if (features.contains(pFeature)) {
+//                    features.remove(pFeature);
+//                    mc.reconsiderFeature(pFeature.getFeature());
+                    } else {
+                        features.add(pFeature);
+                        pFeature.moveToFront();
+                    }
+                    if (!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) {
+                        mc.getFeatureCollection().unselectAll();
+                        mc.getFeatureCollection().select(pFeature.getFeature());
+                        postSelectionChanged();
+                    }
                 }
-                postSelectionChanged();
             } else {
-                feature = null;
+                pFeature = null;
             }
         }
     }
 
     @Override
     public void mouseDragged(final PInputEvent e) {
-        drag = true;
-        final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(e);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
-        }
-        super.mouseDragged(e);
-        if (feature != null) {
-            dragPoint = e.getPosition();
-            final Feature feat = feature.getFeature();
-            // bestimmt selbst wie es bewegt wird?
-            if (feat instanceof SelfManipulatingFeature) {
-                final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
-                final Coordinate coord = new Coordinate(
-                        mc.getWtst().getSourceX(dragPoint.getX()),
-                        mc.getWtst().getSourceY(dragPoint.getY()));
-                smFeature.moveTo(coord);
+        if ((pFeature != null) && (handleLayer.getChildrenCount() > 0)) {
+            drag = true;
+            final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
+            if (moveListener != null) {
+                moveListener.mouseMoved(e);
             } else {
-                // PDimension delta = e.getDeltaRelativeTo(pressPoint);
-                final PDimension delta = e.getCanvasDelta();
-                dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()),
-                    (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
-                final Iterator it = features.iterator();
-                while (it.hasNext()) {
-                    final Object o = it.next();
-                    if (o instanceof PFeature) {
-                        final PFeature f = (PFeature)o;
-                        f.moveFeature(delta);
+                log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
+            }
+            super.mouseDragged(e);
+            if (pFeature != null) {
+                dragPoint = e.getPosition();
+                final Feature feat = pFeature.getFeature();
+                // bestimmt selbst wie es bewegt wird?
+                if (feat instanceof SelfManipulatingFeature) {
+                    final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
+                    final Coordinate coord = new Coordinate(
+                            mc.getWtst().getSourceX(dragPoint.getX()),
+                            mc.getWtst().getSourceY(dragPoint.getY()));
+                    final PDimension delta = e.getDelta();
+                    smFeature.moveTo(coord, delta);
+                } else {
+                    // PDimension delta = e.getDeltaRelativeTo(pressPoint);
+                    final PDimension delta = e.getCanvasDelta();
+                    dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()),
+                        (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
+                    final Iterator it = features.iterator();
+                    while (it.hasNext()) {
+                        final Object o = it.next();
+                        if (o instanceof PFeature) {
+                            final PFeature f = (PFeature)o;
+                            f.moveFeature(delta);
+                        }
+                    }
+                    final double scale = mc.getCamera().getViewScale();
+                    for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
+                        final PNode child = handleLayer.getChild(i);
+                        if (child instanceof PivotPHandle) {
+                            final PivotPHandle pivotHandle = (PivotPHandle)child;
+                            final PLocator pLocator = pivotHandle.getLocator();
+                            final Point2D newMid = new Point2D.Double(pLocator.locateX() + (delta.getWidth() / scale),
+                                    pLocator.locateY()
+                                            + (delta.getHeight() / scale));
+                            pivotHandle.getMid().setLocation(newMid);
+                        }
+                        if (child instanceof PHandle) {
+                            final PHandle pHandle = (PHandle)child;
+                            pHandle.relocateHandle();
+                        }
                     }
                 }
+                mc.syncSelectedObjectPresenter(0);
             }
-            if (handleLayer.getChildrenCount() > 0) {
-                // to avoid problem if featur is dragged, released and dragged again very fast.
-                handleLayer.removeAllChildren();
-            }
-            mc.syncSelectedObjectPresenter(0);
         }
     }
 
@@ -154,10 +179,10 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
         // endDrag
-        if (drag) {
+        if ((pFeature != null) && drag) {
             drag = false;
 
-            final Feature feat = feature.getFeature();
+            final Feature feat = pFeature.getFeature();
             if (feat instanceof SelfManipulatingFeature) {
                 ((SelfManipulatingFeature)feat).moveFinished();
             }
@@ -223,11 +248,12 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             final Object o = it.next();
             if (o instanceof PFeature) {
                 final PFeature f = (PFeature)o;
-                if (f.getFeature() instanceof PureNewFeature) {
+                if (f.getFeature() instanceof AbstractNewFeature) {
                     f.setStrokePaint(Color.black);
-                } else {
-                    mc.reconsiderFeature(f.getFeature());
                 }
+//                else {
+//                    mc.reconsiderFeature(f.getFeature());
+//                }
             }
         }
         features = new Vector();

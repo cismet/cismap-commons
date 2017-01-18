@@ -20,6 +20,8 @@ import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
 
+import edu.umd.cs.piccolo.util.PDimension;
+
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 
@@ -229,9 +231,10 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      * DOCUMENT ME!
      *
      * @param  coordinate  DOCUMENT ME!
+     * @param  delta       DOCUMENT ME!
      */
     @Override
-    public void moveTo(final Coordinate coordinate) {
+    public void moveTo(final Coordinate coordinate, final PDimension delta) {
         if (isMovable()) {
 //        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
 //            coordinate = transformToRouteSrid(coordinate);
@@ -304,11 +307,8 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final PFeature pFeature = mc.getPFeatureHM().get(this);
 
         if (pFeature != null) {
-            final float[] xp = new float[] { (float)coordinate.x };
-            final float[] yp = new float[] { (float)coordinate.y };
-
-            pFeature.setCoordArr(new Coordinate[] { (Coordinate)coordinate.clone() });
-            pFeature.setPathToPolyline(xp, yp);
+            pFeature.setCoordArr(0, 0, new Coordinate[] { (Coordinate)coordinate.clone() });
+            pFeature.updatePath();
             pFeature.syncGeometry();
             pFeature.resetInfoNodePosition();
             pFeature.visualize();

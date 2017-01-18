@@ -56,4 +56,12 @@ public interface PropertyContainer {
      * @return  DOCUMENT ME!
      */
     Object getProperty(String propertyName);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyName   DOCUMENT ME!
+     * @param  propertyValue  DOCUMENT ME!
+     */
+    void setProperty(final String propertyName, final Object propertyValue);
 }

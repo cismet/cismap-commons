@@ -28,6 +28,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 
 import org.jdom.Attribute;
+import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
@@ -41,12 +42,12 @@ import java.io.StringReader;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
@@ -54,7 +55,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 
-import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 
@@ -97,6 +98,7 @@ public class WFSFacade {
     private static final String MAX_FEATURES_ATTR = "maxFeatures";                          // NOI18N
     private static final URL XML_FILE = WFSFacade.class.getResource("wfs.xml");             // TODO Auslagern//NOI18N
     public static final String CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER = "<cismapBoundingBoxAsGmlPlaceholder />";
+    public static final String CISMAP_RESULT_TYPE_PLACEHOLDER = "cismapResultTypePlaceholder";
     public static final String SRS_NAME_PLACEHOLDER = "SRSNAME_PLACEHOLDER";
 
     //~ Instance fields --------------------------------------------------------
@@ -202,45 +204,82 @@ public class WFSFacade {
     /**
      * Set the bounding box and the srs of the given getFeature request and returns the resulting request as string.
      *
-     * @param   query    the getFeature request template.
-     * @param   bbox     the bounding box that should be used in the getFeature request
-     * @param   feature  the type of the feature from the given query
-     * @param   mapCrs   the crs of the map, the features should be shown on
+     * @param   query             the getFeature request template.
+     * @param   bbox              the bounding box that should be used in the getFeature request
+     * @param   feature           the type of the feature from the given query
+     * @param   mapCrs            the crs of the map, the features should be shown on
+     * @param   reverseAxisOrder  if true, the axis order will be lat/lon
      *
      * @return  the new getFeature request
      */
     public String setGetFeatureBoundingBox(final String query,
             final XBoundingBox bbox,
             final FeatureType feature,
-            final String mapCrs) {
+            final String mapCrs,
+            final boolean reverseAxisOrder) {
+        return setGetFeatureBoundingBox(query, bbox, feature, mapCrs, reverseAxisOrder, false);
+    }
+
+    /**
+     * Set the bounding box and the srs of the given getFeature request and returns the resulting request as string.
+     *
+     * @param   query             the getFeature request template.
+     * @param   bbox              the bounding box that should be used in the getFeature request
+     * @param   feature           the type of the feature from the given query
+     * @param   mapCrs            the crs of the map, the features should be shown on
+     * @param   reverseAxisOrder  if true, the axis order will be lat/lon
+     * @param   onlyFeatureCount  the resultType attribute will be set to hits, iif onlyFeatureCount is true
+     *
+     * @return  the new getFeature request
+     */
+    public String setGetFeatureBoundingBox(final String query,
+            final XBoundingBox bbox,
+            final FeatureType feature,
+            final String mapCrs,
+            final boolean reverseAxisOrder,
+            final boolean onlyFeatureCount) {
         String request;
         String envelope;
         final String crs = getOptimalCrsForFeature(feature, mapCrs);
         final Geometry geom = CrsTransformer.transformToGivenCrs(bbox.getGeometry(), crs);
         final XBoundingBox tbbox = new XBoundingBox(geom);
+        final String resultType = (onlyFeatureCount ? "hits" : "results");
 
         if (logger.isDebugEnabled()) {
             logger.debug("optimal crs: " + crs);
         }
 
-        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                             // NOI18N
-            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()  // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                   // NOI18N
-                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";      // NOI18N
-        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                      // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                                 // NOI18N
+            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()      // NOI18N
+                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                       // NOI18N
+                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";          // NOI18N
+        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                          // NOI18N
+            if (reverseAxisOrder) {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            } else {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            }
         } else {
-            logger.error("unknown service version used: " + cap.getVersion()                              // NOI18N
-                        + ". Try to use a version 1.1.0 request");                                        // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            logger.error("unknown service version used: " + cap.getVersion()                                  // NOI18N
+                        + ". Try to use a version 1.1.0 request");                                            // NOI18N
+            if (reverseAxisOrder) {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            } else {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            }
         }
 
         request = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, envelope);
         request = request.replaceAll(SRS_NAME_PLACEHOLDER, crs);
+        request = request.replaceAll(CISMAP_RESULT_TYPE_PLACEHOLDER, resultType);
 
         return request;
     }
@@ -372,11 +411,16 @@ public class WFSFacade {
                         + ". Try to handle this version like version 1.1.0"); // NOI18N
         }
         query.getChild(QUERY, WFS).removeChildren(PROPERTY_NAME, WFS);
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final String s : properties) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(s);
-            query.getChild(QUERY, WFS).addContent(tmp);
+            propertyElements.add(tmp);
+        }
+
+        if (!propertyElements.isEmpty()) {
+            query.getChild(QUERY, WFS).addContent(0, propertyElements);
         }
     }
 
@@ -431,12 +475,18 @@ public class WFSFacade {
         // set geometry
         final Element propertyElement = query.getChild(FILTER, OGC).getChild(BBOX, OGC).getChild(PROPERTY_NAME, OGC);
         propertyElement.setText(feature.getNameOfGeometryAtrtibute());
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final FeatureServiceAttribute attribute : feature.getFeatureAttributes()) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(attribute.getName());
-            query.addContent(tmp);
+            propertyElements.add(tmp);
         }
+
+        if (!propertyElements.isEmpty()) {
+            query.addContent(0, propertyElements);
+        }
+
         return requestElement;
     }
 
@@ -468,12 +518,18 @@ public class WFSFacade {
         // set geometry
         final Element propertyElement = query.getChild(FILTER, OGC).getChild(BBOX, OGC).getChild(PROPERTY_NAME, OGC);
         propertyElement.setText(feature.getNameOfGeometryAtrtibute());
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final FeatureServiceAttribute attribute : feature.getFeatureAttributes()) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(attribute.getName());
-            query.addContent(tmp);
+            propertyElements.add(tmp);
         }
+
+        if (!propertyElements.isEmpty()) {
+            query.addContent(0, propertyElements);
+        }
+
         return requestElement;
     }
 

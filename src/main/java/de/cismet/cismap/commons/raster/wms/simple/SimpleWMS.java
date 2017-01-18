@@ -56,12 +56,17 @@ public class SimpleWMS extends AbstractWMS implements MapService,
      */
     public SimpleWMS(final SimpleWMS s) {
         this(s.gmUrl);
-        bb = (BoundingBox)s.bb.clone();
+        if ((BoundingBox)s.bb != null) {
+            bb = (BoundingBox)s.bb.clone();
+        }
         enabled = s.enabled;
         height = s.height;
         layerPosition = s.layerPosition;
         name = s.name;
-        pNode = s.pNode;
+        // The cloned wms and the origin wms should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+// pNode = s.pNode;
         translucency = s.translucency;
         width = s.width;
         ir = new ImageRetrieval(s);
@@ -71,6 +76,8 @@ public class SimpleWMS extends AbstractWMS implements MapService,
 
     /**
      * Creates a new instance of SimpleWMS.
+     *
+     * <p>p@aram gmUrl DOCUMENT ME!</p>
      *
      * @param  gmUrl  DOCUMENT ME!
      */
@@ -107,6 +114,14 @@ public class SimpleWMS extends AbstractWMS implements MapService,
         if (nameAttr != null) {
             try {
                 name = nameAttr.getValue();
+            } catch (Exception e) {
+            }
+        }
+        final Attribute visAttr = object.getAttribute("visible");                 // NOI18N
+        if (visAttr != null) {
+            try {
+                visible = visAttr.getBooleanValue();
+                pNode.setVisible(visible);
             } catch (Exception e) {
             }
         }
@@ -147,7 +162,8 @@ public class SimpleWMS extends AbstractWMS implements MapService,
         final Element element = new Element("simpleWms");                             // NOI18N
         element.setAttribute("layerPosition", new Integer(layerPosition).toString()); // NOI18N
         element.setAttribute("skip", "false");                                        // NOI18N
-        element.setAttribute("enabled", new Boolean(enabled).toString());             // NOI18N
+        element.setAttribute("enabled", Boolean.toString(enabled));
+        element.setAttribute("visible", Boolean.toString(pNode.getVisible()));        // NOI18N
         element.setAttribute("name", name);                                           // NOI18N
         element.setAttribute("translucency", new Float(translucency).toString());     // NOI18N
         final CDATA data = new CDATA(gmUrl.getUrlTemplate());

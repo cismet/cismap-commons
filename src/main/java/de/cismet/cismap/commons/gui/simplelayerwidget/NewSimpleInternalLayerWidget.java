@@ -282,6 +282,15 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
         if (activeLayerModel != null) {
             createTree();
         }
+
+        mc.addComponentListener(new ComponentAdapter() {
+
+                @Override
+                public void componentResized(final ComponentEvent e) {
+                    reshapeWidget(false);
+                }
+            });
+
         pack();
     }
 

@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -20,7 +22,9 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -35,14 +39,19 @@ import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.util.SLDStyleUtil;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
 import de.cismet.tools.CurrentStackTrace;
@@ -83,8 +92,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
     private ImageIcon refreshNeededIcon;
     private ImageIcon inProgressIcon;
     // private Timer indeterminateProgressTimer = null;
-    /** Liste mit update Timers. FIXME: bei 50 ist schloss. ArrayList? */
-    private Timer[] indeterminateProgressTimers = new Timer[50];
+    private Map<Integer, Timer> indeterminateProgressTimers = new HashMap<Integer, Timer>();
     private StyleLabel styleLabel = new StyleLabel();
     private boolean isWidgetTable = false;
     private JProgressBar progressBar = new JProgressBar(0, 100) {
@@ -188,6 +196,15 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             if (log.isDebugEnabled()) {
                 log.debug(value + ": column=" + column);
             }
+        }
+        if (value instanceof ModeLayer) {
+            return getTableCellRendererComponent(
+                    table,
+                    ((ModeLayer)value).getCurrentLayer(),
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
         }
 
         if (DEBUG) {
@@ -335,12 +352,37 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     log.debug("is it null? " + ((AbstractFeatureService)value).getLayerProperties());
                 }
 
-                if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                    styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                final AbstractFeatureService service = (AbstractFeatureService)value;
+                final FeatureFactory ff = service.getFeatureFactory();
+                BasicStyle basicStyle = null;
+
+                if (ff instanceof AbstractFeatureFactory) {
+                    final AbstractFeatureFactory aff = (AbstractFeatureFactory)ff;
+                    final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
+
+                    basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
                 }
 
-                styleLabel.repaint();
-                return styleLabel;
+                if ((service.getLayerProperties() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
+                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
+                    setHorizontalAlignment(JLabel.LEFT);
+                    setText(NbBundle.getMessage(
+                            ActiveLayerTableCellRenderer.class,
+                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
+                    setIcon(unselectedStyleIcon);
+                } else {
+                    if (basicStyle != null) {
+                        styleLabel.style = basicStyle;
+                    } else {
+                        if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                            styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                        }
+                    }
+
+                    styleLabel.repaint();
+                    return styleLabel;
+                }
             }
         } else if (realColumn == 3) {
             final WMSLayer wmsLayer = null;
@@ -362,25 +404,6 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
 //                }
 //            }
             if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider)value).isQueryable()) {
-                if (((LayerInfoProvider)value).isLayerQuerySelected()) {
-                    EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    if (value instanceof LayerInfoProvider) {
-                                        ((LayerInfoProvider)value).setLayerQuerySelected(true);
-                                        final ActiveLayerEvent ale = new ActiveLayerEvent();
-                                        ale.setLayer(value);
-                                        CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
-                                    }
-                                } catch (Exception ex) {
-                                    log.error("Error in actionPerformed of the informationCheckBos", ex);
-                                }
-                            }
-                        });
-                }
-
                 return booleanRenderer.getTableCellRendererComponent(
                         table,
                         ((LayerInfoProvider)value).isLayerQuerySelected(),
@@ -404,13 +427,13 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 // -1: progress is indeterminate
                 if ((currentProgress == -1) && ((RetrievalServiceLayer)value).isEnabled()
                             && !((RetrievalServiceLayer)value).isRefreshNeeded()) {
-                    if (indeterminateProgressTimers[realRow] == null) {
+                    if (indeterminateProgressTimers.get(realRow) == null) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
                                 log.debug("new indeterminateProgressTimers[" + realRow + "] created"); // NOI18N
                             }
                         }
-                        indeterminateProgressTimers[realRow] = new Timer(30, new ActionListener() {
+                        indeterminateProgressTimers.put(realRow, new Timer(30, new ActionListener() {
 
                                     @Override
                                     public void actionPerformed(final ActionEvent e) {
@@ -422,9 +445,10 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             realColumn);
 
                                         if ((currentProgress == 0) || (currentProgress == 100)) {
-                                            indeterminateProgressTimers[realRow].stop();
-                                            indeterminateProgressTimers[realRow].setRepeats(false);
-                                            indeterminateProgressTimers[realRow] = null;
+                                            final Timer timer = indeterminateProgressTimers.get(realRow);
+                                            timer.stop();
+                                            timer.setRepeats(false);
+                                            indeterminateProgressTimers.remove(realRow);
                                             if (DEBUG) {
                                                 if (log.isDebugEnabled()) {
                                                     log.debug(
@@ -444,13 +468,14 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             ((TreeTableModelAdapter)(table.getModel())).fireTableChanged(evt);
                                         }
                                     }
-                                });
+                                }));
                     }
 
-                    if (!indeterminateProgressTimers[realRow].isRunning()) {
+                    if (!indeterminateProgressTimers.get(realRow).isRunning()) {
                         // this.progressBar.invalidate();
-                        indeterminateProgressTimers[realRow].start();
-                        indeterminateProgressTimers[realRow].setRepeats(true);
+                        final Timer timer = indeterminateProgressTimers.get(realRow);
+                        timer.start();
+                        timer.setRepeats(true);
                     }
 
                     // In this scenario of displaying a JSlider in a JProgressBar as renderer for a table cell, the
@@ -470,7 +495,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     }
 
                     this.progressBar.setValue(currentProgress);
-                    if ((indeterminateProgressTimers[realRow] != null)
+                    if ((indeterminateProgressTimers.get(realRow) != null)
                                 && ((currentProgress == 100) || (currentProgress == 0))) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
@@ -478,9 +503,10 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             + "] stopped from Renderer"); // NOI18N
                             }
                         }
-                        indeterminateProgressTimers[realRow].setRepeats(false);
-                        indeterminateProgressTimers[realRow].stop();
-                        indeterminateProgressTimers[realRow] = null;
+                        final Timer timer = indeterminateProgressTimers.get(realRow);
+                        timer.setRepeats(false);
+                        timer.stop();
+                        indeterminateProgressTimers.remove(realRow);
 
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {

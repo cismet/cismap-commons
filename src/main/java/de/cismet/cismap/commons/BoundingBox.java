@@ -257,7 +257,23 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  String to assemble URL
      */
     public String getURLString() {
-        return getX1() + "," + getY1() + "," + getX2() + "," + getY2(); // NOI18N
+        return getURLString(false);
+    }
+
+    /**
+     * This Method return the BoundingBox like
+     * -179.99999999999997,-105.48710130136223,176.35443037974682,114.6141645214226.
+     *
+     * @param   reverseOrder  DOCUMENT ME!
+     *
+     * @return  String to assemble URL
+     */
+    public String getURLString(final boolean reverseOrder) {
+        if (reverseOrder) {
+            return getY1() + "," + getX1() + "," + getY2() + "," + getX2(); // NOI18N
+        } else {
+            return getX1() + "," + getY1() + "," + getX2() + "," + getY2(); // NOI18N
+        }
     }
 
     /**
@@ -395,5 +411,30 @@ public class BoundingBox implements Cloneable, Serializable {
         return "<gml:Envelope><gml:lowerCorner>" + getX1()                                // NOI18N
                     + " " + getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"          // NOI18N
                     + getX2() + " " + getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+    }
+
+    /**
+     * increased the bounding box.
+     *
+     * @param  percentage  DOCUMENT ME!
+     */
+    public void increase(final int percentage) {
+        final double factor = (percentage / 2.0) / 100.0;
+        final double additionalWidth = getWidth() * factor;
+        final double additionalHeight = getHeight() * factor;
+
+        setX1(getX1() - additionalWidth);
+        setX2(getX2() + additionalWidth);
+        setY1(getY1() - additionalHeight);
+        setY2(getY2() + additionalHeight);
+    }
+
+    /**
+     * Checks, if the bounding box is valid. The box is not valid, if any coordinate has the value NaN.
+     *
+     * @return  true, iff the bounding box is valid
+     */
+    public boolean isValid() {
+        return !((x1 == Double.NaN) || (x2 == Double.NaN) || (y1 == Double.NaN) || (y2 == Double.NaN));
     }
 }

@@ -114,7 +114,8 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     @Override
     public boolean isChanged() {
         return (holdGeometries != jCheckBox1.isSelected())
-                    || (geometryColor.getRGB() != jPanel1.getBackground().getRGB())
+                    || (((geometryColor != null) ? geometryColor.getRGB() : null)
+                        != ((jPanel1.getBackground() != null) ? jPanel1.getBackground().getRGB() : null))
                     || (geometryTransparency != (jSlider1.getValue() / 100f));
     }
 
@@ -194,7 +195,8 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         final Element searchGeometryTransparencyElement = new Element(CONF_GEOMETRY_TRANSPARENCY);
 
         holdSearchGeometriesElement.addContent(Boolean.toString(holdGeometries));
-        searchGeometryColorElement.addContent(String.valueOf(geometryColor.getRGB()));
+
+        searchGeometryColorElement.addContent(String.valueOf((geometryColor != null) ? geometryColor.getRGB() : null));
         searchGeometryTransparencyElement.addContent(String.valueOf(geometryTransparency));
 
         conf.addContent(holdSearchGeometriesElement);

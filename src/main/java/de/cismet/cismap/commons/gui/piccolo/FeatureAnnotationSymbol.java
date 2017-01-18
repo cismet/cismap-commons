@@ -21,11 +21,12 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(FeatureAnnotationSymbol.class);
+    private static final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
+            FeatureAnnotationSymbol.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private Image selectedFeatureAnnotationSymbol = null;
+    private FeatureAnnotationSymbol selectedFeatureAnnotationSymbol = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -70,7 +71,7 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      *
      * @return  DOCUMENT ME!
      */
-    public Image getSelectedFeatureAnnotationSymbol() {
+    public FeatureAnnotationSymbol getSelectedFeatureAnnotationSymbol() {
         return selectedFeatureAnnotationSymbol;
     }
 
@@ -80,7 +81,20 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      * @param  selectedFeatureAnnotationSymbol  DOCUMENT ME!
      */
     public void setSelectedFeatureAnnotationSymbol(final Image selectedFeatureAnnotationSymbol) {
-        this.selectedFeatureAnnotationSymbol = selectedFeatureAnnotationSymbol;
+        if (selectedFeatureAnnotationSymbol != null) {
+            this.selectedFeatureAnnotationSymbol = new FeatureAnnotationSymbol(selectedFeatureAnnotationSymbol);
+            this.selectedFeatureAnnotationSymbol.setSweetSpotX(this.getSweetSpotX());
+            this.selectedFeatureAnnotationSymbol.setSweetSpotY(this.getSweetSpotY());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fas  DOCUMENT ME!
+     */
+    public void setSelectedFeatureAnnotationSymbol(final FeatureAnnotationSymbol fas) {
+        this.selectedFeatureAnnotationSymbol = fas;
     }
 
     /**

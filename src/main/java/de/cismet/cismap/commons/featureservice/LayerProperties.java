@@ -13,6 +13,7 @@ package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 
 /**
  * Combines a set of commen properties of a group of features which belong to the same layer, for example the styles, id
@@ -194,6 +195,20 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
     void setIdExpressionEnabled(boolean idExpressionEnabled);
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    AbstractFeatureService getFeatureService();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  service  DOCUMENT ME!
+     */
+    void setFeatureService(AbstractFeatureService service);
+
+    /**
      * Creates a 1:1 copy of this object.
      *
      * @return  Cloned instance of this object
@@ -202,4 +217,6 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
     //J-
     LayerProperties clone();
     //J+
+
+    AttributeTableRuleSet getAttributeTableRuleSet();
 }

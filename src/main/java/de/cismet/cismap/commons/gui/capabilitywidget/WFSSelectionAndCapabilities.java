@@ -31,6 +31,7 @@ public class WFSSelectionAndCapabilities {
      */
     private FeatureType feature;
     private FeatureType[] features;
+    private boolean reverseAxisOrder = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -48,10 +49,12 @@ public class WFSSelectionAndCapabilities {
     /**
      * Creates a new WFSSelectionAndCapabilities object.
      *
-     * @param  features  DOCUMENT ME!
+     * @param  features          DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
      */
-    public WFSSelectionAndCapabilities(final FeatureType[] features) {
+    public WFSSelectionAndCapabilities(final FeatureType[] features, final boolean reverseAxisOrder) {
         this.features = features;
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -147,5 +150,23 @@ public class WFSSelectionAndCapabilities {
         } else {
             return getFeatures()[0].getFeatureAttributes();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the reversedAxisOrder
+     */
+    public boolean isReverseAxisOrder() {
+        return reverseAxisOrder;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  reversedAxisOrder  the reversedAxisOrder to set
+     */
+    public void setReverseAxisOrder(final boolean reversedAxisOrder) {
+        this.reverseAxisOrder = reversedAxisOrder;
     }
 }

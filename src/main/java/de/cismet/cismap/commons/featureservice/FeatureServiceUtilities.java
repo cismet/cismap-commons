@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import org.deegree.datatypes.Types;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -19,6 +21,7 @@ import org.jdom.output.XMLOutputter;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +58,17 @@ public class FeatureServiceUtilities {
             "MultiSurfacePropertyType",
             "MultiSolidPropertyType",
             "MultiGeometryPropertyType",
-            "MultiLineStringPropertyType"
+            "MultiLineStringPropertyType",
+            "GEOMETRY",
+            String.valueOf(Types.GEOMETRY),
+            String.valueOf(Types.MULTICURVE),
+            String.valueOf(Types.MULTIGEOMETRY),
+            String.valueOf(Types.MULTIPOINT),
+            String.valueOf(Types.MULTISURFACE),
+            String.valueOf(Types.POINT),
+            String.valueOf(Types.CURVE),
+            String.valueOf(Types.SURFACE),
+            String.valueOf(Types.OTHER) // H2 Geometry type
         };
     /** Log4J initialisation. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
@@ -66,10 +79,16 @@ public class FeatureServiceUtilities {
     public static final String INTEGER_PROPERTY_TYPE = "integer"; // NOI18N
     /** name of the name-attribute. */
     public static final String XML_NAME_STRING = "name"; // NOI18N
+    /** name of the alias-attribute. */
+    public static final String XML_ALIAS_STRING = "alias"; // NOI18N
     /** name of the type-attribute. */
     public static final String XML_TYPE_STRING = "type"; // NOI18N
     /** name of the isGeometry-attribute. */
     public static final String IS_GEOMETRY = "isGeometry"; // NOI18N
+    /** name of the isVisible-attribute. */
+    public static final String IS_VISIBLE = "isVisible"; // NOI18N
+    /** name of the toName-attribute. */
+    public static final String IS_NAME_ELEMENT = "isNameElement"; // NOI18N
     /** name of the GetFeature-element. */
     public static final String GET_FEATURE = "GetFeature"; // NOI18N
     /** WFS namespace-contant. */
@@ -239,5 +258,26 @@ public class FeatureServiceUtilities {
             }
         }
         return fsaMap;
+    }
+
+    /**
+     * Creates the ordered FeatureServiceAttributes list by parsing the children of the delivered JDOM-element.
+     *
+     * @param   describeFeatureXML  JDOM-element
+     *
+     * @return  list with the ordered FeatureServiceAttributes
+     */
+    public static List<String> getOrderedFeatureServiceAttributes(
+            final Element describeFeatureXML) {
+        final List<String> fsaList = new ArrayList(describeFeatureXML.getChildren().size());
+        for (final Element currentElement : (List<Element>)describeFeatureXML.getChildren()) {
+            try {
+                final FeatureServiceAttribute fsa = new FeatureServiceAttribute(currentElement);
+                fsaList.add(fsa.getName());
+            } catch (Exception ex) {
+                log.warn("An element could not be parsed as attribute: " + currentElement, ex); // NOI18N
+            }
+        }
+        return fsaList;
     }
 }

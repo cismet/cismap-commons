@@ -18,7 +18,10 @@ import pswing.PSwing;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
@@ -26,6 +29,10 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.RepaintManager;
+import javax.swing.SwingUtilities;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -65,11 +72,11 @@ public class InfoPanel extends JPanel {
         try {
             initComponents();
             cmdMore.setIcon(icoMore);
-            cmdMore.setText(""); // NOI18N
+            cmdMore.setText("");           // NOI18N
             this.more = more;
             if (more == null) {
-                // cmdMore.setVisible(false); //macht die Komponente zu klein
-                cmdMore.setEnabled(false);
+                cmdMore.setVisible(false); // macht die Komponente zu klein
+                // cmdMore.setEnabled(false);
             } else {
                 this.add(more, BorderLayout.CENTER);
                 more.setVisible(false);
@@ -86,7 +93,7 @@ public class InfoPanel extends JPanel {
                         @Override
                         public void componentResized(final ComponentEvent e) {
                             // TODO: calling revalidate outside the EDT looks like an error!
-                            final Runnable t = new Runnable() {
+                            final Runnable t = new Thread("InfoPanel componentResized()") {
 
                                     @Override
                                     public void run() {
@@ -135,6 +142,7 @@ public class InfoPanel extends JPanel {
         lblTitle.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12));                                              // NOI18N
         lblTitle.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
+        lblTitle.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 3, 8, 3));
         lblTitle.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
@@ -162,6 +170,7 @@ public class InfoPanel extends JPanel {
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
@@ -177,7 +186,9 @@ public class InfoPanel extends JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void cmdMoreActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMoreActionPerformed
-        setExpanded(!isExpanded());
+        if (CismapBroker.getInstance().getMappingComponent().isInfoNodesVisible()) {
+            setExpanded(!isExpanded());
+        }
     }                                                                           //GEN-LAST:event_cmdMoreActionPerformed
 
     /**
@@ -224,13 +235,61 @@ public class InfoPanel extends JPanel {
 
     @Override
     public void paintComponent(final Graphics g) {
-        super.paintComponent(g);
-        final Color myGrey = new Color(210, 210, 210);
-        g.setColor(myGrey);
-        g.fillRoundRect(2, 1, getWidth() - 4, getHeight() - 2, 10, 10);
-        if (pNodeParent != null) {
-            pNodeParent.setWidth(this.getWidth());
-            pNodeParent.setHeight(this.getHeight());
+        synchronized (getTreeLock()) {
+            super.paintComponent(g);
+            final Color myGrey = new Color(210, 210, 210);
+            g.setColor(myGrey);
+            g.fillRoundRect(2, 1, getWidth() - 4, getHeight() - 2, 10, 10);
+            if (pNodeParent != null) {
+                pNodeParent.setWidth(this.getWidth());
+                pNodeParent.setHeight(this.getHeight());
+            }
+        }
+    }
+
+    @Override
+    public void paint(final Graphics g) {
+        // If the InfoPanel should be drawn offscreen, the size of the sub components must be set
+        // and doLayout must be invoked. Otherwise the infoPanel will be drawn empty.
+        synchronized (getTreeLock()) {
+            doLayout();
+
+            final Graphics gr = g.create();
+
+            // Print the component
+            printComponent(gr);
+
+            // ... any border
+            printBorder(gr);
+
+            adjustSize(this);
+
+            // ... and all of the children.
+            for (int c = 0; c < getComponentCount(); c++) {
+                final Component comp = getComponent(c);
+                if (comp.isVisible()) {
+                    final Rectangle cr = comp.getBounds();
+
+                    final Graphics cg = gr.create(cr.x, cr.y, cr.width, cr.height);
+                    comp.printAll(cg);
+                }
+            }
+        }
+    }
+
+    /**
+     * Adjusts the size of all sub components and invokes doLayout.
+     *
+     * @param  comp  DOCUMENT ME!
+     */
+    private void adjustSize(final JComponent comp) {
+        for (int i = 0; i < comp.getComponentCount(); ++i) {
+            comp.getComponent(i).setSize(comp.getComponent(i).getPreferredSize());
+            comp.getComponent(i).doLayout();
+
+            if (comp.getComponent(i) instanceof JComponent) {
+                adjustSize((JComponent)comp.getComponent(i));
+            }
         }
     }
 

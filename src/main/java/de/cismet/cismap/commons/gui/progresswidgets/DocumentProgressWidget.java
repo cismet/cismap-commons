@@ -127,33 +127,26 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
                         mainPanelLayout.createSequentialGroup().addComponent(iconLabel).addPreferredGap(
                             javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
                             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                                mainPanelLayout.createSequentialGroup().addComponent(
-                                    messageLabel,
-                                    javax.swing.GroupLayout.DEFAULT_SIZE,
-                                    239,
-                                    Short.MAX_VALUE).addGap(51, 51, 51)).addComponent(
+                                mainPanelLayout.createSequentialGroup().addComponent(messageLabel).addGap(
+                                    51,
+                                    51,
+                                    51)).addComponent(
                                 serviceLabel,
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
-                                290,
+                                javax.swing.GroupLayout.DEFAULT_SIZE,
                                 Short.MAX_VALUE)))).addContainerGap()));
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(
-                    mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                        javax.swing.GroupLayout.Alignment.TRAILING,
+                    mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false).addGroup(
                         mainPanelLayout.createSequentialGroup().addComponent(serviceLabel).addPreferredGap(
-                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
-                            messageLabel,
-                            javax.swing.GroupLayout.PREFERRED_SIZE,
-                            33,
-                            javax.swing.GroupLayout.PREFERRED_SIZE)).addComponent(
-                        iconLabel,
-                        javax.swing.GroupLayout.Alignment.TRAILING)).addPreferredGap(
+                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(messageLabel))
+                                .addComponent(iconLabel, javax.swing.GroupLayout.Alignment.TRAILING)).addPreferredGap(
                     javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
                     progressBar,
                     javax.swing.GroupLayout.PREFERRED_SIZE,
                     20,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(23, Short.MAX_VALUE)));
+                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(20, Short.MAX_VALUE)));
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 

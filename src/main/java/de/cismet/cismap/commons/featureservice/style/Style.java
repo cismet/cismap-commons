@@ -44,6 +44,7 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
     String NAME = "name";             // NOI18N
     String PAINT = "paint";           // NOI18N
     String COLOR = "color";           // NOI18N
+    String HALO = "halo";             // NOI18N
     String WIDTH = "width";           // NOI18N
     String ALPHA = "alpha";           // NOI18N
     String HIGHLIGHT = "highlight";   // NOI18N
@@ -64,6 +65,7 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
      *
      * @return  DOCUMENT ME!
      */
+
     //J-
     Object clone() throws CloneNotSupportedException;
     //J+
@@ -298,4 +300,18 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
      * @param  autoscale  DOCUMENT ME!
      */
     void setAutoscale(boolean autoscale);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  halo  DOCUMENT ME!
+     */
+    void setHalo(Color halo);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Color getHalo();
 }

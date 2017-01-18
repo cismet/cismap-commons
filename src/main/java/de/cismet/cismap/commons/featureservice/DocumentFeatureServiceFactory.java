@@ -13,13 +13,19 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.deegree.io.shpapi.FileHeader;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.RandomAccessFile;
 
+import java.security.MessageDigest;
+
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -36,6 +42,7 @@ public class DocumentFeatureServiceFactory {
     public static final String XML_FILE_EXTENSION = ".xml";
     public static final String GML_FILE_EXTENSION = ".gml";
     public static final String SHP_FILE_EXTENSION = ".shp";
+    public static final String CSV_FILE_EXTENSION = ".csv";
     public static final String SHP_DBF_FILE_EXTENSION = ".dbf";
     public static final String SHP_INDEX_FILE_EXTENSION = ".shx";
     public static final String XML_IDENTIFICATION_STRING = "<?xml";
@@ -106,7 +113,7 @@ public class DocumentFeatureServiceFactory {
      *
      * @throws  Exception  java.lang.Exception
      */
-    public static DocumentFeatureService createDocumentFeatureService(final File documentFile) throws Exception {
+    public static AbstractFeatureService createDocumentFeatureService(final File documentFile) throws Exception {
 //    Element xmlConfig = null;
 //    if (configurationObject instanceof Element)
 //    {
@@ -151,15 +158,47 @@ public class DocumentFeatureServiceFactory {
                     throw new FileExtensionContentMissmatchException(
                         "File extension ist xml/gml aber kein gültiges xml/gml Dokument");
                 }
-            } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)) {
+            } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)
+                        || documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                        || documentFile.getPath().endsWith(CSV_FILE_EXTENSION)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("File extension ist shp");
+                    log.debug("File extension ist shp/dbf/csv");
                 }
-                if (isShapeFile(documentFile)) {
-                    return new ShapeFileFeatureService(documentFile.getName(),
-                            documentFile.toURI(),
-                            documentSize,
-                            null);
+                if (((documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                                    || documentFile.getPath().endsWith(CSV_FILE_EXTENSION))
+                                && CismapBroker.getInstance().isUseInternalDb()) || isShapeFile(documentFile)) {
+                    // dbf and csv will only be supported, if the internal db is used
+                    if (CismapBroker.getInstance().isUseInternalDb()) {
+                        final MessageDigest md5 = MessageDigest.getInstance("MD5");
+                        final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
+                        final byte[] inputArray = new byte[256];
+                        int byteCount = 0;
+
+                        while ((byteCount = is.read(inputArray)) != -1) {
+                            md5.update(inputArray, 0, byteCount);
+                        }
+                        final byte[] hashValue = md5.digest();
+                        final StringBuffer hexString = new StringBuffer();
+
+                        for (final byte b : hashValue) {
+                            hexString.append(String.format("%02x", b));
+                        }
+
+                        String fileName = documentFile.getName();
+                        fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                        final String tableName = fileName + "_" + hexString;
+                        return new H2FeatureService(
+                                fileName,
+                                H2FeatureServiceFactory.DB_NAME,
+                                tableName,
+                                null,
+                                documentFile);
+                    } else {
+                        return new ShapeFileFeatureService(documentFile.getName(),
+                                documentFile.toURI(),
+                                documentSize,
+                                null);
+                    }
 
 //          if (xmlConfig != null)
 //          {

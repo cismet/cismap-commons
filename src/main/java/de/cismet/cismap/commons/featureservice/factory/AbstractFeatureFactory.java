@@ -11,12 +11,20 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import groovy.lang.GroovyShell;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -39,6 +47,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     //~ Instance fields --------------------------------------------------------
 
+    public String layerName = null;
+
     // -1 = not id available
     protected int ID = -1;
     protected Logger logger = Logger.getLogger(this.getClass());
@@ -49,6 +59,13 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // protected boolean primaryAnnotationExpressionChanged = true;
     // protected boolean secondaryAnnotationExpressionChanged = true;
     protected Vector<FT> lastCreatedfeatureVector = new Vector();
+    // private BoundingBox lastBB = null;
+    // private BoundingBox diff = null;
+    // private final WKTReader reader;
+    protected Map<String, LinkedList<Style>> styles;
+    protected Geometry lastGeom = null;
+    protected QT lastQuery;
+    private volatile boolean isInterruptedAllowed = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -69,9 +86,51 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.maxFeatureCount = aff.maxFeatureCount;
         this.lastCreatedfeatureVector = new Vector(aff.lastCreatedfeatureVector.size());
         this.lastCreatedfeatureVector.addAll(lastCreatedfeatureVector);
+        this.styles = aff.styles;
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    public synchronized void waitUntilInterruptedIsAllowed() {
+        try {
+            if (!isInterruptedAllowed) {
+                wait();
+            }
+        } catch (InterruptedException e) {
+            logger.error("should never happen");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected synchronized void setInterruptedAllowed() {
+        isInterruptedAllowed = true;
+        notifyAll();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected synchronized void setInterruptedNotAllowed() {
+        isInterruptedAllowed = false;
+    }
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
+    }
+
+    @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for (final FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyles(getStyle(layerName));
+        }
+    }
 
     @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
@@ -141,6 +200,39 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public void setMaxFeatureCount(final int maxFeatureCount) {
         this.maxFeatureCount = maxFeatureCount;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureList  DOCUMENT ME!
+     * @param  attributes   DOCUMENT ME!
+     */
+    protected void sortFeatureList(final List<? extends FeatureServiceFeature> featureList,
+            final FeatureServiceAttribute[] attributes) {
+        Collections.sort(featureList, new Comparator<FeatureServiceFeature>() {
+
+                @Override
+                public int compare(final FeatureServiceFeature o1, final FeatureServiceFeature o2) {
+                    for (final FeatureServiceAttribute attribute : attributes) {
+                        final Object att1 = o1.getProperty(attribute.getName());
+                        final Object att2 = o2.getProperty(attribute.getName());
+
+                        if ((att1 instanceof Comparable) && (att2 instanceof Comparable)) {
+                            final Comparable c1 = (Comparable)att1;
+                            final Comparable c2 = (Comparable)att2;
+
+                            final int result = c1.compareTo(c2);
+
+                            if (result != 0) {
+                                return result;
+                            }
+                        }
+                    }
+
+                    return 0;
+                }
+            });
     }
 
     /**
@@ -470,14 +562,100 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      * DOCUMENT ME!
      *
      * @param  features  DOCUMENT ME!
+     * @param  geom      DOCUMENT ME!
+     * @param  query     DOCUMENT ME!
      */
-    protected synchronized void updateLastCreatedFeatures(final Collection<FT> features) {
+    protected synchronized void updateLastCreatedFeatures(final Collection<FT> features,
+            final Geometry geom,
+            final QT query) {
         this.lastCreatedfeatureVector.clear();
         this.lastCreatedfeatureVector.ensureCapacity(features.size());
         this.lastCreatedfeatureVector.addAll(features);
         this.lastCreatedfeatureVector.trimToSize();
+        this.lastGeom = geom;
+        this.lastQuery = query;
+    }
+
+    @Override
+    public FeatureServiceFeature createNewFeature() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom   DOCUMENT ME!
+     * @param   query  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected boolean featuresAlreadyInMemory(final Geometry geom, final QT query) {
+        if (((lastQuery == null) && (query != null))
+                    || ((lastQuery != null) && (query != null) && !lastQuery.equals(query))) {
+            return false;
+        } else {
+            return (lastGeom != null) && (geom.getSRID() == lastGeom.getSRID()) && geom.within(lastGeom);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query  DOCUMENT ME!
+     * @param   geom   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  FeatureFactory.TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                                DOCUMENT ME!
+     */
+    protected Vector<FT> createFeaturesFromMemory(final QT query,
+            final Geometry geom) throws FeatureFactory.TooManyFeaturesException, Exception {
+        if (!featuresAlreadyInMemory(geom, query)) {
+            return null;
+        }
+
+        final Vector<FT> featureList = new Vector<FT>();
+
+        for (final FT feature : lastCreatedfeatureVector) {
+            if (geom.intersects(feature.getGeometry())) {
+                featureList.add(feature);
+            }
+        }
+
+        return featureList;
     }
 
     @Override
     public abstract AbstractFeatureFactory clone();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected List<Style> getStyle() {
+        if (styles != null) {
+            return styles.get("default");
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layerName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<Style> getStyle(final String layerName) {
+        if (layerName == null) {
+            return getStyle();
+        } else if ((styles != null) && styles.containsKey(layerName)) {
+            return styles.get(layerName);
+        } else {
+            return null;
+        }
+    }
 }

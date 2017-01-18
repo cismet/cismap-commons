@@ -100,6 +100,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         model.setDefaultHomeSrs(srs);
         model.addHome(home);
         overviewMap.setMappingModel(model);
+        overviewMap.resetWtst();
         model.removeAllLayers();
         model.addLayer((RetrievalServiceLayer)backgroundService);
         backgroundService.addRetrievalListener(new RetrievalListener() {
@@ -190,7 +191,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
                         @Override
                         public void propertyChange(final PropertyChangeEvent evt) {
                             try {
-                                BoundingBox bb = masterMap.getCurrentBoundingBox();
+                                BoundingBox bb = masterMap.getCurrentBoundingBoxFromCamera();
 
                                 if (!CismapBroker.getInstance().getSrs().getCode().equals(srs.getCode())) {
                                     final CrsTransformer transformer = new CrsTransformer(srs.getCode());

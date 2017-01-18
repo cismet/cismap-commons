@@ -59,7 +59,7 @@ public class LinearReferencedPointPHandle extends PHandle {
                 @Override
                 public double locateX() {
                     try {
-                        return pfeature.getXp()[0];
+                        return pfeature.getXp(0, 0)[0];
                     } catch (Exception ex) {
                         return -1;
                     }
@@ -68,7 +68,7 @@ public class LinearReferencedPointPHandle extends PHandle {
                 @Override
                 public double locateY() {
                     try {
-                        return pfeature.getYp()[0];
+                        return pfeature.getYp(0, 0)[0];
                     } catch (Exception ex) {
                         return -1;
                     }
@@ -138,7 +138,7 @@ public class LinearReferencedPointPHandle extends PHandle {
                         wtst.getSourceX(dragPoint.getX()),
                         wtst.getSourceY(dragPoint.getY()));
 
-                linref.moveTo(coord);
+                linref.moveTo(coord, null);
                 relocateHandle();
             }
         } catch (Throwable t) {

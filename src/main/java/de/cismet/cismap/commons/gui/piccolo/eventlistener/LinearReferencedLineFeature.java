@@ -9,7 +9,10 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.TopologyException;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
+
+import edu.umd.cs.piccolo.util.PDimension;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -21,13 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.Refreshable;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
-import de.cismet.cismap.commons.features.FeatureCollectionAdapter;
-import de.cismet.cismap.commons.features.FeatureCollectionEvent;
-import de.cismet.cismap.commons.features.FeatureCollectionListener;
-import de.cismet.cismap.commons.features.XStyledFeature;
+import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -38,7 +35,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class LinearReferencedLineFeature extends DefaultStyledFeature implements DrawSelectionFeature, XStyledFeature {
+public class LinearReferencedLineFeature extends DefaultStyledFeature implements DrawSelectionFeature,
+    XStyledFeature,
+    SelfManipulatingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -201,32 +200,33 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         if ((fromFeature != null) && (toFeature != null)) {
             Geometry sublineGeom;
             if (fromFeature != toFeature) {
-                sublineGeom = createSubline(fromFeature.getCurrentPosition(),
-                        toFeature.getCurrentPosition(),
+                double from = fromFeature.getCurrentPosition();
+                double to = toFeature.getCurrentPosition();
+
+                if (from == to) {
+                    if (from >= 1) {
+                        from = from - 1;
+                    } else {
+                        to = to + 1;
+                    }
+                }
+
+                sublineGeom = createSubline(from,
+                        to,
                         baseLineGeom);
             } else {
                 sublineGeom = fromFeature.getGeometry();
             }
             setGeometry(sublineGeom);
 
-            final Coordinate[] coordinates = sublineGeom.getCoordinates();
-
-            final float[] xp = new float[coordinates.length];
-            final float[] yp = new float[coordinates.length];
-            for (int i = 0; i < coordinates.length; i++) {
-                xp[i] = (float)coordinates[i].x;
-                yp[i] = (float)coordinates[i].y;
-            }
-
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             final PFeature pFeature = mc.getPFeatureHM().get(this);
 
             if (pFeature != null) {
-                pFeature.setCoordArr(coordinates);
-                pFeature.setPathToPolyline(xp, yp);
+                pFeature.setCoordArr(0, 0, sublineGeom.getCoordinates());
+                pFeature.updatePath();
                 pFeature.syncGeometry();
                 pFeature.visualize();
-//            pFeature.resetInfoNodePosition();
             }
         }
     }
@@ -259,6 +259,37 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     @Override
     public boolean isDrawingSelection() {
         return false;
+    }
+
+    @Override
+    public synchronized void moveTo(final Coordinate coord, final PDimension delta) {
+        final Geometry originFromGeom = fromFeature.getGeometry();
+        final double fromX = fromFeature.getGeometry().getCoordinate().x;
+        final double fromY = fromFeature.getGeometry().getCoordinate().y;
+        final Coordinate fromCoord = new Coordinate(fromX + delta.getWidth(), fromY - delta.getHeight());
+        final Geometry originToGeom = toFeature.getGeometry();
+        final double length = toFeature.getCurrentPosition() - fromFeature.getCurrentPosition();
+
+        try {
+            fromFeature.moveTo(fromCoord, delta);
+            toFeature.moveToPosition(fromFeature.getCurrentPosition() + length);
+        } catch (TopologyException e) {
+            toFeature.moveTo(originToGeom.getCoordinate(), delta);
+            fromFeature.moveTo(originFromGeom.getCoordinate(), delta);
+        }
+
+        final double newLength = toFeature.getCurrentPosition() - fromFeature.getCurrentPosition();
+
+        if (Math.abs(length - newLength) > 0.1) {
+            fromFeature.setGeometry(originFromGeom);
+            toFeature.setGeometry(originToGeom);
+        }
+    }
+
+    @Override
+    public void moveFinished() {
+        fromFeature.moveFinished();
+        toFeature.moveFinished();
     }
 
     //~ Inner Classes ----------------------------------------------------------

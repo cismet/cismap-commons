@@ -7,9 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.features;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryCollection;
-import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.*;
 
 import java.util.Collection;
 
@@ -125,13 +123,19 @@ public final class FeatureGroups {
      * @return  DOCUMENT ME!
      */
     public static Geometry getEnclosingGeometry(final Collection<? extends Feature> featureCollection) {
-        final GeometryFactory factory = new GeometryFactory();
-
+        boolean hasLinestringOrPoints = false;
+        Geometry union = null;
         final Geometry[] array = new Geometry[featureCollection.size()];
         int i = 0;
+
         try {
             for (final Feature f : featureCollection) {
                 final Geometry newGeom = f.getGeometry();
+
+                if (!hasLinestringOrPoints && !((newGeom instanceof Polygon) || (newGeom instanceof MultiPolygon))) {
+                    hasLinestringOrPoints = true;
+                }
+
                 if (newGeom != null) {
                     if (FeatureGroups.SHOW_GROUPS_AS_ENVELOPES) {
                         array[i++] = newGeom.getEnvelope();
@@ -140,8 +144,31 @@ public final class FeatureGroups {
                     }
                 }
             }
-            final GeometryCollection collection = factory.createGeometryCollection(array);
-            final Geometry union = collection.buffer(0);
+
+            if (!hasLinestringOrPoints) {
+                // The following two lines are more efficient then the union method.
+                // See http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf
+                // But buffer(0) handles LineStrings and Points as empty polygons, so it can only be used,
+                // if only polygons should be unioned.
+                int srid = 0;
+
+                if (array.length > 0) {
+                    srid = array[0].getSRID();
+                }
+
+                final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+                final GeometryCollection collection = factory.createGeometryCollection(array);
+                union = collection.buffer(0);
+            } else {
+                for (final Geometry g : array) {
+                    if (union == null) {
+                        union = g;
+                    } else {
+                        union = union.union(g);
+                    }
+                }
+            }
+
             return union;
         } catch (Exception e) {
             log.error("Error during creation of enclosing geom", e);

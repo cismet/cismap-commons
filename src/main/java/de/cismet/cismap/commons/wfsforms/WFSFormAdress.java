@@ -14,10 +14,7 @@ package de.cismet.cismap.commons.wfsforms;
 
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +25,6 @@ import java.util.Vector;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -38,6 +34,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -55,19 +52,16 @@ public class WFSFormAdress extends AbstractWFSForm {
     private WFSFormFeature nr = null;
     private final ArrayList<WFSFormAdressListener> listeners = new ArrayList<WFSFormAdressListener>();
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboNr;
-    private javax.swing.JComboBox cboStreets;
+    protected javax.swing.JComboBox cboNr;
+    protected javax.swing.JComboBox cboStreets;
     protected javax.swing.JCheckBox chkLockScale;
     protected javax.swing.JCheckBox chkVisualize;
     protected javax.swing.JButton cmdOk;
     protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel3;
     protected javax.swing.JPanel panEmpty;
-    protected javax.swing.JPanel panNr;
-    protected javax.swing.JPanel panStr;
-    private javax.swing.JProgressBar prbNr;
-    private javax.swing.JProgressBar prbStreets;
+    protected javax.swing.JProgressBar prbNr;
+    protected javax.swing.JProgressBar prbStreets;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -83,9 +77,9 @@ public class WFSFormAdress extends AbstractWFSForm {
             initComponents();
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
-            AutoCompleteDecorator.decorate(cboStreets);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboStreets);
 
-            AutoCompleteDecorator.decorate(cboNr);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboNr);
             prbStreets.setPreferredSize(new java.awt.Dimension(1, 5));
             prbNr.setPreferredSize(new java.awt.Dimension(1, 5));
 
@@ -95,10 +89,7 @@ public class WFSFormAdress extends AbstractWFSForm {
             listComponents.put("cboNumbersOfAStreetProgress", prbNr); // NOI18N
 
             pMark.setVisible(false);
-            pMark.setSweetSpotX(0.5d);
-            pMark.setSweetSpotY(1d);
 
-            // log.fatal(cboNr.getEditor().getEditorComponent());
             final JTextField nrEditor = (JTextField)cboNr.getEditor().getEditorComponent();
             nrEditor.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -133,9 +124,6 @@ public class WFSFormAdress extends AbstractWFSForm {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jPanel3 = new javax.swing.JPanel();
-        panNr = new javax.swing.JPanel();
-        panStr = new javax.swing.JPanel();
         cmdOk = new javax.swing.JButton();
         chkVisualize = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
@@ -146,27 +134,6 @@ public class WFSFormAdress extends AbstractWFSForm {
         prbNr = new javax.swing.JProgressBar();
         cboStreets = new javax.swing.JComboBox();
         prbStreets = new javax.swing.JProgressBar();
-
-        final org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-
-        final org.jdesktop.layout.GroupLayout panNrLayout = new org.jdesktop.layout.GroupLayout(panNr);
-        panNr.setLayout(panNrLayout);
-        panNrLayout.setHorizontalGroup(
-            panNrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        panNrLayout.setVerticalGroup(
-            panNrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-
-        final org.jdesktop.layout.GroupLayout panStrLayout = new org.jdesktop.layout.GroupLayout(panStr);
-        panStr.setLayout(panStrLayout);
-        panStrLayout.setHorizontalGroup(
-            panStrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        panStrLayout.setVerticalGroup(
-            panStrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setMaximumSize(new java.awt.Dimension(498, 35));
@@ -310,13 +277,6 @@ public class WFSFormAdress extends AbstractWFSForm {
                     cboStreetsActionPerformed(evt);
                 }
             });
-        cboStreets.addKeyListener(new java.awt.event.KeyAdapter() {
-
-                @Override
-                public void keyTyped(final java.awt.event.KeyEvent evt) {
-                    cboStreetsKeyTyped(evt);
-                }
-            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -372,14 +332,6 @@ public class WFSFormAdress extends AbstractWFSForm {
             fireWfsFormAddressStreetSelected();
         }
     }                                                                                            //GEN-LAST:event_cboStreetsActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void cboStreetsKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboStreetsKeyTyped
-    }                                                                    //GEN-LAST:event_cboStreetsKeyTyped
 
     /**
      * DOCUMENT ME!

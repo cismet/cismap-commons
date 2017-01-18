@@ -15,16 +15,32 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
+import org.deegree.style.persistence.sld.SLDParser;
+
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+
+import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -32,16 +48,23 @@ import java.util.TreeMap;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
 
+import javax.xml.stream.XMLInputFactory;
+
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.XMLObjectFactory;
+import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.CachingFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
 import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -61,19 +84,61 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             RetrievalServiceLayer,
             FeatureMapService,
             ConvertableToXML,
-            Cloneable {
+            Cloneable,
+            SLDStyledLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(AbstractFeatureService.class);
+    public static String UNKNOWN = "UNKNOWN";
 
     /* defaulttype-constant */
     public static final String DEFAULT_TYPE = "default"; // NOI18N
+    public static final List<DefaultQueryButtonAction> SQL_QUERY_BUTTONS = new ArrayList<DefaultQueryButtonAction>();
+
+    static {
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<>"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Like"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction(">"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction(">="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("And"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Or"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("_", 1));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("%", 1));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("()") {
+
+                {
+                    posCorrection = -1;
+                }
+
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    if (queryTextArea.getSelectionEnd() == 0) {
+                        super.actionPerformed(e);
+                    } else {
+                        final int start = queryTextArea.getSelectionStart();
+                        final int end = queryTextArea.getSelectionEnd();
+                        queryTextArea.insert("(", start);
+                        queryTextArea.insert(")", end + 1);
+                        // jTextArea1.setCaretPosition(end + 2);
+                        if (start == end) {
+                            CorrectCarret(posCorrection);
+                        } else {
+                            CorrectCarret((short)2);
+                        }
+                    }
+                }
+            });
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Is"));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
     /* determines either the layer is enabled or not */
-
     // NOI18N
 
     /* determines either the layer is enabled or not */
@@ -104,8 +169,16 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected LayerInitWorker layerInitWorker = null;
     protected LayerProperties layerProperties = null;
     protected FeatureFactory featureFactory = null;
+    /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
+    protected List<String> orderedFeatureServiceAttributes;
+    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
+    protected boolean initializedFromElement = false;
+    String sldDefinition;
+    final XMLInputFactory factory = XMLInputFactory.newInstance();
+    Legends legends = new Legends();
     private boolean initialisationError = false;
     private Element initElement = null;
+    private boolean selectable = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -184,7 +257,10 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setLayerPosition(afs.getLayerPosition());
         this.setName(afs.getName());
         this.setEncoding(afs.getEncoding());
-        this.setPNode(afs.getPNode());
+        // The cloned featureService and the origin featureService should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+// this.setPNode(afs.getPNode());
         this.setTranslucency(afs.getTranslucency());
         this.setEncoding(afs.getEncoding());
         this.setEnabled(afs.isEnabled());
@@ -199,6 +275,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setInitialized(afs.isInitialized());
         this.setInitialisationError(afs.getInitialisationError());
         this.setInitElement(afs.getInitElement());
+        this.setSelectable(afs.isSelectable());
+        this.sldDefinition = afs.sldDefinition;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -226,6 +304,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (this.isInitialized() || this.isRefreshNeeded()) {
             LOG.warn("layer already initialised, forcing complete re-initialisation"); // NOI18N
             this.setInitialized(false);
+            featureFactory = null;
+            featureServiceAttributes = null;
             // this.layerProperties = null;
             // this.featureFactory = null;
             // this.featureServiceAttributes = null;
@@ -372,6 +452,31 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * Initialises the feature service and blocks until the initialisation of the service is completed. If the
+     * initialisation of the service is already in progress, this method wait until the initialisation is complete, if
+     * this thread is not running in edt.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void initAndWait() throws Exception {
+        if (!initialized && ((layerInitWorker == null) || layerInitWorker.isCancelled())) {
+            layerInitWorker = new LayerInitWorker();
+            init();
+            layerInitWorker = null;
+        } else if (!initialized) {
+            if (!EventQueue.isDispatchThread()) {
+                while ((layerInitWorker != null) && !layerInitWorker.isDone()) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        // nothing to do
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Creates an instance of a service specific LayerProperties implementation.
      *
      * @return  layer properties to be used
@@ -461,7 +566,19 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                                 + featureRetrievalWorker.isCancelled() + ")"); // NOI18N
                 }
             }
-            this.cancel(featureRetrievalWorker);
+            final FeatureRetrievalWorker currentWorker = featureRetrievalWorker;
+//            new Thread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+            synchronized (featureFactory) {
+                if (featureFactory instanceof AbstractFeatureFactory) {
+                    ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
+                }
+                cancel(currentWorker);
+            }
+//                }
+//            }).start();
         }
 
         if (!this.isEnabled() && !this.isVisible()) {
@@ -575,6 +692,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * Returns a list of all featureServiceAttributes of this featureservice.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<String> getOrderedFeatureServiceAttributes() {
+        return this.orderedFeatureServiceAttributes;
+    }
+
+    /**
+     * Setter for the featureServiceAttributes of the featureservice.
+     *
+     * @param  orderedFeatureServiceAttributes  featureServiceAttributes to set
+     */
+    public void setOrderedFeatureServiceAttributes(final List<String> orderedFeatureServiceAttributes) {
+        this.orderedFeatureServiceAttributes = orderedFeatureServiceAttributes;
+    }
+
+    /**
      * Setter for the featureServiceAttributes of the featureservice.
      *
      * @param  featureServiceAttributesVector  featureServiceAttributes to set
@@ -583,11 +718,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (featureServiceAttributesVector != null) {
             if (this.featureServiceAttributes == null) {
                 this.featureServiceAttributes = new HashMap(featureServiceAttributesVector.size());
+                this.orderedFeatureServiceAttributes = new ArrayList<String>();
             } else {
                 this.featureServiceAttributes.clear();
+                this.orderedFeatureServiceAttributes.clear();
             }
 
             for (final FeatureServiceAttribute fsa : featureServiceAttributesVector) {
+                this.orderedFeatureServiceAttributes.add(fsa.getName());
                 this.featureServiceAttributes.put(fsa.getName(), fsa);
             }
         }
@@ -661,11 +799,21 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * Sets the new layer properties of the service and.
+     * DOCUMENT ME!
      *
      * @param  layerProperties  DOCUMENT ME!
      */
     public void setLayerProperties(final LayerProperties layerProperties) {
+        setLayerProperties(layerProperties, true);
+    }
+
+    /**
+     * Sets the new layer properties of the service and.
+     *
+     * @param  layerProperties  DOCUMENT ME!
+     * @param  refreshFeatures  DOCUMENT ME!
+     */
+    public void setLayerProperties(final LayerProperties layerProperties, final boolean refreshFeatures) {
         this.layerProperties = layerProperties;
 
         if (this.featureFactory != null) {
@@ -690,30 +838,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
+            if (refreshFeatures) {
+                refreshFeatures();
             }
         }
     }
@@ -728,7 +854,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("setLayerProperties: new layer properties are also applied to all cached features!"); // NOI18N
                 }
             }
-            // layer properties are appiled to last created features
+            // layer properties are applied to last created features
             if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
                 LOG.warn("must wait until thread '" + featureRetrievalWorker
                             + "' is finished before applying new layer properties");   // NOI18N
@@ -744,31 +870,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
-            }
+            refreshFeatures();
         }
     }
 
@@ -800,6 +902,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void setName(final String name) {
         this.name = name;
+        if (featureFactory != null) {
+            featureFactory.setLayerName(name);
+        }
     }
 
     /**
@@ -946,10 +1051,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         element.setAttribute("translucency", new Float(getTranslucency()).toString());              // NOI18N
         element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString()); // NOI18N
         element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
+        element.setAttribute("isSelectable", Boolean.toString(this.isSelectable()));                // NOI18N
 
         if ((this.getFeatureServiceAttributes() != null) && (this.getFeatureServiceAttributes().size() > 0)) {
             final Element attrib = new Element("Attributes");                    // NOI18N
-            for (final FeatureServiceAttribute e : getFeatureServiceAttributes().values()) {
+            for (final String key : getOrderedFeatureServiceAttributes()) {
+                final FeatureServiceAttribute e = getFeatureServiceAttributes().get(key);
                 attrib.addContent(e.toElement());
             }
             element.addContent(attrib);
@@ -963,7 +1070,16 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             LOG.warn("Layer Properties are null and will not be saved"); // NOI18N
         }
-
+        try {
+            if (getSLDDefiniton() != null) {
+                final Document sldDoc = new org.jdom.input.SAXBuilder().build(getSLDDefiniton());
+                element.addContent(sldDoc.detachRootElement());
+            }
+        } catch (JDOMException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         return element;
     }
 
@@ -982,42 +1098,45 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             this.setInitElement((Element)element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                                  // NOI18N
+        if (element.getAttributeValue("name") != null)                                  // NOI18N
         {
-            this.setName(element.getAttributeValue("name"));                                            // NOI18N
+            this.setName(element.getAttributeValue("name"));                            // NOI18N
         }
-        if (element.getAttributeValue("visible") != null)                                               // NOI18N
+        if (element.getAttributeValue("visible") != null)                               // NOI18N
         {
-            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));                     // NOI18N
+            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));     // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                                               // NOI18N
+        if (element.getAttributeValue("translucency") != null)                          // NOI18N
         {
-            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));                     // NOI18N
+            this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                                          // NOI18N
+        if (element.getAttributeValue("enabled") != null)                               // NOI18N
         {
-            this.setTranslucency(element.getAttribute("translucency").getFloatValue());                 // NOI18N
+            final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
+
+            if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
+                this.setEnabled(false);                                                     // NOI18N
+            } else {
+                this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N
+            }
         }
-        if (element.getAttributeValue("maxFeatureCount") != null)                                       // NOI18N
+        if (element.getAttributeValue("maxFeatureCount") != null)                           // NOI18N
         {
-            this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue());             // NOI18N
+            this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue()); // NOI18N
         }
-        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
+        if (element.getAttributeValue("layerPosition") != null)                             // NOI18N
         {
-            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());                 // NOI18N
+            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());     // NOI18N
         }
-        if (element.getAttributeValue("maxFeatureCount") != null)                                       // NOI18N
+        if (element.getAttributeValue("isSelectable") != null)                              // NOI18N
         {
-            element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString()); // NOI18N
-        }
-        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
-        {
-            element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
+            this.setSelectable(element.getAttribute("isSelectable").getBooleanValue());     // NOI18N
         }
 
         final Element xmlAttributes = element.getChild("Attributes"); // NOI18N
         if (xmlAttributes != null) {
             featureServiceAttributes = FeatureServiceUtilities.getFeatureServiceAttributes(xmlAttributes);
+            orderedFeatureServiceAttributes = FeatureServiceUtilities.getOrderedFeatureServiceAttributes(xmlAttributes);
             this.setFeatureServiceAttributes(featureServiceAttributes);
         }
 
@@ -1035,6 +1154,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 final Element layerPropertiesElement = element.getChild(LayerProperties.LAYER_PROPERTIES_ELEMENT);
                 restoredLayerProperties = (LayerProperties)XMLObjectFactory.restoreObjectfromElement(
                         layerPropertiesElement);
+                restoredLayerProperties.setFeatureService(this);
             } catch (Exception t) {
                 LOG.error("could not restore generic style element '"                           // NOI18N
                             + element.getChild("LayerProperties").getAttribute(ConvertableToXML.TYPE_ATTRIBUTE)
@@ -1045,6 +1165,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             LOG.warn("no layer properties ");                                                   // NOI18N
         }
+        final Element sldStyle = element.getChild(
+                "StyledLayerDescriptor",
+                Namespace.getNamespace("http://www.opengis.net/sld"));
+        if (sldStyle != null) {
+            sldDefinition = new org.jdom.output.XMLOutputter().outputString(sldStyle);
+        }
+
+        initializedFromElement = true;
     }
 
     /**
@@ -1115,6 +1243,115 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public boolean getInitialisationError() {
         return this.initialisationError;
+    }
+
+    /**
+     * The query buttons, which should be used by the query search.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<DefaultQueryButtonAction> getQueryButtons() {
+        return queryButtons;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String decoratePropertyName(final String name) {
+        return name;
+    }
+
+    /**
+     * Determines, if the attribute decoration should be hidden from the user. See <code>decoratePropertyName(String
+     * name)</code>
+     *
+     * @return  True, iff the attribute decoration of the search query should be hidden from the user
+     */
+    public boolean decorateLater() {
+        return false;
+    }
+
+    /**
+     * Decorates the given query. So that it con be used with the services. This method is typically used, if <code>
+     * decorateLater()</code> returns true. This method adds all attribute decorations, which should be hidden from the
+     * user.
+     *
+     * @param   query  the query to decorate
+     *
+     * @return  the decorated query
+     */
+    public String decorateQuery(final String query) {
+        return query;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   columnName  DOCUMENT ME!
+     * @param   value       DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String decoratePropertyValue(final String columnName, final String value) {
+        return "'" + value + "'";
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   boundingBox  DOCUMENT ME!
+     * @param   offset       DOCUMENT ME!
+     * @param   limit        DOCUMENT ME!
+     * @param   orderBy      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public List retrieveFeatures(final BoundingBox boundingBox, final int offset, final int limit, final String orderBy)
+            throws Exception {
+        if (!initialized) {
+            initAndWait();
+        }
+        return getFeatureFactory().createFeatures(getQuery(), boundingBox, layerInitWorker);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query        DOCUMENT ME!
+     * @param   boundingBox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getFeatureCount(final QT query, final BoundingBox boundingBox) {
+        if (!initialized) {
+            try {
+                initAndWait();
+            } catch (Exception e) {
+                LOG.error("Error while initialising feature service.", e);
+            }
+        }
+        if (boundingBox == null) {
+            return getFeatureFactory().getFeatureCount(query, this.bb);
+        } else {
+            return getFeatureFactory().getFeatureCount(query, boundingBox);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   boundingBox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getFeatureCount(final BoundingBox boundingBox) {
+        return getFeatureCount(getQuery(), boundingBox);
     }
 
     /**
@@ -1189,6 +1426,244 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public void setInitElement(final Element initElement) {
         this.initElement = initElement;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectable  DOCUMENT ME!
+     */
+    public void setSelectable(final boolean selectable) {
+        this.selectable = selectable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSelectable() {
+        return this.selectable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isEditable() {
+        return false;
+    }
+
+    @Override
+    public Reader getSLDDefiniton() {
+        return (sldDefinition == null) ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
+                                       : new StringReader(sldDefinition);
+    }
+
+    @Override
+    public void setSLDInputStream(final String inputStream) {
+        if ((inputStream == null) || inputStream.isEmpty()) {
+            sldDefinition = null;
+            featureFactory.setSLDStyle(null);
+            return;
+        }
+        sldDefinition = inputStream;
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
+                    inputStream));
+        if ((styles == null) || styles.isEmpty()) {
+            return;
+        }
+        featureFactory.setSLDStyle(styles);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   input  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> parseSLD(final Reader input) {
+        Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = null;
+        try {
+            if (input != null) {
+                styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+            }
+        } catch (Exception ex) {
+            LOG.error("Fehler in der SLD", ex);
+        }
+        if (styles == null) {
+            LOG.info("SLD Parser funtkioniert nicht");
+        }
+        return styles;
+    }
+
+    @Override
+    public Pair<Integer, Integer> getLegendSize(final int nr) {
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
+        }
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   style  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Pair<Integer, Integer> getLegendSize(final org.deegree.style.se.unevaluated.Style style) {
+        return legends.getLegendSize(style);
+    }
+
+    @Override
+    public Pair<Integer, Integer> getLegendSize() {
+        return getLegendSize(0);
+    }
+
+    @Override
+    public List<Pair<Integer, Integer>> getLegendSizes() {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
+        for (final org.deegree.style.se.unevaluated.Style style : styles) {
+            sizes.add(getLegendSize(style));
+        }
+        return sizes;
+    }
+
+    @Override
+    public void getLegend(final int width, final int height, final Graphics2D g2d) {
+        getLegend(0, width, height, g2d);
+    }
+
+    @Override
+    public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
+                width,
+                height,
+                g2d);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  style   DOCUMENT ME!
+     * @param  width   DOCUMENT ME!
+     * @param  height  DOCUMENT ME!
+     * @param  g2d     DOCUMENT ME!
+     */
+    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
+            final int width,
+            final int height,
+            final Graphics2D g2d) {
+        legends.paintLegend(style,
+            width,
+            height,
+            g2d);
+    }
+
+    @Override
+    public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        for (int i = 0; i < styles.size(); i++) {
+            legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refreshFeatures() {
+        final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
+        if (lastCreatedFeatures.size() > 0) {
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(lastCreatedFeatures.size()
+                                + " last created features refreshed, fiering retrival event"); // NOI18N
+                }
+            }
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        final RetrievalEvent re = new RetrievalEvent();
+                        re.setIsComplete(true);
+                        re.setHasErrors(false);
+                        re.setRefreshExisting(true);
+                        re.setRetrievedObject(lastCreatedFeatures);
+                        re.setRequestIdentifier(System.currentTimeMillis());
+                        fireRetrievalStarted(re);
+                        fireRetrievalComplete(re);
+                    }
+                });
+        } else {
+            LOG.warn("no last created features that could be refreshed found"); // NOI18N
+        }
+    }
+
+    /**
+     * Determines the geometry type of the features of this service.
+     *
+     * @return  the name of the geometrys most specific com.vividsolutions.jts.geom interface or
+     *          {@link AbstractFeatureService#UNKNOWN}, if the features can have different geometries
+     */
+    public String getGeometryType() {
+        return UNKNOWN;
+    }
+
+    /**
+     * The number of features that should be shown on one page. (is used in the attribute table)
+     *
+     * @return  the numbe rof eatures per page. Less than 1 shows all features on one page
+     */
+    public int getMaxFeaturesPerPage() {
+        return -1;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String[] getCalculatedAttributes() {
+        return new String[0];
+    }
+
+    /**
+     * Determines if this service has any restriction that forbids the retrieval of features for the given bounding box.
+     *
+     * @param   box  DOCUMENT ME!
+     *
+     * @return  false, iff any restriction (e.g. the scale) prevents the retrieval of features for the given bounding
+     *          box
+     */
+    public boolean isVisibleInBoundingBox(final XBoundingBox box) {
+        final FeatureFactory ff = getFeatureFactory();
+
+        if (ff instanceof AbstractFeatureFactory) {
+            final List<org.deegree.style.se.unevaluated.Style> styles = ((AbstractFeatureFactory)ff).getStyle(
+                    ((AbstractFeatureFactory)ff).layerName);
+
+            if (styles != null) {
+                for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+                    final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
+                            CismapBroker.getInstance().getMappingComponent().getScaleDenominator());
+                    final List rules = filteredStyle.getRules();
+
+                    return !((rules == null) || rules.isEmpty());
+                }
+            }
+        }
+
+        return true;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -1480,6 +1955,10 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 re.setRetrievedObject(null);
                 fireRetrievalComplete(re);
             } catch (final Exception e) {
+                if (e.getCause() instanceof ShapeFileImportAborted) {
+                    // nothing to do. Layer was removed
+                    return;
+                }
                 LOG.error("LIW[" + this.getId() + "]: Fehler beim initalisieren des Layers: " + e.getMessage(), e); // NOI18N
                 setInitialized(false);
 

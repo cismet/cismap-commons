@@ -13,15 +13,19 @@ package de.cismet.cismap.commons.capabilities;
 
 import javax.swing.tree.TreeModel;
 
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
+
 /**
  * DOCUMENT ME!
  *
  * @author   spuhl
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
+public abstract class AbstractCapabilitiesTreeModel implements TreeModel, StringFilter {
 
     //~ Instance fields --------------------------------------------------------
+
+    protected String filterString;
 
     private String serviceName;
 
@@ -61,4 +65,23 @@ public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
 //    public void setCapabilities(WFSCapabilities capabilities) {
 //        this.capabilities = capabilities;
 //    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the filterString
+     */
+    public String getFilterString() {
+        return filterString;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  filterString  the filterString to set
+     */
+    @Override
+    public void setFilterString(final String filterString) {
+        this.filterString = filterString;
+    }
 }

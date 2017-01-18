@@ -7,19 +7,12 @@
 ****************************************************/
 package de.cismet.cismap.commons.featureservice.factory;
 
-import edu.umd.cs.piccolo.event.PInputEvent;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
+import org.apache.log4j.Logger;
 
 import org.postgis.Geometry;
 import org.postgis.PGgeometry;
 
 import org.postgresql.PGConnection;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,20 +20,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.List;
 import java.util.Vector;
-import java.util.logging.Level;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.features.InputEventAwareFeature;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.PostgisFeature;
+import de.cismet.cismap.commons.features.UpdateablePostgisFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.SimpleFeatureServiceSqlStatement;
-import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
@@ -55,6 +47,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static Logger logger = Logger.getLogger(PostgisFeatureFactory.class);
     public static final String ID_TOKEN = "<cismap::update::id>";
     public static final String QUERY_CANCELED = "57014";
 
@@ -117,9 +110,9 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    protected Connection createConnection(final ConnectionInfo connectionInfo) throws Exception {
+    public static Connection createConnection(final ConnectionInfo connectionInfo) throws Exception {
         try {
-            this.logger.info("creating new PostgisFeatureFactory instance with connection: connection: \n"
+            logger.info("creating new PostgisFeatureFactory instance with connection: connection: \n"
                         + connectionInfo.getUrl() + ", " + connectionInfo.getDriver() + ", "
                         + connectionInfo.getUser());
             Class.forName(connectionInfo.getDriver());
@@ -130,7 +123,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
             ((PGConnection)theConnection).addDataType("box3d", "org.postgis.PGbox3d");
             return theConnection;
         } catch (Throwable t) {
-            this.logger.fatal("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(), t);
+            logger.fatal("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(), t);
             throw new Exception("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(),
                 t);
         }
@@ -142,9 +135,88 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
     }
 
     @Override
-    public synchronized Vector<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
+    public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException, Exception {
+        return createFeatures_internal(sqlStatement, boundingBox, workerThread, 0, 0, null, true);
+    }
+
+    @Override
+    public Vector createAttributes(final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException,
+        Exception {
+        final Vector featureServiceAttributes = new Vector(4);
+        featureServiceAttributes.add(new FeatureServiceAttribute(
+                PostgisFeature.GEO_PROPERTY,
+                "gml:GeometryPropertyType",
+                true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.ID_PROPERTY, "1", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.FEATURE_TYPE_PROPERTY, "2", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.GROUPING_KEY_PROPERTY, "2", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.OBJECT_NAME_PROPERTY, "2", true));
+        return featureServiceAttributes;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  statement  DOCUMENT ME!
+     */
+    protected void cleanup(Statement statement) {
+        if (statement == null) {
+            return;
+        }
+        try {
+            statement.cancel();
+            statement.close();
+            statement = null;
+        } catch (Exception ex) {
+        }
+    }
+
+    @Override
+    public PostgisFeatureFactory clone() {
+        return new PostgisFeatureFactory(this);
+    }
+
+    @Override
+    public int getFeatureCount(final SimpleFeatureServiceSqlStatement query, final BoundingBox bb) {
+        return 0;
+    }
+
+    @Override
+    public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        return createFeatures_internal(sqlStatement, boundingBox, workerThread, offset, limit, orderBy, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   sqlStatement       DOCUMENT ME!
+     * @param   boundingBox        DOCUMENT ME!
+     * @param   workerThread       DOCUMENT ME!
+     * @param   offset             DOCUMENT ME!
+     * @param   limit              DOCUMENT ME!
+     * @param   orderBy            DOCUMENT ME!
+     * @param   saveAsLastCreated  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
+    private synchronized List<PostgisFeature> createFeatures_internal(
+            final SimpleFeatureServiceSqlStatement sqlStatement,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy,
+            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
         if (checkCancelled(workerThread, "createFeatures()")) {
             return null;
         }
@@ -262,7 +334,11 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
                 PostgisFeature postgisFeature;
 
                 if (this.postgisAction != null) {
-                    postgisFeature = new UpdateablePostgisFeature();
+                    postgisFeature = new UpdateablePostgisFeature(
+                            connectionInfo,
+                            parentService,
+                            postgisAction,
+                            connection);
                 } else {
                     postgisFeature = new PostgisFeature();
                 }
@@ -294,159 +370,11 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
 
         this.logger.info("FRW[" + workerThread + "]: Postgis request took " + (System.currentTimeMillis() - start)
                     + " ms");
-        updateLastCreatedFeatures(postgisFeatures);
+
+        if (saveAsLastCreated) {
+            final int crs = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+            updateLastCreatedFeatures(postgisFeatures, boundingBox.getGeometry(crs), sqlStatement);
+        }
         return postgisFeatures;
-    }
-
-    @Override
-    public Vector createAttributes(final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException,
-        Exception {
-        final Vector featureServiceAttributes = new Vector(4);
-        featureServiceAttributes.add(new FeatureServiceAttribute(
-                PostgisFeature.GEO_PROPERTY,
-                "gml:GeometryPropertyType",
-                true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.ID_PROPERTY, "1", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.FEATURE_TYPE_PROPERTY, "2", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.GROUPING_KEY_PROPERTY, "2", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.OBJECT_NAME_PROPERTY, "2", true));
-        return featureServiceAttributes;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  statement  DOCUMENT ME!
-     */
-    protected void cleanup(Statement statement) {
-        if (statement == null) {
-            return;
-        }
-        try {
-            statement.cancel();
-            statement.close();
-            statement = null;
-        } catch (Exception ex) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   id  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    protected void doAction(final int id) throws Exception {
-        if ((this.postgisAction.getAction() != null) && (this.postgisAction.getAction().length() > 0)) {
-            if ((this.connection == null) || this.connection.isClosed()) {
-                this.logger.error("Connection to database lost or not correctly initialised");
-                this.connection = createConnection(this.connectionInfo);
-            }
-
-            final java.sql.Statement statement = connection.createStatement();
-            final String sql = this.postgisAction.getAction().replaceAll(ID_TOKEN, String.valueOf(id));
-            if (DEBUG) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("performing action on feature #" + id + ": \n" + sql);
-                }
-            }
-            statement.execute(sql);
-            statement.close();
-        } else {
-            logger.warn("Feature Service not yet correclty initialised, ignoring action");
-            throw new Exception("Feature Service not yet correclty initialised, ignoring action");
-        }
-    }
-
-    @Override
-    public PostgisFeatureFactory clone() {
-        return new PostgisFeatureFactory(this);
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class UpdateablePostgisFeature extends PostgisFeature implements InputEventAwareFeature {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public boolean noFurtherEventProcessing(final PInputEvent event) {
-            return true;
-        }
-
-        @Override
-        public void mouseClicked(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseEntered(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseExited(final PInputEvent event) {
-        }
-
-        @Override
-        public void mousePressed(final PInputEvent event) {
-            final MappingComponent mappingComponent = (MappingComponent)event.getComponent();
-            if (!mappingComponent.isReadOnly() && (event.getModifiers() == InputEvent.BUTTON3_MASK)) {
-                if (DEBUG) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("showing menu on feature #" + this.getId());
-                    }
-                }
-                final JPopupMenu pop = new JPopupMenu();
-                final JMenuItem mni = new JMenuItem(PostgisFeatureFactory.this.postgisAction.getActionText(),
-                        PostgisFeatureFactory.this.postgisAction.getIcon());
-                mni.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            try {
-                                PostgisFeatureFactory.this.doAction(UpdateablePostgisFeature.this.getId());
-                                PostgisFeatureFactory.this.parentService.retrieve(true);
-                            } catch (Exception ex) {
-                                logger.error("Error during doAction(): " + ex.getMessage(), ex);
-                                final ErrorInfo ei = new ErrorInfo(
-                                        "Fehler",
-                                        "Fehler beim Zugriff auf den FeatureService",
-                                        null,
-                                        null,
-                                        ex,
-                                        Level.ALL,
-                                        null);
-                                JXErrorPane.showDialog(mappingComponent, ei);
-                            }
-                        }
-                    });
-                pop.add(mni);
-                pop.show(
-                    mappingComponent,
-                    (int)event.getCanvasPosition().getX(),
-                    (int)event.getCanvasPosition().getY());
-            }
-        }
-
-        @Override
-        public void mouseWheelRotated(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseReleased(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseMoved(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseDragged(final PInputEvent event) {
-        }
     }
 }

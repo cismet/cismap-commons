@@ -15,11 +15,6 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
-import java.util.Vector;
-
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -35,35 +30,40 @@ public class HandleAddAction implements CustomAction {
 
     //~ Instance fields --------------------------------------------------------
 
-    private MappingComponent mc;
-    private Feature f;
-    private int posInArray;
-    private float x;
-    private float y;
-    private Coordinate c;
+    private final MappingComponent mc;
+    private final Feature feature;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
+    private final float x;
+    private final float y;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Erzeugt eine HandleAddAction-Instanz.
      *
-     * @param  mc   h das Handle selbst
-     * @param  f    PFeature dem das Handle zugeordnet ist
-     * @param  pos  Position der HandleKoordinaten im Koordinatenarray des PFeatures
-     * @param  c    Coordinate-Instanz der Handle-Koordinaten
-     * @param  x    DOCUMENT ME!
-     * @param  y    DOCUMENT ME!
+     * @param  mc              h das Handle selbst
+     * @param  f               PFeature dem das Handle zugeordnet ist
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position der HandleKoordinaten im Koordinatenarray des PFeatures
+     * @param  x               DOCUMENT ME!
+     * @param  y               DOCUMENT ME!
      */
-    public HandleAddAction(final MappingComponent mc,
+    public HandleAddAction(
+            final MappingComponent mc,
             final Feature f,
-            final int pos,
-            final Coordinate c,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final float x,
             final float y) {
         this.mc = mc;
-        this.f = f;
-        this.posInArray = pos;
-        this.c = c;
+        this.feature = f;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.x = x;
         this.y = y;
     }
@@ -75,15 +75,8 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public void doAction() {
-        final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.setXp(pf.insertCoordinate(posInArray, pf.getXp(), x));
-        pf.setYp(pf.insertCoordinate(posInArray, pf.getYp(), y));
-        pf.setCoordArr(pf.insertCoordinate(posInArray, pf.getCoordArr(), c));
-        pf.syncGeometry();
-        pf.setPathToPolyline(pf.getXp(), pf.getYp());
-        final Vector v = new Vector();
-        v.add(pf.getFeature());
-        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+        final PFeature pf = (PFeature)mc.getPFeatureHM().get(feature);
+        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, x, y, false);
     }
 
     /**
@@ -96,7 +89,7 @@ public class HandleAddAction implements CustomAction {
         return org.openide.util.NbBundle.getMessage(
                 HandleAddAction.class,
                 "HandleAddAction.info().return",
-                new Object[] { posInArray, x, y }); // NOI18N
+                new Object[] { coordPosition, x, y }); // NOI18N
     }
 
     /**
@@ -106,6 +99,11 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleDeleteAction(mc, f, posInArray, c, x, y);
+        return new HandleDeleteAction(mc, feature, entityPosition, ringPosition, coordPosition, x, y);
+    }
+
+    @Override
+    public boolean featureConcerned(final Feature feature) {
+        return (feature != null) && feature.equals(feature);
     }
 }

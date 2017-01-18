@@ -44,7 +44,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;
 
-import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 
@@ -122,7 +122,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
         this.comp = comp;
         this.query = query;
 
-        final Runnable t = new Runnable() {
+        final Runnable t = new Thread("WFSFormsListAndComboBoxModel()") {
 
                 @Override
                 public void run() {
@@ -183,8 +183,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                     }
                 }
 
-                log.info("WFS Query:" + StaticHtmlTools.stringToHTMLString(postString)); // NOI18N
-                final String modifiedString = getRightEncodedString(postString);         // NOI18N
+                log.info("WFS Query:\n" + StaticHtmlTools.stringToHTMLString(postString)); // NOI18N
+                final String modifiedString = getRightEncodedString(postString);           // NOI18N
 //                final String modifiedString = getRightEncodedString(new String(
 //                            postString.getBytes("UTF-8"),
 //                            "ISO-8859-1"));                                              // NOI18N
@@ -246,14 +246,16 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                             });
                     }
                     fc = gmlDocument.parse();
+                    log.info("WFS Result:\n" + StaticHtmlTools.stringToHTMLString(gmlDocument.getAsPrettyString())); // NOI18N
+
                     gmlDocument.removeFeatureProgressListener(this);
                     if (log.isDebugEnabled()) {
-                        log.debug("Featurecollection " + fc);               // NOI18N
+                        log.debug("Featurecollection " + fc);     // NOI18N
                     }
                     for (int i = 0; i < fc.size(); ++i) {
                         features.add(new WFSFormFeature(fc.getFeature(i), query));
                         if (log.isDebugEnabled()) {
-                            log.debug(i + ":" + features.get(i));           // NOI18N
+                            log.debug(i + ":" + features.get(i)); // NOI18N
                         }
                     }
 
@@ -338,7 +340,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                                     if (e.getClickCount() > 1) {
                                         comp.removeMouseListener(this);
                                         progressBar.setForeground(oldForeground);
-                                        final Runnable t = new Runnable() {
+                                        final Runnable t = new Thread(
+                                                "WFSFormsListAndComboBoxModel reportRetrievalError()") {
 
                                                 @Override
                                                 public void run() {
@@ -409,7 +412,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
     @Override
     public void setSelectedItem(final Object anItem) {
         if (log.isDebugEnabled()) {
-            log.debug("setSelectedItem:" + anItem.getClass() + "::" + anItem); // NOI18N
+            log.debug("setSelectedItem:" + ((anItem != null) ? anItem.getClass() : "null") + "::" + anItem); // NOI18N
         }
         selectedValue = anItem;
     }

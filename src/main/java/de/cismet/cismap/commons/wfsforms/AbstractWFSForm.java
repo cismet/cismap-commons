@@ -17,6 +17,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 
+import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -52,10 +54,12 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
     protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/markPoint.png")); // NOI18N
+                "/images/markPoint.png")); // NOI18N
     protected FixedPImage pMark = new FixedPImage(mark.getImage());
+
     protected MappingComponent mappingComponent;
     Vector<ActionListener> actionListener = new Vector<ActionListener>();
+    private final java.util.Properties sweetSpotOfpMark = new java.util.Properties();
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
@@ -82,6 +86,13 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
      * Creates a new AbstractWFSForm object.
      */
     public AbstractWFSForm() {
+        try {
+            sweetSpotOfpMark.load(this.getClass().getResourceAsStream("/images/markPointSweetSpot.properties"));
+            pMark.setSweetSpotX(Double.valueOf(sweetSpotOfpMark.getProperty("x", "0")));
+            pMark.setSweetSpotY(Double.valueOf(sweetSpotOfpMark.getProperty("y", "0")));
+        } catch (IOException iox) {
+            log.warn("Problem when loading the markPointSweetSpot.properties", iox);
+        }
         addHierarchyListener(new HierarchyListener() {
 
                 @Override
@@ -92,8 +103,6 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
                 }
             });
         pMark.setVisible(false);
-        pMark.setSweetSpotX(0.5d);
-        pMark.setSweetSpotY(1d);
     }
 
     //~ Methods ----------------------------------------------------------------

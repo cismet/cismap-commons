@@ -244,21 +244,33 @@ public abstract class AbstractVersionNegotiator {
     protected String getDocumentVersion(final StringBuilder document) {
         String documentVersion = null;
         int startIndexOfVersion = -1;
+        String endCharacter = "\"";
 
-        if (document.indexOf("?>") != -1) {                                                               // NOI18N
-            startIndexOfVersion = document.indexOf(VERSION_STRING + "=\"", document.indexOf("?>"))        // NOI18N
-                        + VERSION_STRING.length() + 2;                                                    // NOI18N
+        if (document.indexOf("?>") != -1) {                                                                   // NOI18N
+            if (document.indexOf(VERSION_STRING + "=\"", document.indexOf("?>")) == -1) {
+                startIndexOfVersion = document.indexOf(VERSION_STRING + "='", document.indexOf("?>"))         // NOI18N
+                            + VERSION_STRING.length() + 2;                                                    // NOI18N
+                endCharacter = "'";
+            } else {
+                startIndexOfVersion = document.indexOf(VERSION_STRING + "=\"", document.indexOf("?>"))        // NOI18N
+                            + VERSION_STRING.length() + 2;                                                    // NOI18N
+            }
         } else {
-            startIndexOfVersion = document.indexOf(VERSION_STRING + "=\"") + VERSION_STRING.length() + 2; // NOI18N
+            if (document.indexOf(VERSION_STRING + "=\"") == -1) {
+                startIndexOfVersion = document.indexOf(VERSION_STRING + "='") + VERSION_STRING.length() + 2;  // NOI18N
+                endCharacter = "'";
+            } else {
+                startIndexOfVersion = document.indexOf(VERSION_STRING + "=\"") + VERSION_STRING.length() + 2; // NOI18N
+            }
         }
 
         if (startIndexOfVersion != (VERSION_STRING.length() + 1)) {
             // version string in document found
-            final int endIndexOfVersion = document.indexOf("\"", startIndexOfVersion);        // NOI18N
+            final int endIndexOfVersion = document.indexOf(endCharacter, startIndexOfVersion); // NOI18N
             documentVersion = document.substring(startIndexOfVersion, endIndexOfVersion);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("version of received GetCapabilities document: " + documentVersion); // NOI18N
+            logger.debug("version of received GetCapabilities document: " + documentVersion);  // NOI18N
         }
         return documentVersion;
     }

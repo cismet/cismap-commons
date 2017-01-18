@@ -7,14 +7,20 @@
 ****************************************************/
 package de.cismet.cismap.commons.interaction;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
+
+import java.awt.geom.Point2D;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -29,12 +35,15 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchFacade;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
@@ -103,6 +112,13 @@ public class CismapBroker {
     private String defaultCrs = "EPSG:31466";
     private int DefaultCrsAlias = -1;
     private MetaSearchFacade metaSearch;
+    private boolean useInternalDb = false;
+    private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
+    private String featureStylingComponentKey = BasicFeatureStyleDialogFactory.KEY;
+    private Point2D snappingVetoPoint;
+    private PFeature snappingVetoFeature;
+    private Float minOpacityToStayEnabled = null;
+    private boolean multiFeaturePopupMenuEnabled = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -480,6 +496,7 @@ public class CismapBroker {
             it.next().dragOverMap(mde);
         }
     }
+
     /**
      * public void fireFeatureCollectionChanged(MappingModelEvent mme) { for (Iterator<FeatureCollectionListener> it =
      * featureCollectionListeners.iterator(); it.hasNext();) { it.next().featureCollectionChanged(mme); } } public void
@@ -619,6 +636,7 @@ public class CismapBroker {
     public void setPreferredExceptionsFormat(final String preferredExceptionsFormat) {
         this.preferredExceptionsFormat = preferredExceptionsFormat;
     }
+
     /**
      * public MappingComponent getMappingComponent() { return mappingComponent; }.
      *
@@ -674,9 +692,10 @@ public class CismapBroker {
         if (o instanceof SimpleMoveListener) {
             final double x = ((SimpleMoveListener)o).getXCoord();
             final double y = ((SimpleMoveListener)o).getYCoord();
+
             fireStatusValueChanged(new StatusEvent(
                     StatusEvent.COORDINATE_STRING,
-                    MappingComponent.getCoordinateString(x, y)));
+                    new Coordinate(x, y)));
             final PFeature pf = ((SimpleMoveListener)o).getUnderlyingPFeature();
             if (pf != oldPfeature) {
                 fireStatusValueChanged(new StatusEvent(StatusEvent.OBJECT_INFOS, pf));
@@ -708,6 +727,7 @@ public class CismapBroker {
      */
     public void selectionChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
     }
+
     /**
      * public LayerWidget getLayerWidget() { return layerWidget; } public void setLayerWidget(LayerWidget layerWidget) {
      * this.layerWidget = layerWidget; } public BoundingBox getInitialBoundingBox() { return initialBoundingBox; }
@@ -965,5 +985,132 @@ public class CismapBroker {
         }
 
         return result;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the useInternalDb
+     */
+    public boolean isUseInternalDb() {
+        return useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  useInternalDb  the useInternalDb to set
+     */
+    public void setUseInternalDb(final boolean useInternalDb) {
+        this.useInternalDb = useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCheckForOverlappingGeometriesAfterFeatureRotation() {
+        return checkForOverlappingGeometriesAfterFeatureRotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  checkForOverlappingGeometriesAfterFeatureRotation  DOCUMENT ME!
+     */
+    public void setCheckForOverlappingGeometriesAfterFeatureRotation(
+            final boolean checkForOverlappingGeometriesAfterFeatureRotation) {
+        this.checkForOverlappingGeometriesAfterFeatureRotation = checkForOverlappingGeometriesAfterFeatureRotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getFeatureStylingComponentKey() {
+        return featureStylingComponentKey;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureStylingComponentKey  DOCUMENT ME!
+     */
+    public void setFeatureStylingComponentKey(final String featureStylingComponentKey) {
+        this.featureStylingComponentKey = featureStylingComponentKey;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the snappingVetoPoint
+     */
+    public Point2D getSnappingVetoPoint() {
+        return snappingVetoPoint;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappingVetoPoint  the snappingVetoPoint to set
+     */
+    public void setSnappingVetoPoint(final Point2D snappingVetoPoint) {
+        this.snappingVetoPoint = snappingVetoPoint;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the snappingVetoFeature
+     */
+    public PFeature getSnappingVetoFeature() {
+        return snappingVetoFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappingVetoFeature  the snappingVetoFeature to set
+     */
+    public void setSnappingVetoFeature(final PFeature snappingVetoFeature) {
+        this.snappingVetoFeature = snappingVetoFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the minOpacityToStayEnabled
+     */
+    public Float getMinOpacityToStayEnabled() {
+        return minOpacityToStayEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  minOpacityToStayEnabled  the minOpacityToStayEnabled to set
+     */
+    public void setMinOpacityToStayEnabled(final Float minOpacityToStayEnabled) {
+        this.minOpacityToStayEnabled = minOpacityToStayEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isMultiFeaturePopupMenuEnabled() {
+        return multiFeaturePopupMenuEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiFeaturePopupMenuEnabled  DOCUMENT ME!
+     */
+    public void setMultiFeaturePopupMenuEnabled(final boolean multiFeaturePopupMenuEnabled) {
+        this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
     }
 }

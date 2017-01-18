@@ -107,4 +107,25 @@ public interface Layer {
      * @return  DOCUMENT ME!
      */
     Envelope getLatLonBoundingBoxes();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  filterString  DOCUMENT ME!
+     */
+    void setFilterString(String filterString);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the capabilities
+     */
+    WMSCapabilities getCapabilities();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilities  the capabilities to set
+     */
+    void setCapabilities(WMSCapabilities capabilities);
 }

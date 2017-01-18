@@ -9,6 +9,7 @@ package de.cismet.cismap.commons.wfs.capabilities.deegree;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.model.crs.CRSFactory;
 import org.deegree.model.metadata.iso19115.Keywords;
 import org.deegree.ogcwebservices.wfs.capabilities.FormatType;
 import org.deegree.ogcwebservices.wfs.capabilities.Operation;
@@ -31,6 +32,7 @@ import de.cismet.cismap.commons.wfs.capabilities.OperationType;
 import de.cismet.cismap.commons.wfs.capabilities.OutputFormatType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
+import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeCoordinateSystem;
 import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
 
 /**
@@ -100,9 +102,13 @@ public class DeegreeFeatureType implements FeatureType {
         final Keywords[] words = feature.getKeywords();
         final ArrayList<String> keywords = new ArrayList<String>();
 
-        for (final Keywords tmp : words) {
-            for (final String s : tmp.getKeywords()) {
-                keywords.add(s);
+        if (words != null) {
+            for (final Keywords tmp : words) {
+                if (tmp != null) {
+                    for (final String s : tmp.getKeywords()) {
+                        keywords.add(s);
+                    }
+                }
             }
         }
 
@@ -216,6 +222,16 @@ public class DeegreeFeatureType implements FeatureType {
 
         for (int i = 0; i < envelopeOrig.length; ++i) {
             envelopes[i] = new DeegreeEnvelope(envelopeOrig[i]);
+
+            if (envelopes[i].getCoordinateSystem() == null) {
+                try {
+                    final org.deegree.model.crs.CoordinateSystem cs = CRSFactory.create("EPSG:4326");
+                    final DeegreeCoordinateSystem dcs = new DeegreeCoordinateSystem(cs);
+                    ((DeegreeEnvelope)envelopes[i]).setCoordinateSystem(dcs);
+                } catch (Exception e) {
+                    logger.error("CRS EPSG:4326 not found.", e);
+                }
+            }
         }
 
         return envelopes;

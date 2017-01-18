@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
@@ -71,6 +72,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 
     //~ Instance fields --------------------------------------------------------
 
+    protected MappingComponent mc;
+    protected String mcModus = MappingComponent.LINEAR_REFERENCING;
+
     /**
      * DOCUMENT ME!
      *
@@ -84,8 +88,6 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 // }
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-
-    private MappingComponent mc;
 
 //    private double cursorPosition = -1;
     private float cursorX = Float.MIN_VALUE;
@@ -659,7 +661,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-    private double getCurrentPosition() {
+    protected double getCurrentPosition() {
         if (getSelectedLinePFeature() != null) {
             return LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
                         mc.getWtst().getSourceX(cursorX),
@@ -716,7 +718,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @param  coordinate  x DOCUMENT ME!
      */
-    private void addMarkPHandle(final Coordinate coordinate) {
+    protected void addMarkPHandle(final Coordinate coordinate) {
         if (log.isDebugEnabled()) {
             log.debug("create newPointHandle and Locator"); // NOI18N
         }
@@ -913,7 +915,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      */
     @Override
     public void mouseMoved(final PInputEvent event) {
-        if (mc.getInteractionMode().equals(MappingComponent.LINEAR_REFERENCING)) {
+        if (mc.getInteractionMode().equals(mcModus)) {
             final PFeature selPFeature = getSelectedLinePFeature();
             if (selPFeature != null) {
                 updateCursor(event.getPosition());
@@ -979,7 +981,17 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             final Geometry geom = sels[0].getGeometry();
             if ((geom != null) || (geom instanceof MultiLineString) || (geom instanceof LineString)) {
                 // zugehöriges pfeature holen
-                final PFeature pf = mc.getPFeatureHM().get(sels[0]);
+                PFeature pf = mc.getPFeatureHM().get(sels[0]);
+
+                if (pf == null) {
+                    final SelectionListener sl = (SelectionListener)mc.getInputEventListener()
+                                .get(MappingComponent.SELECT);
+                    final List<PFeature> fl = sl.getAllSelectedPFeatures();
+                    if ((fl != null) && (fl.size() == 1)) {
+                        pf = fl.get(0);
+                    }
+                }
+
                 // zugehörige geometrie holen
                 return pf;
             } else {

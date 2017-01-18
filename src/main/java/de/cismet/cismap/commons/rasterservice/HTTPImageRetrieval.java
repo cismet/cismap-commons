@@ -56,6 +56,7 @@ public class HTTPImageRetrieval extends Thread {
      * @param  listener  DOCUMENT ME!
      */
     public HTTPImageRetrieval(final RetrievalListener listener) {
+        super("HTTPImageRetrieval");
         this.listener = listener;
         client = new HttpClient();
         // client.getHostConfiguration().setProxy("www-proxy.htw-saarland.de", 3128);
