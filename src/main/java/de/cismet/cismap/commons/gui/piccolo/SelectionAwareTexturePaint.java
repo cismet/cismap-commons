@@ -30,7 +30,7 @@ import java.awt.image.ColorModel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class SelectionAwareTexturePaint implements Paint, Cloneable {
+public class SelectionAwareTexturePaint extends TexturePaint implements Paint, Cloneable {
 
     //~ Enums ------------------------------------------------------------------
 
@@ -70,6 +70,7 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
             final BufferedImage highlightedImage,
             final BufferedImage selectedImage,
             final Rectangle2D rec) {
+        super(defaultImage, rec);
         paint = new TexturePaint(defaultImage, rec);
         this.rec = rec;
         this.currentRec = rec;
@@ -80,6 +81,25 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public BufferedImage getImage() {
+        return paint.getImage();
+    }
+
+    @Override
+    public Rectangle2D getAnchorRect() {
+        return paint.getAnchorRect();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public TexturePaint getTexturePaint() {
+        return paint;
+    }
 
     /**
      * Set the selection mode to highlighted, selected or unselected.
@@ -145,6 +165,7 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
         if (geom.getArea() < 0.0001d) {
             factor *= Math.sqrt(geom.getArea());
         }
+
         currentRec = new Rectangle2D.Double(
                 rec.getMinX(),
                 rec.getMinY(),
