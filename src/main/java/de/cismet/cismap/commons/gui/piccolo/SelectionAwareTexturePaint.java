@@ -30,8 +30,8 @@ import java.awt.image.ColorModel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class SelectionAwareTexturePaint extends TexturePaint implements Paint, Cloneable {
-
+public class SelectionAwareTexturePaint implements Paint, Cloneable {
+    private final double MIN_SIDE_LENGTH = 0.5;
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -70,7 +70,6 @@ public class SelectionAwareTexturePaint extends TexturePaint implements Paint, C
             final BufferedImage highlightedImage,
             final BufferedImage selectedImage,
             final Rectangle2D rec) {
-        super(defaultImage, rec);
         paint = new TexturePaint(defaultImage, rec);
         this.rec = rec;
         this.currentRec = rec;
@@ -81,16 +80,6 @@ public class SelectionAwareTexturePaint extends TexturePaint implements Paint, C
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    @Override
-    public BufferedImage getImage() {
-        return paint.getImage();
-    }
-
-    @Override
-    public Rectangle2D getAnchorRect() {
-        return paint.getAnchorRect();
-    }
 
     /**
      * DOCUMENT ME!
@@ -162,15 +151,22 @@ public class SelectionAwareTexturePaint extends TexturePaint implements Paint, C
     public void setScale(final double scale, final Geometry geom) {
         double factor = (1 / scale);
 
+        double minSide = Math.min(rec.getWidth() * factor, rec.getHeight() * factor);
+        
+        if (minSide < MIN_SIDE_LENGTH) {
+            //if the side is smaller than MIN_SIDE_LENGTH, display errors will be occur
+            factor = MIN_SIDE_LENGTH / Math.min(rec.getWidth(), rec.getHeight());
+        }
+
         if (geom.getArea() < 0.0001d) {
+            //wgs 84 is assumed
             factor *= Math.sqrt(geom.getArea());
         }
 
         currentRec = new Rectangle2D.Double(
                 rec.getMinX(),
                 rec.getMinY(),
-                rec.getWidth()
-                        * factor,
+                rec.getWidth() * factor,
                 rec.getHeight()
                         * factor);
         paint = new TexturePaint(
