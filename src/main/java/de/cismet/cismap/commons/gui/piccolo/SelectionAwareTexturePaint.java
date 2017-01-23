@@ -30,7 +30,7 @@ import java.awt.image.ColorModel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class SelectionAwareTexturePaint implements Paint, Cloneable {
+public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrapper {
     private final double MIN_SIDE_LENGTH = 0.5;
     //~ Enums ------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
      *
      * @return  DOCUMENT ME!
      */
-    public TexturePaint getTexturePaint() {
+    public Paint getPaint() {
         return paint;
     }
 

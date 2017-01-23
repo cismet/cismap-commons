@@ -110,6 +110,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -1580,19 +1581,32 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             graphic.size
                                     * multiplier));
             } else {
-                texture = new PFixedTexturePaint(
+                texture = new SelectionAwareTexturePaint(
+                        image,
+                        image,
                         image,
                         new Rectangle2D.Double(
                             0,
                             0,
                             multiplier
                                     * graphic.size
-                                    * image.getWidth()
-                                    / image.getHeight(),
-                            graphic.size
-                                    * multiplier),
-                        parent);
-                map.addStickyNode((PFixedTexturePaint)texture);
+                                    * image.getWidth(),
+                            multiplier
+                                    * graphic.size
+                                    * image.getHeight()));
+//                texture = new PFixedTexturePaint(
+//                        image,
+//                        new Rectangle2D.Double(
+//                            0,
+//                            0,
+//                            multiplier
+//                                    * graphic.size
+//                                    * image.getWidth()
+//                                    / image.getHeight(),
+//                            graphic.size
+//                                    * multiplier),
+//                        parent);
+//                map.addStickyNode((PFixedTexturePaint)texture);
             }
             return texture;
         }

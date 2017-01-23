@@ -1099,7 +1099,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     if (paint instanceof SelectionAwareTexturePaint) {
                         ((SelectionAwareTexturePaint)paint).setScale(viewer.getCamera().getViewScale(),
                             CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode()));
-                        setPaint(((SelectionAwareTexturePaint)paint).getTexturePaint());
+                        setPaint(((SelectionAwareTexturePaint)paint).getPaint());
+                    } else if (paint instanceof PaintWrapper) {
+                        setPaint(((PaintWrapper)paint).getPaint());
                     } else {
                         setPaint(paint);
                     }
@@ -2561,7 +2563,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (!isSelected() && (getPaint() != null) && highlightingEnabledIfStyledFeature) {
             highlighted = highlighting;
             if (highlighted) {
-                if (!(nonHighlightingPaint instanceof SelectionAwareTexturePaint)) {
+                if (!(nonHighlightingPaint instanceof PaintWrapper)) {
                     nonHighlightingPaint = getPaint();
                 }
                 if (nonHighlightingPaint instanceof Color) {
@@ -2574,13 +2576,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         texturePaint.clone();
                     highlightingPaint.setMode(SelectionAwareTexturePaint.SelectionMode.HIGHLIGHTED);
 
-                    setPaintOnAllFeatures(highlightingPaint.getTexturePaint());
+                    setPaintOnAllFeatures(highlightingPaint.getPaint());
+                } else if (nonHighlightingPaint instanceof PaintWrapper) {
+                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(new Color(1f, 1f, 1f, 0.6f));
                 }
             } else {
-                if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                    setPaintOnAllFeatures(((SelectionAwareTexturePaint)nonHighlightingPaint).getTexturePaint());
+                if (nonHighlightingPaint instanceof PaintWrapper) {
+                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(nonHighlightingPaint);
                 }
@@ -2799,13 +2803,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)nonHighlightingPaint;
                     final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint)texturePaint.clone();
                     selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
-                    setPaintOnAllFeatures(selectedPaint.getTexturePaint());
+                    setPaintOnAllFeatures(selectedPaint.getPaint());
+                } else if (nonHighlightingPaint instanceof PaintWrapper) {
+                    setPaintOnAllFeatures( ((PaintWrapper)nonHighlightingPaint).getPaint() );
                 } else {
                     setPaintOnAllFeatures(new Color(172, 210, 248, 178));
                 }
             } else {
-                if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                    setPaintOnAllFeatures(((SelectionAwareTexturePaint)nonHighlightingPaint).getTexturePaint());
+                if (nonHighlightingPaint instanceof PaintWrapper) {
+                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(nonHighlightingPaint);
                 }
