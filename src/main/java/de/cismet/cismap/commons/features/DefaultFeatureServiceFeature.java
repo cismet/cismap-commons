@@ -74,6 +74,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.RGBImageFilter;
+import java.awt.image.RescaleOp;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -112,7 +113,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import java.awt.image.RescaleOp;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -1582,8 +1582,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             graphic.size
                                     * multiplier));
             } else {
-                RescaleOp rescaleOp = new RescaleOp(0.25f, 0f, null);
-                
+                final RescaleOp rescaleOp = new RescaleOp(0.25f, 0f, null);
+
                 texture = new SelectionAwareTexturePaint(
                         image,
                         rescaleOp.filter(image, null),
