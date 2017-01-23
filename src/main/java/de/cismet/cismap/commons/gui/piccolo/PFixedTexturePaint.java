@@ -12,8 +12,8 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
-import java.awt.Paint;
 
+import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -93,7 +93,8 @@ public class PFixedTexturePaint implements java.awt.Paint, PSticky, PaintWrapper
                             * scale,
                     anchor.getWidth()
                             * scale,
-                    anchor.getHeight() * scale));
+                    anchor.getHeight()
+                            * scale));
     }
 
     @Override

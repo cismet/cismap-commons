@@ -2805,7 +2805,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
                     setPaintOnAllFeatures(selectedPaint.getPaint());
                 } else if (nonHighlightingPaint instanceof PaintWrapper) {
-                    setPaintOnAllFeatures( ((PaintWrapper)nonHighlightingPaint).getPaint() );
+                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(new Color(172, 210, 248, 178));
                 }

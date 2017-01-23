@@ -31,7 +31,7 @@ import java.awt.image.ColorModel;
  * @version  $Revision$, $Date$
  */
 public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrapper {
-    private final double MIN_SIDE_LENGTH = 0.5;
+
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -47,6 +47,8 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
     }
 
     //~ Instance fields --------------------------------------------------------
+
+    private final double MIN_SIDE_LENGTH = 0.5;
 
     private final BufferedImage defaultImage;
     private final BufferedImage highlightedImage;
@@ -86,6 +88,7 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Paint getPaint() {
         return paint;
     }
@@ -151,22 +154,23 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
     public void setScale(final double scale, final Geometry geom) {
         double factor = (1 / scale);
 
-        double minSide = Math.min(rec.getWidth() * factor, rec.getHeight() * factor);
-        
+        final double minSide = Math.min(rec.getWidth() * factor, rec.getHeight() * factor);
+
         if (minSide < MIN_SIDE_LENGTH) {
-            //if the side is smaller than MIN_SIDE_LENGTH, display errors will be occur
+            // if the side is smaller than MIN_SIDE_LENGTH, display errors will be occur
             factor = MIN_SIDE_LENGTH / Math.min(rec.getWidth(), rec.getHeight());
         }
 
         if (geom.getArea() < 0.0001d) {
-            //wgs 84 is assumed
+            // wgs 84 is assumed
             factor *= Math.sqrt(geom.getArea());
         }
 
         currentRec = new Rectangle2D.Double(
                 rec.getMinX(),
                 rec.getMinY(),
-                rec.getWidth() * factor,
+                rec.getWidth()
+                        * factor,
                 rec.getHeight()
                         * factor);
         paint = new TexturePaint(

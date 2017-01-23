@@ -829,8 +829,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     ShapeFeature featureServiceFeature;
 
                     if (fc != null) {
-                        featureServiceFeature = createFeatureInstance(null, info, record - 1);
-                        this.initialiseFeature(featureServiceFeature, null, false, record - 1);
+                        featureServiceFeature = createFeatureInstance(null, info, record);
+                        this.initialiseFeature(featureServiceFeature, null, false, record);
                     } else {
                         featureServiceFeature = createFeatureInstance(null, info, record);
                         this.initialiseFeature(featureServiceFeature, null, false, record);

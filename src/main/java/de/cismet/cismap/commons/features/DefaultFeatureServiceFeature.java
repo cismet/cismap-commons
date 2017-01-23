@@ -112,6 +112,7 @@ import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.awt.image.RescaleOp;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -1581,10 +1582,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             graphic.size
                                     * multiplier));
             } else {
+                RescaleOp rescaleOp = new RescaleOp(0.25f, 0f, null);
+                
                 texture = new SelectionAwareTexturePaint(
                         image,
-                        image,
-                        image,
+                        rescaleOp.filter(image, null),
+                        rescaleOp.filter(image, null),
                         new Rectangle2D.Double(
                             0,
                             0,
