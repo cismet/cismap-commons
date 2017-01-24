@@ -30,7 +30,7 @@ import java.awt.image.ColorModel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class SelectionAwareTexturePaint implements Paint, Cloneable {
+public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrapper {
 
     //~ Enums ------------------------------------------------------------------
 
@@ -47,6 +47,8 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
     }
 
     //~ Instance fields --------------------------------------------------------
+
+    private final double MIN_SIDE_LENGTH = 0.5;
 
     private final BufferedImage defaultImage;
     private final BufferedImage highlightedImage;
@@ -80,6 +82,16 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    @Override
+    public Paint getPaint() {
+        return paint;
+    }
 
     /**
      * Set the selection mode to highlighted, selected or unselected.
@@ -142,9 +154,18 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable {
     public void setScale(final double scale, final Geometry geom) {
         double factor = (1 / scale);
 
+        final double minSide = Math.min(rec.getWidth() * factor, rec.getHeight() * factor);
+
+        if (minSide < MIN_SIDE_LENGTH) {
+            // if the side is smaller than MIN_SIDE_LENGTH, display errors will be occur
+            factor = MIN_SIDE_LENGTH / Math.min(rec.getWidth(), rec.getHeight());
+        }
+
         if (geom.getArea() < 0.0001d) {
+            // wgs 84 is assumed
             factor *= Math.sqrt(geom.getArea());
         }
+
         currentRec = new Rectangle2D.Double(
                 rec.getMinX(),
                 rec.getMinY(),

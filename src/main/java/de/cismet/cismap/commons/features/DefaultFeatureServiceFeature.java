@@ -74,6 +74,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.RGBImageFilter;
+import java.awt.image.RescaleOp;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -110,6 +111,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -1580,19 +1582,34 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             graphic.size
                                     * multiplier));
             } else {
-                texture = new PFixedTexturePaint(
+                final RescaleOp rescaleOp = new RescaleOp(0.25f, 0f, null);
+
+                texture = new SelectionAwareTexturePaint(
                         image,
+                        rescaleOp.filter(image, null),
+                        rescaleOp.filter(image, null),
                         new Rectangle2D.Double(
                             0,
                             0,
                             multiplier
                                     * graphic.size
-                                    * image.getWidth()
-                                    / image.getHeight(),
-                            graphic.size
-                                    * multiplier),
-                        parent);
-                map.addStickyNode((PFixedTexturePaint)texture);
+                                    * image.getWidth(),
+                            multiplier
+                                    * graphic.size
+                                    * image.getHeight()));
+//                texture = new PFixedTexturePaint(
+//                        image,
+//                        new Rectangle2D.Double(
+//                            0,
+//                            0,
+//                            multiplier
+//                                    * graphic.size
+//                                    * image.getWidth()
+//                                    / image.getHeight(),
+//                            graphic.size
+//                                    * multiplier),
+//                        parent);
+//                map.addStickyNode((PFixedTexturePaint)texture);
             }
             return texture;
         }

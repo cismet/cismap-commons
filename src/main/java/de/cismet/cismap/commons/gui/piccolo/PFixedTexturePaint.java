@@ -13,6 +13,7 @@ package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
 
+import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
@@ -28,7 +29,7 @@ import java.awt.image.ColorModel;
  * @author   mroncoroni
  * @version  $Revision$, $Date$
  */
-public class PFixedTexturePaint implements java.awt.Paint, PSticky {
+public class PFixedTexturePaint implements java.awt.Paint, PSticky, PaintWrapper {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -92,6 +93,12 @@ public class PFixedTexturePaint implements java.awt.Paint, PSticky {
                             * scale,
                     anchor.getWidth()
                             * scale,
-                    anchor.getHeight()));
+                    anchor.getHeight()
+                            * scale));
+    }
+
+    @Override
+    public Paint getPaint() {
+        return paint;
     }
 }
