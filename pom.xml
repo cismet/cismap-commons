@@ -40,6 +40,44 @@
         <url>https://github.com/cismet/cismap-commons/issues</url>
     </issueManagement>
     
+    <dependencyManagement>  
+        <!-- IMPORT of cismet-ext-bom -->
+        <dependencies>
+            <dependency>
+                <groupId>de.cismet</groupId>
+                <artifactId>cismet-ext-bom</artifactId>
+                <version>5.0-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        
+            <!-- BEGIN: managed cids-dependencies -->
+            <dependency>
+                <groupId>de.cismet.commons</groupId>
+                <artifactId>cismet-commons</artifactId>
+                <version>5.0-SNAPSHOT</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>de.cismet.commons</groupId>
+                <artifactId>cismet-commons</artifactId>
+                <version>5.0-SNAPSHOT</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>de.cismet.commons</groupId>
+                <artifactId>cismet-gui-commons</artifactId>
+                <version>5.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>de.cismet.custom</groupId>
+                <artifactId>beansbinding</artifactId>
+                <version>5.0-SNAPSHOT</version>
+            </dependency>
+            <!-- END: managed cids-dependencies -->
+        </dependencies>
+    </dependencyManagement>
+    
     <!-- 
         TODO define versions in dependency management section of ext-libs-bom 
     -->  
@@ -47,49 +85,53 @@
         <!-- BEGIN: cids-dependencies -->
         <dependency>
             <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
             <artifactId>cismet-gui-commons</artifactId>
-            <version>5.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.grizzly</groupId>
-                    <artifactId>grizzly-servlet-webserver</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>de.cismet.custom</groupId>
             <artifactId>beansbinding</artifactId>
-            <version>5.0-SNAPSHOT</version>
         </dependency>
+        <!-- version and exclusions managed in cismet-ext-bom -->
         <dependency>
             <groupId>de.cismet.custom</groupId>
             <artifactId>cismet-deegree</artifactId>
-            <version>2.3.8</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jdom</groupId>
-                    <artifactId>jdom</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>xerces</groupId>
-                    <artifactId>xmlParserAPIs</artifactId>
-                </exclusion>
-                
-            </exclusions>
         </dependency>
         <!-- END: cids-dependencies -->
+        
+        <!-- BEGIN: managed dependencies -->
+        <!-- jcl-over-slf4j logging bridge is needed to avoid commons-logging compatibility problems  -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>      
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
         <!-- this is only a helper library that is needed at compile time -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.14.4</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
-            <version>2.11.0</version>
         </dependency>
+        <!-- END: managed dependencies -->
+
         <dependency>
             <groupId>com.jgoodies</groupId>
             <artifactId>looks</artifactId>
@@ -99,6 +141,12 @@
             <groupId>ar.com.fdvs</groupId>
             <artifactId>DynamicJasper</artifactId>
             <version>5.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>calpa.html</groupId>
@@ -124,12 +172,7 @@
             <groupId>org.orbisgis</groupId>
             <artifactId>spatial-utilities</artifactId>
             <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>      
+        </dependency>     
         <dependency>
             <groupId>edu.umd</groupId>
             <artifactId>piccolo</artifactId>
@@ -155,12 +198,52 @@
                     <groupId>org.apache.geronimo.specs</groupId>
                     <artifactId>geronimo-stax-api_1.0_spec</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.woodstox</groupId>
+                    <artifactId>wstx-asl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.woodstox</groupId>
+                    <artifactId>woodstox-core-lgpl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--
+            Need to include managed woodstox-core-asl in favour of woodstox mess 
+            excluded from degree!
+        -->
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-rendering-2d</artifactId>
             <version>3.2.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jai</groupId>
+                    <artifactId>jai-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jai</groupId>
+                    <artifactId>jai-imageio</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>batik</groupId>
@@ -171,12 +254,6 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-referencing</artifactId>
             <version>10.8</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
@@ -191,17 +268,24 @@
                     <groupId>stax</groupId>
                     <artifactId>stax-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta-regexp</groupId>
+                    <artifactId>jakarta-regexp</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>stax</groupId>
+                    <artifactId>stax</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
             <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -235,11 +319,6 @@
             <version>10.0</version>
         </dependency>
         <dependency>
-            <groupId>org.postgis</groupId>
-            <artifactId>postgis</artifactId>
-            <version>1.1.7</version>
-        </dependency>
-        <dependency>
             <groupId>jfree</groupId>
             <artifactId>jcommon</artifactId>
             <version>1.0.15</version>
@@ -253,12 +332,6 @@
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
             <version>10.8</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.media</groupId>
-                    <artifactId>jai_core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>commons-collections</groupId>
@@ -289,16 +362,16 @@
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-base</artifactId>
             <version>3.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-httpclient</groupId>
-            <artifactId>commons-httpclient</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>de.cismet.commons</groupId>
-            <artifactId>cismet-commons</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jai</groupId>
+                    <artifactId>jai-codec</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jai</groupId>
+                    <artifactId>jai-imageio</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -308,22 +381,131 @@
         <dependency>
             <groupId>org.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
-            <version>1.3.3</version>
-            <scope>runtime</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
-            <artifactId>jdom</artifactId>
-            <version>1.1.3</version>
+            <artifactId>jdom-legacy</artifactId>
+        </dependency>
+        <!-- Strange: dependecy required by cids-maven direct compile-->
+        <!--<dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-cs</artifactId>
+            <version>3.2.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jai</groupId>
+                    <artifactId>jai-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>xml-apis</groupId>
-            <artifactId>xml-apis</artifactId>
-            <version>1.4.01</version>
+            <groupId>com.drewnoakes</groupId>
+            <artifactId>metadata-extractor</artifactId>
+            <version>2.8.1</version>
+        </dependency>-->
+        <!-- BEGIN: test dependencies -->
+        <!--
+            include and run the cismet-commons test against the resolved dependencies 
+            in cismap commons!
+        -->
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-commons</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
+        <!--
+            ATTENTION: we need to include also all test dependencies required by downstream 
+            test-jars!
+            
+            See https://maven.apache.org/plugins/maven-jar-plugin/examples/create-test-jar.html
+        -->
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.jersey</groupId>
+            <artifactId>jersey-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-xml-provider</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- END: test dependencies -->
     </dependencies>
 
     <build>
+        <!--
+            Note: We need to import the cismet-commons test-jar created by the release profile
+            in order to run the downstream tests!
+        -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <dependenciesToScan>
+                            <dependency>de.cismet.commons:cismet-commons</dependency>
+                        </dependenciesToScan>
+                        <!--
+                            These tests from cismet-commons does not work from inside a JAR file!
+                        -->
+                        <excludes>
+                            <exclude>**/ClassPathInfoTest.java</exclude>
+                            <exclude>**/MultiPagePictureReaderTest.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <finalName>cismapCommons</finalName>
     </build>
 </project>
