@@ -22,7 +22,6 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import edu.umd.cs.piccolo.util.PObjectOutputStream;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.collation.CollationAttributeFactory;
 
 import org.geotools.referencing.wkt.Parser;
 
@@ -36,7 +35,6 @@ import org.jfree.util.Log;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
@@ -82,7 +80,6 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
-import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
