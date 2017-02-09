@@ -221,6 +221,10 @@
                     <groupId>org.codehaus.woodstox</groupId>
                     <artifactId>woodstox-core-lgpl</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javassist</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <!--
@@ -237,6 +241,14 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--
+            Need to include managed javassist in favour of javassist mess 
+            excluded from degree!
+        -->
+        <dependency>
+                <groupId>org.javassist</groupId>
+                <artifactId>javassist</artifactId>
+        </dependency>  
         <dependency>
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-rendering-2d</artifactId>
