@@ -63,7 +63,9 @@
                 <artifactId>cismet-commons</artifactId>
                 <version>5.0-SNAPSHOT</version>
                 <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
+            
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
@@ -75,13 +77,33 @@
                 <artifactId>cismet-gui-commons</artifactId>
                 <version>5.0-SNAPSHOT</version>
                 <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
+            
             <dependency>
                 <groupId>de.cismet.custom</groupId>
                 <artifactId>beansbinding</artifactId>
                 <version>5.0-SNAPSHOT</version>
             </dependency>
             <!-- END: managed cids-dependencies -->
+            
+            <!-- 
+                java3d vecmath 1.5.2 as required by de.cismet.custom:cismet-deegree:2.3.8
+            -->
+            <dependency>
+                <groupId>java3d</groupId>
+                <artifactId>vecmath</artifactId>
+                <version>1.5.2</version>
+            </dependency>
+            
+            <!-- 
+                jaxen 1.1.3 as required by org.apache.ws.commons.axiom:axiom-api:1.2.13
+            -->
+            <dependency>
+                <groupId>jaxen</groupId>
+                <artifactId>jaxen</artifactId>
+                <version>1.1.4</version>
+            </dependency>         
         </dependencies>
     </dependencyManagement>
     
@@ -130,6 +152,14 @@
             <artifactId>commons-httpclient</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
             <groupId>xml-apis</groupId>
             <artifactId>xml-apis</artifactId>
         </dependency>
@@ -137,6 +167,64 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
         </dependency>
+        <!-- 
+            Jasper XML API Exclusions managed in cismet-ext-bom! 
+        -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+        </dependency>
+
+        <!--
+            deegree exclusions managed in cismet-ext-bom!
+        -->
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-style</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-rendering-2d</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-geometry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-base</artifactId>
+        </dependency>
+        <!--
+            Need to include managed woodstox-core-asl in favour of woodstox mess 
+            excluded from degree!
+        -->
+        <dependency>
+            <groupId>org.codehaus.woodstox</groupId>
+            <artifactId>woodstox-core-asl</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.xml.stream</groupId>
+                    <artifactId>stax-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--
+            Need to include managed javassist in favour of javassist mess 
+            excluded from degree!
+        -->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+        </dependency>  
         <!-- END: managed dependencies -->
 
         <dependency>
@@ -166,11 +254,6 @@
             <version>0.14</version>
         </dependency>
         <dependency>
-            <groupId>com.vividsolutions</groupId>
-            <artifactId>jts</artifactId>
-            <version>1.13</version>
-        </dependency>
-        <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>1.4.188</version>
@@ -191,80 +274,6 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>org.deegree</groupId>
-            <artifactId>deegree-core-style</artifactId>
-            <version>3.2.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.deegree</groupId>
-            <artifactId>deegree-core-commons</artifactId>
-            <version>3.2.3</version>
-            <type>jar</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>wstx-asl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.codehaus.woodstox</groupId>
-                    <artifactId>woodstox-core-lgpl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>javassist</groupId>
-                    <artifactId>javassist</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--
-            Need to include managed woodstox-core-asl in favour of woodstox mess 
-            excluded from degree!
-        -->
-        <dependency>
-            <groupId>org.codehaus.woodstox</groupId>
-            <artifactId>woodstox-core-asl</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.stream</groupId>
-                    <artifactId>stax-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!--
-            Need to include managed javassist in favour of javassist mess 
-            excluded from degree!
-        -->
-        <dependency>
-                <groupId>org.javassist</groupId>
-                <artifactId>javassist</artifactId>
-        </dependency>  
-        <dependency>
-            <groupId>org.deegree</groupId>
-            <artifactId>deegree-core-rendering-2d</artifactId>
-            <version>3.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jai</groupId>
-                    <artifactId>jai-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>jai</groupId>
-                    <artifactId>jai-imageio</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>batik</groupId>
             <artifactId>batik-awt-util</artifactId>
             <version>1.6-1</version>
@@ -275,52 +284,9 @@
             <version>10.8</version>
         </dependency>
         <dependency>
-            <groupId>net.sf.jasperreports</groupId>
-            <artifactId>jasperreports</artifactId>
-            <version>6.0.4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.xml.stream</groupId>
-                    <artifactId>stax-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>stax</groupId>
-                    <artifactId>stax-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>jakarta-regexp</groupId>
-                    <artifactId>jakarta-regexp</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>stax</groupId>
-                    <artifactId>stax</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
             <version>1.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.deegree</groupId>
-            <artifactId>deegree-core-geometry</artifactId>
-            <version>3.2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jai</groupId>
-                    <artifactId>jai-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -345,17 +311,12 @@
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>9.0-801.jdbc4</version>
+            <version>9.1-903.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
             <version>10.8</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.1</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -378,21 +339,6 @@
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.deegree</groupId>
-            <artifactId>deegree-core-base</artifactId>
-            <version>3.2.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>jai</groupId>
-                    <artifactId>jai-codec</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>jai</groupId>
-                    <artifactId>jai-imageio</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-dialogs</artifactId>
             <version>RELEASE701</version>
@@ -406,11 +352,13 @@
             <groupId>org.jdom</groupId>
             <artifactId>jdom-legacy</artifactId>
         </dependency>
-        <!-- Strange: dependecy required by cids-maven direct compile-->
+        <!-- 
+            Strange: dependencies required by cids-maven direct compile
+            but not by maven dependency plugin!
+        -->
         <!--<dependency>
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-cs</artifactId>
-            <version>3.2.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>jai</groupId>
