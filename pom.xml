@@ -94,22 +94,35 @@
     -->  
     <dependencies>
         <!-- BEGIN: cids-dependencies -->
-        <dependency>
-            <groupId>de.cismet.commons</groupId>
-            <artifactId>cismet-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.cismet.commons</groupId>
-            <artifactId>cismet-gui-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.cismet.custom</groupId>
-            <artifactId>beansbinding</artifactId>
-        </dependency>
+        <!-- DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER
+        Duplicate class org/deegree/crs/Identifiable.class in
+            de.cismet.custom:cismet-deegree:jar:2.3.8:compile and
+            org.deegree:deegree-core-cs:jar:3.2.3:compile  
+        
+        Place cismet-deegree:jar before other deegree jars!    
+        See https://slack-files.com/T02E499M3-F454S3R0B-f951b30a17
+        DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER DANGER -->
         <!-- version and exclusions managed in cismet-ext-bom -->
         <dependency>
             <groupId>de.cismet.custom</groupId>
             <artifactId>cismet-deegree</artifactId>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-commons</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-gui-commons</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>de.cismet.custom</groupId>
+            <artifactId>beansbinding</artifactId>
         </dependency>
         <!-- END: cids-dependencies -->
         
