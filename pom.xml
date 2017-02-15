@@ -281,7 +281,6 @@
         <dependency>
             <groupId>org.swinglabs</groupId>
             <artifactId>swingx</artifactId>
-            <version>1.6</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -298,6 +297,10 @@
             <artifactId>guava</artifactId>
             <version>10.0</version>
         </dependency>
+        <!--
+            FIXME: Wrong group id for jfree (required: org.jfree)!
+            Dependecy brought in by Jasper!
+        -->
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jcommon</artifactId>
