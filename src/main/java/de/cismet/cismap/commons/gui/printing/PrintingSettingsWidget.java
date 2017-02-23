@@ -417,7 +417,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 mappingComponent.getFeatureCollection();
             mapFeatureCol.holdFeature(printTemplateStyledFeature);
             mapFeatureCol.addFeature(printTemplateStyledFeature);
-            mappingComponent.adjustMapForPrintingTemplates();
+            mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
             mapFeatureCol.select(printTemplateStyledFeature);
             mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
             mappingComponent.showHandles(false);
