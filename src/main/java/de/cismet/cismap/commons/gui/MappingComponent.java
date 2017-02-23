@@ -3134,7 +3134,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 final LinkedHashSet<Feature> copy = new LinkedHashSet(
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
-                                    if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
+                                    if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()
+                                                && !(selectedFeature instanceof RequestForHidingHandles)) {
                                         // manipulates gui -> edt
                                         EventQueue.invokeLater(new Thread("MappingComponent addRotationHandles") {
 
@@ -3154,14 +3155,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 final LinkedHashSet<Feature> copy = new LinkedHashSet(
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
-                                    if ((selectedFeature != null) && selectedFeature.isEditable()) {
+                                    if ((selectedFeature != null) && selectedFeature.isEditable()
+                                                && !(selectedFeature instanceof RequestForHidingHandles)) {
                                         if ((pFeatureHM.get(selectedFeature) != null)
                                                     && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
                                             EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
 
                                                     @Override
-                                                    public void run() {
+                                                    public void run() {             
                                                         try {
                                                             pFeatureHM.get(selectedFeature).addHandles(handleLayer);
                                                         } catch (final Exception e) {
