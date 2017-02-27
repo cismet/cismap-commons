@@ -220,6 +220,42 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>  
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom-legacy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swing-layout</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolox</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-dialogs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-awt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+        </dependency>
         <!-- END: managed dependencies -->
 
         <dependency>
@@ -259,16 +295,6 @@
             <version>1.2.3</version>
         </dependency>     
         <dependency>
-            <groupId>edu.umd</groupId>
-            <artifactId>piccolo</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.umd</groupId>
-            <artifactId>piccolox</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
             <groupId>batik</groupId>
             <artifactId>batik-awt-util</artifactId>
             <version>1.6-1</version>
@@ -283,15 +309,6 @@
                     <artifactId>jai_core</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swingx</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <version>RELEASE701</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -329,38 +346,14 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-awt</artifactId>
-            <version>RELEASE701</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>RELEASE701</version>
-        </dependency>
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swing-layout</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-activation_1.1_spec</artifactId>
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-dialogs</artifactId>
-            <version>RELEASE701</version>
-        </dependency>
-        <dependency>
             <groupId>org.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jdom</groupId>
-            <artifactId>jdom-legacy</artifactId>
         </dependency>
         <!-- 
             Strange: dependencies required by cids-maven direct compile
