@@ -281,8 +281,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private boolean resizeEventActivated = true;
     private double stickyFeatureCorrectionFactor = 1d;
     private volatile Coordinate currentCrosshairPoint;
-    private Thread printingTemplateZoomThread;
-    private long printingTemplateZoomTime;
+    private Thread specialFeatureZoomThread;
+    private long specialFeatureZoomTime;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -594,16 +594,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  specialFeatureClass  DOCUMENT ME!
      */
-    public void adjustMapForPrintingTemplates() {
+    public void adjustMapForSpecialFeatureClasses(final Class specialFeatureClass) {
         final int delayTime = 500;
-        printingTemplateZoomTime = System.currentTimeMillis() + delayTime;
-        if ((printingTemplateZoomThread == null) || !printingTemplateZoomThread.isAlive()) {
-            printingTemplateZoomThread = new Thread("PrintFrameListener adjustMap()") {
+        specialFeatureZoomTime = System.currentTimeMillis() + delayTime;
+        if ((specialFeatureZoomThread == null) || !specialFeatureZoomThread.isAlive()) {
+            specialFeatureZoomThread = new Thread("specialFeatureZoomThread for:"
+                            + specialFeatureClass.getCanonicalName()) {
 
                     @Override
                     public void run() {
-                        while (System.currentTimeMillis() < printingTemplateZoomTime) {
+                        while (System.currentTimeMillis() < specialFeatureZoomTime) {
                             try {
                                 sleep(100);
                                 // log.debug("WAIT");
@@ -614,25 +617,39 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                                 @Override
                                 public void run() {
-                                    ensureVisibilityOfPrintingTemplates();
+                                    ensureVisibilityOfSpecialFeatures(specialFeatureClass);
                                 }
                             });
                     }
                 };
-            printingTemplateZoomThread.setPriority(Thread.NORM_PRIORITY);
-            CismetThreadPool.execute(printingTemplateZoomThread);
+            specialFeatureZoomThread.setPriority(Thread.NORM_PRIORITY);
+            CismetThreadPool.execute(specialFeatureZoomThread);
         }
     }
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  specialFeatureClass  DOCUMENT ME!
+     * @param  fixedScale           DOCUMENT ME!
      */
-    public void ensureVisibilityOfPrintingTemplates() {
+
+    public void ensureVisibilityOfSpecialFeatures(final Class specialFeatureClass, final boolean fixedScale) {
         if (!isFixedMapExtent()) {
-            zoomToAFeatureCollection(getSpecialFeatureCollection(PrintTemplateFeature.class),
+            zoomToAFeatureCollection(getSpecialFeatureCollection(specialFeatureClass),
                 false,
-                isFixedMapScale());
+                fixedScale);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  specialFeatureClass  DOCUMENT ME!
+     */
+
+    public void ensureVisibilityOfSpecialFeatures(final Class specialFeatureClass) {
+        ensureVisibilityOfSpecialFeatures(specialFeatureClass, isFixedMapScale());
     }
 
     /**
@@ -3134,7 +3151,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 final LinkedHashSet<Feature> copy = new LinkedHashSet(
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
-                                    if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
+                                    if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()
+                                                && !(selectedFeature instanceof RequestForHidingHandles)) {
                                         // manipulates gui -> edt
                                         EventQueue.invokeLater(new Thread("MappingComponent addRotationHandles") {
 
@@ -3154,7 +3172,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 final LinkedHashSet<Feature> copy = new LinkedHashSet(
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
-                                    if ((selectedFeature != null) && selectedFeature.isEditable()) {
+                                    if ((selectedFeature != null) && selectedFeature.isEditable()
+                                                && !(selectedFeature instanceof RequestForHidingHandles)) {
                                         if ((pFeatureHM.get(selectedFeature) != null)
                                                     && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
