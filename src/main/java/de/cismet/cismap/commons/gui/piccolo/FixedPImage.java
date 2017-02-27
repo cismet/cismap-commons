@@ -105,6 +105,7 @@ public class FixedPImage extends PImage implements PSticky {
      */
     public void setSweetSpotX(final double sweetSpotX) {
         this.sweetSpotX = sweetSpotX;
+        setOffsetWithoutTouchingOriginalOffset(originalOffsetX, originalOffsetY);
     }
 
     /**
@@ -123,6 +124,7 @@ public class FixedPImage extends PImage implements PSticky {
      */
     public void setSweetSpotY(final double sweetSpotY) {
         this.sweetSpotY = sweetSpotY;
+        setOffsetWithoutTouchingOriginalOffset(originalOffsetX, originalOffsetY);
     }
 
     @Override

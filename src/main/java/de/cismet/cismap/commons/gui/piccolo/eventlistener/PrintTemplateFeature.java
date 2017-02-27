@@ -40,7 +40,6 @@ import java.util.Collection;
 import java.util.concurrent.Future;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JMenu;
@@ -815,7 +814,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             // ---
             mapFeatureCol.holdFeature(PrintTemplateFeature.this);
             mapFeatureCol.addFeature(PrintTemplateFeature.this);
-            mappingComponent.adjustMapForPrintingTemplates();
+            mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
             mapFeatureCol.select(PrintTemplateFeature.this);
             // mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
             mappingComponent.showHandles(false);
@@ -847,7 +846,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             super.mouseReleased(event);
             ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseReleased(
                 event);
-            mappingComponent.ensureVisibilityOfPrintingTemplates();
+            mappingComponent.ensureVisibilityOfSpecialFeatures(PrintTemplateFeature.class);
         }
 
         @Override
@@ -878,10 +877,10 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                 }
                 if (event.getWheelRotation() < 0) {
                     zoom(0.9d, ptf);
-                    mappingComponent.adjustMapForPrintingTemplates();
+                    mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
                 } else {
                     zoom(1.1d, ptf);
-                    mappingComponent.adjustMapForPrintingTemplates();
+                    mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
                 }
             }
         }
@@ -968,7 +967,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                         mappingComponent.getFeatureCollection();
                     mapFeatureCol.holdFeature(newPTF);
                     mapFeatureCol.addFeature(newPTF);
-                    mappingComponent.adjustMapForPrintingTemplates();
+                    mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
                 }
             }
         }

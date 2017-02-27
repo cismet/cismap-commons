@@ -32,6 +32,7 @@ import java.util.Vector;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.RequestForHidingHandles;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
@@ -120,7 +121,9 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseDragged(final PInputEvent e) {
-        if ((pFeature != null) && (handleLayer.getChildrenCount() > 0)) {
+        if ((pFeature != null)
+                    && ((handleLayer.getChildrenCount() > 0)
+                        || (pFeature.getFeature() instanceof RequestForHidingHandles))) {
             drag = true;
             final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
             if (moveListener != null) {
