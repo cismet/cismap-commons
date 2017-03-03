@@ -107,7 +107,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         btnLock.setVisible(model.isResourceConserving());
         this.getContentPane().add(btnLock, BorderLayout.WEST);
 
-        this.setPreferredSize(new Dimension((int)sliderWidth, (int)slider.getPreferredSize().getHeight()
+        this.setPreferredSize(new Dimension((int)sliderWidth + 24, (int)slider.getPreferredSize().getHeight()
                         + 15));
         this.pack();
         this.setResizable(true);
