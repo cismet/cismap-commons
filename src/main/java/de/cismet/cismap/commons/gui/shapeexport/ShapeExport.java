@@ -83,7 +83,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     private static String destinationFile = "export";
     private static String destinationFileExtension = ".zip";
 
-    private static boolean enableShapeExport = true;
+    private static boolean enableShapeExport = false;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -168,6 +168,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     @Override
     public void masterConfigure(final Element parent) {
+        enableShapeExport = true;
         final Element cismapShapeExport = parent.getChild(XML_CONF_ROOT);
         if (cismapShapeExport == null) {
             LOG.warn("The shape export isn't configured. The export functionality will not be available.");
