@@ -88,6 +88,7 @@ import de.cismet.cismap.commons.preferences.LayersPreferences;
 import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
@@ -128,6 +129,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String MOTION = "MOTION";                                           // NOI18N
     public static final String PERPENDICULAR_INTERSECTION = "PERPENDICULAR_INTERSECTION";   // NOI18N
     public static final String SELECT = "SELECT";                                           // NOI18N
+    public static final String GEO_REF = "GEO_REF";                                         // NOI18N
     public static final String ZOOM = "ZOOM";                                               // NOI18N
     public static final String PAN = "PAN";                                                 // NOI18N
     public static final String ALKIS_PRINT = "ALKIS_PRINT";                                 // NOI18N
@@ -461,6 +463,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
             });
+        CismapBroker.getInstance().addActiveLayerListener(RasterGeoReferencingBackend.getInstance());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -897,6 +900,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(ZOOM, new RubberBandZoomListener());
         inputEventListener.put(PAN, new PanAndMousewheelZoomListener());
         inputEventListener.put(SELECT, new SelectionListener());
+        inputEventListener.put(GEO_REF, new RasterGeoReferencingInputListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
         inputEventListener.put(FEATURE_INFO_MULTI_GEOM, new GetFeatureInfoMultiGeomListener());
@@ -936,6 +940,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         putCursor(PERPENDICULAR_INTERSECTION, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(ZOOM, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(PAN, new Cursor(Cursor.HAND_CURSOR));
+        putCursor(GEO_REF, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(FEATURE_INFO, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(FEATURE_INFO_MULTI_GEOM, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(CREATE_SEARCH_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));

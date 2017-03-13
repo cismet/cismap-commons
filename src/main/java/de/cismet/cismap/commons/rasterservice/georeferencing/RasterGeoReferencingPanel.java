@@ -59,7 +59,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final RasterGeoReferencingWizardListener handlerListener = new HandlerListener();
+    private final RasterGeoReferencingWizardListener wizardListener = new WizardListener();
     private final CellSelectionListener selectionListener = new CellSelectionListener();
 
     private boolean isWizardRefreshing = false;
@@ -105,7 +105,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     public RasterGeoReferencingPanel() {
         initComponents();
 
-        getWizard().addListener(handlerListener);
+        getWizard().addListener(wizardListener);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -115,7 +115,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      *
      * @return  DOCUMENT ME!
      */
-    public RasterGeoReferencingWizard getWizard() {
+    public final RasterGeoReferencingWizard getWizard() {
         return RasterGeoReferencingWizard.getInstance();
     }
 
@@ -624,7 +624,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton6ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+    private void jButton6ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton6ActionPerformed
         new SwingWorker<Void, Object>() {
 
                 @Override
@@ -639,14 +639,14 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                     return null;
                 }
             }.execute();
-    }//GEN-LAST:event_jButton6ActionPerformed
+    } //GEN-LAST:event_jButton6ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton7ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+    private void jButton7ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton7ActionPerformed
         new SwingWorker<Void, Object>() {
 
                 @Override
@@ -665,14 +665,14 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                     return null;
                 }
             }.execute();
-    }//GEN-LAST:event_jButton7ActionPerformed
+    } //GEN-LAST:event_jButton7ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton8ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
+    private void jButton8ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton8ActionPerformed
         new SwingWorker<Integer, Object>() {
 
                 @Override
@@ -692,14 +692,14 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                     }
                 }
             }.execute();
-    }//GEN-LAST:event_jButton8ActionPerformed
+    } //GEN-LAST:event_jButton8ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         final int position = jXTable1.getSelectedRow();
         new SwingWorker<Boolean, Object>() {
 
@@ -725,7 +725,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 }
             }.execute();
         ;
-    }//GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -818,7 +818,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                     return (point != null) ? ("[" + (int)point.getX() + ", " + (int)point.getY() + "]") : null;
                 }
                 case 2: {
-                    return (coordinate != null) ? ("[" + coordinate.x + ", " + coordinate.y + "]") : null;
+                    return (coordinate != null)
+                        ? ("[" + new DecimalFormat("#0.00").format(coordinate.x) + ", "
+                                    + new DecimalFormat("#0.00").format(coordinate.y) + "]") : null;
                 }
                 case 3: {
                     return new DecimalFormat("#0.00").format(getHandler().getError(rowIndex));
@@ -956,7 +958,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private class HandlerListener implements RasterGeoReferencingWizardListener {
+    private class WizardListener implements RasterGeoReferencingWizardListener {
 
         //~ Methods ------------------------------------------------------------
 
@@ -998,7 +1000,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         public void handlerChanged(final RasterGeoReferencingHandler handler) {
             refreshModel();
             refreshWizardBinding();
-            if (getHandler().getNumOfPairs() > 0) {
+            if ((getHandler() != null) && (getHandler().getNumOfPairs() > 0)) {
                 getWizard().selectPoint(0);
             }
         }

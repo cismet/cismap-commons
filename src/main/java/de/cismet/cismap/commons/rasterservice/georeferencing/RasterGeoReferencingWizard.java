@@ -119,15 +119,17 @@ public class RasterGeoReferencingWizard {
         final boolean handlerChanged = ((handler != null) && !handler.equals(this.handler))
                     || ((handler == null) && (this.handler != null));
         if (handlerChanged) {
-            if (this.handler != null) {
-                this.handler.removeListener(listenerHandler);
-            }
+            final RasterGeoReferencingHandler oldHandler = this.handler;
             if (handler != null) {
                 handler.addListener(listenerHandler);
             }
 
             this.handler = handler;
             listenerHandler.handlerChanged(handler);
+
+            if (oldHandler != null) {
+                oldHandler.removeListener(listenerHandler);
+            }
         }
     }
 

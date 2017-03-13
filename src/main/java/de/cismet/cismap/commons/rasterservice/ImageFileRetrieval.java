@@ -277,23 +277,39 @@ public class ImageFileRetrieval extends Thread {
         handleInterruption();
 
         // TRANSFORMATION
+        // Just calculating the transformed shape first.
+        // (Not very elegant to do this, but it works)
         // scaling and shearing = worldfile scaling/shearing divided by meterPerPixel
-        // position = combined world offsets divided by meterPerPixel
         final AffineTransform transformation = new AffineTransform(
                 worldFileTransform.getScaleX()
                         / meterPerPixel.getWidth(),
-                worldFileTransform.getShearY()
+                -worldFileTransform.getShearY()
                         / meterPerPixel.getHeight(),
                 worldFileTransform.getShearX()
                         / meterPerPixel.getWidth(),
                 -worldFileTransform.getScaleY()
                         / meterPerPixel.getHeight(),
-                (imageMapWorldOffset.getX() + clippingWorldOffset.getX())
-                        / meterPerPixel.getWidth(),
-                (imageMapWorldOffset.getY() + clippingWorldOffset.getY())
-                        / meterPerPixel.getHeight());
+                0,
+                0);
 
-        final BufferedImage transformedImage = transform(transformation, clippedImage);
+        // The x/y coordinate of the transformed (but not yet translated) is either 0
+        // or negative. This is important, because negative values hav to be added to the offset
+        final Rectangle shapeBounds = transformation.createTransformedShape(imageBounds).getBounds();
+
+        // We apply now the full transormation to the image
+        // position = combined world offsets divided by meterPerPixel
+        final AffineTransform transformation2 = new AffineTransform(
+                transformation.getScaleX(),
+                transformation.getShearY(),
+                transformation.getShearX(),
+                transformation.getScaleY(),
+                ((imageMapWorldOffset.getX() + clippingWorldOffset.getX())
+                            / meterPerPixel.getWidth())
+                        - shapeBounds.getX(),
+                ((imageMapWorldOffset.getY() + clippingWorldOffset.getY())
+                            / meterPerPixel.getHeight())
+                        - shapeBounds.getY());
+        final BufferedImage transformedImage = transform(transformation2, clippedImage);
 
         // cleaning memory
         clippedImage = null;
@@ -339,20 +355,20 @@ public class ImageFileRetrieval extends Thread {
      * @throws  Exception  DOCUMENT ME!
      */
     private ImageFileMetaData getImageMetaData() throws Exception {
-        switch (mode) {
-            case WORLDFILE: {
-                return getWorldFileMetaData(getWorldFile());
-            }
-            case TIFF: {
-                getTiffMetaData();
-            }
-            case GEO_REFERENCED: {
-                return getGeoReferencedMetaData();
-            }
-            default: {
-                return null;
+        if (mode != null) {
+            switch (mode) {
+                case WORLDFILE: {
+                    return getWorldFileMetaData(getWorldFile());
+                }
+                case TIFF: {
+                    getTiffMetaData();
+                }
+                case GEO_REFERENCED: {
+                    return getGeoReferencedMetaData();
+                }
             }
         }
+        return null;
     }
 
     /**
@@ -363,7 +379,7 @@ public class ImageFileRetrieval extends Thread {
      * @throws  Exception  DOCUMENT ME!
      */
     private ImageFileMetaData getGeoReferencedMetaData() throws Exception {
-        return RasterGeoReferencingBackend.getInstance().getImageMetaData(imageFile);
+        return RasterGeoReferencingBackend.getInstance().getHandler(imageFile).getMetaData();
     }
 
     /**
@@ -406,8 +422,8 @@ public class ImageFileRetrieval extends Thread {
             br.close();
 
             if (index == matrix.length) {
-                matrix[1] = -matrix[1]; // don't know exactly why, but it doesn't work otherwise
                 final AffineTransform transform = new AffineTransform(matrix);
+                LOG.info(transform);
 
                 final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
                 final double imageWidth = imageDimension.getWidth();
