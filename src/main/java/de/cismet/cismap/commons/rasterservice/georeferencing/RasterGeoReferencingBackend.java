@@ -15,6 +15,9 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -24,7 +27,12 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollection;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoRefFeature;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -47,7 +55,8 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<File, RasterGeoReferencingHandler>();
+    @Getter(AccessLevel.PRIVATE)
+    private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -76,15 +85,25 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
             final ImageRasterService irs = (ImageRasterService)e.getLayer();
             if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                 final File imagefile = irs.getImageFile();
-                if (!metaDataMap.containsKey(imagefile)) {
+                if (!getMetaDataMap().containsKey(imagefile)) {
                     try {
-                        final RasterGeoReferencingHandler handler = createInitHandler(imagefile);
+                        final RasterGeoReferencingHandler handler = createInitHandler(irs, imagefile);
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    handler.setAllPositionEnabled(false);
+                                    RasterGeoReferencingWizard.getInstance().selectPoint(0);
+                                }
+                            });
 
                         handler.addListener(new RasterGeoReferencingHandlerListener() {
 
                                 private void transformationChanged(final int position) {
-                                    if (imagefile.equals(irs.getImageFile())) {
-                                        irs.retrieve(true);
+                                    if (handler.isComplete()) {
+                                        if (imagefile.equals(irs.getImageFile())) {
+                                            irs.retrieve(true);
+                                        }
                                     }
                                 }
 
@@ -107,8 +126,8 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
                         LOG.warn(ex, ex);
                     }
                 }
-                if (metaDataMap.size() == 1) {
-                    RasterGeoReferencingWizard.getInstance().setHandler(metaDataMap.get(imagefile));
+                if (getMetaDataMap().size() == 1) {
+                    RasterGeoReferencingWizard.getInstance().setHandler(getMetaDataMap().get(imagefile));
                 }
             }
         }
@@ -122,19 +141,21 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
      * @return  DOCUMENT ME!
      */
     public RasterGeoReferencingHandler getHandler(final File imageFile) {
-        return metaDataMap.get(imageFile);
+        return getMetaDataMap().get(imageFile);
     }
 
     /**
      * DOCUMENT ME!
      *
+     * @param   service    DOCUMENT ME!
      * @param   imageFile  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private RasterGeoReferencingHandler createInitHandler(final File imageFile) throws Exception {
+    private RasterGeoReferencingHandler createInitHandler(final ImageRasterService service, final File imageFile)
+            throws Exception {
         final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
         final Rectangle imageBounds = new Rectangle(
                 0,
@@ -169,7 +190,7 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
                 imageBounds,
                 imageEnvelope,
                 null);
-        final RasterGeoReferencingHandler handler = new RasterGeoReferencingHandler(metaData);
+        final RasterGeoReferencingHandler handler = new RasterGeoReferencingHandler(service, metaData);
         handler.addPair(new PointCoordinatePair(
                 new Point(0, 0),
                 new Coordinate(imageEnvelope.getMinX(), imageEnvelope.getMaxY())));
@@ -185,42 +206,12 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
                             - (imageEnvelope.getWidth() / 2d),
                     imageEnvelope.getMinY())));
 
-        handler.doCoordinateCorrection();
+        handler.updateTransformation();
+        handler.removeAllPairs();
 
-        metaDataMap.put(imageFile, handler);
+        getMetaDataMap().put(imageFile, handler);
         return handler;
     }
-
-//    /**
-//     * DOCUMENT ME!
-//     *
-//     * @param   pairs  DOCUMENT ME!
-//     *
-//     * @return  DOCUMENT ME!
-//     *
-//     * @throws  IllegalStateException  DOCUMENT ME!
-//     */
-//    private AffineTransform calculateTransform(final List<PointCoordinatePair> pairs) {
-//        if (pairs.size() >= 3) {
-//            // TODO permutation over all possible transformations and choose
-//            // the one with the minimal error
-//            final PointCoordinatePair pair0 = pairs.get(0);
-//            final PointCoordinatePair pair1 = pairs.get(1);
-//            final PointCoordinatePair pair2 = pairs.get(2);
-//
-//            final AffineTransformationBuilder builder = new AffineTransformationBuilder(
-//                    new Coordinate(pair0.getPoint().getX(), pair0.getPoint().getY()),
-//                    new Coordinate(pair1.getPoint().getX(), pair1.getPoint().getY()),
-//                    new Coordinate(pair2.getPoint().getX(), pair2.getPoint().getY()),
-//                    new Coordinate(pair0.getCoordinate()),
-//                    new Coordinate(pair1.getCoordinate()),
-//                    new Coordinate(pair2.getCoordinate()));
-//            final double[] matrix = builder.getTransformation().getMatrixEntries();
-//            return new AffineTransform(matrix[0], matrix[3], matrix[1], matrix[4], matrix[2], matrix[5]);
-//        } else {
-//            throw new IllegalStateException("minimum of 3 pairs requiered");
-//        }
-//    }
 
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
@@ -228,9 +219,17 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
             final ImageRasterService irs = (ImageRasterService)e.getLayer();
             if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                 final File imageFile = irs.getImageFile();
-                if (metaDataMap.containsKey(imageFile)) {
-                    metaDataMap.remove(imageFile);
+                if (getMetaDataMap().containsKey(imageFile)) {
+                    final RasterGeoRefFeature feature = getHandler(imageFile).getFeature();
                     RasterGeoReferencingWizard.getInstance().setHandler(null);
+                    final FeatureCollection featureCollection = CismapBroker.getInstance()
+                                .getMappingComponent()
+                                .getFeatureCollection();
+                    if ((feature != null) && (featureCollection != null) && featureCollection.contains(feature)) {
+                        featureCollection.removeFeature(feature);
+                        RasterGeoReferencingWizard.getInstance().removeListener(feature);
+                    }
+                    getMetaDataMap().remove(imageFile);
                 }
             }
         }
@@ -259,8 +258,8 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
             final ImageRasterService irs = (ImageRasterService)e.getLayer();
             if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                 final File imagefile = irs.getImageFile();
-                if (metaDataMap.containsKey(imagefile)) {
-                    handler = metaDataMap.get(imagefile);
+                if (getMetaDataMap().containsKey(imagefile)) {
+                    handler = getMetaDataMap().get(imagefile);
                 }
             }
         }

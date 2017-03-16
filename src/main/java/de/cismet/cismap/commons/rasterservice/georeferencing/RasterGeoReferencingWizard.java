@@ -14,10 +14,16 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import lombok.Getter;
+
 import java.awt.Point;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -45,11 +51,15 @@ public class RasterGeoReferencingWizard {
 
     private final ListenerHandler listenerHandler = new ListenerHandler();
 
-    private RasterGeoReferencingHandler handler;
-    private Point selectedPoint;
-    private Coordinate selectedCoordinate;
+    @Getter private RasterGeoReferencingHandler handler;
+
+    @Getter private Point selectedPoint;
+
+    @Getter private Coordinate selectedCoordinate;
 
     private SelectionMode selectionMode = SelectionMode.NONE;
+
+    @Getter private int position = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -106,49 +116,81 @@ public class RasterGeoReferencingWizard {
      *
      * @return  DOCUMENT ME!
      */
-    public RasterGeoReferencingHandler getHandler() {
-        return handler;
+    public boolean isPointSelectionMode() {
+        return SelectionMode.POINT == selectionMode;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  handler  DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
-    public void setHandler(final RasterGeoReferencingHandler handler) {
-        final boolean handlerChanged = ((handler != null) && !handler.equals(this.handler))
-                    || ((handler == null) && (this.handler != null));
-        if (handlerChanged) {
-            final RasterGeoReferencingHandler oldHandler = this.handler;
-            if (handler != null) {
-                handler.addListener(listenerHandler);
-            }
+    public boolean isCoordinateSelectionMode() {
+        return SelectionMode.COORDINATE == selectionMode;
+    }
 
-            this.handler = handler;
-            listenerHandler.handlerChanged(handler);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  position  DOCUMENT ME!
+     */
+    private void setPosition(final int position) {
+        this.position = position;
+    }
 
-            if (oldHandler != null) {
-                oldHandler.removeListener(listenerHandler);
+    /**
+     * DOCUMENT ME!
+     */
+    public void forward() {
+        if (isPointSelected()) {
+            selectCoordinate(getPosition());
+        } else if (isCoordinateSelected()) {
+            if ((getPosition() + 1) < (getHandler().getNumOfPairs())) {
+                selectPoint(getPosition() + 1);
+            } else {
+                selectionMode = SelectionMode.NONE;
+                setPosition(-1);
             }
         }
     }
 
     /**
      * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
      */
-    public Point getSelectedPoint() {
-        return selectedPoint;
+    public void backward() {
+        if (isPointSelected()) {
+            if (getPosition() > 0) {
+                selectCoordinate(getPosition() - 1);
+            } else {
+                selectCoordinate(getHandler().getNumOfPairs() - 1);
+            }
+        } else if (isCoordinateSelected()) {
+            selectPoint(getPosition());
+        }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @param  newHandler  DOCUMENT ME!
      */
-    public Coordinate getSelectedCoordinate() {
-        return selectedCoordinate;
+    public void setHandler(final RasterGeoReferencingHandler newHandler) {
+        final RasterGeoReferencingHandler oldHandler = getHandler();
+
+        final boolean handlerChanged = ((newHandler != null) && !newHandler.equals(oldHandler))
+                    || ((newHandler == null) && (oldHandler != null));
+        if (handlerChanged) {
+            if (newHandler != null) {
+                newHandler.addListener(listenerHandler);
+            }
+
+            this.handler = newHandler;
+            listenerHandler.handlerChanged(newHandler);
+
+            if (oldHandler != null) {
+                oldHandler.removeListener(listenerHandler);
+            }
+        }
     }
 
     /**
@@ -168,15 +210,17 @@ public class RasterGeoReferencingWizard {
      * @throws  IndexOutOfBoundsException  DOCUMENT ME!
      */
     public void selectPoint(final int position) throws IndexOutOfBoundsException {
-        final Point point = handler.getPoint(position);
-        final boolean changed = ((point == null) && (selectedPoint != null))
+        final Point point = getHandler().getPoint(position);
+        final boolean changed = (selectedPoint == null) || ((point == null) && (selectedPoint != null))
                     || ((point != null) && !point.equals(selectedPoint));
         if (changed) {
+            setPosition(position);
             selectionMode = SelectionMode.POINT;
             selectedPoint = point;
             selectedCoordinate = null;
             listenerHandler.pointSelected(position);
         }
+        CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
     }
 
     /**
@@ -187,15 +231,17 @@ public class RasterGeoReferencingWizard {
      * @throws  IndexOutOfBoundsException  DOCUMENT ME!
      */
     public void selectCoordinate(final int position) throws IndexOutOfBoundsException {
-        final Coordinate coordinate = handler.getCoordinate(position);
-        final boolean changed = ((coordinate == null) && (selectedCoordinate != null))
+        final Coordinate coordinate = getHandler().getCoordinate(position);
+        final boolean changed = (selectedCoordinate == null) || ((coordinate == null) && (selectedCoordinate != null))
                     || ((coordinate != null) && !coordinate.equals(selectedCoordinate));
         if (changed) {
+            setPosition(position);
             selectionMode = SelectionMode.COORDINATE;
             selectedPoint = null;
             selectedCoordinate = coordinate;
             listenerHandler.coordinateSelected(position);
         }
+        CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
     }
 
     /**

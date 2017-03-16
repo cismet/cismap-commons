@@ -12,23 +12,16 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
-import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-
-import com.vividsolutions.jts.geom.Coordinate;
-
 import org.apache.log4j.Logger;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
-import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
  * DOCUMENT ME!
@@ -41,11 +34,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(RasterGeoReferencingDialog.class);
-
-    //~ Instance fields --------------------------------------------------------
-
-    private final RasterGeoReferencingWizardListener wizardListener = new WizardListener();
-    private final StatusListener statusListener = new MapStatusListener();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
@@ -73,8 +61,8 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         initComponents();
         getRootPane().setDefaultButton(jButton4);
 
-        RasterGeoReferencingWizard.getInstance().addListener(wizardListener);
-        CismapBroker.getInstance().addStatusListener(statusListener);
+        RasterGeoReferencingWizard.getInstance().addListener(new WizardListener());
+        CismapBroker.getInstance().addStatusListener(new MapStatusListener());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -252,106 +240,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     /**
      * DOCUMENT ME!
      *
-     * @param  args  the command line arguments
-     */
-    public static void main(final String[] args) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (final javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RasterGeoReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RasterGeoReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RasterGeoReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RasterGeoReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        Log4JQuickConfig.configure4LumbermillOnLocalhost();
-        try {
-            javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-        } catch (final Exception ex) {
-            LOG.error(ex, ex);
-        }
-
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-
-                @Override
-                public void uncaughtException(final Thread thread, final Throwable error) {
-                    LOG.error("uncaught exception in thread: " + thread, error);
-                }
-            });
-
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    final RasterGeoReferencingDialog dialog = new RasterGeoReferencingDialog(
-                            new javax.swing.JFrame(),
-                            true);
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
-                            @Override
-                            public void windowClosing(final java.awt.event.WindowEvent e) {
-                                System.exit(0);
-                            }
-                        });
-                    new Thread() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                Thread.sleep(1000);
-
-                                final ImageFileMetaData metaData = new ImageFileMetaData(
-                                        new Rectangle(0, 0, 900, 600),
-                                        null,
-                                        null);
-                                final RasterGeoReferencingHandler handler = new RasterGeoReferencingHandler(metaData);
-
-                                RasterGeoReferencingWizard.getInstance().setHandler(handler);
-
-                                Thread.sleep(1000);
-                                handler.addPair(new Point(294, 674), new Coordinate(374492.74, 5681564.39));
-                                Thread.sleep(200);
-                                handler.addPair(new Point(15, 23), new Coordinate(374358.41, 5681716.48));
-                                Thread.sleep(200);
-                                handler.addPair(new Point(286, 108), new Coordinate(374439.75, 5681717.62));
-                                Thread.sleep(200);
-                                handler.addPair(new Point(159, 409), new Coordinate(374432.30, 5681624.54));
-                                Thread.sleep(200);
-                                handler.addPair(new Point(199, 94), new Coordinate(374414.83, 5681713.61));
-                                Thread.sleep(200);
-                                handler.addPair(new Point(17, 680), new Coordinate(374417.98, 5681538.04));
-                            } catch (final InterruptedException ex) {
-                                LOG.error(ex, ex);
-                            }
-                        }
-                    }.start();
-                    dialog.setVisible(true);
-                }
-            });
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public static RasterGeoReferencingDialog getInstance() {
@@ -401,7 +289,15 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
 
         @Override
         public void handlerChanged(final RasterGeoReferencingHandler handler) {
-            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(handler.getFeature());
+            if (handler != null) {
+                final FeatureCollection featureCollection = CismapBroker.getInstance()
+                            .getMappingComponent()
+                            .getFeatureCollection();
+                final Feature feature = handler.getFeature();
+                if ((feature != null) && (featureCollection != null) && featureCollection.contains(feature)) {
+                    featureCollection.addFeature(feature);
+                }
+            }
         }
 
         @Override

@@ -11,7 +11,15 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
+
+import lombok.Getter;
+import lombok.Setter;
 
 import org.apache.log4j.Logger;
 
@@ -27,7 +35,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 
 import java.io.BufferedReader;
@@ -38,6 +45,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -62,13 +71,13 @@ public class ImageFileRetrieval extends Thread {
      * @version  $Revision$, $Date$
      */
 
-    private int width;
-    private int height;
-    private double x1;
-    private double x2;
-    private double y1;
-    private double y2;
-    private File imageFile;
+    @Getter @Setter private int width;
+    @Getter @Setter private int height;
+    @Getter @Setter private double x1;
+    @Getter @Setter private double x2;
+    @Getter @Setter private double y1;
+    @Getter @Setter private double y2;
+    @Getter @Setter private File imageFile;
     private RetrievalListener listener = null;
     private volatile boolean youngerCall = false;
     private ImageFileMetaData metaData;
@@ -211,7 +220,14 @@ public class ImageFileRetrieval extends Thread {
     private BufferedImage createImage(final ImageFileMetaData metaData) throws IOException,
         InterruptedException,
         NoninvertibleTransformException {
-        final AffineTransform worldFileTransform = metaData.getTransform();
+        final double[] matrix = metaData.getTransform().getMatrixEntries();
+        final AffineTransform worldFileTransform = new AffineTransform(
+                matrix[0],
+                matrix[3],
+                matrix[1],
+                matrix[4],
+                matrix[2],
+                matrix[5]);
 
         // bounds in pixel dimensions
         final Rectangle mapBounds = new Rectangle(width, height);
@@ -422,24 +438,30 @@ public class ImageFileRetrieval extends Thread {
             br.close();
 
             if (index == matrix.length) {
-                final AffineTransform transform = new AffineTransform(matrix);
-                LOG.info(transform);
+                final AffineTransformation transform = new AffineTransformation(matrix);
 
                 final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
                 final double imageWidth = imageDimension.getWidth();
                 final double imageHeight = imageDimension.getHeight();
-                final Rectangle bounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
+                final Rectangle imageBounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
 
-                final Rectangle transformedBounds = ((Path2D)transform.createTransformedShape(bounds)).getBounds();
+                final GeometryFactory factory = new GeometryFactory(
+                        new PrecisionModel(),
+                        CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                final LinearRing linear = factory.createLinearRing(
+                        new Coordinate[] {
+                            new Coordinate(0, 0),
+                            new Coordinate(imageWidth, 0),
+                            new Coordinate(imageWidth, imageHeight),
+                            new Coordinate(0, imageHeight),
+                            new Coordinate(0, 0)
+                        });
+
+                final Envelope imageEnvelope = transform.transform(factory.createPolygon(linear, null))
+                            .getEnvelopeInternal();
                 return new ImageFileMetaData(
-                        bounds,
-                        new Envelope(
-                            transformedBounds.getX(),
-                            transformedBounds.getX()
-                                    + transformedBounds.getWidth(),
-                            transformedBounds.getY(),
-                            transformedBounds.getY()
-                                    + transformedBounds.getHeight()),
+                        imageBounds,
+                        imageEnvelope,
                         transform);
             }
         } catch (Exception e) {
@@ -499,132 +521,6 @@ public class ImageFileRetrieval extends Thread {
         } catch (GeoTiffException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the width
-     */
-    public int getWidth() {
-        return width;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  width  the width to set
-     */
-    public void setWidth(final int width) {
-        this.width = width;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the height
-     */
-    public int getHeight() {
-        return height;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  height  the height to set
-     */
-    public void setHeight(final int height) {
-        this.height = height;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the x1
-     */
-    public double getX1() {
-        return x1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  x1  the x1 to set
-     */
-    public void setX1(final double x1) {
-        this.x1 = x1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the x2
-     */
-    public double getX2() {
-        return x2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  x2  the x2 to set
-     */
-    public void setX2(final double x2) {
-        this.x2 = x2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the y1
-     */
-    public double getY1() {
-        return y1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  y1  the y1 to set
-     */
-    public void setY1(final double y1) {
-        this.y1 = y1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the y2
-     */
-    public double getY2() {
-        return y2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  y2  the y2 to set
-     */
-    public void setY2(final double y2) {
-        this.y2 = y2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the imageFile
-     */
-    public File getImageFile() {
-        return imageFile;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  imageFile  the imageFile to set
-     */
-    public void setImageFile(final File imageFile) {
-        this.imageFile = imageFile;
     }
 
     @Override

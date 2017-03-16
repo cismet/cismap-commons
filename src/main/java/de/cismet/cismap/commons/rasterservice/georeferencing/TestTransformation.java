@@ -20,8 +20,6 @@ import com.vividsolutions.jts.geom.util.AffineTransformation;
 import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
 
 import java.awt.Point;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +86,7 @@ public class TestTransformation {
             pairs.add(pair);
         }
 
-        final List<AffineTransform> transforms = new ArrayList<>();
+        final List<AffineTransformation> transforms = new ArrayList<>();
         for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(pairs.toArray(), 3)) {
             final PointCoordinatePair pair0 = (PointCoordinatePair)arr[0];
             final PointCoordinatePair pair1 = (PointCoordinatePair)arr[1];
@@ -102,31 +100,21 @@ public class TestTransformation {
                     pair1.getCoordinate(),
                     pair2.getCoordinate());
 
-            final AffineTransformation t = builder.getTransformation();
-            if (t != null) {
-                final double[] matrix = t.getMatrixEntries();
-                final AffineTransform transform = new AffineTransform(
-                        matrix[0],
-                        matrix[3],
-                        matrix[1],
-                        matrix[4],
-                        matrix[2],
-                        matrix[5]);
+            final AffineTransformation transform = builder.getTransformation();
+            if (transform != null) {
                 transforms.add(transform);
-                transform.transform(pair2.getPoint(), null);
             }
 //            System.out.println(Arrays.toString(arr));
         }
 
-        final AffineTransform transform = RasterGeoReferencingHandler.createAverageTransformation(transforms);
+        final AffineTransformation transform = RasterGeoReferencingHandler.createAverageTransformation(transforms);
         System.out.println(transform);
 
         int r = 0;
         for (final PointCoordinatePair pair : pairs) {
-            final Point src = pair.getPoint();
-            final Point2D dst = transform.transform(src, null);
-            System.out.println(r++ + ": "
-                        + dst.distance(new Point.Double(pair.getCoordinate().x, pair.getCoordinate().y)));
+            final Coordinate src = new Coordinate(pair.getPoint().getX(), pair.getPoint().getY());
+            final Coordinate dst = transform.transform(src, new Coordinate());
+            System.out.println(r++ + ": " + dst.distance(src));
         }
 
         final long b = System.currentTimeMillis();

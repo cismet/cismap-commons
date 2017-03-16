@@ -14,6 +14,10 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.apache.log4j.Logger;
 
 import java.awt.Point;
@@ -59,10 +63,12 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final RasterGeoReferencingWizardListener wizardListener = new WizardListener();
+    @Getter(AccessLevel.PRIVATE)
     private final CellSelectionListener selectionListener = new CellSelectionListener();
 
-    private boolean isWizardRefreshing = false;
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
+    private boolean wizardRefreshing = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler filler1;
@@ -105,7 +111,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     public RasterGeoReferencingPanel() {
         initComponents();
 
-        getWizard().addListener(wizardListener);
+        getWizard().addListener(new WizardListener());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -361,8 +367,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jScrollPane1.setViewportView(jXTable1);
         jXTable1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        jXTable1.getColumnModel().getSelectionModel().addListSelectionListener(selectionListener);
-        jXTable1.getSelectionModel().addListSelectionListener(selectionListener);
+        jXTable1.getColumnModel().getSelectionModel().addListSelectionListener(getSelectionListener());
+        jXTable1.getSelectionModel().addListSelectionListener(getSelectionListener());
 
         final DefaultTableCellRenderer rightRenderer = new DefaultTableCellRenderer();
 
@@ -629,13 +635,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    if (getWizard().isPointSelected()) {
-                        final int position = jXTable1.getSelectedRow();
-                        getWizard().selectCoordinate(position - 1);
-                    } else if (getWizard().isCoordinateSelected()) {
-                        final int position = jXTable1.getSelectedRow();
-                        getWizard().selectPoint(position);
-                    }
+                    getWizard().backward();
                     return null;
                 }
             }.execute();
@@ -651,17 +651,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    if (getWizard().isPointSelected()) {
-                        final int position = jXTable1.getSelectedRow();
-                        getWizard().selectCoordinate(Math.max(position, 0));
-                    } else if (getWizard().isCoordinateSelected()) {
-                        final int position = jXTable1.getSelectedRow() + 1;
-                        getWizard().selectPoint(position);
-                    } else {
-                        if (getHandler().getNumOfPairs() > 0) {
-                            getWizard().selectPoint(0);
-                        }
-                    }
+                    getWizard().forward();
                     return null;
                 }
             }.execute();
@@ -706,18 +696,18 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 @Override
                 protected Boolean doInBackground() throws Exception {
                     final boolean success = getHandler().removePair(position);
-                    if (success && (getHandler().getNumOfPairs() != 0)) {
-                        getWizard().selectCoordinate(position - 1);
-                    }
                     return success;
                 }
 
                 @Override
                 protected void done() {
                     try {
-                        final Boolean success = (Boolean)get();
+                        final Boolean success = get();
                         if (Boolean.TRUE.equals(success)) {
                             refreshModel();
+                            if (success && (getHandler().getNumOfPairs() != 0)) {
+                                getWizard().selectCoordinate(position - 1);
+                            }
                         }
                     } catch (final Exception ex) {
                         LOG.info(ex, ex);
@@ -731,8 +721,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void refreshWizardBinding() {
-        if (!isWizardRefreshing) {
-            isWizardRefreshing = true;
+        if (!isWizardRefreshing()) {
+            setWizardRefreshing(true);
             SwingUtilities.invokeLater(new Runnable() {
 
                     @Override
@@ -750,7 +740,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                             bindingGroup.getBinding("wizPointEnable").bind();
                             bindingGroup.getBinding("wizCoordinateEnable").bind();
                         } finally {
-                            isWizardRefreshing = false;
+                            setWizardRefreshing(false);
                         }
                     }
                 });
@@ -980,7 +970,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         @Override
         public void positionChanged(final int position) {
-            refreshModel();
+            if (getWizard().isPointSelected()) {
+                refreshModel();
+                pointSelected(position);
+            } else if (getWizard().isCoordinateSelected()) {
+                refreshModel();
+                coordinateSelected(position);
+            }
             refreshWizardBinding();
         }
 

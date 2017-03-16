@@ -16,16 +16,25 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.PNode;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.apache.log4j.Logger;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -59,6 +68,7 @@ import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencin
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandlerListener;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -76,7 +86,8 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     RequestForRotatingPivotLock,
     RequestForNonreflectingFeature,
     RequestForHidingHandles,
-    RasterGeoReferencingHandlerListener {
+    RasterGeoReferencingHandlerListener,
+    RasterGeoReferencingWizardListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -106,8 +117,15 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
     //~ Instance fields --------------------------------------------------------
 
+    @Getter(AccessLevel.PRIVATE)
     private final ArrayList<PNode> children = new ArrayList<>();
+
+    @Getter(AccessLevel.PRIVATE)
     private final RasterGeoReferencingHandler handler;
+
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
+    private boolean refreshing;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -118,7 +136,8 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
      */
     public RasterGeoRefFeature(final RasterGeoReferencingHandler handler) {
         this.handler = handler;
-        handler.addListener(this);
+        getHandler().addListener(this);
+        RasterGeoReferencingWizard.getInstance().addListener(this);
         updateGeometry();
 //        setTransparency(1);
 
@@ -131,7 +150,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                         public void featuresAdded(final FeatureCollectionEvent fce) {
                             if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
                                 RasterGeoReferencingWizard.getInstance().setHandler(handler);
-                                StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
+                                if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
+                                    StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
+                                }
                             }
                         }
 
@@ -141,8 +162,10 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
                         @Override
                         public void featuresRemoved(final FeatureCollectionEvent fce) {
-                            if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                                RasterGeoReferencingDialog.getInstance().setVisible(false);
+                            if (!isRefreshing()) {
+                                if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                                    RasterGeoReferencingDialog.getInstance().setVisible(false);
+                                }
                             }
                         }
 
@@ -180,33 +203,26 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
      * DOCUMENT ME!
      */
     private void updateGeometry() {
-        final GeometryFactory factory = new GeometryFactory(
-                new PrecisionModel(),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-        final Rectangle envelope = handler.getMetaData().getImageBounds();
-        final AffineTransform transform = handler.getMetaData().getTransform();
+        final Rectangle envelope = getHandler().getMetaData().getImageBounds();
+        final AffineTransformation transform = getHandler().getMetaData().getTransform();
         if ((envelope != null) && (transform != null)) {
-            final Point2D upperLeftPoint = transform.transform(new Point2D.Double(
+            final Coordinate upperLeftCoordinate = transform.transform(new Coordinate(
                         envelope.getMinX(),
                         envelope.getMinY()),
-                    null);
-            final Point2D upperRightPoint = transform.transform(new Point2D.Double(
+                    new Coordinate());
+            final Coordinate upperRightCoordinate = transform.transform(new Coordinate(
                         envelope.getMaxX(),
                         envelope.getMinY()),
-                    null);
-            final Point2D lowerRightPoint = transform.transform(new Point2D.Double(
+                    new Coordinate());
+            final Coordinate lowerRightCoordinate = transform.transform(new Coordinate(
                         envelope.getMaxX(),
                         envelope.getMaxY()),
-                    null);
-            final Point2D lowerLeftPoint = transform.transform(new Point2D.Double(
+                    new Coordinate());
+            final Coordinate lowerLeftCoordinate = transform.transform(new Coordinate(
                         envelope.getMinX(),
                         envelope.getMaxY()),
-                    null);
+                    new Coordinate());
 
-            final Coordinate upperLeftCoordinate = new Coordinate(upperLeftPoint.getX(), upperLeftPoint.getY());
-            final Coordinate upperRightCoordinate = new Coordinate(upperRightPoint.getX(), upperRightPoint.getY());
-            final Coordinate lowerRightCoordinate = new Coordinate(lowerRightPoint.getX(), lowerRightPoint.getY());
-            final Coordinate lowerLeftCoordinate = new Coordinate(lowerLeftPoint.getX(), lowerLeftPoint.getY());
             final Coordinate[] coordinates = new Coordinate[] {
                     upperLeftCoordinate,
                     upperRightCoordinate,
@@ -214,10 +230,13 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                     lowerLeftCoordinate,
                     upperLeftCoordinate
                 };
-            final LinearRing linear = new GeometryFactory().createLinearRing(coordinates);
+            final GeometryFactory factory = new GeometryFactory(
+                    new PrecisionModel(),
+                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+            final LinearRing linear = factory.createLinearRing(coordinates);
             setGeometry(factory.createPolygon(linear, null));
-        } else {
-            setGeometry(null);
+//        } else {
+//            setGeometry(null);
         }
     }
 
@@ -252,12 +271,122 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
      * @param  parent  DOCUMENT ME!
      */
     private void init(final PFeature parent) {
-        for (final PointCoordinatePair pair : handler.getPairs()) {
-            if (pair.getCoordinate() != null) {
-                children.add(createCoordinateChild(parent, pair));
-            }
-            if (pair.getPoint() != null) {
-                children.add(createPointChild(parent, pair));
+        final int numOfPairs = getHandler().getPairs().length;
+        for (int position = 0; position < numOfPairs; position++) {
+            addPointChild(parent, position);
+            addCoordinateChild(parent, position);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  parent    DOCUMENT ME!
+     * @param  position  pair DOCUMENT ME!
+     */
+    private void addCoordinateChild(final PFeature parent, final int position) {
+        final PointCoordinatePair pair = getHandler().getPair(position);
+        if ((pair != null) && (pair.getCoordinate() != null)) {
+            final DerivedFixedPImage coordinateDFP = new DerivedFixedPImage(
+                    GEOREF_CROSS_IMAGE,
+                    parent,
+                    new DeriveRule() {
+
+                        @Override
+                        public Geometry derive(final Geometry in) {
+                            final GeometryFactory factory = new GeometryFactory(
+                                    new PrecisionModel(),
+                                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+
+                            return factory.createPoint(pair.getCoordinate());
+                        }
+                    });
+            coordinateDFP.setMultiplier(0.25);
+            coordinateDFP.setSweetSpotX(0.5);
+            coordinateDFP.setSweetSpotY(0.5);
+            getChildren().add(coordinateDFP);
+
+            final DerivedFixedPImage textDFP = new DerivedFixedPImage(createImageFromText(
+                        Integer.toString(position + 1),
+                        30,
+                        30),
+                    parent,
+                    new DeriveRule() {
+
+                        @Override
+                        public Geometry derive(final Geometry in) {
+                            final GeometryFactory factory = new GeometryFactory(
+                                    new PrecisionModel(),
+                                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+
+                            final Point center = factory.createPoint(pair.getCoordinate());
+                            return center;
+                        }
+                    });
+
+            textDFP.setSweetSpotX(1);
+            textDFP.setSweetSpotY(1);
+            getChildren().add(textDFP);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  parent    DOCUMENT ME!
+     * @param  position  pair DOCUMENT ME!
+     */
+    private void addPointChild(final PFeature parent, final int position) {
+        final PointCoordinatePair pair = getHandler().getPair(position);
+        if ((pair != null) && (pair.getPoint() != null)) {
+            final AffineTransformation transform = getHandler().getMetaData().getTransform();
+            if (transform != null) {
+                final DerivedFixedPImage pointDFP = new DerivedFixedPImage(
+                        GEOREF_DOT_IMAGE,
+                        parent,
+                        new DeriveRule() {
+
+                            @Override
+                            public Geometry derive(final Geometry in) {
+                                final GeometryFactory factory = new GeometryFactory(
+                                        new PrecisionModel(),
+                                        CrsTransformer.extractSridFromCrs(
+                                            CismapBroker.getInstance().getSrs().getCode()));
+                                return transform.transform(
+                                        factory.createPoint(
+                                            new Coordinate(
+                                                pair.getPoint().getX(),
+                                                pair.getPoint().getY())));
+                            }
+                        });
+                pointDFP.setMultiplier(0.25);
+                pointDFP.setSweetSpotX(0.5);
+                pointDFP.setSweetSpotY(0.5);
+                getChildren().add(pointDFP);
+
+                final DerivedFixedPImage textDFP = new DerivedFixedPImage(createImageFromText(
+                            Integer.toString(position + 1),
+                            30,
+                            30),
+                        parent,
+                        new DeriveRule() {
+
+                            @Override
+                            public Geometry derive(final Geometry in) {
+                                final GeometryFactory factory = new GeometryFactory(
+                                        new PrecisionModel(),
+                                        CrsTransformer.extractSridFromCrs(
+                                            CismapBroker.getInstance().getSrs().getCode()));
+                                return transform.transform(
+                                        factory.createPoint(
+                                            new Coordinate(
+                                                pair.getPoint().getX(),
+                                                pair.getPoint().getY())));
+                            }
+                        });
+                textDFP.setSweetSpotX(0);
+                textDFP.setSweetSpotY(0);
+                getChildren().add(textDFP);
             }
         }
     }
@@ -265,89 +394,67 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     /**
      * DOCUMENT ME!
      *
-     * @param   parent  DOCUMENT ME!
-     * @param   pair    DOCUMENT ME!
+     * @param   text    DOCUMENT ME!
+     * @param   width   DOCUMENT ME!
+     * @param   height  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private DerivedFixedPImage createCoordinateChild(final PFeature parent, final PointCoordinatePair pair) {
-        final DerivedFixedPImage child = new DerivedFixedPImage(GEOREF_DOT_IMAGE, parent, new DeriveRule() {
+    private BufferedImage createImageFromText(final String text, final int width, final int height) {
+        final Font font = new Font("Arial", Font.BOLD, 12);
 
-                    @Override
-                    public Geometry derive(final Geometry in) {
-                        final GeometryFactory factory = new GeometryFactory(
-                                new PrecisionModel(),
-                                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+        final BufferedImage image = new BufferedImage(width,
+                height,
+                BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D g2d = image.createGraphics();
+        g2d.setComposite(AlphaComposite.Clear);
+        g2d.fillRect(0, 0, width, height);
+        g2d.setComposite(AlphaComposite.Src);
+        g2d.setColor(Color.BLACK);
+        g2d.setFont(font);
 
-                        return factory.createPoint(pair.getCoordinate());
-                    }
-                });
-        child.setMultiplier(0.25);
-        child.setSweetSpotX(0.5);
-        child.setSweetSpotY(0.5);
-        return child;
-    }
+        final FontMetrics metrics = g2d.getFontMetrics(font);
+        g2d.drawString(
+            text,
+            (float)((width / 2f) - (metrics.stringWidth(text) / 2f)),
+            (float)((height / 2f) - (metrics.getHeight() / 2f) + metrics.getAscent()));
+        g2d.dispose();
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   parent  DOCUMENT ME!
-     * @param   pair    DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private DerivedFixedPImage createPointChild(final PFeature parent, final PointCoordinatePair pair) {
-        final DerivedFixedPImage child = new DerivedFixedPImage(GEOREF_CROSS_IMAGE, parent, new DeriveRule() {
-
-                    @Override
-                    public Geometry derive(final Geometry in) {
-                        final GeometryFactory factory = new GeometryFactory(
-                                new PrecisionModel(),
-                                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-                        final Point2D point = pair.getPoint();
-                        final AffineTransform transform = handler.getMetaData().getTransform();
-                        final Point2D transformedPoint = transform.transform(
-                                new Point2D.Double(
-                                    point.getX(),
-                                    point.getY()),
-                                null);
-
-                        return factory.createPoint(new Coordinate(transformedPoint.getX(), transformedPoint.getY()));
-                    }
-                });
-        child.setMultiplier(0.25);
-        child.setSweetSpotX(0.5);
-        child.setSweetSpotY(0.5);
-        return child;
+        return image;
     }
 
     @Override
     public Collection<PNode> provideChildren(final PFeature parent) {
-        if (children.isEmpty()) {
+        if (getChildren().isEmpty()) {
             init(parent);
         }
-        return children;
+        return getChildren();
     }
 
     /**
      * DOCUMENT ME!
      */
     private void refresh() {
-        children.clear();
+        getChildren().clear();
         updateGeometry();
         SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    CismapBroker.getInstance()
-                            .getMappingComponent()
-                            .getFeatureCollection()
-                            .removeFeature(RasterGeoRefFeature.this);
-                    if (getGeometry() != null) {
+                    try {
+                        setRefreshing(true);
                         CismapBroker.getInstance()
                                 .getMappingComponent()
                                 .getFeatureCollection()
-                                .addFeature(RasterGeoRefFeature.this);
+                                .removeFeature(RasterGeoRefFeature.this);
+                        if (getGeometry() != null) {
+                            CismapBroker.getInstance()
+                                    .getMappingComponent()
+                                    .getFeatureCollection()
+                                    .addFeature(RasterGeoRefFeature.this);
+                        }
+                    } finally {
+                        setRefreshing(false);
                     }
                 }
             });
@@ -366,5 +473,20 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     @Override
     public void positionChanged(final int position) {
         refresh();
+    }
+
+    @Override
+    public void pointSelected(final int position) {
+    }
+
+    @Override
+    public void coordinateSelected(final int position) {
+    }
+
+    @Override
+    public void handlerChanged(final RasterGeoReferencingHandler handler) {
+        if ((handler != null) && handler.equals(getHandler())) {
+            refresh();
+        }
     }
 }

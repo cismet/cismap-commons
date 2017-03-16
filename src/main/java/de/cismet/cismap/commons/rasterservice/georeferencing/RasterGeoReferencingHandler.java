@@ -9,16 +9,17 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
 
-import org.apache.log4j.Logger;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,12 +28,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoRefFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
-
-import de.cismet.tools.gui.StaticSwingTools;
-
-import static de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingDialog.getInstance;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -48,26 +48,27 @@ import static de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoRef
  */
 public class RasterGeoReferencingHandler {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(RasterGeoReferencingHandler.class);
-
     //~ Instance fields --------------------------------------------------------
 
-    private final List<PointCoordinatePair> pairs = new ArrayList<PointCoordinatePair>();
+    private final List<PointCoordinatePair> pairs = new ArrayList<>();
+    @Getter(AccessLevel.PRIVATE)
     private final ListenerHandler listenerHandler = new ListenerHandler();
-    private final ImageFileMetaData metaData;
-    private final Map<Integer, Boolean> positionStates = new HashMap<Integer, Boolean>();
-    private final RasterGeoRefFeature feature;
+    @Getter(AccessLevel.PRIVATE)
+    private final Map<Integer, Boolean> positionStates = new HashMap<>();
+    @Getter private final ImageFileMetaData metaData;
+    @Getter private final RasterGeoRefFeature feature;
+    @Getter private final ImageRasterService service;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RasterGeoReferencingHandler object.
      *
+     * @param  service   DOCUMENT ME!
      * @param  metaData  DOCUMENT ME!
      */
-    public RasterGeoReferencingHandler(final ImageFileMetaData metaData) {
+    public RasterGeoReferencingHandler(final ImageRasterService service, final ImageFileMetaData metaData) {
+        this.service = service;
         this.metaData = metaData;
         this.feature = new RasterGeoRefFeature(this);
     }
@@ -85,16 +86,7 @@ public class RasterGeoReferencingHandler {
      */
     public boolean isPositionEnabled(final int position) throws ArrayIndexOutOfBoundsException {
         checḱPosition(position);
-        return Boolean.TRUE.equals(positionStates.get(position));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public RasterGeoRefFeature getFeature() {
-        return feature;
+        return Boolean.TRUE.equals(getPositionStates().get(position));
     }
 
     /**
@@ -107,11 +99,22 @@ public class RasterGeoReferencingHandler {
      */
     public void setPositionEnabled(final int position, final boolean enabled) throws ArrayIndexOutOfBoundsException {
         checḱPosition(position);
-        final boolean changed = !new Boolean(enabled).equals(positionStates.get(position));
+        final boolean changed = !new Boolean(enabled).equals(getPositionStates().get(position));
         if (changed) {
-            positionStates.put(position, enabled);
+            getPositionStates().put(position, enabled);
             updateTransformation();
-            listenerHandler.positionChanged(position);
+            getListenerHandler().positionChanged(position);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    public void setAllPositionEnabled(final boolean enabled) {
+        for (int position = 0; position < getNumOfPairs(); position++) {
+            setPositionEnabled(position, enabled);
         }
     }
 
@@ -120,8 +123,8 @@ public class RasterGeoReferencingHandler {
      *
      * @return  DOCUMENT ME!
      */
-    public ImageFileMetaData getMetaData() {
-        return metaData;
+    public boolean isComplete() {
+        return getCompletePairs().length >= 3;
     }
 
     /**
@@ -132,7 +135,7 @@ public class RasterGeoReferencingHandler {
      * @return  DOCUMENT ME!
      */
     public boolean addListener(final RasterGeoReferencingHandlerListener listener) {
-        return listenerHandler.add(listener);
+        return getListenerHandler().add(listener);
     }
 
     /**
@@ -143,7 +146,7 @@ public class RasterGeoReferencingHandler {
      * @return  DOCUMENT ME!
      */
     public boolean removeListener(final RasterGeoReferencingHandlerListener listener) {
-        return listenerHandler.remove(listener);
+        return getListenerHandler().remove(listener);
     }
 
     /**
@@ -208,9 +211,9 @@ public class RasterGeoReferencingHandler {
         synchronized (pairs) {
             position = pairs.size();
             pairs.add(position, (PointCoordinatePair)pair.clone());
-            positionStates.put(position, Boolean.TRUE);
+            getPositionStates().put(position, Boolean.TRUE);
         }
-        listenerHandler.positionAdded(position);
+        getListenerHandler().positionAdded(position);
         return position;
     }
 
@@ -231,7 +234,16 @@ public class RasterGeoReferencingHandler {
         synchronized (pairs) {
             checḱPosition(position);
             pairs.set(position, (PointCoordinatePair)pair.clone());
-            listenerHandler.positionChanged(position);
+            getListenerHandler().positionChanged(position);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void removeAllPairs() {
+        while (getNumOfPairs() > 0) {
+            removePair(getNumOfPairs() - 1);
         }
     }
 
@@ -249,8 +261,8 @@ public class RasterGeoReferencingHandler {
             checḱPosition(position);
             final boolean success = pairs.remove(position) != null;
             if (success) {
-                positionStates.remove(position);
-                listenerHandler.positionRemoved(position);
+                getPositionStates().remove(position);
+                getListenerHandler().positionRemoved(position);
             }
             return success;
         }
@@ -328,7 +340,7 @@ public class RasterGeoReferencingHandler {
             final PointCoordinatePair pair = getPair(position);
             if (pair != null) {
                 pair.setPoint(point);
-                listenerHandler.positionChanged(position);
+                getListenerHandler().positionChanged(position);
                 return true;
             } else {
                 return false;
@@ -366,7 +378,7 @@ public class RasterGeoReferencingHandler {
             final PointCoordinatePair pair = getPair(position);
             if (pair != null) {
                 pair.setCoordinate(coordinate);
-                listenerHandler.positionChanged(position);
+                getListenerHandler().positionChanged(position);
                 return true;
             } else {
                 return false;
@@ -407,7 +419,7 @@ public class RasterGeoReferencingHandler {
         final List<PointCoordinatePair> pairs = new ArrayList<PointCoordinatePair>(this.pairs);
         final PointCoordinatePair[] array = new PointCoordinatePair[pairs.size()];
         for (int position = 0; position < pairs.size(); position++) {
-            final boolean include = (enabled == null) || enabled.equals(positionStates.get(position));
+            final boolean include = (enabled == null) || enabled.equals(getPositionStates().get(position));
             if (include) {
                 final PointCoordinatePair pair = pairs.get(position);
                 final Point point = pair.getPoint();
@@ -422,10 +434,12 @@ public class RasterGeoReferencingHandler {
      * DOCUMENT ME!
      */
     public void doCoordinateCorrection() {
-        final AffineTransform transform = updateTransformation();
-        for (final PointCoordinatePair pair : getPairs()) {
-            final Point2D correctedCoord = transform.transform(pair.getPoint(), null);
-            pair.setCoordinate(new Coordinate(correctedCoord.getX(), correctedCoord.getY()));
+        final AffineTransformation transform = updateTransformation();
+        if (transform != null) {
+            for (final PointCoordinatePair pair : getPairs()) {
+                final Coordinate point = new Coordinate(pair.getPoint().getX(), pair.getPoint().getY());
+                pair.setCoordinate(transform.transform(point, new Coordinate()));
+            }
         }
         updateTransformation();
     }
@@ -435,11 +449,8 @@ public class RasterGeoReferencingHandler {
      *
      * @return  DOCUMENT ME!
      */
-    private AffineTransform updateTransformation() {
-        final List<AffineTransform> transforms = new ArrayList<>();
-        final Envelope imageEnvelope;
-
-        final AffineTransform avgTransform;
+    public AffineTransformation updateTransformation() {
+        final List<AffineTransformation> transforms = new ArrayList<>();
         final PointCoordinatePair[] completePairs = getCompletePairs();
         if (completePairs.length >= 3) {
             for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(completePairs, 3)) {
@@ -455,39 +466,34 @@ public class RasterGeoReferencingHandler {
                         pair1.getCoordinate(),
                         pair2.getCoordinate());
 
-                final AffineTransformation t = builder.getTransformation();
-                if (t != null) {
-                    final double[] matrix = t.getMatrixEntries();
-                    final AffineTransform transform = new AffineTransform(
-                            matrix[0],
-                            matrix[1],
-                            matrix[3],
-                            matrix[4],
-                            matrix[2],
-                            matrix[5]);
+                final AffineTransformation transform = builder.getTransformation();
+                if (transform != null) {
                     transforms.add(transform);
-                    LOG.info(transform);
                 }
             }
 
-            avgTransform = createAverageTransformation(transforms);
+            final AffineTransformation avgTransform = createAverageTransformation(transforms);
 
-            final Rectangle imageBounds = metaData.getImageBounds();
-            final Rectangle transformedBounds = ((Path2D)avgTransform.createTransformedShape(imageBounds)).getBounds();
-            imageEnvelope = new Envelope(
-                    transformedBounds.getX(),
-                    transformedBounds.getX()
-                            + transformedBounds.getWidth(),
-                    transformedBounds.getY(),
-                    transformedBounds.getY()
-                            + transformedBounds.getHeight());
-        } else {
-            avgTransform = null;
-            imageEnvelope = null;
+            final Rectangle imageBounds = getMetaData().getImageBounds();
+
+            final GeometryFactory factory = new GeometryFactory(
+                    new PrecisionModel(),
+                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+            final LinearRing linear = factory.createLinearRing(
+                    new Coordinate[] {
+                        new Coordinate(imageBounds.getMinX(), imageBounds.getMinY()),
+                        new Coordinate(imageBounds.getMaxX(), imageBounds.getMinY()),
+                        new Coordinate(imageBounds.getMaxX(), imageBounds.getMaxY()),
+                        new Coordinate(imageBounds.getMinX(), imageBounds.getMaxY()),
+                        new Coordinate(imageBounds.getMinX(), imageBounds.getMinY())
+                    });
+
+            final Envelope imageEnvelope = avgTransform.transform(factory.createPolygon(linear)).getEnvelopeInternal();
+            getMetaData().setTransform(avgTransform);
+            getMetaData().setImageEnvelope(imageEnvelope);
+            return avgTransform;
         }
-        metaData.setTransform(avgTransform);
-        metaData.setImageEnvelope(imageEnvelope);
-        return avgTransform;
+        return null;
     }
 
     /**
@@ -497,16 +503,15 @@ public class RasterGeoReferencingHandler {
      *
      * @return  DOCUMENT ME!
      */
-    public static AffineTransform createAverageTransformation(final List<AffineTransform> transforms) {
+    public static AffineTransformation createAverageTransformation(final List<AffineTransformation> transforms) {
         final double[] avg = new double[6];
-        for (final AffineTransform transform : transforms) {
-            final double[] matrix = new double[6];
-            transform.getMatrix(matrix);
+        for (final AffineTransformation transform : transforms) {
+            final double[] matrix = transform.getMatrixEntries();
             for (int i = 0; i < avg.length; i++) {
                 avg[i] += matrix[i] / transforms.size();
             }
         }
-        return new AffineTransform(avg);
+        return new AffineTransformation(avg);
     }
 
     /**
@@ -518,11 +523,11 @@ public class RasterGeoReferencingHandler {
      */
     public double getError(final int position) {
         final PointCoordinatePair pair = pairs.get(position);
-        if ((metaData.getTransform() != null) && (pair != null) && (pair.getPoint() != null)
+        if ((getMetaData().getTransform() != null) && (pair != null) && (pair.getPoint() != null)
                     && (pair.getCoordinate() != null)) {
-            final Point2D dest = metaData.getTransform().transform(pair.getPoint(), null);
-            final Point2D checkDst = new Point.Double(pair.getCoordinate().x, pair.getCoordinate().y);
-            return dest.distance(checkDst);
+            final Coordinate point = new Coordinate(pair.getPoint().getX(), pair.getPoint().getY());
+            final Coordinate transformedPoint = getMetaData().getTransform().transform(point, new Coordinate());
+            return transformedPoint.distance(pair.getCoordinate());
         } else {
             return 0;
         }
