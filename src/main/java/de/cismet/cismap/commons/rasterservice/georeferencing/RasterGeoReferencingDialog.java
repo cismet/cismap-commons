@@ -62,7 +62,9 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         getRootPane().setDefaultButton(jButton4);
 
         RasterGeoReferencingWizard.getInstance().addListener(new WizardListener());
-        CismapBroker.getInstance().addStatusListener(new MapStatusListener());
+        if (CismapBroker.getInstance() != null) {
+            CismapBroker.getInstance().addStatusListener(new MapStatusListener());
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -91,6 +93,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         setTitle(org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingDialog.class,
                 "RasterGeoReferencingDialog.title")); // NOI18N
+        setAlwaysOnTop(true);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
@@ -210,8 +213,8 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      * @param  evt  DOCUMENT ME!
      */
     private void jToggleButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton1ActionPerformed
-        if (CismapBroker.getInstance().getMappingComponent() != null) {
-            CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.ZOOM);
+        if (getMappingComponent() != null) {
+            getMappingComponent().setInteractionMode(MappingComponent.ZOOM);
         }
     }                                                                                  //GEN-LAST:event_jToggleButton1ActionPerformed
 
@@ -221,8 +224,8 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      * @param  evt  DOCUMENT ME!
      */
     private void jToggleButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton2ActionPerformed
-        if (CismapBroker.getInstance().getMappingComponent() != null) {
-            CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.PAN);
+        if (getMappingComponent() != null) {
+            getMappingComponent().setInteractionMode(MappingComponent.PAN);
         }
     }                                                                                  //GEN-LAST:event_jToggleButton2ActionPerformed
 
@@ -232,10 +235,25 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      * @param  evt  DOCUMENT ME!
      */
     private void jToggleButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton3ActionPerformed
-        if (CismapBroker.getInstance().getMappingComponent() != null) {
-            CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
+        final RasterGeoReferencingWizard wizard = RasterGeoReferencingWizard.getInstance();
+        final RasterGeoReferencingHandler handler = wizard.getHandler();
+        if (handler.getNumOfPairs() == 0) {
+            handler.addPair();
+            wizard.selectPoint(0);
+        }
+        if (getMappingComponent() != null) {
+            getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
         }
     }                                                                                  //GEN-LAST:event_jToggleButton3ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static MappingComponent getMappingComponent() {
+        return CismapBroker.getInstance().getMappingComponent();
+    }
 
     /**
      * DOCUMENT ME!
@@ -258,7 +276,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         //~ Static fields/initializers -----------------------------------------
 
         private static final RasterGeoReferencingDialog INSTANCE = new RasterGeoReferencingDialog(
-                StaticSwingTools.getFirstParentFrame(CismapBroker.getInstance().getMappingComponent()),
+                StaticSwingTools.getFirstParentFrame(getMappingComponent()),
                 false);
 
         //~ Constructors -------------------------------------------------------
@@ -324,7 +342,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
 
         @Override
         public void statusValueChanged(final StatusEvent e) {
-            final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
+            final MappingComponent mappingComponent = getMappingComponent();
             if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
                 if (mappingComponent.getInteractionMode().equals(MappingComponent.ZOOM)) {
                     if (!jToggleButton1.isSelected()) {

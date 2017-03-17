@@ -110,17 +110,6 @@ public class RasterGeoReferencingHandler {
     /**
      * DOCUMENT ME!
      *
-     * @param  enabled  DOCUMENT ME!
-     */
-    public void setAllPositionEnabled(final boolean enabled) {
-        for (int position = 0; position < getNumOfPairs(); position++) {
-            setPositionEnabled(position, enabled);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public boolean isComplete() {
@@ -211,7 +200,7 @@ public class RasterGeoReferencingHandler {
         synchronized (pairs) {
             position = pairs.size();
             pairs.add(position, (PointCoordinatePair)pair.clone());
-            getPositionStates().put(position, Boolean.TRUE);
+            getPositionStates().put(position, (pair.getPoint() != null) && (pair.getCoordinate() != null));
         }
         getListenerHandler().positionAdded(position);
         return position;
@@ -321,6 +310,29 @@ public class RasterGeoReferencingHandler {
      */
     public Point getPoint(final int position) throws IndexOutOfBoundsException {
         return getPair(position).getPoint();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   position  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IndexOutOfBoundsException  DOCUMENT ME!
+     */
+    public Coordinate getPointCoordinate(final int position) throws IndexOutOfBoundsException {
+        final Point point = getPoint(position);
+        if (point != null) {
+            final AffineTransformation transform = getMetaData().getTransform();
+            if (transform != null) {
+                return transform.transform(new Coordinate(point.getX(), point.getY()), new Coordinate());
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     /**

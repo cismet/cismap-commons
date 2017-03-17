@@ -88,7 +88,6 @@ import de.cismet.cismap.commons.preferences.LayersPreferences;
 import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
-import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
@@ -463,7 +462,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
             });
-        CismapBroker.getInstance().addActiveLayerListener(RasterGeoReferencingBackend.getInstance());
     }
 
     //~ Methods ----------------------------------------------------------------

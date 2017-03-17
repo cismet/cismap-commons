@@ -27,10 +27,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoRefFeature;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
@@ -65,7 +62,7 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
      */
     private RasterGeoReferencingBackend() {
         // workaround assuring RasterGeoRefPanel is listener of wizard (see constructor of RasterGeoRefPanel)
-        RasterGeoReferencingDialog.getInstance();
+        // RasterGeoReferencingDialog.getInstance();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -88,15 +85,6 @@ public class RasterGeoReferencingBackend implements ActiveLayerListener {
                 if (!getMetaDataMap().containsKey(imagefile)) {
                     try {
                         final RasterGeoReferencingHandler handler = createInitHandler(irs, imagefile);
-                        SwingUtilities.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    handler.setAllPositionEnabled(false);
-                                    RasterGeoReferencingWizard.getInstance().selectPoint(0);
-                                }
-                            });
-
                         handler.addListener(new RasterGeoReferencingHandlerListener() {
 
                                 private void transformationChanged(final int position) {

@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import edu.umd.cs.piccolo.PCanvas;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +34,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoReferencingInputListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -79,7 +85,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButton8;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -100,6 +106,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JPanel panInstructions;
     private javax.swing.JPanel panMapOverview;
     private javax.swing.JPanel panTable;
+    private de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel simpleBackgroundedJPanel1;
+    private de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel simpleBackgroundedJPanel2;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -111,10 +119,34 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     public RasterGeoReferencingPanel() {
         initComponents();
 
-        getWizard().addListener(new WizardListener());
+        if (getWizard() != null) {
+            getWizard().addListener(new WizardListener());
+        }
+
+        initZoomView();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initZoomView() {
+        final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
+        if (mappingComponent != null) {
+            final RasterGeoReferencingInputListener inputListener = (RasterGeoReferencingInputListener)
+                mappingComponent.getInputListener(MappingComponent.GEO_REF);
+            if (inputListener != null) {
+                final PCanvas pCanvasPoint = inputListener.getPointZoomViewCanvas();
+                simpleBackgroundedJPanel1.setPCanvas(pCanvasPoint);
+                inputListener.addPropertyChangeListener(simpleBackgroundedJPanel1);
+
+                final PCanvas pCanvasCoordinate = inputListener.getCoordinateZoomViewCanvas();
+                simpleBackgroundedJPanel2.setPCanvas(pCanvasCoordinate);
+                inputListener.addPropertyChangeListener(simpleBackgroundedJPanel2);
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -166,10 +198,12 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         panMapOverview = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        simpleBackgroundedJPanel1 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
+        jLabel1 = new javax.swing.JLabel();
+        simpleBackgroundedJPanel2 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
+        jLabel10 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
         jPanel3 = new javax.swing.JPanel();
         jCheckBox1 = new javax.swing.JCheckBox();
@@ -488,34 +522,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         panMapOverview.setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/mousezoom.png"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jLabel1,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel1.text"));                                                       // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        panMapOverview.add(jLabel1, gridBagConstraints);
-
-        jLabel2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/ueberlagert.png"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jLabel2,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel2.text"));                                                         // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        panMapOverview.add(jLabel2, gridBagConstraints);
-
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel3,
             org.openide.util.NbBundle.getMessage(
@@ -535,6 +541,54 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panMapOverview.add(jLabel4, gridBagConstraints);
+
+        simpleBackgroundedJPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        simpleBackgroundedJPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(
+                javax.swing.border.BevelBorder.LOWERED));
+        simpleBackgroundedJPanel1.setMaximumSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel1.setMinimumSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel1.setPreferredSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_dot.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jLabel1,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jLabel1.text"));                                                        // NOI18N
+        simpleBackgroundedJPanel1.add(jLabel1, new java.awt.GridBagConstraints());
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+        panMapOverview.add(simpleBackgroundedJPanel1, gridBagConstraints);
+
+        simpleBackgroundedJPanel2.setBackground(new java.awt.Color(255, 255, 255));
+        simpleBackgroundedJPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(
+                javax.swing.border.BevelBorder.LOWERED));
+        simpleBackgroundedJPanel2.setMaximumSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel2.setMinimumSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel2.setPreferredSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel2.setLayout(new java.awt.GridBagLayout());
+
+        jLabel10.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jLabel10,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jLabel10.text"));                                                         // NOI18N
+        simpleBackgroundedJPanel2.add(jLabel10, new java.awt.GridBagConstraints());
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
+        panMapOverview.add(simpleBackgroundedJPanel2, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;

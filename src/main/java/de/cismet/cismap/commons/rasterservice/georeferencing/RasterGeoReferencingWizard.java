@@ -21,7 +21,6 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -142,15 +141,14 @@ public class RasterGeoReferencingWizard {
      * DOCUMENT ME!
      */
     public void forward() {
+        final int position = getPosition();
         if (isPointSelected()) {
-            selectCoordinate(getPosition());
+            selectCoordinate(position);
         } else if (isCoordinateSelected()) {
-            if ((getPosition() + 1) < (getHandler().getNumOfPairs())) {
-                selectPoint(getPosition() + 1);
-            } else {
-                selectionMode = SelectionMode.NONE;
-                setPosition(-1);
+            if ((position + 1) == getHandler().getNumOfPairs()) {
+                getHandler().addPair();
             }
+            selectPoint(position + 1);
         }
     }
 
@@ -336,6 +334,9 @@ public class RasterGeoReferencingWizard {
         public void positionAdded(final int position) {
             for (final RasterGeoReferencingWizardListener listener : listeners) {
                 listener.positionAdded(position);
+            }
+            if (getHandler().getNumOfPairs() == 1) {
+                selectPoint(0);
             }
         }
 
