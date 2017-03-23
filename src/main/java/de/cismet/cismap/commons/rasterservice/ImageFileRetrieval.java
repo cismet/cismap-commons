@@ -11,9 +11,16 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
 
-import org.apache.batik.ext.awt.image.codec.tiff.TIFFImage;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.apache.log4j.Logger;
 
 import org.deegree.io.geotiff.GeoTiffException;
@@ -23,8 +30,11 @@ import org.openide.util.Exceptions;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 
 import java.io.BufferedReader;
@@ -33,17 +43,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.FileImageInputStream;
-import javax.imageio.stream.ImageInputStream;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -58,29 +62,26 @@ public class ImageFileRetrieval extends Thread {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(ImageFileRetrieval.class);
-    private static final Map<String, String> WORLD_FILE_ENDINGS = new HashMap<String, String>();
-
-    static {
-        WORLD_FILE_ENDINGS.put("jpg", "jgw");
-        WORLD_FILE_ENDINGS.put("jpeg", "jgw");
-        WORLD_FILE_ENDINGS.put("png", "pgw");
-        WORLD_FILE_ENDINGS.put("gif", "gfw");
-        WORLD_FILE_ENDINGS.put("tif", "tfw");
-        WORLD_FILE_ENDINGS.put("tiff", "tfw");
-    }
 
     //~ Instance fields --------------------------------------------------------
 
-    private int width;
-    private int height;
-    private double x1;
-    private double x2;
-    private double y1;
-    private double y2;
-    private File imageFile;
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+
+    @Getter @Setter private int width;
+    @Getter @Setter private int height;
+    @Getter @Setter private double x1;
+    @Getter @Setter private double x2;
+    @Getter @Setter private double y1;
+    @Getter @Setter private double y2;
+    @Getter @Setter private File imageFile;
     private RetrievalListener listener = null;
     private volatile boolean youngerCall = false;
-    private ImageMetaData metaData;
+    private ImageFileMetaData metaData;
+    private final ImageFileUtils.Mode mode;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -89,11 +90,16 @@ public class ImageFileRetrieval extends Thread {
      *
      * @param  imageFile  DOCUMENT ME!
      * @param  listener   DOCUMENT ME!
+     * @param  mode       DOCUMENT ME!
      */
-    public ImageFileRetrieval(final File imageFile, final RetrievalListener listener) {
+    public ImageFileRetrieval(final File imageFile,
+            final RetrievalListener listener,
+            final ImageFileUtils.Mode mode) {
         super("ImageFileRetrieval");
         this.imageFile = imageFile;
         this.listener = listener;
+
+        this.mode = mode;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -124,15 +130,12 @@ public class ImageFileRetrieval extends Thread {
                 return;
             }
 
-            final Envelope en = metaData.getImageEnvelope();
-            final Rectangle rec = metaData.getImageBounds();
-
             if (youngerCall && isInterrupted()) {
                 LOG.warn("Image retrieval aborted");
                 return;
             }
 
-            final BufferedImage mapImage = createImage(rec, en);
+            final BufferedImage mapImage = createImage(metaData);
 
             final RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(true);
@@ -167,138 +170,197 @@ public class ImageFileRetrieval extends Thread {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   mapWorldBounds       DOCUMENT ME!
+     * @param   imageMapWorldOffset  DOCUMENT ME!
+     * @param   imageBounds          DOCUMENT ME!
+     * @param   worldFileTransform   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Rectangle getClippingRect(final Rectangle.Double mapWorldBounds,
+            final Point.Double imageMapWorldOffset,
+            final Rectangle imageBounds,
+            final AffineTransform worldFileTransform) {
+        int mapPartStartX = (int)Math.floor(-imageMapWorldOffset.getX() / worldFileTransform.getScaleX());
+        int mapPartStartY = (int)Math.floor(-imageMapWorldOffset.getY() / -worldFileTransform.getScaleY());
+        int mapPartWidth = (int)Math.ceil(mapWorldBounds.getWidth() / worldFileTransform.getScaleX()) + 1;
+        int mapPartHeight = (int)Math.ceil(mapWorldBounds.getHeight() / -worldFileTransform.getScaleY()) + 1;
+
+        if (mapPartStartX < 0) {
+            mapPartStartX = 0;
+            mapPartWidth += mapPartStartX;
+        }
+        if (mapPartStartY < 0) {
+            mapPartStartY = 0;
+            mapPartHeight += mapPartStartY;
+        }
+        if ((mapPartStartX + mapPartWidth) > imageBounds.getWidth()) {
+            mapPartWidth = (int)imageBounds.getWidth() - mapPartStartX;
+        }
+        if ((mapPartStartY + mapPartHeight) > imageBounds.getHeight()) {
+            mapPartHeight = (int)imageBounds.getHeight() - mapPartStartY;
+        }
+
+        return new Rectangle(mapPartStartX, mapPartStartY, mapPartWidth, mapPartHeight);
+    }
+
+    /**
      * Creates an image of the given map section.
      *
-     * @param   origImageBounds  the bounds of the original image
-     * @param   origImageCoords  the envelope of the original image
+     * @param   metaData  origImageBounds the bounds of the original image
      *
      * @return  an image of the given map section
      *
-     * @throws  IOException           DOCUMENT ME!
+     * @throws  IOException                      DOCUMENT ME!
+     * @throws  InterruptedException             DOCUMENT ME!
+     * @throws  NoninvertibleTransformException  DOCUMENT ME!
+     */
+    private BufferedImage createImage(final ImageFileMetaData metaData) throws IOException,
+        InterruptedException,
+        NoninvertibleTransformException {
+        final double[] matrix = metaData.getTransform().getMatrixEntries();
+        final AffineTransform worldFileTransform = new AffineTransform(
+                matrix[0],
+                matrix[3],
+                matrix[1],
+                matrix[4],
+                matrix[2],
+                matrix[5]);
+
+        // bounds in pixel dimensions
+        final Rectangle mapBounds = new Rectangle(width, height);
+        final Rectangle imageBounds = metaData.getImageBounds();
+
+        // bounds in world dimensions
+        final Rectangle.Double mapWorldBounds = new Rectangle.Double(x1, y1, x2 - x1, y2 - y1);
+        final Envelope imageWorldBounds = metaData.getImageEnvelope();
+
+        // the offset of the image in relation to the map in world dimensions
+        final Point.Double imageMapWorldOffset = new Point.Double(
+                imageWorldBounds.getMinX()
+                        - mapWorldBounds.getMinX(),
+                mapWorldBounds.getMaxY()
+                        - imageWorldBounds.getMaxY());
+
+        // meter per pixel ration (the better appropriate "Dimension" class only supports Integers
+        // so we are using Rectangle.Double instead)
+        final Rectangle.Double meterPerPixel = new Rectangle.Double(
+                0,
+                0,
+                mapWorldBounds.getWidth()
+                        / mapBounds.getWidth(),
+                mapWorldBounds.getHeight()
+                        / mapBounds.getHeight());
+
+        // LOAD RAW IMAGE
+        BufferedImage rawImage = ImageIO.read(imageFile);
+
+        handleInterruption();
+
+        // PRECLIPPING
+        final Point.Double clippingWorldOffset;
+        BufferedImage clippedImage;
+        if ((worldFileTransform.getShearX() == 0) && (worldFileTransform.getShearY() == 0)) {
+            // calculating clipping rectangle
+            final Rectangle clippingRect = getClippingRect(
+                    mapWorldBounds,
+                    imageMapWorldOffset,
+                    imageBounds,
+                    worldFileTransform);
+
+            // the clipped image does not start at the same positon. an offset is needed to compensate for this
+            clippingWorldOffset = new Point.Double(
+                    clippingRect.getX()
+                            * worldFileTransform.getScaleX(),
+                    -clippingRect.getY()
+                            * worldFileTransform.getScaleY());
+            // clipping the image
+            clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
+                    (int)clippingRect.getY(),
+                    (int)clippingRect.getWidth(),
+                    (int)clippingRect.getHeight());
+        } else { // no preclipping for sheared/rotated images for simplicity reasons
+            clippingWorldOffset = new Point.Double(0, 0);
+            clippedImage = rawImage;
+        }
+
+        // cleaning memory
+        rawImage = null;
+        System.gc();
+
+        handleInterruption();
+
+        // TRANSFORMATION
+        // Just calculating the transformed shape first.
+        // (Not very elegant to do this, but it works)
+        // scaling and shearing = worldfile scaling/shearing divided by meterPerPixel
+        final AffineTransform transformation = new AffineTransform(
+                worldFileTransform.getScaleX()
+                        / meterPerPixel.getWidth(),
+                -worldFileTransform.getShearY()
+                        / meterPerPixel.getHeight(),
+                worldFileTransform.getShearX()
+                        / meterPerPixel.getWidth(),
+                -worldFileTransform.getScaleY()
+                        / meterPerPixel.getHeight(),
+                0,
+                0);
+
+        // The x/y coordinate of the transformed (but not yet translated) is either 0
+        // or negative. This is important, because negative values hav to be added to the offset
+        final Rectangle shapeBounds = transformation.createTransformedShape(imageBounds).getBounds();
+
+        // We apply now the full transormation to the image
+        // position = combined world offsets divided by meterPerPixel
+        final AffineTransform transformation2 = new AffineTransform(
+                transformation.getScaleX(),
+                transformation.getShearY(),
+                transformation.getShearX(),
+                transformation.getScaleY(),
+                ((imageMapWorldOffset.getX() + clippingWorldOffset.getX())
+                            / meterPerPixel.getWidth())
+                        - shapeBounds.getX(),
+                ((imageMapWorldOffset.getY() + clippingWorldOffset.getY())
+                            / meterPerPixel.getHeight())
+                        - shapeBounds.getY());
+        final BufferedImage transformedImage = transform(transformation2, clippedImage);
+
+        // cleaning memory
+        clippedImage = null;
+        System.gc();
+
+        return transformedImage;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @throws  InterruptedException  DOCUMENT ME!
      */
-    private BufferedImage createImage(final Rectangle origImageBounds, final Envelope origImageCoords)
-            throws IOException, InterruptedException {
-        final double meterPerPixelWidth = origImageCoords.getWidth() / origImageBounds.getWidth();
-        final double meterPerPixelHeight = origImageCoords.getHeight() / origImageBounds.getHeight();
-        int mapPartStartX = (int)((x1 - origImageCoords.getMinX()) / meterPerPixelWidth);
-        int mapPartStartY = (int)((origImageCoords.getMaxY() - y2) / meterPerPixelHeight);
-        int mapPartWidth = (int)((x2 - x1) / meterPerPixelWidth);
-        int mapPartHeight = (int)((y2 - y1) / meterPerPixelHeight);
-        int imageWidth = width;
-        int imageHeight = height;
-        int borderLeft = 0;
-        int borderTop = 0;
-        int borderRight = 0;
-        int borderBottom = 0;
-
-        if (mapPartStartX < 0) {
-            // add left border
-            mapPartWidth -= Math.abs(mapPartStartX);
-            borderLeft = (int)(Math.abs(mapPartStartX) * meterPerPixelWidth / ((x2 - x1) / width));
-            imageWidth -= borderLeft;
-            mapPartStartX = 0;
-        }
-
-        if (mapPartStartY < 0) {
-            // add top border
-            mapPartHeight -= Math.abs(mapPartStartY);
-            borderTop = (int)(Math.abs(mapPartStartY) * meterPerPixelHeight / ((y2 - y1) / height));
-            imageHeight -= borderTop;
-            mapPartStartY = 0;
-        }
-
-        if ((mapPartStartX + mapPartWidth) > origImageBounds.getWidth()) {
-            // add right border
-            borderRight = (int)(((mapPartStartX + mapPartWidth) - origImageBounds.getWidth()) * meterPerPixelWidth
-                            / ((x2 - x1) / width));
-            mapPartWidth = ((int)origImageBounds.getWidth() - mapPartStartX);
-            imageWidth = imageWidth - borderRight;
-        }
-
-        if ((mapPartStartY + mapPartHeight) > origImageBounds.getHeight()) {
-            // add bottom border
-            borderBottom = (int)(((mapPartStartY + mapPartHeight) - origImageBounds.getHeight()) * meterPerPixelHeight
-                            / ((y2 - y1) / height));
-            mapPartHeight = ((int)origImageBounds.getHeight() - mapPartStartY);
-            imageHeight = imageHeight - borderBottom;
-        }
-
-        BufferedImage imagePart = null;
-
-        if ((mapPartWidth > 0) && (mapPartHeight > 0)) {
-            BufferedImage i = ImageIO.read(imageFile);
-            imagePart = i.getSubimage(mapPartStartX, mapPartStartY, mapPartWidth, mapPartHeight);
-            i = null;
-            System.gc();
-        }
-
+    private void handleInterruption() throws InterruptedException {
         if (youngerCall && isInterrupted()) {
             throw new InterruptedException();
         }
-
-        final BufferedImage rescaledImage = rescale(
-                imageWidth,
-                imageHeight,
-                borderLeft,
-                borderRight,
-                borderTop,
-                borderBottom,
-                BufferedImage.TYPE_INT_ARGB,
-                imagePart);
-
-        imagePart = null;
-        System.gc();
-
-        return rescaledImage;
     }
 
     /**
      * Rescale the given image and add transparent borders.
      *
-     * @param   width         DOCUMENT ME!
-     * @param   height        DOCUMENT ME!
-     * @param   borderLeft    DOCUMENT ME!
-     * @param   borderRight   DOCUMENT ME!
-     * @param   borderTop     DOCUMENT ME!
-     * @param   borderBottom  DOCUMENT ME!
-     * @param   type          DOCUMENT ME!
-     * @param   image         DOCUMENT ME!
+     * @param   transform  width transform DOCUMENT ME!
+     * @param   image      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private BufferedImage rescale(final int width,
-            final int height,
-            final int borderLeft,
-            final int borderRight,
-            final int borderTop,
-            final int borderBottom,
-            final int type,
-            final BufferedImage image) {
-        final int totalWdth = width + borderLeft + borderRight;
-        final int totalHeight = height + borderTop + borderBottom;
-        final BufferedImage resized = new BufferedImage(totalWdth, totalHeight, type);
-
+    private BufferedImage transform(final AffineTransform transform, final BufferedImage image) {
+        final BufferedImage transformedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         if (image != null) {
-            final Graphics2D g = resized.createGraphics();
+            final Graphics2D g = transformedImage.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(
-                image,
-                borderLeft,
-                borderTop,
-                width
-                        + borderLeft,
-                height
-                        + borderTop,
-                0,
-                0,
-                image.getWidth(),
-                image.getHeight(),
-                null);
-            g.dispose();
+            g.drawImage(image, transform, null);
         }
-
-        return resized;
+        return transformedImage;
     }
 
     /**
@@ -308,16 +370,32 @@ public class ImageFileRetrieval extends Thread {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private ImageMetaData getImageMetaData() throws Exception {
-        final File worldFile = getWorldFile();
-
-        if (worldFile != null) {
-            return getWorldFileMetaData(worldFile);
-        } else if (imageFile.getName().toLowerCase().endsWith("tif")) {
-            return getTiffMetaData();
+    private ImageFileMetaData getImageMetaData() throws Exception {
+        if (mode != null) {
+            switch (mode) {
+                case WORLDFILE: {
+                    return getWorldFileMetaData(getWorldFile());
+                }
+                case TIFF: {
+                    getTiffMetaData();
+                }
+                case GEO_REFERENCED: {
+                    return getGeoReferencedMetaData();
+                }
+            }
         }
-
         return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private ImageFileMetaData getGeoReferencedMetaData() throws Exception {
+        return RasterGeoReferencingBackend.getInstance().getHandler(imageFile).getMetaData();
     }
 
     /**
@@ -327,16 +405,8 @@ public class ImageFileRetrieval extends Thread {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private ImageMetaData getTiffMetaData() throws Exception {
-        GeoTiffReader r = new GeoTiffReader(imageFile);
-        final org.deegree.model.spatialschema.Envelope e = r.getBoundingBox();
-        final Envelope en = new Envelope(e.getMin().getX(), e.getMax().getX(), e.getMin().getY(), e.getMax().getY());
-        final TIFFImage tiffImage = r.getTIFFImage();
-        final Rectangle rec = tiffImage.getBounds();
-        r = null;
-        System.gc();
-
-        return new ImageMetaData(rec, en);
+    private ImageFileMetaData getTiffMetaData() throws Exception {
+        return ImageFileUtils.getTiffMetaData(imageFile);
     }
 
     /**
@@ -347,42 +417,58 @@ public class ImageFileRetrieval extends Thread {
      *
      * @return  the meta information about the image file
      */
-    private ImageMetaData getWorldFileMetaData(final File worldFile) {
+    private ImageFileMetaData getWorldFileMetaData(final File worldFile) {
         try {
             final BufferedReader br = new BufferedReader(new FileReader(worldFile));
-            String line;
-            final List<Double> parameter = new ArrayList<Double>();
+            final double[] matrix = new double[6];
 
             // read parameter from world file
-            while ((line = br.readLine()) != null) {
-                if (parameter.size() > 5) {
-                    break;
+            int index = 0;
+            String line;
+            while (((line = br.readLine()) != null) && (index < (matrix.length))) {
+                if (line.trim().isEmpty() || line.trim().startsWith("#")) {
+                    continue;
                 }
-                parameter.add(Double.parseDouble(line));
+                if (line.contains(",")) {
+                    line = line.replaceAll(",", ".");
+                }
+                matrix[index++] = Double.parseDouble(line);
             }
 
             br.close();
 
-            if (parameter.size() > 5) {
-                if ((parameter.get(1) == 0.0) && (parameter.get(2) == 0.0)) {
-                    final Dimension imageDimension = getImageDimension(imageFile);
-                    final Rectangle bounds = new Rectangle(
-                            0,
-                            0,
-                            (int)imageDimension.getWidth(),
-                            (int)imageDimension.getHeight());
+            if (index == matrix.length) {
+                final AffineTransformation transform = new AffineTransformation(
+                        matrix[0],
+                        matrix[2],
+                        matrix[4],
+                        matrix[1],
+                        matrix[3],
+                        matrix[5]);
 
-                    final double x1 = parameter.get(4);
-                    final double x2 = x1 + (parameter.get(0) * imageDimension.getWidth());
-                    final double y2 = parameter.get(5);
-                    final double y1 = y2 + (parameter.get(3) * imageDimension.getHeight());
+                final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
+                final double imageWidth = imageDimension.getWidth();
+                final double imageHeight = imageDimension.getHeight();
+                final Rectangle imageBounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
 
-                    final Envelope en = new Envelope(x1, x2, y1, y2);
+                final GeometryFactory factory = new GeometryFactory(
+                        new PrecisionModel(),
+                        CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                final LinearRing linear = factory.createLinearRing(
+                        new Coordinate[] {
+                            new Coordinate(0, 0),
+                            new Coordinate(imageWidth, 0),
+                            new Coordinate(imageWidth, imageHeight),
+                            new Coordinate(0, imageHeight),
+                            new Coordinate(0, 0)
+                        });
 
-                    return new ImageMetaData(bounds, en);
-                } else {
-                    // todo transform image
-                }
+                final Envelope imageEnvelope = transform.transform(factory.createPolygon(linear, null))
+                            .getEnvelopeInternal();
+                return new ImageFileMetaData(
+                        imageBounds,
+                        imageEnvelope,
+                        transform);
             }
         } catch (Exception e) {
             LOG.error("Cannot parse the world file", e);
@@ -392,77 +478,12 @@ public class ImageFileRetrieval extends Thread {
     }
 
     /**
-     * Determines the width and height of the given iamge file. This method does not completely read the image.
-     *
-     * @param   imgFile  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  IOException  DOCUMENT ME!
-     */
-    public static Dimension getImageDimension(final File imgFile) throws IOException {
-        final int pos = imgFile.getName().lastIndexOf(".");
-
-        if (pos == -1) {
-            throw new IOException("The file " + imgFile.getAbsolutePath()
-                        + " has not extension, so no reader can be found.");
-        }
-
-        final String fileSuffix = imgFile.getName().substring(pos + 1);
-        final Iterator<ImageReader> iter = ImageIO.getImageReadersBySuffix(fileSuffix);
-
-        if (iter.hasNext()) {
-            final ImageReader reader = iter.next();
-
-            try {
-                final ImageInputStream stream = new FileImageInputStream(imgFile);
-                reader.setInput(stream);
-                final int width = reader.getWidth(reader.getMinIndex());
-                final int height = reader.getHeight(reader.getMinIndex());
-
-                return new Dimension(width, height);
-            } catch (IOException e) {
-                LOG.warn("Error reading: " + imgFile.getAbsolutePath(), e);
-            } finally {
-                reader.dispose();
-            }
-        }
-
-        throw new IOException("No suitable reader found for file format: " + fileSuffix);
-    }
-
-    /**
      * Returns the world file or null, if it does not exist.
      *
      * @return  the world file of the <code>imageFile</code>
      */
     private File getWorldFile() {
-        return getWorldFile(imageFile);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   imageFile  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static File getWorldFile(final File imageFile) {
-        final String name = imageFile.getAbsolutePath();
-        final String ending = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
-
-        final String wfEnding = WORLD_FILE_ENDINGS.get(ending);
-
-        if (wfEnding != null) {
-            final String worldFileName = name.substring(0, name.lastIndexOf(".") + 1) + wfEnding;
-            final File worldFile = new File(worldFileName);
-
-            if (worldFile.exists()) {
-                return worldFile;
-            }
-        }
-
-        return null;
+        return ImageFileUtils.getWorldFile(imageFile);
     }
 
     /**
@@ -473,7 +494,7 @@ public class ImageFileRetrieval extends Thread {
     public Envelope getEnvelope() {
         try {
             if (metaData == null) {
-                final ImageMetaData metaData = getImageMetaData();
+                final ImageFileMetaData metaData = getImageMetaData();
 
                 if (metaData != null) {
                     return metaData.getImageEnvelope();
@@ -506,132 +527,6 @@ public class ImageFileRetrieval extends Thread {
         } catch (GeoTiffException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the width
-     */
-    public int getWidth() {
-        return width;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  width  the width to set
-     */
-    public void setWidth(final int width) {
-        this.width = width;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the height
-     */
-    public int getHeight() {
-        return height;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  height  the height to set
-     */
-    public void setHeight(final int height) {
-        this.height = height;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the x1
-     */
-    public double getX1() {
-        return x1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  x1  the x1 to set
-     */
-    public void setX1(final double x1) {
-        this.x1 = x1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the x2
-     */
-    public double getX2() {
-        return x2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  x2  the x2 to set
-     */
-    public void setX2(final double x2) {
-        this.x2 = x2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the y1
-     */
-    public double getY1() {
-        return y1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  y1  the y1 to set
-     */
-    public void setY1(final double y1) {
-        this.y1 = y1;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the y2
-     */
-    public double getY2() {
-        return y2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  y2  the y2 to set
-     */
-    public void setY2(final double y2) {
-        this.y2 = y2;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the imageFile
-     */
-    public File getImageFile() {
-        return imageFile;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  imageFile  the imageFile to set
-     */
-    public void setImageFile(final File imageFile) {
-        this.imageFile = imageFile;
     }
 
     @Override
@@ -688,71 +583,5 @@ public class ImageFileRetrieval extends Thread {
      */
     public void copyMetaData(final ImageFileRetrieval other) {
         this.metaData = other.metaData;
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class ImageMetaData {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private Rectangle imageBounds;
-        private Envelope imageEnvelope;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new ImageMetaData object.
-         *
-         * @param  imageBounds    DOCUMENT ME!
-         * @param  imageEnvelope  DOCUMENT ME!
-         */
-        public ImageMetaData(final Rectangle imageBounds, final Envelope imageEnvelope) {
-            this.imageBounds = imageBounds;
-            this.imageEnvelope = imageEnvelope;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the imageBounds
-         */
-        public Rectangle getImageBounds() {
-            return imageBounds;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  imageBounds  the imageBounds to set
-         */
-        public void setImageBounds(final Rectangle imageBounds) {
-            this.imageBounds = imageBounds;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the imageEnvelope
-         */
-        public Envelope getImageEnvelope() {
-            return imageEnvelope;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  imageEnvelope  the imageEnvelope to set
-         */
-        public void setImageEnvelope(final Envelope imageEnvelope) {
-            this.imageEnvelope = imageEnvelope;
-        }
     }
 }

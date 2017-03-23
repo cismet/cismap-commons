@@ -10,7 +10,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>4.1.3</version>
+    <version>4.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -34,7 +34,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-      <tag>v4.1.3</tag>
+      <tag>v4.2</tag>
   </scm>
 
     <repositories>
