@@ -438,7 +438,13 @@ public class ImageFileRetrieval extends Thread {
             br.close();
 
             if (index == matrix.length) {
-                final AffineTransformation transform = new AffineTransformation(matrix);
+                final AffineTransformation transform = new AffineTransformation(
+                        matrix[0],
+                        matrix[2],
+                        matrix[4],
+                        matrix[1],
+                        matrix[3],
+                        matrix[5]);
 
                 final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
                 final double imageWidth = imageDimension.getWidth();

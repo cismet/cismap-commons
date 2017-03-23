@@ -898,7 +898,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(ZOOM, new RubberBandZoomListener());
         inputEventListener.put(PAN, new PanAndMousewheelZoomListener());
         inputEventListener.put(SELECT, new SelectionListener());
-        inputEventListener.put(GEO_REF, new RasterGeoReferencingInputListener());
+        inputEventListener.put(GEO_REF, RasterGeoReferencingInputListener.getInstance());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
         inputEventListener.put(FEATURE_INFO_MULTI_GEOM, new GetFeatureInfoMultiGeomListener());

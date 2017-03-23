@@ -14,8 +14,6 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.umd.cs.piccolo.PCanvas;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,9 +33,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoReferencingInputListener;
-import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.StaticDebuggingTools;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -84,6 +82,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
     private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JDialog jDialog1;
+    private javax.swing.JDialog jDialog2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel3;
@@ -123,30 +123,14 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             getWizard().addListener(new WizardListener());
         }
 
-        initZoomView();
+        simpleBackgroundedJPanel1.setPCanvas(getWizard().getPointZoomViewCanvas());
+        getWizard().addPropertyChangeListener(simpleBackgroundedJPanel1);
+
+        simpleBackgroundedJPanel2.setPCanvas(getWizard().getCoordinateZoomViewCanvas());
+        getWizard().addPropertyChangeListener(simpleBackgroundedJPanel2);
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void initZoomView() {
-        final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
-        if (mappingComponent != null) {
-            final RasterGeoReferencingInputListener inputListener = (RasterGeoReferencingInputListener)
-                mappingComponent.getInputListener(MappingComponent.GEO_REF);
-            if (inputListener != null) {
-                final PCanvas pCanvasPoint = inputListener.getPointZoomViewCanvas();
-                simpleBackgroundedJPanel1.setPCanvas(pCanvasPoint);
-                inputListener.addPropertyChangeListener(simpleBackgroundedJPanel1);
-
-                final PCanvas pCanvasCoordinate = inputListener.getCoordinateZoomViewCanvas();
-                simpleBackgroundedJPanel2.setPCanvas(pCanvasCoordinate);
-                inputListener.addPropertyChangeListener(simpleBackgroundedJPanel2);
-            }
-        }
-    }
 
     /**
      * DOCUMENT ME!
@@ -176,6 +160,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
         bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
+        jDialog1 = new javax.swing.JDialog();
+        jDialog2 = new javax.swing.JDialog();
         panContent = new javax.swing.JPanel();
         panInstructions = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
@@ -212,7 +198,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 32767));
 
-        setLayout(new java.awt.BorderLayout());
+        setLayout(new java.awt.GridBagLayout());
 
         panContent.setLayout(new java.awt.GridBagLayout());
 
@@ -548,6 +534,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel1.setMaximumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setMinimumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setPreferredSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    simpleBackgroundedJPanel1MouseClicked(evt);
+                }
+            });
         simpleBackgroundedJPanel1.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setIcon(new javax.swing.ImageIcon(
@@ -572,6 +565,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel2.setMaximumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel2.setMinimumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel2.setPreferredSize(new java.awt.Dimension(200, 200));
+        simpleBackgroundedJPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    simpleBackgroundedJPanel2MouseClicked(evt);
+                }
+            });
         simpleBackgroundedJPanel2.setLayout(new java.awt.GridBagLayout());
 
         jLabel10.setIcon(new javax.swing.ImageIcon(
@@ -653,90 +653,14 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panContent.add(jPanel2, gridBagConstraints);
 
-        add(panContent, java.awt.BorderLayout.CENTER);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(panContent, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public boolean isBackwardPossible() {
-        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
-                    && ((jXTable1.getSelectedRow() > 0) || getWizard().isCoordinateSelected());
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public boolean isForwardPossible() {
-        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
-                    && ((jXTable1.getSelectedRow() < (getHandler().getNumOfPairs() - 1))
-                        || getWizard().isPointSelected());
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton6ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton6ActionPerformed
-        new SwingWorker<Void, Object>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    getWizard().backward();
-                    return null;
-                }
-            }.execute();
-    } //GEN-LAST:event_jButton6ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton7ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton7ActionPerformed
-        new SwingWorker<Void, Object>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    getWizard().forward();
-                    return null;
-                }
-            }.execute();
-    } //GEN-LAST:event_jButton7ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton8ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton8ActionPerformed
-        new SwingWorker<Integer, Object>() {
-
-                @Override
-                protected Integer doInBackground() throws Exception {
-                    final int position = getHandler().addPair();
-                    return position;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        final int position = (Integer)get();
-                        refreshModel();
-                        getWizard().selectPoint(position);
-                    } catch (final Exception ex) {
-                        LOG.info(ex, ex);
-                    }
-                }
-            }.execute();
-    } //GEN-LAST:event_jButton8ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -770,6 +694,118 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             }.execute();
         ;
     } //GEN-LAST:event_jButton1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton8ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton8ActionPerformed
+        new SwingWorker<Integer, Object>() {
+
+                @Override
+                protected Integer doInBackground() throws Exception {
+                    final int position = getHandler().addPair();
+                    return position;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final int position = (Integer)get();
+                        refreshModel();
+                        getWizard().selectPoint(position);
+                    } catch (final Exception ex) {
+                        LOG.info(ex, ex);
+                    }
+                }
+            }.execute();
+    } //GEN-LAST:event_jButton8ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton7ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton7ActionPerformed
+        new SwingWorker<Void, Object>() {
+
+                @Override
+                protected Void doInBackground() throws Exception {
+                    getWizard().forward();
+                    return null;
+                }
+            }.execute();
+    } //GEN-LAST:event_jButton7ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton6ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton6ActionPerformed
+        new SwingWorker<Void, Object>() {
+
+                @Override
+                protected Void doInBackground() throws Exception {
+                    getWizard().backward();
+                    return null;
+                }
+            }.execute();
+    } //GEN-LAST:event_jButton6ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void simpleBackgroundedJPanel1MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel1MouseClicked
+        // for debugging purposes
+        if (StaticDebuggingTools.checkHomeForFile("cismetDeveloper")) {
+            getWizard().refreshPointZoomMap();
+            jDialog1.getContentPane().removeAll();
+            jDialog1.getContentPane().add(getWizard().getPointZoomMap(), java.awt.BorderLayout.CENTER);
+            jDialog1.setSize(640, 480);
+            StaticSwingTools.showDialog(jDialog1);
+        }
+    } //GEN-LAST:event_simpleBackgroundedJPanel1MouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void simpleBackgroundedJPanel2MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel2MouseClicked
+        // for debugging purposes
+        if (StaticDebuggingTools.checkHomeForFile("cismetDeveloper")) {
+            getWizard().refreshCoordinateZoomMap();
+            jDialog2.getContentPane().removeAll();
+            jDialog2.getContentPane().add(getWizard().getCoordinateZoomMap(), java.awt.BorderLayout.CENTER);
+            jDialog2.setSize(640, 480);
+            StaticSwingTools.showDialog(jDialog2);
+        }
+    } //GEN-LAST:event_simpleBackgroundedJPanel2MouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isBackwardPossible() {
+        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
+                    && ((jXTable1.getSelectedRow() > 0) || getWizard().isCoordinateSelected());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isForwardPossible() {
+        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
+                    && ((jXTable1.getSelectedRow() < (getHandler().getNumOfPairs() - 1))
+                        || getWizard().isPointSelected());
+    }
 
     /**
      * DOCUMENT ME!
@@ -867,7 +903,11 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                                     + new DecimalFormat("#0.00").format(coordinate.y) + "]") : null;
                 }
                 case 3: {
-                    return new DecimalFormat("#0.00").format(getHandler().getError(rowIndex));
+                    if (getHandler().isComplete()) {
+                        return new DecimalFormat("#0.00").format(getHandler().getError(rowIndex));
+                    } else {
+                        return "-";
+                    }
                 }
                 case 4: {
                     return getHandler().isPositionEnabled(rowIndex);

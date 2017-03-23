@@ -93,6 +93,7 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
     private static final BufferedImage GEOREF_DOT_IMAGE;
     private static final BufferedImage GEOREF_CROSS_IMAGE;
+    private static final ImageIcon GEOREF_ICON;
 
     private static final transient Logger LOG = Logger.getLogger(RasterGeoRefFeature.class);
 
@@ -113,6 +114,14 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
             LOG.error("could not load the georref_cross image from resources");
         }
         GEOREF_CROSS_IMAGE = geoRefCrossImage;
+        BufferedImage geoRefIconImage = null;
+        try {
+            geoRefIconImage = ImageIO.read(RasterGeoRefFeature.class.getResource(
+                        "/de/cismet/cismap/commons/rasterservice/georeferencing/georef.png"));
+        } catch (final IOException ex) {
+            LOG.error("could not load the georref_cross image from resources");
+        }
+        GEOREF_ICON = new ImageIcon(geoRefIconImage.getScaledInstance(13, 13, java.awt.Image.SCALE_SMOOTH));
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -123,7 +132,7 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     @Getter(AccessLevel.PRIVATE)
     private final RasterGeoReferencingHandler handler;
 
-    @Getter(AccessLevel.PRIVATE)
+    @Getter
     @Setter(AccessLevel.PRIVATE)
     private boolean refreshing;
 
@@ -139,17 +148,18 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
         getHandler().addListener(this);
         RasterGeoReferencingWizard.getInstance().addListener(this);
         updateGeometry();
-//        setTransparency(1);
 
         CismapBroker.getInstance()
                 .getMappingComponent()
                 .getFeatureCollection()
                 .addFeatureCollectionListener(new FeatureCollectionListener() {
 
+                        boolean ignoreSelection = false;
+
                         @Override
                         public void featuresAdded(final FeatureCollectionEvent fce) {
-                            if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                                RasterGeoReferencingWizard.getInstance().setHandler(handler);
+                            if (!isRefreshing() && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                                // RasterGeoReferencingWizard.getInstance().setHandler(handler);
                                 if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
                                     StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
                                 }
@@ -178,10 +188,20 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                             if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
                                 if (fce.getFeatureCollection().getSelectedFeatures().contains(
                                         RasterGeoRefFeature.this)) {
-                                    RasterGeoReferencingWizard.getInstance().setHandler(handler);
-
-                                    if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
-                                        StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
+                                    if (!ignoreSelection) {
+                                        ignoreSelection = true;
+                                        try {
+                                            RasterGeoReferencingWizard.getInstance().setHandler(handler);
+                                            CismapBroker.getInstance()
+                                            .getMappingComponent()
+                                            .getFeatureCollection()
+                                            .select(handler.getFeature());
+                                            if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
+                                                StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
+                                            }
+                                        } finally {
+                                            ignoreSelection = false;
+                                        }
                                     }
                                 }
                             }
@@ -235,14 +255,12 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                     CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
             final LinearRing linear = factory.createLinearRing(coordinates);
             setGeometry(factory.createPolygon(linear, null));
-//        } else {
-//            setGeometry(null);
         }
     }
 
     @Override
     public ImageIcon getIconImage() {
-        return null;
+        return GEOREF_ICON;
     }
 
     @Override
@@ -262,7 +280,7 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
     @Override
     public String getName() {
-        return "RasterGeoRef";
+        return getHandler().getService().getName();
     }
 
     /**

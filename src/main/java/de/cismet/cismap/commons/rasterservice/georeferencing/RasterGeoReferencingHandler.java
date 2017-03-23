@@ -11,9 +11,9 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -58,6 +58,8 @@ public class RasterGeoReferencingHandler {
     @Getter private final ImageFileMetaData metaData;
     @Getter private final RasterGeoRefFeature feature;
     @Getter private final ImageRasterService service;
+    @Getter(AccessLevel.PRIVATE)
+    private final AffineTransformation initialTransform;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -71,6 +73,7 @@ public class RasterGeoReferencingHandler {
         this.service = service;
         this.metaData = metaData;
         this.feature = new RasterGeoRefFeature(this);
+        this.initialTransform = metaData.getTransform();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -203,6 +206,7 @@ public class RasterGeoReferencingHandler {
             getPositionStates().put(position, (pair.getPoint() != null) && (pair.getCoordinate() != null));
         }
         getListenerHandler().positionAdded(position);
+        updateTransformation();
         return position;
     }
 
@@ -224,6 +228,7 @@ public class RasterGeoReferencingHandler {
             checḱPosition(position);
             pairs.set(position, (PointCoordinatePair)pair.clone());
             getListenerHandler().positionChanged(position);
+            updateTransformation();
         }
     }
 
@@ -252,6 +257,7 @@ public class RasterGeoReferencingHandler {
             if (success) {
                 getPositionStates().remove(position);
                 getListenerHandler().positionRemoved(position);
+                updateTransformation();
             }
             return success;
         }
@@ -391,6 +397,7 @@ public class RasterGeoReferencingHandler {
             if (pair != null) {
                 pair.setCoordinate(coordinate);
                 getListenerHandler().positionChanged(position);
+                updateTransformation();
                 return true;
             } else {
                 return false;
@@ -445,67 +452,39 @@ public class RasterGeoReferencingHandler {
     /**
      * DOCUMENT ME!
      */
-    public void doCoordinateCorrection() {
-        final AffineTransformation transform = updateTransformation();
-        if (transform != null) {
-            for (final PointCoordinatePair pair : getPairs()) {
-                final Coordinate point = new Coordinate(pair.getPoint().getX(), pair.getPoint().getY());
-                pair.setCoordinate(transform.transform(point, new Coordinate()));
-            }
-        }
-        updateTransformation();
+    public void updateTransformation() {
+        final Polygon imageBoundsGeometry = createPolygon(getMetaData().getImageBounds());
+
+        final AffineTransformation avgTransform = RasterGeoReferencingBackend.calculateAvgTransformation(
+                getCompletePairs());
+        final AffineTransformation transform = (avgTransform != null) ? avgTransform : getInitialTransform();
+        final Envelope imageEnvelope = transform.transform(imageBoundsGeometry).getEnvelopeInternal();
+
+        getMetaData().setTransform(transform);
+        getMetaData().setImageEnvelope(imageEnvelope);
     }
 
     /**
      * DOCUMENT ME!
      *
+     * @param   bounds  DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
-    public AffineTransformation updateTransformation() {
-        final List<AffineTransformation> transforms = new ArrayList<>();
-        final PointCoordinatePair[] completePairs = getCompletePairs();
-        if (completePairs.length >= 3) {
-            for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(completePairs, 3)) {
-                final PointCoordinatePair pair0 = (PointCoordinatePair)arr[0];
-                final PointCoordinatePair pair1 = (PointCoordinatePair)arr[1];
-                final PointCoordinatePair pair2 = (PointCoordinatePair)arr[2];
+    private Polygon createPolygon(final Rectangle bounds) {
+        final GeometryFactory factory = new GeometryFactory(
+                new PrecisionModel(),
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
 
-                final AffineTransformationBuilder builder = new AffineTransformationBuilder(
-                        new Coordinate(pair0.getPoint().getX(), pair0.getPoint().getY()),
-                        new Coordinate(pair1.getPoint().getX(), pair1.getPoint().getY()),
-                        new Coordinate(pair2.getPoint().getX(), pair2.getPoint().getY()),
-                        pair0.getCoordinate(),
-                        pair1.getCoordinate(),
-                        pair2.getCoordinate());
-
-                final AffineTransformation transform = builder.getTransformation();
-                if (transform != null) {
-                    transforms.add(transform);
-                }
-            }
-
-            final AffineTransformation avgTransform = createAverageTransformation(transforms);
-
-            final Rectangle imageBounds = getMetaData().getImageBounds();
-
-            final GeometryFactory factory = new GeometryFactory(
-                    new PrecisionModel(),
-                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-            final LinearRing linear = factory.createLinearRing(
-                    new Coordinate[] {
-                        new Coordinate(imageBounds.getMinX(), imageBounds.getMinY()),
-                        new Coordinate(imageBounds.getMaxX(), imageBounds.getMinY()),
-                        new Coordinate(imageBounds.getMaxX(), imageBounds.getMaxY()),
-                        new Coordinate(imageBounds.getMinX(), imageBounds.getMaxY()),
-                        new Coordinate(imageBounds.getMinX(), imageBounds.getMinY())
-                    });
-
-            final Envelope imageEnvelope = avgTransform.transform(factory.createPolygon(linear)).getEnvelopeInternal();
-            getMetaData().setTransform(avgTransform);
-            getMetaData().setImageEnvelope(imageEnvelope);
-            return avgTransform;
-        }
-        return null;
+        final LinearRing linear = factory.createLinearRing(
+                new Coordinate[] {
+                    new Coordinate(bounds.getMinX(), bounds.getMinY()),
+                    new Coordinate(bounds.getMaxX(), bounds.getMinY()),
+                    new Coordinate(bounds.getMaxX(), bounds.getMaxY()),
+                    new Coordinate(bounds.getMinX(), bounds.getMaxY()),
+                    new Coordinate(bounds.getMinX(), bounds.getMinY())
+                });
+        return factory.createPolygon(linear);
     }
 
     /**
@@ -642,7 +621,6 @@ public class RasterGeoReferencingHandler {
 
         @Override
         public void positionAdded(final int position) {
-            updateTransformation();
             for (final RasterGeoReferencingHandlerListener listener : listeners) {
                 listener.positionAdded(position);
             }
@@ -650,7 +628,6 @@ public class RasterGeoReferencingHandler {
 
         @Override
         public void positionRemoved(final int position) {
-            updateTransformation();
             for (final RasterGeoReferencingHandlerListener listener : listeners) {
                 listener.positionRemoved(position);
             }
@@ -658,7 +635,6 @@ public class RasterGeoReferencingHandler {
 
         @Override
         public void positionChanged(final int position) {
-            updateTransformation();
             for (final RasterGeoReferencingHandlerListener listener : listeners) {
                 listener.positionChanged(position);
             }

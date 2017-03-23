@@ -14,9 +14,6 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.umd.cs.piccolo.PCamera;
-import edu.umd.cs.piccolo.PCanvas;
-import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PPanEventHandler;
@@ -29,13 +26,8 @@ import org.apache.log4j.Logger;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.Collection;
+import javax.swing.SwingUtilities;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -60,172 +52,51 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
 
     public static final String NAME = "RasterGeoRefInputListener";
 
-    private static final int DEFAULT_VIEW_WIDTH = 50;
-    private static final int DEFAULT_VIEW_HEIGHT = 50;
-
     //~ Instance fields --------------------------------------------------------
 
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     private float oldTransparency;
 
-    @Getter private final PCanvas pointZoomViewCanvas = new PCanvas();
-    @Getter private final PCanvas coordinateZoomViewCanvas = new PCanvas();
-
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
-    private boolean init = false;
-
-    @Getter(AccessLevel.PRIVATE)
-    private final Collection<PropertyChangeListener> propertyChangeListeners = new ArrayList<>();
-
-    @Getter(AccessLevel.PRIVATE)
-    private final PropertyChangeListenerHandler propertyChangeListenerHandler = new PropertyChangeListenerHandler();
-
-    @Getter @Setter private int viewWidth = DEFAULT_VIEW_WIDTH;
-    @Getter @Setter private int viewHeight = DEFAULT_VIEW_HEIGHT;
+    private boolean ignoreTransformationChanged = false;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RasterGeoReferencingInputListener object.
      */
-    public RasterGeoReferencingInputListener() {
-        RasterGeoReferencingWizard.getInstance().addListener(this);
+    private RasterGeoReferencingInputListener() {
+        getWizard().addListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   propertyChangeListener  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public boolean addPropertyChangeListener(final PropertyChangeListener propertyChangeListener) {
-        return getPropertyChangeListeners().add(propertyChangeListener);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   propertyChangeListener  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public boolean removePropertyChangeListener(final PropertyChangeListener propertyChangeListener) {
-        return getPropertyChangeListeners().remove(propertyChangeListener);
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void initIfNeeded() {
-        if (!isInit()) {
-            initZoomViewCanvas(getPointZoomViewCanvas(), getMappingComponent().getLayer());
-            initZoomViewCanvas(getCoordinateZoomViewCanvas(), getMappingComponent().getLayer());
-            setInit(true);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  pCanvas  DOCUMENT ME!
-     * @param  pLayer   DOCUMENT ME!
-     */
-    private void initZoomViewCanvas(final PCanvas pCanvas, final PLayer pLayer) {
-        final PCamera camera = new PCamera();
-        camera.addLayer(pLayer);
-        pCanvas.setCamera(camera);
-        getMappingComponent().getRoot().addChild(camera);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private static MappingComponent getMappingComponent() {
-        return CismapBroker.getInstance().getMappingComponent();
-    }
-
     @Override
     public void mouseMoved(final PInputEvent pie) {
         super.mouseMoved(pie);
-        initIfNeeded();
 
-        final Point2D mouseScreenPoint = pie.getPosition();
+        if (getHandler() != null) {
+            final Point2D mouseScreenPoint = pie.getPosition();
+            final WorldToScreenTransform wtst = getMainMap().getWtst();
+            final Coordinate mouseCoordinate = new Coordinate(wtst.getWorldX(mouseScreenPoint.getX()),
+                    wtst.getWorldY(mouseScreenPoint.getY()));
 
-        final int position = getWizard().getPosition();
-        final Coordinate pointCoordinate = getHandler().getPointCoordinate(position);
+            final int position = getWizard().getPosition();
+            final Coordinate pointCoordinate = getHandler().getPointCoordinate(position);
 
-        if (!getWizard().isCoordinateSelected() || (pointCoordinate != null)) {
-            final Point2D pointScreenPoint = (!getWizard().isCoordinateSelected()) ? mouseScreenPoint
-                                                                                   : getScreenPoint(pointCoordinate);
-            setPointZoom(pointScreenPoint);
+            if (!getWizard().isCoordinateSelected() || (pointCoordinate != null)) {
+                final Coordinate coordinate = (!getWizard().isCoordinateSelected()) ? mouseCoordinate : pointCoordinate;
+                getWizard().setPointZoom(coordinate);
+            }
+
+            final Coordinate coordinate = getWizard().isCoordinateSelected() ? mouseCoordinate
+                                                                             : getWizard().getSelectedCoordinate();
+            if (getWizard().isCoordinateSelected() || (coordinate != null)) {
+                getWizard().setCoordinateZoom(coordinate);
+            }
         }
-
-        final Coordinate coordinate = getWizard().getSelectedCoordinate();
-        if (getWizard().isCoordinateSelected() || (coordinate != null)) {
-            final Point2D coordinateScreenPoint = getWizard().isCoordinateSelected() ? mouseScreenPoint
-                                                                                     : getScreenPoint(coordinate);
-            setCoordinateZoom(coordinateScreenPoint);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  screenPoint  DOCUMENT ME!
-     */
-    private void setPointZoom(final Point2D screenPoint) {
-        final Rectangle2D viewBounds = calculateBounds(screenPoint);
-        getPointZoomViewCanvas().getCamera().setViewBounds(viewBounds);
-        getPropertyChangeListenerHandler().propertyChange(null);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  screenPoint  DOCUMENT ME!
-     */
-    private void setCoordinateZoom(final Point2D screenPoint) {
-        final Rectangle2D pointViewBounds = calculateBounds(screenPoint);
-        getCoordinateZoomViewCanvas().getCamera().setViewBounds(pointViewBounds);
-        getPropertyChangeListenerHandler().propertyChange(null);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   coordinate  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private static Point2D getScreenPoint(final Coordinate coordinate) {
-        return new Point2D.Double(getWtst().getScreenX(coordinate.x), getWtst().getScreenY(coordinate.y));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   point  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Rectangle2D calculateBounds(final Point2D point) {
-        final int width = getViewWidth();
-        final int height = getViewHeight();
-
-        return new Rectangle2D.Double(
-                point.getX()
-                        - (width / 2),
-                point.getY()
-                        - (height / 2),
-                width,
-                height);
     }
 
     @Override
@@ -252,22 +123,12 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
      * @return  DOCUMENT ME!
      */
     private PanAndMousewheelZoomListener getPanAndMousewheelZoomListener() {
-        return (PanAndMousewheelZoomListener)CismapBroker.getInstance().getMappingComponent()
-                    .getInputListener(MappingComponent.PAN);
+        return (PanAndMousewheelZoomListener)getMainMap().getInputListener(MappingComponent.PAN);
     }
 
     @Override
     public void mouseWheelRotated(final PInputEvent pie) {
         getPanAndMousewheelZoomListener().mouseWheelRotated(pie);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private static WorldToScreenTransform getWtst() {
-        return CismapBroker.getInstance().getMappingComponent().getWtst();
     }
 
     @Override
@@ -277,7 +138,7 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
         if (pie.isLeftMouseButton()) {
             if (pie.getClickCount() < 2) {
                 final Point2D mapPoint = pie.getPosition();
-                final WorldToScreenTransform wtst = getWtst();
+                final WorldToScreenTransform wtst = getMainMap().getWtst();
                 final Coordinate coordinate = new Coordinate(wtst.getWorldX(mapPoint.getX()),
                         wtst.getWorldY(mapPoint.getY()));
 
@@ -331,7 +192,16 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
      *
      * @return  DOCUMENT ME!
      */
-    private RasterGeoReferencingWizard getWizard() {
+    public static MappingComponent getMainMap() {
+        return CismapBroker.getInstance().getMappingComponent();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static RasterGeoReferencingWizard getWizard() {
         return RasterGeoReferencingWizard.getInstance();
     }
 
@@ -340,50 +210,29 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
      *
      * @return  DOCUMENT ME!
      */
-    private RasterGeoReferencingHandler getHandler() {
+    private static RasterGeoReferencingHandler getHandler() {
         return getWizard().getHandler();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  position  DOCUMENT ME!
-     */
-    public void updatePointZoom(final int position) {
-        final Coordinate pointCoordinate = getHandler().getPointCoordinate(position);
-        if (pointCoordinate != null) {
-            final Point2D screenPoint = getScreenPoint(pointCoordinate);
-            setPointZoom(screenPoint);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  position  DOCUMENT ME!
-     */
-    public void updateCoordinateZoom(final int position) {
-        final Coordinate coordinate = getHandler().getCoordinate(position);
-        if (coordinate != null) {
-            final Point2D screenPoint = getScreenPoint(coordinate);
-            setCoordinateZoom(screenPoint);
-        }
     }
 
     @Override
     public void pointSelected(final int position) {
-        updatePointZoom(position);
-        updateCoordinateZoom(position);
+        getWizard().updateZoom(position);
     }
 
     @Override
     public void coordinateSelected(final int position) {
-        updatePointZoom(position);
-        updateCoordinateZoom(position);
+        getWizard().updateZoom(position);
     }
 
     @Override
     public void handlerChanged(final RasterGeoReferencingHandler handler) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    getWizard().refreshPointZoomMap();
+                }
+            });
     }
 
     @Override
@@ -396,8 +245,23 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
 
     @Override
     public void positionChanged(final int position) {
-        updatePointZoom(position);
-        updateCoordinateZoom(position);
+        SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    getWizard().refreshPointZoomMap();
+                    getWizard().updateZoom(position);
+                }
+            });
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static RasterGeoReferencingInputListener getInstance() {
+        return LazyInitialiser.INSTANCE;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -407,15 +271,18 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
      *
      * @version  $Revision$, $Date$
      */
-    class PropertyChangeListenerHandler implements PropertyChangeListener {
+    private static final class LazyInitialiser {
 
-        //~ Methods ------------------------------------------------------------
+        //~ Static fields/initializers -----------------------------------------
 
-        @Override
-        public void propertyChange(final PropertyChangeEvent evt) {
-            for (final PropertyChangeListener propertyChangeListener : propertyChangeListeners) {
-                propertyChangeListener.propertyChange(evt);
-            }
+        private static final RasterGeoReferencingInputListener INSTANCE = new RasterGeoReferencingInputListener();
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new LazyInitialiser object.
+         */
+        private LazyInitialiser() {
         }
     }
 }

@@ -12,14 +12,8 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
-import org.apache.log4j.Logger;
-
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.interaction.StatusListener;
-import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -31,19 +25,10 @@ import de.cismet.tools.gui.StaticSwingTools;
  */
 public class RasterGeoReferencingDialog extends javax.swing.JDialog {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final transient Logger LOG = Logger.getLogger(RasterGeoReferencingDialog.class);
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JToggleButton jToggleButton1;
-    private javax.swing.JToggleButton jToggleButton2;
-    private javax.swing.JToggleButton jToggleButton3;
-    private javax.swing.JToolBar jToolBar1;
     private javax.swing.JPanel panButtons;
     private de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingPanel rasterGeoReferencingPanel1;
     // End of variables declaration//GEN-END:variables
@@ -60,11 +45,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         getRootPane().setDefaultButton(jButton4);
-
-        RasterGeoReferencingWizard.getInstance().addListener(new WizardListener());
-        if (CismapBroker.getInstance() != null) {
-            CismapBroker.getInstance().addStatusListener(new MapStatusListener());
-        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -78,11 +58,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     private void initComponents() {
         final java.awt.GridBagConstraints gridBagConstraints;
 
-        buttonGroup1 = new javax.swing.ButtonGroup();
-        jToolBar1 = new javax.swing.JToolBar();
-        jToggleButton1 = new javax.swing.JToggleButton();
-        jToggleButton2 = new javax.swing.JToggleButton();
-        jToggleButton3 = new javax.swing.JToggleButton();
         jPanel1 = new javax.swing.JPanel();
         rasterGeoReferencingPanel1 =
             new de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingPanel();
@@ -94,71 +69,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
                 RasterGeoReferencingDialog.class,
                 "RasterGeoReferencingDialog.title")); // NOI18N
         setAlwaysOnTop(true);
-
-        jToolBar1.setFloatable(false);
-        jToolBar1.setRollover(true);
-
-        buttonGroup1.add(jToggleButton1);
-        jToggleButton1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/zoom.gif"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jToggleButton1,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.jToggleButton1.text"));                     // NOI18N
-        jToggleButton1.setFocusable(false);
-        jToggleButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jToggleButton1ActionPerformed(evt);
-                }
-            });
-        jToolBar1.add(jToggleButton1);
-
-        buttonGroup1.add(jToggleButton2);
-        jToggleButton2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/pan.gif"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jToggleButton2,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.jToggleButton2.text"));                    // NOI18N
-        jToggleButton2.setFocusable(false);
-        jToggleButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jToggleButton2ActionPerformed(evt);
-                }
-            });
-        jToolBar1.add(jToggleButton2);
-
-        buttonGroup1.add(jToggleButton3);
-        jToggleButton3.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/georef.png"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jToggleButton3,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.jToggleButton3.text"));                       // NOI18N
-        jToggleButton3.setFocusable(false);
-        jToggleButton3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jToggleButton3.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToggleButton3.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jToggleButton3ActionPerformed(evt);
-                }
-            });
-        jToolBar1.add(jToggleButton3);
-
-        getContentPane().add(jToolBar1, java.awt.BorderLayout.NORTH);
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -210,54 +120,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     /**
      * DOCUMENT ME!
      *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jToggleButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton1ActionPerformed
-        if (getMappingComponent() != null) {
-            getMappingComponent().setInteractionMode(MappingComponent.ZOOM);
-        }
-    }                                                                                  //GEN-LAST:event_jToggleButton1ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jToggleButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton2ActionPerformed
-        if (getMappingComponent() != null) {
-            getMappingComponent().setInteractionMode(MappingComponent.PAN);
-        }
-    }                                                                                  //GEN-LAST:event_jToggleButton2ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jToggleButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton3ActionPerformed
-        final RasterGeoReferencingWizard wizard = RasterGeoReferencingWizard.getInstance();
-        final RasterGeoReferencingHandler handler = wizard.getHandler();
-        if (handler.getNumOfPairs() == 0) {
-            handler.addPair();
-            wizard.selectPoint(0);
-        }
-        if (getMappingComponent() != null) {
-            getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
-        }
-    }                                                                                  //GEN-LAST:event_jToggleButton3ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private static MappingComponent getMappingComponent() {
-        return CismapBroker.getInstance().getMappingComponent();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public static RasterGeoReferencingDialog getInstance() {
@@ -275,8 +137,8 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
 
         //~ Static fields/initializers -----------------------------------------
 
-        private static final RasterGeoReferencingDialog INSTANCE = new RasterGeoReferencingDialog(
-                StaticSwingTools.getFirstParentFrame(getMappingComponent()),
+        private static final RasterGeoReferencingDialog INSTANCE = new RasterGeoReferencingDialog(StaticSwingTools
+                        .getParentFrame(CismapBroker.getInstance().getMappingComponent()),
                 false);
 
         //~ Constructors -------------------------------------------------------
@@ -285,81 +147,6 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
          * Creates a new LazyInitialiser object.
          */
         private LazyInitialiser() {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class WizardListener implements RasterGeoReferencingWizardListener {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void pointSelected(final int position) {
-        }
-
-        @Override
-        public void coordinateSelected(final int position) {
-        }
-
-        @Override
-        public void handlerChanged(final RasterGeoReferencingHandler handler) {
-            if (handler != null) {
-                final FeatureCollection featureCollection = CismapBroker.getInstance()
-                            .getMappingComponent()
-                            .getFeatureCollection();
-                final Feature feature = handler.getFeature();
-                if ((feature != null) && (featureCollection != null) && featureCollection.contains(feature)) {
-                    featureCollection.addFeature(feature);
-                }
-            }
-        }
-
-        @Override
-        public void positionAdded(final int position) {
-        }
-
-        @Override
-        public void positionRemoved(final int position) {
-        }
-
-        @Override
-        public void positionChanged(final int position) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class MapStatusListener implements StatusListener {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void statusValueChanged(final StatusEvent e) {
-            final MappingComponent mappingComponent = getMappingComponent();
-            if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                if (mappingComponent.getInteractionMode().equals(MappingComponent.ZOOM)) {
-                    if (!jToggleButton1.isSelected()) {
-                        jToggleButton1.setSelected(true);
-                    }
-                } else if (mappingComponent.getInteractionMode().equals(MappingComponent.PAN)) {
-                    if (!jToggleButton2.isSelected()) {
-                        jToggleButton2.setSelected(true);
-                    }
-                } else if (mappingComponent.getInteractionMode().equals(MappingComponent.GEO_REF)) {
-                    if (!jToggleButton3.isSelected()) {
-                        jToggleButton3.setSelected(true);
-                    }
-                } else {
-                    buttonGroup1.clearSelection();
-                }
-            }
         }
     }
 }

@@ -7,6 +7,9 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider.ToolbarPositionHint;
@@ -17,6 +20,8 @@ import de.cismet.cismap.commons.gui.ToolbarComponentsProvider.ToolbarPositionHin
  * @author   srichter
  * @version  $Revision$, $Date$
  */
+@Getter
+@AllArgsConstructor
 public final class ToolbarComponentDescription {
 
     //~ Instance fields --------------------------------------------------------
@@ -25,6 +30,7 @@ public final class ToolbarComponentDescription {
     private final JComponent component;
     private final ToolbarPositionHint positionHint;
     private final String anchorComponentName;
+    private final boolean interactionMode;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -40,47 +46,6 @@ public final class ToolbarComponentDescription {
             final JComponent component,
             final ToolbarPositionHint positionHint,
             final String anchorComponent) {
-        this.toolbarID = toolbarID;
-        this.component = component;
-        this.positionHint = positionHint;
-        this.anchorComponentName = anchorComponent;
-    }
-
-    //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the toolbarID
-     */
-    public String getToolbarID() {
-        return toolbarID;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the component
-     */
-    public JComponent getComponent() {
-        return component;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the positionHint
-     */
-    public ToolbarPositionHint getPositionHint() {
-        return positionHint;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the anchorComponentName
-     */
-    public String getAnchorComponentName() {
-        return anchorComponentName;
+        this(toolbarID, component, positionHint, anchorComponent, false);
     }
 }
