@@ -62,6 +62,8 @@ public class MappingComponentShapeFileDropHandler implements MappingComponentDro
 
     @Override
     public void dropFiles(final Collection<File> files) {
-        LayerDropUtils.drop(files, layerWidget.getMappingModel(), layerWidget);
+        for (final File file : files) {
+            LayerDropUtils.handleFeatureServiceFile(file, layerWidget.getMappingModel(), -1, layerWidget);
+        }
     }
 }

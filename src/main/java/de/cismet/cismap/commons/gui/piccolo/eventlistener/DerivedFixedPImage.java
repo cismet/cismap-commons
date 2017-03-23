@@ -74,7 +74,6 @@ public class DerivedFixedPImage extends FixedPImage implements PropertyChangeLis
         // prevent endless loop of property change events with if statement. prpably should insert that in
         // mappingComponent.rescaleStickyNodes()
         if (Math.round(getScale() * 100000) != Math.round(targetScale * 100000)) {
-            log.fatal(getScale() + " != " + targetScale);
             mappingComponent.rescaleStickyNodes();
         }
     }

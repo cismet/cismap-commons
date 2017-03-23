@@ -28,8 +28,6 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidgetProvider;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 
-import static de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils.handleImageFile;
-
 /**
  * DOCUMENT ME!
  *
@@ -37,11 +35,12 @@ import static de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils.handleImag
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = MappingComponentDropHandler.class)
-public class MappingComponentWorldFileDropHandler implements MappingComponentDropHandler, LayerWidgetProvider {
+public class MappingComponentGeoReferencedImageFileDropHandler implements MappingComponentDropHandler,
+    LayerWidgetProvider {
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final MappingComponentDropHandlerFileMatcher fileMatcher = new WorldFileMatcher();
+    @Getter private final MappingComponentDropHandlerFileMatcher fileMatcher = new ImageFileMatcher();
 
     @Getter @Setter private LayerWidget layerWidget;
 
@@ -49,7 +48,7 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
 
     @Override
     public int getPriority() {
-        return MappingComponentDropHandlerBuiltinPriorityConstants.WORLD;
+        return MappingComponentDropHandlerBuiltinPriorityConstants.IMAGE;
     }
 
     @Override
@@ -60,7 +59,7 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
                 layerWidget.getMappingModel(),
                 -1,
                 layerWidget,
-                ImageFileUtils.Mode.WORLDFILE);
+                ImageFileUtils.Mode.GEO_REFERENCED);
         }
     }
 
@@ -71,13 +70,13 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
      *
      * @version  $Revision$, $Date$
      */
-    class WorldFileMatcher implements MappingComponentDropHandlerFileMatcher {
+    class ImageFileMatcher implements MappingComponentDropHandlerFileMatcher {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public boolean isMatching(final File file) {
-            return ImageFileUtils.isImageFileEnding(file.getName()) && (ImageFileUtils.getWorldFile(file) != null);
+            return ImageFileUtils.isImageFileEnding(file.getName());
         }
     }
 }
