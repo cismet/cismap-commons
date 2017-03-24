@@ -36,6 +36,8 @@ public class AttributeTableReportBuilderTest {
     @BeforeClass
     public static void setUpClass() {
         System.setProperty(JRStyledText.PROPERTY_AWT_IGNORE_MISSING_FONT, "true");
+        System.setProperty("net.sf.jasperreports.default.font.name", "Lucida Sans");
+        System.setProperty("net.sf.jasperreports.default.pdf.font.name", "Lucida Sans");
     }
 
     @AfterClass
