@@ -58,7 +58,7 @@ public class ImageFileRetrievalTest {
         assertEquals("min = Position: 793450.4967766507 6342804.112485806 max = Position: 794471.126986027 6343386.195819735", 
                 geoTiffReader.getBoundingBox().toString());
         
-        assertEquals(31, geoTiffReader.getTIFFImage().getNumYTiles());
+        assertEquals(163, geoTiffReader.getTIFFImage().getNumYTiles());
         assertEquals(487, geoTiffReader.getTIFFImage().getHeight());
         assertEquals(0, geoTiffReader.getTIFFImage().getMinTileX());
         assertEquals(1, geoTiffReader.getTIFFImage().getNumXTiles());
