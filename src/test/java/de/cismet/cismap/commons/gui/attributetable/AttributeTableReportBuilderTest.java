@@ -35,7 +35,7 @@ public class AttributeTableReportBuilderTest {
 
     @BeforeClass
     public static void setUpClass() {
-        System.setProperty(JRStyledText.PROPERTY_AWT_IGNORE_MISSING_FONT, "false");
+        System.setProperty(JRStyledText.PROPERTY_AWT_IGNORE_MISSING_FONT, "true");
     }
 
     @AfterClass
