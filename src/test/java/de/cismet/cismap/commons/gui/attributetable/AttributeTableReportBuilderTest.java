@@ -110,9 +110,9 @@ public class AttributeTableReportBuilderTest {
         final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, generatedParams, tableDataSource);
         assertNotNull(jasperPrint);
 
-        final JRViewer aViewer = new JRViewer(jasperPrint);
-
-        assertNotNull(aViewer);
+        // DISABLED: java.awt.HeadlessException thown in headless mode (on ci server)
+        //final JRViewer aViewer = new JRViewer(jasperPrint);
+        //assertNotNull(aViewer);
     }
 
     private static class TableDataSource implements JRDataSource {
