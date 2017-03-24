@@ -15,6 +15,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRStyledText;
 import net.sf.jasperreports.swing.JRViewer;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -34,7 +35,7 @@ public class AttributeTableReportBuilderTest {
 
     @BeforeClass
     public static void setUpClass() {
-        System.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "false");
+        System.setProperty(JRStyledText.PROPERTY_AWT_IGNORE_MISSING_FONT, "false");
     }
 
     @AfterClass
