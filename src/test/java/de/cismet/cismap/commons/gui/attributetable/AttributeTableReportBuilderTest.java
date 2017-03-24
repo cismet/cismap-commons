@@ -34,6 +34,7 @@ public class AttributeTableReportBuilderTest {
 
     @BeforeClass
     public static void setUpClass() {
+        System.setProperty("net.sf.jasperreports.awt.ignore.missing.font", "false");
     }
 
     @AfterClass
