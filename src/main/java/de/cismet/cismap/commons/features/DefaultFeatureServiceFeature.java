@@ -109,7 +109,6 @@ import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -1514,6 +1513,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         if (image instanceof BufferedImage) {
             return (BufferedImage)image;
         } else if (image instanceof ToolkitImage) {
+            logger.warn(
+                "sun.awt.image.ToolkitImage is internal proprietary API and may be removed in a future release ("
+                        + mark
+                        + ")");
             return ((ToolkitImage)image).getBufferedImage();
         } else {
             throw new RuntimeException("No BufferedImage" + mark);
