@@ -15,6 +15,7 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRStyledText;
 import net.sf.jasperreports.swing.JRViewer;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -34,6 +35,9 @@ public class AttributeTableReportBuilderTest {
 
     @BeforeClass
     public static void setUpClass() {
+        System.setProperty(JRStyledText.PROPERTY_AWT_IGNORE_MISSING_FONT, "true");
+        System.setProperty("net.sf.jasperreports.default.font.name", "Lucida Sans");
+        System.setProperty("net.sf.jasperreports.default.pdf.font.name", "Lucida Sans");
     }
 
     @AfterClass
@@ -106,9 +110,9 @@ public class AttributeTableReportBuilderTest {
         final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, generatedParams, tableDataSource);
         assertNotNull(jasperPrint);
 
-        final JRViewer aViewer = new JRViewer(jasperPrint);
-
-        assertNotNull(aViewer);
+        // DISABLED: java.awt.HeadlessException thown in headless mode (on ci server)
+        //final JRViewer aViewer = new JRViewer(jasperPrint);
+        //assertNotNull(aViewer);
     }
 
     private static class TableDataSource implements JRDataSource {
