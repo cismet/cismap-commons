@@ -8,7 +8,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>5.0</version>
+        <version>5.0.1</version>
     </parent>
 
     <groupId>de.cismet.commons</groupId>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>de.cismet</groupId>
                 <artifactId>cismet-ext-bom</artifactId>
-                <version>5.0</version>
+                <version>5.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
