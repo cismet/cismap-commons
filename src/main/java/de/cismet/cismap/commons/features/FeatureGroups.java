@@ -9,6 +9,7 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.*;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import de.cismet.tools.collections.TypeSafeCollections;
@@ -144,28 +145,25 @@ public final class FeatureGroups {
                     }
                 }
             }
+            int srid = 0;
+
+            if (array.length > 0) {
+                srid = array[0].getSRID();
+            }
+            final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
 
             if (!hasLinestringOrPoints) {
                 // The following two lines are more efficient then the union method.
                 // See http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf
                 // But buffer(0) handles LineStrings and Points as empty polygons, so it can only be used,
                 // if only polygons should be unioned.
-                int srid = 0;
-
-                if (array.length > 0) {
-                    srid = array[0].getSRID();
-                }
-
-                final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
                 final GeometryCollection collection = factory.createGeometryCollection(array);
                 union = collection.buffer(0);
             } else {
-                for (final Geometry g : array) {
-                    if (union == null) {
-                        union = g;
-                    } else {
-                        union = union.union(g);
-                    }
+                union = factory.buildGeometry(Arrays.asList(array));
+
+                if (union instanceof GeometryCollection) {
+                    union = ((GeometryCollection)union).union();
                 }
             }
 
