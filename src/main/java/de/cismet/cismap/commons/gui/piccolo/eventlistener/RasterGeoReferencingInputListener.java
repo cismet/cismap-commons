@@ -14,7 +14,6 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
-import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PPanEventHandler;
 
@@ -32,7 +31,6 @@ import javax.swing.SwingUtilities;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
@@ -53,10 +51,6 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
     public static final String NAME = "RasterGeoRefInputListener";
 
     //~ Instance fields --------------------------------------------------------
-
-    @Getter(AccessLevel.PRIVATE)
-    @Setter(AccessLevel.PRIVATE)
-    private float oldTransparency;
 
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
@@ -168,22 +162,6 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
             }
         } else if (pie.isRightMouseButton()) {
             getWizard().backward();
-        }
-
-        final ImageRasterService service = getHandler().getService();
-        final float transparency;
-        if (getWizard().isCoordinateSelected()) {
-            setOldTransparency(service.getTranslucency());
-            transparency = 0f;
-        } else {
-            transparency = getOldTransparency();
-        }
-
-        service.setTranslucency(transparency);
-        final PNode pi = service.getPNode();
-        if (pi != null) {
-            pi.setTransparency(transparency);
-            pi.repaint();
         }
     }
 

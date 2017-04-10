@@ -81,7 +81,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JDialog jDialog1;
     private javax.swing.JDialog jDialog2;
     private javax.swing.JLabel jLabel1;
@@ -100,7 +99,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSlider jSlider1;
     private org.jdesktop.swingx.JXTable jXTable1;
     private javax.swing.JPanel panContent;
     private javax.swing.JPanel panInstructions;
@@ -192,8 +190,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jLabel10 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
         jPanel3 = new javax.swing.JPanel();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jSlider1 = new javax.swing.JSlider();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 32767));
@@ -333,18 +329,19 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         panInstructions.add(jPanel1, gridBagConstraints);
 
         jLabel8.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style.png"))); // NOI18N
+                getClass().getResource(
+                    "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_wizard_icon.png"))); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel8,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel8.text"));                                         // NOI18N
+                "RasterGeoReferencingPanel.jLabel8.text"));                                             // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 20);
+        gridBagConstraints.insets = new java.awt.Insets(10, 20, 0, 20);
         panInstructions.add(jLabel8, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -602,35 +599,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jPanel2.add(jSeparator2, gridBagConstraints);
 
         jPanel3.setLayout(new java.awt.GridBagLayout());
-
-        org.openide.awt.Mnemonics.setLocalizedText(
-            jCheckBox1,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jCheckBox1.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel3.add(jCheckBox1, gridBagConstraints);
-
-        jSlider1.setValue(10);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                jCheckBox1,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                jSlider1,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel3.add(jSlider1, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;

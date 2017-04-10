@@ -13,6 +13,7 @@
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PCanvas;
@@ -30,6 +31,9 @@ import java.awt.geom.Rectangle2D;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
+import java.io.File;
+import java.io.PrintWriter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -142,6 +146,53 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void save() throws Exception {
+        final File imageFile = getHandler().getService().getImageFile();
+        final String imageFileName = imageFile.getAbsolutePath();
+        final String[] imageFileParts = imageFileName.split("\\.");
+        final StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < (imageFileParts.length - 1); i++) {
+            sb.append(imageFileParts[i]).append(".");
+        }
+        sb.append("pgw");
+        final File worldFile = new File(sb.toString());
+
+        final PrintWriter pw = new PrintWriter(worldFile);
+        final AffineTransformation at = getHandler().getMetaData().getTransform();
+        final double[] matrix = at.getMatrixEntries();
+        pw.append(Double.toString(matrix[0])).append("\n");
+        pw.append(Double.toString(matrix[3])).append("\n");
+        pw.append(Double.toString(matrix[1])).append("\n");
+        pw.append(Double.toString(matrix[4])).append("\n");
+        pw.append(Double.toString(matrix[2])).append("\n");
+        pw.append(Double.toString(matrix[5])).append("\n");
+
+        pw.append("#cidsgeoref;")
+                .append(Integer.toString(getHandler().getCompletePairs().length))
+                .append(";")
+                .append(getMainMap().getMappingModel().getSrs().getShortname())
+                .append("\n");
+        for (final PointCoordinatePair pair : getHandler().getCompletePairs()) {
+            final Point point = pair.getPoint();
+            final Coordinate coordinate = pair.getCoordinate();
+            pw.append("#")
+                    .append(Double.toString(point.getX()))
+                    .append(",")
+                    .append(Double.toString(point.getY()))
+                    .append(";")
+                    .append(Double.toString(coordinate.x))
+                    .append(",")
+                    .append(Double.toString(coordinate.y))
+                    .append("\n");
+        }
+        pw.close();
+    }
 
     /**
      * DOCUMENT ME!
@@ -476,7 +527,6 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         // (scrolling & paning in map causes multiple fast propertychange events)
         synchronized (getMainMap()) {
             if (getMainMap().equals(evt.getSource()) && !isIgnoreMapChange()) {
-                LOG.fatal(evt.getPropertyName(), new Exception());
                 setIgnoreMapChange(true);
                 new SwingWorker<Void, Void>() {
 
@@ -643,6 +693,28 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     /**
      * DOCUMENT ME!
      *
+     * @param  mode  DOCUMENT ME!
+     */
+    private void changeTransparency(final SelectionMode mode) {
+        final ImageRasterService service = getHandler().getService();
+        final float transparency;
+        if (SelectionMode.COORDINATE.equals(mode)) {
+            transparency = 0.2f;
+        } else {
+            transparency = 1f;
+        }
+
+        service.setTranslucency(transparency);
+        final PNode pi = service.getPNode();
+        if (pi != null) {
+            pi.setTransparency(transparency);
+            pi.repaint();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   position  DOCUMENT ME!
      *
      * @throws  IndexOutOfBoundsException  DOCUMENT ME!
@@ -660,6 +732,8 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             listenerHandler.pointSelected(position);
         }
         getMainMap().setInteractionMode(MappingComponent.GEO_REF);
+
+        changeTransparency(SelectionMode.POINT);
     }
 
     /**
@@ -682,6 +756,8 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             listenerHandler.coordinateSelected(position);
         }
         getMainMap().setInteractionMode(MappingComponent.GEO_REF);
+
+        changeTransparency(SelectionMode.COORDINATE);
     }
 
     /**
