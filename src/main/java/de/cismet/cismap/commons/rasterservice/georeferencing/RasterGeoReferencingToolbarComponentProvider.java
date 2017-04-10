@@ -179,5 +179,9 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         @Override
         public void positionChanged(final int position) {
         }
+
+        @Override
+        public void transformationChanged() {
+        }
     }
 }

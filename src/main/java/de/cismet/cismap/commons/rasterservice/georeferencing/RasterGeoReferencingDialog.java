@@ -12,7 +12,13 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
-import de.cismet.cismap.commons.gui.MappingComponent;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
+import java.util.logging.Level;
+
+import javax.swing.JOptionPane;
+
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -87,6 +93,13 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingDialog.class,
                 "RasterGeoReferencingDialog.jButton4.text")); // NOI18N
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton4ActionPerformed(evt);
+                }
+            });
         panButtons.add(jButton4);
 
         org.openide.awt.Mnemonics.setLocalizedText(
@@ -116,6 +129,29 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     private void jButton5ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton5ActionPerformed
         setVisible(false);
     }                                                                            //GEN-LAST:event_jButton5ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
+        try {
+            RasterGeoReferencingWizard.getInstance().save();
+            setVisible(false);
+            JOptionPane.showMessageDialog(this.getParent(), "Das zugehörige WorldFile wurde erfolgreich geschrieben.");
+        } catch (final Exception ex) {
+            final ErrorInfo errorInfo = new ErrorInfo(
+                    "Fehler beim Anwenden",
+                    "Das zugehörige WorldFile konte nicht geschrieben werden.",
+                    null,
+                    null,
+                    ex,
+                    Level.ALL,
+                    null);
+            JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
+        }
+    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * DOCUMENT ME!
