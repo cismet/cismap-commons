@@ -245,7 +245,8 @@ public class RasterGeoReferencingBackend {
                                     getMetaDataMap().put(imagefile, handler);
                                     handler.addListener(new RasterGeoReferencingHandlerListener() {
 
-                                            private void transformationChanged() {
+                                            @Override
+                                            public void transformationChanged() {
                                                 if (handler.isComplete()) {
                                                     if (imagefile.equals(irs.getImageFile())) {
                                                         irs.retrieve(true);
@@ -255,17 +256,14 @@ public class RasterGeoReferencingBackend {
 
                                             @Override
                                             public void positionAdded(final int position) {
-                                                transformationChanged();
                                             }
 
                                             @Override
                                             public void positionRemoved(final int position) {
-                                                transformationChanged();
                                             }
 
                                             @Override
                                             public void positionChanged(final int position) {
-                                                transformationChanged();
                                             }
                                         });
 

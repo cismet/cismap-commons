@@ -453,15 +453,19 @@ public class RasterGeoReferencingHandler {
      * DOCUMENT ME!
      */
     public void updateTransformation() {
+        final AffineTransformation oldTransformation = getMetaData().getTransform();
         final Polygon imageBoundsGeometry = createPolygon(getMetaData().getImageBounds());
 
         final AffineTransformation avgTransform = RasterGeoReferencingBackend.calculateAvgTransformation(
                 getCompletePairs());
         final AffineTransformation transform = (avgTransform != null) ? avgTransform : getInitialTransform();
-        final Envelope imageEnvelope = transform.transform(imageBoundsGeometry).getEnvelopeInternal();
+        if (!transform.equals(oldTransformation)) {
+            final Envelope imageEnvelope = transform.transform(imageBoundsGeometry).getEnvelopeInternal();
 
-        getMetaData().setTransform(transform);
-        getMetaData().setImageEnvelope(imageEnvelope);
+            getMetaData().setTransform(transform);
+            getMetaData().setImageEnvelope(imageEnvelope);
+            getListenerHandler().transformationChanged();
+        }
     }
 
     /**
@@ -637,6 +641,13 @@ public class RasterGeoReferencingHandler {
         public void positionChanged(final int position) {
             for (final RasterGeoReferencingHandlerListener listener : listeners) {
                 listener.positionChanged(position);
+            }
+        }
+
+        @Override
+        public void transformationChanged() {
+            for (final RasterGeoReferencingHandlerListener listener : listeners) {
+                listener.transformationChanged();
             }
         }
     }

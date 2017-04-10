@@ -1075,6 +1075,10 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         }
 
         @Override
+        public void transformationChanged() {
+        }
+
+        @Override
         public void pointSelected(final int position) {
             jXTable1.changeSelection(position, 1, false, false);
             refreshWizardBinding();

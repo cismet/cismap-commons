@@ -245,12 +245,16 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
 
     @Override
     public void positionChanged(final int position) {
+    }
+
+    @Override
+    public void transformationChanged() {
         SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
                     getWizard().refreshPointZoomMap();
-                    getWizard().updateZoom(position);
+                    getWizard().updateZoom(getWizard().getPosition());
                 }
             });
     }

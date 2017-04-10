@@ -19,26 +19,22 @@ import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.JComponent;
 
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
-import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDebuggingTools;
 
 /**
@@ -100,8 +96,12 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
                 }
                 mc.getFeatureLayer().setVisible(true);
             }
-            mc.setNewViewBounds(mc.getCamera().getViewBounds());
-            mc.queryServices();
+            final Rectangle2D oldBounds = mc.getViewBounds();
+            final Rectangle2D newBounds = mc.getCamera().getViewBounds();
+            if (!newBounds.equals(oldBounds)) {
+                mc.setNewViewBounds(newBounds);
+                mc.queryServices();
+            }
         }
 //        propertyChange(null);
     }

@@ -266,9 +266,6 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
                 height);
         final PCanvas pCanvas = SelectionMode.POINT.equals(mode) ? getPointZoomViewCanvas()
                                                                  : getCoordinateZoomViewCanvas();
-        if (SelectionMode.POINT.equals(mode)) {
-            LOG.fatal(viewBounds, new Exception());
-        }
         pCanvas.getCamera().setViewBounds(viewBounds);
         pCanvas.getCamera().setViewScale(factor);
         getPropertyChangeListenerHandler().propertyChange(null);
@@ -477,26 +474,33 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     public void propertyChange(final PropertyChangeEvent evt) {
         // execute refresh only once a second
         // (scrolling & paning in map causes multiple fast propertychange events)
-        if (!isIgnoreMapChange()) {
-            setIgnoreMapChange(true);
-            new SwingWorker<Void, Void>() {
+        synchronized (getMainMap()) {
+            if (getMainMap().equals(evt.getSource()) && !isIgnoreMapChange()) {
+                LOG.fatal(evt.getPropertyName(), new Exception());
+                setIgnoreMapChange(true);
+                new SwingWorker<Void, Void>() {
 
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        Thread.sleep(1000);
-                        return null;
-                    }
-
-                    @Override
-                    protected void done() {
-                        try {
-                            refreshPointZoomMap();
-                            refreshCoordinateZoomMap();
-                        } finally {
-                            setIgnoreMapChange(false);
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            Thread.sleep(1000);
+                            return null;
                         }
-                    }
-                }.execute();
+
+                        @Override
+                        protected void done() {
+                            try {
+                                if (isPointSelected()) {
+                                    refreshPointZoomMap();
+                                }
+                                if (isCoordinateSelected()) {
+                                    refreshCoordinateZoomMap();
+                                }
+                            } finally {
+                                setIgnoreMapChange(false);
+                            }
+                        }
+                    }.execute();
+            }
         }
     }
 
@@ -807,6 +811,13 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         public void positionChanged(final int position) {
             for (final RasterGeoReferencingWizardListener listener : getSyncedListeners()) {
                 listener.positionChanged(position);
+            }
+        }
+
+        @Override
+        public void transformationChanged() {
+            for (final RasterGeoReferencingWizardListener listener : getSyncedListeners()) {
+                listener.transformationChanged();
             }
         }
     }

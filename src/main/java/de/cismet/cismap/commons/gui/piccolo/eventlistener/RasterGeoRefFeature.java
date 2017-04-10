@@ -494,6 +494,11 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     }
 
     @Override
+    public void transformationChanged() {
+        refresh();
+    }
+
+    @Override
     public void pointSelected(final int position) {
     }
 

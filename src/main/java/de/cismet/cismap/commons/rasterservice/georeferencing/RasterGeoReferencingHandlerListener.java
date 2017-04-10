@@ -43,4 +43,9 @@ public interface RasterGeoReferencingHandlerListener {
      * @param  position  DOCUMENT ME!
      */
     void positionChanged(final int position);
+
+    /**
+     * DOCUMENT ME!
+     */
+    void transformationChanged();
 }
