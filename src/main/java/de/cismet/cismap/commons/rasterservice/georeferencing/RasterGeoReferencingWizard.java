@@ -48,6 +48,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -154,14 +155,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      */
     public void save() throws Exception {
         final File imageFile = getHandler().getService().getImageFile();
-        final String imageFileName = imageFile.getAbsolutePath();
-        final String[] imageFileParts = imageFileName.split("\\.");
-        final StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < (imageFileParts.length - 1); i++) {
-            sb.append(imageFileParts[i]).append(".");
-        }
-        sb.append("pgw");
-        final File worldFile = new File(sb.toString());
+        final File worldFile = ImageFileUtils.getWorldFileWithoutCheck(imageFile);
 
         final PrintWriter pw = new PrintWriter(worldFile);
         final AffineTransformation at = getHandler().getMetaData().getTransform();
