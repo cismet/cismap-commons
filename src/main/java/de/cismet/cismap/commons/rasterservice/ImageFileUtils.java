@@ -83,6 +83,23 @@ public class ImageFileUtils {
      * @return  DOCUMENT ME!
      */
     public static File getWorldFile(final File imageFile) {
+        final File worldFile = getWorldFileWithoutCheck(imageFile);
+
+        if (worldFile.exists()) {
+            return worldFile;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   imageFile  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static File getWorldFileWithoutCheck(final File imageFile) {
         final String name = imageFile.getAbsolutePath();
         final String ending = name.substring(name.lastIndexOf(".") + 1).toLowerCase();
 
@@ -91,13 +108,10 @@ public class ImageFileUtils {
         if (wfEnding != null) {
             final String worldFileName = name.substring(0, name.lastIndexOf(".") + 1) + wfEnding;
             final File worldFile = new File(worldFileName);
-
-            if (worldFile.exists()) {
-                return worldFile;
-            }
+            return worldFile;
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     /**

@@ -50,11 +50,21 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private static final transient Logger LOG = Logger.getLogger(RasterGeoReferencingPanel.class);
 
     private static final String[] COLUMN_NAMES = {
-            "#",
-            "Bild-Koord.",
-            "Welt-Koord.",
-            "Fehler",
-            ""
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.colName.position"),
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.colName.point"),
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.colName.coord"),
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.colName.error"),
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.colName.enabled")
         };
 
     private static final Class[] COLUMN_CLASSES = {
@@ -77,6 +87,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler filler1;
     private javax.swing.Box.Filler filler2;
+    private javax.swing.Box.Filler filler3;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
@@ -93,12 +104,10 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private org.jdesktop.swingx.JXTable jXTable1;
     private javax.swing.JPanel panContent;
     private javax.swing.JPanel panInstructions;
@@ -170,7 +179,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jButton7 = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
-        jSeparator3 = new javax.swing.JSeparator();
         panTable = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jXTable1 = new org.jdesktop.swingx.JXTable();
@@ -180,20 +188,24 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(32767, 0));
         jButton1 = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0));
         panMapOverview = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
         simpleBackgroundedJPanel1 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
         simpleBackgroundedJPanel2 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
         jLabel10 = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
-        jPanel3 = new javax.swing.JPanel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(0, 32767));
+                new java.awt.Dimension(32767, 0));
 
+        setMinimumSize(new java.awt.Dimension(420, 500));
+        setPreferredSize(new java.awt.Dimension(420, 520));
         setLayout(new java.awt.GridBagLayout());
 
         panContent.setLayout(new java.awt.GridBagLayout());
@@ -232,7 +244,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 0);
         panInstructions.add(jLabel5, gridBagConstraints);
 
         org.openide.awt.Mnemonics.setLocalizedText(
@@ -256,6 +268,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 15, 0);
         panInstructions.add(jLabel6, gridBagConstraints);
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 2, 5, 0));
@@ -325,7 +338,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panInstructions.add(jPanel1, gridBagConstraints);
 
         jLabel8.setIcon(new javax.swing.ImageIcon(
@@ -340,8 +352,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridheight = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.insets = new java.awt.Insets(10, 20, 0, 20);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 20);
         panInstructions.add(jLabel8, gridBagConstraints);
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
@@ -363,17 +375,12 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panContent.add(panInstructions, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panContent.add(jSeparator3, gridBagConstraints);
 
+        panTable.setMinimumSize(new java.awt.Dimension(400, 60));
+        panTable.setPreferredSize(new java.awt.Dimension(400, 382));
         panTable.setLayout(new java.awt.GridBagLayout());
 
         jXTable1.setModel(new PairTableModel());
@@ -395,16 +402,16 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jXTable1.getColumnModel().getColumn(0).setMaxWidth(25);
         jXTable1.getColumnModel().getColumn(0).setPreferredWidth(20);
 
-        jXTable1.getColumnModel().getColumn(1).setMinWidth(75);
-        jXTable1.getColumnModel().getColumn(1).setMaxWidth(150);
-        jXTable1.getColumnModel().getColumn(1).setPreferredWidth(100);
+        jXTable1.getColumnModel().getColumn(1).setMinWidth(60);
+        jXTable1.getColumnModel().getColumn(1).setMaxWidth(120);
+        jXTable1.getColumnModel().getColumn(1).setPreferredWidth(80);
 
         jXTable1.getColumnModel().getColumn(2).setMinWidth(150);
-        jXTable1.getColumnModel().getColumn(2).setPreferredWidth(200);
+        jXTable1.getColumnModel().getColumn(2).setPreferredWidth(180);
 
         jXTable1.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
-        jXTable1.getColumnModel().getColumn(3).setMinWidth(50);
-        jXTable1.getColumnModel().getColumn(3).setMaxWidth(75);
+        jXTable1.getColumnModel().getColumn(3).setMinWidth(40);
+        jXTable1.getColumnModel().getColumn(3).setMaxWidth(60);
         jXTable1.getColumnModel().getColumn(3).setPreferredWidth(50);
 
         jXTable1.getColumnModel().getColumn(4).setMinWidth(25);
@@ -418,6 +425,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         panTable.add(jScrollPane1, gridBagConstraints);
 
         jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -443,6 +451,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_END;
@@ -483,28 +492,32 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
         jPanel4.add(jButton1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel4.add(filler3, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         panTable.add(jPanel4, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panContent.add(panTable, gridBagConstraints);
 
-        jPanel2.setLayout(new java.awt.GridBagLayout());
-
         panMapOverview.setLayout(new java.awt.GridBagLayout());
 
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel3,
             org.openide.util.NbBundle.getMessage(
@@ -512,18 +525,27 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 "RasterGeoReferencingPanel.jLabel3.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 2);
         panMapOverview.add(jLabel3, gridBagConstraints);
 
+        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel4,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
                 "RasterGeoReferencingPanel.jLabel4.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 5, 0);
         panMapOverview.add(jLabel4, gridBagConstraints);
+
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        jScrollPane2.setMaximumSize(new java.awt.Dimension(200, 200));
+        jScrollPane2.setMinimumSize(new java.awt.Dimension(200, 200));
+        jScrollPane2.setPreferredSize(new java.awt.Dimension(200, 200));
 
         simpleBackgroundedJPanel1.setBackground(new java.awt.Color(255, 255, 255));
         simpleBackgroundedJPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(
@@ -549,12 +571,20 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 "RasterGeoReferencingPanel.jLabel1.text"));                                                        // NOI18N
         simpleBackgroundedJPanel1.add(jLabel1, new java.awt.GridBagConstraints());
 
+        jScrollPane2.setViewportView(simpleBackgroundedJPanel1);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        panMapOverview.add(simpleBackgroundedJPanel1, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
+        panMapOverview.add(jScrollPane2, gridBagConstraints);
+
+        jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        jScrollPane3.setMaximumSize(new java.awt.Dimension(200, 200));
+        jScrollPane3.setMinimumSize(new java.awt.Dimension(200, 200));
+        jScrollPane3.setPreferredSize(new java.awt.Dimension(200, 200));
 
         simpleBackgroundedJPanel2.setBackground(new java.awt.Color(255, 255, 255));
         simpleBackgroundedJPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(
@@ -580,46 +610,28 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 "RasterGeoReferencingPanel.jLabel10.text"));                                                         // NOI18N
         simpleBackgroundedJPanel2.add(jLabel10, new java.awt.GridBagConstraints());
 
+        jScrollPane3.setViewportView(simpleBackgroundedJPanel2);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        panMapOverview.add(jScrollPane3, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
-        panMapOverview.add(simpleBackgroundedJPanel2, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        panMapOverview.add(filler1, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        jPanel2.add(panMapOverview, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel2.add(jSeparator2, gridBagConstraints);
-
-        jPanel3.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel3.add(filler1, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        jPanel2.add(jPanel3, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panContent.add(jPanel2, gridBagConstraints);
+        panContent.add(panMapOverview, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
