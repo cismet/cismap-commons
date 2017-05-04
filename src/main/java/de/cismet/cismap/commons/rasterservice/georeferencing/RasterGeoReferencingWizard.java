@@ -26,6 +26,8 @@ import lombok.Setter;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -37,17 +39,21 @@ import java.io.PrintWriter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.PNodeProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
@@ -68,6 +74,11 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
             RasterGeoReferencingWizard.class);
 
+    private static final DataFlavor CAPABILITIES_DATA_FLAVOR = new DataFlavor(
+            DataFlavor.javaJVMLocalObjectMimeType,
+            "SelectionAndCapabilities"); // NOI18N
+
+    private static final int MAX_LAYER_COUNT = 3;
     private static final int DEFAULT_ZOOMVIEW_WIDTH = 200;
     private static final int DEFAULT_ZOOMVIEW_HEIGHT = 200;
     private static final int DEFAULT_ZOOMVIEW_FACTOR = 2;
@@ -87,6 +98,8 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     }
 
     //~ Instance fields --------------------------------------------------------
+
+    private RetrievalServiceLayer singleLayer = null;
 
     private final ListenerHandler listenerHandler = new ListenerHandler();
 
@@ -404,6 +417,71 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     /**
      * DOCUMENT ME!
      *
+     * @param  singleLayer  DOCUMENT ME!
+     */
+    public void setSingleLayer(final RetrievalServiceLayer singleLayer) {
+        this.singleLayer = singleLayer;
+        refreshZoomMap(SelectionMode.COORDINATE);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public RetrievalServiceLayer getSingleLayer() {
+        return singleLayer;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   dtde  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean drop(final DropTargetDropEvent dtde) {
+        if (dtde.getTransferable().isDataFlavorSupported(CAPABILITIES_DATA_FLAVOR)) {
+            try {
+                for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]); // NOI18N
+                    }
+                }
+                final Object o = dtde.getTransferable().getTransferData(CAPABILITIES_DATA_FLAVOR);
+                final List<TreePath> treePaths = new ArrayList<TreePath>();
+                dtde.dropComplete(true);
+                if (o instanceof SelectionAndCapabilities) {
+                    final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
+                    for (int i = 0; i < tpa.length; ++i) {
+                        treePaths.add(tpa[i]);
+                    }
+
+                    final WMSServiceLayer layer;
+
+                    if (((SelectionAndCapabilities)o).getUrl().contains("cismap.dont.touch.ordering=true")) {
+                        layer = new WMSServiceLayer(treePaths, false, false);
+                    } else {
+                        layer = new WMSServiceLayer(treePaths, true, true);
+                    }
+
+                    layer.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
+                    layer.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
+
+                    setSingleLayer(layer);
+
+                    return true;
+                }
+            } catch (final Exception e) {
+                LOG.error(e, e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  mode  includingNotImageRasterService DOCUMENT ME!
      */
     private void refreshZoomMap(final SelectionMode mode) {
@@ -455,24 +533,33 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             mappingModel.setSrs(origMap.getMappingModel().getSrs());
             mappingModel.addHome(bb);
 
-            // Adding Layers
-            for (final Object rasterService : origMap.getMappingModel().getRasterServices().values()) {
-                if (rasterService instanceof RetrievalServiceLayer) {
-                    final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)rasterService;
-                    final boolean including = ((retrievalServiceLayer instanceof ImageRasterService)
-                                    && SelectionMode.POINT.equals(mode))
-                                || (!(retrievalServiceLayer instanceof ImageRasterService)
-                                    && SelectionMode.COORDINATE.equals(mode));
-                    if (including) {
-                        final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(
-                                retrievalServiceLayer);
-                        if (SelectionMode.POINT.equals(mode)) {
-                            clone.setTranslucency(1f);
-                        }
-                        if (clone != null) {
-                            clone.addRetrievalListener(getRetrievalListenerAdapter());
-                            getIgnoreLayerList().add(clone);
-                            mappingModel.addLayer(clone);
+            if (getSingleLayer() != null) {
+                mappingModel.addLayer(getSingleLayer());
+            } else {
+                int layerCount = 0;
+                // Adding Layers
+                for (final Object rasterService : origMap.getMappingModel().getRasterServices().values()) {
+                    if (layerCount == MAX_LAYER_COUNT) {
+                        break;
+                    }
+                    if (rasterService instanceof RetrievalServiceLayer) {
+                        final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)rasterService;
+                        final boolean including = ((retrievalServiceLayer instanceof ImageRasterService)
+                                        && SelectionMode.POINT.equals(mode))
+                                    || (!(retrievalServiceLayer instanceof ImageRasterService)
+                                        && SelectionMode.COORDINATE.equals(mode));
+                        if (including) {
+                            final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(
+                                    retrievalServiceLayer);
+                            if (SelectionMode.POINT.equals(mode)) {
+                                clone.setTranslucency(1f);
+                            }
+                            if (clone != null) {
+                                clone.addRetrievalListener(getRetrievalListenerAdapter());
+                                getIgnoreLayerList().add(clone);
+                                mappingModel.addLayer(clone);
+                                layerCount++;
+                            }
                         }
                     }
                 }
