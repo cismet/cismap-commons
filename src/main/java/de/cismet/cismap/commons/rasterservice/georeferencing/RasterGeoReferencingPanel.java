@@ -21,6 +21,12 @@ import lombok.Setter;
 import org.apache.log4j.Logger;
 
 import java.awt.Point;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
+import java.awt.dnd.DropTargetListener;
 
 import java.text.DecimalFormat;
 
@@ -33,9 +39,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.cismet.tools.StaticDebuggingTools;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel;
 
 /**
  * DOCUMENT ME!
@@ -96,6 +101,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JDialog jDialog2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -169,6 +177,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         jDialog1 = new javax.swing.JDialog();
         jDialog2 = new javax.swing.JDialog();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel12 = new javax.swing.JLabel();
         panContent = new javax.swing.JPanel();
         panInstructions = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
@@ -198,11 +208,24 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel1 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        simpleBackgroundedJPanel2 = new de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel();
+        simpleBackgroundedJPanel2 = new DnDTargetSimpleBackgroundedJPanel();
+        jLabel11 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(32767, 0));
+
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jLabel2,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jLabel2.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jLabel12,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jLabel12.text")); // NOI18N
 
         setMinimumSize(new java.awt.Dimension(420, 500));
         setPreferredSize(new java.awt.Dimension(420, 520));
@@ -601,6 +624,29 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             });
         simpleBackgroundedJPanel2.setLayout(new java.awt.GridBagLayout());
 
+        jLabel11.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/info.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jLabel11,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jLabel11.text"));                                                    // NOI18N
+        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    jLabel11MouseClicked(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 3, 0);
+        simpleBackgroundedJPanel2.add(jLabel11, gridBagConstraints);
+        jLabel11.setVisible(false);
+
+        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel10.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png"))); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
@@ -608,7 +654,20 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
                 "RasterGeoReferencingPanel.jLabel10.text"));                                                         // NOI18N
-        simpleBackgroundedJPanel2.add(jLabel10, new java.awt.GridBagConstraints());
+        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    jLabel10MouseClicked(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        simpleBackgroundedJPanel2.add(jLabel10, gridBagConstraints);
 
         jScrollPane3.setViewportView(simpleBackgroundedJPanel2);
 
@@ -740,15 +799,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void simpleBackgroundedJPanel1MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel1MouseClicked
-        // for debugging purposes
-        if (StaticDebuggingTools.checkHomeForFile("cismetDeveloper")) {
-            getWizard().refreshPointZoomMap();
-            jDialog1.getContentPane().removeAll();
-            jDialog1.getContentPane().add(getWizard().getPointZoomMap(), java.awt.BorderLayout.CENTER);
-            jDialog1.setSize(640, 480);
-            StaticSwingTools.showDialog(jDialog1);
-        }
-    } //GEN-LAST:event_simpleBackgroundedJPanel1MouseClicked
+    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel1MouseClicked
 
     /**
      * DOCUMENT ME!
@@ -756,15 +807,39 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void simpleBackgroundedJPanel2MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel2MouseClicked
-        // for debugging purposes
-        if (StaticDebuggingTools.checkHomeForFile("cismetDeveloper")) {
-            getWizard().refreshCoordinateZoomMap();
-            jDialog2.getContentPane().removeAll();
-            jDialog2.getContentPane().add(getWizard().getCoordinateZoomMap(), java.awt.BorderLayout.CENTER);
-            jDialog2.setSize(640, 480);
-            StaticSwingTools.showDialog(jDialog2);
+        resetLayers(evt);
+    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel2MouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jLabel11MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel11MouseClicked
+        resetLayers(evt);
+    }                                                                        //GEN-LAST:event_jLabel11MouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jLabel10MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel10MouseClicked
+        resetLayers(evt);
+    }                                                                        //GEN-LAST:event_jLabel10MouseClicked
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void resetLayers(final java.awt.event.MouseEvent evt) {
+        if (evt.getClickCount() > 1) {
+            getWizard().setSingleLayer(null);
+            jLabel10.setToolTipText(null);
+            jLabel11.setVisible(false);
         }
-    } //GEN-LAST:event_simpleBackgroundedJPanel2MouseClicked
+    }
 
     /**
      * DOCUMENT ME!
@@ -1104,6 +1179,57 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                         getWizard().selectCoordinate(position);
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class DnDTargetSimpleBackgroundedJPanel extends SimpleBackgroundedJPanel implements DropTargetListener {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DnDTargetSimpleBackgroundedJPanel object.
+         */
+        public DnDTargetSimpleBackgroundedJPanel() {
+            final DropTarget dt = new DropTarget(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void dragEnter(final DropTargetDragEvent dtde) {
+        }
+
+        @Override
+        public void dragOver(final DropTargetDragEvent dtde) {
+        }
+
+        @Override
+        public void dropActionChanged(final DropTargetDragEvent dtde) {
+        }
+
+        @Override
+        public void dragExit(final DropTargetEvent dte) {
+        }
+
+        @Override
+        public void drop(final DropTargetDropEvent dtde) {
+            try {
+                getWizard().drop(dtde);
+                final RetrievalServiceLayer layer = getWizard().getSingleLayer();
+                final String tooltip = (layer != null)
+                    ? ("<html>" + jLabel12.getText() + ": " + layer.getName() + "<br>\n<br>\n" + jLabel2.getText())
+                    : null;
+                jLabel10.setToolTipText(tooltip);
+                jLabel11.setToolTipText(tooltip);
+                jLabel11.setVisible(layer != null);
+            } catch (final Exception ex) {
+                LOG.error("Error in drop", ex); // NOI18N
             }
         }
     }
