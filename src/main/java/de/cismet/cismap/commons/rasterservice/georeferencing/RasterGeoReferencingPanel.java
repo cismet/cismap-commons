@@ -103,7 +103,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -111,8 +110,10 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -177,8 +178,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         jDialog1 = new javax.swing.JDialog();
         jDialog2 = new javax.swing.JDialog();
-        jLabel2 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
         panContent = new javax.swing.JPanel();
         panInstructions = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
@@ -216,16 +218,24 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 new java.awt.Dimension(32767, 0));
 
         org.openide.awt.Mnemonics.setLocalizedText(
-            jLabel2,
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel2.text")); // NOI18N
-
-        org.openide.awt.Mnemonics.setLocalizedText(
             jLabel12,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
                 "RasterGeoReferencingPanel.jLabel12.text")); // NOI18N
+
+        org.openide.awt.Mnemonics.setLocalizedText(
+            jMenuItem2,
+            org.openide.util.NbBundle.getMessage(
+                RasterGeoReferencingPanel.class,
+                "RasterGeoReferencingPanel.jMenuItem2.text")); // NOI18N
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jMenuItem2ActionPerformed(evt);
+                }
+            });
+        jPopupMenu1.add(jMenuItem2);
 
         setMinimumSize(new java.awt.Dimension(420, 500));
         setPreferredSize(new java.awt.Dimension(420, 520));
@@ -576,13 +586,6 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel1.setMaximumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setMinimumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setPreferredSize(new java.awt.Dimension(200, 200));
-        simpleBackgroundedJPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
-
-                @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    simpleBackgroundedJPanel1MouseClicked(evt);
-                }
-            });
         simpleBackgroundedJPanel1.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setIcon(new javax.swing.ImageIcon(
@@ -618,8 +621,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    simpleBackgroundedJPanel2MouseClicked(evt);
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    simpleBackgroundedJPanel2MousePressed(evt);
                 }
             });
         simpleBackgroundedJPanel2.setLayout(new java.awt.GridBagLayout());
@@ -634,8 +637,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    jLabel11MouseClicked(evt);
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    jLabel11MousePressed(evt);
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -657,8 +660,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
-                public void mouseClicked(final java.awt.event.MouseEvent evt) {
-                    jLabel10MouseClicked(evt);
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    jLabel10MousePressed(evt);
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -798,47 +801,55 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void simpleBackgroundedJPanel1MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel1MouseClicked
-    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel1MouseClicked
+    private void jMenuItem2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jMenuItem2ActionPerformed
+        resetLayer();
+    }                                                                              //GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void simpleBackgroundedJPanel2MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel2MouseClicked
-        resetLayers(evt);
-    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel2MouseClicked
+    private void jLabel11MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel11MousePressed
+        showResetLayerPopup(evt);
+    }                                                                        //GEN-LAST:event_jLabel11MousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jLabel11MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel11MouseClicked
-        resetLayers(evt);
-    }                                                                        //GEN-LAST:event_jLabel11MouseClicked
+    private void jLabel10MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel10MousePressed
+        showResetLayerPopup(evt);
+    }                                                                        //GEN-LAST:event_jLabel10MousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jLabel10MouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel10MouseClicked
-        resetLayers(evt);
-    }                                                                        //GEN-LAST:event_jLabel10MouseClicked
+    private void simpleBackgroundedJPanel2MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel2MousePressed
+        showResetLayerPopup(evt);
+    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel2MousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void resetLayers(final java.awt.event.MouseEvent evt) {
-        if (evt.getClickCount() > 1) {
-            getWizard().setSingleLayer(null);
-            jLabel10.setToolTipText(null);
-            jLabel11.setVisible(false);
+    private void showResetLayerPopup(final java.awt.event.MouseEvent evt) {
+        if (evt.isPopupTrigger()) {
+            jPopupMenu1.show(evt.getComponent(), evt.getX(), evt.getY());
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void resetLayer() {
+        getWizard().setSingleLayer(null);
+        jLabel10.setToolTipText(null);
+        jLabel11.setVisible(false);
     }
 
     /**
@@ -1222,9 +1233,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             try {
                 getWizard().drop(dtde);
                 final RetrievalServiceLayer layer = getWizard().getSingleLayer();
-                final String tooltip = (layer != null)
-                    ? ("<html>" + jLabel12.getText() + ": " + layer.getName() + "<br>\n<br>\n" + jLabel2.getText())
-                    : null;
+                final String tooltip = (layer != null) ? ("<html>" + jLabel12.getText() + ": " + layer.getName())
+                                                       : null;
                 jLabel10.setToolTipText(tooltip);
                 jLabel11.setToolTipText(tooltip);
                 jLabel11.setVisible(layer != null);
