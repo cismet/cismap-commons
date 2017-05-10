@@ -12,7 +12,12 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import org.apache.batik.ext.awt.image.codec.tiff.TIFFImage;
 import org.apache.log4j.Logger;
@@ -20,19 +25,28 @@ import org.apache.log4j.Logger;
 import org.deegree.io.geotiff.GeoTiffReader;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!
@@ -132,7 +146,7 @@ public class ImageFileUtils {
         r = null;
         System.gc();
 
-        return new ImageFileMetaData(rec, en, null);
+        return new ImageFileMetaData(rec, en, null, null);
     }
 
     /**
@@ -160,26 +174,137 @@ public class ImageFileUtils {
      * @return  DOCUMENT ME!
      */
     public static Mode determineMode(final File imageFile) {
-        final Mode mode;
+        ImageFileMetaData md = null;
+
         final File worldFile = ImageFileUtils.getWorldFile(imageFile);
         if (worldFile != null) {
-            mode = Mode.WORLDFILE;
-        } else {
-            ImageFileMetaData md = null;
-            if (imageFile.getName().toLowerCase().endsWith("tif")) {
-                try {
-                    md = ImageFileUtils.getTiffMetaData(imageFile);
-                } catch (final Exception ex) {
-                    md = null;
-                }
-            }
+            md = getWorldFileMetaData(imageFile, worldFile);
             if (md != null) {
-                mode = Mode.TIFF;
-            } else {
-                mode = Mode.GEO_REFERENCED;
+                return md.isRasterGeoRef() ? Mode.GEO_REFERENCED : Mode.WORLDFILE;
             }
         }
-        return mode;
+
+        if (imageFile.getName().toLowerCase().endsWith("tif")) {
+            try {
+                return Mode.TIFF;
+            } catch (final Exception ex) {
+            }
+        }
+        return (md != null) ? Mode.TIFF : Mode.GEO_REFERENCED;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   worldFile  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean checkIfRasterGeoRef(final File worldFile) {
+        if (worldFile != null) {
+            try {
+                final BufferedReader br = new BufferedReader(new FileReader(worldFile));
+                String line;
+                while (((line = br.readLine()) != null)) {
+                    if (line.startsWith("#cidsgeoref;")) {
+                        return true;
+                    }
+                }
+                br.close();
+            } catch (Exception e) {
+                LOG.error("Cannot parse the world file", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines the meta information about the image file. It will be assumed, that a world file for the image file
+     * exists. The world file must have the file ending .jgw, .pgw, .gfw or .tfw depending on the image format.
+     *
+     * @param   imageFile  DOCUMENT ME!
+     * @param   worldFile  DOCUMENT ME!
+     *
+     * @return  the meta information about the image file
+     */
+    public static ImageFileMetaData getWorldFileMetaData(final File imageFile, final File worldFile) {
+        try {
+            final BufferedReader br = new BufferedReader(new FileReader(worldFile));
+            final double[] matrix = new double[6];
+            final List<PointCoordinatePair> pairs = new ArrayList<>();
+            boolean isRasterGeoReof = false;
+
+            // read parameter from world file
+            int index = 0;
+            String line;
+            while (((line = br.readLine()) != null)) {
+                if (line.startsWith("#cidsgeoref;")) {
+                    isRasterGeoReof = true;
+                    continue;
+                }
+                if (isRasterGeoReof) {
+                    if (line.startsWith("#")) {
+                        final String[] parts = line.substring(1).split(";|,");
+                        if (parts.length == 4) {
+                            final Point point = new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+                            final Coordinate coordinate = new Coordinate(Double.parseDouble(parts[2]),
+                                    Double.parseDouble(parts[3]));
+                            pairs.add(new PointCoordinatePair(point, coordinate));
+                        }
+                    }
+                } else {
+                    if (line.trim().isEmpty() || line.startsWith("#")) {
+                        continue;
+                    }
+                    if (line.contains(",")) {
+                        line = line.replaceAll(",", ".");
+                    }
+                    matrix[index++] = Double.parseDouble(line);
+                }
+            }
+
+            br.close();
+
+            if (index == matrix.length) {
+                final AffineTransformation transform = new AffineTransformation(
+                        matrix[0],
+                        matrix[2],
+                        matrix[4],
+                        matrix[1],
+                        matrix[3],
+                        matrix[5]);
+
+                final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
+                final double imageWidth = imageDimension.getWidth();
+                final double imageHeight = imageDimension.getHeight();
+                final Rectangle imageBounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
+
+                final GeometryFactory factory = new GeometryFactory(
+                        new PrecisionModel(),
+                        CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                final LinearRing linear = factory.createLinearRing(
+                        new Coordinate[] {
+                            new Coordinate(0, 0),
+                            new Coordinate(imageWidth, 0),
+                            new Coordinate(imageWidth, imageHeight),
+                            new Coordinate(0, imageHeight),
+                            new Coordinate(0, 0)
+                        });
+
+                final Envelope imageEnvelope = transform.transform(factory.createPolygon(linear, null))
+                            .getEnvelopeInternal();
+                final ImageFileMetaData metaData = new ImageFileMetaData(
+                        imageBounds,
+                        imageEnvelope,
+                        transform,
+                        (isRasterGeoReof) ? pairs.toArray(new PointCoordinatePair[0]) : null);
+                return metaData;
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot parse the world file", e);
+        }
+
+        return null;
     }
 
     /**

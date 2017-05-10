@@ -76,7 +76,9 @@ public class MappingComponentGeoReferencedImageFileDropHandler implements Mappin
 
         @Override
         public boolean isMatching(final File file) {
-            return ImageFileUtils.isImageFileEnding(file.getName());
+            final File worldFile = ImageFileUtils.getWorldFile(file);
+            return ImageFileUtils.isImageFileEnding(file.getName())
+                        && ((worldFile == null) || ImageFileUtils.checkIfRasterGeoRef(worldFile));
         }
     }
 }

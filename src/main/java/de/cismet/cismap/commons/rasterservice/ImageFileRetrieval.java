@@ -11,12 +11,7 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +23,6 @@ import org.deegree.io.geotiff.GeoTiffReader;
 
 import org.openide.util.Exceptions;
 
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -37,16 +31,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -374,7 +364,7 @@ public class ImageFileRetrieval extends Thread {
         if (mode != null) {
             switch (mode) {
                 case WORLDFILE: {
-                    return getWorldFileMetaData(getWorldFile());
+                    return ImageFileUtils.getWorldFileMetaData(getImageFile(), getWorldFile());
                 }
                 case TIFF: {
                     getTiffMetaData();
@@ -407,74 +397,6 @@ public class ImageFileRetrieval extends Thread {
      */
     private ImageFileMetaData getTiffMetaData() throws Exception {
         return ImageFileUtils.getTiffMetaData(imageFile);
-    }
-
-    /**
-     * Determines the meta information about the image file. It will be assumed, that a world file for the image file
-     * exists. The world file must have the file ending .jgw, .pgw, .gfw or .tfw depending on the image format.
-     *
-     * @param   worldFile  DOCUMENT ME!
-     *
-     * @return  the meta information about the image file
-     */
-    private ImageFileMetaData getWorldFileMetaData(final File worldFile) {
-        try {
-            final BufferedReader br = new BufferedReader(new FileReader(worldFile));
-            final double[] matrix = new double[6];
-
-            // read parameter from world file
-            int index = 0;
-            String line;
-            while (((line = br.readLine()) != null) && (index < (matrix.length))) {
-                if (line.trim().isEmpty() || line.trim().startsWith("#")) {
-                    continue;
-                }
-                if (line.contains(",")) {
-                    line = line.replaceAll(",", ".");
-                }
-                matrix[index++] = Double.parseDouble(line);
-            }
-
-            br.close();
-
-            if (index == matrix.length) {
-                final AffineTransformation transform = new AffineTransformation(
-                        matrix[0],
-                        matrix[2],
-                        matrix[4],
-                        matrix[1],
-                        matrix[3],
-                        matrix[5]);
-
-                final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
-                final double imageWidth = imageDimension.getWidth();
-                final double imageHeight = imageDimension.getHeight();
-                final Rectangle imageBounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
-
-                final GeometryFactory factory = new GeometryFactory(
-                        new PrecisionModel(),
-                        CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-                final LinearRing linear = factory.createLinearRing(
-                        new Coordinate[] {
-                            new Coordinate(0, 0),
-                            new Coordinate(imageWidth, 0),
-                            new Coordinate(imageWidth, imageHeight),
-                            new Coordinate(0, imageHeight),
-                            new Coordinate(0, 0)
-                        });
-
-                final Envelope imageEnvelope = transform.transform(factory.createPolygon(linear, null))
-                            .getEnvelopeInternal();
-                return new ImageFileMetaData(
-                        imageBounds,
-                        imageEnvelope,
-                        transform);
-            }
-        } catch (Exception e) {
-            LOG.error("Cannot parse the world file", e);
-        }
-
-        return null;
     }
 
     /**

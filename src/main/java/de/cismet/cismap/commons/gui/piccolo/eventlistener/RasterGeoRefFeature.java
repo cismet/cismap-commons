@@ -61,16 +61,14 @@ import de.cismet.cismap.commons.features.RequestForUnaddableHandles;
 import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
 import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.features.XStyledFeature;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
-import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingDialog;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandlerListener;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
-
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -158,12 +156,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
                         @Override
                         public void featuresAdded(final FeatureCollectionEvent fce) {
-                            if (!isRefreshing() && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                                // RasterGeoReferencingWizard.getInstance().setHandler(handler);
-                                if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
-                                    StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
-                                }
-                            }
+                            // if (!isRefreshing() && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                            // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
+                            // }
                         }
 
                         @Override
@@ -172,11 +167,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
                         @Override
                         public void featuresRemoved(final FeatureCollectionEvent fce) {
-                            if (!isRefreshing()) {
-                                if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                                    RasterGeoReferencingDialog.getInstance().setVisible(false);
-                                }
-                            }
+                            // if (!isRefreshing()) { if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                            // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.SELECT);
+                            // } }
                         }
 
                         @Override
@@ -196,9 +189,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                                             .getMappingComponent()
                                             .getFeatureCollection()
                                             .select(handler.getFeature());
-                                            if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
-                                                StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
-                                            }
+                                            CismapBroker.getInstance()
+                                            .getMappingComponent()
+                                            .setInteractionMode(MappingComponent.GEO_REF);
                                         } finally {
                                             ignoreSelection = false;
                                         }

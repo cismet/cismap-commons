@@ -17,7 +17,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.awt.Dimension;
@@ -25,6 +24,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import java.io.File;
+import java.io.PrintWriter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,8 +60,7 @@ public class RasterGeoReferencingBackend {
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter(AccessLevel.PRIVATE)
-    private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<>();
+    @Getter private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<>();
 
     @Getter private final ActiveLayerListenerHandler activeLayerListenerHandler = new ActiveLayerListenerHandler();
 
@@ -170,9 +169,52 @@ public class RasterGeoReferencingBackend {
         final ImageFileMetaData metaData = new ImageFileMetaData(
                 imageBounds,
                 imageEnvelope,
-                transform);
+                transform,
+                pairs);
 
         return new RasterGeoReferencingHandler(service, metaData);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   handler  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void save(final RasterGeoReferencingHandler handler) throws Exception {
+        final File imageFile = handler.getService().getImageFile();
+        final File worldFile = ImageFileUtils.getWorldFileWithoutCheck(imageFile);
+
+        final PrintWriter pw = new PrintWriter(worldFile);
+        final AffineTransformation at = handler.getMetaData().getTransform();
+        final double[] matrix = at.getMatrixEntries();
+        pw.append(Double.toString(matrix[0])).append("\n");
+        pw.append(Double.toString(matrix[3])).append("\n");
+        pw.append(Double.toString(matrix[1])).append("\n");
+        pw.append(Double.toString(matrix[4])).append("\n");
+        pw.append(Double.toString(matrix[2])).append("\n");
+        pw.append(Double.toString(matrix[5])).append("\n");
+
+        pw.append("#cidsgeoref;")
+                .append(Integer.toString(handler.getCompletePairs().length))
+                .append(";")
+                .append(getMainMap().getMappingModel().getSrs().getShortname())
+                .append("\n");
+        for (final PointCoordinatePair pair : handler.getCompletePairs()) {
+            final Point point = pair.getPoint();
+            final Coordinate coordinate = pair.getCoordinate();
+            pw.append("#")
+                    .append(Integer.toString((int)point.getX()))
+                    .append(",")
+                    .append(Integer.toString((int)point.getY()))
+                    .append(";")
+                    .append(Double.toString(coordinate.x))
+                    .append(",")
+                    .append(Double.toString(coordinate.y))
+                    .append("\n");
+        }
+        pw.close();
     }
 
     /**
@@ -241,7 +283,19 @@ public class RasterGeoReferencingBackend {
                             final File imagefile = irs.getImageFile();
                             if (!getMetaDataMap().containsKey(imagefile)) {
                                 try {
-                                    final RasterGeoReferencingHandler handler = createInitHandler(irs, imagefile);
+                                    final File worldFile = ImageFileUtils.getWorldFile(imagefile);
+                                    final RasterGeoReferencingHandler handler;
+                                    if (worldFile == null) {
+                                        handler = createInitHandler(irs, imagefile);
+                                    } else {
+                                        final ImageFileMetaData metaData = ImageFileUtils.getWorldFileMetaData(
+                                                imagefile,
+                                                worldFile);
+                                        handler = new RasterGeoReferencingHandler(irs, metaData);
+                                        for (final PointCoordinatePair pair : metaData.getPairs()) {
+                                            handler.addPair(pair);
+                                        }
+                                    }
                                     getMetaDataMap().put(imagefile, handler);
                                     handler.addListener(new RasterGeoReferencingHandlerListener() {
 

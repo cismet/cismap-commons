@@ -21,6 +21,8 @@ import lombok.Setter;
 
 import java.awt.Rectangle;
 
+import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
+
 /**
  * DOCUMENT ME!
  *
@@ -37,4 +39,16 @@ public class ImageFileMetaData {
     private Rectangle imageBounds;
     private Envelope imageEnvelope;
     private AffineTransformation transform;
+    private PointCoordinatePair[] pairs;
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isRasterGeoRef() {
+        return pairs != null;
+    }
 }
