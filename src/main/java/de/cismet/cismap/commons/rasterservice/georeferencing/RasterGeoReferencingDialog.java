@@ -137,7 +137,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      */
     private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
         try {
-            RasterGeoReferencingWizard.getInstance().save();
+            RasterGeoReferencingBackend.getInstance().save(RasterGeoReferencingWizard.getInstance().getHandler());
             setVisible(false);
             JOptionPane.showMessageDialog(this.getParent(), "Das zugehörige WorldFile wurde erfolgreich geschrieben.");
         } catch (final Exception ex) {
@@ -152,6 +152,16 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
             JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
         }
     }                                                                            //GEN-LAST:event_jButton4ActionPerformed
+
+    @Override
+    public void setVisible(final boolean visible) {
+        super.setVisible(visible);
+
+        if (visible) {
+            RasterGeoReferencingWizard.getInstance().refreshPointZoomMap();
+            RasterGeoReferencingWizard.getInstance().refreshCoordinateZoomMap();
+        }
+    }
 
     /**
      * DOCUMENT ME!

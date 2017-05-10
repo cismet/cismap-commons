@@ -147,6 +147,11 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
             } catch (Exception e) {
             }
         }
+        final File worldFile = ImageFileUtils.getWorldFile(imageFile);
+        if (worldFile != null) {
+            mode = ImageFileUtils.checkIfRasterGeoRef(worldFile) ? ImageFileUtils.Mode.GEO_REFERENCED
+                                                                 : ImageFileUtils.Mode.WORLDFILE;
+        }
     }
 
     /**

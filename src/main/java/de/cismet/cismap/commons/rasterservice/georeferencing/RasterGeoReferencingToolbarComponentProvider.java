@@ -28,6 +28,8 @@ import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
 import de.cismet.tools.StaticDebuggingTools;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -141,7 +143,15 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         @Override
         public void statusValueChanged(final StatusEvent evt) {
             if (StatusEvent.MAPPING_MODE.equals(evt.getName())) {
-                btnRasterGeoRef.setSelected(MappingComponent.GEO_REF.equals(evt.getValue()));
+                if (MappingComponent.GEO_REF.equals(evt.getValue())) {
+                    btnRasterGeoRef.setSelected(true);
+                    if (!RasterGeoReferencingDialog.getInstance().isVisible()) {
+                        StaticSwingTools.showDialog(RasterGeoReferencingDialog.getInstance());
+                    }
+                } else {
+                    btnRasterGeoRef.setSelected(false);
+                    RasterGeoReferencingDialog.getInstance().setVisible(false);
+                }
             }
         }
     }

@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PCanvas;
@@ -34,9 +33,6 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.io.File;
-import java.io.PrintWriter;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -54,7 +50,6 @@ import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -160,46 +155,6 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    public void save() throws Exception {
-        final File imageFile = getHandler().getService().getImageFile();
-        final File worldFile = ImageFileUtils.getWorldFileWithoutCheck(imageFile);
-
-        final PrintWriter pw = new PrintWriter(worldFile);
-        final AffineTransformation at = getHandler().getMetaData().getTransform();
-        final double[] matrix = at.getMatrixEntries();
-        pw.append(Double.toString(matrix[0])).append("\n");
-        pw.append(Double.toString(matrix[3])).append("\n");
-        pw.append(Double.toString(matrix[1])).append("\n");
-        pw.append(Double.toString(matrix[4])).append("\n");
-        pw.append(Double.toString(matrix[2])).append("\n");
-        pw.append(Double.toString(matrix[5])).append("\n");
-
-        pw.append("#cidsgeoref;")
-                .append(Integer.toString(getHandler().getCompletePairs().length))
-                .append(";")
-                .append(getMainMap().getMappingModel().getSrs().getShortname())
-                .append("\n");
-        for (final PointCoordinatePair pair : getHandler().getCompletePairs()) {
-            final Point point = pair.getPoint();
-            final Coordinate coordinate = pair.getCoordinate();
-            pw.append("#")
-                    .append(Double.toString(point.getX()))
-                    .append(",")
-                    .append(Double.toString(point.getY()))
-                    .append(";")
-                    .append(Double.toString(coordinate.x))
-                    .append(",")
-                    .append(Double.toString(coordinate.y))
-                    .append("\n");
-        }
-        pw.close();
-    }
 
     /**
      * DOCUMENT ME!
@@ -533,7 +488,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             mappingModel.setSrs(origMap.getMappingModel().getSrs());
             mappingModel.addHome(bb);
 
-            if (getSingleLayer() != null) {
+            if (SelectionMode.COORDINATE.equals(mode) && (getSingleLayer() != null)) {
                 mappingModel.addLayer(getSingleLayer());
             } else {
                 int layerCount = 0;

@@ -28,8 +28,6 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidgetProvider;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 
-import static de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils.handleImageFile;
-
 /**
  * DOCUMENT ME!
  *
@@ -77,7 +75,9 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
 
         @Override
         public boolean isMatching(final File file) {
-            return ImageFileUtils.isImageFileEnding(file.getName()) && (ImageFileUtils.getWorldFile(file) != null);
+            final File worldFile = ImageFileUtils.getWorldFile(file);
+            return ImageFileUtils.isImageFileEnding(file.getName()) && (worldFile != null)
+                        && !ImageFileUtils.checkIfRasterGeoRef(worldFile);
         }
     }
 }
