@@ -12,8 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import org.openide.util.NbBundle;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,10 +22,14 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
@@ -33,13 +38,18 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
+import de.cismet.tools.Static2DTools;
+
+import de.cismet.tools.gui.GUIWindow;
+
 /**
  * DOCUMENT ME!
  *
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class LayerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener {
+@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
+public class LayerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener, GUIWindow {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -91,6 +101,8 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         } catch (Exception e) {
             log.error("Cannot open the resource bundle for the crs mapping.", e);
         }
+        CismapBroker.getInstance().addCapabilityListener(this);
+        CismapBroker.getInstance().addActiveLayerListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -462,6 +474,28 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
             log.warn("Error while checking the GDI String", e);       // NOI18N
             return text;
         }
+    }
+
+    @Override
+    public JComponent getGuiComponent() {
+        return this;
+    }
+
+    @Override
+    public String getPermissionString() {
+        return GUIWindow.NO_PERMISSION;
+    }
+
+    @Override
+    public String getViewTitle() {
+        return NbBundle.getMessage(LayerInfo.class, "LayerInfo.getViewTitle");
+    }
+
+    @Override
+    public Icon getViewIcon() {
+        final Icon icoMap = new ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png"));
+        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 
     //~ Inner Classes ----------------------------------------------------------
