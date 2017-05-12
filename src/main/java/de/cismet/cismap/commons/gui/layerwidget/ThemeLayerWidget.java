@@ -40,7 +40,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.DropMode;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -98,9 +101,6 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 
 import de.cismet.veto.VetoException;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.FOLDER;
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
