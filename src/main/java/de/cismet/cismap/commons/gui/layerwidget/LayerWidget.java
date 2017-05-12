@@ -11,6 +11,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
@@ -31,6 +33,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
 import javax.swing.SwingWorker;
@@ -52,13 +57,15 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
-import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wms.capabilities.*;
+
+import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 
+import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 import de.cismet.tools.gui.treetable.JTreeTable;
@@ -71,7 +78,8 @@ import de.cismet.tools.gui.treetable.TreeTableModel;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class LayerWidget extends JPanel implements DropTargetListener, Configurable {
+@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
+public class LayerWidget extends JPanel implements DropTargetListener, Configurable, GUIWindow {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -113,11 +121,29 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     //~ Constructors -----------------------------------------------------------
 
     /**
+     * This constructor should only be used by the Lookup and the init(MappingComponent) should be invoked, when this
+     * constructor was used.
+     */
+    public LayerWidget() {
+    }
+
+    /**
      * Creates new form LayerWidget.
      *
      * @param  mapC  DOCUMENT ME!
      */
     public LayerWidget(final MappingComponent mapC) {
+        init(mapC);
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * To initialise this component, when the default constructor was used.
+     *
+     * @param  mapC  DOCUMENT ME!
+     */
+    public void init(final MappingComponent mapC) {
         hackDragAndDropDataFlavors();
         initComponents();
         this.mapC = mapC;
@@ -249,8 +275,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             });
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -1013,5 +1037,27 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 "File List");                                      // NOI18N
         sfm.addUnencodedNativeForFlavor(dataFlavor, nativeValue);
         sfm.addFlavorForUnencodedNative(nativeValue, dataFlavor);
+    }
+
+    @Override
+    public JComponent getGuiComponent() {
+        return this;
+    }
+
+    @Override
+    public String getPermissionString() {
+        return GUIWindow.NO_PERMISSION;
+    }
+
+    @Override
+    public String getViewTitle() {
+        return NbBundle.getMessage(LayerWidget.class, "LayerWidget.getViewTitle");
+    }
+
+    @Override
+    public Icon getViewIcon() {
+        final Icon icoMap = new ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/layers.png"));
+        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 }

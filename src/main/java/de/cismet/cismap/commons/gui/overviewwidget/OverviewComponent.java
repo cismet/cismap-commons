@@ -20,14 +20,17 @@ import org.deegree.model.crs.GeoTransformer;
 
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.util.HashMap;
-
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -46,9 +49,12 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
+import de.cismet.tools.Static2DTools;
+
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 
+import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -57,7 +63,8 @@ import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class OverviewComponent extends javax.swing.JPanel implements Configurable {
+@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
+public class OverviewComponent extends javax.swing.JPanel implements Configurable, GUIWindow {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -293,5 +300,26 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
             log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e); // NOI18N
             initBackgroundService();
         }
+    }
+
+    @Override
+    public JComponent getGuiComponent() {
+        return this;
+    }
+
+    @Override
+    public String getPermissionString() {
+        return GUIWindow.NO_PERMISSION;
+    }
+
+    @Override
+    public String getViewTitle() {
+        return NbBundle.getMessage(OverviewComponent.class, "OverviewWidget.getViewTitle");
+    }
+
+    @Override
+    public Icon getViewIcon() {
+        final Icon icoMap = new ImageIcon(getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png"));
+        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 }

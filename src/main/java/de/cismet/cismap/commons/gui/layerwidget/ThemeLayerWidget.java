@@ -93,13 +93,18 @@ import de.cismet.cismap.commons.util.SelectionManager;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 
 import de.cismet.veto.VetoException;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.FOLDER;
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
+import de.cismet.tools.Static2DTools;
 
 /**
  * DOCUMENT ME!
@@ -107,7 +112,10 @@ import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener, SelectionChangedListener { // implements
+@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
+public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener,
+    SelectionChangedListener,
+    GUIWindow { // implements
 
     //~ Instance fields --------------------------------------------------------
 
@@ -672,6 +680,33 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         } catch (VetoException ex) {
             // nothing to do
         }
+    }
+    
+    @Override
+    public String getViewTitle() {
+        return org.openide.util.NbBundle.getMessage(
+                ThemeLayerWidget.class,
+                "CismapPlugin.CismapPlugin(PluginContext).vThemeLayer.title");
+    }
+
+    @Override
+    public Icon getViewIcon() {
+        return Static2DTools.borderIcon(new ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png")),
+                0,
+                3,
+                0,
+                1);
+    }
+
+    @Override
+    public JComponent getGuiComponent() {
+        return this;
+    }
+
+    @Override
+    public String getPermissionString() {
+        return GUIWindow.NO_PERMISSION;
     }
 
     //~ Inner Classes ----------------------------------------------------------
