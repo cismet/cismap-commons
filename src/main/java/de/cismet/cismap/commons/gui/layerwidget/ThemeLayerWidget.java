@@ -36,10 +36,7 @@ import java.util.EventObject;
 import java.util.List;
 
 import javax.swing.DropMode;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -80,18 +77,13 @@ import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-
-import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
-import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 
