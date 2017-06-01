@@ -7,12 +7,16 @@
 ****************************************************/
 package de.cismet.cismap.commons.tools;
 
+import Sirius.util.collections.MultiMap;
+
+import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -23,6 +27,9 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPickPath;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -47,8 +54,7 @@ public class PFeatureTools {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            "de.cismet.cismap.commons.tools.PFeatureTools"); // NOI18N
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PFeatureTools.class); // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -745,5 +751,331 @@ public class PFeatureTools {
             }
         }
         return areaTotal;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pFeatures          DOCUMENT ME!
+     * @param   thresholdInMeters  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static List<PFeatureCoordinateInformation> identifyMergeableCoordinates(final Collection<PFeature> pFeatures,
+            final double thresholdInMeters) {
+        final List<PFeatureCoordinateInformation> groupedInfos = new ArrayList<>();
+
+        // collect all coordinate infos of all pfeatures
+
+        final List<PFeatureCoordinateInformation> infos = new ArrayList<>();
+        for (final PFeature pFeature : pFeatures) {
+            final Geometry geom = pFeature.getFeature().getGeometry();
+            for (int entityPosition = 0; entityPosition < pFeature.getNumOfEntities(); entityPosition++) {
+                for (int ringPosition = 0; ringPosition < pFeature.getNumOfRings(entityPosition); ringPosition++) {
+                    final int numOfCoordinates;
+                    if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
+                        // workaround for not removing last point of a polygon
+                        numOfCoordinates = pFeature.getNumOfCoordinates(entityPosition, ringPosition) - 1;
+                    } else {
+                        numOfCoordinates = pFeature.getNumOfCoordinates(entityPosition, ringPosition);
+                    }
+
+                    for (int coordPosition = 0; coordPosition < numOfCoordinates; coordPosition++) {
+                        final PFeatureCoordinateInformation info = new PFeatureCoordinateInformation(
+                                pFeature,
+                                entityPosition,
+                                ringPosition,
+                                coordPosition);
+                        if (info.getCoordinate() != null) {
+                            infos.add(info);
+                        }
+                    }
+                }
+            }
+        }
+
+        // calculate all neighbours of all coordinates of all pfeatures
+
+        for (int i = 0; i < infos.size(); i++) {
+            final PFeatureCoordinateInformation infoA = infos.get(i);
+            final Coordinate coordA = infoA.getCoordinate();
+            for (int j = i + 1; j < infos.size(); j++) {
+                final PFeatureCoordinateInformation infoB = infos.get(j);
+                final Coordinate coordB = infoB.getCoordinate();
+                if (coordA.distance(coordB) < thresholdInMeters) {
+                    infoA.getNeighbourInfos().add(infoB);
+                    infoB.getNeighbourInfos().add(infoA);
+                }
+            }
+        }
+
+        // removing all zero-distance-only neighbours
+        for (final PFeatureCoordinateInformation info : new ArrayList<>(infos)) {
+            boolean onlyZeroDistance = true;
+
+            final Coordinate coordinate = info.getCoordinate();
+
+            final PFeature pFeature = info.getPFeature();
+            for (final PFeatureCoordinateInformation neighbourInfo : info.getNeighbourInfos()) {
+                final PFeature neighbourPFeature = neighbourInfo.getPFeature();
+                final Coordinate neighbourCoordinate = neighbourInfo.getCoordinate();
+
+                if (neighbourPFeature.equals(pFeature)) {
+                    onlyZeroDistance = false;
+                    break;
+                }
+                final double distance = neighbourCoordinate.distance(coordinate);
+                if (distance > 0) {
+                    onlyZeroDistance = false;
+                    break;
+                }
+            }
+            if (onlyZeroDistance) {
+                infos.remove(info);
+            }
+        }
+
+        // group all infos together by coordinate distance, prioritizing the coordinates with the most neighbours
+
+        while (!infos.isEmpty()) {
+            Collections.sort(infos);
+            final PFeatureCoordinateInformation firstInfo = infos.get(0);
+            if (!firstInfo.getNeighbourInfos().isEmpty()) {
+                groupedInfos.add(firstInfo);
+                for (final PFeatureCoordinateInformation neighbourInfo : firstInfo.getNeighbourInfos()) {
+                    neighbourInfo.getNeighbourInfos().remove(firstInfo);
+                }
+            }
+            infos.remove(firstInfo);
+        }
+
+        return groupedInfos;
+    }
+
+    public static List<PFeatureCoordinateInformation> automergeCoordinates(final Collection<PFeature> pFeatures, final double thresholdInMeters) {
+        return automergeCoordinates(identifyMergeableCoordinates(pFeatures, thresholdInMeters));
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   groupedInfos  pFeatures DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static List<PFeatureCoordinateInformation> automergeCoordinates(
+            final List<PFeatureCoordinateInformation> groupedInfos) {
+        final List<PFeatureCoordinateInformation> unmergedInfos = new ArrayList<>();
+
+        // calculating the centroid of all grouped infos, and setting the coordinates to the centroid
+
+        final MultiMap coordinateRemoveMap = new MultiMap();
+        final Set<PFeature> pFeatureToSync = new HashSet<>();
+
+        for (final PFeatureCoordinateInformation info : groupedInfos) {
+            final PFeature pFeature = info.getPFeature();
+            final Coordinate coordinate = info.getCoordinate();
+            final int entityPosition = info.getEntityPosition();
+            final int ringPosition = info.getRingPosition();
+            final int coordinatePosition = info.getCoordinatePosition();
+
+            // calculating centroid
+            final CentroidPoint centroidPoint = new CentroidPoint();
+
+            try {
+                centroidPoint.add(coordinate);
+                for (final PFeatureCoordinateInformation neighbourInfo : info.getNeighbourInfos()) {
+                    final Coordinate neighbourCoordinate = neighbourInfo.getCoordinate();
+                    centroidPoint.add(neighbourCoordinate);
+                }
+
+                final Coordinate centroid = centroidPoint.getCentroid();
+
+                // setting centroid to group "parent"
+
+                LOG.info("setting centroid to group parent. before: "
+                            + coordinate + " after:" + centroid);
+                if (pFeature.moveCoordinate(entityPosition, ringPosition, coordinatePosition, centroid, false)) {
+                    // setting centroid to group neighbours
+
+                    for (final PFeatureCoordinateInformation neighbourInfo : info.getNeighbourInfos()) {
+                        final PFeature neighbourPFeature = neighbourInfo.getPFeature();
+                        final int neighbourEntityPosition = neighbourInfo.getEntityPosition();
+                        final int neighbourRingPosition = neighbourInfo.getRingPosition();
+                        final int neighbourCoordinatePosition = neighbourInfo.getCoordinatePosition();
+                        final Coordinate neighbourCoordinate = neighbourInfo.getCoordinate();
+
+                        if (neighbourPFeature.equals(pFeature)
+                                    && (neighbourEntityPosition == entityPosition)
+                                    && (neighbourRingPosition == ringPosition)) {
+                            // it's on the same ring of the same pfeature, the coordinate can be removed
+                            LOG.info("it's on the same ring of the same pfeature, the coordinate can be removed");
+
+                            coordinateRemoveMap.put(neighbourPFeature, neighbourInfo);
+                        } else {
+                            LOG.info("setting centroid to group neighbour. before: " + neighbourCoordinate + " after:"
+                                        + centroid);
+                            if (neighbourPFeature.moveCoordinate(
+                                            neighbourEntityPosition,
+                                            neighbourRingPosition,
+                                            neighbourCoordinatePosition,
+                                            centroid,
+                                            true)) {
+                                pFeatureToSync.add(neighbourPFeature);
+                            } else {
+                                LOG.warn("cant move coordinate of  " + neighbourPFeature
+                                            + ". It would result in an invalid geometry. coordinate: " + centroid);
+                                unmergedInfos.add(neighbourInfo);
+                            }
+                        }
+                    }
+                    pFeatureToSync.add(pFeature);
+                } else {
+                    LOG.warn("cant move coordinate of  " + pFeature
+                                + ". It would result in an invalid geometry. coordinate: " + centroid);
+                    unmergedInfos.add(info);
+                }
+            } catch (final Exception ex) {
+                LOG.warn("could not update all coordinates", ex);
+            }
+        }
+
+        // removing now duplicate coordinates from pfeatures
+        // ( in reverse coordinatePosition order, to avoid position-shifting-problems
+        // when removing multiple coordinates from the same pfeature )
+
+        for (final PFeature pFeature : (Set<PFeature>)coordinateRemoveMap.keySet()) {
+            final Set<PFeatureCoordinateInformation> coordinateRemoveSet = new HashSet<>((Collection)
+                    coordinateRemoveMap.get(pFeature));
+            final List<PFeatureCoordinateInformation> coordinateRemoveInfos = new ArrayList<>(coordinateRemoveSet);
+            Collections.sort(coordinateRemoveInfos, new Comparator<PFeatureCoordinateInformation>() {
+
+                    @Override
+                    public int compare(final PFeatureCoordinateInformation o1, final PFeatureCoordinateInformation o2) {
+                        if (o1.getEntityPosition() != o2.getEntityPosition()) {
+                            return -Integer.compare(o1.getEntityPosition(), o2.getEntityPosition());
+                        } else if (o1.getRingPosition() != o2.getRingPosition()) {
+                            return -Integer.compare(o1.getRingPosition(), o2.getRingPosition());
+                        } else if (o1.getCoordinatePosition() != o2.getCoordinatePosition()) {
+                            return -Integer.compare(o1.getCoordinatePosition(), o2.getCoordinatePosition());
+                        } else {
+                            return 0;
+                        }
+                    }
+                });
+
+            for (final PFeatureCoordinateInformation info : coordinateRemoveInfos) {
+                final int entityPosition = info.getEntityPosition();
+                final int ringPosition = info.getRingPosition();
+                final int coordinatePosition = info.getCoordinatePosition();
+
+                // but check before if the minimum number of coordinates for the given geometry type is
+                // respected
+                final Geometry geom = pFeature.getFeature().getGeometry();
+                final int minCoordinates;
+                if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
+                    minCoordinates = 3;
+                } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
+                    minCoordinates = 2;
+                } else {
+                    minCoordinates = 0;
+                }
+
+                final int numOfCoords = pFeature.getNumOfCoordinates(entityPosition, ringPosition);
+                if ((numOfCoords > minCoordinates)
+                            && pFeature.removeCoordinate(
+                                entityPosition,
+                                ringPosition,
+                                coordinatePosition,
+                                false)) {
+                    pFeatureToSync.add(pFeature);
+                } else {
+                    LOG.warn("cant remove coordinate from  " + pFeature
+                                + ". It would result in an invalid geometry.");
+                    unmergedInfos.add(info);
+                }
+            }
+        }
+
+        // update and sync
+        for (final PFeature pFeature : pFeatureToSync) {
+            pFeature.updatePath();
+            pFeature.syncGeometry();
+        }
+
+        return unmergedInfos;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    @Getter
+    @AllArgsConstructor
+    public static class PFeatureCoordinateInformation implements Comparable<PFeatureCoordinateInformation> {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final Collection<PFeatureCoordinateInformation> neighbourInfos = new ArrayList();
+        private final PFeature pFeature;
+        private final int entityPosition;
+        private final int ringPosition;
+        private final int coordinatePosition;
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public Coordinate getCoordinate() {
+            return pFeature.getCoordinate(entityPosition, ringPosition, coordinatePosition);
+        }
+
+        @Override
+        public int compareTo(final PFeatureCoordinateInformation o) {
+            return Integer.compare(getNeighbourInfos().size(), o.getNeighbourInfos().size());
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = (13 * hash) + Objects.hashCode(this.pFeature);
+            hash = (13 * hash) + this.entityPosition;
+            hash = (13 * hash) + this.ringPosition;
+            hash = (13 * hash) + this.coordinatePosition;
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final PFeatureCoordinateInformation other = (PFeatureCoordinateInformation)obj;
+            if (this.entityPosition != other.entityPosition) {
+                return false;
+            }
+            if (this.ringPosition != other.ringPosition) {
+                return false;
+            }
+            if (this.coordinatePosition != other.coordinatePosition) {
+                return false;
+            }
+            if (!Objects.equals(this.pFeature, other.pFeature)) {
+                return false;
+            }
+            return true;
+        }
     }
 }
