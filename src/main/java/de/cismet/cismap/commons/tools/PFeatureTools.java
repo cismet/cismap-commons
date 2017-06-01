@@ -852,10 +852,19 @@ public class PFeatureTools {
         return groupedInfos;
     }
 
-    public static List<PFeatureCoordinateInformation> automergeCoordinates(final Collection<PFeature> pFeatures, final double thresholdInMeters) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pFeatures          DOCUMENT ME!
+     * @param   thresholdInMeters  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static List<PFeatureCoordinateInformation> automergeCoordinates(final Collection<PFeature> pFeatures,
+            final double thresholdInMeters) {
         return automergeCoordinates(identifyMergeableCoordinates(pFeatures, thresholdInMeters));
     }
-    
+
     /**
      * DOCUMENT ME!
      *
