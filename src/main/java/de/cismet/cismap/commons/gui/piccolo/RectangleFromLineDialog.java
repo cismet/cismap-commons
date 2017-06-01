@@ -120,6 +120,8 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
                     fireStateChanged();
                 }
             });
+
+        getRootPane().setDefaultButton(btnOK);
     }
 
     //~ Methods ----------------------------------------------------------------
