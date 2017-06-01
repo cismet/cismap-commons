@@ -483,6 +483,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final PNodeProvider pr = (PNodeProvider)objectToChange;
 
                 if ((pr.getPNode() != null) && (pr.getPNode().getVisible() != visible)) {
+                    if (!visible) {
+                        pr.getPNode().removeAllChildren();
+                    }
                     changeVisibility = true;
                 }
             }
@@ -495,7 +498,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 statusChanged = true;
             }
 
-            if (statusChanged && (objectToChange instanceof MapService)) {
+            if (visible && statusChanged && (objectToChange instanceof MapService)) {
                 ((MapService)objectToChange).setBoundingBox(
                     CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera());
                 ((RetrievalServiceLayer)objectToChange).retrieve(true);
@@ -612,7 +615,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             // nothing to do
         }
     }
-
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -2006,6 +2008,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     leaf,
                     row,
                     hasFocus);
+            if (!(pan.getComponent(0) instanceof JCheckBox)) {
+                // the root element has no checkbox
+                return pan;
+            }
             final JCheckBox leafRenderer = (JCheckBox)pan.getComponent(0);
             final Component ret = pan.getComponent(1);
 
