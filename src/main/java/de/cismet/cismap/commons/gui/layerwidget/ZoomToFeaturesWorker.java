@@ -111,7 +111,7 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
         try {
             final Geometry geom = get();
 
-            if (geom != null) {
+            if ((geom != null) && !geom.isEmpty()) {
                 final XBoundingBox boundingBox = new XBoundingBox(geom);
 
                 if (buffer != 0) {
