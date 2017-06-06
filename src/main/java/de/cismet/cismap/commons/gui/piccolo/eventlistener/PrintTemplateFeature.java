@@ -503,7 +503,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public Paint getFillingPaint() {
-        return javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground");
+        return mappingComponent.getPrintingSettingsDialog().getFeatureFillingPaint();
     }
 
     @Override
@@ -795,6 +795,18 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                             }));
                 }
                 changeMenu.add(menResolution);
+
+                changeMenu.add(new JMenuItem(
+                        new AbstractAction(
+                            org.openide.util.NbBundle.getMessage(
+                                PrintingSettingsWidget.class,
+                                "PrintingTemplateFeature.removeAction")) {
+
+                            @Override
+                            public void actionPerformed(final ActionEvent e) {
+                                mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
+                            }
+                        }));
 
                 changeMenu.show(
                     mappingComponent,
