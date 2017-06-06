@@ -12,6 +12,8 @@
  */
 package de.cismet.cismap.commons.util;
 
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,9 +25,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.swing.Icon;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -34,6 +39,10 @@ import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -42,6 +51,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 
+import static de.cismet.cismap.commons.featureservice.AbstractFeatureService.UNKNOWN;
+
 /**
  * Determines the selected features and sort them by their corresponding service.
  *
@@ -49,6 +60,10 @@ import de.cismet.cismap.commons.retrieval.RepaintListener;
  * @version  $Revision$, $Date$
  */
 public class SelectionManager implements FeatureCollectionListener, ListSelectionListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final AbstractFeatureService DUMMY = new DummyFeatureService();
 
     //~ Instance fields --------------------------------------------------------
 
@@ -72,29 +87,39 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     private SelectionManager() {
         editableServices = Collections.synchronizedList(editableServices);
-        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-        mc.getFeatureCollection().addFeatureCollectionListener(this);
-        mc.addRepaintListener(new RepaintListener() {
-
-                @Override
-                public void repaintStart(final RepaintEvent e) {
-                }
-
-                @Override
-                public void repaintComplete(final RepaintEvent e) {
-                    if (e.getRetrievalEvent().getRetrievalService() instanceof AbstractFeatureService) {
-                        synchronizeSelectionWithMap(
-                            (AbstractFeatureService)e.getRetrievalEvent().getRetrievalService());
-                    }
-                }
-
-                @Override
-                public void repaintError(final RepaintEvent e) {
-                }
-            });
+        init();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void init() {
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+
+        if (mc != null) {
+            mc.getFeatureCollection().addFeatureCollectionListener(this);
+            mc.addRepaintListener(new RepaintListener() {
+
+                    @Override
+                    public void repaintStart(final RepaintEvent e) {
+                    }
+
+                    @Override
+                    public void repaintComplete(final RepaintEvent e) {
+                        if (e.getRetrievalEvent().getRetrievalService() instanceof AbstractFeatureService) {
+                            synchronizeSelectionWithMap(
+                                (AbstractFeatureService)e.getRetrievalEvent().getRetrievalService());
+                        }
+                    }
+
+                    @Override
+                    public void repaintError(final RepaintEvent e) {
+                    }
+                });
+        }
+    }
 
     /**
      * synchronizes the table selection with the PFeatures in the map.
@@ -126,7 +151,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                         .get(MappingComponent.SELECT);
 
             for (final PFeature pfeature : features) {
-                final Feature feature = pfeature.getFeature();
+                Feature feature = pfeature.getFeature();
 
                 if (feature instanceof FeatureWithId) {
                     final boolean selected = Arrays.binarySearch(
@@ -136,6 +161,14 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     if (selected != pfeature.isSelected()) {
                         pfeature.setSelected(selected);
                     }
+
+                    // ensure that the map uses the same feature object that is selected
+                    final int featureIndex = selectedServiceFeatures.indexOf(feature);
+                    if (selectedServiceFeatures.indexOf(feature) != -1) {
+                        feature = selectedServiceFeatures.get(featureIndex);
+                        pfeature.setFeature(feature);
+                    }
+
                     if (selected) {
                         sl.addSelectedFeature(pfeature);
                         featuresToSelect.add(feature);
@@ -148,6 +181,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             selectionChangeInProgress = true;
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addToSelection(featuresToSelect);
             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unselect(featuresToUnselect);
+            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+            pn.postNotification(SelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
             selectionChangeInProgress = false;
         }
     }
@@ -180,6 +215,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     public void setSelectedFeaturesForService(final AbstractFeatureService service,
             final List<? extends Feature> featureList) {
+        AbstractFeatureService s = service;
+
+        if (s == null) {
+            s = DUMMY;
+        }
         selectedFeatures.put(service, null);
         removeSelectionFromMap(service);
 
@@ -187,20 +227,18 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             if (f instanceof DefaultFeatureServiceFeature) {
                 final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
 
-                if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
-                    Set<Feature> list = selectedFeatures.get(fsf.getLayerProperties().getFeatureService());
+                Set<Feature> list = selectedFeatures.get(s);
 
-                    if (list == null) {
-                        list = new HashSet<Feature>();
-                        selectedFeatures.put(fsf.getLayerProperties().getFeatureService(), list);
-                    }
-
-                    list.add(fsf);
+                if (list == null) {
+                    list = new HashSet<Feature>();
+                    selectedFeatures.put(s, list);
                 }
+
+                list.add(fsf);
             }
         }
 
-        synchronizeSelectionWithMap(service);
+        synchronizeSelectionWithMap(s);
 
         fireSelectionChangedEvent();
     }
@@ -231,18 +269,19 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         for (final Feature f : featureList) {
             if (f instanceof DefaultFeatureServiceFeature) {
                 final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
+                AbstractFeatureService service = DUMMY;
 
                 if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
-                    TreeSet<DefaultFeatureServiceFeature> list = selectedFeaturesToRemove.get(
-                            fsf.getLayerProperties().getFeatureService());
-
-                    if (list == null) {
-                        list = new TreeSet<DefaultFeatureServiceFeature>();
-                        selectedFeaturesToRemove.put(fsf.getLayerProperties().getFeatureService(), list);
-                    }
-
-                    list.add(fsf);
+                    service = fsf.getLayerProperties().getFeatureService();
                 }
+                TreeSet<DefaultFeatureServiceFeature> list = selectedFeaturesToRemove.get(service);
+
+                if (list == null) {
+                    list = new TreeSet<DefaultFeatureServiceFeature>();
+                    selectedFeaturesToRemove.put(service, list);
+                }
+
+                list.add(fsf);
             }
         }
 
@@ -268,8 +307,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 if (feature.getFeature() instanceof FeatureServiceFeature) {
                     final FeatureServiceFeature fsf = (FeatureServiceFeature)feature.getFeature();
 
-                    if ((fsf.getLayerProperties() != null) && featureList.contains(fsf)
-                                && feature.isSelected()) {
+                    if (featureList.contains(fsf) && feature.isSelected()) {
                         feature.setSelected(false);
                         sl.removeSelectedFeature(feature);
                         toBeUnselected.add(feature.getFeature());
@@ -306,17 +344,20 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         for (final Feature f : featureList) {
             if (f instanceof DefaultFeatureServiceFeature) {
                 final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
+                AbstractFeatureService service = DUMMY;
 
                 if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
-                    Set<Feature> list = selectedFeatures.get(fsf.getLayerProperties().getFeatureService());
-
-                    if (list == null) {
-                        list = new HashSet<Feature>();
-                        selectedFeatures.put(fsf.getLayerProperties().getFeatureService(), list);
-                    }
-
-                    list.add(fsf);
+                    service = fsf.getLayerProperties().getFeatureService();
                 }
+
+                Set<Feature> list = selectedFeatures.get(service);
+
+                if (list == null) {
+                    list = new HashSet<Feature>();
+                    selectedFeatures.put(service, list);
+                }
+
+                list.add(fsf);
             }
         }
 
@@ -365,7 +406,13 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             if (feature.getFeature() instanceof FeatureServiceFeature) {
                 final FeatureServiceFeature fsf = (FeatureServiceFeature)feature.getFeature();
 
-                if ((fsf.getLayerProperties() != null) && fsf.getLayerProperties().getFeatureService().equals(service)
+                if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)
+                            && fsf.getLayerProperties().getFeatureService().equals(service) && feature.isSelected()) {
+                    feature.setSelected(false);
+                    sl.removeSelectedFeature(feature);
+                    toBeUnselected.add(feature.getFeature());
+                } else if (((fsf.getLayerProperties() == null)
+                                || (fsf.getLayerProperties().getFeatureService() == null)) && service.equals(DUMMY)
                             && feature.isSelected()) {
                     feature.setSelected(false);
                     sl.removeSelectedFeature(feature);
@@ -396,8 +443,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  service  DOCUMENT ME!
      */
     public void clearSelection(final AbstractFeatureService service) {
-        selectedFeatures.put(service, null);
-
+        if (service == null) {
+            selectedFeatures.put(DUMMY, null);
+        } else {
+            selectedFeatures.put(service, null);
+        }
         removeSelectionFromMap(service);
 
         fireSelectionChangedEvent();
@@ -430,12 +480,18 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @return  The selected features of the given service
      */
     public List<Feature> getSelectedFeatures(final AbstractFeatureService service) {
-        final Set set = selectedFeatures.get(service);
+        Set set;
+
+        if (service == null) {
+            set = selectedFeatures.get(DUMMY);
+        } else {
+            set = selectedFeatures.get(service);
+        }
 
         if (set != null) {
             return new ArrayList<Feature>(set);
         } else {
-            return null;
+            return new ArrayList<Feature>();
         }
     }
 
@@ -456,10 +512,12 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @return  The number of selected features of the given service
      */
     public Integer getSelectedFeaturesCount(final AbstractFeatureService service) {
+        Set<Feature> features;
         if (service == null) {
-            return null;
+            features = selectedFeatures.get(DUMMY);
+        } else {
+            features = selectedFeatures.get(service);
         }
-        final Set<Feature> features = selectedFeatures.get(service);
 
         if (features == null) {
             return 0;
@@ -481,7 +539,16 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         }
 
         if (editableServices.contains(service)) {
-            return getSelectedFeaturesCount(service);
+            final List<Feature> features = getSelectedFeatures(service);
+            int modifiable = 0;
+
+            for (final Feature f : features) {
+                if (f.isEditable()) {
+                    ++modifiable;
+                }
+            }
+//            return getSelectedFeaturesCount(service);
+            return modifiable;
         } else {
             return null;
         }
@@ -639,5 +706,93 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         //~ Static fields/initializers -----------------------------------------
 
         static final SelectionManager INSTANCE = new SelectionManager();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class DummyFeatureService extends AbstractFeatureService {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected FeatureFactory createFeatureFactory() throws Exception {
+            return new AbstractFeatureFactory() {
+
+                    @Override
+                    protected boolean isGenerateIds() {
+                        return false;
+                    }
+
+                    @Override
+                    public AbstractFeatureFactory clone() {
+                        return this;
+                    }
+
+                    @Override
+                    public List createFeatures(final Object query,
+                            final BoundingBox boundingBox,
+                            final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException, Exception {
+                        return null;
+                    }
+
+                    @Override
+                    public List createFeatures(final Object query,
+                            final BoundingBox boundingBox,
+                            final SwingWorker workerThread,
+                            final int offset,
+                            final int limit,
+                            final FeatureServiceAttribute[] orderBy) throws FeatureFactory.TooManyFeaturesException,
+                        Exception {
+                        return null;
+                    }
+
+                    @Override
+                    public List createAttributes(final SwingWorker workerThread)
+                            throws FeatureFactory.TooManyFeaturesException, UnsupportedOperationException, Exception {
+                        return new ArrayList();
+                    }
+
+                    @Override
+                    public int getFeatureCount(final Object query, final BoundingBox bb) {
+                        return 0;
+                    }
+                };
+        }
+
+        @Override
+        public Object getQuery() {
+            return null;
+        }
+
+        @Override
+        public void setQuery(final Object query) {
+        }
+
+        @Override
+        protected void initConcreteInstance() throws Exception {
+        }
+
+        @Override
+        protected String getFeatureLayerType() {
+            return UNKNOWN;
+        }
+
+        @Override
+        public Icon getLayerIcon(final int type) {
+            return null;
+        }
+
+        @Override
+        public Object clone() {
+            return null;
+        }
+
+        @Override
+        protected LayerProperties createLayerProperties() {
+            return null;
+        }
     }
 }
