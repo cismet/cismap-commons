@@ -14,6 +14,9 @@ package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
 
+import java.awt.Color;
+import java.awt.Paint;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,13 +49,14 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Element configuration = null;
-    private Vector<Scale> scales = new Vector<Scale>();
-    private Vector<Resolution> resolutions = new Vector<Resolution>();
-    private Vector<Template> templates = new Vector<Template>();
-    private Vector<Action> actions = new Vector<Action>();
+    private Vector<Scale> scales = new Vector<>();
+    private Vector<Resolution> resolutions = new Vector<>();
+    private Vector<Template> templates = new Vector<>();
+    private Vector<Action> actions = new Vector<>();
     private MappingComponent mappingComponent = null;
     private boolean chooseFileName = false;
     private boolean oldOverlappingCheck = true;
+    private Color featureFillingColor;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboAction;
@@ -112,6 +116,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         newWidget.resolutions = resolutions;
         newWidget.templates = templates;
         newWidget.actions = actions;
+        newWidget.featureFillingColor = featureFillingColor;
         newWidget.cboScales.setModel(cboScales.getModel());
         newWidget.cboResolution.setModel(cboResolution.getModel());
         newWidget.cboTemplates.setModel(cboTemplates.getModel());
@@ -451,6 +456,15 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      *
      * @return  DOCUMENT ME!
      */
+    public Paint getFeatureFillingPaint() {
+        return featureFillingColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean getOldOverlappingCheckEnabled() {
         return oldOverlappingCheck;
     }
@@ -493,6 +507,12 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         try {
             final Element prefs = parent.getChild("printing");                             // NOI18N
             configuration = (Element)prefs.clone();
+            try {
+                featureFillingColor = Color.decode(prefs.getAttributeValue("featureFillingColor"));
+            } catch (final Exception ex) {
+                log.info("could not parse featureFillingColor", ex);
+                featureFillingColor = javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground");
+            }
             final List scalesList = prefs.getChildren("scale");                            // NOI18N
             final List resolutionsList = prefs.getChildren("resolution");                  // NOI18N
             final List templatesList = prefs.getChildren("template");                      // NOI18N
