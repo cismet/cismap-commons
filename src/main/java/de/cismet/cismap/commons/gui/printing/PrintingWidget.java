@@ -906,7 +906,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                         PrintTemplateFeature.class);
                 boolean allPrintsReady = true;
                 for (final PrintTemplateFeature ptf : prints) {
-                    if (!(ptf.getFutureMapImage().isDone() || ptf.getFutureMapImage().isCancelled())) {
+                    if ((ptf.getFutureMapImage() == null)
+                                || !(ptf.getFutureMapImage().isDone() || ptf.getFutureMapImage().isCancelled())) {
                         allPrintsReady = false;
                         break;
                     }
