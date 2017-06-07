@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.attributetable;
 
+import java.util.List;
+
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
@@ -33,6 +35,21 @@ public interface FeatureLockingInterface {
      * @throws  Exception                   if the locking failed for some reason
      */
     Object lock(final Feature feature, boolean multiLockForSameUserAllowed) throws LockAlreadyExistsException,
+        Exception;
+
+    /**
+     * locks the given feature list.
+     *
+     * @param   feature                      the feature that should be locked
+     * @param   multiLockForSameUserAllowed  true, iff it is allowed to lock an object that is already locked by this
+     *                                       user
+     *
+     * @return  The unlock object for the given feature. This can be used with {@link unlock(Object)}
+     *
+     * @throws  LockAlreadyExistsException  if the given feature is already locked
+     * @throws  Exception                   if the locking failed for some reason
+     */
+    Object lock(final List<Feature> feature, boolean multiLockForSameUserAllowed) throws LockAlreadyExistsException,
         Exception;
 
     /**
