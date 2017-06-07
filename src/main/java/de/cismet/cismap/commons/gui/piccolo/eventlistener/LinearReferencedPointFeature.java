@@ -110,6 +110,15 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     /**
      * DOCUMENT ME!
      *
+     * @param  baseLineGeom  DOCUMENT ME!
+     */
+    public void setBaseLine(final Geometry baseLineGeom) {
+        this.baseLineGeom = baseLineGeom;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  isMovable  DOCUMENT ME!
      */
     public void setMovable(final boolean isMovable) {
