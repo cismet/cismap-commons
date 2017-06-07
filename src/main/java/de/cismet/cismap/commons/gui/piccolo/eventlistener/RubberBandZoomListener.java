@@ -16,9 +16,6 @@ import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 
@@ -38,13 +35,12 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final int ANIMATION_DURATION = 750;
+    private static final Config CONFIG = new Config();
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient Timer timer;
     private ActionListener zoomListener = null;
-
-    @Setter @Getter private boolean invertScrollDirection = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -89,7 +85,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     @Override
     public void mouseWheelRotated(final PInputEvent pInputEvent) {
         super.mouseWheelRotated(pInputEvent);
-        final int direction = invertScrollDirection ? -1 : 1;
+        final int direction = CONFIG.invertScrollDirection ? -1 : 1;
         if ((direction * pInputEvent.getWheelRotation()) < 0) {
             zoom(0.9f, pInputEvent, 0, 800);
         } else {
@@ -163,5 +159,17 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
         } else {
             timer.start();
         }
+    }
+    
+    public boolean isInvertScrollDirection() {
+        return CONFIG.invertScrollDirection;
+    }
+    
+    public void setInvertScrollDirection(final boolean invertScrollDirection) {
+        CONFIG.invertScrollDirection = invertScrollDirection;
+    }
+    
+    static class Config {
+        boolean invertScrollDirection = false;
     }
 }
