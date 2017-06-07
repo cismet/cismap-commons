@@ -150,7 +150,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     /* the name of this layer */
     protected String name;
     /* determines the transparency of this layer */
-    protected float translucency = 0.2f;
+    protected float translucency = CismapBroker.getInstance().getDefaultTranslucency();
     /* the encoding of the xml documents */
     protected String encoding;
     /* maximal allowed amount of features, default is 1000 */
@@ -1891,7 +1891,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("LIW[" + this.getId() + "]: doInBackground() started"); // NOI18N
                 }
             }
-            EventQueue.invokeLater(new Runnable() {
+            EventQueue.invokeAndWait(new Runnable() {
 
                     @Override
                     public void run() {

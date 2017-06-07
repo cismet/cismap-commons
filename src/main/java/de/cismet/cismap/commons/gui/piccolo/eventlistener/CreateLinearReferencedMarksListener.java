@@ -51,8 +51,6 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 
     //~ Static fields/initializers ---------------------------------------------
 
-    // private static final Color COLOR_SUBLINE = new Color(255, 91, 0);
-    private static final double IDENTICAL_POSITION_DELTA = 1d;
     private static final float CURSOR_PANEL_TRANSPARENCY = 0.7f;
     private static final double INVISIBLE_CURSOR_DISTANCE = 0.015;
 
@@ -74,6 +72,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 
     protected MappingComponent mc;
     protected String mcModus = MappingComponent.LINEAR_REFERENCING;
+
+    // private static final Color COLOR_SUBLINE = new Color(255, 91, 0);
+    private double identicalPositionDelta = 1d;
 
     /**
      * DOCUMENT ME!
@@ -183,6 +184,24 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the identicalPositionDelta
+     */
+    public double getIdenticalPositionDelta() {
+        return identicalPositionDelta;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  identicalPositionDelta  the identicalPositionDelta to set
+     */
+    public void setIdenticalPositionDelta(final double identicalPositionDelta) {
+        this.identicalPositionDelta = identicalPositionDelta;
+    }
 
     /**
      * DOCUMENT ME!
@@ -742,7 +761,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         final Collection<PointMark> pointMarks = getPointMarks(getSelectedLinePFeature());
         boolean pointMarkStillExists = false;
         for (final PointMark pointMark : pointMarks) {
-            if (Math.abs(pointMark.getPosition() - currentPosition) < IDENTICAL_POSITION_DELTA) {
+            if (Math.abs(pointMark.getPosition() - currentPosition) < identicalPositionDelta) {
                 pointMarkStillExists = true;
                 break;
             }

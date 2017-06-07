@@ -160,16 +160,36 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
             timer.start();
         }
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isInvertScrollDirection() {
         return CONFIG.invertScrollDirection;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  invertScrollDirection  DOCUMENT ME!
+     */
     public void setInvertScrollDirection(final boolean invertScrollDirection) {
         CONFIG.invertScrollDirection = invertScrollDirection;
     }
-    
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     static class Config {
+
+        //~ Instance fields ----------------------------------------------------
+
         boolean invertScrollDirection = false;
     }
 }

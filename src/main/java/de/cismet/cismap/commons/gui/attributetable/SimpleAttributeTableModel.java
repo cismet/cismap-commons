@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.model.spatialschema.MultiGeometry;
 
 import org.jdesktop.swingx.JXTable;
 
@@ -32,6 +33,8 @@ import javax.swing.table.TableModel;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.tools.FeatureTools;
+
+import de.cismet.math.geometry.StaticGeometryFunctions;
 
 /**
  * DOCUMENT ME!
@@ -328,7 +331,16 @@ public class SimpleAttributeTableModel implements TableModel {
         } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
             final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)value);
             try {
-                value = JTSAdapter.export(geom).getGeometryType();
+                if (featureList.get(rowIndex).getLayerProperties().getFeatureService().getGeometryType().startsWith(
+                                "Multi")) {
+                    final Geometry geometry = JTSAdapter.export(geom);
+
+                    if (geometry != null) {
+                        value = StaticGeometryFunctions.toMultiGeometry(geometry).getGeometryType();
+                    }
+                } else {
+                    value = JTSAdapter.export(geom).getGeometryType();
+                }
             } catch (GeometryException e) {
                 LOG.error("Error while transforming deegree geometry to jts geometry.", e);
             }

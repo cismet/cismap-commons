@@ -198,6 +198,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
             LOG.debug("update Geometry");
         }
         if ((fromFeature != null) && (toFeature != null)) {
+            this.baseLineGeom = fromFeature.getLineGeometry();
             Geometry sublineGeom;
             if (fromFeature != toFeature) {
                 double from = fromFeature.getCurrentPosition();

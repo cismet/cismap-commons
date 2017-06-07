@@ -18,7 +18,7 @@ import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 
 /**
- * DOCUMENT ME!
+ * The base class of feature creators, which are used to create new features.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -52,9 +52,11 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
     /**
      * DOCUMENT ME!
      *
-     * @param  feature  DOCUMENT ME!
+     * @param  feature     DOCUMENT ME!
+     * @param  properties  DOCUMENT ME!
      */
-    protected void fillFeatureWithDefaultValues(final DefaultFeatureServiceFeature feature) {
+    protected static void fillFeatureWithDefaultValues(final DefaultFeatureServiceFeature feature,
+            final Map<String, Object> properties) {
         if (properties != null) {
             for (final String propName : properties.keySet()) {
                 final Object o = properties.get(propName);
@@ -65,6 +67,27 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
                     feature.setProperty(propName, value);
                 } else {
                     feature.setProperty(propName, o);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature     DOCUMENT ME!
+     * @param  properties  DOCUMENT ME!
+     */
+    protected static void fillFeatureWithDefaultValuesAfterSave(final DefaultFeatureServiceFeature feature,
+            final Map<String, Object> properties) {
+        if (properties != null) {
+            for (final String propName : properties.keySet()) {
+                final Object o = properties.get(propName);
+
+                if ((o instanceof String) && ((String)o).startsWith("@")) {
+                    final String referencedProperty = ((String)o).substring(1);
+                    final Object value = feature.getProperty(referencedProperty);
+                    feature.setProperty(propName, value);
                 }
             }
         }

@@ -16,7 +16,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 
 /**
- * DOCUMENT ME!
+ * can be used tio create new Geometries on the map.
  *
  * @author   therter
  * @version  $Revision$, $Date$

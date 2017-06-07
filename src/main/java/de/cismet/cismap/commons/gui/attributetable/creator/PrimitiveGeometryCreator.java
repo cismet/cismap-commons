@@ -11,6 +11,7 @@
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
@@ -37,7 +38,7 @@ import de.cismet.math.geometry.StaticGeometryFunctions;
 import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
 
 /**
- * DOCUMENT ME!
+ * Creates new features, which use primitive geometry types.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -116,21 +117,40 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
                                 @Override
                                 public void geometryFinished(final Geometry g) {
-                                    Geometry geom;
+                                    Geometry geom = g;
+
+                                    if (mode.equals(CreateGeometryListenerInterface.LINESTRING)
+                                                && geom.getGeometryType().equals("Point")) {
+                                        geom = g.getFactory()
+                                                        .createLineString(
+                                                                new Coordinate[] {
+                                                                    g.getCoordinate(),
+                                                                    new Coordinate(
+                                                                        g.getCoordinate().x
+                                                                        + 1,
+                                                                        g.getCoordinate().y
+                                                                        + 1)
+                                                                });
+                                    }
 
                                     if (multi) {
-                                        geom = StaticGeometryFunctions.toMultiGeometry(g);
+                                        geom = StaticGeometryFunctions.toMultiGeometry(geom);
                                     } else {
-                                        geom = StaticGeometryFunctions.toSimpleGeometry(g);
+                                        geom = StaticGeometryFunctions.toSimpleGeometry(geom);
                                     }
 
                                     feature.setGeometry(geom);
-                                    mc.setInteractionMode(oldInteractionMode);
+//                                    mc.setInteractionMode(oldInteractionMode);
 
                                     if (feature instanceof DefaultFeatureServiceFeature) {
                                         try {
-                                            fillFeatureWithDefaultValues((DefaultFeatureServiceFeature)feature);
+                                            fillFeatureWithDefaultValues(
+                                                (DefaultFeatureServiceFeature)feature,
+                                                properties);
                                             ((DefaultFeatureServiceFeature)feature).saveChanges();
+                                            fillFeatureWithDefaultValuesAfterSave(
+                                                (DefaultFeatureServiceFeature)feature,
+                                                properties);
 
                                             for (final FeatureCreatedListener featureCreatedListener
                                                         : PrimitiveGeometryCreator.this.listener) {
