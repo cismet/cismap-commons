@@ -38,7 +38,7 @@ import de.cismet.math.geometry.StaticGeometryFunctions;
 import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
 
 /**
- * Creates new features, which use primitive geometry types
+ * Creates new features, which use primitive geometry types.
  *
  * @author   therter
  * @version  $Revision$, $Date$

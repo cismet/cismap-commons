@@ -18,7 +18,7 @@ import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 
 /**
- * The base class of feature creators, which are used to create new features
+ * The base class of feature creators, which are used to create new features.
  *
  * @author   therter
  * @version  $Revision$, $Date$
