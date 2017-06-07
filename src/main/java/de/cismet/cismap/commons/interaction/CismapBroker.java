@@ -35,6 +35,7 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
+import de.cismet.cismap.commons.drophandler.builtin.MappingComponentUnknownFileDropHandlerDialog;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
@@ -74,7 +75,6 @@ public class CismapBroker {
     private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";              // NOI18N
     private static final String DEFAULT_CISMAP_FOLDER = ".cismap";                               // NOI18N
     private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME; // NOI18N
-    private static CismapBroker instance = null;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -119,6 +119,8 @@ public class CismapBroker {
     private PFeature snappingVetoFeature;
     private Float minOpacityToStayEnabled = null;
     private boolean multiFeaturePopupMenuEnabled = false;
+    private float defaultTranslucency = 0.2f;
+    private boolean highlightFeatureOnMouseOver = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -134,13 +136,28 @@ public class CismapBroker {
     /**
      * DOCUMENT ME!
      *
+     * @return  the defaultTranslucency
+     */
+    public float getDefaultTranslucency() {
+        return defaultTranslucency;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  defaultTranslucency  the defaultTranslucency to set
+     */
+    public void setDefaultTranslucency(final float defaultTranslucency) {
+        this.defaultTranslucency = defaultTranslucency;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public static CismapBroker getInstance() {
-        if (instance == null) {
-            instance = new CismapBroker();
-        }
-        return instance;
+        return LazyInitialiser.INSTANCE;
     }
 
     /**
@@ -1112,5 +1129,45 @@ public class CismapBroker {
      */
     public void setMultiFeaturePopupMenuEnabled(final boolean multiFeaturePopupMenuEnabled) {
         this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the highlightFeatureOnMouseOver
+     */
+    public boolean isHighlightFeatureOnMouseOver() {
+        return highlightFeatureOnMouseOver;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  highlightFeatureOnMouseOver  the highlightFeatureOnMouseOver to set
+     */
+    public void setHighlightFeatureOnMouseOver(final boolean highlightFeatureOnMouseOver) {
+        this.highlightFeatureOnMouseOver = highlightFeatureOnMouseOver;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class LazyInitialiser {
+
+        //~ Static fields/initializers -----------------------------------------
+
+        private static final CismapBroker INSTANCE = new CismapBroker();
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new LazyInitialiser object.
+         */
+        private LazyInitialiser() {
+        }
     }
 }
