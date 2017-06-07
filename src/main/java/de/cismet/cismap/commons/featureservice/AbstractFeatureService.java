@@ -1891,7 +1891,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("LIW[" + this.getId() + "]: doInBackground() started"); // NOI18N
                 }
             }
-            EventQueue.invokeLater(new Runnable() {
+            EventQueue.invokeAndWait(new Runnable() {
 
                     @Override
                     public void run() {
