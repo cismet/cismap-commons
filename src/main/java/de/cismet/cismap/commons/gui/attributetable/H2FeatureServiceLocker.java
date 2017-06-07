@@ -14,6 +14,9 @@ package de.cismet.cismap.commons.gui.attributetable;
 
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -33,6 +36,18 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
     private static final Logger LOG = Logger.getLogger(H2FeatureServiceLocker.class);
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public Object lock(final List<Feature> features, final boolean multiLockForSameUserAllowed)
+            throws LockAlreadyExistsException, Exception {
+        final List<Lock> locks = new ArrayList<Lock>();
+
+        for (final Feature f : features) {
+            locks.add((Lock)lock(f, multiLockForSameUserAllowed));
+        }
+
+        return locks;
+    }
 
     @Override
     public Object lock(final Feature feature, final boolean multiLockForSameUserAllowed)
@@ -100,6 +115,10 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
             } catch (Exception e) {
                 LOG.error("Error while creating lock object", e);
                 throw new Exception("Cannot lock object");
+            }
+        } else if (unlockObject instanceof List) {
+            for (final Object o : (List)unlockObject) {
+                unlock(o);
             }
         } else {
             throw new IllegalArgumentException("No supported unlock object");
