@@ -361,14 +361,17 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
             try {
                 final PNode n = (PNode)o;
                 setMouseCursorAccordingToMode(n);
-                if (n instanceof Highlightable) {
-                    if (highlighted != null) {
+
+                if (CismapBroker.getInstance().isHighlightFeatureOnMouseOver()) {
+                    if (n instanceof Highlightable) {
+                        if (highlighted != null) {
+                            highlighted.setHighlighting(false);
+                        }
+                        ((Highlightable)n).setHighlighting(true);
+                        highlighted = (Highlightable)n;
+                    } else if (highlighted != null) {
                         highlighted.setHighlighting(false);
                     }
-                    ((Highlightable)n).setHighlighting(true);
-                    highlighted = (Highlightable)n;
-                } else if (highlighted != null) {
-                    highlighted.setHighlighting(false);
                 }
             } catch (Exception e) {
                 LOG.warn("Fehler beim Highlighten", e); // NOI18N

@@ -589,6 +589,18 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     }
 
     /**
+     * Determines attribute table, that is connected witgh the given service.
+     *
+     * @param   service  table The attribute table, that is connected witgh the given service. Null, if no attribute
+     *                   table for the given service is open
+     *
+     * @return  DOCUMENT ME!
+     */
+    public AttributeTable getAttributeTableForService(final AbstractFeatureService service) {
+        return consideredAttributeTables.get(service);
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @param  table  DOCUMENT ME!
