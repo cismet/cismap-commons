@@ -526,10 +526,21 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
                         if (!dialog.isAutoScaleEnabled()) {
                             final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
-                            final Font f = new Font("sansserif", Font.PLAIN, fontSize);
+                            Font f = dialog.getFont();
+
+                            if (f == null) {
+                                f = new Font("sansserif", Font.PLAIN, fontSize);
+                            }
                             newFeature.setPrimaryAnnotationFont(f);
                         } else {
-                            final Font f = new Font("sansserif", Font.PLAIN, 12);
+                            Font f = dialog.getFont();
+                            if (f == null) {
+                                final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                                f = new Font("sansserif", Font.PLAIN, fontSize);
+                            } else {
+                                final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * f.getSize());
+                                f = f.deriveFont(fontSize);
+                            }
                             newFeature.setPrimaryAnnotationFont(f);
                         }
                         newFeature.setAutoScale(dialog.isAutoScaleEnabled());
