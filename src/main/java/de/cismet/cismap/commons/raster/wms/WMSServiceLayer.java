@@ -328,7 +328,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
                 if (l != null) {
                     if (layerList.size() == 1) {
-                        //do not change custom name
+                        // do not change custom name
                         if ((getName() == null) || getName().equals("")) {
                             setName(l.getTitle());
                         }

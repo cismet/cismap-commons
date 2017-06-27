@@ -177,7 +177,7 @@ public class SelectionListener extends CreateGeometryListener {
                     clickOnSelection = true;
                 }
                 if (!selectedPFeatures.contains(selectedPFeature)) {
-                    //do not add duplicates
+                    // do not add duplicates
                     selectedPFeatures.add(selectedPFeature);
                 }
             }
