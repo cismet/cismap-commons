@@ -199,4 +199,16 @@ public class XBoundingBox extends BoundingBox {
 
         return result;
     }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (other instanceof XBoundingBox) {
+            final XBoundingBox bb = (XBoundingBox)other;
+
+            return ((getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1())
+                            && (getY2() == bb.getY2())) && (getSrs() == bb.getSrs());
+        } else {
+            return super.equals(other);
+        }
+    }
 }

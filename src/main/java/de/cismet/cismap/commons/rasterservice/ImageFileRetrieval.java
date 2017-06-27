@@ -22,6 +22,7 @@ import org.deegree.io.geotiff.GeoTiffException;
 import org.deegree.io.geotiff.GeoTiffReader;
 
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -37,6 +38,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import javax.swing.JOptionPane;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -112,8 +116,16 @@ public class ImageFileRetrieval extends Thread {
 
             if (metaData == null) {
                 final RetrievalEvent re = new RetrievalEvent();
+
+                JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                    NbBundle.getMessage(ImageFileRetrieval.class, "ImageFileRetrieval.run().message"),
+                    NbBundle.getMessage(ImageFileRetrieval.class, "ImageFileRetrieval.run().title"),
+                    JOptionPane.ERROR_MESSAGE);
+
                 re.setIsComplete(false);
-                re.setRetrievedObject("Cannot read meta data");
+                re.setRetrievedObject(NbBundle.getMessage(
+                        ImageFileRetrieval.class,
+                        "ImageFileRetrieval.run().message"));
                 re.setErrorType(RetrievalEvent.CLIENTERROR);
                 listener.retrievalError(re);
 
@@ -421,6 +433,8 @@ public class ImageFileRetrieval extends Thread {
                 if (metaData != null) {
                     return metaData.getImageEnvelope();
                 }
+            } else {
+                return metaData.getImageEnvelope();
             }
         } catch (Exception e) {
             LOG.error("Cannot determine the envelope of the image.", e);

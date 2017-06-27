@@ -417,7 +417,9 @@ public class InternalDbTree extends JTree {
                 folder.getName(),
                 true);
 
-        for (final DBEntry entry : (folder).getChildren()) {
+        for (int n = folder.getChildren().size() - 1; n >= 0; --n) {
+            final DBEntry entry = folder.getChildren().get(n);
+
             if (entry instanceof DBFolder) {
                 databaseTable.addChild(getFolderInformation((DBFolder)entry));
             } else {
@@ -626,6 +628,8 @@ public class InternalDbTree extends JTree {
                     if (name.equalsIgnoreCase("spatial_ref_sys")
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME)
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)
+                                || name.equalsIgnoreCase("Zeichnungen")
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.SLD_TABLE_NAME)
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.LOCK_TABLE_NAME)) {
                         continue;
                     }

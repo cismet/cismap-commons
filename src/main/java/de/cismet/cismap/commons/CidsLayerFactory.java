@@ -49,7 +49,6 @@ public class CidsLayerFactory {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(CidsLayerFactory.class);
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CidsLayerFactory.class);
     private static boolean DEBUG = true;
 
     //~ Methods ----------------------------------------------------------------
@@ -287,7 +286,7 @@ public class CidsLayerFactory {
                     final WebFeatureService wfs = new WebFeatureService(layerelement);
                     return getKeyForRetrievalService(wfs);
                 } else if (layerelement.getName().equals("DocumentFeatureServiceLayer")) {                         // NOI18N
-                    log.warn("Sollte nicht vorkommen. Die sollten alle von der XMLObjectFactory geladen werden."); // NOI18N
+                    LOG.warn("Sollte nicht vorkommen. Die sollten alle von der XMLObjectFactory geladen werden."); // NOI18N
                 } else if (layerelement.getName().equals("simpleWms")) {                                           // NOI18N
                     final SimpleWMS simpleWMS = new SimpleWMS(layerelement);
                     return getKeyForRetrievalService(simpleWMS);
@@ -319,7 +318,7 @@ public class CidsLayerFactory {
                     return getKeyForRetrievalService(layer);
                 }
             } catch (Exception ex) {
-                log.error("Konnte keinen Key für das layerelement "
+                LOG.error("Konnte keinen Key für das layerelement "
                             + ((layerelement.getName() != null) ? layerelement.getName() : ("null" + " erstellen")),
                     ex);
             }
@@ -363,7 +362,7 @@ public class CidsLayerFactory {
                     return rsl.getName() + "#" + rsl.getClass();
                 }
             } catch (Exception ex) {
-                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+                LOG.error("Konnte keinen Key für das layerelement erstellen", ex);
             }
         }
         return null;
@@ -432,7 +431,7 @@ public class CidsLayerFactory {
         } else if (layer instanceof JDBCFeatureService) {
             ((JDBCFeatureService)layer).setCrs(crs);
         } else {
-            log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
+            LOG.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
         }
     }
 
@@ -469,7 +468,7 @@ public class CidsLayerFactory {
         } else if (layer instanceof ImageRasterService) {
             return ((ImageRasterService)layer).getElement();
         } else {
-            log.warn("saving configuration not supported by service: " + layer); // NOI18N
+            LOG.warn("saving configuration not supported by service: " + layer); // NOI18N
             return null;
         }
     }
@@ -498,13 +497,13 @@ public class CidsLayerFactory {
             }
 
             if ((layerPosition < 0) || (layerPosition >= orderedLayerElements.length)) {
-                log.warn("layer position of layer #" + i + " (" + layerElement.getName()
+                LOG.warn("layer position of layer #" + i + " (" + layerElement.getName()
                             + ") not set or invalid, setting to " + i); // NOI18N
                 layerPosition = i;
             }
 
             if (orderedLayerElements[layerPosition] != null) {
-                log.warn("conflicting layer position " + layerPosition + ": '" + layerElement.getName() + "' vs '"
+                LOG.warn("conflicting layer position " + layerPosition + ": '" + layerElement.getName() + "' vs '"
                             + orderedLayerElements[layerPosition].getName() + "'");                            // NOI18N
                 for (int j = 0; j < orderedLayerElements.length; j++) {
                     if (orderedLayerElements[j] == null) {
@@ -516,8 +515,8 @@ public class CidsLayerFactory {
                 orderedLayerElements[layerPosition] = layerElement;
             }
             if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug(i + " layer '" + layerElement.getName() + "' set to position " + layerPosition); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(i + " layer '" + layerElement.getName() + "' set to position " + layerPosition); // NOI18N
                 }
             }
             i++;

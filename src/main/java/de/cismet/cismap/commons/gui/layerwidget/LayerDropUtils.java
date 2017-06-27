@@ -247,7 +247,8 @@ public class LayerDropUtils {
 
                     return true;
                 } else if (o instanceof LayerConfig[]) {
-                    for (final LayerConfig config : (LayerConfig[])o) {
+                    for (int i = ((LayerConfig[])o).length - 1; i >= 0; --i) {
+                        final LayerConfig config = ((LayerConfig[])o)[i];
                         if (index != -1) {
                             activeLayerModel.addLayer((config).createConfiguredLayer(),
                                 activeLayerModel.layers.size()
@@ -268,7 +269,8 @@ public class LayerDropUtils {
                 } else if (o instanceof DBTableInformation[]) {
                     final DBTableInformation[] infos = (DBTableInformation[])o;
 
-                    for (final DBTableInformation i : infos) {
+                    for (int n = infos.length - 1; n >= 0; --n) {
+                        final DBTableInformation i = infos[n];
                         if (i.isFolder()) {
                             final LayerCollection lc = createH2Folder(i);
                             lc.setModel(activeLayerModel);
