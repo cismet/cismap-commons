@@ -70,6 +70,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogClosedEvent;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogClosedListener;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRenderer;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -206,6 +207,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void updateTree() {
+        if (tree != null) {
+            tree.repaint();
+            tree.revalidate();
+            tree.updateUI();
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -1399,13 +1411,28 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                 final int pageSize = service.getMaxFeaturesPerPage();
 
                                 if (pageSize != -1) {
-                                    featureList = factory.createFeatures(
-                                            service.getQuery(),
-                                            bb,
-                                            null,
-                                            0,
-                                            pageSize,
-                                            null);
+                                    final AttributeTable table = SelectionManager.getInstance()
+                                                .getAttributeTableForService(service);
+
+                                    if (table == null) {
+                                        featureList = factory.createFeatures(
+                                                service.getQuery(),
+                                                bb,
+                                                null,
+                                                0,
+                                                pageSize,
+                                                null);
+                                    } else {
+                                        EventQueue.invokeLater(new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    table.selectAll();
+                                                }
+                                            });
+
+                                        return null;
+                                    }
                                 } else {
                                     featureList = factory.createFeatures(service.getQuery(),
                                             bb,
@@ -2016,17 +2043,20 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
                     @Override
                     public void mousePressed(final MouseEvent e) {
+                        createPopupMenu();
                         popupMenuListener.mousePressed(e);
                     }
 
                     @Override
                     public void mouseReleased(final MouseEvent e) {
+                        createPopupMenu();
                         popupMenuListener.mouseReleased(e);
                     }
 
                     @Override
                     public void mouseClicked(final MouseEvent e) {
                         if (e.isPopupTrigger() || (e.getButton() != MouseEvent.BUTTON1)) {
+                            createPopupMenu();
                             popupMenuListener.mouseClicked(e);
                             return;
                         }

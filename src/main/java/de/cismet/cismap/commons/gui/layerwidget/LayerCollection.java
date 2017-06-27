@@ -290,16 +290,16 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      */
     @Override
     public boolean isEnabled() {
-        boolean enabled = true;
+        boolean enabled = false;
 
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
-                if (!((LayerCollection)tmp).isEnabled()) {
-                    enabled = false;
+                if (((LayerCollection)tmp).isEnabled()) {
+                    enabled = true;
                 }
             } else if (tmp instanceof ServiceLayer) {
-                if (!((ServiceLayer)tmp).isEnabled()) {
-                    enabled = false;
+                if (((ServiceLayer)tmp).isEnabled()) {
+                    enabled = true;
                 }
 
                 if (model != null) {

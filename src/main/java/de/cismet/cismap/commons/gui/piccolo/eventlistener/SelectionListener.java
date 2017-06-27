@@ -176,7 +176,10 @@ public class SelectionListener extends CreateGeometryListener {
                 if (allClickedPFeatures.contains(selectedPFeature)) {
                     clickOnSelection = true;
                 }
-                selectedPFeatures.add(selectedPFeature);
+                if (!selectedPFeatures.contains(selectedPFeature)) {
+                    //do not add duplicates
+                    selectedPFeatures.add(selectedPFeature);
+                }
             }
         }
 
@@ -785,6 +788,7 @@ public class SelectionListener extends CreateGeometryListener {
             }
 
             if (!finishingEvent.isControlDown()) {
+                lastUnselectedFeatures = null;
                 ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                 unselectAll();
                 featureAdded = false;

@@ -87,6 +87,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.lastCreatedfeatureVector = new Vector(aff.lastCreatedfeatureVector.size());
         this.lastCreatedfeatureVector.addAll(lastCreatedfeatureVector);
         this.styles = aff.styles;
+        this.layerName = aff.layerName;
     }
 
     //~ Methods ----------------------------------------------------------------
