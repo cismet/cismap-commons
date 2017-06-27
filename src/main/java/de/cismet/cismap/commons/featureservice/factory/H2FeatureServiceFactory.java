@@ -35,6 +35,7 @@ import org.jfree.util.Log;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
@@ -46,6 +47,7 @@ import java.io.Serializable;
 import java.net.URI;
 
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -56,6 +58,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,9 +80,9 @@ import de.cismet.cismap.commons.features.JDBCFeatureInfo;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DefaultLayerProperties;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
+import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -102,6 +105,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public static final String DEFAULT_DBF_CHARSET = "ISO8859-1";
     public static final String LR_META_TABLE_NAME = "linear_referencing_meta";
     public static final String META_TABLE_NAME = "table_meta";
+    public static final String SLD_TABLE_NAME = "sld_meta_data";
     public static final String LOCK_TABLE_NAME = "cs_lock";
     public static final int STATION = 1;
     public static final int STATION_LINE = 2;
@@ -122,7 +126,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '\"%s\"');";
     private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from \"%s\"";
     private static final String DROP_TABLE_REFERENCE = "drop table \"%s\";";
-    private static final String SELECT_COLUMN = "select %s, \"%s\" from \"%s\"";
+    private static final String SELECT_COLUMN = "select \"%s\", \"%s\" from \"%s\"";
     private static final String UPDATE_COLUMN = "update \"%s\" set \"%s\" = ? where \"%s\" = ?";
     private static final String CREATE_TABLE_TEMPLATE = "create table \"%s\" (%s)";
     private static final String INSERT_TEMPLATE = "INSERT INTO \"%s\" (%s) VALUES (%s)";
@@ -135,6 +139,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(\"%s\");";
     private static final String CREATE_LR_META_TABLE =
         "create table \"%s\" (id serial, table varchar, lin_ref_reference varchar, domain varchar, src_join_field varchar, targ_join_field varchar, lin_ref_geom varchar, kind int, from_value varchar, till_value varchar);";
+    private static final String CREATE_SLD_META_TABLE =
+        "create table \"%s\" (\"id\" serial, \"table\" varchar, \"sld\" varchar);";
     private static final String CREATE_META_TABLE = "create table \"%s\" (id serial, table varchar, format varchar);";
     private static final String CREATE_LOCK_TABLE = "create table IF NOT EXISTS \"" + LOCK_TABLE_NAME
                 + "\" (\"id\" integer, \"table\" varchar, \"lock_time\" timestamp);";
@@ -153,7 +159,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private JDBCFeatureInfo info;
     private String name;
     private List<LinearReferencingInfo> linRefList;
-    private int srid = 35833;
+    private int srid = CismapBroker.getInstance().getDefaultCrsAlias();
     private String geometryType = AbstractFeatureService.UNKNOWN;
     private int lastFreeId = 0;
 
@@ -190,6 +196,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
+        this.layerName = name;
         this.styles = styles;
         initConnection();
 
@@ -238,6 +245,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
+        this.layerName = name;
         this.styles = styles;
         initConnection();
 
@@ -272,6 +280,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StatementWrapper st = createStatement(conn);
             initDatabase(conn);
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
+            createSldMetaTableIfNotExist();
 
             if (!rs.next()) {
                 rs.close();
@@ -316,9 +325,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     final String crs = determineShapeCrs(file.toURI());
 
                     if (crs != null) {
-                        final PreparedStatement ps = conn.prepareStatement("update \"" + tableName + "\" set " + geoCol
-                                        + " = ? where \"" + idField + "\" = ?");
-                        final ResultSet res = st.executeQuery("select \"" + idField + "\", " + geoCol + " from \""
+                        final PreparedStatement ps = conn.prepareStatement("update \"" + tableName + "\" set \""
+                                        + geoCol
+                                        + "\" = ? where \"" + idField + "\" = ?");
+                        final ResultSet res = st.executeQuery("select \"" + idField + "\", \"" + geoCol + "\" from \""
                                         + tableName + "\"");
 
                         while (res.next()) {
@@ -327,52 +337,76 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             geom.setSRID(CrsTransformer.extractSridFromCrs(crs));
                             final Geometry crsTransformed = CrsTransformer.transformToGivenCrs(
                                     geom,
-                                    CismapBroker.getInstance().getSrs().getCode());
-                            ps.setInt(1, id);
-                            ps.setObject(2, crsTransformed);
+                                    CismapBroker.getInstance().getDefaultCrs());
+                            ps.setObject(1, crsTransformed);
+                            ps.setInt(2, id);
                             ps.addBatch();
                         }
                         ps.executeUpdate();
                     }
                 }
 
-                if (!file.getAbsolutePath().toLowerCase().endsWith("csv")) {
-                    final Charset charset = getCharsetDefinition(file.getAbsolutePath());
+                try {
+                    if (!file.getAbsolutePath().toLowerCase().endsWith("csv")) {
+                        final Charset charset = getCharsetDefinition(file.getAbsolutePath());
 
-                    if ((charset != null) && !charset.name().equals(DEFAULT_DBF_CHARSET)) {
-                        // check and correct encoding
-                        rs = conn.getMetaData().getColumns(null, null, tableName, "%");
-                        // ISO-8859-1 is the default charset of dbf files. If the file has an other encoding,
-                        // all text fields must be converted
-                        while (rs.next()) {
-                            if ((rs.getInt("DATA_TYPE") == java.sql.Types.VARCHAR)
-                                        || (rs.getInt("DATA_TYPE") == java.sql.Types.CHAR)
-                                        || (rs.getInt("DATA_TYPE") == java.sql.Types.NCHAR)
-                                        || (rs.getInt("DATA_TYPE") == java.sql.Types.NVARCHAR)) {
-                                final ResultSet dataRs = st.executeQuery(String.format(
-                                            SELECT_COLUMN,
-                                            rs.getString("COLUMN_NAME"),
-                                            idField,
-                                            tableName));
-                                final PreparedStatement updateSt = conn.prepareStatement(String.format(
-                                            UPDATE_COLUMN,
-                                            tableName,
-                                            rs.getString("COLUMN_NAME"),
-                                            idField));
+                        if ((charset != null) && !charset.name().equals(DEFAULT_DBF_CHARSET)) {
+                            // check and correct encoding
+                            rs = conn.getMetaData().getColumns(null, null, tableName, "%");
+                            // ISO-8859-1 is the default charset of dbf files. If the file has an other encoding,
+                            // all text fields must be converted
+                            while (rs.next()) {
+                                if ((rs.getInt("DATA_TYPE") == java.sql.Types.VARCHAR)
+                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.CHAR)
+                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.NCHAR)
+                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.NVARCHAR)) {
+                                    final ResultSet dataRs = st.executeQuery(String.format(
+                                                SELECT_COLUMN,
+                                                rs.getString("COLUMN_NAME"),
+                                                idField,
+                                                tableName));
+                                    final PreparedStatement updateSt = conn.prepareStatement(String.format(
+                                                UPDATE_COLUMN,
+                                                tableName,
+                                                rs.getString("COLUMN_NAME"),
+                                                idField));
 
-                                while (dataRs.next()) {
-                                    updateSt.setString(
-                                        1,
-                                        new String(dataRs.getString(1).getBytes(DEFAULT_DBF_CHARSET), charset));
-                                    updateSt.setInt(2, dataRs.getInt(2));
-                                    updateSt.execute();
+                                    while (dataRs.next()) {
+                                        final String oldString = dataRs.getString(1);
+                                        final String newString = new String(oldString.getBytes(DEFAULT_DBF_CHARSET),
+                                                charset);
+
+                                        if (!newString.equals(oldString)) {
+                                            updateSt.setString(1, newString);
+                                            updateSt.setInt(2, dataRs.getInt(2));
+                                            updateSt.execute();
+                                        }
+                                    }
+
+                                    dataRs.close();
                                 }
-
-                                dataRs.close();
                             }
+                            rs.close();
                         }
-                        rs.close();
                     }
+                } catch (IllegalCharsetNameException e) {
+                    logger.error("Characterset was not recognised", e);
+                    String errorMessage = e.getMessage();
+
+                    if (errorMessage.contains("\n")) {
+                        errorMessage = errorMessage.substring(0, errorMessage.indexOf("\n"));
+                    }
+
+                    JOptionPane.showMessageDialog(
+                        CismapBroker.getInstance().getMappingComponent(),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.importFile().charsetNotRecognised",
+                            errorMessage),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.importFile().title"), // NOI18N
+                        JOptionPane.WARNING_MESSAGE);
                 }
             }
             st.close();
@@ -718,6 +752,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
             initDatabase(conn);
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
+            createSldMetaTableIfNotExist();
 
             if (!rs.next()) {
                 if (workerThread != null) {
@@ -1052,6 +1087,26 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         }
 
         rs.close();
+    }
+
+    /**
+     * Creates the meta table, if it does not exist.
+     */
+    private void createSldMetaTableIfNotExist() {
+        try {
+            final ResultSet rs = conn.getMetaData().getTables(null, null, SLD_TABLE_NAME, null);
+
+            if (!rs.next()) {
+                // meta table does not exist and should be created
+                final Statement st = createStatement(conn);
+                st.execute(String.format(CREATE_SLD_META_TABLE, SLD_TABLE_NAME));
+                st.close();
+            }
+
+            rs.close();
+        } catch (Exception e) {
+            LOG.error("Cannot create sld meta table", e);
+        }
     }
 
     /**
@@ -1456,9 +1511,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             }
 
             if (layerProperties instanceof DefaultLayerProperties) {
-                ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                        linRefList,
-                        geometryType));
+                ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(createH2AttributeTableRuleSet());
             }
 
             if (geometryField != null) {
@@ -1509,18 +1562,41 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 geometryTypeRs.close();
             }
             st.close();
+
+            if (info == null) {
+                info = new JDBCFeatureInfo(conn, srid, geometryField, tableName, idField);
+            }
         } catch (Exception e) {
             LOG.error("Error while reading meta information of table " + databasePath + "." + tableName, e);
         }
+    }
+
+    /**
+     * The properties linRefList, geometryType and featureServiceAttributes must be filled, when this method is called.
+     *
+     * @return  the default H2AttributeTableRuleSet
+     */
+    public H2AttributeTableRuleSet createH2AttributeTableRuleSet() {
+        final Collection<? extends H2AttributeTableRuleSet> attributeRuleSet = Lookup.getDefault()
+                    .lookupAll(H2AttributeTableRuleSet.class);
+
+        if ((attributeRuleSet != null) && (attributeRuleSet.size() > 0)) {
+            final H2AttributeTableRuleSet ruleSet =
+                attributeRuleSet.toArray(new H2AttributeTableRuleSet[attributeRuleSet.size()])[0];
+
+            ruleSet.init(linRefList, geometryType, featureServiceAttributes);
+
+            return ruleSet;
+        }
+
+        return null;
     }
 
     @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
         super.setLayerProperties(layerProperties);
         if (layerProperties instanceof DefaultLayerProperties) {
-            ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                    linRefList,
-                    geometryType));
+            ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(createH2AttributeTableRuleSet());
         }
     }
 
