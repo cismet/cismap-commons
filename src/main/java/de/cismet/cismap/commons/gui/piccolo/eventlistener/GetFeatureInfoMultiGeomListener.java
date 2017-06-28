@@ -628,7 +628,8 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                         && (service instanceof WMSServiceLayer)) {
                 final WMSServiceLayer wmsService = (WMSServiceLayer)service;
 
-                if (wmsService.isQueryable()) {
+                if (wmsService.isQueryable()
+                            && (wmsService.getWmsCapabilities().getRequest().getFeatureInfoOperation() != null)) {
                     final Parameter p = wmsService.getWmsCapabilities()
                                 .getRequest()
                                 .getFeatureInfoOperation()
