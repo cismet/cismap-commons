@@ -89,6 +89,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
         text = feature.getName();
         setId(feature.getId());
         setGeometry(feature.getGeometry());
+        setProperty("sld", feature.getSld());
         if (feature.getGeometryType().equals(geomType)) {
             setAutoScale(feature.isAutoscale());
             if (feature.getPrimaryAnnotationHalo() != null) {
