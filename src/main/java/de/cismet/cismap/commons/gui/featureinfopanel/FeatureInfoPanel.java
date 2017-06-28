@@ -26,6 +26,9 @@ import org.apache.log4j.Logger;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
+
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -35,6 +38,8 @@ import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import java.lang.reflect.Method;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -74,12 +79,14 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.features.ModifiableFeature;
 import de.cismet.cismap.commons.features.PermissionProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.WMSFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
@@ -1353,6 +1360,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             ((CellSpecificRenderedTable)tabAttributes).removeAllCellRenderers();
             final AttributeTableCellRenderer defaultRenderer = new AttributeTableCellRenderer();
             tabAttributes.setDefaultRenderer(Object.class, defaultRenderer);
+            tabAttributes.setHighlighters(new CustomColorHighlighter(tabAttributes));
 
             if (tableRuleSet != null) {
                 for (int i = 0; i < getRowCount(); ++i) {
@@ -1609,10 +1617,12 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     final int row,
                     final int column) {
                 Object formattedValue = value;
+                final int modelRow = table.convertRowIndexToModel(row);
+                final int modelColumn = table.convertColumnIndexToModel(column);
 
-                if (column == 1) {
+                if (modelColumn == 1) {
                     // convert values only in the data column
-                    final String key = attributeNames[row];
+                    final String key = attributeNames[modelRow];
                     final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
                     final Class cl = FeatureTools.getClass(attr);
 
@@ -1634,9 +1644,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         column);
 
                 if (feature.isEditable()) {
-                    if (row < attributeNames.length) {
+                    if (modelRow < attributeNames.length) {
                         if (tableRuleSet != null) {
-                            if (!tableRuleSet.isColumnEditable(attributeNames[row])) {
+                            if (!tableRuleSet.isColumnEditable(attributeNames[modelRow])) {
                                 final JLabel lab = new JLabel(((JLabel)c).getText(),
                                         ((JLabel)c).getIcon(),
                                         ((JLabel)c).getHorizontalAlignment());
@@ -1650,6 +1660,48 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 }
 
                 return c;
+            }
+        }
+
+        /**
+         * This highlighter considers the editable attribute of the displayed features.
+         *
+         * @version  $Revision$, $Date$
+         */
+        private class CustomColorHighlighter extends org.jdesktop.swingx.decorator.AbstractHighlighter {
+
+            //~ Instance fields ------------------------------------------------
+
+            private final JTable table;
+
+            //~ Constructors ---------------------------------------------------
+
+            /**
+             * Creates a new CustomColorHighlighter object.
+             *
+             * @param  table  DOCUMENT ME!
+             */
+            public CustomColorHighlighter(final JTable table) {
+                this.table = table;
+            }
+
+            //~ Methods --------------------------------------------------------
+
+            @Override
+            protected Component doHighlight(final Component cmpnt, final ComponentAdapter ca) {
+                final int row = table.convertRowIndexToModel(ca.row);
+
+                if (feature.isEditable()) {
+                    if (row < attributeNames.length) {
+                        if (tableRuleSet != null) {
+                            if (!tableRuleSet.isColumnEditable(attributeNames[row])) {
+                                cmpnt.setForeground(Color.LIGHT_GRAY);
+                            }
+                        }
+                    }
+                }
+
+                return cmpnt;
             }
         }
     }
