@@ -399,7 +399,9 @@ public class DefaultLayerProperties implements LayerProperties {
             // nothing to do
         }
 
-        return new DefaultAttributeTableRuleSet();
+        attributeTableRuleSet = new DefaultAttributeTableRuleSet();
+
+        return attributeTableRuleSet;
     }
 
     /**

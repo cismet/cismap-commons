@@ -757,7 +757,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     JOptionPane.YES_NO_CANCEL_OPTION);
 
             if (ans == JOptionPane.YES_OPTION) {
-                saveChangedRows(true);
+                saveChangedRows(true, true);
             } else if (ans == JOptionPane.NO_OPTION) {
                 model.setEditable(false);
                 AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
@@ -845,6 +845,92 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             }
         }
+    }
+
+    /**
+     * Locks the given feature, if a corresponding locker exists and make the feature editable.
+     *
+     * @param  features  the feature to make editable
+     */
+    public void makeFeaturesEditable(final List<FeatureServiceFeature> features) {
+        boolean cannotLockAll = false;
+
+        for (final FeatureServiceFeature f : new ArrayList<FeatureServiceFeature>(features)) {
+            if ((f instanceof PermissionProvider) && (f.getId() > 0)) {
+                final PermissionProvider pp = (PermissionProvider)f;
+
+                if (!pp.hasWritePermissions()) {
+                    cannotLockAll = true;
+                    features.remove(f);
+//                    JOptionPane.showMessageDialog(
+//                        this,
+//                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.makeFeatureEditable.noPermissions.text"),
+//                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.makeFeatureEditable.noPermissions.title"),
+//                        JOptionPane.ERROR_MESSAGE);
+//
+//                    return;
+                }
+            }
+        }
+        final List<FeatureServiceFeature> featuresToLock = new ArrayList<FeatureServiceFeature>();
+
+        for (final FeatureServiceFeature feature : features) {
+            if ((feature != null) && !feature.isEditable()) {
+                if (!shownAsLocked.contains(feature)) {
+                    featuresToLock.add(feature);
+                }
+            }
+        }
+
+//        try {
+//            if ((locker != null) && !tableLock) {
+//                lockingObjects.put(feature, locker.lock(features, false));
+//            }
+//            for (FeatureServiceFeature feature : featuresToLock) {
+//                feature.setEditable(true);
+//                if (!lockedFeatures.contains(feature)) {
+//                    lockedFeatures.add(feature);
+//                    ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
+//                }
+//            }
+//        } catch (LockAlreadyExistsException ex) {
+//            shownAsLocked.add(feature);
+//            JOptionPane.showMessageDialog(
+//                AttributeTable.this,
+//                NbBundle.getMessage(
+//                    AttributeTable.class,
+//                    "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
+//                    feature.getId(),
+//                    ex.getLockMessage()),
+//                NbBundle.getMessage(
+//                    AttributeTable.class,
+//                    "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
+//                JOptionPane.ERROR_MESSAGE);
+//            shownAsLocked.add(feature);
+//
+//            final Timer t = new Timer(500, new ActionListener() {
+//
+//                        @Override
+//                        public void actionPerformed(final ActionEvent e) {
+//                            shownAsLocked.clear();
+//                        }
+//                    });
+//            t.setRepeats(false);
+//            t.start();
+//        } catch (Exception ex) {
+//            LOG.error("Error while locking feature.", ex);
+//            JOptionPane.showMessageDialog(
+//                AttributeTable.this,
+//                NbBundle.getMessage(
+//                    AttributeTable.class,
+//                    "AttributeTable.ListSelectionListener.valueChanged().exception.message",
+//                    ex.getMessage()),
+//                NbBundle.getMessage(
+//                    AttributeTable.class,
+//                    "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
+//                JOptionPane.ERROR_MESSAGE);
+//        }
+
     }
 
     /**
@@ -1218,7 +1304,7 @@ public class AttributeTable extends javax.swing.JPanel {
             if ((table.getEditingColumn() != -1) && (table.getEditingRow() != -1)) {
                 table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
             }
-            saveChangedRows(forceSave);
+            saveChangedRows(forceSave, true);
         }
 
         enableDisableButtons();
@@ -2117,6 +2203,26 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
+        final int[] selectedRows = table.getSelectedRows();
+        int option = 0;
+
+        if (selectedRows.length > 0) {
+            option = JOptionPane.showOptionDialog(
+                    AttributeTable.this,
+                    "Alle Features drucken oder nur die ausgewählten?",
+                    "Drucken",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[] { "alle", "ausgewählte" },
+                    "alle");
+        }
+
+        if (option == -1) {
+            return;
+        }
+        final boolean useSelectedRows = (option != 0);
+
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -2128,7 +2234,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 protected JasperPrint doInBackground() throws Exception {
-                    final JRDataSource ds = new TableDataSource(table);
+                    final JRDataSource ds = (useSelectedRows ? new TableDataSource(table, selectedRows)
+                                                             : new TableDataSource(table));
                     final Map<String, Object> map = new HashMap<String, Object>();
                     map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
                     final DynamicReport report =
@@ -2149,20 +2256,17 @@ public class AttributeTable extends javax.swing.JPanel {
                         final List<JRSaveContributor> contributors = new ArrayList<JRSaveContributor>();
 
                         for (final JRSaveContributor contributor : aViewer.getSaveContributors()) {
-                            if (contributor.getDescription().toLowerCase().contains("single sheet")) {
-                                contributors.add(new ContributorWrapper(contributor, "XLS"));
-                            } else if (!contributor.getDescription().toLowerCase().contains("csv")
-                                        && !contributor.getDescription().toLowerCase().contains("multiple sheets")
-                                        && !contributor.getDescription().toLowerCase().contains("jasperreports")
-                                        && !contributor.getDescription().toLowerCase().contains("embedded")) {
-                                contributors.add(contributor);
+                            if (contributor.getDescription().toLowerCase().contains("pdf")) {
+                                contributors.add(new ContributorWrapper(contributor, "PDF"));
+                            } else if (contributor.getDescription().toLowerCase().contains("docx")) {
+                                contributors.add(new ContributorWrapper(contributor, "DOCX"));
                             }
                         }
 
-                        contributors.add(new ShpSaveContributor());
-                        contributors.add(new DbfSaveContributor());
-                        contributors.add(new CsvSaveContributor());
-                        contributors.add(new TxtSaveContributor());
+//                        contributors.add(new ShpSaveContributor());
+//                        contributors.add(new DbfSaveContributor());
+//                        contributors.add(new CsvSaveContributor());
+//                        contributors.add(new TxtSaveContributor());
 
                         Collections.sort(contributors, new Comparator<JRSaveContributor>() {
 
@@ -2412,8 +2516,6 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
-        final int count = model.getRowCount();
-        final Double[] values = new Double[model.getRowCount()];
         double min = Double.POSITIVE_INFINITY;
         double max = Double.NEGATIVE_INFINITY;
         double sum = 0;
@@ -2425,6 +2527,8 @@ public class AttributeTable extends javax.swing.JPanel {
         if ((consideredFeatures == null) || consideredFeatures.isEmpty()) {
             consideredFeatures = model.getFeatureServiceFeatures();
         }
+        final Double[] values = new Double[consideredFeatures.size()];
+        final int count = consideredFeatures.size();
         final String colName = model.getColumnName(popupColumn);
 
         for (int i = 0; i < consideredFeatures.size(); ++i) {
@@ -2560,6 +2664,26 @@ public class AttributeTable extends javax.swing.JPanel {
             return;
         }
 
+        final int[] selectedRows = table.getSelectedRows();
+        int option = 0;
+
+        if (selectedRows.length > 0) {
+            option = JOptionPane.showOptionDialog(
+                    AttributeTable.this,
+                    "Alle Features drucken oder nur die ausgewählten?",
+                    "Drucken",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[] { "alle", "ausgewählte" },
+                    "alle");
+        }
+
+        if (option == -1) {
+            return;
+        }
+        final boolean useSelectedRows = (option != 0);
+
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -2571,7 +2695,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 protected JasperPrint doInBackground() throws Exception {
-                    final JRDataSource ds = new TableDataSource(table);
+                    final JRDataSource ds = (useSelectedRows ? new TableDataSource(table, selectedRows)
+                                                             : new TableDataSource(table));
                     final Map<String, Object> map = new HashMap<String, Object>();
                     map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
                     final DynamicReport report =
@@ -3132,9 +3257,10 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * Saves all changed rows.
      *
-     * @param  forceSave  true, if the changed data should be saved without confirmation
+     * @param  forceSave             true, if the changed data should be saved without confirmation
+     * @param  changeProcessingMode  DOCUMENT ME!
      */
-    private void saveChangedRows(final boolean forceSave) {
+    public void saveChangedRows(final boolean forceSave, final boolean changeProcessingMode) {
         boolean save = forceSave;
         refreshModifiedFeaturesSet();
 
@@ -3261,7 +3387,9 @@ public class AttributeTable extends javax.swing.JPanel {
                                 wd.setProgress(++count);
                             }
                         }
-                        lockedFeatures.clear();
+                        if (changeProcessingMode) {
+                            lockedFeatures.clear();
+                        }
                         modifiedFeatures.clear();
                         newFeatures.clear();
 
@@ -3269,9 +3397,11 @@ public class AttributeTable extends javax.swing.JPanel {
                             tableRuleSet.afterSave(model);
                         }
 
-                        model.setEditable(false);
-                        AttributeTableFactory.getInstance()
-                                .processingModeChanged(featureService, tbProcessing.isSelected());
+                        if (changeProcessingMode) {
+                            model.setEditable(false);
+                            AttributeTableFactory.getInstance()
+                                    .processingModeChanged(featureService, tbProcessing.isSelected());
+                        }
 
                         EventQueue.invokeLater(new Runnable() {
 
@@ -3285,10 +3415,11 @@ public class AttributeTable extends javax.swing.JPanel {
                         if (CismapBroker.getInstance().getMappingComponent() != null) {
                             CismapBroker.getInstance().getMappingComponent().refresh();
                         }
-                        if (featureService != null) {
-                            loadModel(currentPage);
+                        if (changeProcessingMode) {
+                            if (featureService != null) {
+                                loadModel(currentPage);
+                            }
                         }
-
                         butUndo.setEnabled(isUndoButtonEnabled());
 
                         return null;
@@ -3615,7 +3746,9 @@ public class AttributeTable extends javax.swing.JPanel {
         for (final FeatureServiceFeature f : lockingObjects.keySet()) {
             try {
                 final Object tmp = lockingObjects.get(f);
-                locker.unlock(tmp);
+                if (tmp != null) {
+                    locker.unlock(tmp);
+                }
             } catch (Exception e) {
                 LOG.error("Locking object can't be removed.", e);
                 allLocksRemoved = false;
@@ -3814,7 +3947,8 @@ public class AttributeTable extends javax.swing.JPanel {
                     renderer.setForeground(Color.LIGHT_GRAY);
                 }
 
-                final FeatureServiceFeature f = model.getFeatureServiceFeature(adapter.row);
+                final FeatureServiceFeature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(
+                            adapter.row));
 
                 if (f instanceof PermissionProvider) {
                     if (!((PermissionProvider)f).hasWritePermissions()) {
@@ -4010,6 +4144,7 @@ public class AttributeTable extends javax.swing.JPanel {
         private int index = -1;
         private TableModel model;
         private JTable table;
+        private int[] selectedRows = null;
 
         //~ Constructors -------------------------------------------------------
 
@@ -4023,6 +4158,18 @@ public class AttributeTable extends javax.swing.JPanel {
             this.table = table;
         }
 
+        /**
+         * Creates a new TableDataSource object.
+         *
+         * @param  table         DOCUMENT ME!
+         * @param  selectedRows  DOCUMENT ME!
+         */
+        public TableDataSource(final JTable table, final int[] selectedRows) {
+            this.model = table.getModel();
+            this.table = table;
+            this.selectedRows = selectedRows;
+        }
+
         //~ Methods ------------------------------------------------------------
 
         /**
@@ -4034,15 +4181,27 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         @Override
         public boolean next() throws JRException {
-            final boolean ret = ++index < model.getRowCount();
+            if (selectedRows == null) {
+                final boolean ret = ++index < model.getRowCount();
 
-            if (!ret) {
-                // Set the internal index to the first row, when the return value is false,
-                // so that the data source can used from multiple sub reports.
-                index = -1;
+                if (!ret) {
+                    // Set the internal index to the first row, when the return value is false,
+                    // so that the data source can used from multiple sub reports.
+                    index = -1;
+                }
+
+                return ret;
+            } else {
+                final boolean ret = ++index < selectedRows.length;
+
+                if (!ret) {
+                    // Set the internal index to the first row, when the return value is false,
+                    // so that the data source can used from multiple sub reports.
+                    index = -1;
+                }
+
+                return ret;
             }
-
-            return ret;
         }
 
         /**
@@ -4064,7 +4223,13 @@ public class AttributeTable extends javax.swing.JPanel {
                 LOG.error("Cannot parse column name", e);
             }
 
-            final Object result = model.getValueAt(table.convertRowIndexToModel(index), col);
+            Object result;
+
+            if (selectedRows == null) {
+                result = model.getValueAt(table.convertRowIndexToModel(index), col);
+            } else {
+                result = model.getValueAt(table.convertRowIndexToModel(selectedRows[index]), col);
+            }
 
             if (result != null) {
                 if ((result instanceof Float) || (result instanceof Double)) {
@@ -4380,7 +4545,11 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public boolean equals(final Object obj) {
-            return contributor.equals(obj);
+            if (obj instanceof ContributorWrapper) {
+                return contributor.equals(((ContributorWrapper)obj).contributor);
+            } else {
+                return contributor.equals(obj);
+            }
         }
 
         @Override
