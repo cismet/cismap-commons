@@ -722,7 +722,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             final boolean isPolygon = (entityRingCoordArr[0][0].length > 3)
                                         && entityRingCoordArr[0][0][0].equals(
                                             entityRingCoordArr[0][0][entityRingCoordArr[0][0].length - 1]);
-                            final boolean isLineString = !isPoint && !isPolygon;
+                            final boolean isLineString = !isPoint
+                                        && (!isPolygon || (getFeature().getGeometry() instanceof LineString));
 
                             if (isPoint) {
                                 assignSynchronizedGeometry(createPoint(entityRingCoordArr[0][0][0], geometryFactory));
@@ -1187,9 +1188,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             piSelected.addPropertyChangeListener("fullBounds", annotationListener);
                         }
                     }
-                } else {
-                    primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
                 }
+                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
 
                 addChild(primaryAnnotation);
 
@@ -2268,6 +2268,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             updatePath();
             syncGeometry();
             resetInfoNodePosition();
+            visualize();
+            refreshDesign();
         } catch (NullPointerException npe) {
             LOG.warn("error at moveFeature:", npe);                                 // NOI18N
         }

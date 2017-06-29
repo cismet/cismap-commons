@@ -10,6 +10,7 @@ package de.cismet.cismap.commons;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -93,13 +94,21 @@ public class BoundingBox implements Cloneable, Serializable {
      * @param  geom  DOCUMENT ME!
      */
     public BoundingBox(final Geometry geom) {
-        final Geometry bb = geom.getEnvelope(); // .buffer(0.001d);
+        Geometry bb = geom.getEnvelope(); // .buffer(0.001d);
         if (geom instanceof Point) {
             setX1(((Point)geom).getX());
             setX2(((Point)geom).getX());
             setY1(((Point)geom).getY());
             setY2(((Point)geom).getY());
         } else if (bb instanceof Polygon) {
+            // minx,miny
+            setX1(((Polygon)bb).getExteriorRing().getCoordinateN(0).x);
+            setY1(((Polygon)bb).getExteriorRing().getCoordinateN(0).y);
+            // maxx,maxy
+            setX2(((Polygon)bb).getExteriorRing().getCoordinateN(2).x);
+            setY2(((Polygon)bb).getExteriorRing().getCoordinateN(2).y);
+        } else if (bb instanceof LineString) {
+            bb = bb.buffer(1).getEnvelope();
             // minx,miny
             setX1(((Polygon)bb).getExteriorRing().getCoordinateN(0).x);
             setY1(((Polygon)bb).getExteriorRing().getCoordinateN(0).y);
@@ -322,13 +331,28 @@ public class BoundingBox implements Cloneable, Serializable {
     /**
      * return true if the given boundingBox has the same values.
      *
-     * @param   bb  BoundingBox to be checked
-     *
      * @return  true if the two Boxes are the same
      */
-    boolean equals(final BoundingBox bb) {
-        return ((getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1())
-                        && (getY2() == bb.getY2()));
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
+        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
+        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
+        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object other) {
+        if (other instanceof BoundingBox) {
+            final BoundingBox bb = (BoundingBox)other;
+
+            return ((getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1())
+                            && (getY2() == bb.getY2()));
+        } else {
+            return false;
+        }
     }
 
     /**

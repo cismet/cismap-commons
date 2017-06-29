@@ -76,7 +76,7 @@ public class ExportShapeDownload extends ExportDownload {
                 final Collection<? extends ShapeWriter> writer = Lookup.getDefault().lookupAll(ShapeWriter.class);
 
                 if (writer.size() > 0) {
-                    if (extension.equalsIgnoreCase(".dbf")) {
+                    if (getDefaultExtension().equalsIgnoreCase(".dbf")) {
                         writer.iterator().next().writeDbf(features, aliasAttributeList, fileToSaveTo);
                     } else {
                         writer.iterator().next().writeShape(features, aliasAttributeList, fileToSaveTo);

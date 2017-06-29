@@ -34,7 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
+import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.util.SelectionManager;
 
@@ -254,11 +254,16 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             return;
         }
 
-        final String checkSql = "SELECT \"id\" FROM \"%1s\" WHERE \"id\" = %2s";
+        final String checkSql = "SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = %s";
         final Statement st = featureInfo.getConnection().createStatement();
 
         try {
-            final String sql = String.format(checkSql, featureInfo.getTableName(), getId());
+            final String sql = String.format(
+                    checkSql,
+                    featureInfo.getIdField(),
+                    featureInfo.getTableName(),
+                    featureInfo.getIdField(),
+                    getId());
             final ResultSet rs = st.executeQuery(sql);
             final boolean alreadyExists = ((rs != null) && rs.next());
 
@@ -308,7 +313,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             }
             update.append("\"").append(name).append("\"").append(" = ").append(valueString);
         }
-        update.append(" WHERE \"id\" = ").append(getId());
+        update.append(" WHERE \"" + featureInfo.getIdField() + "\" = ").append(getId());
         st.executeUpdate(update.toString());
 
         super.getProperties().clear();

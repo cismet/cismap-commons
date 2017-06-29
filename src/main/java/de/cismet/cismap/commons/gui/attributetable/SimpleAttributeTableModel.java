@@ -18,11 +18,17 @@ import org.apache.log4j.Logger;
 import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
-import org.deegree.model.spatialschema.MultiGeometry;
 
 import org.jdesktop.swingx.JXTable;
 
+import org.openide.util.Exceptions;
+
+import java.lang.reflect.Constructor;
+
+import java.sql.Timestamp;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -343,6 +349,25 @@ public class SimpleAttributeTableModel implements TableModel {
                 }
             } catch (GeometryException e) {
                 LOG.error("Error while transforming deegree geometry to jts geometry.", e);
+            }
+        } else if ((value != null) && !value.getClass().isAssignableFrom(getColumnClass(columnIndex))) {
+            final Class colClass = getColumnClass(columnIndex);
+
+            final String valAsString = value.toString();
+
+            if (valAsString.getClass().isInstance(colClass)) {
+                return valAsString;
+            } else if (Number.class.isAssignableFrom(colClass)) {
+                try {
+                    final Constructor numberConstructor = colClass.getConstructor(String.class);
+                    return numberConstructor.newInstance(valAsString);
+                } catch (Exception e) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Cannot cast ", e);
+                    }
+                }
+            } else if (colClass.getClass().isAssignableFrom(Date.class) && (value instanceof Timestamp)) {
+                return new Date(((Timestamp)value).getTime());
             }
         }
 

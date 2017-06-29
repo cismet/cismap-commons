@@ -371,15 +371,19 @@ public class HeadlessMapProvider {
      * @param  layer  the layer to add
      */
     public void addLayer(final RetrievalServiceLayer layer) {
-        if (layer instanceof AbstractRetrievalService) {
-            final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
-            // TODO remove this hack
-            if (l instanceof SlidableWMSServiceLayerGroup) {
-                ((SlidableWMSServiceLayerGroup)l).setPrintMode(true);
+        try {
+            if (layer instanceof AbstractRetrievalService) {
+                final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
+                // TODO remove this hack
+                if (l instanceof SlidableWMSServiceLayerGroup) {
+                    ((SlidableWMSServiceLayerGroup)l).setPrintMode(true);
+                }
+                mappingModel.addLayer((RetrievalServiceLayer)l);
+            } else {
+                mappingModel.addLayer(layer);
             }
-            mappingModel.addLayer((RetrievalServiceLayer)l);
-        } else {
-            mappingModel.addLayer(layer);
+        } catch (IllegalArgumentException e) {
+            LOG.error("Cannot add layer.", e);
         }
     }
 
@@ -782,12 +786,17 @@ public class HeadlessMapProvider {
         @Override
         public void repaintError(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
-            LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
 
-            if (e.isInitialisationEvent()) {
-                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                            + "]: retrievalError ignored, initialisation event"); // NOI18N
-                return;
+            if (e != null) {
+                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
+
+                if (e.isInitialisationEvent()) {
+                    LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
+                                + "]: retrievalError ignored, initialisation event"); // NOI18N
+                    return;
+                }
+            } else {
+                LOG.error("repaint error and RetrievalEvent is null", new Exception());
             }
 
             sendNotification(org.openide.util.NbBundle.getMessage(
