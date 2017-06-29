@@ -2804,12 +2804,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 viewer.rescaleStickyNode(pi);
                 viewer.rescaleStickyNode(piSelected);
             }
-        }                                                                                                  // LINESTRING
+        }                                                                                                          // LINESTRING
         else if ((feature.getGeometry() instanceof LineString) || (feature.getGeometry() instanceof MultiLineString)) {
             if (selected) {
                 final CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f, viewer);
                 setStroke(fws);
-                setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")); // NOI18N
+                setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground")); // NOI18N
                 setPaintOnAllFeatures(null);
             } else {
 //                setStroke(new FixedWidthStroke());
