@@ -34,7 +34,10 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -44,6 +47,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
@@ -69,6 +74,7 @@ import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.styling.CustomSLDParser;
 
 import de.cismet.tools.StaticXMLTools;
 
@@ -1395,7 +1401,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
         final long start = System.currentTimeMillis();
         final List<FT> features = getFeatureFactory().createFeatures(this.getQuery(), this.getBoundingBox(), worker);
-        if (features != null) {
+        if ((features != null) && LOG.isInfoEnabled()) {
             LOG.info("FRW[" + worker.getId() + "]: " + features.size() + " features retrieved in "
                         + (System.currentTimeMillis() - start) + " ms");                                        // NOI18N
         } else {
@@ -1488,7 +1494,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = null;
         try {
             if (input != null) {
-                styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+                styles = CustomSLDParser.getCustomStyles(input);
             }
         } catch (Exception ex) {
             LOG.error("Fehler in der SLD", ex);
@@ -1502,8 +1508,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public Pair<Integer, Integer> getLegendSize(final int nr) {
         if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
+            return getLegendSize(getLegendStyle().get(0));
         }
         return null;
     }
@@ -1526,8 +1531,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     @Override
     public List<Pair<Integer, Integer>> getLegendSizes() {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        final List<org.deegree.style.se.unevaluated.Style> styles = getLegendStyle();
         final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
         for (final org.deegree.style.se.unevaluated.Style style : styles) {
             sizes.add(getLegendSize(style));
@@ -1543,11 +1547,146 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
         if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
+            getLegend(getLegendStyle().get(0),
                 width,
                 height,
                 g2d);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<org.deegree.style.se.unevaluated.Style> getLegendStyle() {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+
+        if (styles == null) {
+            try {
+                final InputStream is = getClass().getResourceAsStream(
+                        "/de/cismet/cismap/commons/featureservice/defaultSld.xml");
+                final BufferedReader r = new BufferedReader(new InputStreamReader(is));
+                final StringBuilder sldString = new StringBuilder();
+                String tmp;
+
+                while ((tmp = r.readLine()) != null) {
+                    sldString.append(tmp).append("\n");
+                }
+
+                r.close();
+
+                final Color fillingColor = getLayerProperties().getStyle().getFillColor();
+                final Color lineColor = getLayerProperties().getStyle().getFillColor();
+                String sld = sldString.toString().replace("$name$", aff.layerName);
+                sld = sld.replace("$fillingColor$", color2RGBCode(fillingColor));
+                sld = sld.replace("$lineColor$", color2RGBCode(lineColor));
+                sld = sld.replace("$geomProperty$", getGeoProperty());
+                sld = sld.replace(
+                        "$pointSymbolUrl$",
+                        getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png").toString());
+
+                if (getGeometryType().toLowerCase().contains("point")) {
+                    sld = removeRule(sld, "basicLineStyle");
+                    sld = removeRule(sld, "basicPolyStyle");
+                } else if (getGeometryType().toLowerCase().contains("polygon")) {
+                    sld = removeRule(sld, "basicLineStyle");
+                    sld = removeRule(sld, "pointStyle");
+                } else if (getGeometryType().toLowerCase().contains("linestring")) {
+                    sld = removeRule(sld, "basicPolyStyle");
+                    sld = removeRule(sld, "pointStyle");
+                }
+
+                final Reader sldReader = new StringReader(sld);
+
+                final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> stylesMap = parseSLD(sldReader);
+
+                return stylesMap.get(aff.layerName);
+            } catch (IOException e) {
+                LOG.error("Error while reading default sld file", e);
+            }
+        }
+
+        return styles;
+    }
+
+    /**
+     * Converts the given color to its rgb string.
+     *
+     * @param   c  the color to convert
+     *
+     * @return  a color string in the format #rrggbb
+     */
+    private String color2RGBCode(final Color c) {
+        return "#" + Integer.toHexString(c.getRGB() & 0x00ffffff);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getGeoProperty() {
+        final Map<String, FeatureServiceAttribute> attributes = getFeatureServiceAttributes();
+
+        for (final String key : attributes.keySet()) {
+            final FeatureServiceAttribute attr = attributes.get(key);
+
+            if (attr.isGeometry()) {
+                return key;
+            }
+        }
+
+        return "geom";
+    }
+
+    /**
+     * Removes the rule with the given name from the given sld.
+     *
+     * @param   sld       the sld, the rule should removed from
+     * @param   ruleName  the name of the rule that should be removed
+     *
+     * @return  the sld without the rule with the given name
+     */
+    private String removeRule(final String sld, final String ruleName) {
+        try {
+            final BufferedReader r = new BufferedReader(new StringReader(sld));
+            String tmp;
+            StringBuilder currentRule = null;
+            final StringBuilder newSld = new StringBuilder();
+            String currentRuleName = null;
+            boolean inRule = false;
+
+            while ((tmp = r.readLine()) != null) {
+                if (inRule || tmp.toLowerCase().contains("<sld:rule>")) {
+                    if (tmp.toLowerCase().contains("<sld:rule>")) {
+                        currentRule = new StringBuilder();
+                        inRule = true;
+                    } else if (tmp.contains("<sld:Name>")) {
+                        final Pattern pattern = Pattern.compile("<sld:Name>(.+?)</sld:Name>");
+                        final Matcher matcher = pattern.matcher(tmp);
+                        matcher.find();
+                        currentRuleName = matcher.group(1);
+                    }
+
+                    currentRule.append(tmp).append("\n");
+
+                    if (tmp.toLowerCase().contains("</sld:rule>")) {
+                        if (!currentRuleName.equalsIgnoreCase(ruleName)) {
+                            newSld.append(currentRule);
+                        }
+                        inRule = false;
+                    }
+                } else {
+                    newSld.append(tmp).append("\n");
+                }
+            }
+
+            return newSld.toString();
+        } catch (IOException e) {
+            LOG.error("Error while removing rule from sld:\n" + sld, e);
+            return sld;
         }
     }
 
