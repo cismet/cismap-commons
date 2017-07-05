@@ -729,10 +729,14 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                                 .getDestinationDirectory().getAbsolutePath(),
                                         true,
                                         new String[] { "pdf" },
-                                        "PDF (.pdf)",
+                                        "PDF",
                                         PrintingWidget.this.mappingComponent);
 
                                 if (file != null) {
+                                    if (file.exists()) {
+                                        // Otherwise, a file with an other ending will be created (e.g. file(1).pdf)
+                                        file.delete();
+                                    }
                                     final JasperDownload jd = new JasperDownload(
                                             prints,
                                             file.getParent(),

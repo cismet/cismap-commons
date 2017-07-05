@@ -219,7 +219,7 @@ public class SimpleFeatureServiceSqlStatement {
      */
     public static void main(final String[] args) {
         final SimpleFeatureServiceSqlStatement sqlStatement = new SimpleFeatureServiceSqlStatement(
-                "select <cismap::AllFields> from geom, cs_all_attr_mapping where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)", // NOI18N
+                "select <cismap::AllFields> from geom, cs_attr_object where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)", // NOI18N
                 "<cismap::AllFields>",
                 "<cismap::x1>",
                 "<cismap::y1>",
@@ -232,8 +232,8 @@ public class SimpleFeatureServiceSqlStatement {
         sqlStatement.setX2(3);
         sqlStatement.setY2(4);
 
-        // System.out.println(sqlStatement.getCountFeaturesStatement());
-        // System.out.println(sqlStatement.getFeaturesStatement());
+//         System.out.println(sqlStatement.getCountFeaturesStatement());
+//         System.out.println(sqlStatement.getFeaturesStatement());
 
     }
 

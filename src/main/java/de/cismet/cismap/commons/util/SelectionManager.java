@@ -45,6 +45,7 @@ import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -541,10 +542,33 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         if (editableServices.contains(service)) {
             final List<Feature> features = getSelectedFeatures(service);
             int modifiable = 0;
+            final AttributeTable table = AttributeTableFactory.getInstance().getAttributeTable(service);
+            final List<FeatureServiceFeature> selectedFeatures = table.getSelectedFeatures();
 
             for (final Feature f : features) {
-                if (f.isEditable()) {
-                    ++modifiable;
+                final FeatureServiceFeature featureFromTable = getFeatureFromList(selectedFeatures, f);
+
+                if (featureFromTable != null) {
+                    if (featureFromTable.isEditable()) {
+                        ++modifiable;
+
+                        if (featureFromTable != f) {
+                            final PFeature pf = CismapBroker.getInstance()
+                                        .getMappingComponent()
+                                        .getPFeatureHM()
+                                        .get(featureFromTable);
+
+                            if (pf != null) {
+                                if (!pf.isSelected()) {
+                                    pf.setSelected(true);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (f.isEditable()) {
+                        ++modifiable;
+                    }
                 }
             }
 //            return getSelectedFeaturesCount(service);
@@ -552,6 +576,28 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         } else {
             return null;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   features  DOCUMENT ME!
+     * @param   f         DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private FeatureServiceFeature getFeatureFromList(final List<FeatureServiceFeature> features, final Feature f) {
+        if (f instanceof FeatureServiceFeature) {
+            for (int i = 0; i < features.size(); ++i) {
+                final FeatureServiceFeature featureFromList = features.get(i);
+
+                if (featureFromList.equals(f)) {
+                    return featureFromList;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

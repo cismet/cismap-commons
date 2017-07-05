@@ -26,12 +26,16 @@ import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.util.HashMap;
+
 import javax.swing.JFrame;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CidsLayerFactory;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
@@ -40,6 +44,7 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -59,12 +64,12 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     MappingComponent overviewMap = null;
     MappingComponent masterMap = null;
     ActiveLayerModel model = new ActiveLayerModel();
+    Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true);                                                                                                                                                                                                                              // NOI18N
+    XBoundingBox home = new XBoundingBox(2567799, 5670041, 2594650, 5688258, srs.getCode(), srs.isMetric());
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String url =
         "http://geoportal.wuppertal.de/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:stadtplan2007&STYLES=default"; // NOI18N
-    SimpleWMS backgroundService = new SimpleWMS(new SimpleWmsGetMapUrl(url));
-    Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true);                                                                                                                                                                                                                              // NOI18N
-    XBoundingBox home = new XBoundingBox(2567799, 5670041, 2594650, 5688258, srs.getCode(), srs.isMetric());
+    private HashMap<String, ServiceLayer> layerMap = new HashMap<String, ServiceLayer>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -102,25 +107,30 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         overviewMap.setMappingModel(model);
         overviewMap.resetWtst();
         model.removeAllLayers();
-        model.addLayer((RetrievalServiceLayer)backgroundService);
-        backgroundService.addRetrievalListener(new RetrievalListener() {
 
-                @Override
-                public void retrievalStarted(final RetrievalEvent e) {
-                }
-                @Override
-                public void retrievalProgress(final RetrievalEvent e) {
-                }
-                @Override
-                public void retrievalComplete(final RetrievalEvent e) {
-                }
-                @Override
-                public void retrievalAborted(final RetrievalEvent e) {
-                }
-                @Override
-                public void retrievalError(final RetrievalEvent e) {
-                }
-            });
+        for (final String layerKey : layerMap.keySet()) {
+            final ServiceLayer layer = layerMap.get(layerKey);
+
+            model.addLayer((RetrievalServiceLayer)layer);
+            ((RetrievalServiceLayer)layer).addRetrievalListener(new RetrievalListener() {
+
+                    @Override
+                    public void retrievalStarted(final RetrievalEvent e) {
+                    }
+                    @Override
+                    public void retrievalProgress(final RetrievalEvent e) {
+                    }
+                    @Override
+                    public void retrievalComplete(final RetrievalEvent e) {
+                    }
+                    @Override
+                    public void retrievalAborted(final RetrievalEvent e) {
+                    }
+                    @Override
+                    public void retrievalError(final RetrievalEvent e) {
+                    }
+                });
+        }
     }
 
     /**
@@ -246,13 +256,41 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
             }
 
             try {
-                final SimpleWMS simpleWMS = new SimpleWMS(prefs.getChild("background").getChild("simpleWms")); // NOI18N
-                backgroundService = simpleWMS;
+                final Element e = prefs.getChild("background").getChild("simpleWms");
+
+                if (e != null) {
+                    final SimpleWMS simpleWMS = new SimpleWMS(prefs.getChild("background").getChild("simpleWms")); // NOI18N
+                    layerMap.put("SimpleWms", simpleWMS);
+                } else {
+                    final Element layersElement = prefs.getChild("background");                                    // NOI18N
+                    if (layersElement == null) {
+                        log.error("Kein valides Layerelement gefunden.");                                          // NOI18N
+                        return;
+                    }
+                    final Element[] orderedLayers = CidsLayerFactory.orderLayers(layersElement);
+
+                    for (final Element curLayerElement : orderedLayers) {
+                        final String curKeyString = CidsLayerFactory.getKeyforLayerElement(curLayerElement);
+                        if (curKeyString != null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Adding element: " + curLayerElement + " with key: " + curKeyString);
+                            }
+                            final ServiceLayer layer = CidsLayerFactory.createLayer(
+                                    curLayerElement,
+                                    new HashMap<String, WMSCapabilities>(),
+                                    null);
+                            layerMap.put(curKeyString, layer);
+                        } else {
+                            log.warn("Es war nicht möglich einen Keystring für das Element: " + curLayerElement
+                                        + " zu erzeugen");
+                        }
+                    }
+                }
             } catch (Exception skip) {
             }
             initBackgroundService();
         } catch (Exception e) {
-            log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e);                // NOI18N
+            log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e); // NOI18N
             initBackgroundService();
         }
     }
