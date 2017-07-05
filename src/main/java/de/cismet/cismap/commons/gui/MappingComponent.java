@@ -62,6 +62,7 @@ import javax.swing.Timer;
 
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.features.*;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -1862,6 +1863,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 final Object key = it.next();
                                 final int fsi = ((Integer)key).intValue();
                                 final Object o = fs.get(key);
+
+                                if (o instanceof AbstractFeatureService) {
+                                    final AbstractFeatureService service = (AbstractFeatureService)o;
+                                    XBoundingBox currentBox;
+
+                                    if (service.getBoundingBox() instanceof XBoundingBox) {
+                                        currentBox = (XBoundingBox)service.getBoundingBox();
+                                    } else {
+                                        final Geometry g = service.getBoundingBox()
+                                                    .getGeometry(CrsTransformer.extractSridFromCrs(
+                                                            CismapBroker.getInstance().getSrs().getCode()));
+                                        currentBox = new XBoundingBox(g);
+                                    }
+
+                                    if (!service.isVisibleInBoundingBox(currentBox)) {
+                                        continue;
+                                    }
+                                }
                                 if (o instanceof MapService) {
                                     if (DEBUG) {
                                         if (LOG.isDebugEnabled()) {
