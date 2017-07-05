@@ -439,7 +439,15 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             if (parent instanceof LayerCollection) {
                 ((LayerCollection)parent).remove(layer);
-                fireTreeStructureChanged(this, new Object[] { layer }, null, null);
+                final ActiveLayerEvent ale = new ActiveLayerEvent();
+
+                fireTreeStructureChanged(this, null, null, null);
+
+                if (layer instanceof MapService) {
+                    ale.setLayer(layer);
+                    CismapBroker.getInstance().fireLayerRemoved(ale);
+                    fireMapServiceRemoved((MapService)layer);
+                }
             }
         } else {
             if (layer instanceof RetrievalServiceLayer) {
@@ -474,6 +482,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public void removeLayer(final RetrievalServiceLayer layer) {
         final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
         layers.remove(wmsServiceLayer);
+
+        for (final Object entry : layers) {
+            if (entry instanceof LayerCollection) {
+                removeServiceFromLayerCollection((LayerCollection)entry, layer);
+            }
+        }
+
         final ActiveLayerEvent ale = new ActiveLayerEvent();
         ale.setLayer(wmsServiceLayer);
         CismapBroker.getInstance().fireLayerRemoved(ale);
@@ -483,6 +498,39 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             null,
             null);
         fireMapServiceRemoved((MapService)wmsServiceLayer);
+    }
+
+    /**
+     * Removes the given layer from the given layer collection.
+     *
+     * @param  col    the layer collection, the layer should be removed from
+     * @param  layer  the layer to remove
+     */
+    private void removeServiceFromLayerCollection(final LayerCollection col, final RetrievalServiceLayer layer) {
+        for (final Object o : (ArrayList)col.clone()) {
+            if (o instanceof LayerCollection) {
+                removeServiceFromLayerCollection((LayerCollection)o, layer);
+            } else if (o.equals(layer)) {
+                col.remove(layer);
+            }
+        }
+    }
+
+    /**
+     * Removes the given layer from the given layer collection.
+     *
+     * @param  col            the layer collection, the layer should be removed from
+     * @param  layerToRemove  the layer collection to remove
+     */
+    private void removeLayerCollectionFromLayerCollection(final LayerCollection col,
+            final LayerCollection layerToRemove) {
+        for (final Object o : (ArrayList)col.clone()) {
+            if (o instanceof LayerCollection) {
+                removeLayerCollectionFromLayerCollection((LayerCollection)o, layerToRemove);
+            } else if (o.equals(layerToRemove)) {
+                col.remove(layerToRemove);
+            }
+        }
     }
 
     /**
@@ -505,6 +553,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      */
     public void removeLayerCollection(final LayerCollection layer) {
         layers.remove(layer);
+
+        for (final Object entry : layers) {
+            if (entry instanceof LayerCollection) {
+                removeLayerCollectionFromLayerCollection((LayerCollection)entry, layer);
+            }
+        }
+
         final ActiveLayerEvent ale = new ActiveLayerEvent();
         ale.setLayer(layer);
         CismapBroker.getInstance().fireLayerRemoved(ale);
