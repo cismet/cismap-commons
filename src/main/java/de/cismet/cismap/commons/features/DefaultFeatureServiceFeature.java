@@ -11,19 +11,27 @@
  */
 package de.cismet.cismap.commons.features;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.operation.buffer.BufferParameters;
+import com.vividsolutions.jts.operation.buffer.OffsetCurveBuilder;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PImage;
 import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PBounds;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.xs.XSElementDeclaration;
@@ -34,6 +42,7 @@ import org.deegree.commons.tom.gml.property.Property;
 import org.deegree.commons.tom.gml.property.PropertyType;
 import org.deegree.commons.tom.primitive.PrimitiveValue;
 import org.deegree.commons.utils.Triple;
+import org.deegree.commons.xml.stax.XMLStreamUtils;
 import org.deegree.feature.Feature;
 import org.deegree.feature.property.ExtraProps;
 import org.deegree.feature.types.AppSchema;
@@ -53,6 +62,7 @@ import org.deegree.style.styling.Styling;
 import org.deegree.style.styling.TextStyling;
 import org.deegree.style.styling.components.Fill;
 import org.deegree.style.styling.components.Graphic;
+import org.deegree.style.styling.components.Halo;
 import org.deegree.style.styling.components.Mark;
 import org.deegree.style.styling.components.Stroke;
 
@@ -70,6 +80,7 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.TexturePaint;
 import java.awt.Toolkit;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
@@ -78,6 +89,10 @@ import java.awt.image.RescaleOp;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+
+import java.io.File;
+
+import java.lang.reflect.Constructor;
 
 import java.math.BigDecimal;
 
@@ -112,6 +127,9 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.styling.CustomStyle;
+import de.cismet.cismap.commons.styling.EndPointStyle;
+import de.cismet.cismap.commons.styling.EndPointStyleDescription;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -595,9 +613,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  geom  DOCUMENT ME!
      */
     @Override
-    public void setGeometry(final Geometry geom) {
+    public void setGeometry(Geometry geom) {
+        if ((getLayerProperties() != null) && (getLayerProperties().getAttributeTableRuleSet() != null)) {
+            geom = (Geometry)getLayerProperties().getAttributeTableRuleSet()
+                        .afterEdit(this, "", -1, this.geometry, geom);
+        }
         this.geometry = geom;
-
         setProperty(getGeometryFieldName(), geom);
     }
 
@@ -1076,12 +1097,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             final Stroke stroke,
             final PPath pfeature,
             final MappingComponent map) {
-        /*double scale = 1.0d;
-         * if(PDebug.getProcessingOutput()) { if(PPaintContext.CURRENT_PAINT_CONTEXT != null)     scale =
-         * PPaintContext.CURRENT_PAINT_CONTEXT.getScale(); } else { if(PPickPath.CURRENT_PICK_PATH != null)     scale =
-         * PPickPath.CURRENT_PICK_PATH.getScale();}*/
         final double multiplier = getMultiplierFromDeegreeUOM(uom);
         int linecap = BasicStroke.CAP_ROUND;
+
         if (stroke.linecap == Stroke.LineCap.BUTT) {
             linecap = BasicStroke.CAP_BUTT;
         } else if (stroke.linecap == Stroke.LineCap.ROUND) {
@@ -1089,7 +1107,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         } else if (stroke.linecap == Stroke.LineCap.SQUARE) {
             linecap = BasicStroke.CAP_SQUARE;
         }
+
         int lineJoin = BasicStroke.JOIN_ROUND;
+
         if (stroke.linejoin == Stroke.LineJoin.BEVEL) {
             lineJoin = BasicStroke.JOIN_BEVEL;
         } else if (stroke.linejoin == Stroke.LineJoin.MITRE) {
@@ -1097,14 +1117,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         } else if (stroke.linejoin == Stroke.LineJoin.ROUND) {
             lineJoin = BasicStroke.JOIN_ROUND;
         }
+
         float[] dash_array = null;
+
         if ((stroke.dasharray != null) && (stroke.dasharray.length != 0)) {
             dash_array = new float[stroke.dasharray.length];
             for (int i = 0; i < stroke.dasharray.length; i++) {
                 dash_array[i] = (float)(stroke.dasharray[i] * multiplier);
             }
         }
+
         java.awt.Stroke newStroke;
+
         if (uom == org.deegree.style.styling.components.UOM.Pixel) {
             newStroke = new CustomFixedWidthStroke((float)(stroke.width),
                     linecap,
@@ -1121,6 +1145,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     dash_array,
                     (float)(stroke.dashoffset * multiplier));
         }
+
         pfeature.setStroke(newStroke);
         pfeature.setStrokePaint(getPaintFromDeegree(stroke.fill, stroke.color, uom, pfeature, map));
     }
@@ -1204,7 +1229,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : reverseList) {
             if ((styling.first instanceof PolygonStyling)
                         && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
+                final PolygonStyling polygonStyle = (PolygonStyling)styling.first;
                 PPath path;
+
                 if (polygonNr < 0) {
                     path = pfeature;
                 } else {
@@ -1215,13 +1242,63 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.sldStyledPolygon.add(path);
                         pfeature.addChild(path);
                     }
-                    path.setPathTo(pfeature.getPathReference());
+                    path.setPathTo((GeneralPath)pfeature.getPathReference().clone());
+                }
+
+                if ((polygonStyle.displacementX != 0.0) || (polygonStyle.displacementY != 0.0)) {
+                    if (polygonStyle.uom == org.deegree.style.styling.components.UOM.Pixel) {
+                        final MappingComponent mc = pfeature.getViewer();
+                        final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+                        final Geometry newGeom = (Geometry)geom.clone();
+                        newGeom.apply(new CoordinateFilter() {
+
+                                @Override
+                                public void filter(final Coordinate coord) {
+                                    coord.x = coord.x + (polygonStyle.displacementX * metrePerPixel);
+                                    coord.y = coord.y + (polygonStyle.displacementY * metrePerPixel);
+                                }
+                            });
+                        newGeom.geometryChanged();
+                        setPath(path, newGeom, wtst);
+                    } else {
+                        final double multiplier = getMultiplierFromDeegreeUOM(polygonStyle.uom);
+                        final Geometry newGeom = (Geometry)geom.clone();
+                        newGeom.apply(new CoordinateFilter() {
+
+                                @Override
+                                public void filter(final Coordinate coord) {
+                                    coord.x = coord.x + (polygonStyle.displacementX * multiplier);
+                                    coord.y = coord.y + (polygonStyle.displacementY * multiplier);
+                                }
+                            });
+                        newGeom.geometryChanged();
+                        setPath(path, newGeom, wtst);
+                    }
+                }
+
+                if (polygonStyle.perpendicularOffset != 0.0) {
+                    if (polygonStyle.uom == org.deegree.style.styling.components.UOM.Pixel) {
+                        final MappingComponent mc = pfeature.getViewer();
+                        final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+                        final Geometry newGeom = createOffsetCurve(
+                                geom,
+                                polygonStyle.perpendicularOffset
+                                        * metrePerPixel);
+                        setPath(path, newGeom, wtst);
+                    } else {
+                        final double multiplier = getMultiplierFromDeegreeUOM(polygonStyle.uom);
+                        final Geometry newGeom = createOffsetCurve(geom, polygonStyle.perpendicularOffset
+                                        * multiplier);
+                        setPath(path, newGeom, wtst);
+                    }
                 }
                 applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
                 polygonNr++;
             } else if ((styling.first instanceof LineStyling)
                         && ((geom instanceof LineString) || (geom instanceof MultiLineString))) {
+                final LineStyling lineStyle = (LineStyling)styling.first;
                 PPath path;
+
                 if (polygonNr < 0) {
                     path = pfeature;
                 } else {
@@ -1232,10 +1309,46 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.sldStyledPolygon.add(path);
                         pfeature.addChild(path);
                     }
-                    path.setPathTo(pfeature.getPathReference());
+                    path.setPathTo((GeneralPath)pfeature.getPathReference().clone());
                 }
+                Geometry offsetGeom = geom;
+
+                if (lineStyle.perpendicularOffset != 0.0) {
+                    if (lineStyle.uom == org.deegree.style.styling.components.UOM.Pixel) {
+                        final MappingComponent mc = pfeature.getViewer();
+                        final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset
+                                        * metrePerPixel);
+                        setPath(path, offsetGeom, wtst);
+                    } else {
+                        final double multiplier = getMultiplierFromDeegreeUOM(lineStyle.uom);
+                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset
+                                        * multiplier);
+                        setPath(path, offsetGeom, wtst);
+                    }
+                }
+
+                final List<EndPointStyle> epStyles = getEndPointStyles();
+
                 applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
                 polygonNr++;
+
+                if (!epStyles.isEmpty()) {
+                    for (final EndPointStyle tmpStyle : epStyles) {
+                        final MappingComponent mc = pfeature.getViewer();
+                        final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+
+                        path = new PPath();
+                        final GeneralPath newPath = tmpStyle.arrowhead(
+                                transformCoordinateArr(offsetGeom.getCoordinates(), wtst),
+                                metrePerPixel);
+                        pfeature.sldStyledPolygon.add(path);
+                        pfeature.addChild(path);
+                        path.setPathTo(newPath);
+                        applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
+                        polygonNr++;
+                    }
+                }
             } else if ((styling.first instanceof TextStyling) && (styling.third != null)
                         && !styling.third.equals("null")) {
                 PFeature.PTextWithDisplacement text;
@@ -1349,6 +1462,252 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<EndPointStyle> getEndPointStyles() {
+        final List<EndPointStyle> epStyles = new ArrayList<EndPointStyle>();
+
+        for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+            if (tempStyle instanceof CustomStyle) {
+                final CustomStyle cs = (CustomStyle)tempStyle;
+                if (!cs.getEndPointStyles().isEmpty()) {
+                    for (final EndPointStyleDescription epStyle : cs.getEndPointStyles()) {
+                        try {
+                            final Class c = Class.forName(epStyle.getClassName());
+                            final Constructor constructor = c.getConstructor();
+                            final Object o = constructor.newInstance();
+
+                            if (o instanceof EndPointStyle) {
+                                epStyles.add((EndPointStyle)o);
+                            }
+                        } catch (Exception ex) {
+                            logger.error("Cannot find end point style class", ex);
+                        }
+                    }
+                }
+            }
+        }
+
+        return epStyles;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom    DOCUMENT ME!
+     * @param   offset  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Geometry createOffsetCurve(final Geometry geom, final double offset) {
+        final BufferParameters bufParams = new BufferParameters();
+        bufParams.setSingleSided(true);
+        final OffsetCurveBuilder curveBuilder = new OffsetCurveBuilder(geom.getPrecisionModel(),
+                bufParams);
+        final GeometryFactory factory = geom.getFactory();
+
+        if (geom.getNumGeometries() > 1) {
+            final List<Geometry> geomList = new ArrayList<Geometry>();
+
+            for (int i = 0; i < geom.getNumGeometries(); ++i) {
+                final Coordinate[] newCoords = curveBuilder.getOffsetCurve(geom.getGeometryN(i).getCoordinates(),
+                        offset);
+                final Geometry newGeom = factory.createLineString(newCoords);
+
+                geomList.add(newGeom);
+            }
+
+            return factory.buildGeometry(geomList);
+        } else {
+            final Coordinate[] newCoords = curveBuilder.getOffsetCurve(geom.getCoordinates(), offset);
+            return factory.createLineString(newCoords);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  path  DOCUMENT ME!
+     * @param  geom  DOCUMENT ME!
+     * @param  wtst  DOCUMENT ME!
+     */
+    private void setPath(final PPath path, final Geometry geom, final WorldToScreenTransform wtst) {
+        final Coordinate[][][] entityRingCoordArr = getCoordinateArray(geom);
+
+        final float[][][] entityRingXArr = new float[entityRingCoordArr.length][][];
+        final float[][][] entityRingYArr = new float[entityRingCoordArr.length][][];
+
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            entityRingXArr[entityIndex] = new float[entityRingCoordArr[entityIndex].length][];
+            entityRingYArr[entityIndex] = new float[entityRingCoordArr[entityIndex].length][];
+
+            for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                final Coordinate[] transformedCoordArr = transformCoordinateArr(
+                        entityRingCoordArr[entityIndex][ringIndex],
+                        wtst);
+                final int length = transformedCoordArr.length;
+                entityRingXArr[entityIndex][ringIndex] = new float[length];
+                entityRingYArr[entityIndex][ringIndex] = new float[length];
+
+                for (int coordIndex = 0; coordIndex < length; coordIndex++) {
+                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].x;
+                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].y;
+                }
+            }
+        }
+
+        path.getPathReference().reset();
+
+        if (geom instanceof Point) {
+            path.setPathToPolyline(
+                new float[] { entityRingXArr[0][0][0], entityRingXArr[0][0][0] },
+                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] });
+        } else if ((geom instanceof LineString) || (geom instanceof MultiPoint)) {
+            path.setPathToPolyline(entityRingXArr[0][0], entityRingYArr[0][0]);
+        } else if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
+            path.getPathReference().setWindingRule(GeneralPath.WIND_EVEN_ODD);
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                    addLinearRing(path, coordArr, wtst);
+                }
+            }
+            path.updateBoundsFromPath();
+            path.invalidatePaint();
+        } else if (geom instanceof MultiLineString) {
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                    addLinearRing(path, coordArr, wtst);
+                }
+            }
+            path.updateBoundsFromPath();
+            path.invalidatePaint();
+        }
+    }
+
+    /**
+     * F\u00FCgt dem PFeature ein weiteres Coordinate-Array hinzu. Dadurch entstehen Multipolygone und Polygone mit
+     * L\u00F6chern, je nachdem, ob der neue LinearRing ausserhalb oder innerhalb des PFeatures liegt.
+     *
+     * @param  path           DOCUMENT ME!
+     * @param  coordinateArr  die Koordinaten des hinzuzuf\u00FCgenden Rings als Coordinate-Array
+     * @param  wtst           DOCUMENT ME!
+     */
+    private void addLinearRing(final PPath path, final Coordinate[] coordinateArr, final WorldToScreenTransform wtst) {
+        final Coordinate[] points = transformCoordinateArr(coordinateArr, wtst);
+        final GeneralPath gp = new GeneralPath();
+        gp.reset();
+
+        if (points.length > 0) {
+            gp.moveTo((float)points[0].x, (float)points[0].y);
+            for (int i = 1; i < points.length; i++) {
+                gp.lineTo((float)points[i].x, (float)points[i].y);
+            }
+        }
+
+        path.getPathReference().append(gp, false);
+    }
+
+    /**
+     * Erzeugt PCanvas-Koordinaten-Punktarrays aus Realworldkoordinaten.
+     *
+     * @param   coordinateArr  Array mit Realworld-Koordinaten
+     * @param   wtst           DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Coordinate[] transformCoordinateArr(final Coordinate[] coordinateArr, final WorldToScreenTransform wtst) {
+        final Coordinate[] points = new Coordinate[coordinateArr.length];
+
+        for (int i = 0; i < coordinateArr.length; ++i) {
+            points[i] = new Coordinate();
+            if (wtst == null) {
+                points[i].x = (float)(coordinateArr[i].x);
+                points[i].y = (float)(coordinateArr[i].y);
+            } else {
+                points[i].x = (float)(wtst.getDestX(coordinateArr[i].x));
+                points[i].y = (float)(wtst.getDestY(coordinateArr[i].y));
+            }
+        }
+
+        return points;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Coordinate[][][] getCoordinateArray(final Geometry geom) {
+        Coordinate[][][] otherCoords = null;
+
+        if (geom instanceof Point) {
+            final Point point = (Point)geom;
+            otherCoords = new Coordinate[][][] {
+                    {
+                        { point.getCoordinate() }
+                    }
+                };
+        } else if (geom instanceof LineString) {
+            final LineString lineString = (LineString)geom;
+            otherCoords = new Coordinate[][][] {
+                    { lineString.getCoordinates() }
+                };
+        } else if (geom instanceof Polygon) {
+            final Polygon polygon = (Polygon)geom;
+            final int numOfHoles = polygon.getNumInteriorRing();
+            otherCoords = new Coordinate[1][1 + numOfHoles][];
+            otherCoords[0][0] = polygon.getExteriorRing().getCoordinates();
+            for (int ringIndex = 1; ringIndex < otherCoords[0].length; ++ringIndex) {
+                otherCoords[0][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
+            }
+        } else if (geom instanceof LinearRing) {
+            // doPolygon((Polygon)geom);
+        } else if (geom instanceof MultiPoint) {
+            otherCoords = new Coordinate[][][] {
+                    { ((MultiPoint)geom).getCoordinates() }
+                };
+        } else if (geom instanceof MultiLineString) {
+            final MultiLineString multiLineString = (MultiLineString)geom;
+            final int numOfGeoms = multiLineString.getNumGeometries();
+            otherCoords = new Coordinate[numOfGeoms][][];
+            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
+                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
+                            .getCoordinates();
+                otherCoords[entityIndex] = new Coordinate[][] { coordSubArr };
+            }
+        } else if (geom instanceof MultiPolygon) {
+            final MultiPolygon multiPolygon = (MultiPolygon)geom;
+            final int numOfEntities = multiPolygon.getNumGeometries();
+            otherCoords = new Coordinate[numOfEntities][][];
+            for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
+                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
+                final int numOfHoles = polygon.getNumInteriorRing();
+                otherCoords[entityIndex] = new Coordinate[1 + numOfHoles][];
+                otherCoords[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
+                for (int ringIndex = 1; ringIndex < otherCoords[entityIndex].length; ++ringIndex) {
+                    otherCoords[entityIndex][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
+                }
+            }
+        } else if (geom instanceof GeometryCollection) {
+            final GeometryCollection gc = (GeometryCollection)geom;
+            final int numOfGeoms = gc.getNumGeometries();
+            otherCoords = new Coordinate[numOfGeoms][][];
+            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
+                final Coordinate[][][] coordSubArr = getCoordinateArray(gc.getGeometryN(entityIndex));
+                otherCoords[entityIndex] = coordSubArr[0];
+            }
+        }
+
+        return otherCoords;
+    }
+
+    /**
      * does not have the limitations from the rescaleStickyNode(PSticky) method of the MappingsComponent.
      *
      * @param  pfeature  DOCUMENT ME!
@@ -1398,7 +1757,40 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         }
         ptext.setFont(font);
         ptext.setRotation(Math.toRadians(textStyling.rotation));
-        // ptext.setVisible(true);
+
+        if (textStyling.halo != null) {
+            final Halo halo = textStyling.halo;
+
+            if ((halo.fill != null) && (halo.fill.color != null)) {
+                ptext.setPaint(halo.fill.color);
+            }
+
+            if (halo.radius != 0.0) {
+                final PBounds bound = ptext.getBounds();
+                ptext.setBounds(bound.x, bound.y, bound.width + halo.radius, bound.height + halo.radius);
+            }
+        }
+
+        if (textStyling.uom == org.deegree.style.styling.components.UOM.Pixel) {
+//            final MappingComponent mc = pfeature.getViewer();
+//            final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+            ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
+                textStyling.displacementX,
+                textStyling.displacementY,
+                textStyling.anchorPointX,
+                textStyling.anchorPointY,
+                wtst);
+        } else {
+            final double multiplier = getMultiplierFromDeegreeUOM(textStyling.uom);
+            ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
+                textStyling.displacementX
+                        * multiplier,
+                textStyling.displacementY
+                        * multiplier,
+                textStyling.anchorPointX,
+                textStyling.anchorPointY,
+                wtst);
+        }
     }
 
     /**
