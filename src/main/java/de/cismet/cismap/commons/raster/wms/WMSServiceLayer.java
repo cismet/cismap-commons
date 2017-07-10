@@ -963,8 +963,10 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     // ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
                     if (op.getGet() != null) {
                         prefix = op.getGet().toString();
+                        prefix = addUserAndPasswordToUrlIfRequired(prefix);
                     } else if (op.getPost() != null) {
                         prefix = op.getPost().toString();
+                        prefix = addUserAndPasswordToUrlIfRequired(prefix);
                     } else {
                         return null;
                     }
@@ -975,6 +977,25 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             LOG.warn("Throwable in getMapPrefix", npe); // NOI18N
             return null;
         }
+    }
+
+    /**
+     * adds the username/password combination to the url, if the capabilities url contains one.
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  the given url with the username/password combination
+     */
+    private String addUserAndPasswordToUrlIfRequired(final String url) {
+        if (capabilitiesUrl.contains("@") && capabilitiesUrl.contains("://")
+                    && (capabilitiesUrl.indexOf("@") > capabilitiesUrl.indexOf("://"))) {
+            final String userPwd = capabilitiesUrl.substring(capabilitiesUrl.indexOf("://") + 3,
+                    capabilitiesUrl.indexOf("@"));
+
+            return url.substring(0, url.indexOf("://") + 3) + userPwd + "@" + url.substring(url.indexOf("://") + 3);
+        }
+
+        return url;
     }
 
     /**
@@ -989,6 +1010,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
             if (op != null) {
                 prefix = op.getGet().toString();
+                prefix = addUserAndPasswordToUrlIfRequired(prefix);
             }
             return prefix;
         } catch (NullPointerException npe) {
