@@ -57,6 +57,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private boolean chooseFileName = false;
     private boolean oldOverlappingCheck = true;
     private Color featureFillingColor;
+    private boolean cancelPrintingAfterClose = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboAction;
@@ -100,6 +101,24 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the cancelPrintingAfterClose
+     */
+    public boolean isCancelPrintingAfterClose() {
+        return cancelPrintingAfterClose;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cancelPrintingAfterClose  the cancelPrintingAfterClose to set
+     */
+    public void setCancelPrintingAfterClose(final boolean cancelPrintingAfterClose) {
+        this.cancelPrintingAfterClose = cancelPrintingAfterClose;
+    }
 
     /**
      * DOCUMENT ME!

@@ -47,4 +47,11 @@ public class CreaterGeometryListener extends CreateNewGeometryListener {
         mappingComponent.getTmpFeatureLayer().removeAllChildren();
         geometryFinishedListener.geometryFinished(newFeature.getGeometry());
     }
+
+    /**
+     * stops the current geometry creation process.
+     */
+    public void stopEditing() {
+        reset();
+    }
 }

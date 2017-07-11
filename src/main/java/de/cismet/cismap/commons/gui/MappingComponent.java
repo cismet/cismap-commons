@@ -974,8 +974,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  chooseFile  DOCUMENT ME!
      */
     public void showPrintingSettingsDialog(final boolean chooseFile) {
+        showPrintingSettingsDialog(chooseFile, false);
+    }
+
+    /**
+     * Shows the printingsetting-dialog that resets the interactionmode after printing.
+     *
+     * @param  chooseFile                DOCUMENT ME!
+     * @param  cancelPrintingAfterClose  DOCUMENT ME!
+     */
+    public void showPrintingSettingsDialog(final boolean chooseFile, final boolean cancelPrintingAfterClose) {
         printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
         printingSettingsDialog.setChooseFileName(chooseFile);
+        printingSettingsDialog.setCancelPrintingAfterClose(cancelPrintingAfterClose);
         StaticSwingTools.showDialog(printingSettingsDialog);
     }
 
@@ -2835,6 +2846,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  listener  new PBasicInputEventHandler
      */
     public void addInputListener(final String mode, final PBasicInputEventHandler listener) {
+        final PBasicInputEventHandler oldHandler = inputEventListener.get(mode);
+
+        if (oldHandler != null) {
+            // This handler will be overwritten within the map and should not be used anymore
+            removeInputEventListener(oldHandler);
+        }
+
         inputEventListener.put(mode, listener);
     }
 

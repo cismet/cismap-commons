@@ -13,7 +13,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>5.2.7</version>
+    <version>5.2.8</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-        <tag>v5.2.7</tag>
+        <tag>v5.2.8</tag>
     </scm>
 
     <ciManagement>
@@ -65,17 +65,17 @@
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
-            
+                    
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>5.0.1</version>
+                <version>5.0.4</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>5.0.1</version>
+                <version>5.0.4</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -292,7 +292,21 @@
             <groupId>org.orbisgis</groupId>
             <artifactId>spatial-utilities</artifactId>
             <version>1.2.3</version>
-        </dependency>     
+        </dependency>
+        <!-- BEGIN: runtime dependencies -->     
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2spatial-ext</artifactId>
+            <version>1.2.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.orbisgis</groupId>
+            <artifactId>h2spatial-api</artifactId>
+            <version>1.2.3</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- END runtime dependencies -->     
         <dependency>
             <groupId>batik</groupId>
             <artifactId>batik-awt-util</artifactId>
