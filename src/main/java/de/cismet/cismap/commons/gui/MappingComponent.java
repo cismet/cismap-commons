@@ -2846,13 +2846,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  listener  new PBasicInputEventHandler
      */
     public void addInputListener(final String mode, final PBasicInputEventHandler listener) {
-        PBasicInputEventHandler oldHandler = inputEventListener.get(mode);
-        
+        final PBasicInputEventHandler oldHandler = inputEventListener.get(mode);
+
         if (oldHandler != null) {
             // This handler will be overwritten within the map and should not be used anymore
             removeInputEventListener(oldHandler);
         }
-        
+
         inputEventListener.put(mode, listener);
     }
 
