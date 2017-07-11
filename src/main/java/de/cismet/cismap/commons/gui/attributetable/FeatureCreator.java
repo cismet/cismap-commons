@@ -49,4 +49,9 @@ public interface FeatureCreator {
      * @return  The name of the geometry, that will be created by this FeatureCreator
      */
     String getTypeName();
+
+    /**
+     * the current creation should be cancelled.
+     */
+    void cancel();
 }

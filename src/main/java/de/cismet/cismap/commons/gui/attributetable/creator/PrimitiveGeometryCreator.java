@@ -55,6 +55,7 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     private final String mode;
     private boolean multi;
+    private List<CreaterGeometryListener> geometryListener = new ArrayList<CreaterGeometryListener>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -111,7 +112,7 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
                 public void run() {
                     final String oldInteractionMode = mc.getInteractionMode();
 
-                    final CreateNewGeometryListener listener = new CreaterGeometryListener(
+                    final CreaterGeometryListener listener = new CreaterGeometryListener(
                             mc,
                             new GeometryFinishedListener() {
 
@@ -163,6 +164,8 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
                                     }
                                 }
                             });
+
+                    geometryListener.add(listener);
                     mc.addInputListener(SIMPLE_GEOMETRY_LISTENER_KEY, listener);
                     mc.putCursor(SIMPLE_GEOMETRY_LISTENER_KEY, new Cursor(Cursor.CROSSHAIR_CURSOR));
                     listener.setMode(mode);
@@ -217,5 +220,12 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
      */
     public void setMulti(final boolean multi) {
         this.multi = multi;
+    }
+
+    @Override
+    public void cancel() {
+        for (final CreaterGeometryListener listener : geometryListener) {
+            listener.stopEditing();
+        }
     }
 }
