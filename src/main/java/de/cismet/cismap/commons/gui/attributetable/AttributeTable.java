@@ -3945,6 +3945,8 @@ public class AttributeTable extends javax.swing.JPanel {
                             && !tableRuleSet.isColumnEditable(
                                 model.getColumnAttributeName(table.convertColumnIndexToModel(adapter.column)))) {
                     renderer.setForeground(Color.LIGHT_GRAY);
+                } else {
+                    renderer.setForeground(Color.BLACK);
                 }
 
                 final FeatureServiceFeature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(
@@ -3955,6 +3957,8 @@ public class AttributeTable extends javax.swing.JPanel {
                         renderer.setForeground(Color.LIGHT_GRAY);
                     }
                 }
+            } else {
+                renderer.setForeground(Color.BLACK);
             }
         }
 
