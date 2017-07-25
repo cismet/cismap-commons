@@ -558,9 +558,6 @@ public class CrsTransformer {
         if (crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias())
                     || crs.endsWith(":0") || crs.endsWith(":-1") // NOI18N
                     || crs.equals(CismapBroker.getInstance().getDefaultCrs())) {
-            if (crs.endsWith(":0")) {
-                LOG.warn("srid of a geometry is not set. This can lead to an error.", new Throwable());
-            }
             return true;
         } else {
             return false;

@@ -567,7 +567,102 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
-        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, 1d);
+        final double halo = ((CismapBroker.getInstance().getSrs().isMetric()) ? 1d : 0.0001);
+        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, halo);
+    }
+
+    /**
+     * Determines the nearest geometry coordinate.
+     *
+     * @param   mc                   DOCUMENT ME!
+     * @param   canvasPosition       DOCUMENT ME!
+     * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
+     *                               can be the currently modifying feature.
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @see     getNearestPointInArea(final MappingComponent mc, final Point2D canvasPosition, final Point2D vetoPoint)
+     */
+    public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
+            final Point2D canvasPosition,
+            final boolean considerVetoObjects) {
+        final Point2D vetoPoint = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoPoint() : null);
+
+        return getNearestCoordinateInArea(mc, canvasPosition, vetoPoint);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mc              DOCUMENT ME!
+     * @param   canvasPosition  DOCUMENT ME!
+     * @param   vetoPoint       DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
+            final Point2D canvasPosition,
+            final Point2D vetoPoint) {
+        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
+                (int)canvasPosition.getY()
+                        - (mc.getSnappingRectSize() / 2),
+                mc.getSnappingRectSize(),
+                mc.getSnappingRectSize());
+        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
+        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
+        return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPoint);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mc          DOCUMENT ME!
+     * @param   bounds      DOCUMENT ME!
+     * @param   myPosition  DOCUMENT ME!
+     * @param   vetoPoint   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
+            final PBounds bounds,
+            final Point2D myPosition,
+            final Point2D vetoPoint) {
+        final PFeature[] features = getPFeaturesInArea(mc, bounds);
+        final List<Coordinate> coordinates = new ArrayList<Coordinate>();
+        final Collection<Point2D> p = new ArrayList<Point2D>();
+        if (features == null) {
+            return null;
+        }
+        for (final PFeature pfeature : features) {
+            for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                    final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                    final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                    for (int position = 0; position < xp.length; position++) {
+                        if (bounds.contains(xp[position], yp[position])) {
+                            p.add(new Point2D.Float(xp[position], yp[position]));
+                            coordinates.add(pfeature.getCoordinate(entityIndex, ringIndex, position));
+                        }
+                    }
+                }
+            }
+        }
+        final Point2D[] points = p.toArray(new Point2D[0]);
+
+        double distance = -1;
+        Coordinate nearestCoordinate = null;
+        for (int i = 0; i < points.length; ++i) {
+            if ((vetoPoint != null) && points[i].equals(vetoPoint)) {
+                return null;
+            }
+            final double distanceCheck = myPosition.distanceSq(points[i]);
+            if ((distance < 0) || (distanceCheck < distance)) {
+                nearestCoordinate = coordinates.get(i);
+                distance = distanceCheck;
+            }
+        }
+
+        return nearestCoordinate;
     }
 
     /**
@@ -663,7 +758,7 @@ public class PFeatureTools {
      */
     public static List<PNode> getAllValidObjectsUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses) {
-        return getValidObjectsUnderPointer(pInputEvent, validClasses, 0.001d, false);
+        return getValidObjectsUnderPointer(pInputEvent, validClasses, 0.003d, false);
     }
 
     /**
