@@ -572,15 +572,16 @@ public class PFeatureTools {
     }
 
     /**
-     * Determines the nearest geometry coordinate
+     * Determines the nearest geometry coordinate.
      *
      * @param   mc                   DOCUMENT ME!
      * @param   canvasPosition       DOCUMENT ME!
      * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
      *                               can be the currently modifying feature.
-     * 
-     * @see getNearestPointInArea(final MappingComponent mc, final Point2D canvasPosition, final Point2D vetoPoint)
+     *
      * @return  DOCUMENT ME!
+     *
+     * @see     getNearestPointInArea(final MappingComponent mc, final Point2D canvasPosition, final Point2D vetoPoint)
      */
     public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final Point2D canvasPosition,
