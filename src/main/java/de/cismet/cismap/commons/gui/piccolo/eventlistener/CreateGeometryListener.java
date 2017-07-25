@@ -27,6 +27,8 @@ import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import javax.swing.event.ChangeEvent;
@@ -70,6 +72,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     protected String mode = POLYGON;
 
     protected ArrayList<Point2D> points;
+    protected Map<Point2D, Coordinate> snappedCoordinates = new HashMap<Point2D, Coordinate>();
 
     private Point2D startPoint;
     private PPath tempFeature;
@@ -216,12 +219,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     point = pInputEvent.getPosition();
                 }
                 points = new ArrayList<Point2D>();
+                snappedCoordinates.clear();
                 points.add(point);
                 readyForFinishing(pInputEvent);
             }
         } else if (isInMode(POINT)) {
             if (pInputEvent.isLeftMouseButton()) {
                 Point2D point = null;
+                snappedCoordinates.clear();
                 if (mappingComponent.isSnappingEnabled()) {
                     final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                     point = PFeatureTools.getNearestPointInArea(
@@ -229,6 +234,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                             pInputEvent.getCanvasPosition(),
                             vertexRequired,
                             true);
+
+                    if ((point != null) && !vertexRequired) {
+                        final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
+                                mappingComponent,
+                                pInputEvent.getCanvasPosition(),
+                                true);
+                        snappedCoordinates.put(point, coord);
+                    }
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();
@@ -260,6 +273,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     initTempFeature();
                     startPoint = point;
                     points = new ArrayList<Point2D>(5);
+                    snappedCoordinates.clear();
                     points.add(startPoint);
                 } else {
                     final Point2D stopPoint = point;
@@ -329,6 +343,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 if (pInputEvent.getClickCount() == 1) {
                     Point2D point = null;
                     undoPoints.clear();
+                    if (!inProgress) {
+                        snappedCoordinates.clear();
+                    }
                     if (mappingComponent.isSnappingEnabled()) {
                         final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                         point = PFeatureTools.getNearestPointInArea(
@@ -336,6 +353,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                                 pInputEvent.getCanvasPosition(),
                                 vertexRequired,
                                 true);
+
+                        if ((point != null) && !vertexRequired) {
+                            final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition(),
+                                    true);
+                            snappedCoordinates.put(point, coord);
+                        }
                     }
                     if (point == null) {
                         point = pInputEvent.getPosition();
@@ -485,8 +510,30 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
             newFeature.setGeometryType(geomType);
             newFeature.getGeometry().setSRID(currentSrid);
-            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+            Geometry geom = newFeature.getGeometry();
+
+            if (finalPoints != null) {
+                boolean coordinatesChanged = false;
+
+                for (int i = 0; i < finalPoints.length; ++i) {
+                    final Coordinate coord = snappedCoordinates.get(finalPoints[i]);
+                    if (coord != null) {
+                        if ((geom.getCoordinates()[i].x != coord.x) || (geom.getCoordinates()[i].y != coord.y)) {
+                            geom.getCoordinates()[i].x = coord.x;
+                            geom.getCoordinates()[i].y = coord.y;
+                            coordinatesChanged = true;
+                        }
+                    }
+
+                    if (coordinatesChanged) {
+                        geom.geometryChanged();
+                    }
+                }
+            }
+
+            geom = CrsTransformer.transformToGivenCrs(geom,
                     mappingComponent.getMappingModel().getSrs().getCode());
+
             newFeature.setGeometry(geom);
 
             if (isInMode(TEXT)) {
@@ -752,6 +799,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
             // 4 Punkte, und der erste Punkt nochmal als letzter Punkt
             points = new ArrayList<Point2D>(5);
+            snappedCoordinates.clear();
             points.add(startPoint);
             points.add(new Point2D.Double(startPoint.getX(), pInputEvent.getPosition().getY()));
             points.add(pInputEvent.getPosition());
@@ -779,6 +827,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     pInputEvent.isShiftDown());
 
             points = new ArrayList<Point2D>(coordArr.length);
+            snappedCoordinates.clear();
             for (int i = 0; i < coordArr.length; i++) {
                 points.add(new Point2D.Double(startX - coordArr[i].x, startY - coordArr[i].y));
             }
