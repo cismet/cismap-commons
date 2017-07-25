@@ -3449,6 +3449,9 @@ public class AttributeTable extends javax.swing.JPanel {
             model.setEditable(false);
             AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
             // reload the layer
+            if (CismapBroker.getInstance().getMappingComponent() != null) {
+                CismapBroker.getInstance().getMappingComponent().refresh();
+            }
             if (featureService != null) {
                 featureService.retrieve(true);
             }
@@ -3874,6 +3877,7 @@ public class AttributeTable extends javax.swing.JPanel {
             feature.setProperty(attrName, newObject);
             modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
             butUndo.setEnabled(isUndoButtonEnabled());
+            table.repaint();
         }
 
         /**

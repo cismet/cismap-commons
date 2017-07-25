@@ -86,6 +86,11 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
+    public String getAdditionalFieldFormula(final String propertyName) {
+        return null;
+    }
+
+    @Override
     public Class getAdditionalFieldClass(final int index) {
         return String.class;
     }

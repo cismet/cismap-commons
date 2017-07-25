@@ -437,7 +437,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                     crdnt.x = newX;
                 }
             });
-
+        g.geometryChanged();
         return g;
     }
 
