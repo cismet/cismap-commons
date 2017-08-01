@@ -378,7 +378,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     popupMenu.addSeparator();
                 }
                 popupMenu.add(item);
-                item.setEnabled(item.isSelectable(mask));
+                item.setEnabled(item.isSelectable(mask) && item.isSelectable(serviceLayerList));
                 item.refreshText(paths);
             }
         }

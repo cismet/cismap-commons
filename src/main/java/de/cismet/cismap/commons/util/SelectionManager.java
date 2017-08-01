@@ -343,8 +343,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         }
 
         for (final Feature f : featureList) {
-            if (f instanceof DefaultFeatureServiceFeature) {
-                final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
+            if (f instanceof FeatureServiceFeature) {
+                FeatureServiceFeature fsf = (FeatureServiceFeature)f;
                 AbstractFeatureService service = DUMMY;
 
                 if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
@@ -358,6 +358,16 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     selectedFeatures.put(service, list);
                 }
 
+                final AttributeTable table = consideredAttributeTables.get(service);
+
+                if (table != null) {
+                    final FeatureServiceFeature modifiableFeature = consideredAttributeTables.get(service)
+                                .getFeatureById((fsf).getId());
+
+                    if (modifiableFeature != null) {
+                        fsf = modifiableFeature;
+                    }
+                }
                 list.add(fsf);
             }
         }

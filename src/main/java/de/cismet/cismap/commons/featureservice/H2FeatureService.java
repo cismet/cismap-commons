@@ -16,11 +16,17 @@ import org.apache.log4j.Logger;
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 import org.openide.util.NbBundle;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
 
 import java.net.URI;
 
@@ -30,6 +36,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +47,8 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
+import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
 
 import static de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory.LR_META_TABLE_NAME;
@@ -59,6 +68,12 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     public static final String H2_FEATURELAYER_TYPE = "H2FeatureServiceLayer"; // NOI18N
     private static final String LOCK_FEATURE = "INSERT INTO \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
                 + "\" (\"id\", \"table\", \"lock_time\") VALUES(%s, '%s', now())";
+    private static final String UPDATE_SLD = "UPDATE \"" + H2FeatureServiceFactory.SLD_TABLE_NAME
+                + "\" set \"sld\" = '%s' where \"table\" = '%s'";
+    private static final String INSERT_SLD = "INSERT INTO \"" + H2FeatureServiceFactory.SLD_TABLE_NAME
+                + "\" (\"table\", \"sld\") VALUES('%s', '%s')";
+    private static final String READ_SLD = "SELECT \"sld\" from \"" + H2FeatureServiceFactory.SLD_TABLE_NAME
+                + "\" where \"table\" = '%s'";
     private static final String CHECK_LOCKED_FEATURE = "SELECT \"lock_time\" FROM \""
                 + H2FeatureServiceFactory.LOCK_TABLE_NAME
                 + "\" where (\"id\" = %s OR \"id\" is null) and \"table\" = '%s'";
@@ -364,6 +379,73 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     @Override
+    public void setSLDInputStream(final String inputStream) {
+        super.setSLDInputStream(inputStream);
+
+        // save the sld in a separate file with the ending sld
+        if ((inputStream != null) && !inputStream.isEmpty()) {
+            saveStyleFile(inputStream);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tableName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getTableNameStemFromTableName(final String tableName) {
+        String tableNameStem = tableName;
+
+        if (tableNameStem.contains("_")) {
+            tableNameStem = tableNameStem.substring(0, tableNameStem.lastIndexOf("_"));
+        }
+
+        return tableNameStem;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  content  DOCUMENT ME!
+     */
+    private void saveStyleFile(final String content) {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+        final String tableNameStem = getTableNameStemFromTableName(tableName);
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
+            st = conn.createStatement();
+
+            final int rowsAffected = st.executeUpdate(String.format(UPDATE_SLD, content, tableNameStem));
+
+            if (rowsAffected == 0) {
+                st.executeUpdate(String.format(INSERT_SLD, tableNameStem, content));
+            }
+        } catch (Exception e) {
+            LOG.error("Error while saving style definition", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+    }
+
+    @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         H2FeatureServiceFactory f;
         if (features != null) {
@@ -393,7 +475,82 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             setTheFactorySpecificLayerProperties((DefaultLayerProperties)getLayerProperties(), f);
         }
 
+        final String sldString = getSldDefinition();
+
+        if ((sldString != null) && !sldString.isEmpty()) {
+            if (sldString.contains(Style.STYLE_ELEMENT)) {
+                final SAXBuilder saxBuilder = new SAXBuilder(false);
+                final StringReader stringReader = new StringReader(sldString);
+                final Document document = saxBuilder.build(stringReader);
+                final BasicStyle style = new BasicStyle(document.getRootElement());
+                if (getLayerProperties() != null) {
+                    getLayerProperties().setStyle(style);
+                }
+            } else {
+                sldDefinition = sldString;
+                final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(
+                        new StringReader(
+                            sldString));
+
+                if ((styles != null) && !styles.isEmpty()) {
+                    f.setSLDStyle(styles);
+                }
+            }
+        }
+
         return f;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getSldDefinition() {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+        final String tableNameStem = getTableNameStemFromTableName(tableName);
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
+            st = conn.createStatement();
+
+            rs = st.executeQuery(String.format(READ_SLD, tableNameStem));
+
+            if (rs.next()) {
+                final String s = rs.getString(1);
+
+                return s;
+            }
+        } catch (Exception e) {
+            LOG.error("Error while loading style definition", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -425,10 +582,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     private void setTheFactorySpecificLayerProperties(final DefaultLayerProperties properties,
             final H2FeatureServiceFactory featureFactory) {
-        final H2FeatureServiceFactory f = (H2FeatureServiceFactory)featureFactory;
-        ((DefaultLayerProperties)properties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                f.getLinRefList(),
-                f.getGeometryType()));
+        ((DefaultLayerProperties)properties).setAttributeTableRuleSet(featureFactory.createH2AttributeTableRuleSet());
+
         properties.setIdExpression(((H2FeatureServiceFactory)featureFactory).getIdField(),
             LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
     }

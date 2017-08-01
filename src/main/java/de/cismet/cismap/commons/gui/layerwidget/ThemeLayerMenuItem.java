@@ -98,6 +98,17 @@ public abstract class ThemeLayerMenuItem extends JMenuItem implements ActionList
     /**
      * DOCUMENT ME!
      *
+     * @param   serviceLayerList  mask DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSelectable(final List<ServiceLayer> serviceLayerList) {
+        return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   mask  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
