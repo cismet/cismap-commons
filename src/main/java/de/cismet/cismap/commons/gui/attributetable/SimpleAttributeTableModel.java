@@ -63,6 +63,7 @@ public class SimpleAttributeTableModel implements TableModel {
     protected List<FeatureServiceFeature> featureList;
     protected List<TableModelListener> listener = new ArrayList<TableModelListener>();
     protected AttributeTableRuleSet tableRuleSet;
+    protected List<FeatureServiceFeature> removedFeatures = new ArrayList<FeatureServiceFeature>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -280,6 +281,25 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   id  row DOCUMENT ME!
+     *
+     * @return  The feature that is represented by the given row
+     */
+    public FeatureServiceFeature getFeatureServiceFeatureById(final int id) {
+        if (id > 0) {
+            for (final FeatureServiceFeature feature : new ArrayList<FeatureServiceFeature>(featureList)) {
+                if (feature.getId() == id) {
+                    return feature;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Removes the given feature from the model.
      *
      * @param  feature  the feature to remove
@@ -423,6 +443,31 @@ public class SimpleAttributeTableModel implements TableModel {
             attributeAlias[col] = name;
             fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    public void addRemovedFeature(final FeatureServiceFeature feature) {
+        removedFeatures.add(feature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<FeatureServiceFeature> getRemovedFeature() {
+        return removedFeatures;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void clearRemovedFeatures() {
+        removedFeatures.clear();
     }
 
     /**
