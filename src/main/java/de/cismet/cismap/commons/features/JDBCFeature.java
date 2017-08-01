@@ -393,6 +393,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         st.executeUpdate(deleteStat);
     }
 
+    @Override
+    public void restore() throws Exception {
+        saveChangesWithoutReload();
+    }
+
     /**
      * DOCUMENT ME!
      */
@@ -546,7 +551,9 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         final Geometry oldGeom = getGeometry();
 
         if (((oldGeom == null) != (geom == null))
-                    || ((oldGeom != null) && (geom != null) && !oldGeom.equalsExact(geom))) {
+                    || (((oldGeom != null) && (geom != null)
+                            && (!oldGeom.getEnvelope().equalsExact(geom.getEnvelope()))) || !oldGeom.equalsExact(
+                            geom))) {
             // the old geometry and the new geometry are different
             featureInfo.clearCache();
             super.addProperty(featureInfo.getGeoField(), geom);

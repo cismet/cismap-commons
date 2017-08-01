@@ -102,6 +102,15 @@ public interface AttributeTableRuleSet {
     Object getAdditionalFieldValue(final String propertyName, final FeatureServiceFeature feature);
 
     /**
+     * Determines the formula of the additional field with the given name.
+     *
+     * @param   propertyName  the name of the additional field
+     *
+     * @return  the java.lang.Object
+     */
+    String getAdditionalFieldFormula(final String propertyName);
+
+    /**
      * DOCUMENT ME!
      *
      * @param   columnName  DOCUMENT ME!

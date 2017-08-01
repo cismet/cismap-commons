@@ -55,4 +55,11 @@ public interface ModifiableFeature extends Feature {
      * @return  true, iff the features was changed since the edit mode was turned on
      */
     boolean isFeatureChanged();
+
+    /**
+     * Restores a previously deleted feature.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    void restore() throws Exception;
 }

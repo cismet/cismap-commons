@@ -190,6 +190,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private Object query;
     private int[] lastRows;
     private final TreeSet<DefaultFeatureServiceFeature> modifiedFeatures = new TreeSet<DefaultFeatureServiceFeature>();
+    private final TreeSet<FeatureServiceFeature> allFeaturesToDelete = new TreeSet<FeatureServiceFeature>();
     private final TreeSet<DefaultFeatureServiceFeature> newFeatures = new TreeSet<DefaultFeatureServiceFeature>();
     private Object selectionEventSource = null;
     private List<ListSelectionListener> selectionListener = new ArrayList<ListSelectionListener>();
@@ -1135,22 +1136,24 @@ public class AttributeTable extends javax.swing.JPanel {
                     if (theTable.getSelectedRowCount() != 1) {
                         return;
                     }
-                    col++;
-
-                    // Move to right column
-                    if (col >= endCol) {
-                        return;
-                    } else {
-                        --col;
-                    }
 
                     // Move cell selection
-                    theTable.getCellEditor(theTable.getEditingRow(), theTable.getEditingColumn()).stopCellEditing();
+                    if ((theTable.getEditingRow() != -1) && (theTable.getEditingColumn() != -1)) {
+                        theTable.getCellEditor(theTable.getEditingRow(), theTable.getEditingColumn()).stopCellEditing();
+                    }
                     boolean editCell = false;
+                    int attemptions = 0;
 
                     do {
-                        editCell = theTable.editCellAt(row, ++col);
-                    } while (!editCell && (col < endCol));
+                        ++attemptions;
+                        ++col;
+
+                        if (col >= endCol) {
+                            col = 0;
+                        }
+
+                        editCell = theTable.editCellAt(row, col);
+                    } while (!editCell && (attemptions < 150));
                     theTable.changeSelection(row, col, false, false);
                 }
             });
@@ -1167,22 +1170,22 @@ public class AttributeTable extends javax.swing.JPanel {
                     if (theTable.getSelectedRowCount() != 1) {
                         return;
                     }
-                    col--;
-
-                    // Move to left column
-                    if (col < 0) {
-                        return;
-                    } else {
-                        ++col;
-                    }
 
                     // Move cell selection
-                    theTable.getCellEditor(theTable.getEditingRow(), theTable.getEditingColumn()).stopCellEditing();
+                    if ((theTable.getEditingRow() != -1) && (theTable.getEditingColumn() != -1)) {
+                        theTable.getCellEditor(theTable.getEditingRow(), theTable.getEditingColumn()).stopCellEditing();
+                    }
                     boolean editCell = false;
+                    int attemptions = 0;
 
                     do {
-                        editCell = theTable.editCellAt(row, --col);
-                    } while (!editCell && (col > 0));
+                        ++attemptions;
+                        --col;
+                        if (col < 0) {
+                            col = endCol - 1;
+                        }
+                        editCell = theTable.editCellAt(row, col);
+                    } while (!editCell && (attemptions < 150));
 
                     theTable.changeSelection(row, col, false, false);
                 }
@@ -2762,8 +2765,20 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 }
             }
-
             newFeatures.clear();
+
+            for (final FeatureServiceFeature f : allFeaturesToDelete) {
+                if (f instanceof ModifiableFeature) {
+                    try {
+                        f.setEditable(false);
+                        ((ModifiableFeature)f).restore();
+                        model.addFeature(f);
+                    } catch (Exception e) {
+                        LOG.error("Cannot restore feature", e);
+                    }
+                }
+            }
+            allFeaturesToDelete.clear();
         }
     } //GEN-LAST:event_butUndoActionPerformed
 
@@ -2792,7 +2807,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void deleteFeatures() {
         final int[] selectedRows = table.getSelectedRows();
-        final List<ModifiableFeature> featuresToDelete = new ArrayList<ModifiableFeature>();
+        final List<FeatureServiceFeature> featuresToDelete = new ArrayList<FeatureServiceFeature>();
 
         final int ans = JOptionPane.showConfirmDialog(
                 AttributeTable.this,
@@ -2846,7 +2861,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                                 dfsf.setEditable(false);
                                             }
                                             dfsf.delete();
-                                            featuresToDelete.add(dfsf);
+                                            featuresToDelete.add(featureToDelete);
                                             featureDeleted = true;
                                             lockingObjects.remove(featureToDelete);
                                         }
@@ -2885,8 +2900,8 @@ public class AttributeTable extends javax.swing.JPanel {
                 protected void done() {
                     try {
                         final Map<Integer, String> errors = get();
-
-                        for (final ModifiableFeature fsf : featuresToDelete) {
+                        allFeaturesToDelete.addAll(featuresToDelete);
+                        for (final FeatureServiceFeature fsf : featuresToDelete) {
                             model.removeFeatureServiceFeature((FeatureServiceFeature)fsf);
                             modifiedFeatures.remove(fsf);
                         }
@@ -2919,9 +2934,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                         }
 
-                        if (tableRuleSet != null) {
-                            tableRuleSet.afterSave(model);
-                        }
+//                        if (tableRuleSet != null) {
+//                            tableRuleSet.afterSave(model);
+//                        }
                     } catch (Exception e) {
                         LOG.error("Error while deleting objects", e);
                     }
@@ -3394,8 +3409,15 @@ public class AttributeTable extends javax.swing.JPanel {
                         newFeatures.clear();
 
                         if (tableRuleSet != null) {
-                            tableRuleSet.afterSave(model);
+                            if ((allFeaturesToDelete != null) && !allFeaturesToDelete.isEmpty()) {
+                                for (final FeatureServiceFeature f : allFeaturesToDelete) {
+                                    model.addRemovedFeature(f);
+                                }
+                                tableRuleSet.afterSave(model);
+                                model.clearRemovedFeatures();
+                            }
                         }
+                        allFeaturesToDelete.clear();
 
                         if (changeProcessingMode) {
                             model.setEditable(false);
@@ -3446,9 +3468,26 @@ public class AttributeTable extends javax.swing.JPanel {
             }
 
             newFeatures.clear();
+
+            for (final FeatureServiceFeature f : allFeaturesToDelete) {
+                if (f instanceof ModifiableFeature) {
+                    try {
+                        f.setEditable(false);
+                        ((ModifiableFeature)f).restore();
+                        model.addFeature(f);
+                    } catch (Exception e) {
+                        LOG.error("Cannot restore feature", e);
+                    }
+                }
+            }
+            allFeaturesToDelete.clear();
+
             model.setEditable(false);
             AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
             // reload the layer
+            if (CismapBroker.getInstance().getMappingComponent() != null) {
+                CismapBroker.getInstance().getMappingComponent().refresh();
+            }
             if (featureService != null) {
                 featureService.retrieve(true);
             }
@@ -3729,6 +3768,17 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      *
+     * @param   id  row DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public FeatureServiceFeature getFeatureById(final int id) {
+        return model.getFeatureServiceFeatureById(id);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   col  DOCUMENT ME!
      *
      * @return  the column name (not the column alias)
@@ -3770,6 +3820,7 @@ public class AttributeTable extends javax.swing.JPanel {
         lockingObjects.clear();
         lockedFeatures.clear();
         modifiedFeatures.clear();
+        allFeaturesToDelete.clear();
         newFeatures.clear();
         butUndo.setEnabled(isUndoButtonEnabled());
     }
@@ -3874,6 +3925,7 @@ public class AttributeTable extends javax.swing.JPanel {
             feature.setProperty(attrName, newObject);
             modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
             butUndo.setEnabled(isUndoButtonEnabled());
+            table.repaint();
         }
 
         /**
