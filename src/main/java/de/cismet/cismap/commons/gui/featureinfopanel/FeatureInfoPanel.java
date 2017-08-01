@@ -1521,7 +1521,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 final String attrName = attributeNames[rowIndex];
                 final FeatureServiceAttribute attr = featureServiceAttributes.get(attrName);
                 final Class cl = FeatureTools.getClass(attr);
-                Object valueWithType = FeatureTools.convertObjectToClass(aValue, cl);
+                Object valueWithType = (aValue.equals("") ? null : FeatureTools.convertObjectToClass(aValue, cl));
 
                 if (tableRuleSet != null) {
                     valueWithType = tableRuleSet.afterEdit(
@@ -1529,7 +1529,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                             attrName,
                             -1,
                             feature.getProperty(attrName),
-                            aValue);
+                            valueWithType);
                 }
                 feature.setProperty(attrName, valueWithType);
 
