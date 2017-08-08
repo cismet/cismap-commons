@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 
 /**
@@ -54,4 +55,16 @@ public interface FeatureCreator {
      * the current creation should be cancelled.
      */
     void cancel();
+
+    /**
+     * the current creation should be resumed.
+     */
+    void resume();
+
+    /**
+     * the service that is used by this creator.
+     *
+     * @return  DOCUMENT ME!
+     */
+    AbstractFeatureService getService();
 }

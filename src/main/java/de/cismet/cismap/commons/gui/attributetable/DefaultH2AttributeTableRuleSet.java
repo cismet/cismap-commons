@@ -29,6 +29,7 @@ import javax.swing.table.TableCellRenderer;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCreator;
+import de.cismet.cismap.commons.gui.attributetable.creator.WithoutGeometryCreator;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
@@ -130,6 +131,8 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
                 return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POLYGON, false);
             } else if (geometryType.equalsIgnoreCase("MultiPolygon")) {
                 return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POLYGON, true);
+            } else if (geometryType.equalsIgnoreCase("none")) {
+                return new WithoutGeometryCreator();
             }
         }
 
