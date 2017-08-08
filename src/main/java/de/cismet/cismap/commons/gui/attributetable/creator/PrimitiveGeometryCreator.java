@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.gui.attributetable.creator;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
+import edu.umd.cs.piccolo.PNode;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -27,11 +29,12 @@ import java.util.Map;
 
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedEvent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
 
@@ -56,6 +59,10 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     private final String mode;
     private boolean multi;
     private List<CreaterGeometryListener> geometryListener = new ArrayList<CreaterGeometryListener>();
+    private AbstractFeatureService service = null;
+    private PNode tmpFeature;
+    private MappingComponent mc = null;
+    private boolean activateResume = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -106,6 +113,10 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     @Override
     public void createFeature(final MappingComponent mc,
             final FeatureServiceFeature feature) {
+        this.mc = mc;
+        if ((feature != null) && (feature.getLayerProperties() != null)) {
+            service = feature.getLayerProperties().getFeatureService();
+        }
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
@@ -224,8 +235,27 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     @Override
     public void cancel() {
-        for (final CreaterGeometryListener listener : geometryListener) {
-            listener.stopEditing();
+        if ((mc != null) && !activateResume) {
+            if (mc.getTmpFeatureLayer().getChildrenCount() == 1) {
+                tmpFeature = mc.getTmpFeatureLayer().getChild(0);
+            }
+            mc.getTmpFeatureLayer().removeAllChildren();
         }
+    }
+
+    @Override
+    public void resume() {
+        if ((mc != null) && (tmpFeature != null)) {
+            mc.getTmpFeatureLayer().addChild(tmpFeature);
+        }
+        tmpFeature = null;
+        activateResume = true;
+        CismapBroker.getInstance().getMappingComponent().setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
+        activateResume = false;
+    }
+
+    @Override
+    public AbstractFeatureService getService() {
+        return service;
     }
 }

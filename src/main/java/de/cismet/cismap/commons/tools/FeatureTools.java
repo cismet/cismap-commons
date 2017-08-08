@@ -196,14 +196,14 @@ public class FeatureTools {
                     return objectAsString;
                 }
             } else if (cl.equals(Double.class)) {
-                return Double.parseDouble(objectAsString);
+                return Double.parseDouble(objectAsString.replace(",", "."));
             } else if (cl.equals(Float.class)) {
-                return Float.parseFloat(objectAsString);
+                return Float.parseFloat(objectAsString.replace(",", "."));
             } else if (cl.equals(Integer.class)) {
                 try {
                     return Integer.parseInt(objectAsString);
                 } catch (NumberFormatException e) {
-                    final Double d = Double.parseDouble(objectAsString);
+                    final Double d = Double.parseDouble(objectAsString.replace(",", "."));
 
                     return d.intValue();
                 }
@@ -213,14 +213,14 @@ public class FeatureTools {
                 try {
                     return Long.parseLong(objectAsString);
                 } catch (NumberFormatException e) {
-                    final Double d = Double.parseDouble(objectAsString);
+                    final Double d = Double.parseDouble(objectAsString.replace(",", "."));
 
                     return d.longValue();
                 }
             } else if (cl.equals(Date.class)) {
                 return Timestamp.valueOf(objectAsString);
             } else if (cl.equals(BigDecimal.class)) {
-                return new BigDecimal(objectAsString);
+                return new BigDecimal(objectAsString.replace(",", "."));
             } else {
                 return object;
             }

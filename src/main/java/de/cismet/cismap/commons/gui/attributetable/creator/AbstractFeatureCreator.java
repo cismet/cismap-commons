@@ -92,4 +92,12 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
             }
         }
     }
+
+    @Override
+    public void cancel() {
+    }
+
+    @Override
+    public void resume() {
+    }
 }
