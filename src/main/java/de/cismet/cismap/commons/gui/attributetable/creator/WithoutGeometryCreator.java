@@ -11,11 +11,9 @@
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
-
 
 import java.util.ArrayList;
 import java.util.List;
