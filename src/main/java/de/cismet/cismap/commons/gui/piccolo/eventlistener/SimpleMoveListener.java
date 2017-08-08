@@ -19,21 +19,17 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.util.PLocator;
 
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.awt.Frame;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import java.util.Collection;
-import java.util.LinkedList;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.Highlightable;
@@ -44,7 +40,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
@@ -139,8 +134,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                                 && mappingComponent.getHandleInteractionMode().equals(
                                                     MappingComponent.REFLECT_POLYGON)))) {
                                 if ((mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
-                                            && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .getSelectedFeatures().size() == 1)) {
+//                                  no one knows, why the following condition was there
+//                                            && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+//                                                .getSelectedFeatures().size() == 1)
+                                ) {
                                     if (!newPointHandleExists()) {
                                         createNewPointHandle();
                                     }
