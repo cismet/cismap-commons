@@ -125,12 +125,6 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     && ((handleLayer.getChildrenCount() > 0)
                         || (pFeature.getFeature() instanceof RequestForHidingHandles))) {
             drag = true;
-            final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
-            if (moveListener != null) {
-                moveListener.mouseMoved(e);
-            } else {
-                log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
-            }
             super.mouseDragged(e);
             if (pFeature != null) {
                 dragPoint = e.getPosition();
