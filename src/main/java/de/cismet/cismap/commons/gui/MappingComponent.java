@@ -1070,6 +1070,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 final PInputEventListener pivl = this.getInputListener(this.interactionMode);
                 if (pivl != null) {
+                    if (pivl instanceof DeregistrationListener) {
+                        ((DeregistrationListener)pivl).deregistration();
+                    }
                     removeInputEventListener(pivl);
                 } else {
                     LOG.warn("this.getInputListener(this.interactionMode)==null");                                    // NOI18N
