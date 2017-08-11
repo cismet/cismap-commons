@@ -29,8 +29,6 @@ import javax.swing.JOptionPane;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SearchFeature;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -110,13 +108,6 @@ public class RotationPHandle extends PHandle {
      */
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
-        final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                    .getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(aEvent);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-        }
         pfeature.getViewer().getCamera().localToView(aLocalDimension);
         final double dragRot = pfeature.calculateDrag(
                 aEvent,
@@ -297,19 +288,4 @@ public class RotationPHandle extends PHandle {
         }
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  pInputEvent  DOCUMENT ME!
-     */
-    @Override
-    public void mouseMovedNotInDragOperation(final PInputEvent pInputEvent) {
-        final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                    .getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-        }
-    }
 }
