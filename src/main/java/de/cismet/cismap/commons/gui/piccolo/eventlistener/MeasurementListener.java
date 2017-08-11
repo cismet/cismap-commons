@@ -50,7 +50,6 @@ public class MeasurementListener extends PBasicInputEventHandler {
     protected boolean inProgress;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector points;
-    private SimpleMoveListener moveListener;
     private double measuredLength = 0;
 
     //~ Constructors -----------------------------------------------------------
@@ -62,7 +61,6 @@ public class MeasurementListener extends PBasicInputEventHandler {
      */
     public MeasurementListener(final MappingComponent mc) {
         this.mc = mc;
-        moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -70,12 +68,7 @@ public class MeasurementListener extends PBasicInputEventHandler {
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
-        }
-
+  
         if (inProgress) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
