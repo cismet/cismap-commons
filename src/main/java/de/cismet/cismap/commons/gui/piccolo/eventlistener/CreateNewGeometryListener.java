@@ -38,7 +38,7 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class CreateNewGeometryListener extends CreateGeometryListener {
+public class CreateNewGeometryListener extends CreateGeometryListener implements DeregistrationListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -334,5 +334,12 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
         zoomDelegate.mouseWheelRotated(pie);
         // trigger full repaint
         mouseMoved(pie);
+    }
+
+    @Override
+    public void deregistration() {
+        if ((multiPolygonPointerAnnotation != null) && multiPolygonPointerAnnotation.getVisible()) {
+            multiPolygonPointerAnnotation.setVisible(false);
+        }
     }
 }
