@@ -79,7 +79,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     private boolean inProgress;
     private int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
     private Stack<Point2D> undoPoints;
-    private SimpleMoveListener moveListener;
     private Class<? extends AbstractNewFeature> geometryFeatureClass = null;
     private AbstractNewFeature currentFeature = null;
 
@@ -111,10 +110,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         setGeometryFeatureClass(geometryFeatureClass);
         this.mappingComponent = mc;
         undoPoints = new Stack<Point2D>();
-
-        if (mc != null) {
-            moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
-        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -182,11 +177,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     @Override
     public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
-        }
+
         if (inProgress) {                                                           // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mappingComponent.isSnappingEnabled()) {
@@ -899,7 +890,5 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
-        this.mappingComponent = mappingComponent;
-        moveListener = (SimpleMoveListener)mappingComponent.getInputListener(MappingComponent.MOTION);
     }
 }
