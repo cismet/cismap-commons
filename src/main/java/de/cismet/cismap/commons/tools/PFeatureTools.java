@@ -690,13 +690,20 @@ public class PFeatureTools {
         final PPickPath pp = ((MappingComponent)pInputEvent.getComponent()).getCamera()
                     .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), halo);
         pp.pushNode(pInputEvent.getPickedNode());
+
+        int getIndex = pp.getNodeStackReference().size() - 1;
+        if (pp.getNodeStackReference().size()>0) {
         do {
-            if (first) {
-                pNode = pp.getPickedNode();
-                first = false;
-            } else {
-                pNode = pp.nextPickedNode();
-            }
+//            if (first) {
+//                pNode = pp.getPickedNode();
+//                first = false;
+//
+//            } else {
+//                pNode = pp.nextPickedNode();
+//            }
+              
+            pNode = (PNode)pp.getNodeStackReference().get(getIndex);
+            getIndex--;
 //            if (o!=null && o instanceof PPath && !((PPath)o).getPathReference().contains(xPos,yPos)) {
 //                //In diesem Fall handelte es sich zwar um ein PPATH aber x,y war nicht im PPath enthalten, deshalb mach nix
 //
@@ -726,7 +733,8 @@ public class PFeatureTools {
                     }
                 }
             }
-        } while ((pNode != null) && !rightType);
+        } while (getIndex>0 && (pNode != null) && !rightType);
+        }
         return pNode;
     }
 
