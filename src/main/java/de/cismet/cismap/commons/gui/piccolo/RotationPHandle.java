@@ -287,5 +287,4 @@ public class RotationPHandle extends PHandle {
             log.error("Boooooom", ex);
         }
     }
-
 }

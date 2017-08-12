@@ -68,7 +68,7 @@ public class MeasurementListener extends PBasicInputEventHandler {
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
-  
+
         if (inProgress) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {

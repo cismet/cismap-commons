@@ -178,7 +178,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
 
-        if (inProgress) {                                                           // && (!isInMode(POINT))) {
+        if (inProgress) { // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mappingComponent.isSnappingEnabled()) {
                 final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
