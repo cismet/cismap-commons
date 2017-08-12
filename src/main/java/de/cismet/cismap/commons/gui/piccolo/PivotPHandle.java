@@ -101,7 +101,6 @@ public class PivotPHandle extends PHandle {
         }
     }
 
-
     /**
      * DOCUMENT ME!
      *

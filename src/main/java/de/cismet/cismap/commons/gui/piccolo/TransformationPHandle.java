@@ -168,7 +168,6 @@ public class TransformationPHandle extends PHandle {
         try {
             if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)
                         && !pfeature.getViewer().getInteractionMode().equals(MappingComponent.MOVE_POLYGON)) {
-
                 if ((!(pfeature.getFeature() instanceof RequestForUnaddableHandles)
                                 && pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE))
                             || (!(pfeature.getFeature() instanceof RequestForUnmoveableHandles)
@@ -579,7 +578,6 @@ public class TransformationPHandle extends PHandle {
         }
         return false;
     }
-
 
     @Override
     public void removeHandle() {
