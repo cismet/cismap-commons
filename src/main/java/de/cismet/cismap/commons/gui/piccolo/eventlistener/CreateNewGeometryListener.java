@@ -275,10 +275,19 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
 
                     for (final GeometryCheckInterface check : geometryChecks) {
                         if (!check.check(tempGeometry, lastCoordinate, true)) {
+                            multiPolygonPointerAnnotation.removeAllChildren();
                             multiPolygonPointerAnnotation.setCustomText("Geometrie ungültig", check.getErrorText());
                             errorFound = true;
                         }
                     }
+                }
+
+                if (errorFound) {
+                    multiPolygonPointerAnnotation.setOffset(
+                        pInputEvent.getCanvasPosition().getX()
+                                + 20.0d,
+                        pInputEvent.getCanvasPosition().getY()
+                                + 20.0d);
                 }
                 multiPolygonPointerAnnotation.setVisible(errorFound);
             }
