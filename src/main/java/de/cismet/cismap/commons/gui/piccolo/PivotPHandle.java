@@ -21,9 +21,6 @@ import java.util.Collection;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-
 /**
  * DOCUMENT ME!
  *
@@ -78,13 +75,6 @@ public class PivotPHandle extends PHandle {
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
         if (!((pfeature != null) && (pfeature.getFeature() instanceof RequestForRotatingPivotLock))) {
             final double scale = pfeature.getViewer().getCamera().getViewScale();
-            final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                        .getInputListener(MappingComponent.MOTION);
-            if (moveListener != null) {
-                moveListener.mouseMoved(aEvent);
-            } else {
-                log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-            }
             mid.setLocation(mid.getX() + (aLocalDimension.width / scale),
                 mid.getY()
                         + (aLocalDimension.height / scale));
@@ -108,17 +98,6 @@ public class PivotPHandle extends PHandle {
                 }
             }
             super.endHandleDrag(aLocalPoint, aEvent);
-        }
-    }
-
-    @Override
-    public void mouseMovedNotInDragOperation(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                    .getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
         }
     }
 

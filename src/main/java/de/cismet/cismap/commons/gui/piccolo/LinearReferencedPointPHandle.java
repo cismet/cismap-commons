@@ -25,7 +25,6 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeatureListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 
 /**
  * DOCUMENT ME!
@@ -118,14 +117,6 @@ public class LinearReferencedPointPHandle extends PHandle {
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent pInputEvent) {
         try {
-            final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                        .getInputListener(MappingComponent.MOTION);
-            if (moveListener != null) {
-                moveListener.mouseMoved(pInputEvent);
-            } else {
-                LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-            }
-
             if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
                 pfeature.getViewer().getCamera().localToView(aLocalDimension);
 

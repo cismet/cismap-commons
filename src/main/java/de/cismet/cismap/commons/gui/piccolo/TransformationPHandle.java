@@ -40,8 +40,6 @@ import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
 import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.InvalidPolygonTooltip;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -170,14 +168,6 @@ public class TransformationPHandle extends PHandle {
         try {
             if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)
                         && !pfeature.getViewer().getInteractionMode().equals(MappingComponent.MOVE_POLYGON)) {
-                final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                            .getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-
                 if ((!(pfeature.getFeature() instanceof RequestForUnaddableHandles)
                                 && pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE))
                             || (!(pfeature.getFeature() instanceof RequestForUnmoveableHandles)
@@ -587,17 +577,6 @@ public class TransformationPHandle extends PHandle {
             return readyForSplitting(((MultiPolygon)geom).getGeometryN(0));
         }
         return false;
-    }
-
-    @Override
-    public void mouseMovedNotInDragOperation(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
-                    .getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-        }
     }
 
     @Override

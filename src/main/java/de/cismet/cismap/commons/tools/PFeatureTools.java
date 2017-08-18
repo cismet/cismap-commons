@@ -558,6 +558,7 @@ public class PFeatureTools {
         final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
         return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPoint);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -677,12 +678,26 @@ public class PFeatureTools {
     public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
+        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, halo, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     * @param   halo          DOCUMENT ME!
+     * @param   deepSeek      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final double halo,
+            final boolean deepSeek) {
         // Dieses Konstrukt sorgt daf\u00FCr das uninteressante Objekte die oberhalb dem Mauszeiger liegen
         // einfach ignoriert werden
         PNode pNode = null;
-        boolean rightType = false;
-        boolean first = true;
-//        PPickPath pp=pInputEvent.getInputManager().getMouseOver();
 
         final double xPos = pInputEvent.getPosition().getX();
         final double yPos = pInputEvent.getPosition().getY();
@@ -690,44 +705,87 @@ public class PFeatureTools {
         final PPickPath pp = ((MappingComponent)pInputEvent.getComponent()).getCamera()
                     .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), halo);
         pp.pushNode(pInputEvent.getPickedNode());
-        do {
-            if (first) {
-                pNode = pp.getPickedNode();
-                first = false;
-            } else {
-                pNode = pp.nextPickedNode();
+
+        if (deepSeek) {
+            boolean first = true;
+            do {
+                if (first) {
+                    pNode = pp.getPickedNode();
+                    first = false;
+                } else {
+                    // this is a very time consuming method and should be avoided in move or drag listeners
+                    pNode = pp.nextPickedNode();
+                }
+
+                // pNode is null if there is no Node to pick anymore
+
+                // this if is needed to exit the loop
+                if (pNode == null) {
+                    break;
+                }
+                pNode = getRightPNodeOrNull(pNode, validClasses, xPos, yPos);
+                // pNode is null if it is not of the right type
+            } while (pNode == null);
+
+            return pNode;
+        } else {
+            // deepSeek == false can be used in move or drag listeners
+            // it uses the existing PStack to iterate over the picked Nodes
+            // and check whether the nodes are from the right type
+            // the loop starts with the highest index and goes down to 0
+            // the node with the index 0 is always a camera but since we don't know
+            // what is in the validClasses[] we should go through till 0
+
+            int getIndex = pp.getNodeStackReference().size() - 1;
+            if (pp.getNodeStackReference().size() > 0) {
+                do {
+                    pNode = (PNode)pp.getNodeStackReference().get(getIndex);
+                    pNode = getRightPNodeOrNull(pNode, validClasses, xPos, yPos);
+                    getIndex--;
+                    // pNode is either null now if it not of the right type
+                    // or it is not null. then we can exit the loop
+                    // if the index is below zero we folund nothing
+                } while ((getIndex >= 0) && (pNode == null));
             }
-//            if (o!=null && o instanceof PPath && !((PPath)o).getPathReference().contains(xPos,yPos)) {
-//                //In diesem Fall handelte es sich zwar um ein PPATH aber x,y war nicht im PPath enthalten, deshalb mach nix
-//
-//            } else
-            // durch dieses if wird genaues selektieren erreicht
-            {
-                for (int i = 0; i < validClasses.length; ++i) {
-//                    if (o!=null) log.debug("_ getFirstValidObjectUnderPointer teste "+o.getClass()+ ":"+validClasses[i].getName()+" :"+ validClasses[i].isAssignableFrom(o.getClass()));
-                    if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
-                                && (pNode.getParent() != null) && pNode.getParent().getVisible()
-                                && pNode.getVisible()) {
-                        if ((pNode instanceof PPath)
-                                    && (!isPolygon((PPath)pNode)
-                                        || ((PPath)pNode).getPathReference().contains(xPos, yPos))) {
-                            rightType = true;
-                            break;
-                        }
-                    } else if ((validClasses[i] == PFeature.class) && (pNode != null)
-                                && ParentNodeIsAPFeature.class.isAssignableFrom(pNode.getClass())
-                                && (pNode.getParent() != null) && pNode.getParent().getVisible()
-                                && pNode.getVisible()) {
-                        pNode = getPFeatureByChild((ParentNodeIsAPFeature)pNode);
-                        if (pNode != null) {
-                            rightType = true;
-                            break;
-                        }
-                    }
+            return pNode;
+        }
+    }
+
+    /**
+     * Checks whether the given pNode is from the right type. It returns the pNode (or it's parent from the right type)
+     * if the check is successful and null if not.
+     *
+     * @param   pNode         the pNode to check
+     * @param   validClasses  an array of valid classe
+     * @param   xPos          x Position for the pick
+     * @param   yPos          y Position for the pick
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static PNode getRightPNodeOrNull(final PNode pNode,
+            final Class[] validClasses,
+            final double xPos,
+            final double yPos) {
+        for (int i = 0; i < validClasses.length; ++i) {
+            if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
+                        && (pNode.getParent() != null) && pNode.getParent().getVisible()
+                        && pNode.getVisible()) {
+                if ((pNode instanceof PPath)
+                            && (!isPolygon((PPath)pNode)
+                                || ((PPath)pNode).getPathReference().contains(xPos, yPos))) {
+                    return pNode;
+                }
+            } else if ((validClasses[i] == PFeature.class) && (pNode != null)
+                        && ParentNodeIsAPFeature.class.isAssignableFrom(pNode.getClass())
+                        && (pNode.getParent() != null) && pNode.getParent().getVisible()
+                        && pNode.getVisible()) {
+                final PNode parentPNode = getPFeatureByChild((ParentNodeIsAPFeature)pNode);
+                if (parentPNode != null) {
+                    return parentPNode;
                 }
             }
-        } while ((pNode != null) && !rightType);
-        return pNode;
+        }
+        return null;
     }
 
     /**
@@ -781,6 +839,7 @@ public class PFeatureTools {
                         + " has no ParentNode that is a PFeature"); // NOI18N
         }
     }
+
     /**
      * TODO move to a static geometryutils class.
      *
@@ -861,7 +920,6 @@ public class PFeatureTools {
         final List<PFeatureCoordinateInformation> groupedInfos = new ArrayList<>();
 
         // collect all coordinate infos of all pfeatures
-
         final List<PFeatureCoordinateInformation> infos = new ArrayList<>();
         for (final PFeature pFeature : pFeatures) {
             final Geometry geom = pFeature.getFeature().getGeometry();
@@ -890,7 +948,6 @@ public class PFeatureTools {
         }
 
         // calculate all neighbours of all coordinates of all pfeatures
-
         for (int i = 0; i < infos.size(); i++) {
             final PFeatureCoordinateInformation infoA = infos.get(i);
             final Coordinate coordA = infoA.getCoordinate();
@@ -931,7 +988,6 @@ public class PFeatureTools {
         }
 
         // group all infos together by coordinate distance, prioritizing the coordinates with the most neighbours
-
         while (!infos.isEmpty()) {
             Collections.sort(infos);
             final PFeatureCoordinateInformation firstInfo = infos.get(0);
@@ -972,7 +1028,6 @@ public class PFeatureTools {
         final List<PFeatureCoordinateInformation> unmergedInfos = new ArrayList<>();
 
         // calculating the centroid of all grouped infos, and setting the coordinates to the centroid
-
         final MultiMap coordinateRemoveMap = new MultiMap();
         final Set<PFeature> pFeatureToSync = new HashSet<>();
 
@@ -996,7 +1051,6 @@ public class PFeatureTools {
                 final Coordinate centroid = centroidPoint.getCentroid();
 
                 // setting centroid to group "parent"
-
                 LOG.info("setting centroid to group parent. before: "
                             + coordinate + " after:" + centroid);
                 if (pFeature.moveCoordinate(entityPosition, ringPosition, coordinatePosition, centroid, false)) {
@@ -1047,7 +1101,6 @@ public class PFeatureTools {
         // removing now duplicate coordinates from pfeatures
         // ( in reverse coordinatePosition order, to avoid position-shifting-problems
         // when removing multiple coordinates from the same pfeature )
-
         for (final PFeature pFeature : (Set<PFeature>)coordinateRemoveMap.keySet()) {
             final Set<PFeatureCoordinateInformation> coordinateRemoveSet = new HashSet<>((Collection)
                     coordinateRemoveMap.get(pFeature));
