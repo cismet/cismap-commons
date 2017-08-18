@@ -197,7 +197,7 @@ public class SelectionListener extends CreateGeometryListener {
         final Point point = createPointFromInput(pInputEvent);
 
         final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault().lookupAll(MapPopupAction.class);
-        final ArrayList<MapPopupAction> allPopupActions = new ArrayList<>(lookupResult);
+        final ArrayList<MapPopupAction> allPopupActions = new ArrayList<MapPopupAction>(lookupResult);
         Collections.sort(allPopupActions);
 
         ////

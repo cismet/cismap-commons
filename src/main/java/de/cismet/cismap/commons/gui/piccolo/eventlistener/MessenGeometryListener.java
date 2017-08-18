@@ -68,7 +68,6 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     private final List<Point2D> points = TypeSafeCollections.newArrayList();
     private final List<Point2D> undoPoints = TypeSafeCollections.newArrayList();
     private int numOfEllipseEdges;
-    private SimpleMoveListener moveListener;
     private String mode = POLYGON;
     private Class<? extends PureNewFeature> geometryFeatureClass = null;
     private final PBasicInputEventHandler zoomDelegate;
@@ -95,7 +94,6 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         setGeometryFeatureClass(geometryFeatureClass);
         zoomDelegate = new RubberBandZoomListener();
         this.mc = mc;
-        moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
         undoPoints.clear();
         // srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen
         // geliefert! loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
@@ -129,11 +127,6 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
-        if (moveListener != null) {
-            moveListener.mouseMoved(pInputEvent);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-        }
         if (inProgress) { // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
