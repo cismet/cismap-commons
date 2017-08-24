@@ -171,6 +171,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         if (mappingComponent != null) {
             mappingComponent.getTmpFeatureLayer().removeAllChildren();
         }
+        currentFeature = null;
         inProgress = false;
     }
 
