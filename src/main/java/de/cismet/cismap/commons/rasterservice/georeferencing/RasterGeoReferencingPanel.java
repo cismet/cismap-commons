@@ -29,6 +29,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
@@ -956,21 +957,24 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             final Point point = pair.getPoint();
             final Coordinate coordinate = pair.getCoordinate();
 
+            final DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols();
+            otherSymbols.setDecimalSeparator(',');
+            final DecimalFormat format = new DecimalFormat("#0.00", otherSymbols);
+
             switch (columnIndex) {
                 case 0: {
                     return rowIndex + 1;
                 }
                 case 1: {
-                    return (point != null) ? ("[" + (int)point.getX() + ", " + (int)point.getY() + "]") : null;
+                    return (point != null) ? ("[" + (int)point.getX() + ";" + (int)point.getY() + "]") : null;
                 }
                 case 2: {
                     return (coordinate != null)
-                        ? ("[" + new DecimalFormat("#0.00").format(coordinate.x) + ", "
-                                    + new DecimalFormat("#0.00").format(coordinate.y) + "]") : null;
+                        ? ("[" + format.format(coordinate.x) + ";" + format.format(coordinate.y) + "]") : null;
                 }
                 case 3: {
                     if (getHandler().isComplete()) {
-                        return new DecimalFormat("#0.00").format(getHandler().getError(rowIndex));
+                        return format.format(getHandler().getError(rowIndex));
                     } else {
                         return "-";
                     }
@@ -1040,7 +1044,11 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             if ((columnIndex == 1) || (columnIndex == 2)) {
                 final String value = (aValue != null) ? ((String)aValue).trim() : null;
                 if (value != null) {
-                    final String[] split = value.replaceAll("\\(|\\)|\\[|\\]", "").replaceAll(";|\\|", ",").split(",");
+                    final String[] split = value.replaceAll("\\(|\\)|\\[|\\]| ", "")
+                                .replaceAll("\\.", "")
+                                .replaceAll("\\||/", ";")
+                                .replaceAll(",", ".")
+                                .split(";");
                     if (split.length == 2) {
                         try {
                             if (columnIndex == 1) {
