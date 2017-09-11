@@ -62,8 +62,6 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         if (StaticDebuggingTools.checkHomeForFile("cidsRasterGeoRef")) {
             getToolbarComponents().add(getToolbarComponentDescription());
 
-            CismapBroker.getInstance()
-                    .addActiveLayerListener(RasterGeoReferencingBackend.getInstance().getActiveLayerListenerHandler());
             CismapBroker.getInstance().addStatusListener(new MapStatusListenerHandler());
 
             RasterGeoReferencingWizard.getInstance().addListener(new WizardListenerHandler());
