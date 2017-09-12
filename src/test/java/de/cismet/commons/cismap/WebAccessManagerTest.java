@@ -54,31 +54,31 @@ public class WebAccessManagerTest {
     public void tearDown() {
     }
 
-    @Test
-    public void test010WebAccessManager() throws MalformedURLException, IOException, Exception {
-        // NOI18N
-        final URL getCapURL = new URL("http://wms.fis-wasser-mv.de/services?REQUEST=GetCapabilities&version=1.1.1&service=WMS");
-
-        InputStream inputStream;
-        try {
-            inputStream = WebAccessManager.getInstance().doRequest(getCapURL);
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            //assertTrue(bufferedReader.ready());
-
-            final String wmsResponse = IOUtils.toString(bufferedReader);
-            assertFalse(wmsResponse.isEmpty());
-            
-            final StringReader stringReader = new StringReader(wmsResponse);
-            
-            final XMLInputFactory factory = XMLInputFactory.newInstance();
-            final XMLStreamReader xmlStreamReader = factory.createXMLStreamReader(stringReader);
-            assertTrue(xmlStreamReader.hasNext());
-
-            //System.out.println(wmsResponse);
-        } catch (UnknownHostException | SocketException ex) {
-            System.out.println("WARNING: test010WebAccessManager NOT COMPLETED due to UnknownHost/SocketException: "
-                    + ex.getMessage());
-        }
-    }
+//    @Test
+//    public void test010WebAccessManager() throws MalformedURLException, IOException, Exception {
+//        // NOI18N
+//        final URL getCapURL = new URL("http://wms.fis-wasser-mv.de/services?REQUEST=GetCapabilities&version=1.1.1&service=WMS");
+//
+//        InputStream inputStream;
+//        try {
+//            inputStream = WebAccessManager.getInstance().doRequest(getCapURL);
+//            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+//
+//            //assertTrue(bufferedReader.ready());
+//
+//            final String wmsResponse = IOUtils.toString(bufferedReader);
+//            assertFalse(wmsResponse.isEmpty());
+//            
+//            final StringReader stringReader = new StringReader(wmsResponse);
+//            
+//            final XMLInputFactory factory = XMLInputFactory.newInstance();
+//            final XMLStreamReader xmlStreamReader = factory.createXMLStreamReader(stringReader);
+//            assertTrue(xmlStreamReader.hasNext());
+//
+//            //System.out.println(wmsResponse);
+//        } catch (UnknownHostException | SocketException ex) {
+//            System.out.println("WARNING: test010WebAccessManager NOT COMPLETED due to UnknownHost/SocketException: "
+//                    + ex.getMessage());
+//        }
+//    }
 }
