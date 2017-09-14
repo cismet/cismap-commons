@@ -379,7 +379,10 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      * @param  pInputEvent  DOCUMENT ME!
      */
     protected void handleDoubleClickInMap(final PInputEvent pInputEvent) {
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class },
+                true);
 
         if (!(o instanceof PFeature)) {
             return;

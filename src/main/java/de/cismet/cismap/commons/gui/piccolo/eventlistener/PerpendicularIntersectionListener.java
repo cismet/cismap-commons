@@ -530,7 +530,8 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
             if (stage == Stage.SELECT_FEATURE) {
                 final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                         event,
-                        new Class[] { PFeature.class });
+                        new Class[] { PFeature.class },
+                        true);
                 if (pFeature != null) {
                     selectedFeature = pFeature.getFeature();
                     mappingComponent.getFeatureCollection().select(selectedFeature);

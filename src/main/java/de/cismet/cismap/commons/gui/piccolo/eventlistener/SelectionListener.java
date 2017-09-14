@@ -151,7 +151,8 @@ public class SelectionListener extends CreateGeometryListener {
 
         final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                 pInputEvent,
-                new Class[] { PFeature.class });
+                new Class[] { PFeature.class },
+                true);
 
         // COLLECT ALL PFEATURES UNDER THE POINTER
         final Collection<PFeature> allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
@@ -407,10 +408,10 @@ public class SelectionListener extends CreateGeometryListener {
                 if (pInputEvent.getComponent() instanceof MappingComponent) {
                     mappingComponent = (MappingComponent)pInputEvent.getComponent();
                 }
-
                 final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                         pInputEvent,
-                        new Class[] { PFeature.class });
+                        new Class[] { PFeature.class },
+                        true);
 
                 if (clickedPFeature != null) {
                     sel = clickedPFeature;
@@ -807,7 +808,8 @@ public class SelectionListener extends CreateGeometryListener {
                 } else {
                     final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                             finishingEvent,
-                            new Class[] { PFeature.class });
+                            new Class[] { PFeature.class },
+                            true);
                     pfArr = new PFeature[] { (PFeature)o };
                 }
             } else {
@@ -849,6 +851,9 @@ public class SelectionListener extends CreateGeometryListener {
 
             // Hier passierts
             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(toBeSelected);
+            if (log.isDebugEnabled()) {
+                log.debug("toBeSelected.size:" + toBeSelected.size());
+            }
             lastUnselectedFeatures = toBeUnselected;
             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
 

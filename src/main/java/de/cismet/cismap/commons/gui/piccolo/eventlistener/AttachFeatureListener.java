@@ -67,7 +67,8 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                 pInputEvent,
                 new Class[] { PFeature.class },
-                30.5d);
+                30.5d,
+                true);
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
             featureToAttach = (PFeature)(o);
