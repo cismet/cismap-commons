@@ -10,6 +10,8 @@ package de.cismet.cismap.commons.features;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
+import edu.umd.cs.piccolo.event.PInputEventListener;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -207,9 +209,12 @@ public class SearchFeature extends AbstractNewFeature implements DoubleClickable
     @Override
     public void doubleClickPerformed(final SelectionListener selectionListener) {
         final MappingComponent mappingComponent = selectionListener.getMappingComponent();
-        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-        mappingComponent.getHandleLayer().removeAllChildren();
-        // neue Suche mit Geometry auslösen
-        ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(getInteractionMode())).search(this);
+        final PInputEventListener listener = mappingComponent.getInputListener(getInteractionMode());
+        if (listener instanceof AbstractCreateSearchGeometryListener) {
+            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+            mappingComponent.getHandleLayer().removeAllChildren();
+            // neue Suche mit Geometry auslösen
+            ((AbstractCreateSearchGeometryListener)listener).search(this);
+        }
     }
 }
