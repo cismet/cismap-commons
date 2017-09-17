@@ -408,6 +408,7 @@ public class SelectionListener extends CreateGeometryListener {
                 if (pInputEvent.getComponent() instanceof MappingComponent) {
                     mappingComponent = (MappingComponent)pInputEvent.getComponent();
                 }
+
                 final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                         pInputEvent,
                         new Class[] { PFeature.class },
@@ -796,7 +797,7 @@ public class SelectionListener extends CreateGeometryListener {
             } else {
                 featureAdded = true;
             }
-            final PFeature[] pfArr;
+            PFeature[] pfArr = new PFeature[0];
 
             if (geom.getGeometryType().equalsIgnoreCase("point")) {
                 // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
@@ -810,7 +811,9 @@ public class SelectionListener extends CreateGeometryListener {
                             finishingEvent,
                             new Class[] { PFeature.class },
                             true);
-                    pfArr = new PFeature[] { (PFeature)o };
+                    if (o != null) {
+                        pfArr = new PFeature[] { (PFeature)o };
+                    }
                 }
             } else {
                 // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
