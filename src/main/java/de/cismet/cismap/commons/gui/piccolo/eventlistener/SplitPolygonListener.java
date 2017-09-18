@@ -54,7 +54,10 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
         if (log.isDebugEnabled()) {
             log.debug("mouseClicked()"); // NOI18N
         }
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class },
+                true);
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
             pFeature = (PFeature)(o);
@@ -109,7 +112,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
 //TODO
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent event) {
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class }, true);
         pFeature = (PFeature)o;
         if ((pFeature == null) && (mc.getFeatureCollection().getSelectedFeatures().size() == 1)) {
             pFeature = (PFeature)mc.getPFeatureHM().get(mc.getFeatureCollection().getSelectedFeatures().toArray()[0]);

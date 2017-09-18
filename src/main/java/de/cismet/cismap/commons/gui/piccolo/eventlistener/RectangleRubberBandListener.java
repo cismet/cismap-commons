@@ -134,7 +134,8 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
     private boolean isMouseOverStickyNode(final PInputEvent pInputEvent) {
         final Object firstPFeatureUnderMouse = PFeatureTools.getFirstValidObjectUnderPointer(
                 pInputEvent,
-                new Class[] { PFeature.class });
+                new Class[] { PFeature.class },
+                true);
 
         if ((firstPFeatureUnderMouse != null) && (firstPFeatureUnderMouse instanceof PFeature)) {
             final PFeature pFeature = (PFeature)firstPFeatureUnderMouse;

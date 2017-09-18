@@ -92,7 +92,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             pressPoint = e.getPosition();
             dragDim = e.getCanvasDelta();
             dragPoint = pressPoint;
-            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
+            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class }, true);
 
             if (o instanceof PFeature) {
                 pFeature = (PFeature)(o);

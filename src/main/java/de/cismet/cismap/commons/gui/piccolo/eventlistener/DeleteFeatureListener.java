@@ -100,7 +100,8 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
             final MappingComponent mappingComponent = (MappingComponent)pInputEvent.getComponent();
             final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                     pInputEvent,
-                    new Class[] { PFeature.class });
+                    new Class[] { PFeature.class },
+                    true);
 
             if ((clickedPFeature != null) && (clickedPFeature.getFeature() != null)
                         && (allowedFeatureClassesToDelete != null)

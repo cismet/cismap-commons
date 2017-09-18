@@ -160,7 +160,8 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
                         } else {
                             final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                                     pInputEvent,
-                                    new Class[] { PFeature.class });
+                                    new Class[] { PFeature.class },
+                                    true);
                             if ((pFeature != null)
                                         && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
                                             || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
