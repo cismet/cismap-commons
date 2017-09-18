@@ -20,7 +20,7 @@
         <names.cismap-commons>cismap Commons</names.cismap-commons>
     </properties>
     
-    <name>${names.cismap-commons}</name>
+    <name>${names.cismap-commons}  [${project.version}]</name>
     <description>This project contains various tools to enable geo-specific within Java applications</description>
 
     <scm>

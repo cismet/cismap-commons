@@ -235,7 +235,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     @Override
     public void mouseWheelRotated(final PInputEvent event) {
         super.mouseWheelRotatedByBlock(event);
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class }, true);
         if (!(o instanceof PFeature)) {
             return;
         }

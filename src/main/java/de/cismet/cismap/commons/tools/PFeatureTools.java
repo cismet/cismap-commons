@@ -573,6 +573,22 @@ public class PFeatureTools {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     * @param   deepPick      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final boolean deepPick) {
+        final double halo = ((CismapBroker.getInstance().getSrs().isMetric()) ? 1d : 0.0001);
+        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, halo, deepPick);
+    }
+
+    /**
      * Determines the nearest geometry coordinate.
      *
      * @param   mc                   DOCUMENT ME!

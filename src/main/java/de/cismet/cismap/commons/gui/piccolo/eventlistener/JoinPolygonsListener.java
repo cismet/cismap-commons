@@ -35,7 +35,10 @@ public class JoinPolygonsListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class },
+                true);
         modifier = pInputEvent.getModifiers();
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
