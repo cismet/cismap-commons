@@ -301,6 +301,8 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     }
                     setIcon(okIcon);
                 }
+            } else if (value instanceof LayerCollection) {
+                setIcon(okIcon);
             }
         } else if (realColumn == 2) {
             setText("");                                                      // NOI18N

@@ -121,6 +121,7 @@ public class CismapBroker {
     private boolean multiFeaturePopupMenuEnabled = false;
     private float defaultTranslucency = 0.2f;
     private boolean highlightFeatureOnMouseOver = true;
+    private boolean enableDummyLayerWhenAvailable = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -132,6 +133,24 @@ public class CismapBroker {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the enableDummyLayerWhenAvailable
+     */
+    public boolean isEnableDummyLayerWhenAvailable() {
+        return enableDummyLayerWhenAvailable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enableDummyLayerWhenAvailable  the enableDummyLayerWhenAvailable to set
+     */
+    public void setEnableDummyLayerWhenAvailable(final boolean enableDummyLayerWhenAvailable) {
+        this.enableDummyLayerWhenAvailable = enableDummyLayerWhenAvailable;
+    }
 
     /**
      * DOCUMENT ME!
