@@ -50,7 +50,10 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
         if (log.isDebugEnabled()) {
             log.debug("mouseClicked():" + pInputEvent.getPickedNode());   // NOI18N
         }
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class },
+                true);
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             mc = (MappingComponent)pInputEvent.getComponent();

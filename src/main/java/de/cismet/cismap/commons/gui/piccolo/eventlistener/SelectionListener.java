@@ -151,7 +151,8 @@ public class SelectionListener extends CreateGeometryListener {
 
         final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                 pInputEvent,
-                new Class[] { PFeature.class });
+                new Class[] { PFeature.class },
+                true);
 
         // COLLECT ALL PFEATURES UNDER THE POINTER
         final Collection<PFeature> allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
@@ -410,7 +411,8 @@ public class SelectionListener extends CreateGeometryListener {
 
                 final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                         pInputEvent,
-                        new Class[] { PFeature.class });
+                        new Class[] { PFeature.class },
+                        true);
 
                 if (clickedPFeature != null) {
                     sel = clickedPFeature;
@@ -795,7 +797,7 @@ public class SelectionListener extends CreateGeometryListener {
             } else {
                 featureAdded = true;
             }
-            final PFeature[] pfArr;
+            PFeature[] pfArr = new PFeature[0];
 
             if (geom.getGeometryType().equalsIgnoreCase("point")) {
                 // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
@@ -807,8 +809,11 @@ public class SelectionListener extends CreateGeometryListener {
                 } else {
                     final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                             finishingEvent,
-                            new Class[] { PFeature.class });
-                    pfArr = new PFeature[] { (PFeature)o };
+                            new Class[] { PFeature.class },
+                            true);
+                    if (o != null) {
+                        pfArr = new PFeature[] { (PFeature)o };
+                    }
                 }
             } else {
                 // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
@@ -849,6 +854,9 @@ public class SelectionListener extends CreateGeometryListener {
 
             // Hier passierts
             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(toBeSelected);
+            if (log.isDebugEnabled()) {
+                log.debug("toBeSelected.size:" + toBeSelected.size());
+            }
             lastUnselectedFeatures = toBeUnselected;
             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
 

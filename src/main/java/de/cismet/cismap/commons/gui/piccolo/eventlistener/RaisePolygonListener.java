@@ -49,7 +49,8 @@ public class RaisePolygonListener extends PBasicInputEventHandler {
         }
         final PFeature o = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                 pInputEvent,
-                new Class[] { PFeature.class });
+                new Class[] { PFeature.class },
+                true);
         // if (o!=null&&o.getFeature() instanceof DefaultFeatureServiceFeature&& o.getVisible()==true &&
         // o.getParent()!=null && o.getParent().getVisible()==true) {
         if ((o != null) && (o.getFeature() != null) && (o.getVisible() == true) && (o.getParent() != null)
