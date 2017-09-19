@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
@@ -231,7 +232,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 Set<Feature> list = selectedFeatures.get(s);
 
                 if (list == null) {
-                    list = new HashSet<Feature>();
+                    list = Collections.synchronizedSet(new HashSet<Feature>());
                     selectedFeatures.put(s, list);
                 }
 
@@ -354,7 +355,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 Set<Feature> list = selectedFeatures.get(service);
 
                 if (list == null) {
-                    list = new HashSet<Feature>();
+                    list = Collections.synchronizedSet(new HashSet<Feature>());
                     selectedFeatures.put(service, list);
                 }
 
@@ -472,7 +473,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     public List<Feature> getSelectedFeatures() {
         final List<Feature> features = new ArrayList<Feature>();
 
-        for (final AbstractFeatureService service : selectedFeatures.keySet()) {
+        // copy the key set to avoid a ConcurrentModificationException
+        for (final AbstractFeatureService service : new ArrayList<AbstractFeatureService>(selectedFeatures.keySet())) {
             final Set<Feature> serviceFeatures = selectedFeatures.get(service);
 
             if (serviceFeatures != null) {
@@ -553,6 +555,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             final List<Feature> features = getSelectedFeatures(service);
             int modifiable = 0;
             final AttributeTable table = AttributeTableFactory.getInstance().getAttributeTable(service);
+            if (table == null) {
+                return 0;
+            }
             final List<FeatureServiceFeature> selectedFeatures = table.getSelectedFeatures();
 
             for (final Feature f : features) {

@@ -78,7 +78,10 @@ import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
@@ -229,6 +232,30 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         final ActiveLayerModelWrapperWithoutProgress model = new ActiveLayerModelWrapperWithoutProgress(layerModel);
         tree.setModel(model);
         model.addTreeToUpdate(tree);
+        CismapBroker.getInstance().getMappingComponent().addRepaintListener(new RepaintListener() {
+
+                @Override
+                public void repaintStart(final RepaintEvent e) {
+                }
+
+                @Override
+                public void repaintComplete(final RepaintEvent e) {
+                    if ((e != null) && (e.getRetrievalEvent() != null)) {
+                        if (e.getRetrievalEvent().isInitialisationEvent()) {
+                            updateTree();
+                        }
+                    }
+                }
+
+                @Override
+                public void repaintError(final RepaintEvent e) {
+                    if ((e != null) && (e.getRetrievalEvent() != null)) {
+                        if (e.getRetrievalEvent().isInitialisationEvent()) {
+                            updateTree();
+                        }
+                    }
+                }
+            });
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());
@@ -1936,6 +1963,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 lab.setForeground(Color.GRAY);
             } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
                 lab.setForeground(Color.GRAY);
+            } else if (value instanceof ImageRasterService) {
+                if ((((ImageRasterService)value).getImageFile() != null)
+                            && !((ImageRasterService)value).getImageFile().exists()) {
+                    lab.setForeground(Color.GRAY);
+                }
             }
 
             leafRenderer.setSelected(isValueSelected(value));

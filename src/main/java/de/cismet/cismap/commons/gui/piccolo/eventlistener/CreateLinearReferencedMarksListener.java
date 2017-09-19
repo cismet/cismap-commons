@@ -41,6 +41,8 @@ import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.LinearReferencedPointMarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
  * DOCUMENT ME!
@@ -958,9 +960,23 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         if (selPFeature != null) {
             final Geometry geom = selPFeature.getFeature().getGeometry();
             if (selPFeature != null) {
+                Point2D point = trigger;
+
+                if (mc.isSnappingEnabled()) {
+                    final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
+                            mc,
+                            mc.getCamera().viewToLocal((Point2D)trigger.clone()),
+                            false,
+                            false);
+
+                    if (snapPoint != null) {
+                        point = snapPoint;
+                    }
+                }
+
                 final Coordinate triggerCoordinate = new Coordinate(
-                        mc.getWtst().getSourceX(trigger.getX()),
-                        mc.getWtst().getSourceY(trigger.getY()));
+                        mc.getWtst().getSourceX(point.getX()),
+                        mc.getWtst().getSourceY(point.getY()));
                 final Geometry lineGeometry = LinearReferencedPointFeature.getReducedLineGeometry(
                         geom,
                         new Coordinate(cursorX, cursorY),

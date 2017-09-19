@@ -274,11 +274,15 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
             if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
+                LOG.error("WMSServiceLayer: set enabled to false (minOpacity)");
                 this.setEnabled(false);                                                         // NOI18N
             } else {
+                LOG.error("WMSServiceLayer: set enabled"
+                            + wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());
                 setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());   // NOI18N
             }
         } catch (DataConversionException ex) {
+            LOG.error("Error while set WMSServiceLayer.enabled", ex);
         }
         setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());          // NOI18N
         setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());          // NOI18N
@@ -569,7 +573,9 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             init(wmsServiceLayerElement, capabilities, true);
 
             if (!isDummy()) {
-                setEnabled(true);
+                if (CismapBroker.getInstance().isEnableDummyLayerWhenAvailable()) {
+                    setEnabled(true);
+                }
                 dummyLayer.clear();
 
                 final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);

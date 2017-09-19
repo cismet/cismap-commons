@@ -490,9 +490,11 @@ public class PFeatureTools {
         for (final PFeature pfeature : features) {
             if (!pfeature.equals(vetoFeature)) {
                 final LineSegment seg = getNearestSegment(c, pfeature);
-                final Coordinate point = seg.closestPoint(c);
-                if (bounds.contains(point.x, point.y)) {
-                    points.add(new Point2D.Float((float)point.x, (float)point.y));
+                if (seg != null) {
+                    final Coordinate point = seg.closestPoint(c);
+                    if (bounds.contains(point.x, point.y)) {
+                        points.add(new Point2D.Float((float)point.x, (float)point.y));
+                    }
                 }
             }
         }
