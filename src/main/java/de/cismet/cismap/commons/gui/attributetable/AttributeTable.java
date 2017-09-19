@@ -42,6 +42,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -63,6 +64,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileFilter;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.math.BigDecimal;
@@ -382,14 +384,48 @@ public class AttributeTable extends javax.swing.JPanel {
                             final int[] rows = table.getSelectedRows();
 
                             if (!Arrays.equals(lastRows, rows)) {
-                                for (final int row : rows) {
-                                    final FeatureServiceFeature feature = model.getFeatureServiceFeature(
-                                            table.convertRowIndexToModel(row));
+                                final WaitingDialogThread wdt = new WaitingDialogThread(
+                                        StaticSwingTools.getFirstParentFrame(AttributeTable.this),
+                                        true,
+                                        "",
+                                        null,
+                                        250,
+                                        true) {
 
-                                    if (!((feature instanceof PermissionProvider)
-                                                    && !((PermissionProvider)feature).hasWritePermissions())) {
-                                        makeFeatureEditable(feature);
-                                    }
+                                        @Override
+                                        protected Object doInBackground() throws Exception {
+                                            wd.setMax(rows.length);
+                                            int progress = 0;
+
+                                            for (final int row : rows) {
+                                                final FeatureServiceFeature feature = model.getFeatureServiceFeature(
+                                                        table.convertRowIndexToModel(row));
+
+                                                if (!((feature instanceof PermissionProvider)
+                                                                && !((PermissionProvider)feature)
+                                                                .hasWritePermissions())) {
+                                                    makeFeatureEditable(feature);
+                                                }
+                                                wd.setProgress(++progress);
+                                                if (canceled) {
+                                                    return null;
+                                                }
+                                            }
+
+                                            return null;
+                                        }
+                                    };
+                                try {
+//                                    EventQueue.invokeAndWait(new Thread() {
+//
+//                                            @Override
+//                                            public void run() {
+//                                                wdt.start();
+//                                            }
+//                                        });
+                                    wdt.start();
+                                } catch (Exception ex) {
+                                    LOG.error("Error while locking features", ex);
                                 }
                             }
                             lastRows = rows;
@@ -570,10 +606,31 @@ public class AttributeTable extends javax.swing.JPanel {
         table.getSelectionModel().setValueIsAdjusting(true);
         final int[] selectedRows = table.getSelectedRows();
         Arrays.sort(selectedRows);
+        final Comparator<Feature> featureComp = new Comparator<Feature>() {
+
+                @Override
+                public int compare(final Feature o1, final Feature o2) {
+                    if ((o1 instanceof FeatureWithId) && (o2 instanceof FeatureWithId)) {
+                        return ((FeatureWithId)o1).getId() - ((FeatureWithId)o2).getId();
+                    } else if ((o1 == null) && (o2 == null)) {
+                        return 0;
+                    } else if ((o1 == null) && (o2 != null)) {
+                        return -1;
+                    } else if ((o1 != null) && (o2 == null)) {
+                        return 1;
+                    } else {
+                        return o1.toString().compareTo(o2.toString());
+                    }
+                }
+            };
+        if (selectedFeatures != null) {
+            Collections.sort(selectedFeatures, featureComp);
+        }
 
         for (int index = 0; index < tableFeatures.size(); ++index) {
             final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
-            final boolean contained = (selectedFeatures != null) && selectedFeatures.contains(feature);
+            final boolean contained = (selectedFeatures != null)
+                        && (Collections.binarySearch(selectedFeatures, feature, featureComp) >= 0);
             final boolean selected = Arrays.binarySearch(selectedRows, index) >= 0;
 
             if (contained && !selected) {
@@ -611,14 +668,19 @@ public class AttributeTable extends javax.swing.JPanel {
                         final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom." + geomType);
 
                         if ((geomTypeClass != null)
-                                    && ((feature.getGeometry() == null)
+                                    && ((feature.getGeometry() != null)
                                         || geomTypeClass.isInstance(feature.getGeometry()))) {
                             enabled = true;
                             break;
                         }
                     } catch (Exception e) {
-                        // nothing to do
+                        if (geomType.equals("none") && (feature.getGeometry() == null)) {
+                            enabled = true;
+                        }
                     }
+                } else if ((geomType == null) && (feature.getGeometry() == null)) {
+                    enabled = true;
+                    break;
                 }
             }
         }
@@ -973,22 +1035,20 @@ public class AttributeTable extends javax.swing.JPanel {
                     Thread.currentThread().setName("AttributeTable loadModel");
                     final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
 
-                    if (bb == null) {
-                        final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
+                    final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
 
-                        if (g != null) {
-                            bb = new XBoundingBox(g);
+                    if (g != null) {
+                        bb = new XBoundingBox(g);
 
-                            try {
-                                final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance()
-                                                .getSrs().getCode());
-                                bb = transformer.transformBoundingBox(bb);
-                            } catch (Exception e) {
-                                LOG.error("Cannot transform CRS.", e);
-                            }
-                        } else {
-                            bb = null;
+                        try {
+                            final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs()
+                                            .getCode());
+                            bb = transformer.transformBoundingBox(bb);
+                        } catch (Exception e) {
+                            LOG.error("Cannot transform CRS.", e);
                         }
+                    } else {
+                        bb = null;
                     }
 
                     if ((pageSize != -1) && (itemCount == 0)) {
@@ -2808,13 +2868,32 @@ public class AttributeTable extends javax.swing.JPanel {
     public void deleteFeatures() {
         final int[] selectedRows = table.getSelectedRows();
         final List<FeatureServiceFeature> featuresToDelete = new ArrayList<FeatureServiceFeature>();
+        final List<Integer> rowsToDeleteList = new ArrayList<Integer>();
+        final List<FeatureServiceFeature> featuresToSelect = new ArrayList<FeatureServiceFeature>();
+
+        for (final int row : selectedRows) {
+            final FeatureServiceFeature featureToDelete = model.getFeatureServiceFeature(table.convertRowIndexToModel(
+                        row));
+            if (featureToDelete instanceof ModifiableFeature) {
+                final ModifiableFeature dfsf = (ModifiableFeature)featureToDelete;
+
+                if (!(dfsf instanceof PermissionProvider)
+                            || ((PermissionProvider)dfsf).hasWritePermissions()) {
+                    rowsToDeleteList.add(row);
+                } else {
+                    featuresToSelect.add(featureToDelete);
+                }
+            }
+        }
+
+        final Integer[] selectedRowsToDelete = rowsToDeleteList.toArray(new Integer[rowsToDeleteList.size()]);
 
         final int ans = JOptionPane.showConfirmDialog(
                 AttributeTable.this,
                 NbBundle.getMessage(
                     AttributeTable.class,
                     "AttributeTable.butDeleteActionPerformed().text",
-                    selectedRows.length),
+                    selectedRowsToDelete.length),
                 NbBundle.getMessage(AttributeTable.class, "AttributeTable.butDeleteActionPerformed().title"),
                 JOptionPane.YES_NO_OPTION);
 
@@ -2834,10 +2913,10 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 protected Map<Integer, String> doInBackground() throws Exception {
                     int progress = 0;
-                    wd.setMax(selectedRows.length);
+                    wd.setMax(selectedRowsToDelete.length);
                     final Map<Integer, String> errorMap = new HashMap<Integer, String>();
 
-                    for (final int row : selectedRows) {
+                    for (final int row : selectedRowsToDelete) {
                         final FeatureServiceFeature featureToDelete = model.getFeatureServiceFeature(
                                 table.convertRowIndexToModel(
                                     row));
@@ -2906,6 +2985,10 @@ public class AttributeTable extends javax.swing.JPanel {
                             modifiedFeatures.remove(fsf);
                         }
                         featureService.retrieve(true);
+
+                        if (errors.isEmpty()) {
+                            SelectionManager.getInstance().addSelectedFeatures(featuresToSelect);
+                        }
 
                         for (final Integer id : errors.keySet()) {
                             if (id >= 0) {
@@ -3089,14 +3172,19 @@ public class AttributeTable extends javax.swing.JPanel {
                     try {
                         final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom." + geomType);
 
-                        if ((geomTypeClass != null)
-                                    && ((feature.getGeometry() == null)
-                                        || geomTypeClass.isInstance(feature.getGeometry()))) {
-                            newFeature.setGeometry(feature.getGeometry());
+                        if (((geomTypeClass == null) && (feature.getGeometry() == null))
+                                    || ((geomTypeClass != null)
+                                        && ((feature.getGeometry() != null)
+                                            && geomTypeClass.isInstance(feature.getGeometry())))) {
+                            if (!((geomTypeClass == null) && (feature.getGeometry() == null))) {
+                                newFeature.setGeometry(feature.getGeometry());
+                            }
                             geometryCompatible = true;
                         }
                     } catch (Exception e) {
-                        // nothing to do
+                        if (geomType.equals("none") && (feature.getGeometry() == null)) {
+                            geometryCompatible = true;
+                        }
                     }
                 }
 
@@ -3279,7 +3367,7 @@ public class AttributeTable extends javax.swing.JPanel {
         boolean save = forceSave;
         refreshModifiedFeaturesSet();
 
-        if (!save && (!modifiedFeatures.isEmpty() || featureDeleted)) {
+        if (!save && (!modifiedFeatures.isEmpty() || featureDeleted || !newFeatures.isEmpty())) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -3429,7 +3517,9 @@ public class AttributeTable extends javax.swing.JPanel {
 
                                 @Override
                                 public void run() {
+                                    selectionChangeFromMap = true;
                                     model.fireContentsChanged();
+                                    selectionChangeFromMap = false;
                                 }
                             });
 
@@ -3525,6 +3615,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 f.setEditable(false);
                 ((ModifiableFeature)f).delete();
                 model.removeFeatureServiceFeature(f);
+                modifiedFeatures.remove((DefaultFeatureServiceFeature)f);
             } catch (Exception e) {
                 LOG.error("Cannot remove feature", e);
             }
@@ -3773,6 +3864,9 @@ public class AttributeTable extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     public FeatureServiceFeature getFeatureById(final int id) {
+        if (model == null) {
+            return null;
+        }
         return model.getFeatureServiceFeatureById(id);
     }
 
@@ -3954,11 +4048,15 @@ public class AttributeTable extends javax.swing.JPanel {
                 for (int i = 0; i < getColumnCount(); ++i) {
                     if (i != eCol) {
                         final TableModelEvent e = new TableModelEvent(this, eRow, eRow, i);
+                        selectionChangeFromMap = true;
                         fireContentsChanged(e);
+                        selectionChangeFromMap = false;
                     }
                 }
             } else {
+                selectionChangeFromMap = true;
                 fireContentsChanged();
+                selectionChangeFromMap = false;
             }
         }
     }
