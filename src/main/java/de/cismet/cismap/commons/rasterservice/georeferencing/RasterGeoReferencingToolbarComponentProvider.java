@@ -59,11 +59,14 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
      */
     public RasterGeoReferencingToolbarComponentProvider() {
         initComponents();
-        getToolbarComponents().add(getToolbarComponentDescription());
 
-        CismapBroker.getInstance().addStatusListener(new MapStatusListenerHandler());
+        if (CismapBroker.getInstance().isEnableRasterGeoReferencingToolbar()) {
+            getToolbarComponents().add(getToolbarComponentDescription());
 
-        RasterGeoReferencingWizard.getInstance().addListener(new WizardListenerHandler());
+            CismapBroker.getInstance().addStatusListener(new MapStatusListenerHandler());
+
+            RasterGeoReferencingWizard.getInstance().addListener(new WizardListenerHandler());
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
