@@ -19,8 +19,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -35,8 +33,6 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.drophandler.builtin.MappingComponentUnknownFileDropHandlerDialog;
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -44,7 +40,6 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchFacade;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
@@ -122,6 +117,7 @@ public class CismapBroker {
     private float defaultTranslucency = 0.2f;
     private boolean highlightFeatureOnMouseOver = true;
     private boolean enableDummyLayerWhenAvailable = true;
+    private boolean enableRasterGeoReferencingToolbar = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -133,6 +129,24 @@ public class CismapBroker {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the enableRasterGeoReferencingToolbar
+     */
+    public boolean isEnableRasterGeoReferencingToolbar() {
+        return enableRasterGeoReferencingToolbar;
+    }
+
+    /**
+     * enables or disables the RasterGeoReferencingToolbarComponentProvider. The default value is true
+     *
+     * @param  enableRasterGeoReferencingToolbar  the enableRasterGeoReferencingToolbar to set
+     */
+    public void setEnableRasterGeoReferencingToolbar(final boolean enableRasterGeoReferencingToolbar) {
+        this.enableRasterGeoReferencingToolbar = enableRasterGeoReferencingToolbar;
+    }
 
     /**
      * DOCUMENT ME!
