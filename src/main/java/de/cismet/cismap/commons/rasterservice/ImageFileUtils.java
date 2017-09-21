@@ -99,7 +99,7 @@ public class ImageFileUtils {
     public static File getWorldFile(final File imageFile) {
         final File worldFile = getWorldFileWithoutCheck(imageFile);
 
-        if (worldFile.exists()) {
+        if ((worldFile != null) && worldFile.exists()) {
             return worldFile;
         } else {
             return null;
