@@ -151,6 +151,8 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
         if (worldFile != null) {
             mode = ImageFileUtils.checkIfRasterGeoRef(worldFile) ? ImageFileUtils.Mode.GEO_REFERENCED
                                                                  : ImageFileUtils.Mode.WORLDFILE;
+        } else {
+            mode = ImageFileUtils.Mode.TIFF;
         }
     }
 
