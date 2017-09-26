@@ -84,8 +84,10 @@ public class JDBCFeatureInfo {
      */
     private void createStatements() {
         try {
-            geometryStatement = connection.prepareStatement("select \"" + getGeoField() + "\" from \"" + tableName
-                            + "\" where \"" + idField + "\" = ?");
+            if (getGeoField() != null) {
+                geometryStatement = connection.prepareStatement("select \"" + getGeoField() + "\" from \"" + tableName
+                                + "\" where \"" + idField + "\" = ?");
+            }
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for geometries", e);
         }

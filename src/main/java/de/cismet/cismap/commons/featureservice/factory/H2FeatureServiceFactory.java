@@ -59,10 +59,12 @@ import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -80,10 +82,12 @@ import de.cismet.cismap.commons.features.JDBCFeatureInfo;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DefaultLayerProperties;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -147,6 +151,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_LOCK_TABLE_INDEX = "CREATE INDEX IF NOT EXISTS cs_locks_ind ON \""
                 + LOCK_TABLE_NAME + "\" (\"id\", \"table\");";
     private static String[] knownShpBundleEndings = { "dbf", "atx", "sbn", "prj", "shx", "sbx", "aih", "ain", "cpg" };
+    private static final Map<String, ConnectionWrapper> DB_CONNECTIONS = Collections.synchronizedMap(
+            new HashMap<String, ConnectionWrapper>());
 
     //~ Instance fields --------------------------------------------------------
 
@@ -162,6 +168,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private int srid = CismapBroker.getInstance().getDefaultCrsAlias();
     private String geometryType = AbstractFeatureService.UNKNOWN;
     private int lastFreeId = 0;
+    private boolean removeServiceFromTree = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -318,7 +325,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
                 rs.close();
 
-                createPrimaryKey(hasIdField, tableName);
+                if (!createPrimaryKey(hasIdField, tableName)) {
+                    removeServiceFromTree = true;
+                    H2FeatureService.removeTableIfExists(tableName);
+                }
 
                 if (geoCol != null) {
                     // prepare geo field
@@ -457,22 +467,28 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private void createTableFromSHP(final File file, final Statement st) throws Exception {
         final String tmpTableReference = tableName + "_temp_reference";
         final ResultSet rs;
+        boolean isDbf = false;
 
         if (file.getAbsolutePath().toLowerCase().endsWith(".shp")) {
             if (!checkForFileNames(file)) {
-                JOptionPane.showMessageDialog(
-                    CismapBroker.getInstance().getMappingComponent(),
-                    org.openide.util.NbBundle.getMessage(
+//                JOptionPane.showMessageDialog(
+//                    CismapBroker.getInstance().getMappingComponent(),
+//                    org.openide.util.NbBundle.getMessage(
+//                        H2FeatureServiceFactory.class,
+//                        "H2FeatureServiceFactory.importFile().invalidFileName"),
+//                    org.openide.util.NbBundle.getMessage(
+//                        H2FeatureServiceFactory.class,
+//                        "H2FeatureServiceFactory.importFile().invalidFileName.title"), // NOI18N
+//                    JOptionPane.ERROR_MESSAGE);
+                removeServiceFromTree = true;
+                throw new Exception(org.openide.util.NbBundle.getMessage(
                         H2FeatureServiceFactory.class,
-                        "H2FeatureServiceFactory.importFile().invalidFileName"),
-                    org.openide.util.NbBundle.getMessage(
-                        H2FeatureServiceFactory.class,
-                        "H2FeatureServiceFactory.importFile().invalidFileName.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
-
-                // todo: throw exception
+                        "H2FeatureServiceFactory.importFile().invalidFileName"));
             }
+        } else {
+            isDbf = true;
         }
+
         try {
             st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
             // st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
@@ -481,17 +497,23 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StringBuilder attsRef = new StringBuilder();
 
             rs = st.executeQuery("select * from \"" + tmpTableReference + "\" limit 1");
-            for (int i = 2; i < rs.getMetaData().getColumnCount(); ++i) {
+            for (int i = 2; i <= rs.getMetaData().getColumnCount(); ++i) {
                 if (!attsAndTypes.toString().equals("")) {
                     attsAndTypes.append(",");
                     atts.append(",");
                     attsRef.append(",");
                 }
+                String columnName = rs.getMetaData().getColumnName(i).toLowerCase();
+
+                if (columnName.equals("the_geom")) {
+                    columnName = "geom";
+                }
+
                 attsAndTypes.append("\"")
-                        .append(rs.getMetaData().getColumnName(i).toLowerCase())
+                        .append(columnName)
                         .append("\" ")
                         .append(rs.getMetaData().getColumnTypeName(i));
-                atts.append("\"").append(rs.getMetaData().getColumnName(i).toLowerCase()).append("\"");
+                atts.append("\"").append(columnName).append("\"");
                 attsRef.append(rs.getMetaData().getColumnName(i).toLowerCase());
             }
             rs.close();
@@ -502,6 +524,28 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     atts,
                     attsRef,
                     tmpTableReference));
+
+            if (!isDbf) {
+                ResultSet set = st.executeQuery(String.format(
+                            "SELECT distinct ST_GeometryType(\"geom\") from \"%s\"",
+                            tableName));
+
+                if (set.next()) {
+                    if ((set.getString(1) != null) && set.getString(1).toUpperCase().startsWith("MULTI")) {
+                        set.close();
+                        set = st.executeQuery(String.format(
+                                    "SELECT max(ST_NumGeometries(\"geom\")) from \"%s\"",
+                                    tableName));
+
+                        if (set.next() && (set.getInt(1) == 1)) {
+                            st.execute(String.format(
+                                    "UPDATE \"%s\" set \"geom\" = ST_GeometryN(\"geom\", 1)",
+                                    tableName));
+                            set.close();
+                        }
+                    }
+                }
+            }
             st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
         } finally {
             try {
@@ -938,9 +982,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param   hasIdField  creates a id field, for the primary key, if this parameter is false
      * @param   tableName   DOCUMENT ME!
      *
+     * @return  false, iff the primary key was not created
+     *
      * @throws  SQLException  DOCUMENT ME!
      */
-    private void createPrimaryKey(final boolean hasIdField, final String tableName) throws SQLException {
+    private boolean createPrimaryKey(final boolean hasIdField, final String tableName) throws SQLException {
         final StatementWrapper st = createStatement(conn);
 
         if (!hasIdField) {
@@ -951,7 +997,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         }
 
         try {
-            final String indexName = removeSpecialCharacterFromIndexName(tableName) + "PIndex";
+            final String indexName = removeSpecialCharacterFromIndexName(tableName) + "PIndex"
+                        + System.currentTimeMillis();
             st.execute(String.format(ADD_NOT_NULL_ID, tableName, idField));
             st.execute(String.format(
                     CREATE_PRIMARY_KEY,
@@ -960,7 +1007,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     idField));
         } catch (SQLException e) {
             if (hasIdField) {
-                final String newName = "id___001";
+                final String newName = "id___000";
                 final int ans = JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
                         NbBundle.getMessage(
                             H2FeatureServiceFactory.class,
@@ -980,11 +1027,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                     createPrimaryKey(false, tableName);
                 } else {
-                    // todo remove Table
+                    return false;
                 }
             }
+        } finally {
+            st.close();
         }
-        st.close();
+
+        return true;
     }
 
     /**
@@ -998,7 +1048,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private void createSpatialIndex(final String geoField, final String tableName) throws SQLException {
         final StatementWrapper st = createStatement(conn);
         final String indexName = removeSpecialCharacterFromIndexName(geoField + tableName
-                        + "SpatialIndex");
+                        + "SpatialIndex") + System.currentTimeMillis();
         final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
         st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, geoField));
         st.execute(String.format(UPDATE_SRID, tableName, geoField, srid));
@@ -1061,13 +1111,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
     }
 
@@ -1557,10 +1607,23 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             geometryType = ((Geometry)o).getGeometryType();
                         }
                     }
+
+                    if (getLayerProperties() instanceof DefaultLayerProperties) {
+                        ((DefaultLayerProperties)getLayerProperties()).setAttributeTableRuleSet(
+                            createH2AttributeTableRuleSet());
+                    }
                 }
 
                 geometryTypeRs.close();
+            } else {
+                geometryType = "none";
+
+                if (getLayerProperties() instanceof DefaultLayerProperties) {
+                    ((DefaultLayerProperties)getLayerProperties()).setAttributeTableRuleSet(
+                        createH2AttributeTableRuleSet());
+                }
             }
+
             st.close();
 
             if (info == null) {
@@ -1596,6 +1659,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public void setLayerProperties(final LayerProperties layerProperties) {
         super.setLayerProperties(layerProperties);
         if (layerProperties instanceof DefaultLayerProperties) {
+            if (removeServiceFromTree && (layerProperties.getFeatureService() != null)) {
+                CismapBroker.getInstance()
+                        .getMappingComponent()
+                        .getMappingModel()
+                        .removeLayer(layerProperties.getFeatureService());
+            }
             ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(createH2AttributeTableRuleSet());
         }
     }
@@ -1662,20 +1731,37 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @return  a connection to the internal database
      */
     public static ConnectionWrapper getDBConnection(final String databasePath) {
-        try {
-            Class.forName("org.h2.Driver");
-            final String path = ((databasePath == null) ? DB_NAME : databasePath);
-            return (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + path));
-        } catch (ClassNotFoundException e) {
-            LOG.error("Error while creating database connection.", e);
-            return null;
-        } catch (SQLException e) {
-            LOG.error("Error while creating database connection.", e);
+        final String path = ((databasePath == null) ? DB_NAME : databasePath);
 
-            return null;
+        ConnectionWrapper connection = DB_CONNECTIONS.get(path);
+        boolean isConnectionClosed = false;
+
+        try {
+            if (connection != null) {
+                isConnectionClosed = connection.isClosed();
+            }
+        } catch (Exception e) {
+            isConnectionClosed = true;
         }
+
+        if ((connection == null) || isConnectionClosed) {
+            try {
+                Class.forName("org.h2.Driver");
+                connection = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                            "jdbc:h2:"
+                                    + path));
+                DB_CONNECTIONS.put(path, connection);
+            } catch (ClassNotFoundException e) {
+                LOG.error("Error while creating database connection.", e);
+                return null;
+            } catch (SQLException e) {
+                LOG.error("Error while creating database connection.", e);
+
+                return null;
+            }
+        }
+
+        return connection;
     }
 
     /**
@@ -1793,6 +1879,52 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     /**
      * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void determineEnvelope() throws Exception {
+        StatementWrapper st = null;
+        try {
+            st = createStatement(conn);
+            final ResultSet envelopeSet = st.executeQuery("SELECT ST_Extent(\"" + geometryField
+                            + "\"), (SELECT st_srid(\""
+                            + geometryField + "\"::Geometry) from \"" + tableName + "\" limit 1) from \""
+                            + tableName
+                            + "\" where \"" + geometryField + "\" is not null;");
+
+            if (envelopeSet.next()) {
+                final Object geomObject = envelopeSet.getObject(1);
+
+                if (geomObject instanceof Envelope) {
+                    final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                            envelopeSet.getInt(2));
+                    envelope = gf.toGeometry((Envelope)geomObject);
+                } else if (geomObject instanceof Polygon) {
+                    envelope = (Polygon)geomObject;
+                    envelope.setSRID(envelopeSet.getInt(2));
+                } else {
+                    envelope = null;
+                }
+
+                envelopeSet.close();
+            } else {
+                logger.error("cannot determine H2 layer envelope");
+            }
+        } catch (Exception e) {
+            LOG.error("Error while determining envelope", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException e) {
+                    LOG.error("Error while closing statement", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
      */
     private void determineIdField() {
         String id = "id";
@@ -1847,6 +1979,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final boolean saveAsLastCreated) throws FeatureFactory.TooManyFeaturesException, Exception {
         final StringBuilder sb = new StringBuilder("select \"" + idField + "\" from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
+
+        if ((boundingBox != null) && (geometryField == null)) {
+            return new ArrayList<JDBCFeature>();
+        }
 
         if (boundingBox != null) {
             sb.append(tableName)
@@ -2013,13 +2149,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * DOCUMENT ME!
      */
     public void closeConnection() {
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (Exception e) {
-            // nothing to do
-        }
+//        try {
+//            if (conn != null) {
+//                conn.close();
+//            }
+//        } catch (Exception e) {
+//            // nothing to do
+//        }
     }
 
     /**
