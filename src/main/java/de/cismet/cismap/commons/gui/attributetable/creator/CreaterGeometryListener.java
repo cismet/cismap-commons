@@ -11,9 +11,17 @@
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
+import edu.umd.cs.piccolo.nodes.PPath;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.LINESTRING;
 
 /**
  * can be used tio create new Geometries on the map.
@@ -41,6 +49,27 @@ public class CreaterGeometryListener extends CreateNewGeometryListener {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    @Override
+    protected PPath createNewTempFeature() {
+        final PPath newTempFeaturePath = new PPath();
+        newTempFeaturePath.setStroke(new FixedWidthStroke());
+
+        if (!isInMode(LINESTRING)) {
+            final Color fillingColor = new Color(1f, 0f, 0f, 0.5f);
+            newTempFeaturePath.setStrokePaint(fillingColor.darker());
+            newTempFeaturePath.setPaint(fillingColor);
+        } else {
+            final Color fillingColor = new Color(1f, 0f, 0f, 0.5f);
+            newTempFeaturePath.setStrokePaint(fillingColor);
+        }
+        return newTempFeaturePath;
+    }
 
     @Override
     protected void finishGeometry(final AbstractNewFeature newFeature) {
