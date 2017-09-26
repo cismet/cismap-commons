@@ -34,6 +34,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
 import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.util.SelectionManager;
@@ -174,6 +176,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                     result = getPrepareObject(rs.getObject(1));
                 }
 
+                try {
+                    rs.close();
+                } catch (Exception e) {
+                    logger.error("Error while closing H2 result set", e);
+                }
                 featureInfo.addPropertyToCache(cacheId, result);
             } catch (final Exception e) {
                 logger.error("Cannot read property from the database.", e);
@@ -276,6 +283,19 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             } else {
                 addFeature(st);
             }
+
+            if ((getLayerProperties() != null) && (getLayerProperties().getFeatureService() != null)) {
+                final JDBCFeatureFactory factory = (JDBCFeatureFactory)getLayerProperties().getFeatureService()
+                            .getFeatureFactory();
+
+                if (factory instanceof H2FeatureServiceFactory) {
+                    final Geometry envelope = factory.getEnvelope();
+
+                    if ((getGeometry() != null) && !envelope.contains(getGeometry())) {
+                        ((H2FeatureServiceFactory)factory).determineEnvelope();
+                    }
+                }
+            }
         } finally {
             if (st != null) {
                 st.close();
@@ -331,6 +351,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         final String insertSql = "INSERT INTO \"%1s\" (%2s) VALUES (%3s)";
         final List<String> attributes = new ArrayList<String>();
         final List<String> values = new ArrayList<String>();
+        boolean idExists = false;
 
         for (final Object name : map.keySet()) {
             final Object value = map.get(name);
@@ -344,9 +365,15 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
             attributes.add("\"" + String.valueOf(name) + "\"");
             values.add(valueString);
+
+            if (name.equals("id")) {
+                idExists = true;
+            }
         }
-        attributes.add("\"" + String.valueOf("id") + "\"");
-        values.add(String.valueOf(getId()));
+        if (!idExists) {
+            attributes.add("\"" + String.valueOf("id") + "\"");
+            values.add(String.valueOf(getId()));
+        }
 
         final String query = String.format(
                 insertSql,
@@ -384,6 +411,10 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     @Override
     public void delete() throws Exception {
+        // this is required for a clean restore
+        super.getProperties().clear();
+        setProperties(getProperties());
+
         final String deleteStat = String.format(
                 DELETE_STATEMENT,
                 featureInfo.getTableName(),
@@ -512,6 +543,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
 
         ResultSet rs = null;
+
+        if (featureInfo.getGeometryStatement() == null) {
+            // the feature has no geometry
+            return null;
+        }
 
         try {
             final PreparedStatement ps = featureInfo.getGeometryStatement();

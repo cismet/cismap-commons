@@ -293,11 +293,15 @@ public class TransformationPHandle extends PHandle {
                     final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                     final Coordinate coordinate = coordArr[coordPosition];
 
-                    final double leftDistance = coordinate.distance(leftNeighbourCoordinate);
-                    final double rightDistance = coordinate.distance(rightNeighbourCoordinate);
+                    if (leftNeighbourCoordinate != null) {
+                        final double leftDistance = coordinate.distance(leftNeighbourCoordinate);
+                        leftInfo.setText(StaticDecimalTools.round(leftDistance));
+                    }
 
-                    leftInfo.setText(StaticDecimalTools.round(leftDistance));
-                    rightInfo.setText(StaticDecimalTools.round(rightDistance));
+                    if (rightInfo != null) {
+                        final double rightDistance = coordinate.distance(rightNeighbourCoordinate);
+                        rightInfo.setText(StaticDecimalTools.round(rightDistance));
+                    }
                 }
             }
         } catch (final Throwable t) {
@@ -331,11 +335,18 @@ public class TransformationPHandle extends PHandle {
                 System.arraycopy(coordArr, 0, backupCoordArr, 0, backupCoordArr.length);
 
                 leftNeighbourIndex = getLeftNeighbourIndex(coordPosition);
+
+                if ((leftNeighbourIndex >= 0) && (leftNeighbourIndex < coordArr.length)) {
+                    leftNeighbourCoordinate = coordArr[leftNeighbourIndex];
+                    leftNeighbourPoint = new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]);
+                }
+
                 rightNeighbourIndex = getRightNeighbourIndex(coordPosition);
-                leftNeighbourCoordinate = coordArr[leftNeighbourIndex];
-                rightNeighbourCoordinate = coordArr[rightNeighbourIndex];
-                leftNeighbourPoint = new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]);
-                rightNeighbourPoint = new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]);
+
+                if ((rightNeighbourIndex >= 0) && (rightNeighbourIndex < coordArr.length)) {
+                    rightNeighbourCoordinate = coordArr[rightNeighbourIndex];
+                    rightNeighbourPoint = new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]);
+                }
 
                 if ((pfeature.getFeature() instanceof AbstractNewFeature)
                             && ((((AbstractNewFeature)pfeature.getFeature()).getGeometryType()
@@ -355,7 +366,9 @@ public class TransformationPHandle extends PHandle {
                     /*if (pivotHandle != null) {
                      * pfeature.getViewer().getHandleLayer().addChild(pivotHandle);}*/
                 } else {
-                    if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
+                    if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)
+                                && (rightNeighbourPoint != null)
+                                && (leftNeighbourPoint != null)) {
                         // Infonodes (Entfernung) anlegen
                         final Point2D leftInfoPoint = pfeature.getViewer().getCamera().viewToLocal(leftNeighbourPoint);
                         final Point2D rightInfoPoint = pfeature.getViewer()
