@@ -222,118 +222,259 @@ public class ImageFileRetrieval extends Thread {
     private BufferedImage createImage(final ImageFileMetaData metaData) throws IOException,
         InterruptedException,
         NoninvertibleTransformException {
-        final double[] matrix = metaData.getTransform().getMatrixEntries();
-        final AffineTransform worldFileTransform = new AffineTransform(
-                matrix[0],
-                matrix[3],
-                matrix[1],
-                matrix[4],
-                matrix[2],
-                matrix[5]);
+        if (metaData.getTransform() == null) {
+            final Envelope en = metaData.getImageEnvelope();
+            final Rectangle rec = metaData.getImageBounds();
+            return createImage(rec, en);
+        } else {
+            final double[] matrix = metaData.getTransform().getMatrixEntries();
+            final AffineTransform worldFileTransform = new AffineTransform(
+                    matrix[0],
+                    matrix[3],
+                    matrix[1],
+                    matrix[4],
+                    matrix[2],
+                    matrix[5]);
 
-        // bounds in pixel dimensions
-        final Rectangle mapBounds = new Rectangle(width, height);
-        final Rectangle imageBounds = metaData.getImageBounds();
+            // bounds in pixel dimensions
+            final Rectangle mapBounds = new Rectangle(width, height);
+            final Rectangle imageBounds = metaData.getImageBounds();
 
-        // bounds in world dimensions
-        final Rectangle.Double mapWorldBounds = new Rectangle.Double(x1, y1, x2 - x1, y2 - y1);
-        final Envelope imageWorldBounds = metaData.getImageEnvelope();
+            // bounds in world dimensions
+            final Rectangle.Double mapWorldBounds = new Rectangle.Double(x1, y1, x2 - x1, y2 - y1);
+            final Envelope imageWorldBounds = metaData.getImageEnvelope();
 
-        // the offset of the image in relation to the map in world dimensions
-        final Point.Double imageMapWorldOffset = new Point.Double(
-                imageWorldBounds.getMinX()
-                        - mapWorldBounds.getMinX(),
-                mapWorldBounds.getMaxY()
-                        - imageWorldBounds.getMaxY());
+            // the offset of the image in relation to the map in world dimensions
+            final Point.Double imageMapWorldOffset = new Point.Double(
+                    imageWorldBounds.getMinX()
+                            - mapWorldBounds.getMinX(),
+                    mapWorldBounds.getMaxY()
+                            - imageWorldBounds.getMaxY());
 
-        // meter per pixel ration (the better appropriate "Dimension" class only supports Integers
-        // so we are using Rectangle.Double instead)
-        final Rectangle.Double meterPerPixel = new Rectangle.Double(
-                0,
-                0,
-                mapWorldBounds.getWidth()
-                        / mapBounds.getWidth(),
-                mapWorldBounds.getHeight()
-                        / mapBounds.getHeight());
+            // meter per pixel ration (the better appropriate "Dimension" class only supports Integers
+            // so we are using Rectangle.Double instead)
+            final Rectangle.Double meterPerPixel = new Rectangle.Double(
+                    0,
+                    0,
+                    mapWorldBounds.getWidth()
+                            / mapBounds.getWidth(),
+                    mapWorldBounds.getHeight()
+                            / mapBounds.getHeight());
 
-        // LOAD RAW IMAGE
-        BufferedImage rawImage = ImageIO.read(imageFile);
+            // LOAD RAW IMAGE
+            BufferedImage rawImage = ImageIO.read(imageFile);
 
-        handleInterruption();
+            handleInterruption();
 
-        // PRECLIPPING
-        final Point.Double clippingWorldOffset;
-        BufferedImage clippedImage;
-        if ((worldFileTransform.getShearX() == 0) && (worldFileTransform.getShearY() == 0)) {
-            // calculating clipping rectangle
-            final Rectangle clippingRect = getClippingRect(
-                    mapWorldBounds,
-                    imageMapWorldOffset,
-                    imageBounds,
-                    worldFileTransform);
+            // PRECLIPPING
+            final Point.Double clippingWorldOffset;
+            BufferedImage clippedImage;
+            if ((worldFileTransform.getShearX() == 0) && (worldFileTransform.getShearY() == 0)) {
+                // calculating clipping rectangle
+                final Rectangle clippingRect = getClippingRect(
+                        mapWorldBounds,
+                        imageMapWorldOffset,
+                        imageBounds,
+                        worldFileTransform);
 
-            // the clipped image does not start at the same positon. an offset is needed to compensate for this
-            clippingWorldOffset = new Point.Double(
-                    clippingRect.getX()
-                            * worldFileTransform.getScaleX(),
-                    -clippingRect.getY()
-                            * worldFileTransform.getScaleY());
-            // clipping the image
-            clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
-                    (int)clippingRect.getY(),
-                    (int)clippingRect.getWidth(),
-                    (int)clippingRect.getHeight());
-        } else { // no preclipping for sheared/rotated images for simplicity reasons
-            clippingWorldOffset = new Point.Double(0, 0);
-            clippedImage = rawImage;
+                // the clipped image does not start at the same positon. an offset is needed to compensate for this
+                clippingWorldOffset = new Point.Double(
+                        clippingRect.getX()
+                                * worldFileTransform.getScaleX(),
+                        -clippingRect.getY()
+                                * worldFileTransform.getScaleY());
+                // clipping the image
+                clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
+                        (int)clippingRect.getY(),
+                        (int)clippingRect.getWidth(),
+                        (int)clippingRect.getHeight());
+            } else { // no preclipping for sheared/rotated images for simplicity reasons
+                clippingWorldOffset = new Point.Double(0, 0);
+                clippedImage = rawImage;
+            }
+
+            // cleaning memory
+            rawImage = null;
+            System.gc();
+
+            handleInterruption();
+
+            // TRANSFORMATION
+            // Just calculating the transformed shape first.
+            // (Not very elegant to do this, but it works)
+            // scaling and shearing = worldfile scaling/shearing divided by meterPerPixel
+            final AffineTransform transformation = new AffineTransform(
+                    worldFileTransform.getScaleX()
+                            / meterPerPixel.getWidth(),
+                    -worldFileTransform.getShearY()
+                            / meterPerPixel.getHeight(),
+                    worldFileTransform.getShearX()
+                            / meterPerPixel.getWidth(),
+                    -worldFileTransform.getScaleY()
+                            / meterPerPixel.getHeight(),
+                    0,
+                    0);
+
+            // The x/y coordinate of the transformed (but not yet translated) is either 0
+            // or negative. This is important, because negative values hav to be added to the offset
+            final Rectangle shapeBounds = transformation.createTransformedShape(imageBounds).getBounds();
+
+            // We apply now the full transormation to the image
+            // position = combined world offsets divided by meterPerPixel
+            final AffineTransform transformation2 = new AffineTransform(
+                    transformation.getScaleX(),
+                    transformation.getShearY(),
+                    transformation.getShearX(),
+                    transformation.getScaleY(),
+                    ((imageMapWorldOffset.getX() + clippingWorldOffset.getX())
+                                / meterPerPixel.getWidth())
+                            - shapeBounds.getX(),
+                    ((imageMapWorldOffset.getY() + clippingWorldOffset.getY())
+                                / meterPerPixel.getHeight())
+                            - shapeBounds.getY());
+            final BufferedImage transformedImage = transform(transformation2, clippedImage);
+
+            // cleaning memory
+            clippedImage = null;
+            System.gc();
+
+            return transformedImage;
+        }
+    }
+
+    /**
+     * Creates an image of the given map section, without any transformation.
+     *
+     * @param   origImageBounds  the bounds of the original image
+     * @param   origImageCoords  the envelope of the original image
+     *
+     * @return  an image of the given map section
+     *
+     * @throws  IOException           DOCUMENT ME!
+     * @throws  InterruptedException  DOCUMENT ME!
+     */
+    private BufferedImage createImage(final Rectangle origImageBounds, final Envelope origImageCoords)
+            throws IOException, InterruptedException {
+        final double meterPerPixelWidth = origImageCoords.getWidth() / origImageBounds.getWidth();
+        final double meterPerPixelHeight = origImageCoords.getHeight() / origImageBounds.getHeight();
+        int mapPartStartX = (int)((x1 - origImageCoords.getMinX()) / meterPerPixelWidth);
+        int mapPartStartY = (int)((origImageCoords.getMaxY() - y2) / meterPerPixelHeight);
+        int mapPartWidth = (int)((x2 - x1) / meterPerPixelWidth);
+        int mapPartHeight = (int)((y2 - y1) / meterPerPixelHeight);
+        int imageWidth = width;
+        int imageHeight = height;
+        int borderLeft = 0;
+        int borderTop = 0;
+        int borderRight = 0;
+        int borderBottom = 0;
+
+        if (mapPartStartX < 0) {
+            // add left border
+            mapPartWidth -= Math.abs(mapPartStartX);
+            borderLeft = (int)(Math.abs(mapPartStartX) * meterPerPixelWidth / ((x2 - x1) / width));
+            imageWidth -= borderLeft;
+            mapPartStartX = 0;
         }
 
-        // cleaning memory
-        rawImage = null;
+        if (mapPartStartY < 0) {
+            // add top border
+            mapPartHeight -= Math.abs(mapPartStartY);
+            borderTop = (int)(Math.abs(mapPartStartY) * meterPerPixelHeight / ((y2 - y1) / height));
+            imageHeight -= borderTop;
+            mapPartStartY = 0;
+        }
+
+        if ((mapPartStartX + mapPartWidth) > origImageBounds.getWidth()) {
+            // add right border
+            borderRight = (int)(((mapPartStartX + mapPartWidth) - origImageBounds.getWidth()) * meterPerPixelWidth
+                            / ((x2 - x1) / width));
+            mapPartWidth = ((int)origImageBounds.getWidth() - mapPartStartX);
+            imageWidth = imageWidth - borderRight;
+        }
+
+        if ((mapPartStartY + mapPartHeight) > origImageBounds.getHeight()) {
+            // add bottom border
+            borderBottom = (int)(((mapPartStartY + mapPartHeight) - origImageBounds.getHeight()) * meterPerPixelHeight
+                            / ((y2 - y1) / height));
+            mapPartHeight = ((int)origImageBounds.getHeight() - mapPartStartY);
+            imageHeight = imageHeight - borderBottom;
+        }
+
+        BufferedImage imagePart = null;
+
+        if ((mapPartWidth > 0) && (mapPartHeight > 0)) {
+            BufferedImage i = ImageIO.read(imageFile);
+            imagePart = i.getSubimage(mapPartStartX, mapPartStartY, mapPartWidth, mapPartHeight);
+            i = null;
+            System.gc();
+        }
+
+        if (youngerCall && isInterrupted()) {
+            throw new InterruptedException();
+        }
+
+        final BufferedImage rescaledImage = rescale(
+                imageWidth,
+                imageHeight,
+                borderLeft,
+                borderRight,
+                borderTop,
+                borderBottom,
+                BufferedImage.TYPE_INT_ARGB,
+                imagePart);
+
+        imagePart = null;
         System.gc();
 
-        handleInterruption();
+        return rescaledImage;
+    }
 
-        // TRANSFORMATION
-        // Just calculating the transformed shape first.
-        // (Not very elegant to do this, but it works)
-        // scaling and shearing = worldfile scaling/shearing divided by meterPerPixel
-        final AffineTransform transformation = new AffineTransform(
-                worldFileTransform.getScaleX()
-                        / meterPerPixel.getWidth(),
-                -worldFileTransform.getShearY()
-                        / meterPerPixel.getHeight(),
-                worldFileTransform.getShearX()
-                        / meterPerPixel.getWidth(),
-                -worldFileTransform.getScaleY()
-                        / meterPerPixel.getHeight(),
+    /**
+     * Rescale the given image and add transparent borders.
+     *
+     * @param   width         DOCUMENT ME!
+     * @param   height        DOCUMENT ME!
+     * @param   borderLeft    DOCUMENT ME!
+     * @param   borderRight   DOCUMENT ME!
+     * @param   borderTop     DOCUMENT ME!
+     * @param   borderBottom  DOCUMENT ME!
+     * @param   type          DOCUMENT ME!
+     * @param   image         DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage rescale(final int width,
+            final int height,
+            final int borderLeft,
+            final int borderRight,
+            final int borderTop,
+            final int borderBottom,
+            final int type,
+            final BufferedImage image) {
+        final int totalWdth = width + borderLeft + borderRight;
+        final int totalHeight = height + borderTop + borderBottom;
+        final BufferedImage resized = new BufferedImage(totalWdth, totalHeight, type);
+
+        if (image != null) {
+            final Graphics2D g = resized.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(
+                image,
+                borderLeft,
+                borderTop,
+                width
+                        + borderLeft,
+                height
+                        + borderTop,
                 0,
-                0);
+                0,
+                image.getWidth(),
+                image.getHeight(),
+                null);
+            g.dispose();
+        }
 
-        // The x/y coordinate of the transformed (but not yet translated) is either 0
-        // or negative. This is important, because negative values hav to be added to the offset
-        final Rectangle shapeBounds = transformation.createTransformedShape(imageBounds).getBounds();
-
-        // We apply now the full transormation to the image
-        // position = combined world offsets divided by meterPerPixel
-        final AffineTransform transformation2 = new AffineTransform(
-                transformation.getScaleX(),
-                transformation.getShearY(),
-                transformation.getShearX(),
-                transformation.getScaleY(),
-                ((imageMapWorldOffset.getX() + clippingWorldOffset.getX())
-                            / meterPerPixel.getWidth())
-                        - shapeBounds.getX(),
-                ((imageMapWorldOffset.getY() + clippingWorldOffset.getY())
-                            / meterPerPixel.getHeight())
-                        - shapeBounds.getY());
-        final BufferedImage transformedImage = transform(transformation2, clippedImage);
-
-        // cleaning memory
-        clippedImage = null;
-        System.gc();
-
-        return transformedImage;
+        return resized;
     }
 
     /**
@@ -379,7 +520,7 @@ public class ImageFileRetrieval extends Thread {
                     return ImageFileUtils.getWorldFileMetaData(getImageFile(), getWorldFile());
                 }
                 case TIFF: {
-                    getTiffMetaData();
+                    return getTiffMetaData();
                 }
                 case GEO_REFERENCED: {
                     return getGeoReferencedMetaData();
