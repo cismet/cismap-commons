@@ -11,19 +11,32 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import org.apache.log4j.Logger;
+
+import org.deegree.datatypes.Types;
 
 import org.openide.util.NbBundle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JOptionPane;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.DefaultLayerProperties;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
@@ -45,6 +58,10 @@ public class PointReferencingDialog extends javax.swing.JDialog {
     private static final Logger LOG = Logger.getLogger(PointReferencingDialog.class);
     private static Object lastFromProperty = null;
     private static Object lastTillProperty = null;
+    private static Double MIN_X = null;
+    private static Double MAX_X = null;
+    private static Double MIN_Y = null;
+    private static Double MAX_Y = null;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -89,6 +106,78 @@ public class PointReferencingDialog extends javax.swing.JDialog {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the MIN_X
+     */
+    public static Double getMIN_X() {
+        return MIN_X;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aMIN_X  the MIN_X to set
+     */
+    public static void setMIN_X(final Double aMIN_X) {
+        MIN_X = aMIN_X;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the MAX_X
+     */
+    public static Double getMAX_X() {
+        return MAX_X;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aMAX_X  the MAX_X to set
+     */
+    public static void setMAX_X(final Double aMAX_X) {
+        MAX_X = aMAX_X;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the MIN_Y
+     */
+    public static Double getMIN_Y() {
+        return MIN_Y;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aMIN_Y  the MIN_Y to set
+     */
+    public static void setMIN_Y(final Double aMIN_Y) {
+        MIN_Y = aMIN_Y;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the MAX_Y
+     */
+    public static Double getMAX_Y() {
+        return MAX_Y;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aMAX_Y  the MAX_Y to set
+     */
+    public static void setMAX_Y(final Double aMAX_Y) {
+        MAX_Y = aMAX_Y;
+    }
 
     /**
      * DOCUMENT ME!
@@ -307,7 +396,7 @@ public class PointReferencingDialog extends javax.swing.JDialog {
             return;
         }
 
-        final WaitingDialogThread<H2FeatureService> wdt = new WaitingDialogThread<H2FeatureService>(StaticSwingTools
+        final WaitingDialogThread<ServiceWithHint> wdt = new WaitingDialogThread<ServiceWithHint>(StaticSwingTools
                         .getParentFrame(
                             getParent()),
                 true,
@@ -318,23 +407,173 @@ public class PointReferencingDialog extends javax.swing.JDialog {
                 200) {
 
                 @Override
-                protected H2FeatureService doInBackground() throws Exception {
-                    return service.createPointGeometryInformation(
-                            fromField,
-                            tillField,
-                            tableName);
+                protected ServiceWithHint doInBackground() throws Exception {
+//                    return service.createPointGeometryInformation(
+//                            fromField,
+//                            tillField,
+//                            tableName);
+
+                    service.initAndWait();
+                    final Map<String, FeatureServiceAttribute> attributes =
+                        new HashMap<String, FeatureServiceAttribute>(service.getFeatureServiceAttributes());
+                    String geometryField = null;
+                    final List<String> attributeOrder = new ArrayList<String>(
+                            service.getOrderedFeatureServiceAttributes());
+
+                    for (final String key : attributes.keySet()) {
+                        final FeatureServiceAttribute attr = attributes.get(key);
+
+                        if (attr.isGeometry()) {
+                            geometryField = key;
+                            break;
+                        }
+                    }
+
+                    if (geometryField != null) {
+                        attributes.remove(geometryField);
+                        attributeOrder.remove(geometryField);
+                    }
+
+                    attributes.put("geom", new FeatureServiceAttribute("geom", String.valueOf(Types.GEOMETRY), true));
+                    attributeOrder.add(0, "geom");
+
+                    final List<FeatureServiceAttribute> featureServiceAttributes =
+                        new ArrayList<FeatureServiceAttribute>();
+
+                    for (final String key : attributeOrder) {
+                        final FeatureServiceAttribute attr = attributes.get(key);
+
+                        featureServiceAttributes.add(attr);
+                    }
+
+                    final List<FeatureServiceFeature> featureList = new ArrayList<FeatureServiceFeature>();
+                    final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
+                    final LayerProperties layerProperties = new DefaultLayerProperties();
+                    // add a dummy service, that contains the feature service attributes
+                    layerProperties.setFeatureService(new H2FeatureService(
+                            "dummy",
+                            "dummy",
+                            null,
+                            featureServiceAttributes));
+
+                    final List<FeatureServiceFeature> features = service.getFeatureFactory()
+                                .createFeatures(service.getQuery(), null, null, 0, 0, null);
+                    final List<FeatureServiceFeature> newFeatures = new ArrayList<FeatureServiceFeature>();
+                    int invalidCount = 0;
+
+                    for (final FeatureServiceFeature tmp : features) {
+                        final HashMap<String, Object> properties = new HashMap<String, Object>(
+                                featureServiceAttributes.size());
+                        final Double x;
+                        final Double y;
+
+                        try {
+                            if (tmp.getProperty(fromField) != null) {
+                                x = Double.parseDouble(tmp.getProperty(fromField).toString());
+                            } else {
+                                ++invalidCount;
+                                continue;
+                            }
+                        } catch (NumberFormatException e) {
+                            ++invalidCount;
+                            continue;
+                        }
+
+                        try {
+                            if (tmp.getProperty(tillField) != null) {
+                                y = Double.parseDouble(tmp.getProperty(fromField).toString());
+                            } else {
+                                ++invalidCount;
+                                continue;
+                            }
+                        } catch (NumberFormatException e) {
+                            ++invalidCount;
+                            continue;
+                        }
+
+                        if (((MIN_X != null) && (x < MIN_X)) || ((MAX_X != null) && (x > MAX_X))
+                                    || ((MIN_Y != null) && (y < MIN_Y))
+                                    || ((MAX_Y != null) && (y > MAX_Y))) {
+                            ++invalidCount;
+                            continue;
+                        }
+
+                        final Geometry g = geomFactory.createPoint(new Coordinate(x, y));
+
+                        for (final String propName : attributeOrder) {
+                            if (propName.equals("geom")) {
+                                properties.put(propName, g);
+                            } else {
+                                properties.put(propName, tmp.getProperty(propName));
+                            }
+                        }
+
+                        final DefaultFeatureServiceFeature lastFeature = new DefaultFeatureServiceFeature(
+                                tmp.getId(),
+                                g,
+                                layerProperties);
+                        lastFeature.setProperties(properties);
+                        featureList.add(lastFeature);
+                    }
+
+                    H2FeatureService internalService = null;
+                    String hint = null;
+
+                    if (featureList.size() > 0) {
+                        internalService = new H2FeatureService(
+                                tableName,
+                                H2FeatureServiceFactory.DB_NAME,
+                                tableName,
+                                featureServiceAttributes,
+                                featureList);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("create the new data source");
+                        }
+                        internalService.initAndWait();
+                    } else {
+                        hint = NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.themeNotCreated");
+                    }
+
+                    if (invalidCount > 0) {
+                        hint = NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.themePartiallyCreated",
+                                invalidCount,
+                                (featureList.size() + invalidCount));
+                    }
+
+                    return new ServiceWithHint(hint, internalService);
                 }
 
                 @Override
                 protected void done() {
                     try {
-                        final H2FeatureService service = get();
-                        final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
+                        final ServiceWithHint serviceWithHint = get();
 
-                        if (cap != null) {
-                            cap.refreshJdbcTrees();
+                        final String hint = serviceWithHint.getHint();
+
+                        if (hint != null) {
+                            JOptionPane.showMessageDialog(
+                                PointReferencingDialog.this,
+                                hint,
+                                NbBundle.getMessage(
+                                    PointReferencingDialog.class,
+                                    "PointReferencingDialog.butApplyActionPerformed.title"),
+                                JOptionPane.WARNING_MESSAGE);
                         }
 
+                        final H2FeatureService service = serviceWithHint.getService();
+
+                        if (service != null) {
+                            final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
+
+                            if (cap != null) {
+                                cap.refreshJdbcTrees();
+                            }
+                        }
                         lastFromProperty = cbFrom.getSelectedItem();
                         lastTillProperty = cbTill.getSelectedItem();
                     } catch (H2FeatureServiceFactory.NegativeValueException ex) {
@@ -415,5 +654,53 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         }
         //</editor-fold>
         //</editor-fold>
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class ServiceWithHint {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final String hint;
+        private final H2FeatureService service;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ServiceWithHint object.
+         *
+         * @param  hint     DOCUMENT ME!
+         * @param  service  DOCUMENT ME!
+         */
+        public ServiceWithHint(final String hint, final H2FeatureService service) {
+            this.hint = hint;
+            this.service = service;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  the hint
+         */
+        public String getHint() {
+            return hint;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  the service
+         */
+        public H2FeatureService getService() {
+            return service;
+        }
     }
 }

@@ -23,6 +23,7 @@ import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
+import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
@@ -44,6 +45,7 @@ import java.nio.charset.Charset;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,13 +53,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.features.ShapeInfo;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -65,6 +73,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.util.CrsDeterminer;
 
 import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
@@ -96,6 +105,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private FeatureCollection fc = null;
     private String filename;
     private String geometryType = AbstractFeatureService.UNKNOWN;
+    private int lastFreeId = -1;
+    private ShapeInfo info = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -289,6 +300,63 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public String getSldDefinition() {
+        String sldFilename;
+        File sldFile;
+
+        if (this.documentURI.getPath().endsWith(".shp")) {
+            sldFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+        } else {
+            sldFilename = this.documentURI.getPath();
+        }
+
+        sldFile = new File(sldFilename + ".sld");
+        if (!sldFile.exists()) {
+            sldFile = new File(sldFilename + ".SLD");
+        }
+        BufferedReader br = null;
+        try {
+            if (sldFile.exists()) {
+                final StringBuilder sld = new StringBuilder();
+                br = new BufferedReader(new FileReader(sldFile));
+                String tmp = null;
+
+                while ((tmp = br.readLine()) != null) {
+                    sld.append(tmp).append("\n");
+                }
+                final String sldString = sld.toString();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("sld file with content " + sldString + " found");
+                }
+                if (!sldString.equals("")) {
+                    return sldString;
+                }
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("No sld file found.");
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error while reading the sld file.");
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException ex) {
+                    logger.error("Cannot close sld file", ex);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   workerThread  DOCUMENT ME!
      *
      * @throws  Exception               DOCUMENT ME!
@@ -329,20 +397,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         } else {
             filename = this.documentURI.getPath();
         }
-
-        final ShapeFileReader reader = new ShapeFileReader(filename);
-        final int shapeType = reader.getShapeType();
-
-        if ((shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.MULTIPOINTM)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEM)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONM)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTM)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONZ)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEZ)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTZ)) {
-            final org.deegree.io.shpapi.shape_new.ShapeFile shapeFromReader = reader.read();
-            fc = shapeFromReader.getFeatureCollection();
-        }
+        createFeatureCollectionIfRequired();
 
         try {
             if (!shapeFile.hasRTreeIndex()) {
@@ -529,7 +584,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    private ShapeFile getShapeFile() throws IOException {
+    public ShapeFile getShapeFile() throws IOException {
         cleanup();
         final Charset cs = getCharsetDefinition();
         String filename = null;
@@ -543,6 +598,55 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         shapeFile = new ShapeFile(filename, cs);
 
         return shapeFile;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refreshData() {
+        try {
+            if (info != null) {
+                if (info.getFile() != null) {
+                    info.getFile().close();
+                }
+                info.setFile(getShapeFile());
+                if (info.getFc() != null) {
+                    createFeatureCollectionIfRequired();
+                    info.setFc(fc);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error while refreshing data", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void createFeatureCollectionIfRequired() throws Exception {
+        String filename;
+
+        if (this.documentURI.getPath().endsWith(".shp")) {
+            filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+        } else {
+            filename = this.documentURI.getPath();
+        }
+
+        final ShapeFileReader reader = new ShapeFileReader(filename);
+        final int shapeType = reader.getShapeType();
+
+        if ((shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.MULTIPOINTM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONZ)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEZ)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTZ)) {
+            final org.deegree.io.shpapi.shape_new.ShapeFile shapeFromReader = reader.read();
+            fc = shapeFromReader.getFeatureCollection();
+        }
     }
 
     @Override
@@ -758,7 +862,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @throws  Exception                 DOCUMENT ME!
      */
     private synchronized List<ShapeFeature> createFeatures_internal(final String query,
-            final BoundingBox boundingBox,
+            BoundingBox boundingBox,
             final SwingWorker workerThread,
             final int offset,
             final int limit,
@@ -780,6 +884,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             List<ShapeFeature> selectedFeatures;
             final long start = System.currentTimeMillis();
             final Coordinate[] polyCords = new Coordinate[5];
+            if (boundingBox == null) {
+                boundingBox = new XBoundingBox(getEnvelope());
+            }
             polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
             polyCords[1] = new Coordinate(boundingBox.getX1(), boundingBox.getY2());
             polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
@@ -806,7 +913,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     filename = this.documentURI.getPath();
                 }
 
-                final ShapeFile persShapeFile = getShapeFile();
+                if (info == null) {
+                    info = new ShapeInfo(filename, getShapeFile(), featureSrid, fc);
+                }
+                final ShapeFile persShapeFile = info.getFile();
 
                 shapeFile = null;
                 final int[] recordNumbers = persShapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon)
@@ -821,7 +931,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 }
 
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
-                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
                 int count = 0;
 
                 for (final int record : recordNumbers) {
@@ -829,14 +938,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     ShapeFeature featureServiceFeature;
 
                     if (fc != null) {
-                        featureServiceFeature = createFeatureInstance(null, info, record);
-                        this.initialiseFeature(featureServiceFeature, null, false, record);
+                        featureServiceFeature = createFeatureInstance(null, info, record - 1);
+                        this.initialiseFeature(featureServiceFeature, null, false, record - 1);
                     } else {
                         featureServiceFeature = createFeatureInstance(null, info, record);
                         this.initialiseFeature(featureServiceFeature, null, false, record);
                     }
-                    selectedFeatures.add(featureServiceFeature);
 
+                    if (fulfilQuery(query, featureServiceFeature)) {
+                        selectedFeatures.add(featureServiceFeature);
+                    }
                     if (saveAsLastCreated && (count > 50000)) {
                         break;
                     }
@@ -864,7 +975,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                             + " exceeds max feature count " + this.getMaxFeatureCount());
             } else if (selectedFeatures.size() == 0) {
                 logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
-                return null;
+                return selectedFeatures;
             }
 
             if ((orderBy != null) && (orderBy.length > 0)) {
@@ -901,6 +1012,143 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             return new Vector<ShapeFeature>(selectedFeatures);
         } finally {
             cleanup();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query    DOCUMENT ME!
+     * @param   feature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean fulfilQuery(final String query, final ShapeFeature feature) {
+        if ((query == null) || query.equals("")) {
+            return true;
+        }
+
+        final ScriptEngineManager manager = new ScriptEngineManager();
+        final ScriptEngine engine = manager.getEngineByName("js");
+
+        try {
+            final String dataDefinition = toVariableString(feature);
+            String code = query;
+
+            code = dataDefinition + "\n " + code.replace((CharSequence)"app:", (CharSequence)"");
+            final Object result = engine.eval(code);
+
+            if (result instanceof Boolean) {
+                return (Boolean)result;
+            } else {
+                logger.error("invalid query");
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("invalid fromula: " + query, e);
+            return false;
+//            JOptionPane.showMessageDialog(
+//                FieldCalculatorDialog.this,
+//                e.getMessage(),
+//                NbBundle.getMessage(
+//                    FieldCalculatorDialog.class,
+//                    "FieldCalculatorDialog.btnSearchCancelActionPerformed().error.title"),
+//                JOptionPane.ERROR_MESSAGE,
+//                null);
+        }
+    }
+
+    /**
+     * Creates a javascript string that contains all properties of the given feature as variable.
+     *
+     * @param   feature  the feature, that should be translated to javascript
+     *
+     * @return  the created string
+     */
+    private String toVariableString(final FeatureServiceFeature feature) {
+        final StringBuilder vars = new StringBuilder("");
+        final HashMap<String, Object> props = feature.getProperties();
+
+        for (final String propName : props.keySet()) {
+            final FeatureServiceAttribute attr = (FeatureServiceAttribute)feature.getLayerProperties()
+                        .getFeatureService()
+                        .getFeatureServiceAttributes()
+                        .get(propName);
+            final Class cl = FeatureTools.getClass(attr);
+            Object value = props.get(propName);
+
+            if (value instanceof org.deegree.model.spatialschema.Geometry) {
+                try {
+                    value = JTSAdapter.export((org.deegree.model.spatialschema.Geometry)value);
+                } catch (GeometryException ex) {
+                    logger.error("Error while converting deegree geometry to jts geometry", ex);
+                }
+            }
+            if (vars.length() > 0) {
+                vars.append(";\n");
+            }
+
+            vars.append(propName.replace((CharSequence)"app:", (CharSequence)"")).append("=");
+            if ((value != null) && (cl.equals(String.class) || cl.equals(Date.class))) {
+                vars.append("\"").append(value).append("\"");
+            } else {
+                vars.append(String.valueOf(value));
+            }
+        }
+
+        vars.append(";\n");
+
+        return vars.toString();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private int getNextFreeId() throws Exception {
+        if (lastFreeId > 0) {
+            return ++lastFreeId;
+        } else {
+            if (fc != null) {
+                lastFreeId = fc.size();
+            } else {
+                final ShapeFile persShapeFile = getShapeFile();
+                lastFreeId = persShapeFile.getRecordNum() + 1;
+            }
+
+            return lastFreeId;
+        }
+    }
+
+    @Override
+    public FeatureServiceFeature createNewFeature() {
+        try {
+            ShapeFeature featureServiceFeature;
+            final ShapeFile persShapeFile = getShapeFile();
+            final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
+
+            try {
+                final int freeid = getNextFreeId();
+                if (fc != null) {
+                    featureServiceFeature = createFeatureInstance(null, info, freeid);
+                    this.initialiseFeature(featureServiceFeature, null, false, freeid);
+                    // fc.add(featureServiceFeature);
+                } else {
+                    featureServiceFeature = createFeatureInstance(null, info, freeid);
+                    this.initialiseFeature(featureServiceFeature, null, false, freeid);
+                }
+
+                return featureServiceFeature;
+            } catch (Exception e) {
+                logger.error("Error while creating new feature", e);
+                return null;
+            }
+        } catch (Exception e) {
+            logger.error("Error while creating new feature", e);
+            return null;
         }
     }
 

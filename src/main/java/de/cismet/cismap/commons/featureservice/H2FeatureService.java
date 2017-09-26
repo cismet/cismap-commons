@@ -435,13 +435,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
     }
 
@@ -474,6 +474,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         if (getLayerProperties() != null) {
             setTheFactorySpecificLayerProperties((DefaultLayerProperties)getLayerProperties(), f);
         }
+        tableFormat = getTableFormat(tableName, H2FeatureServiceFactory.DB_NAME);
 
         final String sldString = getSldDefinition();
 
@@ -541,13 +542,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
 
         return null;
@@ -776,13 +777,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close result set", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
 
         return tableExists;
@@ -836,13 +837,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
     }
 
@@ -870,13 +871,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
     }
 
@@ -910,13 +911,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
     }
 
@@ -957,13 +958,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close result set", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
 
         return tableExists;
@@ -1009,13 +1010,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close connection", ex);
                 }
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    LOG.warn("Cannot close connection", ex);
-                }
-            }
+//            if (conn != null) {
+//                try {
+//                    conn.close();
+//                } catch (SQLException ex) {
+//                    LOG.warn("Cannot close connection", ex);
+//                }
+//            }
         }
 
         return format;
