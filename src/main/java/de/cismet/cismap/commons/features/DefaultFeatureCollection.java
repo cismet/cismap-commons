@@ -9,12 +9,14 @@ package de.cismet.cismap.commons.features;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.cismet.cismap.commons.gui.MapListener;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -37,7 +39,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     protected List<Feature> features = new ArrayList<Feature>();
     protected final Set<FeatureCollectionListener> listeners = new HashSet<FeatureCollectionListener>();
     protected LinkedHashSet<Feature> holdFeatures = new LinkedHashSet<Feature>();
-    protected LinkedHashSet<Feature> selectedFeatures = new LinkedHashSet<Feature>();
+    protected Set<Feature> selectedFeatures = Collections.newSetFromMap(new ConcurrentHashMap<Feature, Boolean>());
     protected boolean holdAll = false;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
