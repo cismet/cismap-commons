@@ -175,6 +175,11 @@
             <artifactId>jts</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>de.cismet.custom</groupId>
+            <artifactId>ycad</artifactId>
+            <version>1.0.2</version>
+        </dependency>
         <!--
             deegree exclusions managed in cismet-ext-bom!
         -->
