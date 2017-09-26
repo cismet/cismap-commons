@@ -387,7 +387,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                 final WaitingDialogThread wdt = new WaitingDialogThread(
                                         StaticSwingTools.getFirstParentFrame(AttributeTable.this),
                                         true,
-                                        "",
+                                        "Sperre Objekte",
                                         null,
                                         250,
                                         true) {

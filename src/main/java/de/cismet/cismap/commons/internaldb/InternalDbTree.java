@@ -870,6 +870,7 @@ public class InternalDbTree extends JTree {
         public void remove(final String tableName) {
             final String[] parts = tableName.split("->");
             List<DBEntry> parent = entries;
+            DBFolder folder = null;
 
             for (int i = 0; i < parts.length; ++i) {
                 final String part = parts[i];
@@ -877,7 +878,7 @@ public class InternalDbTree extends JTree {
                 if (i == (parts.length - 1)) {
                     parent.remove(new DBEntry(tableName));
                 } else {
-                    DBFolder folder = new DBFolder(part);
+                    folder = ((folder == null) ? new DBFolder(part) : new DBFolder(folder.getName() + "->" + part));
                     final int folderIndex = parent.indexOf(folder);
 
                     if (folderIndex == -1) {

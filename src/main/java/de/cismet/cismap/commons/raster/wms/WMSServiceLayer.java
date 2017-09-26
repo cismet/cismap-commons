@@ -274,11 +274,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
             if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
-                LOG.error("WMSServiceLayer: set enabled to false (minOpacity)");
                 this.setEnabled(false);                                                         // NOI18N
             } else {
-                LOG.error("WMSServiceLayer: set enabled"
-                            + wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());
                 setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());   // NOI18N
             }
         } catch (DataConversionException ex) {

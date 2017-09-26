@@ -15,9 +15,16 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
+import org.deegree.io.shpapi.shape_new.ShapeFile;
+import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import java.io.File;
+import java.io.FileFilter;
+
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,13 +32,20 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
+import de.cismet.cismap.commons.util.SelectionManager;
+
 /**
  * Features read from a SHP File.
  *
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class ShapeFeature extends DefaultFeatureServiceFeature {
+public class ShapeFeature extends DefaultFeatureServiceFeature implements ModifiableFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -41,6 +55,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Instance fields --------------------------------------------------------
 
     private final ShapeInfo shapeInfo;
+    private Geometry geom;
+    private boolean isChanged;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -65,6 +81,26 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void setEditable(final boolean editable) {
+        final boolean oldEditableStatus = isEditable();
+        super.setEditable(editable);
+
+        if (oldEditableStatus != editable) {
+            isChanged = false;
+
+            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
+            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
+
+            if (editable) {
+                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(this);
+                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(this);
+//                SelectionManager.getInstance().addSelectedFeatures(Collections.nCopies(1, this));
+//                setBackgroundColor(new Color(255, 91, 0));
+            }
+        }
+    }
 
     /**
      * /** * Creates a new ShapeFeature object. * * @param typename DOCUMENT ME! * @param styles DOCUMENT ME!
@@ -138,7 +174,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         if (!existProperties()) {
             super.setProperties(getProperties());
         }
-
+        isChanged = true;
         super.addProperty(propertyName, propertyValue);
     }
 
@@ -160,21 +196,73 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      */
     @Override
     public FeatureServiceFeature saveChanges() throws Exception {
-        org.deegree.model.feature.Feature deegreeFeature = null;
-        synchronized (sync) {
-            deegreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
+        final AbstractFeatureService featureService = getLayerProperties().getFeatureService();
+        final List<FeatureServiceFeature> features = featureService.retrieveFeatures(null, 0, 0, null);
+        features.remove(this);
+        features.add(this);
+        Collections.sort(features, new Comparator<FeatureServiceFeature>() {
+
+                @Override
+                public int compare(final FeatureServiceFeature o1, final FeatureServiceFeature o2) {
+                    return Integer.compare(o1.getId(), o2.getId());
+                }
+            });
+
+        final org.deegree.model.feature.FeatureCollection fc = new SimpleFeatureCollection(
+                String.valueOf(System.currentTimeMillis()),
+                features.toArray(new FeatureServiceFeature[features.size()]),
+                null);
+        String filename = ((ShapeFileFeatureService)featureService).getDocumentURI().getPath();
+        final File shapeFile = new File(filename);
+
+        if (shapeFile.exists()) {
+            String file = shapeFile.getName();
+            if (file.contains(".")) {
+                file = file.substring(0, file.lastIndexOf("."));
+            }
+            final String nameStem = file;
+
+            final File[] files = shapeFile.getParentFile().listFiles(new FileFilter() {
+
+                        @Override
+                        public boolean accept(final File pathname) {
+                            return pathname.getName().substring(0, nameStem.length()).equals(nameStem);
+                        }
+                    });
+
+            for (final File f : files) {
+                if (f.getName().endsWith(".sbx") || f.getName().endsWith(".rti")) {
+                    f.delete();
+                }
+            }
+        }
+        if (filename.contains(".")) {
+            filename = filename.substring(0, filename.lastIndexOf("."));
         }
 
-        final Map<String, Object> map = super.getProperties();
+        final ShapeFile shape = new ShapeFile(
+                fc,
+                filename);
+        final ShapeFileWriter writer = new ShapeFileWriter(shape);
+        writer.write();
+//        org.deegree.model.feature.Feature deegreeFeature = null;
 
-        final FeatureProperty[] featureProperties = deegreeFeature.getProperties();
-        for (final FeatureProperty fp : featureProperties) {
-            fp.setValue(map.get(fp.getName().getAsString()));
-        }
-
-        shapeInfo.getFile().writeShape(null);
+//        synchronized (sync) {
+//            deegreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
+//        }
+//
+//        final Map<String, Object> map = super.getProperties();
+//
+//        final FeatureProperty[] featureProperties = deegreeFeature.getProperties();
+//        for (final FeatureProperty fp : featureProperties) {
+//            fp.setValue(map.get(fp.getName().getAsString()));
+//        }
+//
+//        shapeInfo.getFile().writeShape(null);
+        ((ShapeFeatureFactory)featureService.getFeatureFactory()).refreshData();
         super.getProperties().clear();
-
+        geom = null;
+        isChanged = false;
         return this;
     }
 
@@ -184,6 +272,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void undoAll() {
         super.getProperties().clear();
+        geom = null;
     }
 
     @Override
@@ -208,6 +297,9 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      */
     @Override
     public Geometry getGeometry() {
+        if (geom != null) {
+            return geom;
+        }
         Geometry g = null;
         if (shapeInfo.getFc() == null) {
             g = shapeInfo.getGeometryFromCache(getId());
@@ -243,12 +335,31 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      */
     @Override
     public void setGeometry(final Geometry geom) {
-        // do nothing
+        this.geom = geom;
+        isChanged = true;
     }
 
     @Override
     protected Feature getDeegreeFeature() {
         return new ShapeFileLayerDeegreeFeature();
+    }
+
+    @Override
+    public void saveChangesWithoutReload() throws Exception {
+        saveChanges();
+    }
+
+    @Override
+    public void delete() throws Exception {
+    }
+
+    @Override
+    public void restore() throws Exception {
+    }
+
+    @Override
+    public boolean isFeatureChanged() {
+        return isChanged;
     }
 
     //~ Inner Classes ----------------------------------------------------------
