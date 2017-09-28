@@ -18,6 +18,7 @@ import java.awt.Color;
 
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 
@@ -66,6 +67,7 @@ public class CreaterGeometryListener extends CreateNewGeometryListener {
             newTempFeaturePath.setPaint(fillingColor);
         } else {
             final Color fillingColor = new Color(1f, 0f, 0f, 0.5f);
+            newTempFeaturePath.setStroke(new CustomFixedWidthStroke(3));
             newTempFeaturePath.setStrokePaint(fillingColor);
         }
         return newTempFeaturePath;

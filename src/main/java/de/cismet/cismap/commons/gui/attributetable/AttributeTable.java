@@ -3551,6 +3551,7 @@ public class AttributeTable extends javax.swing.JPanel {
                         f.setEditable(false);
                         ((ModifiableFeature)f).delete();
                         model.removeFeatureServiceFeature(f);
+                        SelectionManager.getInstance().removeSelectedFeatures(f);
                     } catch (Exception e) {
                         LOG.error("Cannot remove feature", e);
                     }
