@@ -95,6 +95,8 @@ import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
+import de.cismet.tools.Static2DTools;
+
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
@@ -104,7 +106,6 @@ import de.cismet.veto.VetoException;
 
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.FOLDER;
 import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
-import de.cismet.tools.Static2DTools;
 
 /**
  * DOCUMENT ME!
@@ -681,7 +682,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             // nothing to do
         }
     }
-    
+
     @Override
     public String getViewTitle() {
         return org.openide.util.NbBundle.getMessage(
