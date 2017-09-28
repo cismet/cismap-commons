@@ -1364,9 +1364,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             getGeometry(),
                             pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
                             .getInteriorPoint();
+                String value = styling.third;
+                try {
+                    final double val = Double.parseDouble(styling.third);
+
+                    if (val == (long)val) {
+                        value = String.valueOf((long)val);
+                    }
+                } catch (NumberFormatException e) {
+                }
                 applyTextStyling(
                     text,
-                    styling.third,
+                    value,
                     (TextStyling)styling.first,
                     wtst,
                     intPoint.getX(),
