@@ -547,7 +547,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         final java.awt.GridBagConstraints gridBagConstraints;
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        tree = new javax.swing.JTree();
+        tree = new TreeWithoutNPEAfterDrop();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -2236,6 +2236,23 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             } else if (value instanceof LayerCollection) {
                 final LayerCollection layer = (LayerCollection)value;
                 layer.setName(name);
+            }
+        }
+    }
+
+    /**
+     * Without this special JTree, a NPE will be thrown when a drop operation on a TransferHandler occurs.
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class TreeWithoutNPEAfterDrop extends JTree {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
+            if ((newValue != null) || !propertyName.equals("dropLocation")) {
+                super.firePropertyChange(propertyName, oldValue, newValue);
             }
         }
     }

@@ -13,17 +13,21 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.apache.log4j.Logger;
 
+import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
+
+import de.cismet.cismap.commons.rasterservice.MapService;
 
 /**
  * DOCUMENT ME!
@@ -212,7 +216,7 @@ public class TreeTransferHandler extends TransferHandler {
                 System.out.println("I/O error: " + ioe.getMessage());
             }
 
-            for (int i = 0; i < nodes.length; i++) {
+            for (int i = nodes.length - 1; i >= 0; i--) {
                 final TreePath parentPath = nodes[i].getParentPath();
                 final Object layer = nodes[i].getLastPathComponent();
 
@@ -236,7 +240,35 @@ public class TreeTransferHandler extends TransferHandler {
             }
             return true;
         } else {
-            return dropPerformed(support, model, index, tree);
+            final TreeMap<Integer, MapService> services = model.getMapServices();
+            final boolean dropped = dropPerformed(support, model, index, tree);
+
+            if (dropped && (dest != null) && !dest.equals(tree.getPathForRow(0))) {
+                final int modelIndex = index;
+                final TreeMap<Integer, MapService> newServices = model.getMapServices();
+                final List<MapService> addedServices = new ArrayList<MapService>();
+                Integer oldKey = null;
+
+                for (final Integer key : newServices.keySet()) {
+                    if (oldKey == null) {
+                        oldKey = key;
+                    } else {
+                        oldKey = oldKey + 1;
+                    }
+                    final MapService mapService = newServices.get(key);
+
+                    if (!mapService.equals(services.get(oldKey))) {
+                        addedServices.add(mapService);
+                        oldKey = oldKey - 1;
+                    }
+                }
+
+                for (final MapService mapService : addedServices) {
+                    model.moveLayer(tree.getPathForRow(0), dest, modelIndex, mapService);
+                }
+            }
+
+            return dropped;
         }
     }
 
