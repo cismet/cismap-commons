@@ -313,10 +313,6 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                             model.registerRetrievalServiceLayer(rl);
                         }
                     }
-
-                    if (model.isVisible(tp) != enabled) {
-                        model.handleVisibility(tp);
-                    }
                 }
             }
         }
