@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
@@ -115,6 +117,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private List<ThemeLayerListener> themeLayerListener = new ArrayList<ThemeLayerListener>();
     private AddThemeMenuItem addThemeMenuItem;
     private final List<TreePath> expendedPaths = new ArrayList<TreePath>();
+    private Timer refreshTimer = new Timer("ThemeTree refresh thread");
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
@@ -565,8 +568,22 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
     @Override
     public void selectionChanged(final SelectionChangedEvent event) {
-        createPopupMenu();
-        tree.updateUI();
+        refreshTimer.cancel();
+        refreshTimer = new Timer();
+        refreshTimer.schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                createPopupMenu();
+                                tree.updateUI();
+                            }
+                        });
+                }
+            }, 100);
     }
 
     /**
