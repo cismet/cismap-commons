@@ -387,7 +387,9 @@ public class AttributeTable extends javax.swing.JPanel {
                                 final WaitingDialogThread wdt = new WaitingDialogThread(
                                         StaticSwingTools.getFirstParentFrame(AttributeTable.this),
                                         true,
-                                        "Sperre Objekte",
+                                        NbBundle.getMessage(
+                                            AttributeTable.class,
+                                            "AttributeTable.ListSelectionListener.text"),
                                         null,
                                         250,
                                         true) {
@@ -669,7 +671,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
                         if ((geomTypeClass != null)
                                     && ((feature.getGeometry() != null)
-                                        || geomTypeClass.isInstance(feature.getGeometry()))) {
+                                        && geomTypeClass.isInstance(feature.getGeometry()))) {
                             enabled = true;
                             break;
                         }
@@ -1009,6 +1011,27 @@ public class AttributeTable extends javax.swing.JPanel {
             table.getSelectionModel().addSelectionInterval(index, index);
             modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
             newFeatures.add((DefaultFeatureServiceFeature)feature);
+            butMoveSelectedRowsActionPerformed(null);
+        }
+    }
+
+    /**
+     * Adds the given feature to the attribute table. The feature must be of the same type as the other features in the
+     * model
+     *
+     * @param  features  FeatureServiceFeature the feature to add
+     */
+    public void addFeatures(final List<FeatureServiceFeature> features) {
+        if (model != null) {
+            final int index = model.getRowCount();
+            model.addFeatures(features);
+
+            for (final FeatureServiceFeature feature : features) {
+                modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
+                newFeatures.add((DefaultFeatureServiceFeature)feature);
+            }
+
+            table.getSelectionModel().addSelectionInterval(index, model.getRowCount() - 1);
             butMoveSelectedRowsActionPerformed(null);
         }
     }
@@ -3160,69 +3183,104 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void pasteSelectedFeaturesfromClipboard() {
         if ((clipboard != null) && featureService.isEditable()) {
-            for (final FeatureServiceFeature feature : clipboard) {
-                final FeatureServiceFeature newFeature = featureService.getFeatureFactory().createNewFeature();
-                final Map<String, FeatureServiceAttribute> attributeMap = featureService.getFeatureServiceAttributes();
-                final Map<String, Object> defaultValues = tableRuleSet.getDefaultValues();
-                boolean geometryCompatible = false;
+            final WaitingDialogThread<List<FeatureServiceFeature>> wdt =
+                new WaitingDialogThread<List<FeatureServiceFeature>>(StaticSwingTools.getParentFrame(this),
+                    true,
+                    NbBundle.getMessage(AttributeTable.class, "AttributeTable.pasteSelectedFeaturesfromClipboard.text"),
+                    null,
+                    500) {
 
-                // check, if the geometry types are compatible
-                final String geomType = featureService.getLayerProperties().getFeatureService().getGeometryType();
-                if ((geomType != null) && !geomType.equals(AbstractFeatureService.UNKNOWN)) {
-                    try {
-                        final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom." + geomType);
+                    @Override
+                    protected List<FeatureServiceFeature> doInBackground() throws Exception {
+                        final List<FeatureServiceFeature> copiedFeatures = new ArrayList<FeatureServiceFeature>();
 
-                        if (((geomTypeClass == null) && (feature.getGeometry() == null))
-                                    || ((geomTypeClass != null)
-                                        && ((feature.getGeometry() != null)
-                                            && geomTypeClass.isInstance(feature.getGeometry())))) {
-                            if (!((geomTypeClass == null) && (feature.getGeometry() == null))) {
-                                newFeature.setGeometry(feature.getGeometry());
+                        for (final FeatureServiceFeature feature : clipboard) {
+                            final FeatureServiceFeature newFeature = featureService.getFeatureFactory()
+                                        .createNewFeature();
+                            final Map<String, FeatureServiceAttribute> attributeMap =
+                                featureService.getFeatureServiceAttributes();
+                            final Map<String, Object> defaultValues = tableRuleSet.getDefaultValues();
+                            boolean geometryCompatible = false;
+
+                            // check, if the geometry types are compatible
+                            final String geomType = featureService.getLayerProperties()
+                                        .getFeatureService()
+                                        .getGeometryType();
+                            if ((geomType != null) && !geomType.equals(AbstractFeatureService.UNKNOWN)) {
+                                try {
+                                    final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom."
+                                                    + geomType);
+
+                                    if (((geomTypeClass == null) && (feature.getGeometry() == null))
+                                                || ((geomTypeClass != null)
+                                                    && ((feature.getGeometry() != null)
+                                                        && geomTypeClass.isInstance(feature.getGeometry())))) {
+                                        if (!((geomTypeClass == null) && (feature.getGeometry() == null))) {
+                                            newFeature.setGeometry(feature.getGeometry());
+                                        }
+                                        geometryCompatible = true;
+                                    }
+                                } catch (Exception e) {
+                                    if (geomType.equals("none") && (feature.getGeometry() == null)) {
+                                        geometryCompatible = true;
+                                    }
+                                }
                             }
-                            geometryCompatible = true;
-                        }
-                    } catch (Exception e) {
-                        if (geomType.equals("none") && (feature.getGeometry() == null)) {
-                            geometryCompatible = true;
-                        }
-                    }
-                }
 
-                if (!geometryCompatible) {
-                    continue;
-                }
-
-                if (tableRuleSet != null) {
-                    tableRuleSet.copyProperties(feature, newFeature);
-                } else {
-                    // copy properties
-                    if (defaultValues != null) {
-                        for (final String propName : defaultValues.keySet()) {
-                            newFeature.setProperty(propName, defaultValues.get(propName));
-                        }
-                    }
-
-                    final boolean hasIdExpression = featureService.getLayerProperties().getIdExpressionType()
-                                == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
-                    for (final String attrKey : attributeMap.keySet()) {
-                        if (hasIdExpression
-                                    && featureService.getLayerProperties().getIdExpression().equalsIgnoreCase(
-                                        attrKey)) {
-                            // do not change the id
-                            continue;
-                        }
-                        if (tableRuleSet.isColumnEditable(attrKey)) {
-                            final Object val = getFeaturePropertyIgnoreCase(feature, attrKey);
-                            if (val != null) {
-                                // without this null check, the geometry will probably be overwritten
-                                newFeature.setProperty(attrKey, val);
+                            if (!geometryCompatible) {
+                                continue;
                             }
+
+                            if (tableRuleSet != null) {
+                                tableRuleSet.copyProperties(feature, newFeature);
+                            } else {
+                                // copy properties
+                                if (defaultValues != null) {
+                                    for (final String propName : defaultValues.keySet()) {
+                                        newFeature.setProperty(propName, defaultValues.get(propName));
+                                    }
+                                }
+
+                                final boolean hasIdExpression =
+                                    featureService.getLayerProperties().getIdExpressionType()
+                                            == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
+                                for (final String attrKey : attributeMap.keySet()) {
+                                    if (hasIdExpression
+                                                && featureService.getLayerProperties().getIdExpression()
+                                                .equalsIgnoreCase(
+                                                    attrKey)) {
+                                        // do not change the id
+                                        continue;
+                                    }
+                                    if (tableRuleSet.isColumnEditable(attrKey)) {
+                                        final Object val = getFeaturePropertyIgnoreCase(feature, attrKey);
+                                        if (val != null) {
+                                            // without this null check, the geometry will probably be overwritten
+                                            newFeature.setProperty(attrKey, val);
+                                        }
+                                    }
+                                }
+                            }
+
+                            copiedFeatures.add(newFeature);
+                        }
+
+                        return copiedFeatures;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            final List<FeatureServiceFeature> copiedFeatures = get();
+
+                            addFeatures(copiedFeatures);
+                        } catch (Exception e) {
+                            LOG.error("Error while paste features", e);
                         }
                     }
-                }
+                };
 
-                addFeature(newFeature);
-            }
+            wdt.start();
         }
     }
 
@@ -3765,7 +3823,8 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void setItemCount(final int count) {
         itemCount = count;
-        int pageCount = itemCount / pageSize;
+        int pageCount = itemCount
+                    / pageSize;
 
         if ((pageCount * pageSize) < itemCount) {
             ++pageCount;
@@ -3991,10 +4050,12 @@ public class AttributeTable extends javax.swing.JPanel {
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
                 if (tableRuleSet != null) {
-                    return editable && tableRuleSet.isColumnEditable(attributeNames[columnIndex])
+                    return editable
+                                && tableRuleSet.isColumnEditable(attributeNames[columnIndex])
                                 && getFeatureServiceFeature(rowIndex).isEditable();
                 } else {
-                    return editable && getFeatureServiceFeature(rowIndex).isEditable();
+                    return editable
+                                && getFeatureServiceFeature(rowIndex).isEditable();
                 }
             } else {
                 return false;
@@ -4337,7 +4398,8 @@ public class AttributeTable extends javax.swing.JPanel {
         @Override
         public boolean next() throws JRException {
             if (selectedRows == null) {
-                final boolean ret = ++index < model.getRowCount();
+                final boolean ret = ++index
+                            < model.getRowCount();
 
                 if (!ret) {
                     // Set the internal index to the first row, when the return value is false,
@@ -4347,7 +4409,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 return ret;
             } else {
-                final boolean ret = ++index < selectedRows.length;
+                final boolean ret = ++index
+                            < selectedRows.length;
 
                 if (!ret) {
                     // Set the internal index to the first row, when the return value is false,
@@ -4667,7 +4730,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public boolean accept(final File f) {
-            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".shp");
+            return (f != null)
+                        && f.getAbsolutePath().toLowerCase().endsWith(".shp");
         }
     }
 
@@ -4744,7 +4808,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public boolean accept(final File f) {
-            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".csv");
+            return (f != null)
+                        && f.getAbsolutePath().toLowerCase().endsWith(".csv");
         }
     }
 
@@ -4769,7 +4834,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public boolean accept(final File f) {
-            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".dbf");
+            return (f != null)
+                        && f.getAbsolutePath().toLowerCase().endsWith(".dbf");
         }
     }
 
@@ -4794,7 +4860,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public boolean accept(final File f) {
-            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".txt");
+            return (f != null)
+                        && f.getAbsolutePath().toLowerCase().endsWith(".txt");
         }
     }
 }

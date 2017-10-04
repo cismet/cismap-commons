@@ -962,7 +962,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             if (selPFeature != null) {
                 Point2D point = trigger;
 
-                if (mc.isSnappingEnabled()) {
+                if (mc.isSnappingEnabled() && !mc.isSnappingOnLineEnabled()) {
                     final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
                             mc,
                             mc.getCamera().viewToLocal((Point2D)trigger.clone()),
