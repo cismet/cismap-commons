@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.util;
 
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import java.awt.EventQueue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -81,6 +85,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     private List<AbstractFeatureService> editableServices = new ArrayList<AbstractFeatureService>();
     private final List<SelectionChangedListener> listener = new ArrayList<SelectionChangedListener>();
     private boolean selectionChangeInProgress = false;
+    private MapSelectionRefresher mapRefresher = new MapSelectionRefresher();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -180,12 +185,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     }
                 }
             }
-            selectionChangeInProgress = true;
-            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addToSelection(featuresToSelect);
-            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unselect(featuresToUnselect);
-            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-            pn.postNotification(SelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
-            selectionChangeInProgress = false;
+
+            mapRefresher.refresh(featuresToSelect, featuresToUnselect);
         }
     }
 
@@ -195,8 +196,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  featureList  DOCUMENT ME!
      */
     public void addSelectedFeatures(final List<? extends Feature> featureList) {
-        setSelectedFeatures(featureList, false, true);
-        fireSelectionChangedEvent();
+        if (setSelectedFeatures(featureList, false, true)) {
+            fireSelectionChangedEvent();
+        }
     }
 
     /**
@@ -328,13 +330,16 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     /**
      * Set the selected features of a specific service.
      *
-     * @param  featureList         DOCUMENT ME!
-     * @param  removeOldSelection  service DOCUMENT ME!
-     * @param  syncMap             DOCUMENT ME!
+     * @param   featureList         DOCUMENT ME!
+     * @param   removeOldSelection  service DOCUMENT ME!
+     * @param   syncMap             DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    private void setSelectedFeatures(final List<? extends Feature> featureList,
+    private boolean setSelectedFeatures(final List<? extends Feature> featureList,
             final boolean removeOldSelection,
             final boolean syncMap) {
+        boolean added = false;
         if (removeOldSelection) {
             selectedFeatures.clear();
 
@@ -369,7 +374,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                         fsf = modifiableFeature;
                     }
                 }
-                list.add(fsf);
+                added = list.add(fsf) | added;
             }
         }
 
@@ -378,6 +383,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 synchronizeSelectionWithMap(service);
             }
         }
+
+        return added;
     }
 
     /**
@@ -866,6 +873,68 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         @Override
         protected LayerProperties createLayerProperties() {
             return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class MapSelectionRefresher {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final List<Feature> featuresToSelectInt = new ArrayList<Feature>();
+        private final List<Feature> featuresToUnselectInt = new ArrayList<Feature>();
+        private Timer refreshTimer = new Timer();
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  featuresToSelect    DOCUMENT ME!
+         * @param  featuresToUnselect  DOCUMENT ME!
+         */
+        public void refresh(final List<Feature> featuresToSelect, final List<Feature> featuresToUnselect) {
+            synchronized (featuresToSelectInt) {
+                featuresToSelectInt.addAll(featuresToSelect);
+                featuresToUnselectInt.addAll(featuresToUnselect);
+
+                refreshTimer.cancel();
+                refreshTimer = new Timer();
+                refreshTimer.schedule(new TimerTask() {
+
+                        @Override
+                        public void run() {
+                            EventQueue.invokeLater(new Thread() {
+
+                                    @Override
+                                    public void run() {
+                                        // in edt to avoid a ConcurrentModificationException in
+                                        // MappingComponent.featureLayer.getChildrenReference()
+                                        synchronized (featuresToSelectInt) {
+                                            selectionChangeInProgress = true;
+                                            CismapBroker.getInstance()
+                                                    .getMappingComponent()
+                                                    .getFeatureCollection()
+                                                    .addToSelection(featuresToSelectInt);
+                                            CismapBroker.getInstance()
+                                                    .getMappingComponent()
+                                                    .getFeatureCollection()
+                                                    .unselect(featuresToUnselectInt);
+                                            featuresToSelectInt.clear();
+                                            featuresToUnselectInt.clear();
+                                            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                                            pn.postNotification(SelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
+                                            selectionChangeInProgress = false;
+                                        }
+                                    }
+                                });
+                        }
+                    }, 100);
+            }
         }
     }
 }

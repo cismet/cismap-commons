@@ -93,8 +93,10 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 }
                 stations.clear();
             } else {
-                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
-                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
+                if (CismapBroker.getInstance().getMappingComponent().getFeatureCollection().contains(this)) {
+                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
+                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
+                }
             }
 
             if (editable) {
