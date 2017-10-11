@@ -80,6 +80,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -183,7 +184,7 @@ public class AttributeTable extends javax.swing.JPanel {
 //    private final FeatureCollectionListener featureCollectionListener;
     private final SelectionChangedListener featureSelectionChangedListener;
     private final RepaintListener repaintListener;
-    private final List<FeatureServiceFeature> lockedFeatures = new ArrayList<FeatureServiceFeature>();
+    private final HashSet<FeatureServiceFeature> lockedFeatures = new HashSet<FeatureServiceFeature>();
     private AttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
     private final FeatureLockingInterface locker;
     private final Map<FeatureServiceFeature, Object> lockingObjects = new HashMap<FeatureServiceFeature, Object>();
