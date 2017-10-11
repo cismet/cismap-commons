@@ -93,7 +93,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 }
                 stations.clear();
             } else {
-                if (CismapBroker.getInstance().getMappingComponent().getFeatureCollection().contains(this)) {
+                if (!editable
+                            || CismapBroker.getInstance().getMappingComponent().getFeatureCollection().contains(this)) {
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
                 }
@@ -256,13 +257,14 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         return this;
     }
 
-    @Override
-    public void saveChangesWithoutReload() throws Exception {
-        if (!existProperties()) {
-            // no changes
-            return;
-        }
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private boolean existsInDB() throws Exception {
         final String checkSql = "SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = %s";
         final Statement st = featureInfo.getConnection().createStatement();
 
@@ -280,7 +282,25 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 rs.close();
             }
 
-            if (alreadyExists) {
+            return alreadyExists;
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    @Override
+    public void saveChangesWithoutReload() throws Exception {
+        if (!existProperties()) {
+            // no changes
+            return;
+        }
+
+        final Statement st = featureInfo.getConnection().createStatement();
+
+        try {
+            if (existsInDB()) {
                 updateFeature(st);
             } else {
                 addFeature(st);
@@ -362,7 +382,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             if ((value instanceof String) || (value instanceof Geometry) || (value instanceof java.sql.Timestamp)) {
                 valueString = "'" + value + "'";
             } else {
-                valueString = value.toString();
+                valueString = String.valueOf(value);
             }
 
             attributes.add("\"" + String.valueOf(name) + "\"");
@@ -415,7 +435,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     public void delete() throws Exception {
         // this is required for a clean restore
         super.getProperties().clear();
-        setProperties(getProperties());
+        super.setProperties(getProperties());
 
         final String deleteStat = String.format(
                 DELETE_STATEMENT,
@@ -436,13 +456,20 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      */
     @Override
     public void undoAll() {
-        super.getProperties().clear();
+        try {
+            if (existsInDB()) {
+                super.getProperties().clear();
+            }
+        } catch (Exception e) {
+            logger.error("Error while undo.", e);
+            super.getProperties().clear();
+        }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  properties  DOCUMENT ME!
+     * @param  properties  colName properties DOCUMENT ME!
      */
     @Override
     public void setProperties(final HashMap properties) {
