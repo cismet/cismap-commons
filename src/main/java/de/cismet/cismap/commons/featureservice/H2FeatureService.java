@@ -944,6 +944,10 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                 st.execute(String.format(DROP_SEQUENCE, tableName));
                 st.execute(String.format(DELETE_FROM_TABLE, H2FeatureServiceFactory.LR_META_TABLE_NAME, tableName));
                 st.execute(String.format(DELETE_FROM_TABLE, H2FeatureServiceFactory.META_TABLE_NAME, tableName));
+                st.execute(String.format(
+                        DELETE_FROM_TABLE,
+                        H2FeatureServiceFactory.META_TABLE_ATTRIBUTES_NAME,
+                        tableName));
                 st.execute(String.format(DELETE_FROM_LOCK_TABLE, H2FeatureServiceFactory.LOCK_TABLE_NAME, tableName));
                 st.close();
                 return true;
