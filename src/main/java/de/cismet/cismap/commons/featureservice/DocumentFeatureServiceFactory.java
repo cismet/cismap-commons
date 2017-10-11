@@ -305,12 +305,20 @@ public class DocumentFeatureServiceFactory {
      */
     private static String calcMd5FromFile(final File documentFile) throws Exception {
         final MessageDigest md5 = MessageDigest.getInstance("MD5");
-        final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
         final byte[] inputArray = new byte[256];
         int byteCount = 0;
+        BufferedInputStream is = null;
 
-        while ((byteCount = is.read(inputArray)) != -1) {
-            md5.update(inputArray, 0, byteCount);
+        try {
+            is = new BufferedInputStream(new FileInputStream(documentFile));
+
+            while ((byteCount = is.read(inputArray)) != -1) {
+                md5.update(inputArray, 0, byteCount);
+            }
+        } finally {
+            if (is != null) {
+                is.close();
+            }
         }
         final byte[] hashValue = md5.digest();
         final StringBuffer hexString = new StringBuffer();

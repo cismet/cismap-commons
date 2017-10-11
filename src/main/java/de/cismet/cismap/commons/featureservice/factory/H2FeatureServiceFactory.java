@@ -58,8 +58,10 @@ import java.sql.Statement;
 import java.text.ParseException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -109,6 +111,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public static final String DEFAULT_DBF_CHARSET = "ISO8859-1";
     public static final String LR_META_TABLE_NAME = "linear_referencing_meta";
     public static final String META_TABLE_NAME = "table_meta";
+    public static final String META_TABLE_ATTRIBUTES_NAME = "table_attributes_meta";
     public static final String SLD_TABLE_NAME = "sld_meta_data";
     public static final String LOCK_TABLE_NAME = "cs_lock";
     public static final int STATION = 1;
@@ -119,6 +122,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 + "\" where table = '%s';";
     private static final String INSERT_META_DATA = "INSERT INTO \"" + META_TABLE_NAME
                 + "\" (table, format) VALUES ('%s','%s');";
+    private static final String INSERT_ATTRIBUTE_META_DATA = "INSERT INTO \"" + META_TABLE_ATTRIBUTES_NAME
+                + "\" (table, attributes) VALUES (?,?);";
+    private static final String UPDATE_ATTRIBUTE_META_DATA = "UPDATE \"" + META_TABLE_ATTRIBUTES_NAME
+                + "\" set attributes = ? where table = ?;";
+    private static final String SELECT_ATTRIBUTE_META_DATA = "SELECT attributes from \"" + META_TABLE_ATTRIBUTES_NAME
+                + "\" where table = '%s';";
 
     private static Logger LOG = Logger.getLogger(H2FeatureServiceFactory.class);
     public static final String DB_NAME = "~/cismap/internalH2";
@@ -146,6 +155,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_SLD_META_TABLE =
         "create table \"%s\" (\"id\" serial, \"table\" varchar, \"sld\" varchar);";
     private static final String CREATE_META_TABLE = "create table \"%s\" (id serial, table varchar, format varchar);";
+    private static final String CREATE_ATTRIBUTES_META_TABLE =
+        "create table \"%s\" (id serial, table varchar, attributes array);";
     private static final String CREATE_LOCK_TABLE = "create table IF NOT EXISTS \"" + LOCK_TABLE_NAME
                 + "\" (\"id\" integer, \"table\" varchar, \"lock_time\" timestamp);";
     private static final String CREATE_LOCK_TABLE_INDEX = "CREATE INDEX IF NOT EXISTS cs_locks_ind ON \""
@@ -300,7 +311,24 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 if (file.getAbsolutePath().toLowerCase().endsWith("csv")) {
                     createTableFromCsv(file, st);
                 } else {
-                    createTableFromSHP(file, st);
+                    Class.forName("org.h2.Driver");
+                    ConnectionWrapper connection = null;
+                    StatementWrapper sta = null;
+
+                    try {
+                        connection = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                                    "jdbc:h2:"
+                                            + databasePath));
+                        sta = createStatement(connection);
+                        createTableFromSHP(file, sta);
+                    } finally {
+                        if (sta != null) {
+                            sta.close();
+                        }
+                        if (connection != null) {
+                            connection.close();
+                        }
+                    }
                 }
                 final String format = file.getAbsolutePath()
                             .toLowerCase()
@@ -457,6 +485,191 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   list  DOCUMENT ME!
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private int indexOfString(final String[] list, final String name) {
+        for (int i = 0; i < list.length; ++i) {
+            if (list[i].equals(name)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  index  DOCUMENT ME!
+     * @param  name   DOCUMENT ME!
+     */
+    private void addCustomIdFieldToAttributes(final int index, final String name) {
+        final String[] attributes = loadOrderedAttributeArray();
+
+        if (attributes != null) {
+            final ArrayList<String> orderedAttributes = new ArrayList<String>(Arrays.asList(attributes));
+            orderedAttributes.add(index, name);
+            saveAttributeOrder(orderedAttributes.toArray(new String[orderedAttributes.size()]));
+        }
+    }
+
+    /**
+     * Saves the order of the feature attributes in the corresponding meta table.
+     *
+     * @param  attributes  DOCUMENT ME!
+     */
+    private void saveAttributeOrder(final String[] attributes) {
+        PreparedStatement st = null;
+
+        try {
+            if (attributes[1].equals("id")) {
+                final String tmp = attributes[0];
+                attributes[0] = attributes[1];
+                attributes[1] = tmp;
+            }
+
+            if (existsOrderedAttributeArray()) {
+                st = conn.prepareStatement(UPDATE_ATTRIBUTE_META_DATA);
+
+                st.setObject(1, attributes);
+                st.setString(2, tableName);
+
+                st.executeUpdate();
+            } else {
+                st = conn.prepareStatement(INSERT_ATTRIBUTE_META_DATA);
+
+                st.setString(1, tableName);
+                st.setObject(2, attributes);
+
+                st.executeUpdate();
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot insert attributes", e);
+        } finally {
+            try {
+                if (st != null) {
+                    st.close();
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot close statement", e);
+            }
+        }
+    }
+
+    /**
+     * Loads the order of the feature attributes from the corresponding meta table.
+     */
+    private void loadAttributeOrder() {
+        final String[] attributes = loadOrderedAttributeArray();
+
+        if (attributes != null) {
+            Collections.sort(featureServiceAttributes, new Comparator<FeatureServiceAttribute>() {
+
+                    private int indexOfAttributes(final String name) {
+                        for (int i = 0; i < attributes.length; ++i) {
+                            if (attributes[i].equals(name)) {
+                                return i;
+                            }
+                        }
+
+                        return -1;
+                    }
+
+                    @Override
+                    public int compare(final FeatureServiceAttribute o1, final FeatureServiceAttribute o2) {
+                        final String name1 = o1.getName();
+                        final String name2 = o2.getName();
+
+                        return (int)Math.signum(indexOfAttributes(name1) - indexOfAttributes(name2));
+                    }
+                });
+        }
+    }
+
+    /**
+     * Loads the order of the feature attributes from the corresponding meta table.
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String[] loadOrderedAttributeArray() {
+        ResultSet rs = null;
+        Statement st = null;
+
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, tableName));
+
+            if (rs.next()) {
+                final Object o = rs.getObject(1);
+
+                if (o instanceof Object[]) {
+                    final String[] attributes = new String[((Object[])o).length];
+
+                    for (int i = 0; i < ((Object[])o).length; ++i) {
+                        attributes[i] = (String)((Object[])o)[i];
+                    }
+
+                    return attributes;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot insert attributes", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot close statement", e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  true, iff a dataset for this table exists
+     */
+    private boolean existsOrderedAttributeArray() {
+        ResultSet rs = null;
+        Statement st = null;
+
+        try {
+            st = conn.createStatement();
+            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, tableName));
+
+            if (rs.next()) {
+                return true;
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot insert attributes", e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot close statement", e);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Creates the a new table from the given shp/dbf file.
      *
      * @param   file  the file with the source data
@@ -495,6 +708,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StringBuilder attsAndTypes = new StringBuilder();
             final StringBuilder atts = new StringBuilder();
             final StringBuilder attsRef = new StringBuilder();
+            final List<String> attributeNames = new ArrayList<String>();
 
             rs = st.executeQuery("select * from \"" + tmpTableReference + "\" limit 1");
             for (int i = 2; i <= rs.getMetaData().getColumnCount(); ++i) {
@@ -508,7 +722,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 if (columnName.equals("the_geom")) {
                     columnName = "geom";
                 }
-
+                attributeNames.add(columnName);
                 attsAndTypes.append("\"")
                         .append(columnName)
                         .append("\" ")
@@ -524,6 +738,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     atts,
                     attsRef,
                     tmpTableReference));
+
+            saveAttributeOrder(attributeNames.toArray(new String[0]));
 
             if (!isDbf) {
                 ResultSet set = st.executeQuery(String.format(
@@ -582,6 +798,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     options));
         final int colCount = csvRs.getMetaData().getColumnCount();
         StringBuilder select = null;
+        final List<String> attributeNames = new ArrayList<String>();
 
         for (int i = 1; i <= colCount; ++i) {
             boolean isInteger = false;
@@ -636,6 +853,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             }
 
             select.append(" as \"").append(colName).append("\"");
+            attributeNames.add(colName);
         }
 
         csvRs.close();
@@ -645,6 +863,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 ((select != null) ? select.toString() : " * "),
                 file.getAbsolutePath(),
                 options));
+
+        saveAttributeOrder(attributeNames.toArray(new String[0]));
     }
 
     /**
@@ -823,7 +1043,16 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 if (orderedAttributeList != null) {
                     attributeList = orderedAttributeList;
                 } else {
-                    attributeList = new ArrayList<String>(attributeMap.keySet());
+                    final List<String> orderedList = features.get(0)
+                                .getLayerProperties()
+                                .getFeatureService()
+                                .getOrderedFeatureServiceAttributes();
+
+                    if (orderedList != null) {
+                        attributeList = orderedList;
+                    } else {
+                        attributeList = new ArrayList<String>(attributeMap.keySet());
+                    }
                 }
 
                 for (final String attrKey : attributeList) {
@@ -892,6 +1121,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
 
                 createPrimaryKey(hasIdField, tableName);
+                saveAttributeOrder(attributeList.toArray(new String[0]));
             }
             st.close();
 
@@ -1007,7 +1237,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     idField));
         } catch (SQLException e) {
             if (hasIdField) {
-                final String newName = "id___000";
+                int index = 0;
+                final String nameBase = "id___";
+                String newName = nameBase + fillWithZeros(index);
+
+                while (indexOfString(loadOrderedAttributeArray(), newName) != -1) {
+                    newName = nameBase + fillWithZeros(++index);
+                }
+
                 final int ans = JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
                         NbBundle.getMessage(
                             H2FeatureServiceFactory.class,
@@ -1024,7 +1261,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             tableName,
                             idField,
                             newName));
-
+                    addCustomIdFieldToAttributes(1, newName);
                     createPrimaryKey(false, tableName);
                 } else {
                     return false;
@@ -1035,6 +1272,23 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         }
 
         return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   number  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String fillWithZeros(final int number) {
+        if (number < 10) {
+            return "00" + number;
+        } else if (number < 100) {
+            return "0" + number;
+        } else {
+            return String.valueOf(number);
+        }
     }
 
     /**
@@ -1127,12 +1381,23 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @throws  Exception  DOCUMENT ME!
      */
     private void createMetaTableIfNotExist() throws Exception {
-        final ResultSet rs = conn.getMetaData().getTables(null, null, META_TABLE_NAME, null);
+        ResultSet rs = conn.getMetaData().getTables(null, null, META_TABLE_NAME, null);
 
         if (!rs.next()) {
             // meta table does not exist and should be created
             final Statement st = createStatement(conn);
             st.execute(String.format(CREATE_META_TABLE, META_TABLE_NAME));
+            st.close();
+        }
+
+        rs.close();
+
+        rs = conn.getMetaData().getTables(null, null, META_TABLE_ATTRIBUTES_NAME, null);
+
+        if (!rs.next()) {
+            // meta table does not exist and should be created
+            final Statement st = createStatement(conn);
+            st.execute(String.format(CREATE_ATTRIBUTES_META_TABLE, META_TABLE_ATTRIBUTES_NAME));
             st.close();
         }
 
@@ -1537,7 +1802,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
             } while (rep < 2);
             rs.close();
-
+            loadAttributeOrder();
             createMetaLinRefTablesIfNotExist();
             final StatementWrapper st = createStatement(conn);
             final ResultSet lrMeta = st.executeQuery(

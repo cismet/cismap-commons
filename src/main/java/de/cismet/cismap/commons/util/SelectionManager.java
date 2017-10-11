@@ -196,9 +196,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  featureList  DOCUMENT ME!
      */
     public void addSelectedFeatures(final List<? extends Feature> featureList) {
-        if (setSelectedFeatures(featureList, false, true)) {
-            fireSelectionChangedEvent();
-        }
+        setSelectedFeatures(featureList, false, true);
+        fireSelectionChangedEvent();
     }
 
     /**
@@ -915,20 +914,24 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                                         // in edt to avoid a ConcurrentModificationException in
                                         // MappingComponent.featureLayer.getChildrenReference()
                                         synchronized (featuresToSelectInt) {
-                                            selectionChangeInProgress = true;
-                                            CismapBroker.getInstance()
-                                                    .getMappingComponent()
-                                                    .getFeatureCollection()
-                                                    .addToSelection(featuresToSelectInt);
-                                            CismapBroker.getInstance()
-                                                    .getMappingComponent()
-                                                    .getFeatureCollection()
-                                                    .unselect(featuresToUnselectInt);
-                                            featuresToSelectInt.clear();
-                                            featuresToUnselectInt.clear();
-                                            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-                                            pn.postNotification(SelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
-                                            selectionChangeInProgress = false;
+                                            if (!featuresToSelectInt.isEmpty() || !featuresToUnselectInt.isEmpty()) {
+                                                selectionChangeInProgress = true;
+                                                CismapBroker.getInstance()
+                                                        .getMappingComponent()
+                                                        .getFeatureCollection()
+                                                        .addToSelection(featuresToSelectInt);
+                                                CismapBroker.getInstance()
+                                                        .getMappingComponent()
+                                                        .getFeatureCollection()
+                                                        .unselect(featuresToUnselectInt);
+                                                featuresToSelectInt.clear();
+                                                featuresToUnselectInt.clear();
+                                                final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                                                pn.postNotification(
+                                                    SelectionListener.SELECTION_CHANGED_NOTIFICATION,
+                                                    this);
+                                                selectionChangeInProgress = false;
+                                            }
                                         }
                                     }
                                 });
