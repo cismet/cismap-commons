@@ -3225,7 +3225,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     @Override
                                                     public void run() {
                                                         try {
-                                                            pFeatureHM.get(selectedFeature).addHandles(handleLayer);
+                                                            final PFeature feature = pFeatureHM.get(selectedFeature);
+
+                                                            if (feature != null) {
+                                                                feature.addHandles(handleLayer);
+                                                            }
                                                         } catch (final Exception e) {
                                                             LOG.error("Error bei addHandles: ", e); // NOI18N
                                                         }
