@@ -684,10 +684,16 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      */
     protected double getCurrentPosition() {
         if (getSelectedLinePFeature() != null) {
-            return LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
+            final double position = LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
                         mc.getWtst().getSourceX(cursorX),
                         mc.getWtst().getSourceY(cursorY)),
                     getSelectedLinePFeature().getFeature().getGeometry());
+            // prevent rounding problem and allow to set the postion 0.00
+            if (position < 0.007) {
+                return 0.00;
+            }
+
+            return position;
         } else {
             return 0d;
         }
