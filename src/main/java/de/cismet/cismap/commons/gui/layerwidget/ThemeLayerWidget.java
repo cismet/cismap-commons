@@ -751,7 +751,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public void actionPerformed(final ActionEvent e) {
             final TreePath[] paths = tree.getSelectionPaths();
 
-            changeVisibility(paths);
+            changeVisibilityForPath(paths);
         }
 
         /**
@@ -759,7 +759,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          *
          * @param  paths  DOCUMENT ME!
          */
-        private void changeVisibility(final TreePath[] paths) {
+        private void changeVisibilityForPath(final TreePath[] paths) {
             for (final TreePath path : paths) {
                 final Object selectedComponent = path.getLastPathComponent();
 
@@ -769,13 +769,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         layer.setEnabled(shouldBeEnabled);
                     }
                     if (layerModel.isVisible(path) != shouldBeEnabled) {
-                        layerModel.handleVisibility(path);
+                        changeVisibility(selectedComponent, shouldBeEnabled);
                     }
                 } else if (selectedComponent instanceof LayerCollection) {
                     final LayerCollection layer = (LayerCollection)selectedComponent;
 
                     if (layer.isEnabled() != shouldBeEnabled) {
-                        layer.setEnabled(shouldBeEnabled);
+                        changeVisibility(selectedComponent, shouldBeEnabled);
                     }
                 } else if (selectedComponent.equals(layerModel.getRoot())) {
                     final List<TreePath> tp = new ArrayList<TreePath>();
@@ -785,7 +785,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         tp.add(rootPath.pathByAddingChild(layerModel.getChild(layerModel.getRoot(), i)));
                     }
 
-                    changeVisibility(tp.toArray(new TreePath[tp.size()]));
+                    changeVisibilityForPath(tp.toArray(new TreePath[tp.size()]));
                 }
             }
         }

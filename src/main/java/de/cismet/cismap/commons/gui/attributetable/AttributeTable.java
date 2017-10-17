@@ -3560,10 +3560,10 @@ public class AttributeTable extends javax.swing.JPanel {
                                 for (final FeatureServiceFeature f : allFeaturesToDelete) {
                                     model.addRemovedFeature(f);
                                 }
-                                tableRuleSet.afterSave(model);
-                                model.clearRemovedFeatures();
                             }
                         }
+                        tableRuleSet.afterSave(model);
+                        model.clearRemovedFeatures();
                         allFeaturesToDelete.clear();
 
                         if (changeProcessingMode) {
