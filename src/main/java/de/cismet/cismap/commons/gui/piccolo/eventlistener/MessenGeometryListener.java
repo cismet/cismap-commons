@@ -693,7 +693,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
-    private PPath initTempFeature(final boolean filled) {
+    protected PPath initTempFeature(final boolean filled) {
         tempFeature = new PPath();
         tempFeature.setStroke(new FixedWidthStroke());
         final Color fillingColor = getFillingColor();
