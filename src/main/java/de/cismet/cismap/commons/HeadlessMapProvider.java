@@ -32,6 +32,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -259,7 +260,11 @@ public class HeadlessMapProvider {
                 }
             }
             if (addable) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
+                if (rasterService instanceof ModeLayer) {
+                    headlessMapProvider.addLayer(((ModeLayer)rasterService).getCurrentLayer());
+                } else {
+                    headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
+                }
             } else {
                 LOG.warn(
                     "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
