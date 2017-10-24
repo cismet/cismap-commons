@@ -407,7 +407,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                                 if (!((feature instanceof PermissionProvider)
                                                                 && !((PermissionProvider)feature)
                                                                 .hasWritePermissions())) {
-                                                    makeFeatureEditable(feature);
+                                                    makeFeatureEditable(feature, wd);
                                                 }
                                                 wd.setProgress(++progress);
                                                 if (canceled) {
@@ -845,8 +845,9 @@ public class AttributeTable extends javax.swing.JPanel {
      * Locks the given feature, if a corresponding locker exists and make the feature editable.
      *
      * @param  feature  the feature to make editable
+     * @param  parent   DOCUMENT ME!
      */
-    public void makeFeatureEditable(final FeatureServiceFeature feature) {
+    public void makeFeatureEditable(final FeatureServiceFeature feature, final Component parent) {
         if ((feature instanceof PermissionProvider) && (feature.getId() > 0)) {
             final PermissionProvider pp = (PermissionProvider)feature;
 
@@ -865,7 +866,9 @@ public class AttributeTable extends javax.swing.JPanel {
             if (!shownAsLocked.contains(feature)) {
                 try {
                     if ((locker != null) && !tableLock) {
-                        lockingObjects.put(feature, locker.lock(feature, false));
+                        if (!lockingObjects.containsKey(feature)) {
+                            lockingObjects.put(feature, locker.lock(feature, false));
+                        }
                     }
                     feature.setEditable(true);
                     if (!lockedFeatures.contains(feature)) {
@@ -874,8 +877,13 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 } catch (LockAlreadyExistsException ex) {
                     shownAsLocked.add(feature);
+                    Component c = parent;
+                    if (c == null) {
+                        c = AttributeTable.this;
+                    }
+
                     JOptionPane.showMessageDialog(
-                        AttributeTable.this,
+                        c,
                         NbBundle.getMessage(
                             AttributeTable.class,
                             "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
@@ -3530,7 +3538,9 @@ public class AttributeTable extends javax.swing.JPanel {
                                 LOG.error("Error while refreshing shape file.", e);
                             }
                         } else {
-                            wd.setMax(modifiedFeatures.size());
+                            if (modifiedFeatures.size() > 0) {
+                                wd.setMax(modifiedFeatures.size());
+                            }
                             int count = 0;
 
                             for (final FeatureServiceFeature fsf : modifiedFeatures) {
@@ -3676,6 +3686,8 @@ public class AttributeTable extends javax.swing.JPanel {
                 ((ModifiableFeature)f).delete();
                 model.removeFeatureServiceFeature(f);
                 modifiedFeatures.remove((DefaultFeatureServiceFeature)f);
+                allFeaturesToDelete.add(f);
+                featureDeleted = true;
             } catch (Exception e) {
                 LOG.error("Cannot remove feature", e);
             }
