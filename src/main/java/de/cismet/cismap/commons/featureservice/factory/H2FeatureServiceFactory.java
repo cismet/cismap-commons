@@ -2297,7 +2297,6 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             setInterruptedNotAllowed();
             final StatementWrapper st = createStatement(conn);
             final ResultSet rs = st.executeQuery(select);
-            setInterruptedAllowed();
             final List<JDBCFeature> selectedFeatures = new ArrayList<JDBCFeature>();
 
             if (info == null) {
@@ -2323,6 +2322,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             return selectedFeatures;
         } catch (SQLException e) {
             LOG.error("Error during the createFeatures operation. Query: " + query, e);
+        } finally {
+            setInterruptedAllowed();
         }
 
         return new ArrayList<JDBCFeature>();
