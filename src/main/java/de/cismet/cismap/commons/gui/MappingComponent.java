@@ -3917,7 +3917,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 getFeatureCollection().removeFeatures(lf);
             }
 
-            System.gc();
+            new Thread() {
+
+                    @Override
+                    public void run() {
+                        System.gc();
+                    }
+                }.start();
         } catch (final Exception e) {
             LOG.warn("Fehler bei mapServiceRemoved", e); // NOI18N
         }
