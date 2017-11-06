@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.PersistentFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 import de.cismet.tools.gui.downloadmanager.Download;
@@ -80,61 +81,71 @@ public class ExportTxtDownload extends ExportDownload {
         if (status != Download.State.WAITING) {
             return;
         }
-
-        status = Download.State.RUNNING;
-        stateChanged();
-
         try {
-            loadFeaturesIfRequired();
-        } catch (Exception e) {
-            log.error("Error while retrieving features", e);
-            error(e);
-            return;
-        }
-
-        if ((features != null) && (features.length > 0)) {
-            final List<String> attributeList = toAttributeList(aliasAttributeList);
-            BufferedWriter bw = null;
-            boolean firstLine = true;
-            try {
-                bw = new BufferedWriter(new FileWriter(fileToSaveTo));
-
-                for (final FeatureServiceFeature feature : features) {
-                    if (Thread.interrupted()) {
-                        bw.close();
-                        fileToSaveTo.delete();
-                        bw = null;
-                        break;
-                    }
-                    if (firstLine && (aliasAttributeList != null)) {
-                        if (writeHeader) {
-                            bw.write(toString(toAliasList(aliasAttributeList), true));
-                            bw.newLine();
-                        }
-
-                        firstLine = false;
-                    }
-                    bw.write(toString(attributeList, feature));
-                    bw.newLine();
-                }
-            } catch (final Exception ex) {
-                error(ex);
-            } finally {
-                if (bw != null) {
-                    try {
-                        bw.close();
-                    } catch (final IOException e) {
-                        log.error("Error while closing file", e);
-                    }
-                }
-            }
-        } else {
-            error(new Exception("No features found"));
-        }
-
-        if (status == Download.State.RUNNING) {
-            status = Download.State.COMPLETED;
+            status = Download.State.RUNNING;
             stateChanged();
+
+            try {
+                loadFeaturesIfRequired();
+            } catch (Exception e) {
+                log.error("Error while retrieving features", e);
+                error(e);
+                return;
+            }
+
+            if ((features != null) && (features.length > 0)) {
+                final List<String> attributeList = toAttributeList(aliasAttributeList);
+                BufferedWriter bw = null;
+                boolean firstLine = true;
+                try {
+                    bw = new BufferedWriter(new FileWriter(fileToSaveTo));
+
+                    for (final FeatureServiceFeature feature : features) {
+                        if (Thread.interrupted()) {
+                            bw.close();
+                            fileToSaveTo.delete();
+                            bw = null;
+                            break;
+                        }
+                        if (firstLine && (aliasAttributeList != null)) {
+                            if (writeHeader) {
+                                bw.write(toString(toAliasList(aliasAttributeList), true));
+                                bw.newLine();
+                            }
+
+                            firstLine = false;
+                        }
+                        bw.write(toString(attributeList, feature));
+                        bw.newLine();
+                    }
+                } catch (final Exception ex) {
+                    error(ex);
+                } finally {
+                    if (bw != null) {
+                        try {
+                            bw.close();
+                        } catch (final IOException e) {
+                            log.error("Error while closing file", e);
+                        }
+                    }
+                }
+
+                if (features[0] instanceof PersistentFeature) {
+                    ((PersistentFeature)features[0]).getPersistenceManager().close();
+                }
+            } else {
+                error(new Exception("No features found"));
+            }
+
+            if (status == Download.State.RUNNING) {
+                status = Download.State.COMPLETED;
+                stateChanged();
+            }
+        } finally {
+            // without the following lines, a lot of memory will be used as long as
+            // this download is in the download list
+            features = null;
+            service = null;
         }
     }
 
