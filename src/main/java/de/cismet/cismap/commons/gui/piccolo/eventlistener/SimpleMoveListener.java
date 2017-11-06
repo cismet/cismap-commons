@@ -82,6 +82,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     private PPath snapRect = PPath.createRectangle(0.0f, 0.0f, 20.0f, 20.0f);
     private boolean annotationNodeVisible = false;
     private double underlyingObjectHalo = 0.0d;
+    private boolean deepSeekEnabled = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -119,7 +120,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         } else {
                             o = PFeatureTools.getFirstValidObjectUnderPointer(
                                     event,
-                                    new Class[] { PFeature.class });
+                                    new Class[] { PFeature.class },
+                                    deepSeekEnabled);
                         }
                         if (o instanceof PFeature) {
                             underlyingObject = (PFeature)o;
@@ -258,6 +260,15 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     /**
      * DOCUMENT ME!
      *
+     * @param  deepSeekEnabled  DOCUMENT ME!
+     */
+    public void setDeepSeekEnabled(final boolean deepSeekEnabled) {
+        this.deepSeekEnabled = deepSeekEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     private boolean newPointHandleExists() {
@@ -354,7 +365,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         synchronized (handleHighlightingStuff) {
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                     event,
-                    new Class[] { PFeature.class, PHandle.class });
+                    new Class[] { PFeature.class, PHandle.class }, deepSeekEnabled);
             try {
                 final PNode n = (PNode)o;
                 setMouseCursorAccordingToMode(n);
