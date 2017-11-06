@@ -147,18 +147,22 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             int index = -1;
 
             for (final Feature f : selectedServiceFeatures) {
+                final PFeature mapFeature = CismapBroker.getInstance().getMappingComponent().getPFeatureHM().get(f);
+                if ((mapFeature != null) && !mapFeature.isSelected()) {
+                    mapFeature.setSelected(true);
+                }
                 if (f instanceof FeatureWithId) {
                     selectedFeatureIds[++index] = ((FeatureWithId)f).getId();
                 }
             }
-
+            CismapBroker.getInstance().getMappingComponent().showHandles(false);
             Arrays.sort(selectedFeatureIds);
             final SelectionListener sl = (SelectionListener)CismapBroker.getInstance().getMappingComponent()
                         .getInputEventListener()
                         .get(MappingComponent.SELECT);
 
             for (final PFeature pfeature : features) {
-                Feature feature = pfeature.getFeature();
+                final Feature feature = pfeature.getFeature();
 
                 if (feature instanceof FeatureWithId) {
                     final boolean selected = Arrays.binarySearch(
@@ -170,11 +174,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     }
 
                     // ensure that the map uses the same feature object that is selected
-                    final int featureIndex = selectedServiceFeatures.indexOf(feature);
-                    if (selectedServiceFeatures.indexOf(feature) != -1) {
-                        feature = selectedServiceFeatures.get(featureIndex);
-                        pfeature.setFeature(feature);
-                    }
+// final int featureIndex = selectedServiceFeatures.indexOf(feature);
+// if (featureIndex != -1) {
+// feature = selectedServiceFeatures.get(featureIndex);
+// pfeature.setFeature(feature);
+// }
 
                     if (selected) {
                         sl.addSelectedFeature(pfeature);

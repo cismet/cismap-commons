@@ -198,7 +198,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private Object selectionEventSource = null;
     private List<ListSelectionListener> selectionListener = new ArrayList<ListSelectionListener>();
     private TreeSet<Feature> shownAsLocked = new TreeSet<Feature>();
-    private String lastExportPath = DownloadManager.instance().getDestinationDirectory().getAbsolutePath();
+    private String lastExportPath = null;
     private boolean tableLock = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -407,7 +407,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                                 if (!((feature instanceof PermissionProvider)
                                                                 && !((PermissionProvider)feature)
                                                                 .hasWritePermissions())) {
-                                                    makeFeatureEditable(feature);
+                                                    makeFeatureEditable(feature, wd);
                                                 }
                                                 wd.setProgress(++progress);
                                                 if (canceled) {
@@ -426,7 +426,21 @@ public class AttributeTable extends javax.swing.JPanel {
 //                                                wdt.start();
 //                                            }
 //                                        });
-                                    wdt.start();
+                                    if (!EventQueue.isDispatchThread()) {
+                                        final int progress = 0;
+
+                                        for (final int row : rows) {
+                                            final FeatureServiceFeature feature = model.getFeatureServiceFeature(
+                                                    table.convertRowIndexToModel(row));
+
+                                            if (!((feature instanceof PermissionProvider)
+                                                            && !((PermissionProvider)feature).hasWritePermissions())) {
+                                                makeFeatureEditable(feature, null);
+                                            }
+                                        }
+                                    } else {
+                                        wdt.start();
+                                    }
                                 } catch (Exception ex) {
                                     LOG.error("Error while locking features", ex);
                                 }
@@ -845,8 +859,9 @@ public class AttributeTable extends javax.swing.JPanel {
      * Locks the given feature, if a corresponding locker exists and make the feature editable.
      *
      * @param  feature  the feature to make editable
+     * @param  parent   DOCUMENT ME!
      */
-    public void makeFeatureEditable(final FeatureServiceFeature feature) {
+    public void makeFeatureEditable(final FeatureServiceFeature feature, final Component parent) {
         if ((feature instanceof PermissionProvider) && (feature.getId() > 0)) {
             final PermissionProvider pp = (PermissionProvider)feature;
 
@@ -865,7 +880,9 @@ public class AttributeTable extends javax.swing.JPanel {
             if (!shownAsLocked.contains(feature)) {
                 try {
                     if ((locker != null) && !tableLock) {
-                        lockingObjects.put(feature, locker.lock(feature, false));
+                        if (!lockingObjects.containsKey(feature)) {
+                            lockingObjects.put(feature, locker.lock(feature, false));
+                        }
                     }
                     feature.setEditable(true);
                     if (!lockedFeatures.contains(feature)) {
@@ -874,8 +891,13 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 } catch (LockAlreadyExistsException ex) {
                     shownAsLocked.add(feature);
+                    Component c = parent;
+                    if (c == null) {
+                        c = AttributeTable.this;
+                    }
+
                     JOptionPane.showMessageDialog(
-                        AttributeTable.this,
+                        c,
                         NbBundle.getMessage(
                             AttributeTable.class,
                             "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
@@ -2291,24 +2313,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
         final int[] selectedRows = table.getSelectedRows();
-        int option = 0;
-
-        if (selectedRows.length > 0) {
-            option = JOptionPane.showOptionDialog(
-                    AttributeTable.this,
-                    "Alle Features drucken oder nur die ausgewählten?",
-                    "Drucken",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[] { "alle", "ausgewählte" },
-                    "alle");
-        }
-
-        if (option == -1) {
-            return;
-        }
-        final boolean useSelectedRows = (option != 0);
+        final boolean useSelectedRows = (selectedRows.length > 0);
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
@@ -2534,18 +2539,21 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
+        final int[] selectedRows = table.getSelectedRows();
+        final FeatureServiceFeature[] selectedFeatures = new FeatureServiceFeature[selectedRows.length];
+        final int selectedRowCount = selectedRows.length;
+        Arrays.sort(selectedRows);
+
+        for (int i = 0; i < selectedRowCount; ++i) {
+            selectedFeatures[i] = model.getFeatureServiceFeature(table.convertRowIndexToModel(selectedRows[i]));
+        }
+
         for (int i = 0; i < model.getColumnCount(); ++i) {
             table.setSortOrder(i, SortOrder.UNSORTED);
         }
 
-        final int[] selectedRows = table.getSelectedRows();
-        final int selectedRowCount = table.getSelectedRowCount();
-        int count = 0;
-
-        Arrays.sort(selectedRows);
-
         for (int i = (selectedRowCount - 1); i >= 0; --i) {
-            model.moveRowUp(selectedRows[i] + (count++));
+            model.moveRowUp(selectedFeatures[i]);
         }
 
         table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
@@ -2705,11 +2713,12 @@ public class AttributeTable extends javax.swing.JPanel {
             return;
         }
 
-        diaExport.setSize(400, 130);
-        diaExport.pack();
-        diaExport.setResizable(false);
-        diaExport.setModal(true);
-        StaticSwingTools.showDialog(diaExport);
+//        diaExport.setSize(400, 130);
+//        diaExport.pack();
+//        diaExport.setResizable(false);
+//        diaExport.setModal(true);
+//        StaticSwingTools.showDialog(diaExport);
+        startExport(null, null);
     } //GEN-LAST:event_butExportActionPerformed
 
     /**
@@ -2752,24 +2761,7 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         final int[] selectedRows = table.getSelectedRows();
-        int option = 0;
-
-        if (selectedRows.length > 0) {
-            option = JOptionPane.showOptionDialog(
-                    AttributeTable.this,
-                    "Alle Features drucken oder nur die ausgewählten?",
-                    "Drucken",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[] { "alle", "ausgewählte" },
-                    "alle");
-        }
-
-        if (option == -1) {
-            return;
-        }
-        final boolean useSelectedRows = (option != 0);
+        final boolean useSelectedRows = (selectedRows.length > 0);
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
@@ -3322,7 +3314,10 @@ public class AttributeTable extends javax.swing.JPanel {
     private void startExport(ExportDownload ed, final File file) {
         final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
         final int[] selectedRows = table.getSelectedRows();
-        int option = 0;
+
+        if (lastExportPath == null) {
+            lastExportPath = DownloadManager.instance().getDestinationDirectory().getAbsolutePath();
+        }
 
         if (selectedRows != null) {
             for (final int row : selectedRows) {
@@ -3334,22 +3329,7 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
-        if (!features.isEmpty()) {
-            option = JOptionPane.showOptionDialog(
-                    AttributeTable.this,
-                    "Alle Features exportieren oder nur die ausgewählten?",
-                    "Exportieren",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[] { "alle", "ausgewählte" },
-                    "alle");
-        }
-
-        if (option == -1) {
-            return;
-        } else if (option == 0) {
-            // export all features
+        if (features.isEmpty()) {
             for (int i = 0; i < model.getRowCount(); ++i) {
                 features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
             }
@@ -3366,36 +3346,89 @@ public class AttributeTable extends javax.swing.JPanel {
 
         try {
             // every download needs its own instance of the Download class
-            ed = ed.getClass().newInstance();
             File outputFile = file;
 
-            if (outputFile == null) {
-                outputFile = StaticSwingTools.chooseFile(
+            if ((outputFile == null) && (ed == null)) {
+                outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
                         lastExportPath,
                         true,
-                        new String[] { ed.getDefaultExtension().substring(1) },
-                        ed.getDefaultExtension(),
+                        new String[] { "shp", "dbf", "csv", "txt" },
+                        new String[] { "shp", "dbf", "csv", "txt" },
                         this);
-            }
 
-            if (outputFile != null) {
-                lastExportPath = outputFile.getParent();
-                final List<String[]> attributeNames;
+                if (outputFile != null) {
+                    ExportDownload downloader;
+                    final List<String[]> attributeNames;
 
-                if (!ed.getClass().getName().toLowerCase().contains("csv")
-                            && !ed.getClass().getName().toLowerCase().contains("txt")) {
-                    attributeNames = getAliasAttributeList(true);
-                } else {
-                    attributeNames = getAliasAttributeList(false);
+                    if (!outputFile.getName().toLowerCase().endsWith("csv")
+                                && !outputFile.getName().toLowerCase().endsWith("txt")) {
+                        attributeNames = getAliasAttributeList(true);
+                    } else {
+                        attributeNames = getAliasAttributeList(false);
+                    }
+
+                    if (outputFile.getName().toLowerCase().endsWith("dbf")) {
+                        downloader = new ExportDbfDownload();
+                        downloader.init(outputFile.getAbsolutePath(),
+                            "",
+                            features.toArray(new FeatureServiceFeature[features.size()]),
+                            featureService,
+                            attributeNames);
+                    } else if (outputFile.getName().toLowerCase().endsWith("csv")) {
+                        downloader = new ExportCsvDownload(outputFile.getAbsolutePath(),
+                                "",
+                                features.toArray(new FeatureServiceFeature[features.size()]),
+                                featureService,
+                                attributeNames);
+                    } else if (outputFile.getName().toLowerCase().endsWith("txt")) {
+                        downloader = new ExportTxtDownload(outputFile.getAbsolutePath(),
+                                "",
+                                features.toArray(new FeatureServiceFeature[features.size()]),
+                                featureService,
+                                attributeNames);
+                    } else {
+                        downloader = new ExportShapeDownload();
+                        downloader.init(outputFile.getAbsolutePath(),
+                            "",
+                            features.toArray(new FeatureServiceFeature[features.size()]),
+                            featureService,
+                            attributeNames);
+                    }
+
+                    lastExportPath = outputFile.getParent();
+                    DownloadManager.instance().add(downloader);
+                }
+            } else {
+                ed = ed.getClass().newInstance();
+
+                if (outputFile == null) {
+                    outputFile = StaticSwingTools.chooseFile(
+                            lastExportPath,
+                            true,
+                            new String[] { ed.getDefaultExtension().substring(1) },
+                            ed.getDefaultExtension(),
+                            this);
                 }
 
-                ed.init(outputFile.getAbsolutePath(),
-                    "",
-                    features.toArray(new FeatureServiceFeature[features.size()]),
-                    featureService,
-                    attributeNames);
+                if (outputFile != null) {
+                    lastExportPath = outputFile.getParent();
+                    final List<String[]> attributeNames;
 
-                DownloadManager.instance().add(ed);
+                    if (!ed.getClass().getName().toLowerCase().contains("csv")
+                                && !ed.getClass().getName().toLowerCase().contains("txt")) {
+                        attributeNames = getAliasAttributeList(true);
+                    } else {
+                        attributeNames = getAliasAttributeList(false);
+                    }
+
+                    ed.init(outputFile.getAbsolutePath(),
+                        "",
+                        features.toArray(new FeatureServiceFeature[features.size()]),
+                        featureService,
+                        attributeNames);
+
+                    DownloadManager.instance().add(ed);
+                }
             }
         } catch (Exception e) {
             LOG.error("The ExportDownload class has possibly no public constructor without arguments.", e);
@@ -3530,7 +3563,9 @@ public class AttributeTable extends javax.swing.JPanel {
                                 LOG.error("Error while refreshing shape file.", e);
                             }
                         } else {
-                            wd.setMax(modifiedFeatures.size());
+                            if (modifiedFeatures.size() > 0) {
+                                wd.setMax(modifiedFeatures.size());
+                            }
                             int count = 0;
 
                             for (final FeatureServiceFeature fsf : modifiedFeatures) {
@@ -3676,6 +3711,8 @@ public class AttributeTable extends javax.swing.JPanel {
                 ((ModifiableFeature)f).delete();
                 model.removeFeatureServiceFeature(f);
                 modifiedFeatures.remove((DefaultFeatureServiceFeature)f);
+                allFeaturesToDelete.add(f);
+                featureDeleted = true;
             } catch (Exception e) {
                 LOG.error("Cannot remove feature", e);
             }

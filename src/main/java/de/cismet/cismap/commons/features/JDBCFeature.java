@@ -63,6 +63,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     private final JDBCFeatureInfo featureInfo;
     private boolean modified = false;
+    private boolean deleted = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -292,7 +293,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     @Override
     public void saveChangesWithoutReload() throws Exception {
-        if (!existProperties()) {
+        if (!existProperties() || deleted) {
             // no changes
             return;
         }
@@ -359,6 +360,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         st.executeUpdate(update.toString());
 
         super.getProperties().clear();
+        featureInfo.clearCache();
     }
 
     /**
@@ -405,6 +407,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         st.executeUpdate(query);
 
         super.getProperties().clear();
+        featureInfo.clearCache();
     }
 
     /**
@@ -444,10 +447,12 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 getId());
         final Statement st = featureInfo.getConnection().createStatement();
         st.executeUpdate(deleteStat);
+        deleted = true;
     }
 
     @Override
     public void restore() throws Exception {
+        deleted = false;
         saveChangesWithoutReload();
     }
 

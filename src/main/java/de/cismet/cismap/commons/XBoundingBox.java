@@ -211,4 +211,9 @@ public class XBoundingBox extends BoundingBox {
             return super.equals(other);
         }
     }
+
+    @Override
+    public Object clone() {
+        return new XBoundingBox(getX1(), getY1(), getX2(), getY2(), srs, metric);
+    }
 }
