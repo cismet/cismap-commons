@@ -11,14 +11,23 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import java.io.File;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.PersistentFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.util.FilePersistenceManager;
 
 import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
@@ -101,9 +110,51 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected void loadFeaturesIfRequired() throws Exception {
         if (features == null) {
             service.initAndWait();
-            final List<FeatureServiceFeature> featureList = service.getFeatureFactory()
-                        .createFeatures(service.getQuery(), null, null, 0, 0, null);
-            features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
+            final int pageSize = service.getMaxFeaturesPerPage() * 2;
+            List<FeatureServiceFeature> featureList;
+
+            if ((pageSize == -1)
+                        || ((service.getFeatureServiceAttributes() == null)
+                            || (service.getFeatureServiceAttributes().get("id") == null))) {
+                featureList = service.getFeatureFactory().createFeatures(service.getQuery(), null, null, 0, 0, null);
+                features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
+            } else {
+                final List<FeatureServiceFeature> tmpFeatureList = new ArrayList<FeatureServiceFeature>();
+                final Geometry g = ZoomToLayerWorker.getServiceBounds(service);
+                XBoundingBox bb;
+                final FeatureServiceAttribute[] idAttr = new FeatureServiceAttribute[] {
+                        (FeatureServiceAttribute)service.getFeatureServiceAttributes().get("id")
+                    };
+
+                if (g != null) {
+                    bb = new XBoundingBox(g);
+
+                    try {
+                        final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs()
+                                        .getCode());
+                        bb = transformer.transformBoundingBox(bb);
+                    } catch (Exception e) {
+                        error(e);
+                    }
+                } else {
+                    bb = null;
+                }
+
+                final int count = service.getFeatureCount(service.getQuery(), bb);
+                int index = 0;
+                final FilePersistenceManager pm = new FilePersistenceManager(fileToSaveTo.getParentFile());
+
+                do {
+                    featureList = service.getFeatureFactory()
+                                .createFeatures(service.getQuery(), null, null, index, pageSize, idAttr);
+                    index += featureList.size();
+
+                    for (final FeatureServiceFeature f : featureList) {
+                        tmpFeatureList.add(new PersistentFeature(f, pm));
+                    }
+                } while (index < count);
+                features = tmpFeatureList.toArray(new FeatureServiceFeature[tmpFeatureList.size()]);
+            }
 
             if (aliasAttributeList == null) {
                 if ((features != null) && (features.length > 0)) {

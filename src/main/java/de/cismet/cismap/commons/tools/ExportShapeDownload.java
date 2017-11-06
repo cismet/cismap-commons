@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.Collection;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.PersistentFeature;
 
 import de.cismet.tools.gui.downloadmanager.Download;
 
@@ -60,38 +61,49 @@ public class ExportShapeDownload extends ExportDownload {
             return;
         }
 
-        status = Download.State.RUNNING;
-        stateChanged();
-
         try {
-            loadFeaturesIfRequired();
-        } catch (Exception e) {
-            log.error("Error while retrieving features", e);
-            error(e);
-            return;
-        }
-
-        if ((features != null) && (features.length > 0)) {
-            try {
-                final Collection<? extends ShapeWriter> writer = Lookup.getDefault().lookupAll(ShapeWriter.class);
-
-                if (writer.size() > 0) {
-                    if (getDefaultExtension().equalsIgnoreCase(".dbf")) {
-                        writer.iterator().next().writeDbf(features, aliasAttributeList, fileToSaveTo);
-                    } else {
-                        writer.iterator().next().writeShape(features, aliasAttributeList, fileToSaveTo);
-                    }
-                }
-            } catch (Exception ex) {
-                error(ex);
-            }
-        } else {
-            error(new Exception("No features found"));
-        }
-
-        if (status == Download.State.RUNNING) {
-            status = Download.State.COMPLETED;
+            status = Download.State.RUNNING;
             stateChanged();
+
+            try {
+                loadFeaturesIfRequired();
+            } catch (Exception e) {
+                log.error("Error while retrieving features", e);
+                error(e);
+                return;
+            }
+
+            if ((features != null) && (features.length > 0)) {
+                try {
+                    final Collection<? extends ShapeWriter> writer = Lookup.getDefault().lookupAll(ShapeWriter.class);
+
+                    if (writer.size() > 0) {
+                        if (getDefaultExtension().equalsIgnoreCase(".dbf")) {
+                            writer.iterator().next().writeDbf(features, aliasAttributeList, fileToSaveTo);
+                        } else {
+                            writer.iterator().next().writeShape(features, aliasAttributeList, fileToSaveTo);
+                        }
+                    }
+                } catch (Exception ex) {
+                    error(ex);
+                }
+
+                if (features[0] instanceof PersistentFeature) {
+                    ((PersistentFeature)features[0]).getPersistenceManager().close();
+                }
+            } else {
+                error(new Exception("No features found"));
+            }
+
+            if (status == Download.State.RUNNING) {
+                status = Download.State.COMPLETED;
+                stateChanged();
+            }
+        } finally {
+            // without the following lines, a lot of memory will be used as long as
+            // this download is in the download list
+            features = null;
+            service = null;
         }
     }
 
