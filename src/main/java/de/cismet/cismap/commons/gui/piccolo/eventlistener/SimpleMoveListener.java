@@ -365,7 +365,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         synchronized (handleHighlightingStuff) {
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                     event,
-                    new Class[] { PFeature.class, PHandle.class }, deepSeekEnabled);
+                    new Class[] { PFeature.class, PHandle.class },
+                    deepSeekEnabled);
             try {
                 final PNode n = (PNode)o;
                 setMouseCursorAccordingToMode(n);
