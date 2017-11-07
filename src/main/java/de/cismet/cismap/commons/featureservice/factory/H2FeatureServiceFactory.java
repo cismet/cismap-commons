@@ -757,8 +757,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             st.execute(String.format(
                                     "UPDATE \"%s\" set \"geom\" = ST_GeometryN(\"geom\", 1)",
                                     tableName));
-                            set.close();
                         }
+                        set.close();
                     }
                 }
             }
@@ -1492,6 +1492,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         StatementWrapper st = null;
         ResultSet rs = null;
         PreparedStatement linRefGeomUpdate = null;
+        PreparedStatement removeLine = null;
         int creationSuccessfully = 0;
         int errorCode = 0;
         int errorStation = 0;
@@ -1525,6 +1526,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             String additionalFields = "\"" + fromField + "\",\"" + routeField + "\"";
             linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + newTableName + "\" set \""
                             + newGeometryField + "\" = ? WHERE \"" + idField + "\" = ?");
+            removeLine = conn.prepareStatement("DELETE FROM \"" + newTableName + "\"  WHERE \"" + idField + "\" = ?");
 
             if (tillField != null) {
                 additionalFields += ",\"" + tillField + "\"";
@@ -1542,6 +1544,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 if (routeGeom == null) {
                     LOG.warn("No geometry found for route " + routeId);
                     errorCode++;
+                    removeLine.setInt(1, id);
+                    removeLine.execute();
                     continue;
                 }
                 final double routeLength = routeGeom.getLength();
@@ -1632,6 +1636,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (linRefGeomUpdate != null) {
                 try {
                     linRefGeomUpdate.close();
+                } catch (SQLException ex) {
+                    LOG.error("Error while closing prepared statement", ex);
+                }
+            }
+            if (removeLine != null) {
+                try {
+                    removeLine.close();
                 } catch (SQLException ex) {
                     LOG.error("Error while closing prepared statement", ex);
                 }
@@ -1910,9 +1921,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         if ((attributeRuleSet != null) && (attributeRuleSet.size() > 0)) {
             final H2AttributeTableRuleSet ruleSet =
-                attributeRuleSet.toArray(new H2AttributeTableRuleSet[attributeRuleSet.size()])[0];
+                attributeRuleSet.toArray(new H2AttributeTableRuleSet[attributeRuleSet.size()])[0].clone();
 
-            ruleSet.init(linRefList, geometryType, featureServiceAttributes);
+            ruleSet.init(linRefList, geometryType, featureServiceAttributes, tableName);
 
             return ruleSet;
         }

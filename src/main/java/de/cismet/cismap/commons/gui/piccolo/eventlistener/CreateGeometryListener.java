@@ -9,6 +9,9 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -525,6 +528,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
             geom = CrsTransformer.transformToGivenCrs(geom,
                     mappingComponent.getMappingModel().getSrs().getCode());
+
+            if (isInMode(LINESTRING) && geom.getGeometryType().equals("Polygon")) {
+                final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                        currentSrid);
+                geom = factory.createLineString(((Polygon)geom).getExteriorRing().getCoordinates());
+            }
 
             newFeature.setGeometry(geom);
 

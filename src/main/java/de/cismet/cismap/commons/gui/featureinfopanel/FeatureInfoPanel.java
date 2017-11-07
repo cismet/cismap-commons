@@ -35,6 +35,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Stroke;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -76,6 +77,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -100,7 +102,9 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerCombobox;
 import de.cismet.cismap.commons.gui.layerwidget.LayerFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToFeaturesWorker;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
@@ -483,10 +487,16 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             if (highlightingGeometry.getCoordinates().length > 500) {
                 highlightingGeometry = TopologyPreservingSimplifier.simplify(highlightingGeometry, 30);
             }
-            final PureNewFeature highligtingFeature = new PureNewFeature(highlightingGeometry);
+            final PureNewFeature highligtingFeature = new PureNewFeature(highlightingGeometry) {
+
+                    @Override
+                    public Stroke getLineStyle() {
+                        return new CustomFixedWidthStroke(3);
+                    }
+                };
 
             highligtingFeature.setFillingPaint(Color.decode("#EEC506"));
-            mappingComonent.highlightFeature(highligtingFeature, 1500);
+            mappingComonent.highlightFeature(highligtingFeature, 1500, Color.RED);
         } else if (selectedComp instanceof WMSGetFeatureInfoDescription) {
             // the default wms mechanism should be used
             enableAttributeTable(false);
@@ -669,7 +679,15 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         // ((DefaultFeatureServiceFeature)fsf).addPropertyChangeListener(model);
                     }
                 }
+                final Geometry g = fsf.getGeometry();
                 fsf.setEditable(true);
+
+                if ((g != null) && (fsf.getGeometry() != null) && (g.distance(fsf.getGeometry()) > 2)) {
+                    final XBoundingBox boundingBox = new XBoundingBox(g.union(fsf.getGeometry()));
+                    boundingBox.increase(10);
+
+                    CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
+                }
             } catch (LockAlreadyExistsException ex) {
                 JOptionPane.showMessageDialog(
                     FeatureInfoPanel.this,

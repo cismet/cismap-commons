@@ -82,9 +82,8 @@ public abstract class AbstractRetrievalService implements RetrievalService {
         synchronized (fireRetrievalStartedLock) {
             this.setProgress(-1);
             e.setRetrievalService(this);
-            final Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                final Object l = it.next();
+            for (int i = 0; i < listeners.size(); ++i) {
+                final Object l = listeners.get(i);
                 if (l instanceof RetrievalListener) {
                     ((RetrievalListener)l).retrievalStarted(e);
                 }

@@ -93,8 +93,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
 //    private double cursorPosition = -1;
-    private float cursorX = Float.MIN_VALUE;
-    private float cursorY = Float.MIN_VALUE;
+    // use double instead of float to minimize rounding differences when snap with an other station
+    private double cursorX = Float.MIN_VALUE;
+    private double cursorY = Float.MIN_VALUE;
     private final LinearReferencedPointMarkPHandle cursorPHandle;
     private final Collection<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
 
@@ -966,23 +967,27 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         if (selPFeature != null) {
             final Geometry geom = selPFeature.getFeature().getGeometry();
             if (selPFeature != null) {
-                Point2D point = trigger;
+                final Point2D point = trigger;
+                Coordinate snapPoint = null;
 
                 if (mc.isSnappingEnabled() && !mc.isSnappingOnLineEnabled()) {
-                    final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
+                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
                             mc,
                             mc.getCamera().viewToLocal((Point2D)trigger.clone()),
-                            false,
                             false);
 
-                    if (snapPoint != null) {
-                        point = snapPoint;
-                    }
+//                    if (snapPoint != null) {
+//                        point = snapPoint;
+//                    }
                 }
 
-                final Coordinate triggerCoordinate = new Coordinate(
-                        mc.getWtst().getSourceX(point.getX()),
-                        mc.getWtst().getSourceY(point.getY()));
+                Coordinate triggerCoordinate = snapPoint;
+
+                if (triggerCoordinate == null) {
+                    triggerCoordinate = new Coordinate(
+                            mc.getWtst().getSourceX(point.getX()),
+                            mc.getWtst().getSourceY(point.getY()));
+                }
                 final Geometry lineGeometry = LinearReferencedPointFeature.getReducedLineGeometry(
                         geom,
                         new Coordinate(cursorX, cursorY),
@@ -996,8 +1001,8 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 final boolean cursorIsVisible = (dist / mc.getScaleDenominator()) < INVISIBLE_CURSOR_DISTANCE;
 
                 cursorPHandle.setVisible(cursorIsVisible);
-                cursorX = (float)mc.getWtst().getDestX(erg.x);
-                cursorY = (float)mc.getWtst().getDestY(erg.y);
+                cursorX = mc.getWtst().getDestX(erg.x);
+                cursorY = mc.getWtst().getDestY(erg.y);
 
 //                cursorPosition = getCurrentPosition();
             }

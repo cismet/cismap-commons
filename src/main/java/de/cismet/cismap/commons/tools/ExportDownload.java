@@ -40,6 +40,10 @@ import de.cismet.tools.gui.downloadmanager.Download;
  */
 public abstract class ExportDownload extends AbstractCancellableDownload {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static int currentId = 0;
+
     //~ Instance fields --------------------------------------------------------
 
     protected FeatureServiceFeature[] features;
@@ -47,8 +51,18 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected List<String[]> aliasAttributeList;
     protected String extension;
     private boolean absoluteFileName;
+    private final int id = getId();
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static synchronized int getId() {
+        return ++currentId;
+    }
 
     /**
      * DOCUMENT ME!
@@ -113,7 +127,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             final int pageSize = service.getMaxFeaturesPerPage() * 2;
             List<FeatureServiceFeature> featureList;
 
-            if ((pageSize == -1)
+            if ((pageSize < 0)
                         || ((service.getFeatureServiceAttributes() == null)
                             || (service.getFeatureServiceAttributes().get("id") == null))) {
                 featureList = service.getFeatureFactory().createFeatures(service.getQuery(), null, null, 0, 0, null);
@@ -145,6 +159,11 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                 final FilePersistenceManager pm = new FilePersistenceManager(fileToSaveTo.getParentFile());
 
                 do {
+                    if (Thread.interrupted()) {
+                        features = null;
+                        pm.close();
+                        return;
+                    }
                     featureList = service.getFeatureFactory()
                                 .createFeatures(service.getQuery(), null, null, index, pageSize, idAttr);
                     index += featureList.size();
@@ -242,8 +261,8 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof Download) {
-            if ((fileToSaveTo == null) && (((Download)obj).getFileToSaveTo() == null)) {
+        if (obj instanceof ExportDownload) {
+            if ((((ExportDownload)obj).id == id)) {
                 return (obj.getClass().getName().equals(this.getClass().getName()));
             }
         }
