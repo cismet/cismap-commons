@@ -155,14 +155,14 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     selectedFeatureIds[++index] = ((FeatureWithId)f).getId();
                 }
             }
-            CismapBroker.getInstance().getMappingComponent().showHandles(false);
+//            CismapBroker.getInstance().getMappingComponent().showHandles(false);
             Arrays.sort(selectedFeatureIds);
             final SelectionListener sl = (SelectionListener)CismapBroker.getInstance().getMappingComponent()
                         .getInputEventListener()
                         .get(MappingComponent.SELECT);
 
             for (final PFeature pfeature : features) {
-                final Feature feature = pfeature.getFeature();
+                Feature feature = pfeature.getFeature();
 
                 if (feature instanceof FeatureWithId) {
                     final boolean selected = Arrays.binarySearch(
@@ -174,11 +174,14 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     }
 
                     // ensure that the map uses the same feature object that is selected
-// final int featureIndex = selectedServiceFeatures.indexOf(feature);
-// if (featureIndex != -1) {
-// feature = selectedServiceFeatures.get(featureIndex);
-// pfeature.setFeature(feature);
-// }
+                    final int featureIndex = selectedServiceFeatures.indexOf(feature);
+                    if (featureIndex != -1) {
+                        feature = selectedServiceFeatures.get(featureIndex);
+
+                        if (feature.isEditable()) {
+                            pfeature.setFeature(feature);
+                        }
+                    }
 
                     if (selected) {
                         sl.addSelectedFeature(pfeature);
@@ -888,8 +891,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         //~ Instance fields ----------------------------------------------------
 
-        private final List<Feature> featuresToSelectInt = new ArrayList<Feature>();
-        private final List<Feature> featuresToUnselectInt = new ArrayList<Feature>();
+        private final Set<Feature> featuresToSelectInt = new HashSet<Feature>();
+        private final Set<Feature> featuresToUnselectInt = new HashSet<Feature>();
         private Timer refreshTimer = new Timer();
 
         //~ Methods ------------------------------------------------------------
@@ -902,6 +905,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
          */
         public void refresh(final List<Feature> featuresToSelect, final List<Feature> featuresToUnselect) {
             synchronized (featuresToSelectInt) {
+                featuresToSelectInt.removeAll(featuresToUnselect);
+                featuresToUnselectInt.removeAll(featuresToSelect);
                 featuresToSelectInt.addAll(featuresToSelect);
                 featuresToUnselectInt.addAll(featuresToUnselect);
 
@@ -934,6 +939,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                                                 pn.postNotification(
                                                     SelectionListener.SELECTION_CHANGED_NOTIFICATION,
                                                     this);
+                                                CismapBroker.getInstance().getMappingComponent().showHandles(false);
                                                 selectionChangeInProgress = false;
                                             }
                                         }

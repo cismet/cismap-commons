@@ -349,7 +349,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             }
 
             String valueString;
-            if ((value instanceof String) || (value instanceof Geometry)) {
+            if ((value instanceof String) || (value instanceof Geometry) || (value instanceof java.sql.Timestamp)) {
                 valueString = "'" + value + "'";
             } else {
                 valueString = String.valueOf(value);

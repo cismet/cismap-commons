@@ -76,6 +76,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -100,7 +101,9 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerCombobox;
 import de.cismet.cismap.commons.gui.layerwidget.LayerFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToFeaturesWorker;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
@@ -113,6 +116,7 @@ import de.cismet.tools.gui.CellSpecificRenderedTable;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
+import java.awt.Stroke;
 
 /**
  * DOCUMENT ME!
@@ -446,19 +450,19 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             model.setLayerFilter((LayerFilter)evt.getItem());
             expandAll(new TreePath(model.getRoot()));
         }
-    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
+    }//GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         createPopupMenu();
@@ -483,10 +487,16 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             if (highlightingGeometry.getCoordinates().length > 500) {
                 highlightingGeometry = TopologyPreservingSimplifier.simplify(highlightingGeometry, 30);
             }
-            final PureNewFeature highligtingFeature = new PureNewFeature(highlightingGeometry);
+            final PureNewFeature highligtingFeature = new PureNewFeature(highlightingGeometry) {
+                @Override
+                public Stroke getLineStyle() {
+                    return new CustomFixedWidthStroke(3);
+                }
+                
+            };
 
             highligtingFeature.setFillingPaint(Color.decode("#EEC506"));
-            mappingComonent.highlightFeature(highligtingFeature, 1500);
+            mappingComonent.highlightFeature(highligtingFeature, 1500, Color.RED);
         } else if (selectedComp instanceof WMSGetFeatureInfoDescription) {
             // the default wms mechanism should be used
             enableAttributeTable(false);
@@ -504,14 +514,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    } //GEN-LAST:event_jtFeaturesValueChanged
+    }//GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -536,14 +546,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     new Feature[featureList.size()]),
                 10);
         worker.execute();
-    } //GEN-LAST:event_miZoomActionPerformed
+    }//GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
+    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
 
         for (final TreePath tp : tps) {
@@ -584,14 +594,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         repaint();
 
         createPopupMenu();
-    } //GEN-LAST:event_miEditActionPerformed
+    }//GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miPrintActionPerformed
+    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miPrintActionPerformed
         final TreePath tps = jtFeatures.getSelectionPath();
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
@@ -635,7 +645,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_miPrintActionPerformed
+    }//GEN-LAST:event_miPrintActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -669,7 +679,15 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         // ((DefaultFeatureServiceFeature)fsf).addPropertyChangeListener(model);
                     }
                 }
+                final Geometry g = fsf.getGeometry();
                 fsf.setEditable(true);
+
+                if ((g != null) && (fsf.getGeometry() != null) && (g.distance(fsf.getGeometry()) > 2)) {
+                    final XBoundingBox boundingBox = new XBoundingBox(g.union(fsf.getGeometry()));
+                    boundingBox.increase(10);
+
+                    CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
+                }
             } catch (LockAlreadyExistsException ex) {
                 JOptionPane.showMessageDialog(
                     FeatureInfoPanel.this,
