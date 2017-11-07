@@ -40,6 +40,10 @@ import de.cismet.tools.gui.downloadmanager.Download;
  */
 public abstract class ExportDownload extends AbstractCancellableDownload {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static int currentId = 0;
+
     //~ Instance fields --------------------------------------------------------
 
     protected FeatureServiceFeature[] features;
@@ -47,8 +51,18 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected List<String[]> aliasAttributeList;
     protected String extension;
     private boolean absoluteFileName;
+    private final int id = getId();
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static synchronized int getId() {
+        return ++currentId;
+    }
 
     /**
      * DOCUMENT ME!
@@ -242,8 +256,8 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof Download) {
-            if ((fileToSaveTo == null) && (((Download)obj).getFileToSaveTo() == null)) {
+        if (obj instanceof ExportDownload) {
+            if ((((ExportDownload)obj).id == id)) {
                 return (obj.getClass().getName().equals(this.getClass().getName()));
             }
         }
