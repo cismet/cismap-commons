@@ -25,11 +25,14 @@ import java.util.Map;
 
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCreator;
 import de.cismet.cismap.commons.gui.attributetable.creator.WithoutGeometryCreator;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
@@ -69,11 +72,13 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
      * @param  refInfos      DOCUMENT ME!
      * @param  geometryType  DOCUMENT ME!
      * @param  attributes    DOCUMENT ME!
+     * @param  tableName     DOCUMENT ME!
      */
     @Override
     public void init(final List<LinearReferencingInfo> refInfos,
             final String geometryType,
-            final List<FeatureServiceAttribute> attributes) {
+            final List<FeatureServiceAttribute> attributes,
+            final String tableName) {
         this.refInfos = refInfos;
         this.geometryType = geometryType;
 
@@ -185,5 +190,14 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
     @Override
     public List<LinearReferencingInfo> getAllLinRefInfos() {
         return refInfos;
+    }
+
+    @Override
+    public H2AttributeTableRuleSet clone() {
+        final H2AttributeTableRuleSet other = new DefaultH2AttributeTableRuleSet();
+
+        other.init(refInfos, geometryType, null, null);
+
+        return other;
     }
 }
