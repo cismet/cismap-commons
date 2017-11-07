@@ -138,4 +138,10 @@ public class FilePersistenceManager {
             LOG.error("Error while closing FilePersistenceManager.", e);
         }
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        close();
+    }
 }
