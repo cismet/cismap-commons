@@ -127,7 +127,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             final int pageSize = service.getMaxFeaturesPerPage() * 2;
             List<FeatureServiceFeature> featureList;
 
-            if ((pageSize == -1)
+            if ((pageSize < 0)
                         || ((service.getFeatureServiceAttributes() == null)
                             || (service.getFeatureServiceAttributes().get("id") == null))) {
                 featureList = service.getFeatureFactory().createFeatures(service.getQuery(), null, null, 0, 0, null);
@@ -159,6 +159,11 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                 final FilePersistenceManager pm = new FilePersistenceManager(fileToSaveTo.getParentFile());
 
                 do {
+                    if (Thread.interrupted()) {
+                        features = null;
+                        pm.close();
+                        return;
+                    }
                     featureList = service.getFeatureFactory()
                                 .createFeatures(service.getQuery(), null, null, index, pageSize, idAttr);
                     index += featureList.size();
