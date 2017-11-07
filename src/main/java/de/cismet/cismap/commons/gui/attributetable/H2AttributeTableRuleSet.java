@@ -33,10 +33,12 @@ public interface H2AttributeTableRuleSet extends AttributeTableRuleSet {
      * @param  refInfos      DOCUMENT ME!
      * @param  geometryType  DOCUMENT ME!
      * @param  attributes    DOCUMENT ME!
+     * @param  tableName     DOCUMENT ME!
      */
     void init(final List<LinearReferencingInfo> refInfos,
             final String geometryType,
-            final List<FeatureServiceAttribute> attributes);
+            final List<FeatureServiceAttribute> attributes,
+            final String tableName);
 
     /**
      * DOCUMENT ME!
@@ -53,4 +55,11 @@ public interface H2AttributeTableRuleSet extends AttributeTableRuleSet {
      * @return  DOCUMENT ME!
      */
     List<LinearReferencingInfo> getAllLinRefInfos();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    H2AttributeTableRuleSet clone();
 }
