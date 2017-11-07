@@ -93,7 +93,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
 //    private double cursorPosition = -1;
-    //use double instead of float to minimize rounding differences when snap with an other station
+    // use double instead of float to minimize rounding differences when snap with an other station
     private double cursorX = Float.MIN_VALUE;
     private double cursorY = Float.MIN_VALUE;
     private final LinearReferencedPointMarkPHandle cursorPHandle;
