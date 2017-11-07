@@ -38,7 +38,11 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
 
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
+
 import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
+import static de.cismet.cismap.commons.gui.attributetable.creator.AbstractFeatureCreator.fillFeatureWithDefaultValues;
 
 /**
  * Creates new features, which use primitive geometry types.
@@ -129,50 +133,67 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
                                 @Override
                                 public void geometryFinished(final Geometry g) {
-                                    Geometry geom = g;
+                                    final WaitingDialogThread wdt = new WaitingDialogThread(
+                                            StaticSwingTools.getParentFrame(mc),
+                                            true,
+                                            "Erstelle Objekt",
+                                            null,
+                                            1000) {
 
-                                    if (mode.equals(CreateGeometryListenerInterface.LINESTRING)
-                                                && geom.getGeometryType().equals("Point")) {
-                                        geom = g.getFactory()
-                                                        .createLineString(
-                                                                new Coordinate[] {
-                                                                    g.getCoordinate(),
-                                                                    new Coordinate(
-                                                                        g.getCoordinate().x
-                                                                        + 1,
-                                                                        g.getCoordinate().y
-                                                                        + 1)
-                                                                });
-                                    }
+                                            @Override
+                                            protected Object doInBackground() throws Exception {
+                                                Geometry geom = g;
 
-                                    if (multi) {
-                                        geom = StaticGeometryFunctions.toMultiGeometry(geom);
-                                    } else {
-                                        geom = StaticGeometryFunctions.toSimpleGeometry(geom);
-                                    }
+                                                if (mode.equals(CreateGeometryListenerInterface.LINESTRING)
+                                                            && geom.getGeometryType().equals("Point")) {
+                                                    geom = g.getFactory()
+                                                                    .createLineString(
+                                                                            new Coordinate[] {
+                                                                                g.getCoordinate(),
+                                                                                new Coordinate(
+                                                                                    g.getCoordinate().x
+                                                                                    + 1,
+                                                                                    g.getCoordinate().y
+                                                                                    + 1)
+                                                                            });
+                                                }
 
-                                    feature.setGeometry(geom);
-//                                    mc.setInteractionMode(oldInteractionMode);
+                                                if (multi) {
+                                                    geom = StaticGeometryFunctions.toMultiGeometry(geom);
+                                                } else {
+                                                    geom = StaticGeometryFunctions.toSimpleGeometry(geom);
+                                                }
 
-                                    if (feature instanceof DefaultFeatureServiceFeature) {
-                                        try {
-                                            fillFeatureWithDefaultValues(
-                                                (DefaultFeatureServiceFeature)feature,
-                                                properties);
-                                            ((DefaultFeatureServiceFeature)feature).saveChanges();
-                                            fillFeatureWithDefaultValuesAfterSave(
-                                                (DefaultFeatureServiceFeature)feature,
-                                                properties);
+                                                feature.setGeometry(geom);
+                                                // mc.setInteractionMode(oldInteractionMode);
 
-                                            for (final FeatureCreatedListener featureCreatedListener
-                                                        : PrimitiveGeometryCreator.this.listener) {
-                                                featureCreatedListener.featureCreated(
-                                                    new FeatureCreatedEvent(PrimitiveGeometryCreator.this, feature));
+                                                if (feature instanceof DefaultFeatureServiceFeature) {
+                                                    try {
+                                                        fillFeatureWithDefaultValues(
+                                                            (DefaultFeatureServiceFeature)feature,
+                                                            properties);
+                                                        ((DefaultFeatureServiceFeature)feature).saveChanges();
+                                                        fillFeatureWithDefaultValuesAfterSave(
+                                                            (DefaultFeatureServiceFeature)feature,
+                                                            properties);
+
+                                                        for (final FeatureCreatedListener featureCreatedListener
+                                                                    : PrimitiveGeometryCreator.this.listener) {
+                                                            featureCreatedListener.featureCreated(
+                                                                new FeatureCreatedEvent(
+                                                                    PrimitiveGeometryCreator.this,
+                                                                    feature));
+                                                        }
+                                                    } catch (Exception e) {
+                                                        LOG.error("Cannot save new feature", e);
+                                                    }
+                                                }
+
+                                                return null;
                                             }
-                                        } catch (Exception e) {
-                                            LOG.error("Cannot save new feature", e);
-                                        }
-                                    }
+                                        };
+
+                                    wdt.start();
                                 }
                             });
 
@@ -235,23 +256,23 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     @Override
     public void cancel() {
-        if ((mc != null) && !activateResume) {
-            if (mc.getTmpFeatureLayer().getChildrenCount() == 1) {
-                tmpFeature = mc.getTmpFeatureLayer().getChild(0);
-            }
-            mc.getTmpFeatureLayer().removeAllChildren();
-        }
+//        if ((mc != null) && !activateResume) {
+//            if (mc.getTmpFeatureLayer().getChildrenCount() == 1) {
+//                tmpFeature = mc.getTmpFeatureLayer().getChild(0);
+//            }
+//            mc.getTmpFeatureLayer().removeAllChildren();
+//        }
     }
 
     @Override
     public void resume() {
-        if ((mc != null) && (tmpFeature != null)) {
-            mc.getTmpFeatureLayer().addChild(tmpFeature);
-        }
-        tmpFeature = null;
-        activateResume = true;
+//        if ((mc != null) && (tmpFeature != null)) {
+//            mc.getTmpFeatureLayer().addChild(tmpFeature);
+//        }
+//        tmpFeature = null;
+//        activateResume = true;
         CismapBroker.getInstance().getMappingComponent().setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
-        activateResume = false;
+//        activateResume = false;
     }
 
     @Override
