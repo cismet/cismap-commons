@@ -25,6 +25,8 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeatureListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
  * DOCUMENT ME!
@@ -129,7 +131,22 @@ public class LinearReferencedPointPHandle extends PHandle {
                         wtst.getSourceX(dragPoint.getX()),
                         wtst.getSourceY(dragPoint.getY()));
 
-                linref.moveTo(coord, null);
+                Coordinate snapPoint = null;
+
+                if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
+                            && !CismapBroker.getInstance().getMappingComponent().isSnappingOnLineEnabled()) {
+                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
+                            CismapBroker.getInstance().getMappingComponent(),
+                            CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
+                                (Point2D)dragPoint.clone()),
+                            false);
+                }
+
+                if (snapPoint != null) {
+                    linref.moveTo(snapPoint, null);
+                } else {
+                    linref.moveTo(coord, null);
+                }
                 relocateHandle();
             }
         } catch (Throwable t) {
