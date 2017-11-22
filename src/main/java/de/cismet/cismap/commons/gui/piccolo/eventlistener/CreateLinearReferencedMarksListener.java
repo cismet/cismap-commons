@@ -975,10 +975,6 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                             mc,
                             mc.getCamera().viewToLocal((Point2D)trigger.clone()),
                             false);
-
-//                    if (snapPoint != null) {
-//                        point = snapPoint;
-//                    }
                 }
 
                 Coordinate triggerCoordinate = snapPoint;

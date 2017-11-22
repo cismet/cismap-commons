@@ -149,7 +149,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_SEQUENCE = "CREATE SEQUENCE \"%s\";";
     private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN \"%s\" int default \"%s\".nextval;";
     private static final String ADD_NOT_NULL_ID = "ALTER TABLE \"%s\" ALTER COLUMN \"%s\" SET NOT NULL;";
-    private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(\"%s\");";
+    private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY \"%s\" ON \"%s\"(\"%s\");";
     private static final String CREATE_LR_META_TABLE =
         "create table \"%s\" (id serial, table varchar, lin_ref_reference varchar, domain varchar, src_join_field varchar, targ_join_field varchar, lin_ref_geom varchar, kind int, from_value varchar, till_value varchar);";
     private static final String CREATE_SLD_META_TABLE =
