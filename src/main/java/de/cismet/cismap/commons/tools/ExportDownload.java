@@ -262,9 +262,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof ExportDownload) {
-            if ((((ExportDownload)obj).id == id)) {
-                return (obj.getClass().getName().equals(this.getClass().getName()));
-            }
+            return (((ExportDownload)obj).id == id) && (obj.getClass().getName().equals(this.getClass().getName()));
         }
 
         return super.equals(obj);

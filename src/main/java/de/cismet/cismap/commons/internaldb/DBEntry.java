@@ -121,7 +121,7 @@ public class DBEntry {
             start = name.lastIndexOf("->") + 2;
         }
         if (!(this instanceof DBFolder)) {
-            if (name.lastIndexOf("_") != -1) {
+            if ((name.lastIndexOf("_") != -1) && ((name.length() - name.lastIndexOf("_")) == 33)) {
                 end = name.lastIndexOf("_");
             }
         }

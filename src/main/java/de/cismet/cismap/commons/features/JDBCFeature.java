@@ -314,7 +314,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 if (factory instanceof H2FeatureServiceFactory) {
                     final Geometry envelope = factory.getEnvelope();
 
-                    if ((getGeometry() != null) && !envelope.contains(getGeometry())) {
+                    if ((getGeometry() != null) && (envelope != null) && !envelope.contains(getGeometry())) {
                         ((H2FeatureServiceFactory)factory).determineEnvelope();
                     }
                 }
