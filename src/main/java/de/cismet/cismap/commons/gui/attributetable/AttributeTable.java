@@ -392,7 +392,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                             AttributeTable.class,
                                             "AttributeTable.ListSelectionListener.text"),
                                         null,
-                                        250,
+                                        500,
                                         true) {
 
                                         @Override
@@ -1151,7 +1151,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                 null, 0, 0, null);
                     }
 
-                    return featureList;
+                    return new ArrayList<FeatureServiceFeature>(featureList);
                 }
 
                 @Override
@@ -2540,23 +2540,64 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
         final int[] selectedRows = table.getSelectedRows();
-        final FeatureServiceFeature[] selectedFeatures = new FeatureServiceFeature[selectedRows.length];
+        final FeatureWithIndex[] selectedFeatures = new FeatureWithIndex[selectedRows.length];
         final int selectedRowCount = selectedRows.length;
         Arrays.sort(selectedRows);
 
         for (int i = 0; i < selectedRowCount; ++i) {
-            selectedFeatures[i] = model.getFeatureServiceFeature(table.convertRowIndexToModel(selectedRows[i]));
+            final int modelIndex = table.convertRowIndexToModel(selectedRows[i]);
+            selectedFeatures[i] = new FeatureWithIndex(model.getFeatureServiceFeature(modelIndex), modelIndex);
         }
 
         for (int i = 0; i < model.getColumnCount(); ++i) {
             table.setSortOrder(i, SortOrder.UNSORTED);
         }
 
-        for (int i = (selectedRowCount - 1); i >= 0; --i) {
-            model.moveRowUp(selectedFeatures[i]);
-        }
+        final WaitingDialogThread wdt = new WaitingDialogThread(StaticSwingTools.getFirstParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()),
+                true,
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butMoveSelectedRows.waiting"),
+                null,
+                250) {
 
-        table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
+                @Override
+                protected Object doInBackground() throws Exception {
+                    wd.setMax(selectedRowCount);
+                    for (int i = (selectedRowCount - 1); i >= 0; --i) {
+                        final int index = (selectedRowCount - 1) - i;
+                        model.moveRowUp(
+                            selectedFeatures[i].getFeature(),
+                            selectedFeatures[i].getIndex()
+                                    + (index),
+                            (i == 0));
+
+                        if ((index % 10) == 1) {
+                            wd.setProgress((int)(index / 0.9));
+                        }
+                    }
+
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
+                }
+            };
+
+        if (EventQueue.isDispatchThread()) {
+            wdt.start();
+        } else {
+            for (int i = (selectedRowCount - 1); i >= 0; --i) {
+                final int index = (selectedRowCount - 1) - i;
+                model.moveRowUp(
+                    selectedFeatures[i].getFeature(),
+                    selectedFeatures[i].getIndex()
+                            + (index),
+                    (i == 0));
+            }
+            table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
+        }
     } //GEN-LAST:event_butMoveSelectedRowsActionPerformed
 
     /**
@@ -3489,7 +3530,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     true,
                     "Speichere Änderungen",
                     null,
-                    200) {
+                    500) {
 
                     @Override
                     protected Void doInBackground() throws Exception {
@@ -3639,6 +3680,8 @@ public class AttributeTable extends javax.swing.JPanel {
                     ((DefaultFeatureServiceFeature)f).undoAll();
                 }
             }
+            // features should not be restored, if they are new features
+            allFeaturesToDelete.removeAll(newFeatures);
             for (final DefaultFeatureServiceFeature f : newFeatures) {
                 if (f instanceof ModifiableFeature) {
                     try {
@@ -4900,6 +4943,52 @@ public class AttributeTable extends javax.swing.JPanel {
         public boolean accept(final File f) {
             return (f != null)
                         && f.getAbsolutePath().toLowerCase().endsWith(".txt");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class FeatureWithIndex {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private FeatureServiceFeature feature;
+        private int index;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new FeatureWithIndex object.
+         *
+         * @param  feature  DOCUMENT ME!
+         * @param  index    DOCUMENT ME!
+         */
+        public FeatureWithIndex(final FeatureServiceFeature feature, final int index) {
+            this.feature = feature;
+            this.index = index;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public int getIndex() {
+            return index;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public FeatureServiceFeature getFeature() {
+            return feature;
         }
     }
 }
