@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -225,11 +226,29 @@ public class SimpleAttributeTableModel implements TableModel {
      *
      * @param  propToMove  index DOCUMENT ME!
      */
-    public void moveRowUp(final FeatureServiceFeature propToMove) {
-        featureList.remove(propToMove);
-        featureList.add(0, propToMove);
+    public void moveRowUp(final FeatureServiceFeature[] propToMove) {
+        for (int i = (propToMove.length - 1); i >= 0; --i) {
+            featureList.remove(propToMove[i]);
+            featureList.add(0, propToMove[i]);
+        }
 
         fireContentsChanged();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propToMove  index DOCUMENT ME!
+     * @param  index       DOCUMENT ME!
+     * @param  fireEvent   DOCUMENT ME!
+     */
+    public void moveRowUp(final FeatureServiceFeature propToMove, final int index, final boolean fireEvent) {
+        featureList.remove(index);
+        featureList.add(0, propToMove);
+
+        if (fireEvent) {
+            fireContentsChanged();
+        }
     }
 
     /**
