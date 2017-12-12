@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import edu.umd.cs.piccolo.PNode;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -75,6 +77,7 @@ import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRenderer;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -518,6 +521,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
                 if ((pr.getPNode() != null) && (pr.getPNode().getVisible() != visible)) {
                     if (!visible) {
+                        for (int i = 0; i < pr.getPNode().getChildrenCount(); ++i) {
+                            final PNode node = pr.getPNode().getChild(i);
+
+                            if (node instanceof PFeature) {
+                                ((PFeature)node).releaseResources();
+                            }
+                        }
                         pr.getPNode().removeAllChildren();
                     }
                     changeVisibility = true;
