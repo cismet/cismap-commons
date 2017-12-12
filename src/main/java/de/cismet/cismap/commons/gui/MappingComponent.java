@@ -3898,6 +3898,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void mapServiceRemoved(final MapService rasterService) {
         try {
             mapServicelayer.removeChild(rasterService.getPNode());
+
+            // release PFeature resource (for example PStickyNodes)
+            if (rasterService.getPNode() != null) {
+                for (int i = 0; i < rasterService.getPNode().getChildrenCount(); ++i) {
+                    final PNode node = rasterService.getPNode().getChild(i);
+
+                    if (node instanceof PFeature) {
+                        ((PFeature)node).releaseResources();
+                    }
+                }
+            }
+
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
                         .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, rasterService));
