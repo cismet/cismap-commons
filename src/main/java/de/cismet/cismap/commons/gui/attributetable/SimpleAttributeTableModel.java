@@ -238,13 +238,11 @@ public class SimpleAttributeTableModel implements TableModel {
     /**
      * DOCUMENT ME!
      *
-     * @param  propToMove  index DOCUMENT ME!
-     * @param  index       DOCUMENT ME!
-     * @param  fireEvent   DOCUMENT ME!
+     * @param  index      DOCUMENT ME!
+     * @param  fireEvent  DOCUMENT ME!
      */
-    public void moveRowUp(final FeatureServiceFeature propToMove, final int index, final boolean fireEvent) {
-        featureList.remove(index);
-        featureList.add(0, propToMove);
+    public void moveRowUp(final int index, final boolean fireEvent) {
+        featureList.add(0, featureList.remove(index));
 
         if (fireEvent) {
             fireContentsChanged();
