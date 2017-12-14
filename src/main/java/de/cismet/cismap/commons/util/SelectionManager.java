@@ -75,7 +75,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
     // this maps contains pre-calculated values
     private final Map<AbstractFeatureService, Set<Feature>> selectedFeatures =
-        new HashMap<AbstractFeatureService, Set<Feature>>();
+        new ConcurrentHashMap<AbstractFeatureService, Set<Feature>>();
     private final Map<AbstractFeatureService, Integer> modifiableFeaturesCount =
         new HashMap<AbstractFeatureService, Integer>();
 
@@ -230,7 +230,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         if (s == null) {
             s = DUMMY;
         }
-        selectedFeatures.put(service, null);
+        selectedFeatures.remove(service);
         removeSelectionFromMap(service);
 
         for (final Feature f : featureList) {
@@ -469,9 +469,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     public void clearSelection(final AbstractFeatureService service) {
         if (service == null) {
-            selectedFeatures.put(DUMMY, null);
+            selectedFeatures.remove(DUMMY);
         } else {
-            selectedFeatures.put(service, null);
+            selectedFeatures.remove(service);
         }
         removeSelectionFromMap(service);
 
