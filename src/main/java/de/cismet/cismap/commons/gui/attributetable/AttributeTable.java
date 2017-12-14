@@ -81,6 +81,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -195,6 +196,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private final TreeSet<DefaultFeatureServiceFeature> modifiedFeatures = new TreeSet<DefaultFeatureServiceFeature>();
     private final TreeSet<FeatureServiceFeature> allFeaturesToDelete = new TreeSet<FeatureServiceFeature>();
     private final TreeSet<DefaultFeatureServiceFeature> newFeatures = new TreeSet<DefaultFeatureServiceFeature>();
+    private final TreeSet<DefaultFeatureServiceFeature> rejectedNewFeatures =
+        new TreeSet<DefaultFeatureServiceFeature>();
     private Object selectionEventSource = null;
     private List<ListSelectionListener> selectionListener = new ArrayList<ListSelectionListener>();
     private TreeSet<Feature> shownAsLocked = new TreeSet<Feature>();
@@ -2553,6 +2556,14 @@ public class AttributeTable extends javax.swing.JPanel {
             table.setSortOrder(i, SortOrder.UNSORTED);
         }
 
+        final Comparator<Integer> reverseIntCompartor = new Comparator<Integer>() {
+
+                @Override
+                public int compare(final Integer o1, final Integer o2) {
+                    return -1 * Integer.compare(o1, o2);
+                }
+            };
+
         final WaitingDialogThread wdt = new WaitingDialogThread(StaticSwingTools.getFirstParentFrame(
                     CismapBroker.getInstance().getMappingComponent()),
                 true,
@@ -2563,16 +2574,20 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 protected Object doInBackground() throws Exception {
                     wd.setMax(selectedRowCount);
+                    final List<Integer> ts = new ArrayList<Integer>();
+
                     for (int i = (selectedRowCount - 1); i >= 0; --i) {
-                        final int index = (selectedRowCount - 1) - i;
+                        final int index = -1
+                                    * (Collections.binarySearch(ts, selectedFeatures[i].getIndex(), reverseIntCompartor)
+                                        + 1);
                         model.moveRowUp(
-                            selectedFeatures[i].getFeature(),
                             selectedFeatures[i].getIndex()
                                     + (index),
                             (i == 0));
-
-                        if ((index % 10) == 1) {
-                            wd.setProgress((int)(index / 0.9));
+                        ts.add(index, selectedFeatures[i].getIndex());
+                        final int count = (selectedRowCount - 1) - i;
+                        if ((count % 10) == 1) {
+                            wd.setProgress((int)(count / 0.9));
                         }
                     }
 
@@ -2588,13 +2603,16 @@ public class AttributeTable extends javax.swing.JPanel {
         if (EventQueue.isDispatchThread()) {
             wdt.start();
         } else {
+            final LinkedList<Integer> ts = new LinkedList<Integer>();
+
             for (int i = (selectedRowCount - 1); i >= 0; --i) {
-                final int index = (selectedRowCount - 1) - i;
+                final int index = -1
+                            * (Collections.binarySearch(ts, selectedFeatures[i].getIndex(), reverseIntCompartor) + 1);
                 model.moveRowUp(
-                    selectedFeatures[i].getFeature(),
                     selectedFeatures[i].getIndex()
                             + (index),
                     (i == 0));
+                ts.add(index, selectedFeatures[i].getIndex());
             }
             table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
         }
@@ -3694,7 +3712,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 }
             }
-
+            rejectedNewFeatures.addAll(newFeatures);
             newFeatures.clear();
 
             for (final FeatureServiceFeature f : allFeaturesToDelete) {
@@ -3712,6 +3730,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
             model.setEditable(false);
             AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
+            rejectedNewFeatures.clear();
             // reload the layer
             if (CismapBroker.getInstance().getMappingComponent() != null) {
                 CismapBroker.getInstance().getMappingComponent().refresh();
@@ -3759,6 +3778,22 @@ public class AttributeTable extends javax.swing.JPanel {
             } catch (Exception e) {
                 LOG.error("Cannot remove feature", e);
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    public void removeFeatureFromModel(final DefaultFeatureServiceFeature f) {
+        model.removeFeatureServiceFeature(f);
+        newFeatures.remove(f);
+        modifiedFeatures.remove(f);
+        allFeaturesToDelete.remove(f);
+
+        if (f.isEditable()) {
+            f.setEditable(false);
         }
     }
 
@@ -4000,6 +4035,15 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public int getFeatureCount() {
+        return model.getRowCount();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   id  row DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -4058,6 +4102,15 @@ public class AttributeTable extends javax.swing.JPanel {
         allFeaturesToDelete.clear();
         newFeatures.clear();
         butUndo.setEnabled(isUndoButtonEnabled());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the rejectedNewFeatures
+     */
+    public TreeSet<DefaultFeatureServiceFeature> getRejectedNewFeatures() {
+        return rejectedNewFeatures;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -4951,7 +5004,7 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private static class FeatureWithIndex {
+    private static class FeatureWithIndex implements Comparable<FeatureWithIndex> {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -4989,6 +5042,11 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         public FeatureServiceFeature getFeature() {
             return feature;
+        }
+
+        @Override
+        public int compareTo(final FeatureWithIndex o) {
+            return Integer.compare(getIndex(), o.getIndex());
         }
     }
 }
