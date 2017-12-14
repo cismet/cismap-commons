@@ -28,6 +28,8 @@ import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.SwingWorker;
@@ -83,6 +85,7 @@ public class TransformationPHandle extends PHandle {
     private Coordinate rightNeighbourCoordinate;
     private Coordinate[] backupCoordArr;
     private InvalidPolygonTooltip polygonTooltip = new InvalidPolygonTooltip();
+    private Map<Point2D, Coordinate> snappedCoordinates = new HashMap<Point2D, Coordinate>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -215,6 +218,15 @@ public class TransformationPHandle extends PHandle {
                                     vertexRequired,
                                     true);
                             if (snapPoint != null) {
+                                if (!vertexRequired) {
+                                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
+                                            pfeature.getViewer(),
+                                            pInputEvent.getCanvasPosition(),
+                                            true);
+                                    pfeature.getViewer().getWtst().addXCoordinate((float)snapPoint.getX(), coord.x);
+                                    pfeature.getViewer().getWtst().addYCoordinate((float)snapPoint.getY(), coord.y);
+                                    snappedCoordinates.put(snapPoint, coord);
+                                }
                                 currentX = (float)snapPoint.getX();
                                 currentY = (float)snapPoint.getY();
                             }
@@ -741,5 +753,13 @@ public class TransformationPHandle extends PHandle {
                     polygonTooltip.setVisible(false);
                 }
             }.execute();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        for (final Point2D p : snappedCoordinates.keySet()) {
+            pfeature.getViewer().getWtst().removeXCoordinate((float)p.getX());
+            pfeature.getViewer().getWtst().removeYCoordinate((float)p.getY());
+        }
     }
 }

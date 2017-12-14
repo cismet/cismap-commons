@@ -7,6 +7,13 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
+import java.awt.geom.Point2D;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * DOCUMENT ME!
  *
@@ -20,6 +27,8 @@ public class WorldToScreenTransform {
     double xHome;
     double yHome;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private Map<Double, Double> snappedXCoordinates = new HashMap<Double, Double>();
+    private Map<Double, Double> snappedYCoordinates = new HashMap<Double, Double>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -38,6 +47,44 @@ public class WorldToScreenTransform {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  xScreen  DOCUMENT ME!
+     * @param  xWorld   DOCUMENT ME!
+     */
+    public void addXCoordinate(final double xScreen, final double xWorld) {
+        snappedXCoordinates.put(xScreen, xWorld);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  yScreen  DOCUMENT ME!
+     * @param  yWorld   DOCUMENT ME!
+     */
+    public void addYCoordinate(final double yScreen, final double yWorld) {
+        snappedYCoordinates.put(yScreen, yWorld);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  xScreen  DOCUMENT ME!
+     */
+    public void removeXCoordinate(final double xScreen) {
+        snappedXCoordinates.remove(xScreen);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  yScreen  DOCUMENT ME!
+     */
+    public void removeYCoordinate(final double yScreen) {
+        snappedYCoordinates.remove(yScreen);
+    }
 
     /**
      * DOCUMENT ME!
@@ -88,7 +135,11 @@ public class WorldToScreenTransform {
      * @return  DOCUMENT ME!
      */
     public double getWorldX(final double screenX) {
-        return screenX + xHome;
+        if (snappedXCoordinates.get(screenX) == null) {
+            return screenX + xHome;
+        } else {
+            return snappedXCoordinates.get(screenX);
+        }
     }
     /**
      * DOCUMENT ME!
@@ -98,7 +149,11 @@ public class WorldToScreenTransform {
      * @return  DOCUMENT ME!
      */
     public double getWorldY(final double screenY) {
-        return yHome - screenY;
+        if (snappedYCoordinates.get(screenY) == null) {
+            return yHome - screenY;
+        } else {
+            return snappedYCoordinates.get(screenY);
+        }
     }
     /**
      * DOCUMENT ME!
