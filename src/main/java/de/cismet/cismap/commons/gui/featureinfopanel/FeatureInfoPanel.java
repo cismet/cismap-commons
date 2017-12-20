@@ -555,6 +555,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
+        boolean editModeStopped = false;
 
         for (final TreePath tp : tps) {
             final Object o = tp.getLastPathComponent();
@@ -587,11 +588,15 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     final DefaultFeatureServiceFeature f = (DefaultFeatureServiceFeature)feature;
                     stopEditMode(f);
                     fireFeatureSaved();
+                    editModeStopped = true;
                 }
             }
         }
 
         repaint();
+        if (editModeStopped) {
+            mappingComonent.refresh();
+        }
 
         createPopupMenu();
     } //GEN-LAST:event_miEditActionPerformed
