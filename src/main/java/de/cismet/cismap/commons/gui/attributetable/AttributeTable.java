@@ -3833,6 +3833,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private List<String[]> getAliasAttributeList(final boolean withGeometryColumn) {
         final List<String[]> attrNames = new ArrayList<String[]>();
         final Map<String, FeatureServiceAttribute> attributeMap = featureService.getFeatureServiceAttributes();
+        boolean addGeomField = true;
 
         for (int i = 0; i < table.getColumnCount(false); ++i) {
             final int modelCol = table.convertColumnIndexToModel(i);
@@ -3842,6 +3843,11 @@ public class AttributeTable extends javax.swing.JPanel {
                 if ((attr != null) && attr.isGeometry()) {
                     continue;
                 }
+            } else {
+                final FeatureServiceAttribute attr = attributeMap.get(model.getColumnAttributeName(modelCol));
+                if ((attr != null) && attr.isGeometry()) {
+                    addGeomField = false;
+                }
             }
 
             final String[] aliasAttr = new String[2];
@@ -3850,6 +3856,21 @@ public class AttributeTable extends javax.swing.JPanel {
             aliasAttr[1] = model.getColumnAttributeName(modelCol);
 
             attrNames.add(aliasAttr);
+        }
+
+        if (withGeometryColumn && addGeomField) {
+            for (final String name : attributeMap.keySet()) {
+                final FeatureServiceAttribute attr = attributeMap.get(name);
+
+                if ((attr != null) && attr.isGeometry()) {
+                    final String[] aliasAttr = new String[2];
+
+                    aliasAttr[0] = name;
+                    aliasAttr[1] = name;
+                    attrNames.add(aliasAttr);
+                    break;
+                }
+            }
         }
 
         return attrNames;
