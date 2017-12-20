@@ -294,7 +294,7 @@ public class InternalDbTree extends JTree {
         final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
         model.removeFolder(folder);
 
-        refresh();
+        model.fireTreeStructureChanged();
     }
 
     /**
@@ -317,7 +317,7 @@ public class InternalDbTree extends JTree {
             model.remove(entry.getName());
 
             removeEntryFromActiveLayerModel(entry);
-            refresh();
+            ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
         } catch (Exception e) {
             LOG.error("Cannot remove entry", e);
         }
@@ -351,7 +351,22 @@ public class InternalDbTree extends JTree {
      * @param  name  DOCUMENT ME!
      */
     public void addFolder(final String name) {
-        ((InternalDBTreeModel)getModel()).addFolder(name);
+        final TreePath selectionPath = getSelectionPath();
+
+        if ((selectionPath != null) && (selectionPath.getLastPathComponent() instanceof DBFolder)) {
+            final DBFolder folder = (DBFolder)selectionPath.getLastPathComponent();
+            DBFolder newFolder = new DBFolder(name);
+            int count = 0;
+
+            while (folder.contains(newFolder)) {
+                newFolder = new DBFolder(name + "_" + (++count));
+            }
+
+            folder.addChildren(newFolder);
+            ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
+        } else {
+            ((InternalDBTreeModel)getModel()).addFolder(name);
+        }
     }
 
     /**
@@ -1157,6 +1172,8 @@ public class InternalDbTree extends JTree {
                         folder = true;
                     } else if (path.getLastPathComponent() instanceof DBEntry) {
                         theme = true;
+                    } else {
+                        folder = true;
                     }
                 }
 
