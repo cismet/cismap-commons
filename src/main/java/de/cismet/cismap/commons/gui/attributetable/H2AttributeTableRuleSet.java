@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.gui.attributetable;
 
 import java.util.List;
 
+import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 
@@ -62,4 +63,11 @@ public interface H2AttributeTableRuleSet extends AttributeTableRuleSet {
      * @return  DOCUMENT ME!
      */
     H2AttributeTableRuleSet clone();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    void startEditMode(final JDBCFeature feature);
 }

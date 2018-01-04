@@ -13,6 +13,8 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.deegree.io.shpapi.FileHeader;
 
+import org.openide.util.Exceptions;
+
 import java.awt.Component;
 
 import java.io.BufferedInputStream;
@@ -20,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 
 import java.security.MessageDigest;
@@ -212,7 +215,10 @@ public class DocumentFeatureServiceFactory {
                             H2FeatureServiceFactory.DB_NAME,
                             tableName,
                             attributes,
-                            pointFeatures);
+                            null,
+                            pointFeatures,
+                            null,
+                            "dxf");
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -224,7 +230,10 @@ public class DocumentFeatureServiceFactory {
                             H2FeatureServiceFactory.DB_NAME,
                             tableName,
                             attributes,
-                            linestringFeatures);
+                            null,
+                            linestringFeatures,
+                            null,
+                            "dxf");
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -236,7 +245,10 @@ public class DocumentFeatureServiceFactory {
                             H2FeatureServiceFactory.DB_NAME,
                             tableName,
                             attributes,
-                            polygonFeatures);
+                            null,
+                            polygonFeatures,
+                            null,
+                            "dxf");
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -249,7 +261,10 @@ public class DocumentFeatureServiceFactory {
                             H2FeatureServiceFactory.DB_NAME,
                             tableName,
                             attributes,
-                            annotationFeatures);
+                            null,
+                            annotationFeatures,
+                            null,
+                            "dxf");
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -258,6 +273,8 @@ public class DocumentFeatureServiceFactory {
             } else {
                 throw new UnknownDocumentException("Endung des Dokumentes ist nicht bekannt");
             }
+        } catch (LayerAlreadyAddedException e) {
+            throw e;
         } catch (Exception ex) {
             if ((ex instanceof UnknownDocumentException) || (ex instanceof FileExtensionContentMissmatchException)) {
                 log.error(
@@ -414,20 +431,20 @@ public class DocumentFeatureServiceFactory {
         }
         if (documentFile != null) {
             final BufferedReader bf = new BufferedReader(new FileReader(documentFile));
-            String currentLine = null;
-            final int counter = 1;
-            while (((currentLine = bf.readLine()) != null) || (counter < 100)) {
-                if (counter == 2) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Erste Zeile des Dokuments: ");
+
+            try {
+                String currentLine = null;
+                int counter = 0;
+
+                while (((currentLine = bf.readLine()) != null) && (counter < 100)) {
+                    if (currentLine.contains(GML_IDENTIFICATION_STRING)) {
+                        return true;
                     }
-                    if (!currentLine.startsWith(XML_IDENTIFICATION_STRING)) {
-                        log.info("XML File fängt nicht mit " + XML_IDENTIFICATION_STRING + " an.");
-                        return false;
-                    }
+                    ++counter;
                 }
-                if (currentLine.contains(GML_IDENTIFICATION_STRING)) {
-                    return true;
+            } finally {
+                if (bf != null) {
+                    bf.close();
                 }
             }
             log.info("Im ganzen Dokument konnte keine Zeile mit: " + GML_IDENTIFICATION_STRING + " gefunden werden");
@@ -449,9 +466,10 @@ public class DocumentFeatureServiceFactory {
         if (log.isDebugEnabled()) {
             log.debug("Prüfe ob Document ein ShapeFile ist");
         }
+        RandomAccessFile raf = null;
         try {
             if (documentFile != null) {
-                final RandomAccessFile raf = new RandomAccessFile(documentFile, "r");
+                raf = new RandomAccessFile(documentFile, "r");
                 final FileHeader fh = new FileHeader(raf);
                 return true;
             } else {
@@ -461,6 +479,14 @@ public class DocumentFeatureServiceFactory {
         } catch (Exception ex) {
             log.warn("Document ist wahrscheinlich kein Shapefile");
             return false;
+        } finally {
+            if (raf != null) {
+                try {
+                    raf.close();
+                } catch (IOException ex) {
+                    log.error("Cannot close file", ex);
+                }
+            }
         }
     }
 }
