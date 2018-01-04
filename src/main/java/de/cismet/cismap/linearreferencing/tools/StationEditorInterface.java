@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.linearreferencing.tools;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 /**
  * DOCUMENT ME!
  *
@@ -35,4 +37,11 @@ public interface StationEditorInterface {
      * @return  DOCUMENT ME!
      */
     Object getValue();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Geometry getGeometry();
 }
