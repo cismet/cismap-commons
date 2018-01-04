@@ -44,6 +44,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.math.BigDecimal;
+
 import java.net.URI;
 
 import java.nio.charset.Charset;
@@ -62,10 +64,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -164,6 +169,26 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static String[] knownShpBundleEndings = { "dbf", "atx", "sbn", "prj", "shx", "sbx", "aih", "ain", "cpg" };
     private static final Map<String, ConnectionWrapper> DB_CONNECTIONS = Collections.synchronizedMap(
             new HashMap<String, ConnectionWrapper>());
+    private static Map<String, String> CS_MAPPING = new HashMap<String, String>();
+
+    static {
+        try {
+            final ResourceBundle csMapping = ResourceBundle.getBundle("cismapCsMapping", Locale.getDefault());
+            final Enumeration<String> en = csMapping.getKeys();
+
+            while (en.hasMoreElements()) {
+                final String key = en.nextElement();
+                final String value = csMapping.getString(key);
+                if (value != null) {
+                    CS_MAPPING.put(key, value);
+                }
+            }
+        } catch (Exception e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Cannot open the resource bundle for the cs mapping.", e);
+            }
+        }
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -199,19 +224,21 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * Creates a new H2FeatureServiceFactory object.
      *
-     * @param  name          DOCUMENT ME!
-     * @param  databasePath  DOCUMENT ME!
-     * @param  tableName     DOCUMENT ME!
-     * @param  file          supported file formats are shp, dbf and csv (really comma separated)
-     * @param  workerThread  DOCUMENT ME!
-     * @param  styles        DOCUMENT ME!
+     * @param   name          DOCUMENT ME!
+     * @param   databasePath  DOCUMENT ME!
+     * @param   tableName     DOCUMENT ME!
+     * @param   file          supported file formats are shp, dbf and csv (really comma separated)
+     * @param   workerThread  DOCUMENT ME!
+     * @param   styles        DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
             final String databasePath,
             final String tableName,
             final File file,
             final SwingWorker workerThread,
-            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) throws Exception {
         super(databasePath, tableName);
         this.name = name;
         this.layerName = name;
@@ -282,7 +309,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      */
     public void setFile(final File file) {
         if (file != null) {
-            importFile(null, file);
+            try {
+                importFile(null, file);
+            } catch (Exception ex) {
+                LOG.error("Error while assigning file", ex);
+            }
         }
         initFactory();
     }
@@ -290,10 +321,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * Import the given file into the db.
      *
-     * @param  workerThread  the thread, that is used to handle the current progress
-     * @param  file          the file to import
+     * @param   workerThread  the thread, that is used to handle the current progress
+     * @param   file          the file to import
+     *
+     * @throws  Exception  DOCUMENT ME!
      */
-    private void importFile(final SwingWorker workerThread, final File file) {
+    private void importFile(final SwingWorker workerThread, final File file) throws Exception {
         try {
             final StatementWrapper st = createStatement(conn);
             initDatabase(conn);
@@ -380,7 +413,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             ps.setInt(2, id);
                             ps.addBatch();
                         }
-                        ps.executeUpdate();
+                        ps.executeBatch();
                     }
                 }
 
@@ -472,6 +505,20 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                                 "H2FeatureServiceFactory.importFile().dbfError");
                     }
                 }
+                if (jdbcException.getCause() instanceof IndexOutOfBoundsException) {
+                    errorMessage = NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.importFile().dbfError");
+                }
+                JOptionPane.showMessageDialog(
+                    CismapBroker.getInstance().getMappingComponent(),
+                    errorMessage,
+                    org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.importFile().title"), // NOI18N
+                    JOptionPane.ERROR_MESSAGE);
+
+                throw e;
             }
 
             JOptionPane.showMessageDialog(
@@ -505,25 +552,41 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * DOCUMENT ME!
      *
+     * @param  tableFormat  DOCUMENT ME!
+     */
+    public void setTableFormat(final String tableFormat) {
+        if (tableFormat != null) {
+            try {
+                getConnection().createStatement().execute(String.format(INSERT_META_DATA, tableName, tableFormat));
+            } catch (Exception e) {
+                LOG.error("Error while changing table format", e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  index  DOCUMENT ME!
      * @param  name   DOCUMENT ME!
      */
     private void addCustomIdFieldToAttributes(final int index, final String name) {
-        final String[] attributes = loadOrderedAttributeArray();
+        final String[] attributes = loadOrderedAttributeArray(tableName);
 
         if (attributes != null) {
             final ArrayList<String> orderedAttributes = new ArrayList<String>(Arrays.asList(attributes));
             orderedAttributes.add(index, name);
-            saveAttributeOrder(orderedAttributes.toArray(new String[orderedAttributes.size()]));
+            saveAttributeOrder(tableName, orderedAttributes.toArray(new String[orderedAttributes.size()]));
         }
     }
 
     /**
      * Saves the order of the feature attributes in the corresponding meta table.
      *
+     * @param  table       DOCUMENT ME!
      * @param  attributes  DOCUMENT ME!
      */
-    private void saveAttributeOrder(final String[] attributes) {
+    private void saveAttributeOrder(final String table, final String[] attributes) {
         PreparedStatement st = null;
 
         try {
@@ -533,17 +596,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 attributes[1] = tmp;
             }
 
-            if (existsOrderedAttributeArray()) {
+            if (existsOrderedAttributeArray(tableName)) {
                 st = conn.prepareStatement(UPDATE_ATTRIBUTE_META_DATA);
 
                 st.setObject(1, attributes);
-                st.setString(2, tableName);
+                st.setString(2, table);
 
                 st.executeUpdate();
             } else {
                 st = conn.prepareStatement(INSERT_ATTRIBUTE_META_DATA);
 
-                st.setString(1, tableName);
+                st.setString(1, table);
                 st.setObject(2, attributes);
 
                 st.executeUpdate();
@@ -565,7 +628,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * Loads the order of the feature attributes from the corresponding meta table.
      */
     private void loadAttributeOrder() {
-        final String[] attributes = loadOrderedAttributeArray();
+        final String[] attributes = loadOrderedAttributeArray(tableName);
 
         if (attributes != null) {
             Collections.sort(featureServiceAttributes, new Comparator<FeatureServiceAttribute>() {
@@ -594,15 +657,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * Loads the order of the feature attributes from the corresponding meta table.
      *
+     * @param   table  DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
-    private String[] loadOrderedAttributeArray() {
+    private String[] loadOrderedAttributeArray(final String table) {
         ResultSet rs = null;
         Statement st = null;
 
         try {
             st = conn.createStatement();
-            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, tableName));
+            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, table));
 
             if (rs.next()) {
                 final Object o = rs.getObject(1);
@@ -638,15 +703,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * DOCUMENT ME!
      *
+     * @param   table  DOCUMENT ME!
+     *
      * @return  true, iff a dataset for this table exists
      */
-    private boolean existsOrderedAttributeArray() {
+    private boolean existsOrderedAttributeArray(final String table) {
         ResultSet rs = null;
         Statement st = null;
 
         try {
             st = conn.createStatement();
-            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, tableName));
+            rs = st.executeQuery(String.format(SELECT_ATTRIBUTE_META_DATA, table));
 
             if (rs.next()) {
                 return true;
@@ -739,7 +806,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     attsRef,
                     tmpTableReference));
 
-            saveAttributeOrder(attributeNames.toArray(new String[0]));
+            saveAttributeOrder(tableName, attributeNames.toArray(new String[0]));
 
             if (!isDbf) {
                 ResultSet set = st.executeQuery(String.format(
@@ -864,7 +931,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 file.getAbsolutePath(),
                 options));
 
-        saveAttributeOrder(attributeNames.toArray(new String[0]));
+        saveAttributeOrder(tableName, attributeNames.toArray(new String[0]));
     }
 
     /**
@@ -1121,7 +1188,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
 
                 createPrimaryKey(hasIdField, tableName);
-                saveAttributeOrder(attributeList.toArray(new String[0]));
+                saveAttributeOrder(tableName, attributeList.toArray(new String[0]));
             }
             st.close();
 
@@ -1241,7 +1308,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 final String nameBase = "id___";
                 String newName = nameBase + fillWithZeros(index);
 
-                while (indexOfString(loadOrderedAttributeArray(), newName) != -1) {
+                while (indexOfString(loadOrderedAttributeArray(tableName), newName) != -1) {
                     newName = nameBase + fillWithZeros(++index);
                 }
 
@@ -1447,7 +1514,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         try {
             if (cpgFile.exists()) {
                 final BufferedReader br = new BufferedReader(new FileReader(cpgFile));
-                final String csName = br.readLine();
+                String csName = br.readLine();
+
+                csName = CS_MAPPING.getOrDefault(csName, csName);
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("cpg file with charset " + csName + " found");
                 }
@@ -1521,12 +1591,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 st.execute("alter table \"" + newTableName + "\" drop column \"" + geometryField + "\"");
             }
 
-            final String newGeometryField = "geo_" + geoCol;
+            final String newGeometryField = "geom";
             st.execute("alter table \"" + newTableName + "\" add column \"" + newGeometryField + "\" Geometry");
             String additionalFields = "\"" + fromField + "\",\"" + routeField + "\"";
             linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + newTableName + "\" set \""
                             + newGeometryField + "\" = ? WHERE \"" + idField + "\" = ?");
             removeLine = conn.prepareStatement("DELETE FROM \"" + newTableName + "\"  WHERE \"" + idField + "\" = ?");
+
+            final String[] attributes = loadOrderedAttributeArray(this.tableName);
+            final List<String> attributeList = new ArrayList<String>(Arrays.asList(attributes));
+            attributeList.add(0, newGeometryField);
+            saveAttributeOrder(newTableName, attributeList.toArray(new String[attributeList.size()]));
 
             if (tillField != null) {
                 additionalFields += ",\"" + tillField + "\"";
@@ -1540,7 +1615,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 double from = rs.getDouble(2);
                 final Object routeId = rs.getObject(3);
                 Geometry geom = null;
-                final Geometry routeGeom = routeGeometries.get(routeId);
+                Geometry routeGeom = routeGeometries.get(routeId);
+
+                if ((routeGeom == null) && (routeId instanceof Long)) {
+                    routeGeom = routeGeometries.get(new BigDecimal((Long)routeId));
+                }
                 if (routeGeom == null) {
                     LOG.warn("No geometry found for route " + routeId);
                     errorCode++;
@@ -1857,6 +1936,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     } else if (geomObject instanceof Polygon) {
                         envelope = (Polygon)geomObject;
                         envelope.setSRID(envelopeSet.getInt(2));
+                    } else if (geomObject instanceof Geometry) {
+                        final Geometry g = ((Geometry)geomObject);
+                        if (!g.isEmpty()) {
+                            envelope = g.getEnvelope().buffer(50);
+                            envelope.setSRID(envelopeSet.getInt(2));
+                        }
                     } else {
                         envelope = null;
                     }
@@ -2000,6 +2085,15 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private ConnectionWrapper getConnection() {
+        return getDBConnection(databasePath);
+    }
+
+    /**
      * Creates a connection to the internal database.
      *
      * @param   databasePath  the path to the database. if null, {@link DB_NAME} will be used
@@ -2014,7 +2108,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         try {
             if (connection != null) {
-                isConnectionClosed = connection.isClosed();
+                isConnectionClosed = connection.isClosed() || !connection.isValid(100);
             }
         } catch (Exception e) {
             isConnectionClosed = true;
@@ -2022,6 +2116,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         if ((connection == null) || isConnectionClosed) {
             try {
+                if (connection != null) {
+                    connection.close();
+                }
                 Class.forName("org.h2.Driver");
                 connection = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
                             "jdbc:h2:"
