@@ -50,6 +50,7 @@ import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import static de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory.LR_META_TABLE_NAME;
 
@@ -191,25 +192,74 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     + ";r",
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerR.png")));                   // NOI18N
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerR.png")));                     // NOI18N
         layerIcons.put(
             String.valueOf(LAYER_ENABLED_INVISIBLE)
                     + ";r",
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerRInvisible.png")));          // NOI18N
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerRInvisible.png")));            // NOI18N
         layerIcons.put(
             String.valueOf(LAYER_DISABLED_VISIBLE)
                     + ";r",
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerR.png")));          // NOI18N
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerR.png")));            // NOI18N
         layerIcons.put(
             String.valueOf(LAYER_DISABLED_INVISIBLE)
                     + ";r",
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerRInvisible.png"))); // NOI18N
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerRInvisible.png")));   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";csv",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerCsv.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";csv",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerCsvInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";csv",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerCsv.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";csv",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerCsvInvisible.png"))); // NOI18N
+
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";dxf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerDxf.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";dxf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerDxfInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";dxf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerDxf.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";dxf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerDxfInvisible.png"))); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -333,10 +383,37 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final File shapeFile,
             final List<FeatureServiceFeature> features,
             final List<String> orderedAttributeNames) throws Exception {
+        this(name, databasePath, tableName, attributes, shapeFile, features, null, null);
+    }
+
+    /**
+     * Creates a new H2FeatureService object.
+     *
+     * @param   name                   The name of the service
+     * @param   databasePath           the database path of the service
+     * @param   tableName              the name of the service table
+     * @param   attributes             the feature service attributes of the service
+     * @param   shapeFile              the shape file to import
+     * @param   features               the features to import
+     * @param   orderedAttributeNames  the order of the service attributes. Can be null for an arbitrary attribute
+     *                                 order.
+     * @param   format                 DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public H2FeatureService(final String name,
+            final String databasePath,
+            final String tableName,
+            final List<FeatureServiceAttribute> attributes,
+            final File shapeFile,
+            final List<FeatureServiceFeature> features,
+            final List<String> orderedAttributeNames,
+            final String format) throws Exception {
         super(name, databasePath, tableName, attributes);
         this.shapeFile = shapeFile;
         this.features = features;
         this.orderedAttributeNames = orderedAttributeNames;
+        this.tableFormat = format;
     }
 
     /**
@@ -460,15 +537,25 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             checkTable();
             geometryType = f.getGeometryType();
         } else {
-            f = new H2FeatureServiceFactory(
-                    name,
-                    databasePath,
-                    tableName,
-                    shapeFile,
-                    layerInitWorker,
-                    parseSLD(getSLDDefiniton()));
+            try {
+                f = new H2FeatureServiceFactory(
+                        name,
+                        databasePath,
+                        tableName,
+                        shapeFile,
+                        layerInitWorker,
+                        parseSLD(getSLDDefiniton()));
+            } catch (Exception e) {
+                CismapBroker.getInstance().getMappingComponent().getMappingModel().removeLayer(this);
+                removeTableIfExists(tableName);
+                throw e;
+            }
             checkTable();
             geometryType = f.getGeometryType();
+        }
+
+        if (tableFormat != null) {
+            f.setTableFormat(tableFormat);
         }
 
         if (getLayerProperties() != null) {
