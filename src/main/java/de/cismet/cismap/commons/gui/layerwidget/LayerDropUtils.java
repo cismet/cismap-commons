@@ -35,6 +35,7 @@ import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.LayerAlreadyAddedException;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -480,6 +481,9 @@ public class LayerDropUtils {
                         }
                     }).start();
             }
+        } catch (LayerAlreadyAddedException e) {
+            // nothing to do. This exception means that the layer should not be added to the layer model, because it is
+            // already there
         } catch (final Exception ex) {
             LOG.error("Error during creation of a FeatureServices", ex); // NOI18N
             return false;

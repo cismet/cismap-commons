@@ -56,4 +56,15 @@ public class DBFolder extends DBEntry {
     public void addChildren(final DBEntry child) {
         this.children.add(child);
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   folder  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean contains(final DBEntry folder) {
+        return children.contains(folder);
+    }
 }

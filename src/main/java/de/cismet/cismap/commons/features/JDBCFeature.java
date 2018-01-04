@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 
 import org.h2.jdbc.JdbcClob;
 
@@ -110,6 +111,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(this);
                     SelectionManager.getInstance().addSelectedFeatures(Collections.nCopies(1, this));
                     setBackgroundColor(new Color(255, 91, 0));
+                } else {
+                    tableRuleSet.startEditMode(this);
                 }
             }
         }
@@ -296,6 +299,15 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         if (!existProperties() || deleted) {
             // no changes
             return;
+        }
+
+        if (stations != null) {
+            for (final String name : stations.keySet()) {
+                setGeometry(stations.get(name).getGeometry());
+                if (stations.get(name).getGeometry() instanceof LineString) {
+                    break;
+                }
+            }
         }
 
         final Statement st = featureInfo.getConnection().createStatement();

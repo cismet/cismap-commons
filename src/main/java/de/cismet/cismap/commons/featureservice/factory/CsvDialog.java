@@ -119,10 +119,8 @@ public class CsvDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 10);
         getContentPane().add(labSep, gridBagConstraints);
 
-        txtSep.setText(org.openide.util.NbBundle.getMessage(
-                CsvDialog.class,
-                "CsvDialog.txtSep.text",
-                new Object[] {})); // NOI18N
+        txtSep.setText(org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.txtSep.text", new Object[] {
+                })); // NOI18N
         txtSep.setMinimumSize(new java.awt.Dimension(30, 20));
         txtSep.setPreferredSize(new java.awt.Dimension(30, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();

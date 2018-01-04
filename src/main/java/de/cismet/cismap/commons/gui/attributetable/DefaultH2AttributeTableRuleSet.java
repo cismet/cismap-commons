@@ -28,6 +28,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCreator;
@@ -199,5 +200,9 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
         other.init(refInfos, geometryType, null, null);
 
         return other;
+    }
+
+    @Override
+    public void startEditMode(final JDBCFeature feature) {
     }
 }

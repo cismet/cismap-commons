@@ -414,39 +414,39 @@ public class SelectionListener extends CreateGeometryListener {
                         new Class[] { PFeature.class },
                         true);
 
+                try {
+                    Point2D point = null;
+                    if (mappingComponent.isSnappingEnabled()) {
+                        final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                        point = PFeatureTools.getNearestPointInArea(
+                                mappingComponent,
+                                pInputEvent.getCanvasPosition(),
+                                vertexRequired,
+                                true);
+                    }
+                    if (point == null) {
+                        point = pInputEvent.getPosition();
+                    }
+
+                    final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
+
+                    final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
+                                    .getCode());
+                    final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
+                    newFeature.setGeometryType(geomType);
+                    newFeature.getGeometry().setSRID(currentSrid);
+                    final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                            mappingComponent.getMappingModel().getSrs().getCode());
+                    newFeature.setGeometry(geom);
+
+                    finishingEvent = pInputEvent;
+                    finishGeometry(newFeature);
+                } catch (Throwable throwable) {
+                    log.error("Error during the creation of the geometry", throwable); // NOI18N
+                }
+
                 if (clickedPFeature != null) {
                     sel = clickedPFeature;
-
-                    try {
-                        Point2D point = null;
-                        if (mappingComponent.isSnappingEnabled()) {
-                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
-                            point = PFeatureTools.getNearestPointInArea(
-                                    mappingComponent,
-                                    pInputEvent.getCanvasPosition(),
-                                    vertexRequired,
-                                    true);
-                        }
-                        if (point == null) {
-                            point = pInputEvent.getPosition();
-                        }
-
-                        final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
-
-                        final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
-                                        .getCode());
-                        final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
-                        newFeature.setGeometryType(geomType);
-                        newFeature.getGeometry().setSRID(currentSrid);
-                        final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
-                                mappingComponent.getMappingModel().getSrs().getCode());
-                        newFeature.setGeometry(geom);
-
-                        finishingEvent = pInputEvent;
-                        finishGeometry(newFeature);
-                    } catch (Throwable throwable) {
-                        log.error("Error during the creation of the geometry", throwable); // NOI18N
-                    }
 
                     if (clickCount == 2) {
                         final Feature feature = sel.getFeature();
@@ -456,11 +456,6 @@ public class SelectionListener extends CreateGeometryListener {
                             }
                         }
                     }
-                } else {
-                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                    }
-                    unselectAll();
                 }
             } finally {
                 selectionInProgress = false;
