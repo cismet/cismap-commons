@@ -544,7 +544,7 @@ public class InternalDbTree extends JTree {
                             newName = getNameWithoutFolder(ti.getDatabaseTable());
                         }
                         if (ti.isFolder()) {
-                            entry = new DBFolder(newName);
+                            entry = getEntryFromTableInformation(ti);
                         } else {
                             entry = new DBEntry(newName);
                             final Connection con = model.getConnection();
@@ -587,6 +587,27 @@ public class InternalDbTree extends JTree {
             }
 
             return true;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   ti  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private DBEntry getEntryFromTableInformation(final DBTableInformation ti) {
+            if (ti.isFolder()) {
+                final DBFolder folder = new DBFolder(ti.getName());
+
+                for (final DBTableInformation inf : ti.getChildren()) {
+                    folder.addChildren(getEntryFromTableInformation(inf));
+                }
+
+                return folder;
+            } else {
+                return new DBEntry(ti.getDatabaseTable());
+            }
         }
 
         /**
@@ -892,7 +913,9 @@ public class InternalDbTree extends JTree {
                 final String part = parts[i];
 
                 if (i == (parts.length - 1)) {
-                    parent.remove(new DBEntry(tableName));
+                    if (!parent.remove(new DBEntry(tableName))) {
+                        parent.remove(new DBFolder(tableName));
+                    }
                 } else {
                     folder = ((folder == null) ? new DBFolder(part) : new DBFolder(folder.getName() + "->" + part));
                     final int folderIndex = parent.indexOf(folder);
