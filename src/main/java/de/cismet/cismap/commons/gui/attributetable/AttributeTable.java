@@ -694,7 +694,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             break;
                         }
                     } catch (Exception e) {
-                        if (geomType.equals("none") && (feature.getGeometry() == null)) {
+                        if (geomType.equals(AbstractFeatureService.NONE) && (feature.getGeometry() == null)) {
                             enabled = true;
                         }
                     }
@@ -3273,7 +3273,8 @@ public class AttributeTable extends javax.swing.JPanel {
                                         geometryCompatible = true;
                                     }
                                 } catch (Exception e) {
-                                    if (geomType.equals("none") && (feature.getGeometry() == null)) {
+                                    if (geomType.equals(AbstractFeatureService.NONE)
+                                                && (feature.getGeometry() == null)) {
                                         geometryCompatible = true;
                                     }
                                 }
@@ -3408,12 +3409,24 @@ public class AttributeTable extends javax.swing.JPanel {
             File outputFile = file;
 
             if ((outputFile == null) && (ed == null)) {
-                outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
-                        lastExportPath,
-                        true,
-                        new String[] { "shp", "dbf", "csv", "txt" },
-                        new String[] { "shp", "dbf", "csv", "txt" },
-                        this);
+                final String geometryType = featureService.getLayerProperties().getFeatureService().getGeometryType();
+
+                if ((geometryType == null) || geometryType.equals(AbstractFeatureService.UNKNOWN)
+                            || geometryType.equals(AbstractFeatureService.NONE)) {
+                    outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
+                            lastExportPath,
+                            true,
+                            new String[] { "dbf", "csv", "txt" },
+                            new String[] { "dbf", "csv", "txt" },
+                            this);
+                } else {
+                    outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
+                            lastExportPath,
+                            true,
+                            new String[] { "shp", "dbf", "csv", "txt" },
+                            new String[] { "shp", "dbf", "csv", "txt" },
+                            this);
+                }
 
                 if (outputFile != null) {
                     ExportDownload downloader;
