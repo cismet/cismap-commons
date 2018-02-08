@@ -97,6 +97,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     private static final transient Logger LOG = Logger.getLogger(AbstractFeatureService.class);
     public static String UNKNOWN = "UNKNOWN";
+    public static String NONE = "none";
 
     /* defaulttype-constant */
     public static final String DEFAULT_TYPE = "default"; // NOI18N

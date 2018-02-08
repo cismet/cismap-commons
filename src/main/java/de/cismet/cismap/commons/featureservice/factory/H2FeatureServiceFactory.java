@@ -141,7 +141,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         "UPDATE \"%1$s\" set \"%2$s\" = st_setsrid(\"%2$s\", %3$s) where \"%2$s\" is not null";
     private static final String CREATE_TABLE_FROM_CSV =
         "CREATE TABLE \"%s\" as select %s from CSVREAD('%s', null, '%s');";
-    private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '\"%s\"');";
+    private static final String CREATE_TABLE_FROM_DBF = "CALL DBFRead('%s', '\"%s\"', '%s');";
+    private static final String CREATE_TABLE_FROM_SHP = "CALL SHPRead('%s', '\"%s\"', '%s');";
+    private static final String CREATE_TABLE_FROM_FILE = "CALL FILE_TABLE('%s', '\"%s\"');";
     private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from \"%s\"";
     private static final String DROP_TABLE_REFERENCE = "drop table \"%s\";";
     private static final String SELECT_COLUMN = "select \"%s\", \"%s\" from \"%s\"";
@@ -327,8 +329,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @throws  Exception  DOCUMENT ME!
      */
     private void importFile(final SwingWorker workerThread, final File file) throws Exception {
+        StatementWrapper st = null;
+
         try {
-            final StatementWrapper st = createStatement(conn);
+            st = createStatement(conn);
             initDatabase(conn);
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
             createSldMetaTableIfNotExist();
@@ -416,71 +420,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         ps.executeBatch();
                     }
                 }
-
-                try {
-                    if (!file.getAbsolutePath().toLowerCase().endsWith("csv")) {
-                        final Charset charset = getCharsetDefinition(file.getAbsolutePath());
-
-                        if ((charset != null) && !charset.name().equals(DEFAULT_DBF_CHARSET)) {
-                            // check and correct encoding
-                            rs = conn.getMetaData().getColumns(null, null, tableName, "%");
-                            // ISO-8859-1 is the default charset of dbf files. If the file has an other encoding,
-                            // all text fields must be converted
-                            while (rs.next()) {
-                                if ((rs.getInt("DATA_TYPE") == java.sql.Types.VARCHAR)
-                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.CHAR)
-                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.NCHAR)
-                                            || (rs.getInt("DATA_TYPE") == java.sql.Types.NVARCHAR)) {
-                                    final ResultSet dataRs = st.executeQuery(String.format(
-                                                SELECT_COLUMN,
-                                                rs.getString("COLUMN_NAME"),
-                                                idField,
-                                                tableName));
-                                    final PreparedStatement updateSt = conn.prepareStatement(String.format(
-                                                UPDATE_COLUMN,
-                                                tableName,
-                                                rs.getString("COLUMN_NAME"),
-                                                idField));
-
-                                    while (dataRs.next()) {
-                                        final String oldString = dataRs.getString(1);
-                                        final String newString = new String(oldString.getBytes(DEFAULT_DBF_CHARSET),
-                                                charset);
-
-                                        if (!newString.equals(oldString)) {
-                                            updateSt.setString(1, newString);
-                                            updateSt.setInt(2, dataRs.getInt(2));
-                                            updateSt.execute();
-                                        }
-                                    }
-
-                                    dataRs.close();
-                                }
-                            }
-                            rs.close();
-                        }
-                    }
-                } catch (IllegalCharsetNameException e) {
-                    logger.error("Characterset was not recognised", e);
-                    String errorMessage = e.getMessage();
-
-                    if (errorMessage.contains("\n")) {
-                        errorMessage = errorMessage.substring(0, errorMessage.indexOf("\n"));
-                    }
-
-                    JOptionPane.showMessageDialog(
-                        CismapBroker.getInstance().getMappingComponent(),
-                        org.openide.util.NbBundle.getMessage(
-                            H2FeatureServiceFactory.class,
-                            "H2FeatureServiceFactory.importFile().charsetNotRecognised",
-                            errorMessage),
-                        org.openide.util.NbBundle.getMessage(
-                            H2FeatureServiceFactory.class,
-                            "H2FeatureServiceFactory.importFile().title"), // NOI18N
-                        JOptionPane.WARNING_MESSAGE);
-                }
             }
-            st.close();
 
             final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
 
@@ -528,6 +468,21 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     H2FeatureServiceFactory.class,
                     "H2FeatureServiceFactory.importFile().title"), // NOI18N
                 JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+            // the following gc() invocation removes all file descriptors from the imported shp/dbf/csv files
+
+            final Thread t = new Thread("cleanup") {
+
+                    @Override
+                    public void run() {
+                        System.gc();
+                    }
+                };
+
+            t.start();
         }
     }
 
@@ -746,20 +701,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      */
     private void createTableFromSHP(final File file, final Statement st) throws Exception {
         final String tmpTableReference = tableName + "_temp_reference";
-        final ResultSet rs;
+        ResultSet rs;
         boolean isDbf = false;
 
         if (file.getAbsolutePath().toLowerCase().endsWith(".shp")) {
             if (!checkForFileNames(file)) {
-//                JOptionPane.showMessageDialog(
-//                    CismapBroker.getInstance().getMappingComponent(),
-//                    org.openide.util.NbBundle.getMessage(
-//                        H2FeatureServiceFactory.class,
-//                        "H2FeatureServiceFactory.importFile().invalidFileName"),
-//                    org.openide.util.NbBundle.getMessage(
-//                        H2FeatureServiceFactory.class,
-//                        "H2FeatureServiceFactory.importFile().invalidFileName.title"), // NOI18N
-//                    JOptionPane.ERROR_MESSAGE);
                 removeServiceFromTree = true;
                 throw new Exception(org.openide.util.NbBundle.getMessage(
                         H2FeatureServiceFactory.class,
@@ -770,7 +716,36 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         }
 
         try {
-            st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
+            final Charset charset = getCharsetDefinition(file.getAbsolutePath());
+
+            if (charset == null) {
+                st.execute(String.format(CREATE_TABLE_FROM_FILE, file.getAbsolutePath(), tmpTableReference));
+            } else {
+                if (isDbf) {
+                    st.execute(String.format(
+                            CREATE_TABLE_FROM_DBF,
+                            file.getAbsolutePath(),
+                            tmpTableReference,
+                            charset));
+                } else {
+                    st.execute(String.format(
+                            CREATE_TABLE_FROM_SHP,
+                            file.getAbsolutePath(),
+                            tmpTableReference,
+                            charset));
+                }
+            }
+
+            // test, if file is empty
+            rs = st.executeQuery("select * from \"" + tmpTableReference + "\" limit 1");
+
+            if (!rs.next()) {
+                throw new Exception(org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.importFile().emptyFile"));
+            }
+            rs.close();
+
             // st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
             final StringBuilder attsAndTypes = new StringBuilder();
             final StringBuilder atts = new StringBuilder();
@@ -856,82 +831,93 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         StaticSwingTools.centerWindowOnScreen(dialog);
 
         final StatementWrapper checkStatement = createStatement(conn);
-        ResultSet checkResultSet = null;
-        final String options = "charset=" + dialog.getCharactersetName() + " fieldDelimiter="
-                    + dialog.getTextSep() + " fieldSeparator=" + dialog.getSeparatorChar();
-        final ResultSet csvRs = st.executeQuery(String.format(
-                    "select * from CSVREAD('%s', null, '%s') limit 1;",
-                    file.getAbsolutePath(),
-                    options));
-        final int colCount = csvRs.getMetaData().getColumnCount();
-        StringBuilder select = null;
-        final List<String> attributeNames = new ArrayList<String>();
+        ResultSet csvRs = null;
+        try {
+            ResultSet checkResultSet = null;
+            final String options = "charset=" + dialog.getCharactersetName() + " fieldDelimiter="
+                        + dialog.getTextSep() + " fieldSeparator=" + dialog.getSeparatorChar();
+            csvRs = st.executeQuery(String.format(
+                        "select * from CSVREAD('%s', null, '%s') limit 1;",
+                        file.getAbsolutePath(),
+                        options));
+            final int colCount = csvRs.getMetaData().getColumnCount();
+            StringBuilder select = null;
+            final List<String> attributeNames = new ArrayList<String>();
 
-        for (int i = 1; i <= colCount; ++i) {
-            boolean isInteger = false;
-            final String colName = csvRs.getMetaData().getColumnName(i);
+            for (int i = 1; i <= colCount; ++i) {
+                boolean isInteger = false;
+                final String colName = csvRs.getMetaData().getColumnName(i);
 
-            if (select == null) {
-                select = new StringBuilder("\"" + colName + "\"");
-            } else {
-                select.append(", \"").append(colName).append("\"");
-            }
-
-            try {
-                checkResultSet = checkStatement.executeQuery(String.format(
-                            "select distinct "
-                                    + colName
-                                    + "::integer = "
-                                    + colName
-                                    + "::double from CSVREAD('%s', null, '%s');",
-                            file.getAbsolutePath(),
-                            options));
-
-                if (checkResultSet.next()) {
-                    if (checkResultSet.getBoolean(1)) {
-                        select.append("::integer");
-                        isInteger = true;
-                    }
+                if (select == null) {
+                    select = new StringBuilder("\"" + colName + "\"");
+                } else {
+                    select.append(", \"").append(colName).append("\"");
                 }
-            } catch (Exception e) {
-                // nothing to do. column data type is no integer
-            } finally {
-                if (checkResultSet != null) {
-                    checkResultSet.close();
-                }
-            }
 
-            if (!isInteger) {
                 try {
                     checkResultSet = checkStatement.executeQuery(String.format(
-                                "select "
+                                "select distinct "
+                                        + colName
+                                        + "::integer = "
                                         + colName
                                         + "::double from CSVREAD('%s', null, '%s');",
                                 file.getAbsolutePath(),
                                 options));
-                    select.append("::double");
+
+                    if (checkResultSet.next()) {
+                        if (checkResultSet.getBoolean(1)) {
+                            select.append("::integer");
+                            isInteger = true;
+                        }
+                    }
                 } catch (Exception e) {
-                    // nothing to do. column data type is no double
+                    // nothing to do. column data type is no integer
                 } finally {
                     if (checkResultSet != null) {
                         checkResultSet.close();
                     }
                 }
+
+                if (!isInteger) {
+                    try {
+                        checkResultSet = checkStatement.executeQuery(String.format(
+                                    "select "
+                                            + colName
+                                            + "::double from CSVREAD('%s', null, '%s');",
+                                    file.getAbsolutePath(),
+                                    options));
+                        select.append("::double");
+                    } catch (Exception e) {
+                        // nothing to do. column data type is no double
+                    } finally {
+                        if (checkResultSet != null) {
+                            checkResultSet.close();
+                        }
+                    }
+                }
+
+                select.append(" as \"").append(colName).append("\"");
+                attributeNames.add(colName);
             }
 
-            select.append(" as \"").append(colName).append("\"");
-            attributeNames.add(colName);
+            st.execute(String.format(
+                    CREATE_TABLE_FROM_CSV,
+                    tableName,
+                    ((select != null) ? select.toString() : " * "),
+                    file.getAbsolutePath(),
+                    options));
+
+            saveAttributeOrder(tableName, attributeNames.toArray(new String[0]));
+        } finally {
+            if (csvRs != null) {
+                try {
+                    csvRs.close();
+                } catch (Exception e) {
+                    LOG.warn("Error while closing result set", e);
+                }
+            }
+            checkStatement.close();
         }
-
-        csvRs.close();
-        st.execute(String.format(
-                CREATE_TABLE_FROM_CSV,
-                tableName,
-                ((select != null) ? select.toString() : " * "),
-                file.getAbsolutePath(),
-                options));
-
-        saveAttributeOrder(tableName, attributeNames.toArray(new String[0]));
     }
 
     /**
@@ -1977,7 +1963,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                 geometryTypeRs.close();
             } else {
-                geometryType = "none";
+                geometryType = AbstractFeatureService.NONE;
 
                 if (getLayerProperties() instanceof DefaultLayerProperties) {
                     ((DefaultLayerProperties)getLayerProperties()).setAttributeTableRuleSet(
