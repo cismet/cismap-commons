@@ -482,7 +482,7 @@ public class PointReferencingDialog extends javax.swing.JDialog {
 
                         try {
                             if (tmp.getProperty(tillField) != null) {
-                                y = Double.parseDouble(tmp.getProperty(fromField).toString());
+                                y = Double.parseDouble(tmp.getProperty(tillField).toString());
                             } else {
                                 ++invalidCount;
                                 continue;
@@ -537,11 +537,11 @@ public class PointReferencingDialog extends javax.swing.JDialog {
                                 "PointReferencingDialog.butApplyActionPerformed.themeNotCreated");
                     }
 
-                    if (invalidCount > 0) {
+                    if ((hint == null) && (invalidCount > 0)) {
                         hint = NbBundle.getMessage(
                                 PointReferencingDialog.class,
                                 "PointReferencingDialog.butApplyActionPerformed.themePartiallyCreated",
-                                invalidCount,
+                                featureList.size(),
                                 (featureList.size() + invalidCount));
                     }
 
