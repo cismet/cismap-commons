@@ -118,6 +118,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public static final String META_TABLE_NAME = "table_meta";
     public static final String META_TABLE_ATTRIBUTES_NAME = "table_attributes_meta";
     public static final String SLD_TABLE_NAME = "sld_meta_data";
+    public static final String SORT_TABLE_NAME = "sort_meta_data";
     public static final String LOCK_TABLE_NAME = "cs_lock";
     public static final int STATION = 1;
     public static final int STATION_LINE = 2;
@@ -159,6 +160,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY \"%s\" ON \"%s\"(\"%s\");";
     private static final String CREATE_LR_META_TABLE =
         "create table \"%s\" (id serial, table varchar, lin_ref_reference varchar, domain varchar, src_join_field varchar, targ_join_field varchar, lin_ref_geom varchar, kind int, from_value varchar, till_value varchar);";
+    private static final String CREATE_SORT_META_TABLE =
+        "create table \"%s\" (id serial, folder varchar, table varchar, position integer);";
     private static final String CREATE_SLD_META_TABLE =
         "create table \"%s\" (\"id\" serial, \"table\" varchar, \"sld\" varchar);";
     private static final String CREATE_META_TABLE = "create table \"%s\" (id serial, table varchar, format varchar);";
@@ -431,7 +434,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             logger.error("Error while creating new shape table", e);
             String errorMessage = e.getMessage();
 
-            if (errorMessage.contains("\n")) {
+            if (errorMessage.contains("\n") && !errorMessage.startsWith("Shape kann")) {
                 errorMessage = errorMessage.substring(0, errorMessage.indexOf("\n"));
             }
 
@@ -468,6 +471,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     H2FeatureServiceFactory.class,
                     "H2FeatureServiceFactory.importFile().title"), // NOI18N
                 JOptionPane.ERROR_MESSAGE);
+
+            if (errorMessage.equals(
+                            org.openide.util.NbBundle.getMessage(
+                                H2FeatureServiceFactory.class,
+                                "H2FeatureServiceFactory.importFile().emptyFile"))) {
+                // remove the layer from the tree
+                throw e;
+            }
         } finally {
             if (st != null) {
                 st.close();
@@ -1385,6 +1396,45 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      *
      * @throws  Exception  DOCUMENT ME!
      */
+    public static void createSortMetaTableIfNotExist() throws Exception {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = getDBConnection(DB_NAME);
+
+            rs = conn.getMetaData().getTables(null, null, SORT_TABLE_NAME, null);
+
+            if (!rs.next()) {
+                st = conn.createStatement();
+                st.execute(String.format(CREATE_SORT_META_TABLE, SORT_TABLE_NAME));
+                st.close();
+            }
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates the meta table for linear referencing, if it does not exist.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     public static void createLockTableIfNotExist() throws Exception {
         ConnectionWrapper conn = null;
         Statement st = null;
@@ -1552,6 +1602,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         int creationSuccessfully = 0;
         int errorCode = 0;
         int errorStation = 0;
+        int onlyParts = 0;
+        int dsCount = 0;
 
         try {
             if (!routeService.isInitialized()) {
@@ -1597,11 +1649,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             + newTableName + "\"");
 
             while (rs.next()) {
+                boolean fromError = false;
                 final int id = rs.getInt(1);
                 double from = rs.getDouble(2);
                 final Object routeId = rs.getObject(3);
                 Geometry geom = null;
                 Geometry routeGeom = routeGeometries.get(routeId);
+                dsCount++;
 
                 if ((routeGeom == null) && (routeId instanceof Long)) {
                     routeGeom = routeGeometries.get(new BigDecimal((Long)routeId));
@@ -1620,6 +1674,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                 if (from > routeLength) {
                     errorStation++;
+                    fromError = true;
+                    creationSuccessfully--;
                 }
 
                 if (tillField != null) {
@@ -1627,6 +1683,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                     if (till > routeLength) {
                         errorStation++;
+
+                        if (!fromError) {
+                            ++onlyParts;
+                            creationSuccessfully--;
+                        }
                     }
 
                     if ((till > routeLength) && (from > routeLength)) {
@@ -1669,18 +1730,52 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             createPrimaryKey(true, newTableName);
             createSpatialIndex(newGeometryField, newTableName);
 
-            JOptionPane.showMessageDialog(
-                CismapBroker.getInstance().getMappingComponent(),
-                org.openide.util.NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.createLinearReferencingLayer()",
-                    creationSuccessfully,
-                    errorCode,
-                    errorStation),
-                org.openide.util.NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.createLinearReferencingLayer().title"), // NOI18N
-                JOptionPane.INFORMATION_MESSAGE);
+            if (creationSuccessfully == 0) {
+                JOptionPane.showMessageDialog(
+                    CismapBroker.getInstance().getMappingComponent(),
+                    org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.createLinearReferencingLayer().noresult",
+                        errorCode,
+                        errorStation),
+                    org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.createLinearReferencingLayer().title"), // NOI18N
+                    JOptionPane.INFORMATION_MESSAGE);
+                H2FeatureService.removeTableIfExists(newTableName);
+            } else if ((errorCode == 0) && (errorStation == 0)) {
+            } else {
+                if (tillField == null) {
+                    JOptionPane.showMessageDialog(
+                        CismapBroker.getInstance().getMappingComponent(),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createLinearReferencingLayer().points",
+                            creationSuccessfully,
+                            dsCount,
+                            errorCode,
+                            errorStation),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createLinearReferencingLayer().title"), // NOI18N
+                        JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(
+                        CismapBroker.getInstance().getMappingComponent(),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createLinearReferencingLayer()",
+                            creationSuccessfully,
+                            dsCount,
+                            onlyParts,
+                            errorCode,
+                            errorStation),
+                        org.openide.util.NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createLinearReferencingLayer().title"), // NOI18N
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
         } catch (Exception e) {
             try {
                 if (st != null) {

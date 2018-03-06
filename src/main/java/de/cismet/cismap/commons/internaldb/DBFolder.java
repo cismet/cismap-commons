@@ -60,6 +60,16 @@ public class DBFolder extends DBEntry {
     /**
      * DOCUMENT ME!
      *
+     * @param  child  the children to set
+     * @param  index  DOCUMENT ME!
+     */
+    public void addChildren(final DBEntry child, final int index) {
+        this.children.add((index > children.size()) ? children.size() : index, child);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   folder  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
