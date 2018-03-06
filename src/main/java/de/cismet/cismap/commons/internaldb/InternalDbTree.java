@@ -17,23 +17,33 @@ import org.apache.log4j.Logger;
 
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.lang.reflect.InvocationTargetException;
+
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.DropMode;
@@ -42,6 +52,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
@@ -65,7 +76,6 @@ import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
-import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.PointReferencingDialog;
@@ -96,6 +106,7 @@ public class InternalDbTree extends JTree {
 
     private String databasePath;
     private JPopupMenu popupMenu = new JPopupMenu();
+    private final List<TreePath> expendedPaths = new ArrayList<TreePath>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -259,6 +270,14 @@ public class InternalDbTree extends JTree {
 
     //~ Methods ----------------------------------------------------------------
 
+    @Override
+    protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
+        // without this modification, a NPE will be thrown when a drop operation on a TransferHandler occurs.
+        if ((newValue != null) || !propertyName.equals("dropLocation")) {
+            super.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+
     /**
      * DOCUMENT ME!
      */
@@ -292,9 +311,27 @@ public class InternalDbTree extends JTree {
         }
 
         final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
-        model.removeFolder(folder);
+        Statement st = null;
 
-        model.fireTreeStructureChanged();
+        try {
+            st = model.getConnection().createStatement();
+            st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where table = '"
+                        + folder.getName() + "'");
+            st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where left(folder, "
+                        + folder.getName().length() + ") = '" + folder.getName() + "'");
+        } catch (Exception e) {
+            LOG.error("Error while removing folder", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.error("Error while removing folder", ex);
+                }
+            }
+        }
+
+        model.removeFolder(folder);
     }
 
     /**
@@ -307,13 +344,30 @@ public class InternalDbTree extends JTree {
         try {
             if (entry instanceof DBFolder) {
                 removeFolder(((DBFolder)entry));
+                ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
                 return;
             }
             final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
             final Connection con = model.getConnection();
-            final Statement st = con.createStatement();
+            Statement st = null;
             H2FeatureService.removeTableIfExists(entry.getName());
 
+            try {
+                st = con.createStatement();
+                st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
+                            + "\" where table = '"
+                            + entry.getName() + "'");
+            } catch (Exception e) {
+                LOG.error("Error while removing folder", e);
+            } finally {
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (SQLException ex) {
+                        LOG.error("Error while removing folder", ex);
+                    }
+                }
+            }
             model.remove(entry.getName());
 
             removeEntryFromActiveLayerModel(entry);
@@ -347,6 +401,58 @@ public class InternalDbTree extends JTree {
 
     /**
      * DOCUMENT ME!
+     */
+    private void saveExpandedPaths() {
+        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        expendedPaths.clear();
+        final TreePath root = new TreePath(new Object[] { model.getRoot() });
+        final Enumeration<TreePath> en = getExpandedDescendants(root);
+
+        while (en.hasMoreElements()) {
+            expendedPaths.add(en.nextElement());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void resetExpansion() {
+        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
+
+        if (pathCopy.isEmpty()) {
+            // root should always be expanded
+            final TreePath root = new TreePath(new Object[] { model.getRoot() });
+            pathCopy.add(root);
+        }
+
+        for (final TreePath tp : pathCopy) {
+            expandPath(tp);
+        }
+//        try {
+//            EventQueue.invokeAndWait(new Runnable() {
+//
+//                    @Override
+//                    public void run() {
+//                        final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
+//
+//                        if (pathCopy.isEmpty()) {
+//                            // root should always be expanded
+//                            final TreePath root = new TreePath(new Object[] { model.getRoot() });
+//                            pathCopy.add(root);
+//                        }
+//
+//                        for (final TreePath tp : pathCopy) {
+//                            expandPath(tp);
+//                        }
+//                    }
+//                });
+//        } catch (Exception ex) {
+//        }
+    }
+
+    /**
+     * DOCUMENT ME!
      *
      * @param  name  DOCUMENT ME!
      */
@@ -355,14 +461,34 @@ public class InternalDbTree extends JTree {
 
         if ((selectionPath != null) && (selectionPath.getLastPathComponent() instanceof DBFolder)) {
             final DBFolder folder = (DBFolder)selectionPath.getLastPathComponent();
-            DBFolder newFolder = new DBFolder(name);
+            DBFolder newFolder = new DBFolder(folder.getName() + "->" + name);
             int count = 0;
 
             while (folder.contains(newFolder)) {
-                newFolder = new DBFolder(name + "_" + (++count));
+                newFolder = new DBFolder(folder.getName() + "->" + name + "_" + (++count));
             }
 
             folder.addChildren(newFolder);
+            Statement st = null;
+
+            try {
+                st = ((InternalDBTreeModel)getModel()).getConnection().createStatement();
+                st.execute("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
+                            + "\" (folder, table, position) VALUES ('"
+                            + folder.getName() + "', '" + folder.getName() + "->" + newFolder
+                            + "', (select max(position) + 1 from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
+                            + "\"))");
+            } catch (Exception e) {
+                LOG.error("Error while removing folder", e);
+            } finally {
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (SQLException ex) {
+                        LOG.error("Error while removing folder", ex);
+                    }
+                }
+            }
             ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
         } else {
             ((InternalDBTreeModel)getModel()).addFolder(name);
@@ -503,13 +629,35 @@ public class InternalDbTree extends JTree {
             final JTree t = (JTree)info.getComponent();
 //            boolean b = info.isDrop() && info.isDataFlavorSupported(rowFlavor);
 
+            // Do not allow a drop on the drag source selections
+            final JTree.DropLocation dl = (JTree.DropLocation)info.getDropLocation();
+            final JTree tree = (JTree)info.getComponent();
+            final int dropRow = tree.getRowForPath(dl.getPath());
+            final int[] selRows = tree.getSelectionRows();
+            for (int i = 0; i < selRows.length; i++) {
+                if (selRows[i] == dropRow) {
+                    return false;
+                }
+
+                if (selRows[i] == 0) {
+                    return false;
+                }
+            }
+
+            // Do not allow a drop on a layer that is not a collection
+            final Object targetNode = dl.getPath().getLastPathComponent();
+
+            if (!(targetNode instanceof DBFolder) && !targetNode.equals(t.getModel().getRoot())) {
+                return false;
+            }
+
 //            t.setCursor( b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop);
             final TreePath p = t.getPathForLocation(
                     info.getDropLocation().getDropPoint().x,
                     info.getDropLocation().getDropPoint().y);
-            return ((p != null)
-                            && ((p.getLastPathComponent() instanceof DBFolder)
-                                || p.getLastPathComponent().equals(t.getModel().getRoot())));
+            return ((p != null));
+//                            && ((p.getLastPathComponent() instanceof DBFolder)
+//                                || p.getLastPathComponent().equals(t.getModel().getRoot())));
 //            return b;
         }
 
@@ -525,12 +673,17 @@ public class InternalDbTree extends JTree {
             final TreePath p = target.getPathForLocation(
                     info.getDropLocation().getDropPoint().x,
                     info.getDropLocation().getDropPoint().y);
+            final JTree.DropLocation dl = (JTree.DropLocation)info.getDropLocation();
+            final InternalDBTreeModel model = (InternalDBTreeModel)target.getModel();
+            final Connection con = model.getConnection();
+            Statement st = null;
 
             try {
-                final InternalDBTreeModel model = (InternalDBTreeModel)target.getModel();
-                final Object targetFolder = p.getLastPathComponent();
+                st = con.createStatement();
+                final Object targetFolder = dl.getPath().getLastPathComponent();
+                int index = ((dl.getChildIndex() != -1) ? dl.getChildIndex() : 0);
 
-                if ((p != null) && ((targetFolder instanceof DBFolder) || targetFolder.equals(model.getRoot()))) {
+                if ((targetFolder instanceof DBFolder) || targetFolder.equals(model.getRoot())) {
                     DBFolder folder = null;
                     final DBTableInformation[] o = (DBTableInformation[])info.getTransferable()
                                 .getTransferData(TREEPATH_FLAVOR);
@@ -543,21 +696,64 @@ public class InternalDbTree extends JTree {
                         } else if (targetFolder.equals(model.getRoot())) {
                             newName = getNameWithoutFolder(ti.getDatabaseTable());
                         }
+                        final String targetFolderString = targetFolder.equals(model.getRoot())
+                            ? "/" : ((DBFolder)targetFolder).getName();
+
                         if (ti.isFolder()) {
                             entry = getEntryFromTableInformation(ti);
+                            entry.setName(newName);
+
+                            if (!ti.getParentFolder().equals(targetFolderString)) {
+                                final List<DBEntry> entries = getDBEntriesFromFolder((DBFolder)entry);
+
+                                for (final DBEntry e : entries) {
+                                    final String newTableName = newName + "->"
+                                                + e.getName().substring(ti.getDatabaseTable().length() + 2);
+                                    final ResultSet rs = con.getMetaData().getTables(null, null, newTableName, null);
+                                    if (rs.next()) {
+                                        JOptionPane.showMessageDialog(
+                                            InternalDbTree.this,
+                                            "Tabelle existiert bereits",
+                                            "titel",
+                                            JOptionPane.WARNING_MESSAGE);
+                                        rs.close();
+                                        return false;
+                                    }
+                                    rs.close();
+                                }
+
+                                for (final DBEntry e : entries) {
+                                    final String oldName = e.getName();
+                                    final String newTableName = newName + "->"
+                                                + e.getName().substring(ti.getDatabaseTable().length() + 2);
+                                    st.execute("alter table \"" + oldName + "\" rename to \"" + newTableName
+                                                + "\"");
+                                    e.setName(newTableName);
+                                }
+                            }
                         } else {
                             entry = new DBEntry(newName);
-                            final Connection con = model.getConnection();
-                            final Statement st = con.createStatement();
-                            st.execute("alter table \"" + ti.getDatabaseTable() + "\" rename to \"" + newName + "\"");
-                            st.close();
+                            if (!ti.getDatabaseTable().equals(newName)) {
+                                st.execute("alter table \"" + ti.getDatabaseTable() + "\" rename to \"" + newName
+                                            + "\"");
+                            }
                         }
-                        model.remove(ti.getDatabaseTable());
+                        saveExpandedPaths();
+                        final int removeFromPosition = model.remove(ti.getDatabaseTable());
+
+                        if (ti.getParentFolder().equals(targetFolderString)) {
+                            if ((removeFromPosition != -1) && (removeFromPosition <= index)) {
+                                --index;
+                            }
+                        }
                         if (targetFolder instanceof DBFolder) {
-                            folder.addChildren(entry);
+                            folder.addChildren(entry, index);
                         } else if (targetFolder.equals(model.getRoot())) {
-                            model.addEntry(entry);
+                            model.addEntry(entry, index);
                         }
+
+                        st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\"");
+                        model.saveTableOrder(model.getEntries());
 
                         // notify the layer, if it is active
                         if (!ti.isFolder()) {
@@ -578,15 +774,48 @@ public class InternalDbTree extends JTree {
                                 }
                             }
                         }
+
+                        model.loadFromDb();
+                        model.fireTreeStructureChanged();
+                        resetExpansion();
                     }
                 } else {
                     return false;
                 }
             } catch (Exception e) {
                 LOG.error("Error during drop operation.", e);
+            } finally {
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (SQLException ex) {
+                        LOG.error("cannot close statement", ex);
+                    }
+                }
             }
 
             return true;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   folder  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private List<DBEntry> getDBEntriesFromFolder(final DBFolder folder) {
+            final List<DBEntry> list = new ArrayList<DBEntry>();
+
+            for (final DBEntry e : folder.getChildren()) {
+                if (e instanceof DBFolder) {
+                    list.addAll(getDBEntriesFromFolder((DBFolder)e));
+                } else {
+                    list.add(e);
+                }
+            }
+
+            return list;
         }
 
         /**
@@ -598,7 +827,7 @@ public class InternalDbTree extends JTree {
          */
         private DBEntry getEntryFromTableInformation(final DBTableInformation ti) {
             if (ti.isFolder()) {
-                final DBFolder folder = new DBFolder(ti.getName());
+                final DBFolder folder = new DBFolder(ti.getDatabaseTable());
 
                 for (final DBTableInformation inf : ti.getChildren()) {
                     folder.addChildren(getEntryFromTableInformation(inf));
@@ -654,9 +883,19 @@ public class InternalDbTree extends JTree {
          * Creates a new InternalDBTreeModel object.
          */
         public InternalDBTreeModel() {
+            conn = H2FeatureServiceFactory.getDBConnection(databasePath);
+            loadFromDb();
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void loadFromDb() {
             try {
-                conn = H2FeatureServiceFactory.getDBConnection(databasePath);
                 final ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE" });
+                entries.clear();
 
                 while (rs.next()) {
                     final String name = rs.getString("TABLE_NAME");
@@ -665,6 +904,7 @@ public class InternalDbTree extends JTree {
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME)
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_ATTRIBUTES_NAME)
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.SORT_TABLE_NAME)
                                 || name.equalsIgnoreCase("Zeichnungen")
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.SLD_TABLE_NAME)
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.LOCK_TABLE_NAME)) {
@@ -705,12 +945,211 @@ public class InternalDbTree extends JTree {
                         }
                     }
                 }
+                addFolder();
+                sortTables(entries);
             } catch (Exception e) {
                 LOG.error("Error while retrieving meta infos from the db" + databasePath, e);
             }
         }
 
-        //~ Methods ------------------------------------------------------------
+        /**
+         * DOCUMENT ME!
+         */
+        private void addFolder() {
+            final Map<Integer, DBFolder> allEntries = getAllEntriesInFolder("/");
+
+            for (final Integer key : allEntries.keySet()) {
+                final DBFolder f = allEntries.get(key);
+
+                if (!entries.contains(f) && !entries.contains(new DBEntry(f.getName()))) {
+                    if (key > entries.size()) {
+                        entries.add(entries.size(), f);
+                    } else {
+                        entries.add((key > entries.size()) ? entries.size() : key, f);
+                    }
+                }
+            }
+
+            for (final DBEntry entry : entries) {
+                if (entry instanceof DBFolder) {
+                    addFolder((DBFolder)entry);
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  folder  DOCUMENT ME!
+         */
+        private void addFolder(final DBFolder folder) {
+            final Map<Integer, DBFolder> allEntries = getAllEntriesInFolder(folder.getName());
+
+            for (final Integer key : allEntries.keySet()) {
+                final DBFolder f = allEntries.get(key);
+
+                if (!folder.contains(f) && !folder.contains(new DBEntry(f.getName()))) {
+                    folder.addChildren(f, key);
+                }
+            }
+
+            for (final DBEntry entry : folder.getChildren()) {
+                if (entry instanceof DBFolder) {
+                    addFolder((DBFolder)entry);
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   parent  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private Map<Integer, DBFolder> getAllEntriesInFolder(final String parent) {
+            final Map<Integer, DBFolder> resultMap = new HashMap<Integer, DBFolder>();
+
+            try {
+                final Statement st = conn.createStatement();
+
+                final ResultSet rs = st.executeQuery("select table, position from \""
+                                + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = '" + parent + "'");
+
+                while (rs.next()) {
+                    final String table = rs.getString(1);
+                    if (parent.equals("/")) {
+                        if (table.indexOf("->") == -1) {
+                            resultMap.put(rs.getInt(2) - 1, new DBFolder(table));
+                        }
+                    } else {
+                        if (table.length() > (parent.length() + 2)) {
+                            if (table.substring(parent.length() + 2).indexOf("->") == -1) {
+                                resultMap.put(rs.getInt(2) - 1, new DBFolder(table));
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error while reading folder", e);
+            }
+
+            return resultMap;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  parent  DOCUMENT ME!
+         */
+        public void sortTables(final List<DBEntry> parent) {
+            DBEntryComparator comparator = null;
+            try {
+                comparator = new DBEntryComparator(conn, "/");
+                Collections.sort(parent, comparator);
+
+                for (final DBEntry entry : parent) {
+                    if (entry instanceof DBFolder) {
+                        sortFolder((DBFolder)entry);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot sort folder", e);
+            } finally {
+                if (comparator != null) {
+                    comparator.cleanup();
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  parent  DOCUMENT ME!
+         */
+        public void saveTableOrder(final List<DBEntry> parent) {
+            DBEntryComparator comparator = null;
+            try {
+                comparator = new DBEntryComparator(conn, "/");
+
+                for (final DBEntry entry : parent) {
+                    comparator.getPosition(entry);
+                }
+
+                for (final DBEntry entry : parent) {
+                    if (entry instanceof DBFolder) {
+                        saveFolderOrder((DBFolder)entry);
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot sort folder", e);
+            } finally {
+                if (comparator != null) {
+                    comparator.cleanup();
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   folder  DOCUMENT ME!
+         *
+         * @throws  Exception  DOCUMENT ME!
+         */
+        private void saveFolderOrder(final DBFolder folder) throws Exception {
+            DBEntryComparator comparator = null;
+            try {
+                comparator = new DBEntryComparator(conn, folder.getName());
+                for (final DBEntry entry : folder.getChildren()) {
+                    comparator.getPosition(entry);
+                }
+
+                for (final DBEntry entry : folder.getChildren()) {
+                    if (entry instanceof DBFolder) {
+                        saveFolderOrder((DBFolder)entry);
+                    }
+                }
+            } finally {
+                if (comparator != null) {
+                    comparator.cleanup();
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   folder  DOCUMENT ME!
+         *
+         * @throws  Exception  DOCUMENT ME!
+         */
+        private void sortFolder(final DBFolder folder) throws Exception {
+            DBEntryComparator comparator = null;
+            try {
+                comparator = new DBEntryComparator(conn, folder.getName());
+                Collections.sort(folder.getChildren(), comparator);
+
+                for (final DBEntry entry : folder.getChildren()) {
+                    if (entry instanceof DBFolder) {
+                        sortFolder((DBFolder)entry);
+                    }
+                }
+            } finally {
+                if (comparator != null) {
+                    comparator.cleanup();
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public List<DBEntry> getEntries() {
+            return entries;
+        }
 
         @Override
         public Object getRoot() {
@@ -852,6 +1291,17 @@ public class InternalDbTree extends JTree {
             fireTreeStructureChanged();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e      DOCUMENT ME!
+         * @param  index  DOCUMENT ME!
+         */
+        public void addEntry(final DBEntry e, final int index) {
+            entries.add(index, e);
+            fireTreeStructureChanged();
+        }
+
         @Override
         public int getIndexOfChild(final Object parent, final Object child) {
             if (parent == root) {
@@ -867,9 +1317,11 @@ public class InternalDbTree extends JTree {
          * DOCUMENT ME!
          */
         private void fireTreeStructureChanged() {
+            saveExpandedPaths();
             for (final TreeModelListener l : listener) {
                 l.treeStructureChanged(new TreeModelEvent(this, new Object[] { root }));
             }
+            resetExpansion();
         }
 
         @Override
@@ -896,15 +1348,36 @@ public class InternalDbTree extends JTree {
             }
 
             entries.add(folder);
+            Statement st = null;
+
+            try {
+                st = ((InternalDBTreeModel)getModel()).getConnection().createStatement();
+                st.execute("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
+                            + "\" (folder, table, position) VALUES ('/', '"
+                            + folder.getName() + "', (select max(position) + 1 from \""
+                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\"))");
+            } catch (Exception e) {
+                LOG.error("Error while removing folder", e);
+            } finally {
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (SQLException ex) {
+                        LOG.error("Error while removing folder", ex);
+                    }
+                }
+            }
             fireTreeStructureChanged();
         }
 
         /**
          * DOCUMENT ME!
          *
-         * @param  tableName  DOCUMENT ME!
+         * @param   tableName  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
          */
-        public void remove(final String tableName) {
+        public int remove(final String tableName) {
             final String[] parts = tableName.split("->");
             List<DBEntry> parent = entries;
             DBFolder folder = null;
@@ -913,9 +1386,14 @@ public class InternalDbTree extends JTree {
                 final String part = parts[i];
 
                 if (i == (parts.length - 1)) {
+                    int position = parent.indexOf(new DBEntry(tableName));
+
                     if (!parent.remove(new DBEntry(tableName))) {
+                        position = parent.indexOf(new DBFolder(tableName));
                         parent.remove(new DBFolder(tableName));
                     }
+
+                    return position;
                 } else {
                     folder = ((folder == null) ? new DBFolder(part) : new DBFolder(folder.getName() + "->" + part));
                     final int folderIndex = parent.indexOf(folder);
@@ -931,6 +1409,8 @@ public class InternalDbTree extends JTree {
             }
 
             fireTreeStructureChanged();
+
+            return -1;
         }
 
         /**
@@ -949,6 +1429,7 @@ public class InternalDbTree extends JTree {
 
             final String[] parts = folderToRemove.getName().split("->");
             List<DBEntry> parent = entries;
+            DBFolder folder = null;
 
             for (int i = 0; i < parts.length; ++i) {
                 final String part = parts[i];
@@ -956,7 +1437,7 @@ public class InternalDbTree extends JTree {
                 if (i == (parts.length - 1)) {
                     parent.remove(folderToRemove);
                 } else {
-                    DBFolder folder = new DBFolder(part);
+                    folder = ((folder == null) ? new DBFolder(part) : new DBFolder(folder.getName() + "->" + part));
                     final int folderIndex = parent.indexOf(folder);
 
                     if (folderIndex == -1) {
@@ -1343,6 +1824,113 @@ public class InternalDbTree extends JTree {
                 return visible;
             } else {
                 return false;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class DBEntryComparator implements Comparator<DBEntry> {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final PreparedStatement positionStatement;
+        private final PreparedStatement maxPosStatement;
+        private final PreparedStatement insertStatement;
+        private String folder;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DBEntryComparator object.
+         *
+         * @param   conn    DOCUMENT ME!
+         * @param   folder  DOCUMENT ME!
+         *
+         * @throws  Exception  DOCUMENT ME!
+         */
+        public DBEntryComparator(final ConnectionWrapper conn, final String folder) throws Exception {
+            H2FeatureServiceFactory.createSortMetaTableIfNotExist();
+            positionStatement = conn.prepareStatement("select position from \""
+                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = ? and table = ?");
+            maxPosStatement = conn.prepareStatement("select max(position) from \""
+                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = ?");
+            insertStatement = conn.prepareStatement("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
+                            + "\" (folder, table, position) VALUES (?, ?, ?)");
+            this.folder = folder;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public int compare(final DBEntry o1, final DBEntry o2) {
+            final Integer posO1 = getPosition(o1);
+            final Integer posO2 = getPosition(o2);
+
+            return posO1.compareTo(posO2);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   entry  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public int getPosition(final DBEntry entry) {
+            try {
+                positionStatement.setString(1, folder);
+                positionStatement.setString(2, entry.getName());
+                ResultSet rs = positionStatement.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getInt(1);
+                } else {
+                    maxPosStatement.setString(1, folder);
+                    rs.close();
+                    rs = maxPosStatement.executeQuery();
+                    int newPos = 1;
+
+                    if (rs.next()) {
+                        newPos = rs.getInt(1) + 1;
+                    }
+                    rs.close();
+
+                    insertStatement.setString(1, folder);
+                    insertStatement.setString(2, entry.getName());
+                    insertStatement.setInt(3, newPos);
+                    insertStatement.execute();
+
+                    return newPos;
+                }
+            } catch (Exception e) {
+                LOG.error("SQL error: ", e);
+
+                return 0;
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void cleanup() {
+            try {
+                positionStatement.close();
+            } catch (Exception e) {
+                LOG.error("Error while closing statement: ", e);
+            }
+            try {
+                maxPosStatement.close();
+            } catch (Exception e) {
+                LOG.error("Error while closing statement: ", e);
+            }
+            try {
+                insertStatement.close();
+            } catch (Exception e) {
+                LOG.error("Error while closing statement: ", e);
             }
         }
     }

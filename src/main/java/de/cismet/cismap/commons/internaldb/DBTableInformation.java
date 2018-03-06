@@ -82,6 +82,19 @@ public class DBTableInformation {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public String getParentFolder() {
+        if (this.databaseTable.indexOf("->") != -1) {
+            return this.databaseTable.substring(0, this.databaseTable.lastIndexOf("->"));
+        } else {
+            return "/";
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  databaseTable  the databaseTable to set
      */
     public void setDatabaseTable(final String databaseTable) {
