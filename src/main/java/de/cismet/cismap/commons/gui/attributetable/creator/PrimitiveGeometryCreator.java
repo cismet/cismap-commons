@@ -34,6 +34,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedEvent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
@@ -62,7 +63,7 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     private final String mode;
     private boolean multi;
-    private List<CreaterGeometryListener> geometryListener = new ArrayList<CreaterGeometryListener>();
+    private CreaterGeometryListener geometryListener = null;
     private AbstractFeatureService service = null;
     private PNode tmpFeature;
     private MappingComponent mc = null;
@@ -197,7 +198,13 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
                                 }
                             });
 
-                    geometryListener.add(listener);
+                    if ((CismapBroker.getInstance() != null)
+                                && (CismapBroker.getInstance().getMappingComponent() != null)) {
+                        final CreateNewGeometryListener result = (CreateNewGeometryListener)CismapBroker
+                                    .getInstance().getMappingComponent().getInputListener(MappingComponent.NEW_POLYGON);
+                        listener.setShowCurrentLength(result.isShowCurrentLength());
+                    }
+                    geometryListener = listener;
                     mc.addInputListener(SIMPLE_GEOMETRY_LISTENER_KEY, listener);
                     mc.putCursor(SIMPLE_GEOMETRY_LISTENER_KEY, new Cursor(Cursor.CROSSHAIR_CURSOR));
                     listener.setMode(mode);
@@ -266,13 +273,15 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     @Override
     public void resume() {
-//        if ((mc != null) && (tmpFeature != null)) {
-//            mc.getTmpFeatureLayer().addChild(tmpFeature);
-//        }
-//        tmpFeature = null;
-//        activateResume = true;
         CismapBroker.getInstance().getMappingComponent().setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
-//        activateResume = false;
+        if (mc != null) {
+            final CreateNewGeometryListener result = (CreateNewGeometryListener)mc.getInputListener(
+                    MappingComponent.NEW_POLYGON);
+
+            if (geometryListener != null) {
+                geometryListener.setShowCurrentLength(result.isShowCurrentLength());
+            }
+        }
     }
 
     @Override
