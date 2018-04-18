@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.nodes.PText;
 
 import org.apache.log4j.Logger;
 
@@ -49,6 +50,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.NewTextDialog;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
+import de.cismet.tools.StaticDecimalTools;
+
 import de.cismet.tools.gui.StaticSwingTools;
 
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.POLYGON;
@@ -77,6 +80,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     protected ArrayList<Point2D> points;
     protected Map<Point2D, Coordinate> snappedCoordinates = new HashMap<Point2D, Coordinate>();
 
+    private boolean showCurrentLength = false;
+    private PText currentLength;
     private Point2D startPoint;
     private PPath tempFeature;
     private boolean inProgress;
@@ -116,6 +121,24 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the showCurrentLength
+     */
+    public boolean isShowCurrentLength() {
+        return showCurrentLength;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  showCurrentLength  the showCurrentLength to set
+     */
+    public void setShowCurrentLength(final boolean showCurrentLength) {
+        this.showCurrentLength = showCurrentLength;
+    }
 
     /**
      * DOCUMENT ME!
@@ -196,6 +219,31 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 point = pInputEvent.getPosition();
             }
             updatePolygon(point);
+
+            if (showCurrentLength && isInMode(LINESTRING)) {
+                if (currentLength == null) {
+                    currentLength = new PText();
+                    currentLength.setVisible(true);
+                    if (currentLength != null) {
+                        mappingComponent.getTmpFeatureLayer().addChild(currentLength);
+                    }
+                }
+                final Point2D leftInfoPoint = pInputEvent.getPosition();
+                int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                if (fontSize < 1) {
+                    fontSize = 1;
+                }
+                final Font f = new Font("sansserif", Font.PLAIN, fontSize);
+                currentLength.setFont(f);
+                currentLength.setTextPaint(new Color(100, 100, 0));
+                currentLength.setPaint(new Color(255, 255, 255));
+                currentLength.setX(leftInfoPoint.getX() + (12 / mappingComponent.getCamera().getViewScale()));
+                currentLength.setY(leftInfoPoint.getY() - (12 / mappingComponent.getCamera().getViewScale()));
+
+                if ((currentFeature != null) && (currentFeature.getGeometry() != null)) {
+                    currentLength.setText(StaticDecimalTools.round(currentFeature.getGeometry().getLength()));
+                }
+            }
         }
     }
 
@@ -844,6 +892,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      */
     protected void finishGeometry(final AbstractNewFeature newFeature) {
         mappingComponent.getTmpFeatureLayer().removeAllChildren();
+        currentLength = null;
     }
 
     /**
