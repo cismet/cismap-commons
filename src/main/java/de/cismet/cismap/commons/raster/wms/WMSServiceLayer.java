@@ -21,6 +21,10 @@ import java.awt.EventQueue;
 
 import java.beans.PropertyChangeSupport;
 
+import java.io.UnsupportedEncodingException;
+
+import java.net.URLEncoder;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1058,7 +1062,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getStylesString() {
-        final StringBuilder stylesString = new StringBuilder("");                                               // NOI18N
+        final StringBuilder stylesString = new StringBuilder("");                        // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
@@ -1068,18 +1072,22 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                             || (isDummy() && (((WMSLayer)o).getStyleName() != null))) {
                     counter++;
                     if (counter > 1) {
-                        stylesString.append(",");                                                               // NOI18N
+                        stylesString.append(",");                                        // NOI18N
                     }
                     if (!isDummy()) {
-                        stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                        stylesString.append(((WMSLayer)o).getSelectedStyle().getName()); // NOI18N
                     } else {
-                        stylesString.append(((WMSLayer)o).getStyleName().replaceAll(" ", "%20"));               // NOI18N
+                        stylesString.append(((WMSLayer)o).getStyleName());               // NOI18N
                     }
                 }
             }
         }
 
-        return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
+        try {
+            return "&STYLES=" + (URLEncoder.encode(stylesString.toString(), "UTF-8")); // LDS Bugfix//NOI18N
+        } catch (UnsupportedEncodingException e) {
+            return "&STYLES=" + (URLEncoder.encode(stylesString.toString()));          // LDS Bugfix//NOI18N
+        }
     }
 
     /**
