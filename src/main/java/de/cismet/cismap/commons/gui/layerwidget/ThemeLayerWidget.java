@@ -40,10 +40,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.DropMode;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -95,10 +92,7 @@ import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
-import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.DefaultPopupMenuListener;
-import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 
@@ -113,10 +107,7 @@ import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
-public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener,
-    SelectionChangedListener,
-    GUIWindow { // implements
+public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener, SelectionChangedListener { // implements
 
     //~ Instance fields --------------------------------------------------------
 
@@ -681,33 +672,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         } catch (VetoException ex) {
             // nothing to do
         }
-    }
-
-    @Override
-    public String getViewTitle() {
-        return org.openide.util.NbBundle.getMessage(
-                ThemeLayerWidget.class,
-                "CismapPlugin.CismapPlugin(PluginContext).vThemeLayer.title");
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        return Static2DTools.borderIcon(new ImageIcon(
-                    getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png")),
-                0,
-                3,
-                0,
-                1);
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
     }
 
     //~ Inner Classes ----------------------------------------------------------

@@ -68,7 +68,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -130,12 +129,10 @@ import de.cismet.security.exceptions.RequestFailedException;
 import de.cismet.security.handler.WSSAccessHandler;
 
 import de.cismet.tools.CismetThreadPool;
-import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
-import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -144,13 +141,11 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
 public class CapabilityWidget extends JPanel implements DropTargetListener,
     ChangeListener,
     ActionListener,
     Configurable,
-    MapBoundsListener,
-    GUIWindow {
+    MapBoundsListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -2409,28 +2404,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     public boolean isSearchEnabled() {
         return txtSearch.isVisible();
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
-    }
-
-    @Override
-    public String getViewTitle() {
-        return NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getViewTitle");
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/server.png"));
-        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 
     //~ Inner Classes ----------------------------------------------------------

@@ -12,25 +12,16 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
-import org.openide.util.NbBundle;
-
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
-import de.cismet.tools.Static2DTools;
-
-import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -39,8 +30,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
-public class ServerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener, GUIWindow {
+public class ServerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JList cboKeywords;
@@ -72,8 +62,6 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     public ServerInfo() {
         initComponents();
         StaticSwingTools.setNiftyScrollBars(scpMain);
-        CismapBroker.getInstance().addCapabilityListener(this);
-        CismapBroker.getInstance().addActiveLayerListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -429,28 +417,6 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
 
     @Override
     public void layerAdded(final ActiveLayerEvent e) {
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
-    }
-
-    @Override
-    public String getViewTitle() {
-        return NbBundle.getMessage(ServerInfo.class, "ServerInfo.getViewTitle");
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/capabilitywidget/res/serverInfo.png"));
-        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 
     //~ Inner Classes ----------------------------------------------------------
