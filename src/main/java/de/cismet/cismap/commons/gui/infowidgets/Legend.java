@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -20,7 +22,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -31,6 +35,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -43,6 +48,9 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
+import de.cismet.tools.Static2DTools;
+
+import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -51,7 +59,8 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class Legend extends javax.swing.JPanel implements ActiveLayerListener, StatusListener {
+@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
+public class Legend extends javax.swing.JPanel implements ActiveLayerListener, StatusListener, GUIWindow {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -86,6 +95,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         scpLegends = new JScrollPane(tblLegends);
         StaticSwingTools.setNiftyScrollBars(scpLegends);
         add(scpLegends, BorderLayout.CENTER);
+        CismapBroker.getInstance().addActiveLayerListener(this);
+        CismapBroker.getInstance().addStatusListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -393,6 +404,27 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 addWmsServiceLayer((WMSServiceLayer)e.getValue());
             }
         }
+    }
+
+    @Override
+    public JComponent getGuiComponent() {
+        return this;
+    }
+
+    @Override
+    public String getPermissionString() {
+        return GUIWindow.NO_PERMISSION;
+    }
+
+    @Override
+    public String getViewTitle() {
+        return NbBundle.getMessage(Legend.class, "Legend.getViewTitle");
+    }
+
+    @Override
+    public Icon getViewIcon() {
+        final Icon icoMap = new ImageIcon(getClass().getResource("/de/cismet/cismap/navigatorplugin/res/legend.png"));
+        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 
     //~ Inner Classes ----------------------------------------------------------
