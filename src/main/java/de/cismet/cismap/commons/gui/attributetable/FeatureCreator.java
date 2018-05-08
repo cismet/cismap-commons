@@ -67,4 +67,13 @@ public interface FeatureCreator {
      * @return  DOCUMENT ME!
      */
     AbstractFeatureService getService();
+
+    /**
+     * True, iff the creation of a new object is currently allowed.
+     *
+     * @param   mc  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isCreationAllowed(final MappingComponent mc);
 }
