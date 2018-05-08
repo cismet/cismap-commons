@@ -16,8 +16,6 @@ import lombok.Getter;
 
 import org.openide.util.lookup.ServiceProvider;
 
-import java.awt.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,6 @@ import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.tools.StaticDebuggingTools;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.menu.CidsUiComponent;
 
 /**
  * DOCUMENT ME!
@@ -41,8 +38,7 @@ import de.cismet.tools.gui.menu.CidsUiComponent;
  */
 @ServiceProvider(service = ToolbarComponentsProvider.class)
 public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JPanel
-        implements ToolbarComponentsProvider,
-            CidsUiComponent {
+        implements ToolbarComponentsProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -130,20 +126,6 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
     @Override
     public String getPluginName() {
         return PLUGIN_NAME;
-    }
-
-    @Override
-    public String getValue(final String key) {
-        if (key.equals(CidsUiComponent.CIDS_ACTION_KEY)) {
-            return "RasterGeoReferencingToolbar";
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public Component getComponent() {
-        return btnRasterGeoRef;
     }
 
     //~ Inner Classes ----------------------------------------------------------

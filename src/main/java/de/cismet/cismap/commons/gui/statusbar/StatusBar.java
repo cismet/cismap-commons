@@ -18,7 +18,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.RenderingHints;
@@ -33,7 +32,6 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
@@ -58,8 +56,6 @@ import de.cismet.tools.Static2DTools;
 import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
 
-import de.cismet.tools.gui.GUIWindow;
-import de.cismet.tools.gui.NavigatorStatusBarComponent;
 import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener;
 
 /**
@@ -68,32 +64,30 @@ import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = NavigatorStatusBarComponent.class)
 public class StatusBar extends javax.swing.JPanel implements StatusListener,
     FeatureCollectionListener,
-    ActiveLayerListener,
-    NavigatorStatusBarComponent {
+    ActiveLayerListener {
 
     //~ Instance fields --------------------------------------------------------
 
     String mode;
     ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/map.png"));      // NOI18N
+                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private CrsTransformer transformer = null;
-    private final DecimalFormat df = new DecimalFormat("0.000000"); // NOI18N
+    private DecimalFormat df = new DecimalFormat("0.000000");  // NOI18N
     private int servicesCounter = 0;
     private int servicesErroneousCounter = 0;
     private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
     private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
-    private final JPanel servicesBusyPanel = new ServicesBusyPanel();
-    private final JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
-    private final JPanel servicesErrorPanel = new ServicesErrorPanel();
-    private final JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
-    private final JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
-    private final JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
-    private final JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
+    private JPanel servicesBusyPanel = new ServicesBusyPanel();
+    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
+    private JPanel servicesErrorPanel = new ServicesErrorPanel();
+    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
+    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
+    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
+    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
     private boolean developerMode = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -125,27 +119,10 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
     /**
      * Creates new form StatusBar.
-     */
-    public StatusBar() {
-    }
-
-    /**
-     * Creates a new StatusBar object.
      *
      * @param  mappingComponent  DOCUMENT ME!
      */
     public StatusBar(final MappingComponent mappingComponent) {
-        init(mappingComponent);
-    }
-
-    //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  mappingComponent  DOCUMENT ME!
-     */
-    public final void init(final MappingComponent mappingComponent) {
         initComponents();
         this.mappingComponent = mappingComponent;
         lblStatusImage.setText(""); // NOI18N
@@ -168,9 +145,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
 
         developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
-        CismapBroker.getInstance().addActiveLayerListener(this);
-        CismapBroker.getInstance().addStatusListener(this);
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -572,9 +549,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(lblStatusImage, gridBagConstraints);
-
-        lblStatus.setMinimumSize(new java.awt.Dimension(100, 17));
-        lblStatus.setPreferredSize(new java.awt.Dimension(100, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -958,46 +932,5 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     public DefaultExceptionHandlerListener getExceptionHandlerListener() {
         return exceptionNotificationStatusPanel;
-    }
-
-    /**
-     * todo: remove method
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getViewTitle() {
-        return "Statusbar";
-    }
-
-    @Override
-    public Component getComponent() {
-        return this;
-    }
-
-    @Override
-    public double getWeight() {
-        return 0.8;
-    }
-
-    @Override
-    public NavigatorStatusBarComponent.Side getSide() {
-        return NavigatorStatusBarComponent.Side.LEFT;
-    }
-
-    @Override
-    public boolean isVisibleInStatusBar() {
-        return true;
-    }
-
-    @Override
-    public void initialize() {
-        final MappingComponent mapC = CismapBroker.getInstance().getMappingComponent();
-        if (mapC != null) {
-            init(mapC);
-
-            addCrsPopups();
-            addScalePopups();
-            mapC.getFeatureCollection().addFeatureCollectionListener(this);
-        }
     }
 }

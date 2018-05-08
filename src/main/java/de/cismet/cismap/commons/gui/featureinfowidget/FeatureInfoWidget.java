@@ -16,8 +16,6 @@ import com.jgoodies.looks.Options;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.NbBundle;
-
 import java.awt.Color;
 import java.awt.Component;
 
@@ -27,9 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -46,18 +41,13 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 
-import de.cismet.tools.Static2DTools;
-
-import de.cismet.tools.gui.GUIWindow;
-
 /**
  * DOCUMENT ME!
  *
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
-public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, MapClickListener, GUIWindow {
+public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, MapClickListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -87,8 +77,6 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
         tbpFeatureInfos.putClientProperty(Options.NO_CONTENT_BORDER_KEY, Boolean.FALSE);
         tbpFeatureInfos.setRequestFocusEnabled(true);
         tbpFeatureInfos.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-        CismapBroker.getInstance().addActiveLayerListener(this);
-        CismapBroker.getInstance().addMapClickListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -313,27 +301,5 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 displays.get(layer).showFeatureInfo(mce);
             }
         }
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
-    }
-
-    @Override
-    public String getViewTitle() {
-        return NbBundle.getMessage(FeatureInfoWidget.class, "FeatureInfoWidget.getViewTitle");
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/featureinfowidget/res/featureInfo16.png"));
-        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 }

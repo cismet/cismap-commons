@@ -97,12 +97,10 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
-import de.cismet.tools.Static2DTools;
 import de.cismet.tools.StaticDebuggingTools;
 
 import de.cismet.tools.configuration.Configurable;
 
-import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitDialog;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
@@ -116,17 +114,12 @@ import static java.lang.Thread.sleep;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(
-    position = 1,
-    service = GUIWindow.class
-)
 public final class MappingComponent extends PSwingCanvas implements MappingModelListener,
     FeatureCollectionListener,
     HistoryModel,
     Configurable,
     DropTargetListener,
-    CrsChangeListener,
-    GUIWindow {
+    CrsChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -5544,36 +5537,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void setFeaturePrintingDpi(final double featurePrintingDpi) {
         this.featurePrintingDpi = featurePrintingDpi;
-    }
-
-    @Override
-    public String getViewTitle() {
-        return NbBundle.getMessage(MappingComponent.class, "MappingComponent.getViewTitle");
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png"));
-        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  mainMappingComponent  the mainMappingComponent to set
-     */
-    public void setMainMappingComponent(final boolean mainMappingComponent) {
-        this.mainMappingComponent = mainMappingComponent;
     }
 
     //~ Inner Classes ----------------------------------------------------------

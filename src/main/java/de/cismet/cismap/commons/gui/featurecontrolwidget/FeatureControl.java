@@ -23,8 +23,6 @@ import org.jdesktop.swingx.table.TableColumnExt;
 
 import org.jdom.Element;
 
-import org.openide.util.NbBundle;
-
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -38,7 +36,6 @@ import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 import javax.swing.RowFilter;
 import javax.swing.SortOrder;
 import javax.swing.event.ListSelectionEvent;
@@ -65,14 +62,11 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 
 import de.cismet.tools.CurrentStackTrace;
-import de.cismet.tools.Static2DTools;
 import de.cismet.tools.StaticDecimalTools;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
-
-import de.cismet.tools.gui.GUIWindow;
 
 /**
  * DOCUMENT ME!
@@ -80,11 +74,9 @@ import de.cismet.tools.gui.GUIWindow;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-@org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
 public class FeatureControl extends javax.swing.JPanel implements FeatureCollectionListener,
     MapBoundsListener,
-    Configurable,
-    GUIWindow {
+    Configurable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -116,6 +108,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     private javax.swing.JButton cmdRemoveFeatures;
     private javax.swing.JButton cmdZoomToAllFeatures;
     private javax.swing.JButton cmdZoomToFeatures;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToolBar jToolBar1;
     private org.jdesktop.swingx.JXTable jxtFeatures;
@@ -123,17 +118,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     private javax.swing.JToggleButton togFixMapExtent;
     private javax.swing.JToggleButton togFixMapScale;
     private javax.swing.JToggleButton togHoldAll;
+    private javax.swing.JToggleButton togSelectionWizard;
     private javax.swing.JToggleButton togShowOnlyVisible;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
-
-    /**
-     * This constructor should only be used by the Lookup and the init(MappingComponent) should be invoked, when this
-     * constructor was used.
-     */
-    public FeatureControl() {
-    }
 
     /**
      * Creates new form FeatureControl.
@@ -141,17 +130,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      * @param  mappingComponent  DOCUMENT ME!
      */
     public FeatureControl(final de.cismet.cismap.commons.gui.MappingComponent mappingComponent) {
-        init(mappingComponent);
-    }
-
-    //~ Methods ----------------------------------------------------------------
-
-    /**
-     * To initialise this component, when the default constructor was used.
-     *
-     * @param  mappingComponent  DOCUMENT ME!
-     */
-    public void init(final de.cismet.cismap.commons.gui.MappingComponent mappingComponent) {
         initComponents();
         this.mappingComponent = mappingComponent;
         final FeatureCollectionTableModel model = new FeatureCollectionTableModel();
@@ -190,6 +168,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             });
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      */
@@ -214,6 +194,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        togSelectionWizard = new javax.swing.JToggleButton();
         jToolBar1 = new javax.swing.JToolBar();
         cmdZoomToAllFeatures = new javax.swing.JButton();
         cmdZoomToFeatures = new javax.swing.JButton();
@@ -227,6 +211,36 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         cmdHold = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jxtFeatures = new org.jdesktop.swingx.JXTable();
+
+        jButton1.setText(null);
+
+        jButton2.setText(null);
+
+        jButton3.setForeground(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
+        jButton3.setText(null);
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton3ActionPerformed(evt);
+                }
+            });
+
+        togSelectionWizard.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/wizard.png"))); // NOI18N
+        togSelectionWizard.setRolloverIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/wizard.png"))); // NOI18N
+        togSelectionWizard.setRolloverSelectedIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/wizard.png"))); // NOI18N
+        togSelectionWizard.setSelectedIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/wizard.png"))); // NOI18N
+        togSelectionWizard.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    togSelectionWizardActionPerformed(evt);
+                }
+            });
 
         setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createEtchedBorder(),
@@ -439,11 +453,29 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      *
      * @param  evt  DOCUMENT ME!
      */
+    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton3ActionPerformed
+        tester();
+    }                                                                            //GEN-LAST:event_jButton3ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     private void cmdRemoveAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveAllActionPerformed
         mappingComponent.getFeatureCollection().removeAllFeatures();
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
     }                                                                                //GEN-LAST:event_cmdRemoveAllActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void togSelectionWizardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togSelectionWizardActionPerformed
+        wizardMode = togSelectionWizard.isSelected();
+    }                                                                                      //GEN-LAST:event_togSelectionWizardActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -744,6 +776,15 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isWizardMode() {
+        return wizardMode;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  Element
      */
     @Override
@@ -881,6 +922,15 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     */
+    private void tester() {
+        for (final Object tce : jxtFeatures.getColumns()) {
+            // log.debug(((TableColumnExt)tce).getSorter().getComparator());
+        }
+    }
+
     @Override
     public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
     }
@@ -892,27 +942,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     @Override
     public void featureCollectionChanged() {
-    }
-
-    @Override
-    public JComponent getGuiComponent() {
-        return this;
-    }
-
-    @Override
-    public String getPermissionString() {
-        return GUIWindow.NO_PERMISSION;
-    }
-
-    @Override
-    public String getViewTitle() {
-        return NbBundle.getMessage(FeatureControl.class, "FeatureControl.getViewTitle");
-    }
-
-    @Override
-    public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource("/images/objects.png"));
-        return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 
     //~ Inner Classes ----------------------------------------------------------
