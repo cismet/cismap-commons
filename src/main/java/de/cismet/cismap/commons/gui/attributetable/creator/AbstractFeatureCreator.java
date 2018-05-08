@@ -15,6 +15,7 @@ package de.cismet.cismap.commons.gui.attributetable.creator;
 import java.util.Map;
 
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 
 /**
@@ -99,5 +100,10 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
 
     @Override
     public void resume() {
+    }
+
+    @Override
+    public boolean isCreationAllowed(final MappingComponent mc) {
+        return true;
     }
 }
