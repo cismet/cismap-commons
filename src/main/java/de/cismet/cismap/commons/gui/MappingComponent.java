@@ -3024,6 +3024,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         if (pf != null) {
             pf.cleanup();
+            pf.releaseResources();
             pFeatureHM.remove(f);
             stickyPNodes.remove(pf);
             try {

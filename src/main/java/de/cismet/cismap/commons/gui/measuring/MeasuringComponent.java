@@ -154,11 +154,13 @@ public class MeasuringComponent extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     public void removeAllFeatures() {
-        final FeatureCollection fc = map.getFeatureCollection();
-        if (fc instanceof DefaultFeatureCollection) {
-            ((DefaultFeatureCollection)fc).clear();
-        } else {
-            fc.removeAllFeatures();
+        if (map != null) {
+            final FeatureCollection fc = map.getFeatureCollection();
+            if (fc instanceof DefaultFeatureCollection) {
+                ((DefaultFeatureCollection)fc).clear();
+            } else {
+                fc.removeAllFeatures();
+            }
         }
     }
 
