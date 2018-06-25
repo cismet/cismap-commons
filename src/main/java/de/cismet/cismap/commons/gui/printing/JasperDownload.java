@@ -9,7 +9,6 @@ package de.cismet.cismap.commons.gui.printing;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -22,6 +21,7 @@ import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
@@ -40,7 +40,7 @@ public class JasperDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
-    private ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(5);
+    private final List<JasperPrint> prints = new ArrayList<>(5);
     private JasperReport report;
     private Map parameters;
     private JRDataSource dataSource;
@@ -159,10 +159,22 @@ public class JasperDownload extends AbstractCancellableDownload {
             }
         }
 
+        cleanup();
+
         if (status == State.RUNNING) {
             status = State.COMPLETED;
             stateChanged();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void cleanup() {
+        report = null;
+        parameters = null;
+        dataSource = null;
+        prints.clear();
     }
 
     /**
