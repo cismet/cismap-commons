@@ -994,7 +994,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  the given url with the username/password combination
      */
     private String addUserAndPasswordToUrlIfRequired(final String url) {
-        if (capabilitiesUrl.contains("@") && capabilitiesUrl.contains("://")
+        if ((capabilitiesUrl != null) && capabilitiesUrl.contains("@") && capabilitiesUrl.contains("://")
                     && (capabilitiesUrl.indexOf("@") > capabilitiesUrl.indexOf("://"))) {
             final String userPwd = capabilitiesUrl.substring(capabilitiesUrl.indexOf("://") + 3,
                     capabilitiesUrl.indexOf("@"));
