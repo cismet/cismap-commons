@@ -904,6 +904,15 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         return GUIWindow.NO_PERMISSION;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isWizardMode() {
+        return wizardMode;
+    }
+
     @Override
     public String getViewTitle() {
         return NbBundle.getMessage(FeatureControl.class, "FeatureControl.getViewTitle");
