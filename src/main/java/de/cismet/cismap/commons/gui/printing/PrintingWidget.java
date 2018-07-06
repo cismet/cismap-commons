@@ -48,6 +48,7 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JToolTip;
@@ -74,6 +75,7 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import de.cismet.tools.gui.downloadmanager.MultipleDownload;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
 import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
@@ -116,6 +118,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private javax.swing.JButton cmdBack;
     private javax.swing.JButton cmdCancel;
     private javax.swing.JButton cmdOk;
+    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -228,6 +231,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         txt1 = new javax.swing.JTextField();
         lbl2 = new javax.swing.JLabel();
         txt2 = new javax.swing.JTextField();
+        jCheckBox1 = new javax.swing.JCheckBox();
         panDesc = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
@@ -256,6 +260,10 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         lbl2.setText(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.lbl2.text")); // NOI18N
 
         txt2.setText(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.txt2.text")); // NOI18N
+
+        jCheckBox1.setText(org.openide.util.NbBundle.getMessage(
+                PrintingWidget.class,
+                "PrintingWidget.jCheckBox1.text")); // NOI18N
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.title")); // NOI18N
@@ -289,19 +297,19 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                 286,
                 Short.MAX_VALUE).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                panDescLayout.createSequentialGroup().addContainerGap(146, Short.MAX_VALUE).add(jLabel5)
-                            .addContainerGap()).add(
                 panDescLayout.createSequentialGroup().addContainerGap().add(
                     panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                         panDescLayout.createSequentialGroup().add(
-                            jSeparator2,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            262,
-                            Short.MAX_VALUE).addContainerGap()).add(
+                            panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                                jLabel1).add(jLabel2).add(jLabel3).add(jLabel4)).add(83, 83, 83)).add(
                         panDescLayout.createSequentialGroup().add(
                             panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                jLabel1).add(jLabel2).add(jLabel3).add(jLabel4)).add(83, 83, 83)))));
+                                org.jdesktop.layout.GroupLayout.TRAILING,
+                                panDescLayout.createSequentialGroup().add(0, 138, Short.MAX_VALUE).add(jLabel5)).add(
+                                jSeparator2,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                266,
+                                Short.MAX_VALUE)).addContainerGap()))));
         panDescLayout.setVerticalGroup(
             panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                 panDescLayout.createSequentialGroup().addContainerGap().add(jLabel1).addPreferredGap(
@@ -314,7 +322,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel3).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel4).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.RELATED,
-                    58,
+                    63,
                     Short.MAX_VALUE).add(jLabel5).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
                     jSeparator3,
                     org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
@@ -359,11 +367,11 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
             panProgressLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                 prbLoading,
                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                435,
+                439,
                 Short.MAX_VALUE).add(
                 scpLoadingStatus,
                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                435,
+                439,
                 Short.MAX_VALUE));
         panProgressLayout.setVerticalGroup(
             panProgressLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
@@ -383,26 +391,27 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         panLoadAndInscribe.setLayout(panLoadAndInscribeLayout);
         panLoadAndInscribeLayout.setHorizontalGroup(
             panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                panLoadAndInscribeLayout.createSequentialGroup().addContainerGap().add(jLabel6).add(148, 148, 148)).add(
                 jSeparator4,
                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                 459,
                 Short.MAX_VALUE).add(
                 panLoadAndInscribeLayout.createSequentialGroup().addContainerGap().add(
-                    jSeparator1,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    447,
-                    Short.MAX_VALUE)).add(
-                panLoadAndInscribeLayout.createSequentialGroup().addContainerGap().add(
-                    panProgress,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE).addContainerGap()).add(
-                panLoadAndInscribeLayout.createSequentialGroup().addContainerGap().add(
-                    panInscribe,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    435,
-                    Short.MAX_VALUE).addContainerGap()));
+                    panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                        panLoadAndInscribeLayout.createSequentialGroup().add(jLabel6).add(148, 148, 148)).add(
+                        jSeparator1,
+                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                        449,
+                        Short.MAX_VALUE).add(
+                        panLoadAndInscribeLayout.createSequentialGroup().add(
+                            panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                                panProgress,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE).add(
+                                panInscribe,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                439,
+                                Short.MAX_VALUE)).addContainerGap()))));
         panLoadAndInscribeLayout.setVerticalGroup(
             panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                 panLoadAndInscribeLayout.createSequentialGroup().addContainerGap().add(jLabel6).addPreferredGap(
@@ -515,6 +524,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         }
         panInscribe.removeAll();
         panInscribe.add(inscriber, BorderLayout.CENTER);
+        if (mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class).size() > 1) {
+            panInscribe.add(jCheckBox1, BorderLayout.SOUTH);
+        }
 
         cmdOk.setEnabled(false);
 //        final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
@@ -771,8 +783,23 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                             } else if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(
                                             PrintingWidget.this.mappingComponent)) {
                                 final String jobname = DownloadManagerDialog.getInstance().getJobName();
-                                DownloadManager.instance()
-                                        .add(new JasperDownload(prints, jobname, "Cismap-Druck", "cismap"));
+
+                                final Download download;
+                                if (jCheckBox1.isSelected()) {
+                                    final Collection<Download> singleDownloads = new ArrayList<>();
+                                    for (int i = 0; i < prints.size(); i++) {
+                                        singleDownloads.add(new JasperDownload(
+                                                prints.get(i),
+                                                jobname,
+                                                "Cismap-Druck",
+                                                "cismap_"
+                                                        + (i + 1)));
+                                    }
+                                    download = new MultipleDownload(singleDownloads, "Cismap-Druck");
+                                } else {
+                                    download = new JasperDownload(prints, jobname, "Cismap-Druck", "cismap");
+                                }
+                                DownloadManager.instance().add(download);
                             }
 
                             java.awt.EventQueue.invokeLater(new Runnable() {
