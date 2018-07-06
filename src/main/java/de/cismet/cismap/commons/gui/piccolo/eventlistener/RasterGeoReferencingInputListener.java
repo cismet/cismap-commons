@@ -31,6 +31,7 @@ import javax.swing.SwingUtilities;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingDialog;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
@@ -71,7 +72,7 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
     public void mouseMoved(final PInputEvent pie) {
         super.mouseMoved(pie);
 
-        if (getHandler() != null) {
+        if (RasterGeoReferencingDialog.getInstance().isVisible() && (getHandler() != null)) {
             final Point2D mouseScreenPoint = pie.getPosition();
             final WorldToScreenTransform wtst = getMainMap().getWtst();
             final Coordinate mouseCoordinate = new Coordinate(wtst.getWorldX(mouseScreenPoint.getX()),
@@ -129,7 +130,7 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
     public void mouseClicked(final PInputEvent pie) {
         super.mouseClicked(pie);
 
-        if (pie.isLeftMouseButton()) {
+        if (RasterGeoReferencingDialog.getInstance().isVisible() && pie.isLeftMouseButton()) {
             if (pie.getClickCount() < 2) {
                 final Point2D mapPoint = pie.getPosition();
                 final WorldToScreenTransform wtst = getMainMap().getWtst();

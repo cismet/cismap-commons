@@ -151,6 +151,9 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
                     btnRasterGeoRef.setSelected(false);
                     RasterGeoReferencingDialog.getInstance().setVisible(false);
                 }
+                if (RasterGeoReferencingWizard.getInstance().getHandler().getFeature() != null) {
+                    RasterGeoReferencingWizard.getInstance().getHandler().getFeature().transformationChanged();
+                }
             }
         }
     }
