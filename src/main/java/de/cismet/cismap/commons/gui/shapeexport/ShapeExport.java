@@ -30,6 +30,8 @@ import org.jdom.Element;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
+import java.awt.Component;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -49,6 +51,8 @@ import de.cismet.tools.collections.TypeSafeCollections;
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 
+import de.cismet.tools.gui.menu.CidsUiComponent;
+
 /**
  * This class configures the shape export functionality in cismap. Therefore it reads the corresponding part of
  * defaultCismapProperties.xml and provides the buttons for cismap's toolbar.
@@ -57,7 +61,7 @@ import de.cismet.tools.configuration.NoWriteError;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = ToolbarComponentsProvider.class)
-public class ShapeExport implements Configurable, ToolbarComponentsProvider {
+public class ShapeExport implements Configurable, ToolbarComponentsProvider, CidsUiComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -309,5 +313,27 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         }
 
         return toolbarComponents;
+    }
+
+    @Override
+    public String getValue(final String key) {
+        if (key.equals(CidsUiComponent.CIDS_ACTION_KEY)) {
+            return "ShapeExport";
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Component getComponent() {
+        final JButton btnShapeExport = new JButton(new ShapeExportAction());
+        btnShapeExport.setText(null);
+        btnShapeExport.setName(NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
+        btnShapeExport.setBorderPainted(false);
+        btnShapeExport.setFocusable(false);
+        btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        return btnShapeExport;
     }
 }

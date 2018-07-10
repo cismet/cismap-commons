@@ -199,7 +199,9 @@ public class CismapBroker {
      * @param  cl  DOCUMENT ME!
      */
     public void addCapabilityListener(final CapabilityListener cl) {
-        capabilityListeners.add(cl);
+        if (!capabilityListeners.contains(cl)) {
+            capabilityListeners.add(cl);
+        }
     }
 
     /**
@@ -217,7 +219,9 @@ public class CismapBroker {
      * @param  ml  DOCUMENT ME!
      */
     public void addMappingModelListener(final MappingModelListener ml) {
-        mappingModelListeners.add(ml);
+        if (!mappingModelListeners.contains(ml)) {
+            mappingModelListeners.add(ml);
+        }
     }
 
     /**
@@ -235,7 +239,9 @@ public class CismapBroker {
      * @param  sl  DOCUMENT ME!
      */
     public void addStatusListener(final StatusListener sl) {
-        statusListeners.add(sl);
+        if (!statusListeners.contains(sl)) {
+            statusListeners.add(sl);
+        }
     }
 
     /**
@@ -253,7 +259,9 @@ public class CismapBroker {
      * @param  hml  DOCUMENT ME!
      */
     public void addHistoryModelListener(final HistoryModelListener hml) {
-        historyModelListeners.add(hml);
+        if (!historyModelListeners.contains(hml)) {
+            historyModelListeners.add(hml);
+        }
     }
 
     /**
@@ -271,7 +279,9 @@ public class CismapBroker {
      * @param  all  DOCUMENT ME!
      */
     public void addActiveLayerListener(final ActiveLayerListener all) {
-        activeLayerListeners.add(all);
+        if (!activeLayerListeners.contains(all)) {
+            activeLayerListeners.add(all);
+        }
     }
 
     /**
@@ -289,7 +299,9 @@ public class CismapBroker {
      * @param  mcl  DOCUMENT ME!
      */
     public void addMapClickListener(final MapClickListener mcl) {
-        mapClickListeners.add(mcl);
+        if (!mapClickListeners.contains(mcl)) {
+            mapClickListeners.add(mcl);
+        }
     }
 
     /**
@@ -307,7 +319,9 @@ public class CismapBroker {
      * @param  msl  DOCUMENT ME!
      */
     public void addMapSearchListener(final MapSearchListener msl) {
-        mapSearchListeners.add(msl);
+        if (!mapSearchListeners.contains(msl)) {
+            mapSearchListeners.add(msl);
+        }
     }
 
     /**
@@ -325,7 +339,9 @@ public class CismapBroker {
      * @param  mdl  DOCUMENT ME!
      */
     public void addMapDnDListener(final MapDnDListener mdl) {
-        mapDnDListeners.add(mdl);
+        if (!mapDnDListeners.contains(mdl)) {
+            mapDnDListeners.add(mdl);
+        }
     }
 
     /**
@@ -343,7 +359,9 @@ public class CismapBroker {
      * @param  fcl  DOCUMENT ME!
      */
     public void addFeatureCollectionListener(final FeatureCollectionListener fcl) {
-        featureCollectionListeners.add(fcl);
+        if (!featureCollectionListeners.contains(fcl)) {
+            featureCollectionListeners.add(fcl);
+        }
     }
 
     /**
@@ -361,7 +379,9 @@ public class CismapBroker {
      * @param  mbl  DOCUMENT ME!
      */
     public void addMapBoundsListener(final MapBoundsListener mbl) {
-        mapBoundsListeners.add(mbl);
+        if (!mapBoundsListeners.contains(mbl)) {
+            mapBoundsListeners.add(mbl);
+        }
     }
 
     /**
@@ -379,7 +399,9 @@ public class CismapBroker {
      * @param  mbl  DOCUMENT ME!
      */
     public void addCrsChangeListener(final CrsChangeListener mbl) {
-        crsChangeListeners.add(mbl);
+        if (!crsChangeListeners.contains(mbl)) {
+            crsChangeListeners.add(mbl);
+        }
     }
 
     /**
