@@ -767,7 +767,6 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             selectedCoordinate = null;
             listenerHandler.pointSelected(position);
         }
-        getMainMap().setInteractionMode(MappingComponent.GEO_REF);
 
         changeTransparency(SelectionMode.POINT);
     }
@@ -791,7 +790,6 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             selectedCoordinate = coordinate;
             listenerHandler.coordinateSelected(position);
         }
-        getMainMap().setInteractionMode(MappingComponent.GEO_REF);
 
         changeTransparency(SelectionMode.COORDINATE);
     }

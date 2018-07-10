@@ -189,9 +189,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
                                             .getMappingComponent()
                                             .getFeatureCollection()
                                             .select(handler.getFeature());
-                                            CismapBroker.getInstance()
-                                            .getMappingComponent()
-                                            .setInteractionMode(MappingComponent.GEO_REF);
+                                            // CismapBroker.getInstance()
+                                            // .getMappingComponent()
+                                            // .setInteractionMode(MappingComponent.GEO_REF);
                                         } finally {
                                             ignoreSelection = false;
                                         }
@@ -282,10 +282,12 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
      * @param  parent  DOCUMENT ME!
      */
     private void init(final PFeature parent) {
-        final int numOfPairs = getHandler().getPairs().length;
-        for (int position = 0; position < numOfPairs; position++) {
-            addPointChild(parent, position);
-            addCoordinateChild(parent, position);
+        if (MappingComponent.GEO_REF.equals(CismapBroker.getInstance().getMappingComponent().getInteractionMode())) {
+            final int numOfPairs = getHandler().getPairs().length;
+            for (int position = 0; position < numOfPairs; position++) {
+                addPointChild(parent, position);
+                addCoordinateChild(parent, position);
+            }
         }
     }
 

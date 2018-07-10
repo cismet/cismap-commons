@@ -16,6 +16,8 @@ import lombok.Getter;
 
 import org.openide.util.lookup.ServiceProvider;
 
+import java.awt.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +31,7 @@ import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.tools.StaticDebuggingTools;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.menu.CidsUiComponent;
 
 /**
  * DOCUMENT ME!
@@ -38,7 +41,8 @@ import de.cismet.tools.gui.StaticSwingTools;
  */
 @ServiceProvider(service = ToolbarComponentsProvider.class)
 public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JPanel
-        implements ToolbarComponentsProvider {
+        implements ToolbarComponentsProvider,
+            CidsUiComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -128,6 +132,20 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         return PLUGIN_NAME;
     }
 
+    @Override
+    public String getValue(final String key) {
+        if (key.equals(CidsUiComponent.CIDS_ACTION_KEY)) {
+            return "RasterGeoReferencingToolbar";
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Component getComponent() {
+        return btnRasterGeoRef;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -150,6 +168,9 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
                 } else {
                     btnRasterGeoRef.setSelected(false);
                     RasterGeoReferencingDialog.getInstance().setVisible(false);
+                }
+                if (RasterGeoReferencingWizard.getInstance().getHandler().getFeature() != null) {
+                    RasterGeoReferencingWizard.getInstance().getHandler().getFeature().transformationChanged();
                 }
             }
         }
