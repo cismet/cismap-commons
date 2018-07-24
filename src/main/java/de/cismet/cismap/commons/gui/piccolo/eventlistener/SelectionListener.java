@@ -103,6 +103,7 @@ public class SelectionListener extends CreateGeometryListener {
     private SelectFeature lastFeature;
     private SelectFeature selectFeature;
     private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private boolean showHandleNeighbourDistance = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -124,6 +125,24 @@ public class SelectionListener extends CreateGeometryListener {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isShowHandleNeighbourDistance() {
+        return showHandleNeighbourDistance;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  showHandleNeighbourDistance  DOCUMENT ME!
+     */
+    public void setShowHandleNeighbourDistance(final boolean showHandleNeighbourDistance) {
+        this.showHandleNeighbourDistance = showHandleNeighbourDistance;
+    }
 
     @Override
     public void mouseMoved(final PInputEvent pInputEvent) {
