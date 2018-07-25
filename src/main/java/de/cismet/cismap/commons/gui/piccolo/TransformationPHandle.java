@@ -23,7 +23,6 @@ import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
 import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.InvalidPolygonTooltip;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -85,7 +85,7 @@ public class TransformationPHandle extends PHandle {
     private Coordinate rightNeighbourCoordinate;
     private Coordinate[] backupCoordArr;
     private InvalidPolygonTooltip polygonTooltip = new InvalidPolygonTooltip();
-    private Map<Point2D, Coordinate> snappedCoordinates = new HashMap<Point2D, Coordinate>();
+    private Map<Point2D, Coordinate> snappedCoordinates = new HashMap<>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -387,18 +387,22 @@ public class TransformationPHandle extends PHandle {
                                     .getCamera()
                                     .viewToLocal(rightNeighbourPoint);
 
-                        leftInfo = new PText();
-                        leftInfo.setPaint(new Color(255, 255, 255, 100));
-                        rightInfo = new PText();
-                        rightInfo.setPaint(new Color(255, 255, 255, 100));
-                        leftInfo.setX(leftInfoPoint.getX() + 6);
-                        leftInfo.setY(leftInfoPoint.getY() - 6);
-                        rightInfo.setX(rightInfoPoint.getX() + 6);
-                        rightInfo.setY(rightInfoPoint.getY() - 6);
-                        leftInfo.setVisible(true);
-                        rightInfo.setVisible(true);
-                        addChild(leftInfo);
-                        addChild(rightInfo);
+                        if (
+                            ((SelectionListener)CismapBroker.getInstance().getMappingComponent().getInputListener(
+                                            MappingComponent.SELECT)).isShowHandleNeighbourDistance()) {
+                            leftInfo = new PText();
+                            leftInfo.setPaint(new Color(255, 255, 255, 100));
+                            rightInfo = new PText();
+                            rightInfo.setPaint(new Color(255, 255, 255, 100));
+                            leftInfo.setX(leftInfoPoint.getX() + 6);
+                            leftInfo.setY(leftInfoPoint.getY() - 6);
+                            rightInfo.setX(rightInfoPoint.getX() + 6);
+                            rightInfo.setY(rightInfoPoint.getY() - 6);
+                            leftInfo.setVisible(true);
+                            rightInfo.setVisible(true);
+                            addChild(leftInfo);
+                            addChild(rightInfo);
+                        }
 
                         // Glue: IdentischePunkte mitverschieben
                         if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {

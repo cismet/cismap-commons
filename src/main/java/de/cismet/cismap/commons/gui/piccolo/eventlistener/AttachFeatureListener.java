@@ -142,7 +142,7 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
 
                 // Feature zur Liste der markierten Features hinzufügen, falls dessen
                 // Geometrie sich mit der Geometrie der BoundingBox überschneidet
-                final List<Feature> markedFeatures = new ArrayList<Feature>();
+                final List<Feature> markedFeatures = new ArrayList<>();
                 for (final Feature feature : mc.getFeatureCollection().getAllFeatures()) {
                     if ((feature instanceof Attachable) && feature.getGeometry().intersects(geom)) {
                         markedFeatures.add(feature);
