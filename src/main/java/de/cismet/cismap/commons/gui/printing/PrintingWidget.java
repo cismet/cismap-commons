@@ -79,6 +79,8 @@ import de.cismet.tools.gui.downloadmanager.MultipleDownload;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
 import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
+import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 
 /**
  * DOCUMENT ME!
@@ -169,6 +171,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         initComponents();
         panDesc.setBackground(new Color(216, 228, 248));
         getRootPane().setDefaultButton(cmdOk);
+        StaticSwingTools.doClickButtonOnKeyStroke(cmdOk, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), getRootPane());
+        StaticSwingTools.doClickButtonOnKeyStroke(cmdCancel, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), getRootPane());        
+        
         txpLoadingStatus.setBackground(this.getBackground());
         prbLoading.setForeground(panDesc.getBackground());
         styleTip = txpLoadingStatus.addStyle(TIP.name(), null);
@@ -500,9 +505,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -591,15 +596,15 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         if (mappingComponent.getPrintingSettingsDialog().isCancelPrintingAfterClose()) {
             final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
                         PrintTemplateFeature.class));
@@ -609,14 +614,14 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                         mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
         }
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable t = new Thread("PrintingWidget actionPerformed") {
 
                 @Override
@@ -847,7 +852,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         CismetThreadPool.execute(t);
 
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!

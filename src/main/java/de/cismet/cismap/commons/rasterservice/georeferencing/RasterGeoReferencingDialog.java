@@ -22,6 +22,8 @@ import javax.swing.JOptionPane;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 
 /**
  * DOCUMENT ME!
@@ -51,6 +53,8 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         getRootPane().setDefaultButton(jButton4);
+        StaticSwingTools.doClickButtonOnKeyStroke(jButton4, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), getRootPane());
+        StaticSwingTools.doClickButtonOnKeyStroke(jButton5, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), getRootPane());        
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -126,16 +130,16 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton5ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton5ActionPerformed
+    private void jButton5ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         setVisible(false);
-    }                                                                            //GEN-LAST:event_jButton5ActionPerformed
+    }//GEN-LAST:event_jButton5ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
+    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         try {
             RasterGeoReferencingBackend.getInstance().save(RasterGeoReferencingWizard.getInstance().getHandler());
             setVisible(false);
@@ -151,7 +155,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
                     null);
             JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
         }
-    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     @Override
     public void setVisible(final boolean visible) {

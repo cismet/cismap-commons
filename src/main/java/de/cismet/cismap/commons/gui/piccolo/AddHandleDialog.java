@@ -18,9 +18,14 @@ package de.cismet.cismap.commons.gui.piccolo;
 
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -94,6 +99,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
         initComponents();
         sliDistance.setUI(new mySliderUI(sliDistance));
         getRootPane().setDefaultButton(btnOK);
+        StaticSwingTools.doClickButtonOnKeyStroke(btnOK, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), getRootPane());
+        StaticSwingTools.doClickButtonOnKeyStroke(btnCancel, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), getRootPane());
         pack();
         allLocked = false;
     }
@@ -370,38 +377,38 @@ public class AddHandleDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
+    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         returnStatus = STATUS_OK;
         dispose();
-    }                                                                         //GEN-LAST:event_btnOKActionPerformed
+    }//GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sliDistanceStateChanged
+    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliDistanceStateChanged
         sliderValueChanged();
-    }                                                                               //GEN-LAST:event_sliDistanceStateChanged
+    }//GEN-LAST:event_sliDistanceStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         setDistanceToLeft(distanceTotal / 2d);
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!

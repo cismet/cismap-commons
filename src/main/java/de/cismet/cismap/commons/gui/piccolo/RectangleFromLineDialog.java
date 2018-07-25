@@ -28,6 +28,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.event.KeyEvent;
 import org.jdesktop.beansbinding.AbstractBindingListener;
 import org.jdesktop.beansbinding.Binding;
 import org.jdesktop.beansbinding.Converter;
@@ -37,6 +39,7 @@ import java.text.NumberFormat;
 import java.util.LinkedList;
 
 import javax.swing.JFormattedTextField;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -122,6 +125,8 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
             });
 
         getRootPane().setDefaultButton(btnOK);
+        StaticSwingTools.doClickButtonOnKeyStroke(btnOK, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), getRootPane());
+        StaticSwingTools.doClickButtonOnKeyStroke(btnCancel, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), getRootPane());        
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -433,20 +438,20 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
+    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         returnStatus = STATUS_OK;
         dispose();
-    }                                                                         //GEN-LAST:event_btnOKActionPerformed
+    }//GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
