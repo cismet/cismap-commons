@@ -178,7 +178,8 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
 
                         @Override
                         public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                            if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                            if ((fce != null) && (fce.getEventFeatures() != null)
+                                && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
                                 if (fce.getFeatureCollection().getSelectedFeatures().contains(
                                         RasterGeoRefFeature.this)) {
                                     if (!ignoreSelection) {
