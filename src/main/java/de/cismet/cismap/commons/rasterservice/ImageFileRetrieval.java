@@ -283,11 +283,15 @@ public class ImageFileRetrieval extends Thread {
                                 * worldFileTransform.getScaleX(),
                         -clippingRect.getY()
                                 * worldFileTransform.getScaleY());
-                // clipping the image
-                clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
-                        (int)clippingRect.getY(),
-                        (int)clippingRect.getWidth(),
-                        (int)clippingRect.getHeight());
+                if ((clippingRect.getWidth() >= 0) && (clippingRect.getHeight() >= 0)) {
+                    // clipping the image
+                    clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
+                            (int)clippingRect.getY(),
+                            (int)clippingRect.getWidth(),
+                            (int)clippingRect.getHeight());
+                } else {
+                    clippedImage = null;
+                }
             } else { // no preclipping for sheared/rotated images for simplicity reasons
                 clippingWorldOffset = new Point.Double(0, 0);
                 clippedImage = rawImage;
