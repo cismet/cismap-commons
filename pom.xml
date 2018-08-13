@@ -13,7 +13,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>6.0.11</version>
+    <version>6.0.12</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-        <tag>v6.0.11</tag>
+        <tag>v6.0.12</tag>
     </scm>
 
     <ciManagement>
