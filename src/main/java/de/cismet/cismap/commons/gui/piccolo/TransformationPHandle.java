@@ -305,12 +305,12 @@ public class TransformationPHandle extends PHandle {
                     final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                     final Coordinate coordinate = coordArr[coordPosition];
 
-                    if (leftNeighbourCoordinate != null) {
+                    if ((leftInfo != null) && (leftNeighbourCoordinate != null)) {
                         final double leftDistance = coordinate.distance(leftNeighbourCoordinate);
                         leftInfo.setText(StaticDecimalTools.round(leftDistance));
                     }
 
-                    if (rightInfo != null) {
+                    if ((rightInfo != null) && (rightNeighbourCoordinate != null)) {
                         final double rightDistance = coordinate.distance(rightNeighbourCoordinate);
                         rightInfo.setText(StaticDecimalTools.round(rightDistance));
                     }
@@ -452,8 +452,12 @@ public class TransformationPHandle extends PHandle {
                 CismapBroker.getInstance().setSnappingVetoPoint(null);
 
                 // linke und rechte info entfernen
-                removeChild(leftInfo);
-                removeChild(rightInfo);
+                if (leftInfo != null) {
+                    removeChild(leftInfo);
+                }
+                if (rightInfo != null) {
+                    removeChild(rightInfo);
+                }
                 leftInfo = null;
                 rightInfo = null;
 
