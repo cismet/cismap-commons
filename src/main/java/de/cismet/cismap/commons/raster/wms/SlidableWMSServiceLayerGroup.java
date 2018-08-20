@@ -1333,6 +1333,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
 
             if (fadeInThisWidget) {
+                internalFrame.updateHorizontalOrVertical();
                 CismapBroker.getInstance()
                         .getMappingComponent()
                         .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
@@ -1361,6 +1362,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
 
             if ((getPNode() != null) && getPNode().getVisible()) {
+                internalFrame.updateHorizontalOrVertical();
                 CismapBroker.getInstance()
                         .getMappingComponent()
                         .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
