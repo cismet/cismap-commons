@@ -624,7 +624,17 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         layers.get(0).setVisible(true);
         initDialog(sliderValue);
-        CismapBroker.getInstance().addActiveLayerListener(this);
+        if (SwingUtilities.isEventDispatchThread()) {
+            CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+                    }
+                });
+        }
     }
 
     /**
@@ -1323,6 +1333,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
 
             if (fadeInThisWidget) {
+                internalFrame.updateHorizontalOrVertical();
                 CismapBroker.getInstance()
                         .getMappingComponent()
                         .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
@@ -1351,6 +1362,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
 
             if ((getPNode() != null) && getPNode().getVisible()) {
+                internalFrame.updateHorizontalOrVertical();
                 CismapBroker.getInstance()
                         .getMappingComponent()
                         .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);

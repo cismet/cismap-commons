@@ -79,15 +79,6 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         slider.setPaintLabels(true);
         slider.setBorder(new EmptyBorder(3, 3, 3, 3));
 
-        final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
-        double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
-        if ((sliderWidth / mapCWidth) < model.getVerticalLabelWidthThreshold()) {
-            slider.drawLabels(SlidableWMSServiceLayerGroup.LabelDirection.HORIZONTAL);
-        } else {
-            slider.drawLabels(SlidableWMSServiceLayerGroup.LabelDirection.VERTICAL);
-            sliderWidth = slider.estimateSliderWidthVerticalLabels();
-        }
-
         this.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
         this.getContentPane().setLayout(new BorderLayout());
         this.getContentPane().add(slider, BorderLayout.CENTER);
@@ -107,14 +98,29 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         btnLock.setVisible(model.isResourceConserving());
         this.getContentPane().add(btnLock, BorderLayout.WEST);
 
-        this.setPreferredSize(new Dimension((int)sliderWidth + 24, (int)slider.getPreferredSize().getHeight()
-                        + 15));
-        this.pack();
+        updateHorizontalOrVertical();
+
         this.setResizable(true);
         addListenersFromModel();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void updateHorizontalOrVertical() {
+        final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
+        double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
+        if ((sliderWidth / mapCWidth) < model.getVerticalLabelWidthThreshold()) {
+            slider.drawLabels(SlidableWMSServiceLayerGroup.LabelDirection.HORIZONTAL);
+        } else {
+            slider.drawLabels(SlidableWMSServiceLayerGroup.LabelDirection.VERTICAL);
+            sliderWidth = slider.estimateSliderWidthVerticalLabels();
+        }
+        this.setPreferredSize(new Dimension((int)sliderWidth + 24, (int)slider.getPreferredSize().getHeight() + 15));
+        this.pack();
+    }
 
     /**
      * DOCUMENT ME!
