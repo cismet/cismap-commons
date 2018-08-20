@@ -624,7 +624,17 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         layers.get(0).setVisible(true);
         initDialog(sliderValue);
-        CismapBroker.getInstance().addActiveLayerListener(this);
+        if (SwingUtilities.isEventDispatchThread()) {
+            CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+                    }
+                });
+        }
     }
 
     /**
