@@ -1289,14 +1289,17 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 addedInternalWidget = null;
             }
 
-            // use invoke later to avoid a java.util.ConcurrentModificationException
-            EventQueue.invokeLater(new Runnable() {
+            if (SwingUtilities.isEventDispatchThread()) {
+                CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+            } else {
+                SwingUtilities.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
-                    }
-                });
+                        @Override
+                        public void run() {
+                            CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+                        }
+                    });
+            }
             try {
                 uniqueNumbers.remove(Integer.valueOf(sliderName.substring(SLIDER_PREFIX.length())));
             } catch (final NumberFormatException ex) {
