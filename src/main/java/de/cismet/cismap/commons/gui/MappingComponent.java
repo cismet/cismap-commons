@@ -981,19 +981,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  chooseFile  DOCUMENT ME!
      */
     public void showPrintingSettingsDialog(final boolean chooseFile) {
-        showPrintingSettingsDialog(chooseFile, false);
-    }
-
-    /**
-     * Shows the printingsetting-dialog that resets the interactionmode after printing.
-     *
-     * @param  chooseFile                DOCUMENT ME!
-     * @param  cancelPrintingAfterClose  DOCUMENT ME!
-     */
-    public void showPrintingSettingsDialog(final boolean chooseFile, final boolean cancelPrintingAfterClose) {
         printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
         printingSettingsDialog.setChooseFileName(chooseFile);
-        printingSettingsDialog.setCancelPrintingAfterClose(cancelPrintingAfterClose);
         StaticSwingTools.showDialog(printingSettingsDialog);
     }
 
