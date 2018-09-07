@@ -608,14 +608,12 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        if (mappingComponent.getPrintingSettingsDialog().isCancelPrintingAfterClose()) {
-            final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
-                        PrintTemplateFeature.class));
-            mappingComponent.getFeatureCollection().removeFeatures(ptfs);
-            CismapBroker.getInstance()
-                    .setCheckForOverlappingGeometriesAfterFeatureRotation(
-                        mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
-        }
+        final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent.getSpecialFeatureCollection(
+                    PrintTemplateFeature.class));
+        mappingComponent.getFeatureCollection().removeFeatures(ptfs);
+        CismapBroker.getInstance()
+                .setCheckForOverlappingGeometriesAfterFeatureRotation(
+                    mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
