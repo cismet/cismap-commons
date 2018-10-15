@@ -548,7 +548,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         fireAllFeaturesRemoved(cf);
 
         final ArrayList<Feature> list = new ArrayList<Feature>();
-        
+
         for (final Feature f : holdFeatures) {
             if (f instanceof FeatureGroup) {
                 list.addAll(FeatureGroups.expandAll((FeatureGroup)f));
