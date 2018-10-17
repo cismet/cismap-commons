@@ -282,7 +282,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lstPagesValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstPagesValueChanged
+    private void lstPagesValueChanged(final javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstPagesValueChanged
         if (!evt.getValueIsAdjusting()) {
             final Object page = lstPages.getSelectedValue();
 
@@ -290,7 +290,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 loadPage(((Integer)page) - 1);
             }
         }
-    } //GEN-LAST:event_lstPagesValueChanged
+    }//GEN-LAST:event_lstPagesValueChanged
 
     /**
      * DOCUMENT ME!
@@ -330,6 +330,17 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      * @return  DOCUMENT ME!
      */
     public URL getDocumentUrl() {
+        return getDocumentUrl(currentDocument);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   document  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public URL getDocumentUrl(final String document) {
         try {
             return new URL(DOWNLOAD_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl).replace(
                         "<rasterfari:document>",
@@ -345,27 +356,27 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togPanActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togPanActionPerformed
+    private void togPanActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togPanActionPerformed
         measuringComponent.actionPan();
-    }                                                                          //GEN-LAST:event_togPanActionPerformed
+    }//GEN-LAST:event_togPanActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togZoomActionPerformed
+    private void togZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togZoomActionPerformed
         measuringComponent.actionZoom();
-    }                                                                           //GEN-LAST:event_togZoomActionPerformed
+    }//GEN-LAST:event_togZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnHomeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnHomeActionPerformed
+    private void btnHomeActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHomeActionPerformed
         measuringComponent.gotoInitialBoundingBox();
-    }                                                                           //GEN-LAST:event_btnHomeActionPerformed
+    }//GEN-LAST:event_btnHomeActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -397,7 +408,6 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                                 .replace("<cismap:height>", "10")
                                 .replace("<rasterfari:document>", currentDocument);
                     final URL url = new URL(template);
-                    LOG.error("before request: " + template);
                     final InputStream is =
                         new SimpleHttpAccessHandler().doRequest(
                             url,
