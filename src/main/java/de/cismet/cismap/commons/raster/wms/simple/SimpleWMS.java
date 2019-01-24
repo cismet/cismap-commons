@@ -149,6 +149,9 @@ public class SimpleWMS extends AbstractWMS implements MapService,
             final boolean canbeDisabled,
             final String name) {
         this.gmUrl = gmUrl;
+        this.layerPosition = layerPosition;
+        this.enabled = enabled;
+        this.name = name;
     }
 
     //~ Methods ----------------------------------------------------------------
