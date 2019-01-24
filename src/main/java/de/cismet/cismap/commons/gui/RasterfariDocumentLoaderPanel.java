@@ -39,6 +39,7 @@ import javax.swing.ListModel;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -347,11 +348,14 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      * DOCUMENT ME!
      */
     public void showFullDocument() {
+        final Geometry geometry;
         if (mainDocumentGeometry != null) {
-            getMap().gotoBoundingBoxWithoutHistory(new XBoundingBox(mainDocumentGeometry));
+            geometry = mainDocumentGeometry;
         } else {
-            getMap().gotoInitialBoundingBox();
+            geometry = getMap().getInitialBoundingBox()
+                        .getGeometry(CrsTransformer.extractSridFromCrs(getMap().getMappingModel().getSrs().getCode()));
         }
+        getMap().gotoBoundingBoxWithoutHistory(new XBoundingBox(geometry.buffer(scale / 10)));
     }
 
     /**
@@ -522,7 +526,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                                     + currentPage
                                     + "]",
                                     "UTF-8") : ""));
-//            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 0, true, false, "prefetching_Lageplan"));
+            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 1, true, false, "prefetching_Lageplan"));
             mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 0, true, false, "Lageplan"));
 
             togPan.setSelected(true);

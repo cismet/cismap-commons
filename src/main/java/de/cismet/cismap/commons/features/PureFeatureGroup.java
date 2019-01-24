@@ -66,7 +66,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
         if ((features == null) || (features.size() <= 0)) {
             this.groupFeatures = TypeSafeCollections.newHashSet();
         } else {
-            this.groupFeatures = TypeSafeCollections.newHashSet(features);
+            this.groupFeatures = (Set<Feature>)TypeSafeCollections.newHashSet(features);
         }
         this.readOnlyGroupFeatures = Collections.unmodifiableCollection(groupFeatures);
     }
