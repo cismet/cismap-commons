@@ -590,16 +590,16 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jToggleButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton2ActionPerformed
+    private void jToggleButton2ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton2ActionPerformed
         setShowFeature(jToggleButton2.isSelected());
         if (tempFeature != null) {
             if (isShowFeature()) {
@@ -612,47 +612,47 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
             }
         }
         refreshButtons();
-    }                                                                                  //GEN-LAST:event_jToggleButton2ActionPerformed
+    }//GEN-LAST:event_jToggleButton2ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jToggleButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton1ActionPerformed
+    private void jToggleButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton1ActionPerformed
         setMirrorA(jToggleButton1.isSelected());
         doCalculateAngle();
-    }                                                                                  //GEN-LAST:event_jToggleButton1ActionPerformed
+    }//GEN-LAST:event_jToggleButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jToggleButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton3ActionPerformed
+    private void jToggleButton3ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jToggleButton3ActionPerformed
         setMirrorB(jToggleButton3.isSelected());
         doCalculateAngle();
-    }                                                                                  //GEN-LAST:event_jToggleButton3ActionPerformed
+    }//GEN-LAST:event_jToggleButton3ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         final Feature feature = (Feature)jList1.getSelectedValue();
         getMappingComponent().getFeatureCollection().removeFeature(feature);
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton2ActionPerformed
+    private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         final Feature feature = (Feature)jList2.getSelectedValue();
         getMappingComponent().getFeatureCollection().removeFeature(feature);
-    }                                                                            //GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     @Override
     public void dispose() {
@@ -709,34 +709,39 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         }
         if ((featureA == null) || !checkForSegment(featureA.getGeometry()) || (featureB == null)
                     || !checkForSegment(featureB.getGeometry())) {
+            setMirrorAAllowed(false);
+            setMirrorBAllowed(false);
+            jLabel4.setText("");
             return;
         }
         final LineString geomA = (LineString)featureA.getGeometry();
         final LineString geomB = (LineString)featureB.getGeometry();
 
-        final LineSegment segA = new LineSegment(geomA.getCoordinateN(0), geomA.getCoordinateN(1));
-        final LineSegment segB = new LineSegment(geomB.getCoordinateN(0), geomB.getCoordinateN(1));
+        final Coordinate coordA1 = geomA.getCoordinateN(0);
+        final Coordinate coordA2 = geomA.getCoordinateN(1);
+        final Coordinate coordB1 = geomB.getCoordinateN(0);
+        final Coordinate coordB2 = geomB.getCoordinateN(1);
+        final LineSegment segA = new LineSegment(coordA1, coordA2);
+        final LineSegment segB = new LineSegment(coordB1, coordB2);
         final Coordinate intersection = segA.lineIntersection(segB);
 
         if (intersection != null) {
-            final boolean intersectsA = segA.distance(intersection) < 0.01;
-            final boolean intersectsB = segB.distance(intersection) < 0.01;
+            final boolean intersectsA = (coordA1.distance(intersection) > 0.01)
+                        && (coordA2.distance(intersection) > 0.01) && (segA.distance(intersection) < 0.01);
+            final boolean intersectsB = (coordB1.distance(intersection) > 0.01)
+                        && (coordB2.distance(intersection) > 0.01) && (segB.distance(intersection) < 0.01);
 
             setMirrorAAllowed(intersectsA);
             setMirrorBAllowed(intersectsB);
 
-            final Coordinate cA0 =
-                (intersection.distance(segA.getCoordinate(0)) > intersection.distance(segA.getCoordinate(1)))
-                ? segA.getCoordinate(0) : segA.getCoordinate(1);
-            final Coordinate cA1 =
-                (intersection.distance(segA.getCoordinate(0)) > intersection.distance(segA.getCoordinate(1)))
-                ? segA.getCoordinate(1) : segA.getCoordinate(0);
-            final Coordinate cB0 =
-                (intersection.distance(segB.getCoordinate(0)) > intersection.distance(segB.getCoordinate(1)))
-                ? segB.getCoordinate(0) : segB.getCoordinate(1);
-            final Coordinate cB1 =
-                (intersection.distance(segB.getCoordinate(0)) > intersection.distance(segB.getCoordinate(1)))
-                ? segB.getCoordinate(1) : segB.getCoordinate(0);
+            final Coordinate cA0 = (intersection.distance(coordA1) > intersection.distance(coordA2)) ? coordA1
+                                                                                                     : coordA2;
+            final Coordinate cA1 = (intersection.distance(coordA1) > intersection.distance(coordA2)) ? coordA2
+                                                                                                     : coordA1;
+            final Coordinate cB0 = (intersection.distance(coordB1) > intersection.distance(coordB2)) ? coordB1
+                                                                                                     : coordB2;
+            final Coordinate cB1 = (intersection.distance(coordB1) > intersection.distance(coordB2)) ? coordB2
+                                                                                                     : coordB1;
 
             final Coordinate cA;
             final Coordinate cB;
