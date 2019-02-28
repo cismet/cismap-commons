@@ -635,7 +635,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         try {
             return new URL(DOWNLOAD_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl).replace(
                         "<rasterfari:document>",
-                        currentDocument));
+                        document));
         } catch (final MalformedURLException ex) {
             LOG.error(ex, ex);
             return null;
