@@ -355,7 +355,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
             geometry = getMap().getInitialBoundingBox()
                         .getGeometry(CrsTransformer.extractSridFromCrs(getMap().getMappingModel().getSrs().getCode()));
         }
-        getMap().gotoBoundingBoxWithoutHistory(new XBoundingBox(geometry.buffer(scale / 10)));
+        getMap().gotoBoundingBoxWithHistory(new XBoundingBox(geometry.buffer(scale / 10)));
     }
 
     /**
