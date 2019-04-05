@@ -2682,7 +2682,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void setPaintOnAllFeatures(final Paint newPaint) {
         if (feature instanceof SLDStyledFeature) {
-            if ((sldStyledPolygon == null) || (sldStyledPolygon.size() == 0)) {
+            if ((sldStyledPolygon == null) || (sldStyledPolygon.isEmpty())) {
                 super.setPaint(newPaint);
             } else {
                 for (int i = 0; i < sldStyledPolygon.size(); ++i) {
@@ -2691,6 +2691,25 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         } else {
             super.setPaint(newPaint);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newStroke  DOCUMENT ME!
+     */
+    public void setStrokeOnAllFeatures(final Stroke newStroke) {
+        if (feature instanceof SLDStyledFeature) {
+            if ((sldStyledPolygon == null) || (sldStyledPolygon.isEmpty())) {
+                super.setStroke(newStroke);
+            } else {
+                for (int i = 0; i < sldStyledPolygon.size(); ++i) {
+                    sldStyledPolygon.get(i).setStroke(stroke);
+                }
+            }
+        } else {
+            super.setStroke(newStroke);
         }
     }
 
@@ -2839,39 +2858,58 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             if (selected) {
-                nonSelectedPaint = getPaint();
-                if ((nonSelectedPaint instanceof Color) && (nonHighlightingPaint instanceof Color)) {
-                    final Color c = (Color)nonHighlightingPaint;
-                    if (c != null) {
-                        Color selectionColor = null;
-                        try {
-                            selectionColor = javax.swing.UIManager.getDefaults()
-                                        .getColor("Cismap.featureSelectionForeground");
-                        } catch (Exception e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(
-                                    "Error when getting javax.swing.UIManager.getDefaults().getColor(\"Cismap.featureSelectionForeground\")",
-                                    e);
-                            }
-                        }
-                        if (selectionColor == null) {
-                            selectionColor = javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground");
-                        }
+                if (feature instanceof CustomSelectionStyleFeature) {
+                    moveToFront();
+                    setPaint(((CustomSelectionStyleFeature)feature).getSelectionFillingPaint());
+                    setStrokePaint(((CustomSelectionStyleFeature)feature).getSelectionLinePaint());
 
-                        final int red = (int)(selectionColor.getRed());     // NOI18N
-                        final int green = (int)(selectionColor.getGreen()); // NOI18N
-                        final int blue = (int)(selectionColor.getBlue());   // NOI18N
-                        setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha() / 2));
+                    final int lineWidth = ((CustomSelectionStyleFeature)feature).getSelectionLineWidth();
+                    if (lineWidth <= 1) {
+                        setStroke(FIXED_WIDTH_STROKE);
+                    } else {
+                        final CustomFixedWidthStroke stroke = new CustomFixedWidthStroke(lineWidth, viewer);
+                        setStroke(stroke);
                     }
-                } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                    final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)nonHighlightingPaint;
-                    final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint)texturePaint.clone();
-                    selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
-                    setPaintOnAllFeatures(selectedPaint.getPaint());
-                } else if (nonHighlightingPaint instanceof PaintWrapper) {
-                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
                 } else {
-                    setPaintOnAllFeatures(new Color(172, 210, 248, 178));
+                    nonSelectedPaint = getPaint();
+                    if ((nonSelectedPaint instanceof Color) && (nonHighlightingPaint instanceof Color)) {
+                        final Color c = (Color)nonHighlightingPaint;
+                        if (c != null) {
+                            final Stroke selectionStroke = getStroke();
+                            Color selectionColor = null;
+                            try {
+                                selectionColor = javax.swing.UIManager.getDefaults()
+                                            .getColor("Cismap.featureSelectionForeground");
+                            } catch (Exception e) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug(
+                                        "Error when getting javax.swing.UIManager.getDefaults().getColor(\"Cismap.featureSelectionForeground\")",
+                                        e);
+                                }
+                            }
+                            if (selectionColor == null) {
+                                selectionColor = javax.swing.UIManager.getDefaults()
+                                            .getColor("Table.selectionBackground");
+                            }
+
+                            final int red = (int)(selectionColor.getRed());     // NOI18N
+                            final int green = (int)(selectionColor.getGreen()); // NOI18N
+                            final int blue = (int)(selectionColor.getBlue());   // NOI18N
+                            setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha() / 2));
+                            setStrokeOnAllFeatures(selectionStroke);
+                        }
+                    } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
+                        final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)
+                            nonHighlightingPaint;
+                        final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint)
+                            texturePaint.clone();
+                        selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
+                        setPaintOnAllFeatures(selectedPaint.getPaint());
+                    } else if (nonHighlightingPaint instanceof PaintWrapper) {
+                        setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
+                    } else {
+                        setPaintOnAllFeatures(new Color(172, 210, 248, 178));
+                    }
                 }
             } else {
                 if (nonHighlightingPaint instanceof PaintWrapper) {
