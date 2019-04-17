@@ -43,6 +43,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel;
 
+import de.cismet.tools.transformations.PointCoordinatePair;
+
 /**
  * DOCUMENT ME!
  *

@@ -15,7 +15,6 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
 
 import lombok.Getter;
 
@@ -26,9 +25,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.PrintWriter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -43,7 +40,8 @@ import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 
-import static de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler.createAverageTransformation;
+import de.cismet.tools.transformations.PointCoordinatePair;
+import de.cismet.tools.transformations.TransformationTools;
 
 /**
  * DOCUMENT ME!
@@ -164,7 +162,7 @@ public class RasterGeoReferencingBackend {
                                 - (imageEnvelope.getWidth() / 2d),
                         imageEnvelope.getMinY()))
             };
-        final AffineTransformation transform = calculateAvgTransformation(pairs);
+        final AffineTransformation transform = TransformationTools.calculateAvgTransformation(pairs);
 
         final ImageFileMetaData metaData = new ImageFileMetaData(
                 imageBounds,
@@ -224,41 +222,6 @@ public class RasterGeoReferencingBackend {
      */
     public static RasterGeoReferencingWizard getWizard() {
         return RasterGeoReferencingWizard.getInstance();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   completePairs  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static AffineTransformation calculateAvgTransformation(final PointCoordinatePair[] completePairs) {
-        final List<AffineTransformation> transforms = new ArrayList<>();
-        if (completePairs.length >= 3) {
-            for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(completePairs, 3)) {
-                final PointCoordinatePair pair0 = (PointCoordinatePair)arr[0];
-                final PointCoordinatePair pair1 = (PointCoordinatePair)arr[1];
-                final PointCoordinatePair pair2 = (PointCoordinatePair)arr[2];
-
-                final AffineTransformationBuilder builder = new AffineTransformationBuilder(
-                        new Coordinate(pair0.getPoint().getX(), pair0.getPoint().getY()),
-                        new Coordinate(pair1.getPoint().getX(), pair1.getPoint().getY()),
-                        new Coordinate(pair2.getPoint().getX(), pair2.getPoint().getY()),
-                        pair0.getCoordinate(),
-                        pair1.getCoordinate(),
-                        pair2.getCoordinate());
-
-                final AffineTransformation transform = builder.getTransformation();
-                if (transform != null) {
-                    transforms.add(transform);
-                }
-            }
-
-            final AffineTransformation avgTransform = createAverageTransformation(transforms);
-            return avgTransform;
-        }
-        return null;
     }
 
     //~ Inner Classes ----------------------------------------------------------

@@ -64,11 +64,12 @@ import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandlerListener;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
+
+import de.cismet.tools.transformations.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!

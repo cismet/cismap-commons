@@ -24,6 +24,9 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.cismet.tools.transformations.PointCoordinatePair;
+import de.cismet.tools.transformations.TransformationTools;
+
 /**
  * cismet GmbH, Saarbruecken, Germany.
  *
@@ -87,7 +90,7 @@ public class TestTransformation {
         }
 
         final List<AffineTransformation> transforms = new ArrayList<>();
-        for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(pairs.toArray(), 3)) {
+        for (final Object[] arr : TransformationTools.getCombinations(pairs.toArray(), 3)) {
             final PointCoordinatePair pair0 = (PointCoordinatePair)arr[0];
             final PointCoordinatePair pair1 = (PointCoordinatePair)arr[1];
             final PointCoordinatePair pair2 = (PointCoordinatePair)arr[2];
@@ -107,7 +110,7 @@ public class TestTransformation {
 //            System.out.println(Arrays.toString(arr));
         }
 
-        final AffineTransformation transform = RasterGeoReferencingHandler.createAverageTransformation(transforms);
+        final AffineTransformation transform = TransformationTools.createAverageTransformation(transforms);
         System.out.println(transform);
 
         int r = 0;

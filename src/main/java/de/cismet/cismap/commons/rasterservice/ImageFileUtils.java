@@ -46,7 +46,8 @@ import javax.imageio.stream.ImageInputStream;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
+
+import de.cismet.tools.transformations.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!

@@ -34,6 +34,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 
+import de.cismet.tools.transformations.PointCoordinatePair;
+import de.cismet.tools.transformations.TransformationTools;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -456,7 +459,7 @@ public class RasterGeoReferencingHandler {
         final AffineTransformation oldTransformation = getMetaData().getTransform();
         final Polygon imageBoundsGeometry = createPolygon(getMetaData().getImageBounds());
 
-        final AffineTransformation avgTransform = RasterGeoReferencingBackend.calculateAvgTransformation(
+        final AffineTransformation avgTransform = TransformationTools.calculateAvgTransformation(
                 getCompletePairs());
         final AffineTransformation transform = (avgTransform != null) ? avgTransform : getInitialTransform();
         if (!transform.equals(oldTransformation)) {
@@ -494,24 +497,6 @@ public class RasterGeoReferencingHandler {
     /**
      * DOCUMENT ME!
      *
-     * @param   transforms  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static AffineTransformation createAverageTransformation(final List<AffineTransformation> transforms) {
-        final double[] avg = new double[6];
-        for (final AffineTransformation transform : transforms) {
-            final double[] matrix = transform.getMatrixEntries();
-            for (int i = 0; i < avg.length; i++) {
-                avg[i] += matrix[i] / transforms.size();
-            }
-        }
-        return new AffineTransformation(avg);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param   position  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -526,63 +511,6 @@ public class RasterGeoReferencingHandler {
         } else {
             return 0;
         }
-    }
-
-    /**
-     * public static List<Object[]> comb(final Object[] input, final int k) { final List<int[]> indices = comb(input,
-     * k); }.
-     *
-     * @param   input    DOCUMENT ME!
-     * @param   setSize  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static List<Object[]> getCombinations(final Object[] input, final int setSize) {
-        final List<Object[]> subsets = new ArrayList<>();
-
-        final int[] indices = new int[setSize]; // here we'll keep indices
-        // pointing to elements in input array
-
-        if (setSize <= input.length) {
-            // store first 'setSize' number of indices
-            for (int index = 0; index < setSize; index++) {
-                indices[index] = index;
-            }
-            subsets.add(getSubset(input, indices));
-
-            int index;
-            do {
-                // find position of item that can be incremented
-                index = setSize - 1;
-                while ((index >= 0) && (indices[index] == (input.length - setSize + index))) {
-                    index--;
-                }
-                if (index >= 0) {
-                    indices[index]++;                         // increment this item
-                    for (++index; index < setSize; index++) { // fill up remaining items
-                        indices[index] = indices[index - 1] + 1;
-                    }
-                    subsets.add(getSubset(input, indices));
-                }
-            } while (index >= 0);
-        }
-        return subsets;
-    }
-
-    /**
-     * generate actual subset by index sequence.
-     *
-     * @param   input    DOCUMENT ME!
-     * @param   indices  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static Object[] getSubset(final Object[] input, final int[] indices) {
-        final Object[] result = new Object[indices.length];
-        for (int index = 0; index < indices.length; index++) {
-            result[index] = input[indices[index]];
-        }
-        return result;
     }
 
     //~ Inner Classes ----------------------------------------------------------

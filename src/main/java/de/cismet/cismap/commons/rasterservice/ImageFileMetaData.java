@@ -21,7 +21,7 @@ import lombok.Setter;
 
 import java.awt.Rectangle;
 
-import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
+import de.cismet.tools.transformations.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!
