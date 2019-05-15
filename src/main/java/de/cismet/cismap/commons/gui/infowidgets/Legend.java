@@ -350,7 +350,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     String url = null;
                     try {
                         final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].toString();
+                        url = lua[0].toURI().toASCIIString();
                     } catch (final Exception t) {
                         if (log.isDebugEnabled()) {
                             log.debug("Could not find legend for " + title, t); // NOI18N

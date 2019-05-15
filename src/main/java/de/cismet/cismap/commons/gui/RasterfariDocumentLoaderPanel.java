@@ -53,10 +53,11 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 import de.cismet.commons.security.AccessHandler;
-import de.cismet.commons.security.handler.SimpleHttpAccessHandler;
 
 import de.cismet.connectioncontext.ConnectionContext;
 import de.cismet.connectioncontext.ConnectionContextProvider;
+
+import de.cismet.security.WebAccessManager;
 
 /**
  * DOCUMENT ME!
@@ -711,11 +712,11 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                                 .replace("<rasterfari:offsetX>", Double.toString(0d))
                                 .replace("<rasterfari:offsetY>", Double.toString(0d));
                     final URL url = new URL(template);
-                    final InputStream is =
-                        new SimpleHttpAccessHandler().doRequest(
-                            url,
-                            new StringReader(""),
-                            AccessHandler.ACCESS_METHODS.HEAD_REQUEST);
+                    final InputStream is = WebAccessManager.getInstance()
+                                .doRequest(
+                                    url,
+                                    new StringReader(""),
+                                    AccessHandler.ACCESS_METHODS.HEAD_REQUEST);
                     try(final ObjectInputStream ois = new ObjectInputStream(is)) {
                         final Object object = ois.readObject();
                         final Header[] headers = (Header[])object;
