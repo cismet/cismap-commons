@@ -70,7 +70,7 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
                 PointsFromTextConverter.class,
-                "PointFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+                "PointsFromTextConverter.getFormatDescription().returnValue"); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -80,7 +80,7 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     public String getFormatHtmlDescription() {
         final String desc = NbBundle.getMessage(
                     PointsFromTextConverter.class,
-                    "PointFromTextConverter.getFormatHtmlDescription().returnValue")
+                    "PointsFromTextConverter.getFormatHtmlDescription().returnValue")
                     .replaceAll("<[/]?html>", "");                                              // NOI18N
         final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
 
@@ -91,7 +91,7 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     public Object getFormatExample() {
         return NbBundle.getMessage(
                 PointsFromTextConverter.class,
-                "PointFromTextConverter.getFormatExample().returnValue",
+                "PointsFromTextConverter.getFormatExample().returnValue",
                 getDecimalSeparator()); // NOI18N
     }
 
@@ -114,11 +114,11 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
 
         if (tokens.length < 2) {
             return 0;
-        } else if (tokens.length > 2) {
-            return 50;
+        } else if ((tokens.length % 2) == 0) {
+            return 100;
         } else {
             // 2 tokens = 1 coordinates
-            return 100;
+            return 50;
         }
     }
 }
