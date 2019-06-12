@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.commons.cismap.io;
 
+import com.vividsolutions.jts.geom.GeometryCollection;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -152,13 +154,22 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
                         mappingModel.addLayer(swms);
                     }
 
-                    final Feature dsf = new PureNewFeature(model.getGeometry());
                     previewMap.setMappingModel(mappingModel);
                     previewMap.setAnimationDuration(0);
                     previewMap.gotoInitialBoundingBox();
                     previewMap.setInteractionMode(MappingComponent.ZOOM);
                     previewMap.setInteractionMode("MUTE"); // NOI18N
-                    previewMap.getFeatureCollection().addFeature(dsf);
+                    if (model.hasMultipleGeometries() && (model.getGeometry() instanceof GeometryCollection)) {
+                        final GeometryCollection gc = (GeometryCollection)model.getGeometry();
+
+                        for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                            final Feature dsf = new PureNewFeature(gc.getGeometryN(i));
+                            previewMap.getFeatureCollection().addFeature(dsf);
+                        }
+                    } else {
+                        final Feature dsf = new PureNewFeature(model.getGeometry());
+                        previewMap.getFeatureCollection().addFeature(dsf);
+                    }
                     previewMap.setAnimationDuration(300);
 
                     // finally when all configurations are done the map may animate again

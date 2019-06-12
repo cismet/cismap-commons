@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import de.cismet.cismap.commons.Crs;
 
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
+import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
@@ -52,6 +53,7 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
     private transient String statusMessage;
     private transient String previewUrl;
     private transient Crs currentCrs;
+    private transient boolean multipleGeometries;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -62,6 +64,15 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
      */
     public Geometry getGeometry() {
         return geometry;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean hasMultipleGeometries() {
+        return multipleGeometries;
     }
 
     /**
@@ -210,6 +221,7 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                 @Override
                 public void run() {
                     setGeometry(null);
+                    multipleGeometries = false;
                     setStatusMessage(
                         NbBundle.getMessage(
                             AddGeometriesToMapPreviewWizardPanel.class,
@@ -234,6 +246,8 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                                 "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.conversionSuccessful")); // NOI18N
 
                         setGeometry(geom);
+
+                        multipleGeometries = (geomConverter instanceof MultiGeometriesProvider);
                     } catch (final Exception ex) {
                         LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex);             // NOI18N
                         setStatusMessage(
