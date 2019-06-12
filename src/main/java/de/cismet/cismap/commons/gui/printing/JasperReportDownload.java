@@ -48,6 +48,7 @@ public class JasperReportDownload extends AbstractCancellableDownload {
     protected JasperReportParametersGenerator parametersGenerator;
     protected JRDataSource dataSource;
     protected JasperReportDataSourceGenerator dataSourceGenerator;
+    protected JasperReport reportResource;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -147,6 +148,32 @@ public class JasperReportDownload extends AbstractCancellableDownload {
         determineDestinationFile(filename, ".pdf");
     }
 
+    /**
+     * Creates a new AnotherJasperDownload object.
+     *
+     * @param  reportResource       report DOCUMENT ME!
+     * @param  parametersGenerator  DOCUMENT ME!
+     * @param  dataSourceGenerator  DOCUMENT ME!
+     * @param  directory            DOCUMENT ME!
+     * @param  title                DOCUMENT ME!
+     * @param  filename             DOCUMENT ME!
+     */
+    public JasperReportDownload(final JasperReport reportResource,
+            final JasperReportParametersGenerator parametersGenerator,
+            final JasperReportDataSourceGenerator dataSourceGenerator,
+            final String directory,
+            final String title,
+            final String filename) {
+        this.reportResource = reportResource;
+        this.parametersGenerator = parametersGenerator;
+        this.dataSourceGenerator = dataSourceGenerator;
+        this.directory = directory;
+        this.title = title;
+
+        status = State.WAITING;
+        determineDestinationFile(filename, ".pdf");
+    }
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -174,9 +201,11 @@ public class JasperReportDownload extends AbstractCancellableDownload {
         }
 
         try {
-            final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(JasperReportDownload.class
-                            .getResourceAsStream(
-                                reportResourceName));
+            JasperReport jasperReport = reportResource;
+            if (jasperReport == null) {
+                jasperReport = (JasperReport)JRLoader.loadObject(JasperReportDownload.class.getResourceAsStream(
+                            reportResourceName));
+            }
             print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
         } catch (JRException ex) {
             error(ex);

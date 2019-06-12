@@ -8,6 +8,7 @@
 package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 
 import org.apache.log4j.Logger;
 
@@ -37,6 +38,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 
@@ -54,6 +56,7 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 import de.cismet.commons.cismap.io.converters.AbstractGeometryFromTextConverter;
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
+import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
 import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
 
 import de.cismet.commons.converter.ConversionException;
@@ -273,17 +276,37 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                     protected void done() {
                         try {
                             final Geometry geom = get();
-                            final PureNewFeature feature = new PureNewFeature(geom);
-                            feature.setGeometryType(getGeomType(geom));
-                            feature.setEditable(true);
+                            final Converter converter = (Converter)wizard.getProperty(
+                                    AbstractConverterChooseWizardPanel.PROP_CONVERTER);
+                            final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
+
+                            if ((converter instanceof MultiGeometriesProvider)
+                                        && (geom instanceof GeometryCollection)) {
+                                final GeometryCollection gc = (GeometryCollection)geom;
+
+                                for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                                    final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
+                                    feature.setGeometryType(getGeomType(gc.getGeometryN(i)));
+                                    feature.setEditable(true);
+                                    featureList.add(feature);
+                                }
+                            } else {
+                                final PureNewFeature feature = new PureNewFeature(geom);
+                                feature.setGeometryType(getGeomType(geom));
+                                feature.setEditable(true);
+                                featureList.add(feature);
+                            }
 
                             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-                            map.getFeatureCollection().addFeature(feature);
-                            map.getFeatureCollection().holdFeature(feature);
+                            map.getFeatureCollection().addFeatures(featureList);
+
+                            for (final PureNewFeature feature : featureList) {
+                                map.getFeatureCollection().holdFeature(feature);
+                            }
 
                             // fixed extent means, don't move map at all
                             if (!map.isFixedMapExtent()) {
-                                map.zoomToAFeatureCollection(Arrays.asList((Feature)feature),
+                                map.zoomToAFeatureCollection(featureList,
                                     true,
                                     map.isFixedMapScale());
                             }
