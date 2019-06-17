@@ -15,6 +15,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
+import Sirius.util.collections.MultiMap;
+
 import edu.umd.cs.piccolo.PLayer;
 
 import java.util.Collection;
@@ -24,8 +26,6 @@ import java.util.Vector;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-
-import de.cismet.tools.collections.MultiMap;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein Handle, das vom Benutzer

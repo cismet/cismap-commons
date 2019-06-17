@@ -225,8 +225,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                             final Point2D nearestPoint = PFeatureTools.getNearestPointInArea(
                                     mappingComponent,
                                     event.getCanvasPosition(),
-                                    mappingComponent.isSnappingOnLineEnabled(),
-                                    true);
+                                    true,
+                                    null);
                             if (nearestPoint != null) {
                                 mappingComponent.getCamera().viewToLocal(nearestPoint);
                                 final PPath show = PPath.createEllipse((float)(nearestPoint.getX() - 3),
