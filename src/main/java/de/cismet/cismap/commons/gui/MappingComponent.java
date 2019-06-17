@@ -3480,7 +3480,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     @Deprecated
     public void setSnappingEnabled(final boolean snappingEnabled) {
-        setSnappingMode(SnappingMode.POINT);
+        setSnappingMode(snappingEnabled ? SnappingMode.POINT : SnappingMode.OFF);
     }
 
     /**
