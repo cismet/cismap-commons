@@ -12,8 +12,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 
-import java.awt.geom.Point2D;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -110,7 +108,6 @@ public class CismapBroker {
     private boolean useInternalDb = false;
     private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
     private String featureStylingComponentKey = BasicFeatureStyleDialogFactory.KEY;
-    private Point2D snappingVetoPoint;
     private PFeature snappingVetoFeature;
     private Float minOpacityToStayEnabled = null;
     private boolean multiFeaturePopupMenuEnabled = false;
@@ -1112,24 +1109,6 @@ public class CismapBroker {
      */
     public void setFeatureStylingComponentKey(final String featureStylingComponentKey) {
         this.featureStylingComponentKey = featureStylingComponentKey;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the snappingVetoPoint
-     */
-    public Point2D getSnappingVetoPoint() {
-        return snappingVetoPoint;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  snappingVetoPoint  the snappingVetoPoint to set
-     */
-    public void setSnappingVetoPoint(final Point2D snappingVetoPoint) {
-        this.snappingVetoPoint = snappingVetoPoint;
     }
 
     /**

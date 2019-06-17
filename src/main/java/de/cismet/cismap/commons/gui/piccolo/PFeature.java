@@ -12,6 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import Sirius.util.collections.MultiMap;
+
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
@@ -62,8 +64,6 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAc
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
-
-import de.cismet.tools.collections.MultiMap;
 
 /**
  * DOCUMENT ME!
@@ -1575,7 +1575,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  MultiMap mit Features, die die Bedingungen erf\u00FCllen
      */
-    public de.cismet.tools.collections.MultiMap checkforGlueCoords(
+    public MultiMap checkforGlueCoords(
             final int entityPosition,
             final int ringPosition,
             final int coordPosition) {
