@@ -72,12 +72,11 @@ public class MeasurementListener extends PBasicInputEventHandler {
         if (inProgress) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
-                final boolean vertexRequired = mc.isSnappingOnLineEnabled();
                 point = PFeatureTools.getNearestPointInArea(
                         mc,
                         pInputEvent.getCanvasPosition(),
-                        vertexRequired,
-                        true);
+                        true,
+                        null);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -98,12 +97,11 @@ public class MeasurementListener extends PBasicInputEventHandler {
             if (pInputEvent.getClickCount() == 1) {
                 Point2D point = null;
                 if (mc.isSnappingEnabled()) {
-                    final boolean vertexRequired = mc.isSnappingOnLineEnabled();
                     point = PFeatureTools.getNearestPointInArea(
                             mc,
                             pInputEvent.getCanvasPosition(),
-                            vertexRequired,
-                            true);
+                            true,
+                            null);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();

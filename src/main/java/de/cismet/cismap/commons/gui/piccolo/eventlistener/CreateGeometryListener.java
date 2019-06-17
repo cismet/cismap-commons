@@ -208,12 +208,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         if (inProgress) { // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mappingComponent.isSnappingEnabled()) {
-                final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                 point = PFeatureTools.getNearestPointInArea(
                         mappingComponent,
                         pInputEvent.getCanvasPosition(),
-                        vertexRequired,
-                        true);
+                        true,
+                        null);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -271,14 +270,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 Point2D point = null;
                 snappedCoordinates.clear();
                 if (mappingComponent.isSnappingEnabled()) {
-                    final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                     point = PFeatureTools.getNearestPointInArea(
                             mappingComponent,
                             pInputEvent.getCanvasPosition(),
-                            vertexRequired,
-                            true);
+                            true,
+                            null);
 
-                    if ((point != null) && !vertexRequired) {
+                    if ((point != null)
+                                && MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())) {
                         final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                 mappingComponent,
                                 pInputEvent.getCanvasPosition(),
@@ -289,7 +288,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 if (point == null) {
                     point = pInputEvent.getPosition();
                 }
-                points = new ArrayList<Point2D>();
+                points = new ArrayList<>();
                 points.add(point);
                 readyForFinishing(pInputEvent);
             }
@@ -390,14 +389,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         snappedCoordinates.clear();
                     }
                     if (mappingComponent.isSnappingEnabled()) {
-                        final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                         point = PFeatureTools.getNearestPointInArea(
                                 mappingComponent,
                                 pInputEvent.getCanvasPosition(),
-                                vertexRequired,
-                                true);
+                                true,
+                                null);
 
-                        if ((point != null) && !vertexRequired) {
+                        if ((point != null)
+                                    && MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())) {
                             final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                     mappingComponent,
                                     pInputEvent.getCanvasPosition(),
@@ -471,12 +470,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         points.remove(points.size() - 1);
                         Point2D point = null;
                         if (mappingComponent.isSnappingEnabled()) {
-                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                             point = PFeatureTools.getNearestPointInArea(
                                     mappingComponent,
                                     pInputEvent.getCanvasPosition(),
-                                    vertexRequired,
-                                    true);
+                                    true,
+                                    null);
                         }
                         if (point == null) {
                             point = pInputEvent.getPosition();

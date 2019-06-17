@@ -436,12 +436,11 @@ public class SelectionListener extends CreateGeometryListener {
                 try {
                     Point2D point = null;
                     if (mappingComponent.isSnappingEnabled()) {
-                        final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                         point = PFeatureTools.getNearestPointInArea(
                                 mappingComponent,
                                 pInputEvent.getCanvasPosition(),
-                                vertexRequired,
-                                true);
+                                true,
+                                null);
                     }
                     if (point == null) {
                         point = pInputEvent.getPosition();

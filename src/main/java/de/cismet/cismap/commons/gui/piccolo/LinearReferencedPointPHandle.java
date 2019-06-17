@@ -134,7 +134,8 @@ public class LinearReferencedPointPHandle extends PHandle {
                 Coordinate snapPoint = null;
 
                 if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
-                            && !CismapBroker.getInstance().getMappingComponent().isSnappingOnLineEnabled()) {
+                            && MappingComponent.SnappingMode.POINT.equals(
+                                CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
                     snapPoint = PFeatureTools.getNearestCoordinateInArea(
                             CismapBroker.getInstance().getMappingComponent(),
                             CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
