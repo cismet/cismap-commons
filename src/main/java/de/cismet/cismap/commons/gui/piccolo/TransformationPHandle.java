@@ -86,6 +86,8 @@ public class TransformationPHandle extends PHandle {
     private Coordinate[] backupCoordArr;
     private InvalidPolygonTooltip polygonTooltip = new InvalidPolygonTooltip();
     private Map<Point2D, Coordinate> snappedCoordinates = new HashMap<>();
+    private final Color snappedOnPoint = Color.GREEN.darker().darker();
+    private final Color snappedOnLine = Color.ORANGE.brighter().brighter();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -178,8 +180,8 @@ public class TransformationPHandle extends PHandle {
                                     MappingComponent.MOVE_HANDLE))) {
                     // neue HandlePosition berechnen
 
-                    float currentX;
-                    float currentY;
+                    final float currentX;
+                    final float currentY;
 
                     // CTRL DOWN => an der Linie kleben
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
@@ -205,32 +207,41 @@ public class TransformationPHandle extends PHandle {
                         currentX = (float)ergPoint.getX();
                         currentY = (float)ergPoint.getY();
                     } else {
-                        // an der Maus
-                        currentX = (float)pInputEvent.getPosition().getX();
-                        currentY = (float)pInputEvent.getPosition().getY();
+                        final PFeatureTools.SnappedPoint potentiallySnappedPoint = PFeatureTools.getNearestPointInArea(
+                                pfeature.getViewer(),
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                glueCoordinates);
+                        final Point2D point = potentiallySnappedPoint.getPoint();
 
-                        // snapping ?
-                        if (pfeature.getViewer().isSnappingEnabled()) {
-                            final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
-                                    pfeature.getViewer(),
-                                    pInputEvent.getCanvasPosition(),
-                                    true,
-                                    glueCoordinates);
-                            if (snapPoint != null) {
-                                if (MappingComponent.SnappingMode.POINT.equals(
-                                                pfeature.getViewer().getSnappingMode())) {
-                                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
-                                            pfeature.getViewer(),
-                                            pInputEvent.getCanvasPosition(),
-                                            true);
-                                    pfeature.getViewer().getWtst().addXCoordinate((float)snapPoint.getX(), coord.x);
-                                    pfeature.getViewer().getWtst().addYCoordinate((float)snapPoint.getY(), coord.y);
-                                    snappedCoordinates.put(snapPoint, coord);
-                                }
-                                currentX = (float)snapPoint.getX();
-                                currentY = (float)snapPoint.getY();
+                        if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(
+                                        potentiallySnappedPoint.getSnappedOn())) {
+                            if (MappingComponent.SnappingMode.POINT.equals(
+                                            pfeature.getViewer().getSnappingMode())) {
+                                final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
+                                        pfeature.getViewer(),
+                                        pInputEvent.getCanvasPosition(),
+                                        true);
+                                pfeature.getViewer().getWtst().addXCoordinate((float)point.getX(), coord.x);
+                                pfeature.getViewer().getWtst().addYCoordinate((float)point.getY(), coord.y);
+                                snappedCoordinates.put(point, coord);
                             }
+
+                            switch (potentiallySnappedPoint.getSnappedOn()) {
+                                case POINT: {
+                                    setPaint(snappedOnPoint);
+                                }
+                                break;
+                                case LINE: {
+                                    setPaint(snappedOnLine);
+                                }
+                                break;
+                            }
+                        } else {
+                            setPaint(isSelected() ? getDefaultSelectedColor() : getDefaultColor());
                         }
+                        currentX = (float)point.getX();
+                        currentY = (float)point.getY();
                     }
 
                     updateGeometryPoints(currentX, currentY);

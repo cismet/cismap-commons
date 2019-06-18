@@ -157,7 +157,7 @@ public class PFeatureTools {
             }
         }
 
-        final LinkedList<PNode> allValidPNodes = new LinkedList<PNode>();
+        final LinkedList<PNode> allValidPNodes = new LinkedList<>();
         for (final PNode pNode : pNodes) {
             for (int i = 0; i < validClasses.length; ++i) {
                 if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
@@ -422,40 +422,53 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D getNearestPointInArea(final MappingComponent mc,
+    public static SnappedPoint getNearestPointInArea(final MappingComponent mc,
             final Point2D canvasPosition,
             final boolean considerVetoObjects,
             final MultiMap glueCoordinates) {
-        final PFeature vetoFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature() : null);
+        if (mc.isSnappingEnabled()) {
+            final PFeature vetoFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
+                                                              : null);
+            final Point2D nearestPointOnPoint =
+                (MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())
+                            || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode()))
+                ? getNearestPointInArea(mc, canvasPosition, vetoFeature, glueCoordinates) : null;
+            final Point2D nearestPointOnLine =
+                ((nearestPointOnPoint == null)
+                            && (MappingComponent.SnappingMode.LINE.equals(mc.getSnappingMode())
+                                || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())))
+                ? getNearestPointInAreaNoVertexRequired(
+                    mc,
+                    canvasPosition,
+                    vetoFeature,
+                    glueCoordinates) : null;
 
-        final Point2D nearestPointOnPoint =
-            (MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())
-                        || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode()))
-            ? getNearestPointInArea(mc, canvasPosition, vetoFeature, glueCoordinates) : null;
-        final Point2D nearestPointOnLine =
-            ((nearestPointOnPoint == null)
-                        && (MappingComponent.SnappingMode.LINE.equals(mc.getSnappingMode())
-                            || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())))
-            ? getNearestPointInAreaNoVertexRequired(
-                mc,
-                canvasPosition,
-                vetoFeature,
-                glueCoordinates) : null;
-
-        if (mc.getSnappingMode() != null) {
-            switch (mc.getSnappingMode()) {
-                case POINT: {
-                    return nearestPointOnPoint;
-                }
-                case LINE: {
-                    return nearestPointOnLine;
-                }
-                case BOTH: {
-                    return (nearestPointOnPoint != null) ? nearestPointOnPoint : nearestPointOnLine;
+            if (mc.getSnappingMode() != null) {
+                switch (mc.getSnappingMode()) {
+                    case POINT: {
+                        if (nearestPointOnPoint != null) {
+                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                        }
+                    }
+                    break;
+                    case LINE: {
+                        if (nearestPointOnLine != null) {
+                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        }
+                    }
+                    break;
+                    case BOTH: {
+                        if (nearestPointOnPoint != null) {
+                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                        } else if (nearestPointOnLine != null) {
+                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        }
+                    }
+                    break;
                 }
             }
         }
-        return null;
+        return new SnappedPoint(mc.getCamera().localToView(canvasPosition), SnappedPoint.SnappedOn.NOTHING);
     }
 
     /**
@@ -1314,6 +1327,47 @@ public class PFeatureTools {
                 return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    @Getter
+    public static class SnappedPoint {
+
+        //~ Enums --------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @version  $Revision$, $Date$
+         */
+        public enum SnappedOn {
+
+            //~ Enum constants -------------------------------------------------
+
+            NOTHING, POINT, LINE
+        }
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final Point2D point;
+        private final SnappedOn snappedOn;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SnappedPoint object.
+         *
+         * @param  point      DOCUMENT ME!
+         * @param  snappedOn  DOCUMENT ME!
+         */
+        public SnappedPoint(final Point2D point, final SnappedOn snappedOn) {
+            this.point = point;
+            this.snappedOn = snappedOn;
         }
     }
 }
