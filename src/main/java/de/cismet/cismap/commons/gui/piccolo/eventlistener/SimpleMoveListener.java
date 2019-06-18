@@ -222,18 +222,29 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         }
 
                         if (mappingComponent.isVisualizeSnappingEnabled()) {
-                            final Point2D nearestPoint = PFeatureTools.getNearestPointInArea(
+                            final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
                                     mappingComponent,
                                     event.getCanvasPosition(),
                                     true,
                                     null);
-                            if (nearestPoint != null) {
+                            if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(
+                                            snappedPoint.getSnappedOn())) {
+                                final Point2D nearestPoint = snappedPoint.getPoint();
                                 mappingComponent.getCamera().viewToLocal(nearestPoint);
                                 final PPath show = PPath.createEllipse((float)(nearestPoint.getX() - 3),
                                         (float)(nearestPoint.getY() - 3),
                                         (float)(6),
                                         (float)(6));
-                                show.setPaint(new Color(0, 0, 0));
+                                switch (snappedPoint.getSnappedOn()) {
+                                    case POINT: {
+                                        show.setPaint(Color.BLACK);
+                                    }
+                                    break;
+                                    case LINE: {
+                                        show.setPaint(Color.GRAY);
+                                    }
+                                    break;
+                                }
                                 mappingComponent.getSnapHandleLayer().addChild(show);
                             }
                             if (mappingComponent.isVisualizeSnappingRectEnabled()) {
