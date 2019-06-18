@@ -128,17 +128,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
         if (inProgress) { // && (!isInMode(POINT))) {
-            Point2D point = null;
-            if (mc.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(
-                        mc,
-                        pInputEvent.getCanvasPosition(),
-                        true,
-                        null);
-            }
-            if (point == null) {
-                point = pInputEvent.getPosition();
-            }
+            final Point2D point = mc.isSnappingEnabled()
+                ? PFeatureTools.getNearestPointInArea(
+                            mc,
+                            pInputEvent.getCanvasPosition(),
+                            true,
+                            null).getPoint() : pInputEvent.getPosition();
             updatePolygon(point);
         }
     }
@@ -156,17 +151,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
         if (isInMode(POINT)) {
             if (pInputEvent.isLeftMouseButton()) {
-                Point2D point = null;
-                if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(
-                            mc,
-                            pInputEvent.getCanvasPosition(),
-                            true,
-                            null);
-                }
-                if (point == null) {
-                    point = pInputEvent.getPosition();
-                }
+                final Point2D point = mc.isSnappingEnabled()
+                    ? PFeatureTools.getNearestPointInArea(
+                                mc,
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                null).getPoint() : pInputEvent.getPosition();
                 try {
                     final Constructor<? extends PureNewFeature> c = geometryFeatureClass.getConstructor(
                             Point2D.class,
@@ -195,18 +185,13 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
             }
         } else if (isInMode(POLYGON) || isInMode(LINESTRING)) {
             if (pInputEvent.getClickCount() == 1) {
-                Point2D point = null;
                 undoPoints.clear();
-                if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(
-                            mc,
-                            pInputEvent.getCanvasPosition(),
-                            true,
-                            null);
-                }
-                if (point == null) {
-                    point = pInputEvent.getPosition();
-                }
+                final Point2D point = mc.isSnappingEnabled()
+                    ? PFeatureTools.getNearestPointInArea(
+                                mc,
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                null).getPoint() : pInputEvent.getPosition();
                 if (!inProgress) {
                     if (isInMode(POLYGON)) {
                         tempFeature = initTempFeature(true);

@@ -206,17 +206,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         super.mouseMoved(pInputEvent);
 
         if (inProgress) { // && (!isInMode(POINT))) {
-            Point2D point = null;
-            if (mappingComponent.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(
+            final Point2D point = PFeatureTools.getNearestPointInArea(
                         mappingComponent,
                         pInputEvent.getCanvasPosition(),
                         true,
-                        null);
-            }
-            if (point == null) {
-                point = pInputEvent.getPosition();
-            }
+                        null)
+                        .getPoint();
             updatePolygon(point);
 
             if (showCurrentLength && isInMode(LINESTRING)) {
@@ -260,36 +255,29 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 if (point == null) {
                     point = pInputEvent.getPosition();
                 }
-                points = new ArrayList<Point2D>();
+                points = new ArrayList<>();
                 snappedCoordinates.clear();
                 points.add(point);
                 readyForFinishing(pInputEvent);
             }
         } else if (isInMode(POINT)) {
             if (pInputEvent.isLeftMouseButton()) {
-                Point2D point = null;
                 snappedCoordinates.clear();
-                if (mappingComponent.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(
+                final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
+                        mappingComponent,
+                        pInputEvent.getCanvasPosition(),
+                        true,
+                        null);
+                if (MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
+                            && !PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(snappedPoint.getSnappedOn())) {
+                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                             mappingComponent,
                             pInputEvent.getCanvasPosition(),
-                            true,
-                            null);
-
-                    if ((point != null)
-                                && MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())) {
-                        final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
-                                mappingComponent,
-                                pInputEvent.getCanvasPosition(),
-                                true);
-                        snappedCoordinates.put(point, coord);
-                    }
-                }
-                if (point == null) {
-                    point = pInputEvent.getPosition();
+                            true);
+                    snappedCoordinates.put(snappedPoint.getPoint(), coord);
                 }
                 points = new ArrayList<>();
-                points.add(point);
+                points.add(snappedPoint.getPoint());
                 readyForFinishing(pInputEvent);
             }
         } else if (isInMode(RECTANGLE)) {
@@ -390,11 +378,10 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     }
                     if (mappingComponent.isSnappingEnabled()) {
                         point = PFeatureTools.getNearestPointInArea(
-                                mappingComponent,
-                                pInputEvent.getCanvasPosition(),
-                                true,
-                                null);
-
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition(),
+                                    true,
+                                    null).getPoint();
                         if ((point != null)
                                     && MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())) {
                             final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
@@ -468,17 +455,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         inProgress = false;
                     } else {
                         points.remove(points.size() - 1);
-                        Point2D point = null;
-                        if (mappingComponent.isSnappingEnabled()) {
-                            point = PFeatureTools.getNearestPointInArea(
+                        final Point2D point = PFeatureTools.getNearestPointInArea(
                                     mappingComponent,
                                     pInputEvent.getCanvasPosition(),
                                     true,
-                                    null);
-                        }
-                        if (point == null) {
-                            point = pInputEvent.getPosition();
-                        }
+                                    null)
+                                    .getPoint();
                         updatePolygon(point);
                     }
                 }

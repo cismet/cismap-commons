@@ -434,17 +434,12 @@ public class SelectionListener extends CreateGeometryListener {
                         true);
 
                 try {
-                    Point2D point = null;
-                    if (mappingComponent.isSnappingEnabled()) {
-                        point = PFeatureTools.getNearestPointInArea(
-                                mappingComponent,
-                                pInputEvent.getCanvasPosition(),
-                                true,
-                                null);
-                    }
-                    if (point == null) {
-                        point = pInputEvent.getPosition();
-                    }
+                    final Point2D point = mappingComponent.isSnappingEnabled()
+                        ? PFeatureTools.getNearestPointInArea(
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition(),
+                                    true,
+                                    null).getPoint() : pInputEvent.getPosition();
 
                     final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
 
