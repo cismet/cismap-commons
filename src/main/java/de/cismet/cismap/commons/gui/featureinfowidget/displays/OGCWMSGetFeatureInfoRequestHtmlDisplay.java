@@ -19,7 +19,6 @@ import calpa.html.DefaultCalHTMLObserver;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 
 import java.applet.AppletContext;
@@ -32,9 +31,12 @@ import java.awt.event.MouseEvent;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
-import java.net.MalformedURLException;
 import java.net.URL;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -59,8 +61,6 @@ import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.handler.WSSAccessHandler;
-
-import de.cismet.tools.gui.FXWebViewPanel;
 
 /**
  * DOCUMENT ME!
@@ -496,9 +496,44 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                     }
                     byteArrayOut.write(c);
                 }
-                return byteArrayOut.toString();
+
+                String s = byteArrayOut.toString();
+                final String charset = getCharset(s);
+
+                if (charset != null) {
+                    try {
+                        // the charset from the html code should be used. Otherwise, special
+                        // characters will be wrong
+                        s = byteArrayOut.toString(charset);
+                    } catch (UnsupportedEncodingException e) {
+                        LOG.error("Unsupported charset used", e);
+                    }
+                }
+
+                return s;
             } catch (final Exception ex) {
                 LOG.error("Error while fetching FeatureInfos", ex); // NOI18N
+                return null;
+            }
+        }
+
+        /**
+         * Try to odetermine the charsert of the given html code.
+         *
+         * @param   s  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private String getCharset(final String s) {
+            // The regular expression is an easy way to find out the characterset.
+            // Not 100 percent accurate, but it should be good enought
+            final Pattern p = Pattern.compile(
+                    "<meta(?!\\s*(?:name|value)\\s*=)[^>]*?charset\\s*=[\\s\"']*([^\\s\"'/>]*)");
+            final Matcher m = p.matcher(s);
+
+            if (m.find()) {
+                return m.group(1);
+            } else {
                 return null;
             }
         }
