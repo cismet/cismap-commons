@@ -974,7 +974,8 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                     snapPoint = PFeatureTools.getNearestCoordinateInArea(
                             mc,
                             mc.getCamera().viewToLocal((Point2D)trigger.clone()),
-                            false);
+                            false,
+                            null);
                 }
 
                 Coordinate triggerCoordinate = snapPoint;
