@@ -221,7 +221,8 @@ public class TransformationPHandle extends PHandle {
                                 final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                         pfeature.getViewer(),
                                         pInputEvent.getCanvasPosition(),
-                                        true);
+                                        true,
+                                        glueCoordinates);
                                 pfeature.getViewer().getWtst().addXCoordinate((float)point.getX(), coord.x);
                                 pfeature.getViewer().getWtst().addYCoordinate((float)point.getY(), coord.y);
                                 snappedCoordinates.put(point, coord);

@@ -273,7 +273,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                             mappingComponent,
                             pInputEvent.getCanvasPosition(),
-                            true);
+                            true,
+                            null);
                     snappedCoordinates.put(snappedPoint.getPoint(), coord);
                 }
                 points = new ArrayList<>();
@@ -387,7 +388,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                             final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                     mappingComponent,
                                     pInputEvent.getCanvasPosition(),
-                                    true);
+                                    true,
+                                    null);
                             snappedCoordinates.put(point, coord);
                         }
                     }
