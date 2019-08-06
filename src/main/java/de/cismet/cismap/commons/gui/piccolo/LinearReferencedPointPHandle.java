@@ -140,7 +140,8 @@ public class LinearReferencedPointPHandle extends PHandle {
                             CismapBroker.getInstance().getMappingComponent(),
                             CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
                                 (Point2D)dragPoint.clone()),
-                            false);
+                            false,
+                            null);
                 }
 
                 if (snapPoint != null) {
