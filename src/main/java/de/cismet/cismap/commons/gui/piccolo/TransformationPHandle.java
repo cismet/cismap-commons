@@ -217,14 +217,19 @@ public class TransformationPHandle extends PHandle {
                         if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(
                                         potentiallySnappedPoint.getSnappedOn())) {
                             if (MappingComponent.SnappingMode.POINT.equals(
-                                            pfeature.getViewer().getSnappingMode())) {
+                                            pfeature.getViewer().getSnappingMode())
+                                        || (MappingComponent.SnappingMode.BOTH.equals(
+                                                pfeature.getViewer().getSnappingMode()))) {
                                 final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                         pfeature.getViewer(),
                                         pInputEvent.getCanvasPosition(),
-                                        true);
-                                pfeature.getViewer().getWtst().addXCoordinate((float)point.getX(), coord.x);
-                                pfeature.getViewer().getWtst().addYCoordinate((float)point.getY(), coord.y);
-                                snappedCoordinates.put(point, coord);
+                                        true,
+                                        glueCoordinates);
+                                if (coord != null) {
+                                    pfeature.getViewer().getWtst().addXCoordinate((float)point.getX(), coord.x);
+                                    pfeature.getViewer().getWtst().addYCoordinate((float)point.getY(), coord.y);
+                                    snappedCoordinates.put(point, coord);
+                                }
                             }
 
                             switch (potentiallySnappedPoint.getSnappedOn()) {

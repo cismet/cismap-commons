@@ -42,6 +42,8 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedLineFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -485,11 +487,7 @@ public class PFeatureTools {
             final Point2D canvasPosition,
             final PFeature vetoFeature,
             final MultiMap glueCoordinates) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
-                (int)canvasPosition.getY()
-                        - (mc.getSnappingRectSize() / 2),
-                mc.getSnappingRectSize(),
-                mc.getSnappingRectSize());
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
         final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
         final PBounds bounds = new PBounds(d2d);
@@ -627,14 +625,26 @@ public class PFeatureTools {
             final Point2D canvasPosition,
             final PFeature vetoPFeature,
             final MultiMap glueCoordinates) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
+        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
+        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
+    }
+
+    /**
+     * Determines the snapping area.
+     *
+     * @param   mc              the used mapping component
+     * @param   canvasPosition  the canvas position
+     *
+     * @return  the snapping area
+     */
+    private static Rectangle2D getSnappingRectangle(final MappingComponent mc, final Point2D canvasPosition) {
+        return new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
                 (int)canvasPosition.getY()
                         - (mc.getSnappingRectSize() / 2),
                 mc.getSnappingRectSize(),
                 mc.getSnappingRectSize());
-        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
-        return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
     }
 
     /**
@@ -673,6 +683,7 @@ public class PFeatureTools {
      * @param   canvasPosition       DOCUMENT ME!
      * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
      *                               can be the currently modifying feature.
+     * @param   glueCoordinates      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
@@ -680,48 +691,49 @@ public class PFeatureTools {
      */
     public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final boolean considerVetoObjects) {
+            final boolean considerVetoObjects,
+            final MultiMap glueCoordinates) {
         final PFeature vetoPFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
                                                            : null);
-        return getNearestCoordinateInArea(mc, canvasPosition, vetoPFeature);
+        return getNearestCoordinateInArea(mc, canvasPosition, vetoPFeature, glueCoordinates);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   mc              DOCUMENT ME!
-     * @param   canvasPosition  DOCUMENT ME!
-     * @param   vetoPFeature    vetoPointIndex DOCUMENT ME!
+     * @param   mc               DOCUMENT ME!
+     * @param   canvasPosition   DOCUMENT ME!
+     * @param   vetoPFeature     vetoPointIndex DOCUMENT ME!
+     * @param   glueCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final PFeature vetoPFeature) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
-                (int)canvasPosition.getY()
-                        - (mc.getSnappingRectSize() / 2),
-                mc.getSnappingRectSize(),
-                mc.getSnappingRectSize());
+            final PFeature vetoPFeature,
+            final MultiMap glueCoordinates) {
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
         final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
-        return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPFeature);
+        return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   mc            DOCUMENT ME!
-     * @param   bounds        DOCUMENT ME!
-     * @param   myPosition    DOCUMENT ME!
-     * @param   vetoPFeature  DOCUMENT ME!
+     * @param   mc                      DOCUMENT ME!
+     * @param   bounds                  DOCUMENT ME!
+     * @param   myPosition              DOCUMENT ME!
+     * @param   vetoPFeature            DOCUMENT ME!
+     * @param   glueFeatureCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     private static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final PBounds bounds,
             final Point2D myPosition,
-            final PFeature vetoPFeature) {
+            final PFeature vetoPFeature,
+            final MultiMap glueFeatureCoordinates) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
         final List<Coordinate> coordinates = new ArrayList<>();
         final Collection<Point2D> p = new ArrayList<>();
@@ -729,12 +741,22 @@ public class PFeatureTools {
             return null;
         }
         for (final PFeature pfeature : features) {
+            if ((pfeature != null)
+                        && ((pfeature.getFeature() instanceof LinearReferencedPointFeature)
+                            || (pfeature.getFeature() instanceof LinearReferencedLineFeature))) {
+                continue;
+            }
+            if (pfeature.equals(vetoPFeature)) {
+                continue;
+            }
+            final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
+                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
             for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                 for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                     final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                     final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                     for (int position = 0; position < xp.length; position++) {
-                        if (pfeature.equals(vetoPFeature)) {
+                        if ((glueCoordinates != null) && glueCoordinates.contains(position)) {
                             continue;
                         }
                         if (bounds.contains(xp[position], yp[position])) {

@@ -268,13 +268,17 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         pInputEvent.getCanvasPosition(),
                         true,
                         null);
-                if (MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
+                if ((MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
+                                || MappingComponent.SnappingMode.BOTH.equals(mappingComponent.getSnappingMode()))
                             && !PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(snappedPoint.getSnappedOn())) {
                     final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                             mappingComponent,
                             pInputEvent.getCanvasPosition(),
-                            true);
-                    snappedCoordinates.put(snappedPoint.getPoint(), coord);
+                            true,
+                            null);
+                    if (coord != null) {
+                        snappedCoordinates.put(snappedPoint.getPoint(), coord);
+                    }
                 }
                 points = new ArrayList<>();
                 points.add(snappedPoint.getPoint());
@@ -383,12 +387,17 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                                     true,
                                     null).getPoint();
                         if ((point != null)
-                                    && MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())) {
+                                    && (MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
+                                        || MappingComponent.SnappingMode.BOTH.equals(
+                                            mappingComponent.getSnappingMode()))) {
                             final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                                     mappingComponent,
                                     pInputEvent.getCanvasPosition(),
-                                    true);
-                            snappedCoordinates.put(point, coord);
+                                    true,
+                                    null);
+                            if (coord != null) {
+                                snappedCoordinates.put(point, coord);
+                            }
                         }
                     }
                     if (point == null) {
