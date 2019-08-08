@@ -772,7 +772,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     /**
      * DOCUMENT ME!
      */
-    private void fireSelectionChangedEvent() {
+    public void fireSelectionChangedEvent() {
         final SelectionChangedEvent e = new SelectionChangedEvent(this);
 
         for (final SelectionChangedListener l : listener) {
