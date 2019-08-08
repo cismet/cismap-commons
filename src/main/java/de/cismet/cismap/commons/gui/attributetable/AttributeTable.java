@@ -27,6 +27,7 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.type.OrientationEnum;
 import net.sf.jasperreports.view.JRSaveContributor;
 import net.sf.jasperreports.view.JRViewer;
 
@@ -184,6 +185,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private boolean selectionChangeFromMap = false;
 //    private final FeatureCollectionListener featureCollectionListener;
     private final SelectionChangedListener featureSelectionChangedListener;
+    private final ListSelectionListener listSelectionListener;
     private final RepaintListener repaintListener;
     private final HashSet<FeatureServiceFeature> lockedFeatures = new HashSet<FeatureServiceFeature>();
     private AttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
@@ -203,6 +205,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private TreeSet<Feature> shownAsLocked = new TreeSet<Feature>();
     private String lastExportPath = null;
     private boolean tableLock = false;
+    private boolean setNewModel = false;
+    private boolean makeEditable = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -364,20 +368,19 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 }
             });
-
-        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+        listSelectionListener = new ListSelectionListener() {
 
                 @Override
                 public void valueChanged(final ListSelectionEvent e) {
-                    if (!e.getValueIsAdjusting()) {
-                        final boolean rowsSelected = table.getSelectedRows().length > 0;
-                        butCopy.setEnabled(rowsSelected);
-                        butDelete.setEnabled(rowsSelected);
-                        butClearSelection.setEnabled(rowsSelected);
-                        butMoveSelectedRows.setEnabled(rowsSelected);
-                        butZoomToSelection.setEnabled(rowsSelected);
-                        butDelete.setEnabled(isDeleteButtonEnabled());
+                    final boolean rowsSelected = table.getSelectedRows().length > 0;
+                    butCopy.setEnabled(rowsSelected);
+                    butDelete.setEnabled(rowsSelected);
+                    butClearSelection.setEnabled(rowsSelected);
+                    butMoveSelectedRows.setEnabled(rowsSelected);
+                    butZoomToSelection.setEnabled(rowsSelected);
+                    butDelete.setEnabled(isDeleteButtonEnabled());
 
+                    if (!e.getValueIsAdjusting() && !setNewModel && !makeEditable) {
                         if (!selectionChangeFromMap) {
                             SelectionManager.getInstance()
                                     .setSelectedFeaturesForService(featureService, getSelectedFeatures());
@@ -410,7 +413,12 @@ public class AttributeTable extends javax.swing.JPanel {
                                                 if (!((feature instanceof PermissionProvider)
                                                                 && !((PermissionProvider)feature)
                                                                 .hasWritePermissions())) {
-                                                    makeFeatureEditable(feature, wd);
+                                                    makeEditable = true;
+                                                    try {
+                                                        makeFeatureEditable(feature, wd);
+                                                    } finally {
+                                                        makeEditable = false;
+                                                    }
                                                 }
                                                 wd.setProgress(++progress);
                                                 if (canceled) {
@@ -418,6 +426,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                                 }
                                             }
 
+                                            SelectionManager.getInstance().fireSelectionChangedEvent();
                                             return null;
                                         }
                                     };
@@ -438,7 +447,12 @@ public class AttributeTable extends javax.swing.JPanel {
 
                                             if (!((feature instanceof PermissionProvider)
                                                             && !((PermissionProvider)feature).hasWritePermissions())) {
-                                                makeFeatureEditable(feature, null);
+                                                makeEditable = true;
+                                                try {
+                                                    makeFeatureEditable(feature, null);
+                                                } finally {
+                                                    makeEditable = false;
+                                                }
                                             }
                                         }
                                     } else {
@@ -460,7 +474,9 @@ public class AttributeTable extends javax.swing.JPanel {
                         }
                     }
                 }
-            });
+            };
+
+        table.getSelectionModel().addListSelectionListener(listSelectionListener);
 
         table.setDefaultRenderer(String.class, new AttributeTableCellRenderer());
         table.setDefaultRenderer(Boolean.class, new AttributeTableCellRenderer());
@@ -489,6 +505,9 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 public void selectionChanged(final SelectionChangedEvent event) {
+                    if (makeEditable) {
+                        return;
+                    }
                     selectionEventSource = event.getSource();
                     selectionChangeFromMap = true;
                     setSelection(SelectionManager.getInstance().getSelectedFeatures(featureService));
@@ -765,8 +784,12 @@ public class AttributeTable extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void refreshModifiedFeaturesSet() {
-        for (final FeatureServiceFeature feature : lockedFeatures) {
+        for (FeatureServiceFeature feature : lockedFeatures) {
             if ((feature instanceof ModifiableFeature) && (feature instanceof DefaultFeatureServiceFeature)) {
+                final FeatureServiceFeature featureFromModel = model.getFeatureServiceFeatureById(feature.getId());
+                if (featureFromModel != null) {
+                    feature = featureFromModel;
+                }
                 if (((ModifiableFeature)feature).isFeatureChanged()) {
                     modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
                 }
@@ -855,6 +878,10 @@ public class AttributeTable extends javax.swing.JPanel {
 //        mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
         mappingComponent.removeRepaintListener(repaintListener);
         instances.remove(this);
+        table.getSelectionModel().removeListSelectionListener(listSelectionListener);
+        selectionListener.clear();
+        model.setNewFeatureList(new ArrayList<FeatureServiceFeature>());
+        model = null;
         return true;
     }
 
@@ -1075,6 +1102,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         panWaiting.setVisible(true);
         ((JXBusyLabel)labWaitingImage).setBusy(true);
+        setNewModel = true;
 
         final SwingWorker<List<FeatureServiceFeature>, Void> worker =
             new SwingWorker<List<FeatureServiceFeature>, Void>() {
@@ -1181,6 +1209,7 @@ public class AttributeTable extends javax.swing.JPanel {
                         } else {
                             model.setNewFeatureList(featureList);
                         }
+                        setNewModel = false;
 
                         applySelection();
                         // add custom renderer and editors
@@ -1208,6 +1237,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     } finally {
                         panWaiting.setVisible(false);
                         ((JXBusyLabel)labWaitingImage).setBusy(false);
+                        setNewModel = false;
                     }
                 }
             };
@@ -2850,7 +2880,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 protected void done() {
                     try {
                         final JasperPrint jasperPrint = get();
-
+                        jasperPrint.setOrientation(OrientationEnum.LANDSCAPE);
                         JasperPrintManager.printReport(jasperPrint, true);
                     } catch (Exception e) {
                         LOG.error("Error while creating report", e);
@@ -3531,7 +3561,9 @@ public class AttributeTable extends javax.swing.JPanel {
         boolean save = forceSave;
         refreshModifiedFeaturesSet();
 
-        if (!save && (!modifiedFeatures.isEmpty() || featureDeleted || !newFeatures.isEmpty())) {
+        if (!save
+                    && (!modifiedFeatures.isEmpty() || featureDeleted || !newFeatures.isEmpty()
+                        || !lockedFeatures.isEmpty())) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -3551,8 +3583,12 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         if (save) {
+            final List<FeatureServiceFeature> featuresPrepareForSave = new ArrayList<FeatureServiceFeature>(
+                    modifiedFeatures);
+            featuresPrepareForSave.removeAll(allFeaturesToDelete);
+
             if ((tableRuleSet != null)
-                        && !tableRuleSet.prepareForSave(new ArrayList<FeatureServiceFeature>(modifiedFeatures))) {
+                        && !tableRuleSet.prepareForSave(featuresPrepareForSave)) {
                 tbProcessing.setSelected(true);
                 return;
             }
@@ -3660,6 +3696,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             lockedFeatures.clear();
                         }
                         modifiedFeatures.clear();
+                        for (final DefaultFeatureServiceFeature f : newFeatures) {
+                            f.setEditable(false);
+                        }
                         newFeatures.clear();
 
                         if (tableRuleSet != null) {
@@ -4324,7 +4363,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 if ((tableRuleSet != null)
                             && !tableRuleSet.isColumnEditable(
                                 model.getColumnAttributeName(table.convertColumnIndexToModel(adapter.column)))) {
-                    renderer.setForeground(Color.LIGHT_GRAY);
+                    renderer.setForeground(Color.GRAY);
                 } else {
                     renderer.setForeground(Color.BLACK);
                 }
@@ -4334,7 +4373,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 if (f instanceof PermissionProvider) {
                     if (!((PermissionProvider)f).hasWritePermissions()) {
-                        renderer.setForeground(Color.LIGHT_GRAY);
+                        renderer.setForeground(Color.GRAY);
                     }
                 }
             } else {
@@ -4456,7 +4495,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             ((JLabel)c).getIcon(),
                             ((JLabel)c).getHorizontalAlignment());
                     lab.setBackground(((JLabel)c).getBackground());
-                    lab.setForeground(Color.LIGHT_GRAY);
+                    lab.setForeground(Color.GRAY);
                     lab.setOpaque(true);
                     return lab;
                 }

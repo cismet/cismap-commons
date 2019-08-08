@@ -2277,7 +2277,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             selectionChangedBySelectionListener = sl.isSelectionInProgress();
         }
 
-        for (final Object o : allChildren) {
+        for (final Object o : new ArrayList(allChildren)) {
             if (o instanceof PFeature) {
                 all.add((PFeature)o);
             } else if (o instanceof PLayer) {
@@ -2316,10 +2316,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 if (feature != null) {
                     if (feature.getParent() != null) {
-                        feature.getParent().moveToFront();
+                        try {
+                            feature.getParent().moveToFront();
+                        } catch (Throwable t) {
+                            // nothing to do
+                        }
                     }
                     feature.setSelected(true);
-                    feature.moveToFront();
+                    try {
+                        feature.moveToFront();
+                    } catch (Throwable t) {
+                        // nothing to do
+                    }
                     if ((sl != null) && !selectionChangedBySelectionListener) {
                         sl.addSelectedFeature(feature);
                     }
