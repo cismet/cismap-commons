@@ -52,6 +52,8 @@ import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.net.URLEncoder;
+import java.util.StringTokenizer;
 
 /**
  * DOCUMENT ME!
@@ -236,7 +238,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             String url = null;
             try {
                 final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                url = lua[0].toString();
+                url = getValidUrlString(lua[0]);
             } catch (final Exception t) {
                 if (log.isDebugEnabled()) {
                     log.debug("Could not find a legend for " + title, t); // NOI18N
@@ -270,7 +272,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             }
             try {
                 if (!layer.isDummy()) {
-                    scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].toString());
+                    scrollToLegend(getValidUrlString(layer.getSelectedStyle().getLegendURL()[0]));
                 }
             } catch (Exception ex) {
                 if (log.isDebugEnabled()) {
@@ -350,7 +352,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     String url = null;
                     try {
                         final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].toURI().toASCIIString();
+                        url = getValidUrlString(lua[0]);
                     } catch (final Exception t) {
                         if (log.isDebugEnabled()) {
                             log.debug("Could not find legend for " + title, t); // NOI18N
@@ -368,6 +370,47 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         }
     }
 
+    /**
+     * The legend url can contains umlaute and colons, which cannot be handled by the ImageRetrieval class. So this
+     * characters should be encoded
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private String getValidUrlString(final URL url) throws Exception {
+        String urlString = null;
+
+        try {
+            urlString = url.toURI().toASCIIString();
+        } catch (final Exception t) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot convert legend url to ascii string", t); // NOI18N
+            }
+            urlString = url.toString();
+
+            if (urlString.contains("?")) {
+                final String param = urlString.substring(urlString.indexOf("?") + 1);
+                urlString = urlString.substring(0, urlString.indexOf("?")) + "?";
+                final StringTokenizer stParam = new StringTokenizer(param, "&");
+
+                while (stParam.hasMoreTokens()) {
+                    final StringTokenizer stKeyVal = new StringTokenizer(stParam.nextToken(), "=");
+
+                    if (stKeyVal.countTokens() == 2) {
+                        urlString += "&" + stKeyVal.nextToken() + "="
+                                    + URLEncoder.encode(stKeyVal.nextToken(), "UTF-8");
+                    }
+                }
+            }
+        }
+
+        return urlString;
+    }
+
+    
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
     }

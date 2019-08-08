@@ -288,4 +288,13 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     public AbstractFeatureService getService() {
         return service;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getMode() {
+        return mode;
+    }
 }

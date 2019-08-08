@@ -233,7 +233,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         if (tree != null) {
             tree.repaint();
             tree.revalidate();
-            tree.updateUI();
+//            tree.updateUI();
         }
     }
 
@@ -269,6 +269,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             updateTree();
                         }
                     }
+                }
+            });
+        SelectionManager.getInstance().addSelectionChangedListener(new SelectionChangedListener() {
+
+                @Override
+                public void selectionChanged(final SelectionChangedEvent event) {
+                    updateTree();
                 }
             });
 
