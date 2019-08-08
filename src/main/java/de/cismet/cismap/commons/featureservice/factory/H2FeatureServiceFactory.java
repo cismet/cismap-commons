@@ -858,26 +858,21 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             for (int i = 1; i <= colCount; ++i) {
                 boolean isInteger = false;
                 final String colName = csvRs.getMetaData().getColumnName(i);
-
-                if (select == null) {
-                    select = new StringBuilder("\"" + colName + "\"");
-                } else {
-                    select.append(", \"").append(colName).append("\"");
-                }
+                String columnText = "\"" + colName + "\"";
 
                 try {
                     checkResultSet = checkStatement.executeQuery(String.format(
-                                "select distinct "
+                                "select distinct \""
                                         + colName
-                                        + "::integer = "
+                                        + "\"::integer = \""
                                         + colName
-                                        + "::double from CSVREAD('%s', null, '%s');",
+                                        + "\"::double from CSVREAD('%s', null, '%s');",
                                 file.getAbsolutePath(),
                                 options));
 
                     if (checkResultSet.next()) {
                         if (checkResultSet.getBoolean(1)) {
-                            select.append("::integer");
+                            columnText += "::integer";
                             isInteger = true;
                         }
                     }
@@ -892,19 +887,35 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 if (!isInteger) {
                     try {
                         checkResultSet = checkStatement.executeQuery(String.format(
-                                    "select "
+                                    "select \""
                                             + colName
-                                            + "::double from CSVREAD('%s', null, '%s');",
+                                            + "\"::double from CSVREAD('%s', null, '%s');",
                                     file.getAbsolutePath(),
                                     options));
-                        select.append("::double");
+                        columnText += "::double";
                     } catch (Exception e) {
-                        // nothing to do. column data type is no double
+                        try {
+                            checkResultSet = checkStatement.executeQuery(String.format(
+                                        "select replace(\""
+                                                + colName
+                                                + "\",',','.')::double from CSVREAD('%s', null, '%s');",
+                                        file.getAbsolutePath(),
+                                        options));
+                            columnText = "replace(" + columnText + ",',','.')::double";
+                        } catch (Exception ex) {
+                            // nothing to do. column data type is no double
+                        }
                     } finally {
                         if (checkResultSet != null) {
                             checkResultSet.close();
                         }
                     }
+                }
+
+                if (select == null) {
+                    select = new StringBuilder(columnText);
+                } else {
+                    select.append(", ").append(columnText);
                 }
 
                 select.append(" as \"").append(colName).append("\"");
@@ -2492,6 +2503,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 info = new JDBCFeatureInfo(conn, srid, geometryField, tableName, idField);
             }
             final List style = getStyle(name);
+            Geometry boundingBoxGeom = null;
+
+            if (boundingBox != null) {
+                boundingBoxGeom = boundingBox.getGeometry(srid);
+            }
 
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {
@@ -2500,6 +2516,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 final JDBCFeature feature = new JDBCFeature(info, style);
                 feature.setId(rs.getInt(idField));
                 feature.setLayerProperties(this.getLayerProperties());
+                final Geometry featureGeometry = feature.getGeometry();
+
+                if (!saveAsLastCreated && (boundingBoxGeom != null) && (featureGeometry != null)
+                            && !boundingBoxGeom.intersects(featureGeometry)) {
+                    continue;
+                }
+
                 selectedFeatures.add(feature);
             }
 //            updatePFeatures();

@@ -451,7 +451,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
-        if (evt.getStateChange() == ItemEvent.SELECTED) {
+        if ((evt.getStateChange() == ItemEvent.SELECTED) && (model != null)) {
             model.setLayerFilter((LayerFilter)evt.getItem());
             expandAll(new TreePath(model.getRoot()));
         }
@@ -484,7 +484,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             Geometry highlightingGeometry = selectedFeature.getGeometry();
 
-            if (highlightingGeometry.getCoordinates().length > 500) {
+            if (highlightingGeometry.getCoordinates().length > 25000) {
                 highlightingGeometry = TopologyPreservingSimplifier.simplify(highlightingGeometry, 30);
             }
             final PureNewFeature highligtingFeature = new PureNewFeature(highlightingGeometry) {
@@ -586,9 +586,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 } else if ((feature != null) && feature.isEditable() && !setEditable) {
                     // stop edit mode
                     final DefaultFeatureServiceFeature f = (DefaultFeatureServiceFeature)feature;
-                    stopEditMode(f);
-                    fireFeatureSaved();
-                    editModeStopped = true;
+                    if (stopEditMode(f)) {
+                        fireFeatureSaved();
+                        editModeStopped = true;
+                    }
                 }
             }
         }
@@ -724,15 +725,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      *
-     * @param  f  DOCUMENT ME!
+     * @param   f  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    private void stopEditMode(final DefaultFeatureServiceFeature f) {
+    private boolean stopEditMode(final DefaultFeatureServiceFeature f) {
         try {
             final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
                         .getLockerForFeatureService(f.getLayerProperties().getFeatureService());
             final AttributeTableRuleSet tableRuleSet = f.getLayerProperties().getAttributeTableRuleSet();
             if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(lockedFeatures)) {
-                return;
+                return false;
             }
             if ((tableRuleSet != null) && isFeatureModified(f)) {
                 tableRuleSet.beforeSave(f);
@@ -753,21 +756,25 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 if (lockingObject != null) {
                     locker.unlock(lockingObject);
                     lockMap.remove(f);
+                    lockedFeatures.remove(f);
                 }
             }
-            lockedFeatures.remove(f);
             modifiedFeature.remove(f);
 
             if ((tableRuleSet != null) && isFeatureModified(f)) {
                 tableRuleSet.afterSave(null);
             }
 
-            if (f.getLayerProperties().getFeatureService() != null) {
+            // if the bounding box == null, this layer wasn't be shown on the map and so it should not be refreshed
+            if ((f.getLayerProperties().getFeatureService() != null)
+                        && (f.getLayerProperties().getFeatureService().getBoundingBox() != null)) {
                 f.getLayerProperties().getFeatureService().retrieve(true);
             }
         } catch (Exception e) {
             LOG.error("Error while saving feature", e);
         }
+
+        return true;
     }
 
     /**
@@ -866,12 +873,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         if (f instanceof DefaultFeatureServiceFeature) {
             final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)f;
-            stopEditMode(feature);
-            savedFeatureList.add(feature);
-        }
 
-        for (final DefaultFeatureServiceFeature fe : savedFeatureList) {
-            lockMap.remove(fe);
+            if (stopEditMode(feature)) {
+                savedFeatureList.add(feature);
+            }
         }
 
         fireFeatureSaved();
@@ -944,15 +949,23 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             popupMenu.add(miPrint);
             if ((((DefaultFeatureServiceFeature)c).getLayerProperties().getFeatureService() != null)
                         && ((DefaultFeatureServiceFeature)c).getLayerProperties().getFeatureService().isEditable()) {
-                if (lockedFeatures.contains((DefaultFeatureServiceFeature)c) || lockedFeatures.isEmpty()) {
-                    popupMenu.add(miEdit);
+                boolean noEdit = false;
+
+                if (c instanceof PermissionProvider) {
+                    noEdit = !((PermissionProvider)c).hasWritePermissions();
                 }
-                if (((DefaultFeatureServiceFeature)c).isEditable()) {
-                    miEdit.setText(NbBundle.getMessage(
-                            FeatureInfoPanel.class,
-                            "FeatureInfoPanel.miEdit.text.editable"));
-                } else {
-                    miEdit.setText(NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text"));
+
+                if (!noEdit) {
+                    if (lockedFeatures.contains((DefaultFeatureServiceFeature)c) || lockedFeatures.isEmpty()) {
+                        popupMenu.add(miEdit);
+                    }
+                    if (((DefaultFeatureServiceFeature)c).isEditable()) {
+                        miEdit.setText(NbBundle.getMessage(
+                                FeatureInfoPanel.class,
+                                "FeatureInfoPanel.miEdit.text.editable"));
+                    } else {
+                        miEdit.setText(NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text"));
+                    }
                 }
             }
         }
@@ -1012,8 +1025,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private void fireDispose() {
         final FeatureInfoPanelEvent evt = new FeatureInfoPanelEvent(this);
+        // copy the array to prevent a java.util.ConcurrentModificationException
+        final List<FeatureInfoPanelListener> listeners = new ArrayList<FeatureInfoPanelListener>(
+                featureInfoPanelListeners);
 
-        for (final FeatureInfoPanelListener featureInfoPanelListener : featureInfoPanelListeners) {
+        for (final FeatureInfoPanelListener featureInfoPanelListener : listeners) {
             featureInfoPanelListener.dispose(evt);
         }
     }
@@ -1023,8 +1039,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private void fireFeatureSaved() {
         final FeatureInfoPanelEvent evt = new FeatureInfoPanelEvent(this);
+        // copy the array to prevent a java.util.ConcurrentModificationException
+        final List<FeatureInfoPanelListener> listeners = new ArrayList<FeatureInfoPanelListener>(
+                featureInfoPanelListeners);
 
-        for (final FeatureInfoPanelListener featureInfoPanelListener : featureInfoPanelListeners) {
+        for (final FeatureInfoPanelListener featureInfoPanelListener : listeners) {
             featureInfoPanelListener.featureSaved(evt);
         }
     }
