@@ -4460,6 +4460,50 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.error("Fehler beim Lesen von Scale", skip); // NOI18N
         }
 
+        {
+            Color fillingColor = null;
+            Color lineColor = null;
+            Integer lineWidth = null;
+            final Element measuringComponentElement = prefs.getChild("measuringComponent");
+            if (measuringComponentElement != null) {
+                final Element fillingColorElement = measuringComponentElement.getChild("fillingColor");
+                if (fillingColorElement != null) {
+                    try {
+                        final Integer red = Integer.parseInt(fillingColorElement.getAttributeValue("red"));
+                        final Integer green = Integer.parseInt(fillingColorElement.getAttributeValue("green"));
+                        final Integer blue = Integer.parseInt(fillingColorElement.getAttributeValue("blue"));
+                        final Integer opacity = (fillingColorElement.getAttributeValue("opacity") != null)
+                            ? Integer.parseInt(fillingColorElement.getAttributeValue("opacity")) : 255;
+                        fillingColor = new Color(red, green, blue, opacity);
+                    } catch (final Exception ex) {
+                        LOG.error("measuringComponent fillingColor is not defined properly.", ex); // NOI18N
+                    }
+                }
+                final Element lineColorElement = measuringComponentElement.getChild("lineColor");
+                if (lineColorElement != null) {
+                    try {
+                        final Integer red = Integer.parseInt(lineColorElement.getAttributeValue("red"));
+                        final Integer green = Integer.parseInt(lineColorElement.getAttributeValue("green"));
+                        final Integer blue = Integer.parseInt(lineColorElement.getAttributeValue("blue"));
+                        final Integer opacity = (lineColorElement.getAttributeValue("opacity") != null)
+                            ? Integer.parseInt(lineColorElement.getAttributeValue("opacity")) : 255;
+                        lineColor = new Color(red, green, blue, opacity);
+                    } catch (final Exception ex) {
+                        LOG.error("measuringComponent lineColor is not defined properly.", ex);    // NOI18N
+                    }
+                }
+
+                try {
+                    lineWidth = Integer.parseInt(measuringComponentElement.getChildText("lineWidth"));
+                } catch (final NumberFormatException ex) {
+                    LOG.error("measuringComponent lineWidth value is not a number.", ex); // NOI18N
+                }
+            }
+            CismapBroker.getInstance().setMeasurementFillingColor(fillingColor);
+            CismapBroker.getInstance().setMeasurementLineColor(lineColor);
+            CismapBroker.getInstance().setMeasurementLineWidth(lineWidth);
+        }
+
         try {
             final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
 
