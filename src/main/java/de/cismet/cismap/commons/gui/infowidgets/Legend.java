@@ -16,11 +16,13 @@ import java.awt.EventQueue;
 import java.awt.Image;
 
 import java.net.URL;
+import java.net.URLEncoder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -52,8 +54,6 @@ import de.cismet.tools.Static2DTools;
 
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
-import java.net.URLEncoder;
-import java.util.StringTokenizer;
 
 /**
  * DOCUMENT ME!
@@ -410,7 +410,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         return urlString;
     }
 
-    
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
     }

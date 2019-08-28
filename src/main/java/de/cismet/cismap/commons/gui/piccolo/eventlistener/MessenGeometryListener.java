@@ -30,9 +30,10 @@ import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.EllipsePHandle;
-import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.collections.TypeSafeCollections;
@@ -55,7 +56,9 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     public static final String ELLIPSE = "ELLIPSE";
     private static final int NUMOF_ELLIPSE_EDGES = 36;
     public static final String GEOMETRY_CREATED_NOTIFICATION = "GEOMETRY_CREATED_NOTIFICATION";
-    private static final Color PAINT_COLOR = new Color(255, 0, 255, 45);
+    private static final Color FALLBACK_PAINT_COLOR = new Color(255, 0, 255, 45);
+    private static final Color FALLBACK_LINE_COLOR = FALLBACK_PAINT_COLOR.darker();
+    private static final int FALLBACK_LINE_WIDTH = 1;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -337,7 +340,28 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
      * @return  DOCUMENT ME!
      */
     protected Color getFillingColor() {
-        return PAINT_COLOR;
+        final Color fillingColor = CismapBroker.getInstance().getMeasurementFillingColor();
+        return (fillingColor != null) ? fillingColor : FALLBACK_PAINT_COLOR;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Color getLineColor() {
+        final Color lineColor = CismapBroker.getInstance().getMeasurementLineColor();
+        return (lineColor != null) ? lineColor : FALLBACK_LINE_COLOR;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected int getLineWidth() {
+        final Integer lineWitdth = CismapBroker.getInstance().getMeasurementLineWidth();
+        return (lineWitdth != null) ? lineWitdth : FALLBACK_LINE_WIDTH;
     }
 
     /**
@@ -347,10 +371,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
      */
     private void applyCurrentStyle(final Feature toProcess) {
         if (toProcess instanceof StyledFeature) {
+            final Color fillingColor = getFillingColor();
             final StyledFeature sf = (StyledFeature)toProcess;
-            sf.setFillingPaint(PAINT_COLOR);
-            sf.setLinePaint(PAINT_COLOR.darker());
-            sf.setTransparency((PAINT_COLOR.getTransparency() / 255.0f));
+            sf.setLineWidth(getLineWidth());
+            sf.setFillingPaint(fillingColor);
+            sf.setLinePaint(getLineColor());
+            sf.setTransparency((fillingColor.getTransparency() / 255.0f));
         }
     }
 
@@ -677,9 +703,9 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
      */
     protected PPath initTempFeature(final boolean filled) {
         tempFeature = new PPath();
-        tempFeature.setStroke(new FixedWidthStroke());
+        tempFeature.setStroke(new CustomFixedWidthStroke(getLineWidth()));
         final Color fillingColor = getFillingColor();
-        tempFeature.setStrokePaint(fillingColor.darker());
+        tempFeature.setStrokePaint(getLineColor());
         if (filled) {
             tempFeature.setPaint(fillingColor);
         } else {
