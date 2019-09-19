@@ -496,7 +496,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
         }
 
         // adding properties
-        if ((featureServiceFeature.getProperties() == null) || featureServiceFeature.getProperties().isEmpty()) {
+        if ((degreeFeature.getProperties() != null) && (degreeFeature.getProperties().length > 0)) {
             // set the properties
             final FeatureProperty[] featureProperties = degreeFeature.getProperties();
 

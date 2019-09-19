@@ -12,7 +12,9 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
 
 import org.h2.jdbc.JdbcClob;
 
@@ -341,6 +343,41 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     /**
      * DOCUMENT ME!
      *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void saveChangesWithoutUpdateEnvelope() throws Exception {
+        if (!existProperties() || deleted) {
+            // no changes
+            return;
+        }
+
+        if (stations != null) {
+            for (final String name : stations.keySet()) {
+                setGeometry(stations.get(name).getGeometry());
+                if (stations.get(name).getGeometry() instanceof LineString) {
+                    break;
+                }
+            }
+        }
+
+        final Statement st = featureInfo.getConnection().createStatement();
+
+        try {
+            if (existsInDB()) {
+                updateFeature(st);
+            } else {
+                addFeature(st);
+            }
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   st  DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
@@ -583,9 +620,14 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private Geometry getOriginalGeometry() {
         Geometry g = null;
         g = featureInfo.getGeometryFromCache(getId());
-
         if (g != null) {
-            return g;
+            final GeometryFactory fg = new GeometryFactory(g.getPrecisionModel(),
+                    g.getSRID(),
+                    CoordinateArraySequenceFactory.instance());
+            g = fg.createGeometry(g);
+        }
+        if (g != null) {
+            return toSerializableGeometry(g);
         }
 
         ResultSet rs = null;
@@ -616,6 +658,30 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
 
         featureInfo.addGeometryToCache(getId(), g);
+
+        return toSerializableGeometry(g);
+    }
+
+    /**
+     * The geometry is not serializable, if the com.vividsolutions.jts.geom.impl.PackedCoordinateSequence is used. So
+     * this method replaces the PackedCoordinateSequence with the CoordinateArraySequenceFactory.
+     *
+     * @param   g  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Geometry toSerializableGeometry(final Geometry g) {
+        if (g instanceof LineString) {
+            final LineString ls = (LineString)g;
+            if (ls.getCoordinateSequence() instanceof com.vividsolutions.jts.geom.impl.PackedCoordinateSequence) {
+                final GeometryFactory fg = new GeometryFactory(g.getPrecisionModel(),
+                        g.getSRID(),
+                        CoordinateArraySequenceFactory.instance());
+                final Geometry newGeometry = fg.createGeometry(g);
+
+                return newGeometry;
+            }
+        }
 
         return g;
     }

@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import Sirius.util.collections.MultiMap;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -51,8 +53,6 @@ import de.cismet.math.geometry.StaticGeometryFunctions;
 
 import de.cismet.tools.StaticDecimalTools;
 
-import de.cismet.tools.collections.MultiMap;
-
 /**
  * DOCUMENT ME!
  *
@@ -86,6 +86,8 @@ public class TransformationPHandle extends PHandle {
     private Coordinate[] backupCoordArr;
     private InvalidPolygonTooltip polygonTooltip = new InvalidPolygonTooltip();
     private Map<Point2D, Coordinate> snappedCoordinates = new HashMap<>();
+    private final Color snappedOnPoint = Color.GREEN.darker().darker();
+    private final Color snappedOnLine = Color.ORANGE.brighter().brighter();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -178,8 +180,8 @@ public class TransformationPHandle extends PHandle {
                                     MappingComponent.MOVE_HANDLE))) {
                     // neue HandlePosition berechnen
 
-                    float currentX;
-                    float currentY;
+                    final float currentX;
+                    final float currentY;
 
                     // CTRL DOWN => an der Linie kleben
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
@@ -201,36 +203,50 @@ public class TransformationPHandle extends PHandle {
                                 rightNeighbourPoint,
                                 trigger);
 
-                        final Point2D ergPoint = pfeature.getViewer().getCamera().localToView(erg);
+                        final Point2D ergPoint = pfeature.getViewer().getCamera().localToView((Point2D)erg.clone());
                         currentX = (float)ergPoint.getX();
                         currentY = (float)ergPoint.getY();
                     } else {
-                        // an der Maus
-                        currentX = (float)pInputEvent.getPosition().getX();
-                        currentY = (float)pInputEvent.getPosition().getY();
+                        final PFeatureTools.SnappedPoint potentiallySnappedPoint = PFeatureTools.getNearestPointInArea(
+                                pfeature.getViewer(),
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                glueCoordinates);
+                        final Point2D point = potentiallySnappedPoint.getPoint();
 
-                        // snapping ?
-                        if (pfeature.getViewer().isSnappingEnabled()) {
-                            final boolean vertexRequired = pfeature.getViewer().isSnappingOnLineEnabled();
-                            final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
-                                    pfeature.getViewer(),
-                                    pInputEvent.getCanvasPosition(),
-                                    vertexRequired,
-                                    true);
-                            if (snapPoint != null) {
-                                if (!vertexRequired) {
-                                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
-                                            pfeature.getViewer(),
-                                            pInputEvent.getCanvasPosition(),
-                                            true);
-                                    pfeature.getViewer().getWtst().addXCoordinate((float)snapPoint.getX(), coord.x);
-                                    pfeature.getViewer().getWtst().addYCoordinate((float)snapPoint.getY(), coord.y);
-                                    snappedCoordinates.put(snapPoint, coord);
+                        if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(
+                                        potentiallySnappedPoint.getSnappedOn())) {
+                            if (MappingComponent.SnappingMode.POINT.equals(
+                                            pfeature.getViewer().getSnappingMode())
+                                        || (MappingComponent.SnappingMode.BOTH.equals(
+                                                pfeature.getViewer().getSnappingMode()))) {
+                                final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
+                                        pfeature.getViewer(),
+                                        pInputEvent.getCanvasPosition(),
+                                        true,
+                                        glueCoordinates);
+                                if (coord != null) {
+                                    pfeature.getViewer().getWtst().addXCoordinate((float)point.getX(), coord.x);
+                                    pfeature.getViewer().getWtst().addYCoordinate((float)point.getY(), coord.y);
+                                    snappedCoordinates.put(point, coord);
                                 }
-                                currentX = (float)snapPoint.getX();
-                                currentY = (float)snapPoint.getY();
                             }
+
+                            switch (potentiallySnappedPoint.getSnappedOn()) {
+                                case POINT: {
+                                    setPaint(snappedOnPoint);
+                                }
+                                break;
+                                case LINE: {
+                                    setPaint(snappedOnLine);
+                                }
+                                break;
+                            }
+                        } else {
+                            setPaint(isSelected() ? getDefaultSelectedColor() : getDefaultColor());
                         }
+                        currentX = (float)point.getX();
+                        currentY = (float)point.getY();
                     }
 
                     updateGeometryPoints(currentX, currentY);
@@ -331,12 +347,6 @@ public class TransformationPHandle extends PHandle {
     @Override
     public void startHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {
         try {
-            final Point2D startPoint = PFeatureTools.getNearestPointInArea(
-                    pfeature.getViewer(),
-                    aEvent.getCanvasPosition(),
-                    false,
-                    false);
-            CismapBroker.getInstance().setSnappingVetoPoint(startPoint);
             CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
             if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.MOVE_POLYGON)) {
                 final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
@@ -365,9 +375,11 @@ public class TransformationPHandle extends PHandle {
                                     == AbstractNewFeature.geomTypes.RECTANGLE)
                                 || (((AbstractNewFeature)pfeature.getFeature()).getGeometryType()
                                     == AbstractNewFeature.geomTypes.ELLIPSE))) {
-                    final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
-                    for (final Object o : selArr) {
-                        final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(o));
+                    final Collection<Feature> selArr = pfeature.getViewer()
+                                .getFeatureCollection()
+                                .getSelectedFeatures();
+                    for (final Feature feature : selArr) {
+                        final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(feature));
                         if ((pf != null) && (pf.getInfoNode() != null)) {
                             pf.getInfoNode().setVisible(false);
                         }
@@ -439,7 +451,7 @@ public class TransformationPHandle extends PHandle {
 
                 if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                     pfeature.syncGeometry();
-                    final Collection<Feature> features = new ArrayList<Feature>();
+                    final Collection<Feature> features = new ArrayList<>();
                     features.add(pfeature.getFeature());
                     ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(
                         features);
@@ -449,7 +461,6 @@ public class TransformationPHandle extends PHandle {
 
                 // remove the veto objects
                 CismapBroker.getInstance().setSnappingVetoFeature(null);
-                CismapBroker.getInstance().setSnappingVetoPoint(null);
 
                 // linke und rechte info entfernen
                 if (leftInfo != null) {
@@ -467,9 +478,9 @@ public class TransformationPHandle extends PHandle {
                                     && (Math.abs(startX - getLocator().locateX()) > 0.001d)))
                             || (Math.abs(startY - getLocator().locateY()) > 0.001d)) {
                     boolean isGluedAction = false;
-                    if (glueCoordinates.size() != 0) {
+                    if (!glueCoordinates.isEmpty()) {
                         isGluedAction = true;
-                        final Collection<Feature> features = new ArrayList<Feature>();
+                        final Collection<Feature> features = new ArrayList<>();
                         if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
                             final Set<PFeature> pFeatureSet = glueCoordinates.keySet();
                             for (final PFeature gluePFeature : pFeatureSet) {
@@ -765,6 +776,7 @@ public class TransformationPHandle extends PHandle {
 
     @Override
     protected void finalize() throws Throwable {
+        super.finalize();
         for (final Point2D p : snappedCoordinates.keySet()) {
             pfeature.getViewer().getWtst().removeXCoordinate((float)p.getX());
             pfeature.getViewer().getWtst().removeYCoordinate((float)p.getY());

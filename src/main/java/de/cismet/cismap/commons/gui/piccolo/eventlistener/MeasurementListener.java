@@ -70,18 +70,12 @@ public class MeasurementListener extends PBasicInputEventHandler {
         super.mouseMoved(pInputEvent);
 
         if (inProgress) {
-            Point2D point = null;
-            if (mc.isSnappingEnabled()) {
-                final boolean vertexRequired = mc.isSnappingOnLineEnabled();
-                point = PFeatureTools.getNearestPointInArea(
-                        mc,
-                        pInputEvent.getCanvasPosition(),
-                        vertexRequired,
-                        true);
-            }
-            if (point == null) {
-                point = pInputEvent.getPosition();
-            }
+            final Point2D point = mc.isSnappingEnabled()
+                ? PFeatureTools.getNearestPointInArea(
+                            mc,
+                            pInputEvent.getCanvasPosition(),
+                            true,
+                            null).getPoint() : pInputEvent.getPosition();
             updatePolygon(point);
         }
     }
@@ -96,18 +90,12 @@ public class MeasurementListener extends PBasicInputEventHandler {
         super.mouseClicked(pInputEvent);
         if (pInputEvent.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht finden
             if (pInputEvent.getClickCount() == 1) {
-                Point2D point = null;
-                if (mc.isSnappingEnabled()) {
-                    final boolean vertexRequired = mc.isSnappingOnLineEnabled();
-                    point = PFeatureTools.getNearestPointInArea(
-                            mc,
-                            pInputEvent.getCanvasPosition(),
-                            vertexRequired,
-                            true);
-                }
-                if (point == null) {
-                    point = pInputEvent.getPosition();
-                }
+                final Point2D point = mc.isSnappingEnabled()
+                    ? PFeatureTools.getNearestPointInArea(
+                                mc,
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                null).getPoint() : pInputEvent.getPosition();
                 if (!inProgress) {
                     // Polygon erzeugen
                     tempFeature = new PPath();

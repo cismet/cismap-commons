@@ -12,7 +12,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 
-import java.awt.geom.Point2D;
+import java.awt.Color;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,7 +30,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.SwingWorker;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
@@ -76,22 +75,22 @@ public class CismapBroker {
     PFeature oldPfeature = null;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private Properties userProperties = new Properties();
+    private final Properties userProperties = new Properties();
     private Properties defaultProperties;
     private String cismapFolderPath = USER_HOME_DIRECTORY + FS + DEFAULT_CISMAP_FOLDER;
     private File defaultAliasFile;
     private File userAliasFile;
-    private Vector<CapabilityListener> capabilityListeners = new Vector<CapabilityListener>();
-    private Vector<MappingModelListener> mappingModelListeners = new Vector<MappingModelListener>();
-    private Vector<StatusListener> statusListeners = new Vector<StatusListener>();
-    private Vector<HistoryModelListener> historyModelListeners = new Vector<HistoryModelListener>();
-    private Vector<ActiveLayerListener> activeLayerListeners = new Vector<ActiveLayerListener>();
-    private Vector<MapClickListener> mapClickListeners = new Vector<MapClickListener>();
-    private Vector<MapSearchListener> mapSearchListeners = new Vector<MapSearchListener>();
-    private Vector<MapDnDListener> mapDnDListeners = new Vector<MapDnDListener>();
-    private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<FeatureCollectionListener>();
-    private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();
-    private Vector<CrsChangeListener> crsChangeListeners = new Vector<CrsChangeListener>();
+    private Vector<CapabilityListener> capabilityListeners = new Vector<>();
+    private Vector<MappingModelListener> mappingModelListeners = new Vector<>();
+    private Vector<StatusListener> statusListeners = new Vector<>();
+    private Vector<HistoryModelListener> historyModelListeners = new Vector<>();
+    private Vector<ActiveLayerListener> activeLayerListeners = new Vector<>();
+    private Vector<MapClickListener> mapClickListeners = new Vector<>();
+    private Vector<MapSearchListener> mapSearchListeners = new Vector<>();
+    private Vector<MapDnDListener> mapDnDListeners = new Vector<>();
+    private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<>();
+    private Vector<MapBoundsListener> mapBoundsListeners = new Vector<>();
+    private Vector<CrsChangeListener> crsChangeListeners = new Vector<>();
     // private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new
     // Hashtable<WMSCapabilities, GUICredentialsProvider>();
     private Crs srs;
@@ -101,7 +100,6 @@ public class CismapBroker {
     private String preferredExceptionsFormat;
     private MappingComponent mappingComponent = null;
     private LayerWidget layerWidget = null;
-    private BoundingBox initialBoundingBox;
     private ExecutorService execService = null;
     private boolean serverAliasesInited = false;
     private String defaultCrs = "EPSG:31466";
@@ -110,7 +108,6 @@ public class CismapBroker {
     private boolean useInternalDb = false;
     private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
     private String featureStylingComponentKey = BasicFeatureStyleDialogFactory.KEY;
-    private Point2D snappingVetoPoint;
     private PFeature snappingVetoFeature;
     private Float minOpacityToStayEnabled = null;
     private boolean multiFeaturePopupMenuEnabled = false;
@@ -118,6 +115,9 @@ public class CismapBroker {
     private boolean highlightFeatureOnMouseOver = true;
     private boolean enableDummyLayerWhenAvailable = true;
     private boolean enableRasterGeoReferencingToolbar = true;
+    private Color measurementFillingColor;
+    private Color measurementLineColor;
+    private Integer measurementLineWidth;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1117,24 +1117,6 @@ public class CismapBroker {
     /**
      * DOCUMENT ME!
      *
-     * @return  the snappingVetoPoint
-     */
-    public Point2D getSnappingVetoPoint() {
-        return snappingVetoPoint;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  snappingVetoPoint  the snappingVetoPoint to set
-     */
-    public void setSnappingVetoPoint(final Point2D snappingVetoPoint) {
-        this.snappingVetoPoint = snappingVetoPoint;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  the snappingVetoFeature
      */
     public PFeature getSnappingVetoFeature() {
@@ -1202,6 +1184,60 @@ public class CismapBroker {
      */
     public void setHighlightFeatureOnMouseOver(final boolean highlightFeatureOnMouseOver) {
         this.highlightFeatureOnMouseOver = highlightFeatureOnMouseOver;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Color getMeasurementFillingColor() {
+        return measurementFillingColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  measurementFillingColor  DOCUMENT ME!
+     */
+    public void setMeasurementFillingColor(final Color measurementFillingColor) {
+        this.measurementFillingColor = measurementFillingColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Color getMeasurementLineColor() {
+        return measurementLineColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  measurementLineColor  DOCUMENT ME!
+     */
+    public void setMeasurementLineColor(final Color measurementLineColor) {
+        this.measurementLineColor = measurementLineColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Integer getMeasurementLineWidth() {
+        return measurementLineWidth;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  measurementLineWidth  DOCUMENT ME!
+     */
+    public void setMeasurementLineWidth(final Integer measurementLineWidth) {
+        this.measurementLineWidth = measurementLineWidth;
     }
 
     //~ Inner Classes ----------------------------------------------------------

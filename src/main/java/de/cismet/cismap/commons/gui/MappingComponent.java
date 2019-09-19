@@ -182,6 +182,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private static final long criticalDocumentSize = 10000000;                                    // 10MB
     private static final transient Logger LOG = Logger.getLogger(MappingComponent.class);
 
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public enum SnappingMode {
+
+        //~ Enum constants -----------------------------------------------------
+
+        OFF, POINT, LINE, BOTH
+    }
+
     //~ Instance fields --------------------------------------------------------
 
     private boolean featureServiceLayerVisible = true;
@@ -206,8 +220,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PLayer stickyLayer = new PLayer();
     private PLayer dragPerformanceImproverLayer = new PLayer();
     private boolean readOnly = true;
-    private boolean snappingEnabled = true;
-    private boolean snappingOnLineEnabled = false;
+    private SnappingMode snappingMode = SnappingMode.POINT;
     private boolean visualizeSnappingEnabled = true;
     private boolean visualizeSnappingRectEnabled = false;
     private int snappingRectSize = 20;
@@ -315,7 +328,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         THIS = this;
         // wird in der Regel wieder ueberschrieben
         setSnappingRectSize(20);
-        setSnappingEnabled(false);
+        setSnappingMode(SnappingMode.OFF);
         setVisualizeSnappingEnabled(false);
         setAnimationDuration(500);
         setInteractionMode(ZOOM);
@@ -2264,7 +2277,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             selectionChangedBySelectionListener = sl.isSelectionInProgress();
         }
 
-        for (final Object o : allChildren) {
+        for (final Object o : new ArrayList(allChildren)) {
             if (o instanceof PFeature) {
                 all.add((PFeature)o);
             } else if (o instanceof PLayer) {
@@ -2303,10 +2316,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 if (feature != null) {
                     if (feature.getParent() != null) {
-                        feature.getParent().moveToFront();
+                        try {
+                            feature.getParent().moveToFront();
+                        } catch (Throwable t) {
+                            // nothing to do
+                        }
                     }
                     feature.setSelected(true);
-                    feature.moveToFront();
+                    try {
+                        feature.moveToFront();
+                    } catch (Throwable t) {
+                        // nothing to do
+                    }
                     if ((sl != null) && !selectionChangedBySelectionListener) {
                         sl.addSelectedFeature(feature);
                     }
@@ -3455,17 +3476,29 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @return  DOCUMENT ME!
      */
     public boolean isSnappingEnabled() {
-        return snappingEnabled;
+        return (snappingMode != null) && !SnappingMode.OFF.equals(snappingMode);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  snappingEnabled  DOCUMENT ME!
+     * @param       snappingEnabled  DOCUMENT ME!
+     *
+     * @Deprecated  use setSnappingMode instead
      */
+    @Deprecated
     public void setSnappingEnabled(final boolean snappingEnabled) {
-        this.snappingEnabled = snappingEnabled;
-        setVisualizeSnappingEnabled(snappingEnabled);
+        setSnappingMode(snappingEnabled ? SnappingMode.POINT : SnappingMode.OFF);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappingMode  DOCUMENT ME!
+     */
+    public void setSnappingMode(final SnappingMode snappingMode) {
+        this.snappingMode = (snappingMode != null) ? snappingMode : SnappingMode.OFF;
+        setVisualizeSnappingEnabled(isSnappingEnabled());
     }
 
     /**
@@ -3473,17 +3506,31 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return  DOCUMENT ME!
      */
-    public boolean isSnappingOnLineEnabled() {
-        return snappingOnLineEnabled;
+    public SnappingMode getSnappingMode() {
+        return this.snappingMode;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  snappingOnLineEnabled  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @Deprecated  use getSnappingMode instead
+     */
+    @Deprecated
+    public boolean isSnappingOnLineEnabled() {
+        return SnappingMode.LINE.equals(getSnappingMode());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param       snappingOnLineEnabled  DOCUMENT ME!
+     *
+     * @Deprecated  use setSnappingMode instead
      */
     public void setSnappingOnLineEnabled(final boolean snappingOnLineEnabled) {
-        this.snappingOnLineEnabled = snappingOnLineEnabled;
+        setSnappingMode(snappingOnLineEnabled ? SnappingMode.LINE : SnappingMode.POINT);
     }
 
     /**
@@ -3536,7 +3583,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final GlobalPreferences globalPrefs = prefs.getGlobalPrefs();
 
         setSnappingRectSize(globalPrefs.getSnappingRectSize());
-        setSnappingEnabled(globalPrefs.isSnappingEnabled());
+        if (globalPrefs.getSnappingMode() != null) {
+            setSnappingMode(globalPrefs.getSnappingMode());
+        } else {
+            if (globalPrefs.isSnappingEnabled()) {
+                setSnappingMode(SnappingMode.POINT);
+            } else {
+                setSnappingMode(SnappingMode.OFF);
+            }
+        }
         setVisualizeSnappingEnabled(globalPrefs.isSnappingPreviewEnabled());
         setAnimationDuration(globalPrefs.getAnimationDuration());
         setInteractionMode(globalPrefs.getStartMode());
@@ -4220,6 +4275,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).getMode()); // NOI18N
         ret.setAttribute("handleInteractionMode", getHandleInteractionMode());                      // NOI18N
         ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());                  // NOI18N
+        ret.setAttribute("snappingMode", getSnappingMode().toString());
 
         final Object inputListener = getInputListener(CREATE_SEARCH_POLYGON);
         if (inputListener instanceof CreateSearchGeometryListener) {
@@ -4404,6 +4460,50 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.error("Fehler beim Lesen von Scale", skip); // NOI18N
         }
 
+        {
+            Color fillingColor = null;
+            Color lineColor = null;
+            Integer lineWidth = null;
+            final Element measuringComponentElement = prefs.getChild("measuringComponent");
+            if (measuringComponentElement != null) {
+                final Element fillingColorElement = measuringComponentElement.getChild("fillingColor");
+                if (fillingColorElement != null) {
+                    try {
+                        final Integer red = Integer.parseInt(fillingColorElement.getAttributeValue("red"));
+                        final Integer green = Integer.parseInt(fillingColorElement.getAttributeValue("green"));
+                        final Integer blue = Integer.parseInt(fillingColorElement.getAttributeValue("blue"));
+                        final Integer opacity = (fillingColorElement.getAttributeValue("opacity") != null)
+                            ? Integer.parseInt(fillingColorElement.getAttributeValue("opacity")) : 255;
+                        fillingColor = new Color(red, green, blue, opacity);
+                    } catch (final Exception ex) {
+                        LOG.error("measuringComponent fillingColor is not defined properly.", ex); // NOI18N
+                    }
+                }
+                final Element lineColorElement = measuringComponentElement.getChild("lineColor");
+                if (lineColorElement != null) {
+                    try {
+                        final Integer red = Integer.parseInt(lineColorElement.getAttributeValue("red"));
+                        final Integer green = Integer.parseInt(lineColorElement.getAttributeValue("green"));
+                        final Integer blue = Integer.parseInt(lineColorElement.getAttributeValue("blue"));
+                        final Integer opacity = (lineColorElement.getAttributeValue("opacity") != null)
+                            ? Integer.parseInt(lineColorElement.getAttributeValue("opacity")) : 255;
+                        lineColor = new Color(red, green, blue, opacity);
+                    } catch (final Exception ex) {
+                        LOG.error("measuringComponent lineColor is not defined properly.", ex);    // NOI18N
+                    }
+                }
+
+                try {
+                    lineWidth = Integer.parseInt(measuringComponentElement.getChildText("lineWidth"));
+                } catch (final NumberFormatException ex) {
+                    LOG.error("measuringComponent lineWidth value is not a number.", ex); // NOI18N
+                }
+            }
+            CismapBroker.getInstance().setMeasurementFillingColor(fillingColor);
+            CismapBroker.getInstance().setMeasurementLineColor(lineColor);
+            CismapBroker.getInstance().setMeasurementLineWidth(lineWidth);
+        }
+
         try {
             final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
 
@@ -4491,14 +4591,21 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.warn("Fehler beim Setzen des HandleInteractionMode", ex);                          // NOI18N
         }
         try {
-            final boolean snapping = prefs.getAttribute("snapping").getBooleanValue();             // NOI18N
-            LOG.info("snapping=" + snapping);                                                      // NOI18N
-
-            setSnappingEnabled(snapping);
-            setVisualizeSnappingEnabled(snapping);
-            setInGlueIdenticalPointsMode(snapping);
+            final String snappingModeValue = prefs.getAttribute("snappingMode").getValue();
+            for (final MappingComponent.SnappingMode snappingMode : MappingComponent.SnappingMode.values()) {
+                if (snappingMode.name().equalsIgnoreCase(snappingModeValue)) {
+                    setSnappingMode(snappingMode);
+                    break;
+                }
+            }
+            if (snappingModeValue == null) {
+                final boolean snapping = prefs.getAttribute("snapping").getBooleanValue();         // NOI18N
+                LOG.info("snapping=" + snapping);                                                  // NOI18N
+                setSnappingMode(snapping ? SnappingMode.POINT : SnappingMode.OFF);
+            }
+            setInGlueIdenticalPointsMode(isSnappingEnabled());
         } catch (final Exception ex) {
-            LOG.warn("Fehler beim setzen von snapping und Konsorten", ex); // NOI18N
+            LOG.warn("Fehler beim setzen von snapping und Konsorten", ex);                         // NOI18N
         }
 
         // aktuelle Position

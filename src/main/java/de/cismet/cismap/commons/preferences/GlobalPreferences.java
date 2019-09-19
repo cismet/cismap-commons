@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
 
 /**
  * DOCUMENT ME!
@@ -25,7 +25,13 @@ public class GlobalPreferences {
 
     final Logger log = Logger.getLogger(this.getClass());
     private int animationDuration = 500;
+    /**
+     * DOCUMENT ME!
+     *
+     * @deprecated  use snappingMode instead
+     */
     private boolean snappingEnabled = false;
+    private MappingComponent.SnappingMode snappingMode = null;
     private boolean snappingPreviewEnabled = false;
     private boolean panPerformanceBooster = false;
     private int errorAbolitionTime = 2000;
@@ -47,9 +53,22 @@ public class GlobalPreferences {
             log.warn("Read preferences. Error. GlobalPreferences.animationDuration  ", e);             // NOI18N
         }
         try {
-            snappingEnabled = element.getAttribute("snappingEnabled").getBooleanValue();               // NOI18N
+            final String snappingModeValue = element.getAttribute("snappingMode").getValue();
+            for (final MappingComponent.SnappingMode snappingMode : MappingComponent.SnappingMode.values()) {
+                if (snappingMode.name().equalsIgnoreCase(snappingModeValue)) {
+                    this.snappingMode = snappingMode;
+                    break;
+                }
+            }
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.snappingEnabled  ", e);               // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.snappingMode  ", e);                  // NOI18N
+        }
+        if (this.snappingMode == null) {
+            try {
+                snappingEnabled = element.getAttribute("snappingEnabled").getBooleanValue();           // NOI18N
+            } catch (Exception e) {
+                log.warn("Read preferences. Error. GlobalPreferences.snappingEnabled  ", e);           // NOI18N
+            }
         }
         try {
             snappingPreviewEnabled = element.getAttribute("snappingPreviewEnabled").getBooleanValue(); // NOI18N
@@ -111,7 +130,9 @@ public class GlobalPreferences {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  use snappingMode instead
      */
     public boolean isSnappingEnabled() {
         return snappingEnabled;
@@ -120,7 +141,18 @@ public class GlobalPreferences {
     /**
      * DOCUMENT ME!
      *
-     * @param  snappingEnabled  DOCUMENT ME!
+     * @return  DOCUMENT ME!
+     */
+    public MappingComponent.SnappingMode getSnappingMode() {
+        return snappingMode;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param       snappingEnabled  DOCUMENT ME!
+     *
+     * @deprecated  use snappingMode instead
      */
     public void setSnappingEnabled(final boolean snappingEnabled) {
         this.snappingEnabled = snappingEnabled;

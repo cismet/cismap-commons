@@ -42,6 +42,8 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedLineFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -157,7 +159,7 @@ public class PFeatureTools {
             }
         }
 
-        final LinkedList<PNode> allValidPNodes = new LinkedList<PNode>();
+        final LinkedList<PNode> allValidPNodes = new LinkedList<>();
         for (final PNode pNode : pNodes) {
             for (int i = 0; i < validClasses.length; ++i) {
                 if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
@@ -184,7 +186,6 @@ public class PFeatureTools {
     public static PFeature[] getPFeaturesInArea(final MappingComponent mc, final PBounds bounds) {
         final WorldToScreenTransform wtst = mc.getWtst();
         final Geometry bBox = getGeometryFromPBounds(bounds, wtst, mc.getMappingModel().getSrs().getCode());
-
         return getPFeaturesInArea(mc, bBox);
     }
 
@@ -206,7 +207,7 @@ public class PFeatureTools {
             }
         }
 
-        final Collection<PFeature> vRet = new ArrayList<PFeature>(pFeatures.size());
+        final Collection<PFeature> vRet = new ArrayList<>(pFeatures.size());
         for (final PFeature pf : pFeatures) {
             if (pf.isSnappable()) {
                 vRet.add(pf);
@@ -255,7 +256,7 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static List<PFeature> findIntersectingPFeatures(final PNode node, final Geometry geometry) {
-        final List<PFeature> pFeatures = new ArrayList<PFeature>();
+        final List<PFeature> pFeatures = new ArrayList<>();
         final String srs = CrsTransformer.createCrsFromSrid(geometry.getSRID());
 
         for (int index = 0; index < node.getChildrenCount(); index++) {
@@ -330,23 +331,37 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
-     * @param   mc      DOCUMENT ME!
-     * @param   bounds  DOCUMENT ME!
+     * @param   mc                      DOCUMENT ME!
+     * @param   bounds                  DOCUMENT ME!
+     * @param   vetoPFeature            DOCUMENT ME!
+     * @param   glueFeatureCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D[] getPointsInArea(final MappingComponent mc, final PBounds bounds) {
+    public static Point2D[] getPointsInArea(final MappingComponent mc,
+            final PBounds bounds,
+            final PFeature vetoPFeature,
+            final MultiMap glueFeatureCoordinates) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
-        final Collection<Point2D> points = new ArrayList<Point2D>();
+
+        final Collection<Point2D> points = new ArrayList<>();
         if (features == null) {
             return null;
         }
         for (final PFeature pfeature : features) {
+            if (pfeature.equals(vetoPFeature)) {
+                continue;
+            }
+            final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
+                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
             for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                 for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                     final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                     final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                     for (int position = 0; position < xp.length; position++) {
+                        if ((glueCoordinates != null) && glueCoordinates.contains(position)) {
+                            continue;
+                        }
                         if (bounds.contains(xp[position], yp[position])) {
                             points.add(new Point2D.Float(xp[position], yp[position]));
                         }
@@ -360,24 +375,23 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
-     * @param   mc          DOCUMENT ME!
-     * @param   bounds      DOCUMENT ME!
-     * @param   myPosition  DOCUMENT ME!
-     * @param   vetoPoint   DOCUMENT ME!
+     * @param   mc               DOCUMENT ME!
+     * @param   bounds           DOCUMENT ME!
+     * @param   myPosition       DOCUMENT ME!
+     * @param   vetoPFeature     DOCUMENT ME!
+     * @param   glueCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     private static Point2D getNearestPointInArea(final MappingComponent mc,
             final PBounds bounds,
             final Point2D myPosition,
-            final Point2D vetoPoint) {
-        final Point2D[] points = getPointsInArea(mc, bounds);
+            final PFeature vetoPFeature,
+            final MultiMap glueCoordinates) {
+        final Point2D[] points = getPointsInArea(mc, bounds, vetoPFeature, glueCoordinates);
         double distance = -1;
         Point2D nearestPoint = null;
         for (int i = 0; i < points.length; ++i) {
-            if ((vetoPoint != null) && points[i].equals(vetoPoint)) {
-                return null;
-            }
             final double distanceCheck = myPosition.distanceSq(points[i]);
             if ((distance < 0) || (distanceCheck < distance)) {
                 nearestPoint = points[i];
@@ -396,7 +410,7 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static Point2D getNearestPointInArea(final MappingComponent mc, final Point2D canvasPosition) {
-        return getNearestPointInArea(mc, canvasPosition, null);
+        return getNearestPointInArea(mc, canvasPosition, null, null);
     }
 
     /**
@@ -404,62 +418,86 @@ public class PFeatureTools {
      *
      * @param   mc                   DOCUMENT ME!
      * @param   canvasPosition       DOCUMENT ME!
-     * @param   vertexRequired       DOCUMENT ME!
      * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
      *                               can be the currently modifying feature.
+     * @param   glueCoordinates      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D getNearestPointInArea(final MappingComponent mc,
+    public static SnappedPoint getNearestPointInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final boolean vertexRequired,
-            final boolean considerVetoObjects) {
-        final Point2D vetoPoint = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoPoint() : null);
-
-        if (!vertexRequired) {
-            return getNearestPointInArea(mc, canvasPosition, vetoPoint);
-        } else {
+            final boolean considerVetoObjects,
+            final MultiMap glueCoordinates) {
+        if (mc.isSnappingEnabled()) {
             final PFeature vetoFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
                                                               : null);
-
-            return getNearestPointInAreaNoVertexRequired(
+            final Point2D nearestPointOnPoint =
+                (MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())
+                            || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode()))
+                ? getNearestPointInArea(mc, canvasPosition, vetoFeature, glueCoordinates) : null;
+            final Point2D nearestPointOnLine =
+                ((nearestPointOnPoint == null)
+                            && (MappingComponent.SnappingMode.LINE.equals(mc.getSnappingMode())
+                                || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())))
+                ? getNearestPointInAreaNoVertexRequired(
                     mc,
                     canvasPosition,
-                    vetoPoint,
-                    vetoFeature);
+                    vetoFeature,
+                    glueCoordinates) : null;
+
+            if (mc.getSnappingMode() != null) {
+                switch (mc.getSnappingMode()) {
+                    case POINT: {
+                        if (nearestPointOnPoint != null) {
+                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                        }
+                    }
+                    break;
+                    case LINE: {
+                        if (nearestPointOnLine != null) {
+                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        }
+                    }
+                    break;
+                    case BOTH: {
+                        if (nearestPointOnPoint != null) {
+                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                        } else if (nearestPointOnLine != null) {
+                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        }
+                    }
+                    break;
+                }
+            }
         }
+        return new SnappedPoint(mc.getCamera().localToView(canvasPosition), SnappedPoint.SnappedOn.NOTHING);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   mc              DOCUMENT ME!
-     * @param   canvasPosition  DOCUMENT ME!
-     * @param   vetoPoint       DOCUMENT ME!
-     * @param   vetoFeature     DOCUMENT ME!
+     * @param   mc               DOCUMENT ME!
+     * @param   canvasPosition   DOCUMENT ME!
+     * @param   vetoFeature      DOCUMENT ME!
+     * @param   glueCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static Point2D getNearestPointInAreaNoVertexRequired(final MappingComponent mc,
             final Point2D canvasPosition,
-            final Point2D vetoPoint,
-            final PFeature vetoFeature) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
-                (int)canvasPosition.getY()
-                        - (mc.getSnappingRectSize() / 2),
-                mc.getSnappingRectSize(),
-                mc.getSnappingRectSize());
+            final PFeature vetoFeature,
+            final MultiMap glueCoordinates) {
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
+        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
         final PBounds bounds = new PBounds(d2d);
 
-        final Point2D[] points = getPointsInAreaNoVertexRequired(mc, bounds, myPosition, vetoFeature);
+        final Point2D[] points = getPointsInAreaNoVertexRequired(mc, bounds, myPosition, vetoFeature, glueCoordinates);
         double distance = -1;
         Point2D nearestPoint = null;
         for (int i = 0; i < points.length; ++i) {
             final double distanceCheck = myPosition.distanceSq(points[i]);
-            if (((vetoPoint == null) || !vetoPoint.equals(points[i]))
-                        && ((distance < 0) || (distanceCheck < distance))) {
+            if ((distance < 0) || (distanceCheck < distance)) {
                 nearestPoint = points[i];
                 distance = distanceCheck;
             }
@@ -470,28 +508,62 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
-     * @param   mc               DOCUMENT ME!
-     * @param   bounds           DOCUMENT ME!
-     * @param   currentPosition  DOCUMENT ME!
-     * @param   vetoFeature      DOCUMENT ME!
+     * @param   mc                      DOCUMENT ME!
+     * @param   bounds                  DOCUMENT ME!
+     * @param   currentPosition         DOCUMENT ME!
+     * @param   vetoFeature             DOCUMENT ME!
+     * @param   glueFeatureCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static Point2D[] getPointsInAreaNoVertexRequired(final MappingComponent mc,
             final PBounds bounds,
             final Point2D currentPosition,
-            final PFeature vetoFeature) {
+            final PFeature vetoFeature,
+            final MultiMap glueFeatureCoordinates) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
-        final Collection<Point2D> points = new ArrayList<Point2D>();
+        final Collection<Point2D> points = new ArrayList<>();
         if (features == null) {
             return null;
         }
         final Coordinate c = new Coordinate(currentPosition.getX(), currentPosition.getY());
         for (final PFeature pfeature : features) {
+            final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
+                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
             if (!pfeature.equals(vetoFeature)) {
-                final LineSegment seg = getNearestSegment(c, pfeature);
-                if (seg != null) {
-                    final Coordinate point = seg.closestPoint(c);
+                LineSegment segment = null;
+                double dist = Double.POSITIVE_INFINITY;
+                if (pfeature != null) {
+                    final Geometry geometry = pfeature.getFeature().getGeometry();
+                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
+                                || (geometry instanceof MultiPolygon)) {
+                        for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                            for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                                final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                                final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                                for (int coordIndex = xp.length - 1; coordIndex > 0; coordIndex--) {
+                                    if ((glueCoordinates != null)
+                                                && (glueCoordinates.contains(coordIndex)
+                                                    || glueCoordinates.contains(coordIndex - 1))) {
+                                        continue;
+                                    }
+                                    final LineSegment tmpSegment = new LineSegment(
+                                            xp[coordIndex - 1],
+                                            yp[coordIndex - 1],
+                                            xp[coordIndex],
+                                            yp[coordIndex]);
+                                    final double tmpDist = tmpSegment.distance(c);
+                                    if (tmpDist < dist) {
+                                        dist = tmpDist;
+                                        segment = tmpSegment;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (segment != null) {
+                    final Coordinate point = segment.closestPoint(c);
                     if (bounds.contains(point.x, point.y)) {
                         points.add(new Point2D.Float((float)point.x, (float)point.y));
                     }
@@ -542,23 +614,37 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
-     * @param   mc              DOCUMENT ME!
-     * @param   canvasPosition  DOCUMENT ME!
-     * @param   vetoPoint       DOCUMENT ME!
+     * @param   mc               DOCUMENT ME!
+     * @param   canvasPosition   DOCUMENT ME!
+     * @param   vetoPFeature     DOCUMENT ME!
+     * @param   glueCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static Point2D getNearestPointInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final Point2D vetoPoint) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
+            final PFeature vetoPFeature,
+            final MultiMap glueCoordinates) {
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
+        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
+        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
+    }
+
+    /**
+     * Determines the snapping area.
+     *
+     * @param   mc              the used mapping component
+     * @param   canvasPosition  the canvas position
+     *
+     * @return  the snapping area
+     */
+    private static Rectangle2D getSnappingRectangle(final MappingComponent mc, final Point2D canvasPosition) {
+        return new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
                 (int)canvasPosition.getY()
                         - (mc.getSnappingRectSize() / 2),
                 mc.getSnappingRectSize(),
                 mc.getSnappingRectSize());
-        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
-        return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPoint);
     }
 
     /**
@@ -597,6 +683,7 @@ public class PFeatureTools {
      * @param   canvasPosition       DOCUMENT ME!
      * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
      *                               can be the currently modifying feature.
+     * @param   glueCoordinates      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
@@ -604,60 +691,74 @@ public class PFeatureTools {
      */
     public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final boolean considerVetoObjects) {
-        final Point2D vetoPoint = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoPoint() : null);
-
-        return getNearestCoordinateInArea(mc, canvasPosition, vetoPoint);
+            final boolean considerVetoObjects,
+            final MultiMap glueCoordinates) {
+        final PFeature vetoPFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
+                                                           : null);
+        return getNearestCoordinateInArea(mc, canvasPosition, vetoPFeature, glueCoordinates);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   mc              DOCUMENT ME!
-     * @param   canvasPosition  DOCUMENT ME!
-     * @param   vetoPoint       DOCUMENT ME!
+     * @param   mc               DOCUMENT ME!
+     * @param   canvasPosition   DOCUMENT ME!
+     * @param   vetoPFeature     vetoPointIndex DOCUMENT ME!
+     * @param   glueCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final Point2D canvasPosition,
-            final Point2D vetoPoint) {
-        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
-                (int)canvasPosition.getY()
-                        - (mc.getSnappingRectSize() / 2),
-                mc.getSnappingRectSize(),
-                mc.getSnappingRectSize());
+            final PFeature vetoPFeature,
+            final MultiMap glueCoordinates) {
+        final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
-        return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPoint);
+        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   mc          DOCUMENT ME!
-     * @param   bounds      DOCUMENT ME!
-     * @param   myPosition  DOCUMENT ME!
-     * @param   vetoPoint   DOCUMENT ME!
+     * @param   mc                      DOCUMENT ME!
+     * @param   bounds                  DOCUMENT ME!
+     * @param   myPosition              DOCUMENT ME!
+     * @param   vetoPFeature            DOCUMENT ME!
+     * @param   glueFeatureCoordinates  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     private static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
             final PBounds bounds,
             final Point2D myPosition,
-            final Point2D vetoPoint) {
+            final PFeature vetoPFeature,
+            final MultiMap glueFeatureCoordinates) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
-        final List<Coordinate> coordinates = new ArrayList<Coordinate>();
-        final Collection<Point2D> p = new ArrayList<Point2D>();
+        final List<Coordinate> coordinates = new ArrayList<>();
+        final Collection<Point2D> p = new ArrayList<>();
         if (features == null) {
             return null;
         }
         for (final PFeature pfeature : features) {
+            if ((pfeature != null)
+                        && ((pfeature.getFeature() instanceof LinearReferencedPointFeature)
+                            || (pfeature.getFeature() instanceof LinearReferencedLineFeature))) {
+                continue;
+            }
+            if (pfeature.equals(vetoPFeature)) {
+                continue;
+            }
+            final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
+                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
             for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                 for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                     final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                     final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                     for (int position = 0; position < xp.length; position++) {
+                        if ((glueCoordinates != null) && glueCoordinates.contains(position)) {
+                            continue;
+                        }
                         if (bounds.contains(xp[position], yp[position])) {
                             p.add(new Point2D.Float(xp[position], yp[position]));
                             coordinates.add(pfeature.getCoordinate(entityIndex, ringIndex, position));
@@ -671,9 +772,6 @@ public class PFeatureTools {
         double distance = -1;
         Coordinate nearestCoordinate = null;
         for (int i = 0; i < points.length; ++i) {
-            if ((vetoPoint != null) && points[i].equals(vetoPoint)) {
-                return null;
-            }
             final double distanceCheck = myPosition.distanceSq(points[i]);
             if ((distance < 0) || (distanceCheck < distance)) {
                 nearestCoordinate = coordinates.get(i);
@@ -1251,6 +1349,47 @@ public class PFeatureTools {
                 return false;
             }
             return true;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    @Getter
+    public static class SnappedPoint {
+
+        //~ Enums --------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @version  $Revision$, $Date$
+         */
+        public enum SnappedOn {
+
+            //~ Enum constants -------------------------------------------------
+
+            NOTHING, POINT, LINE
+        }
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final Point2D point;
+        private final SnappedOn snappedOn;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SnappedPoint object.
+         *
+         * @param  point      DOCUMENT ME!
+         * @param  snappedOn  DOCUMENT ME!
+         */
+        public SnappedPoint(final Point2D point, final SnappedOn snappedOn) {
+            this.point = point;
+            this.snappedOn = snappedOn;
         }
     }
 }

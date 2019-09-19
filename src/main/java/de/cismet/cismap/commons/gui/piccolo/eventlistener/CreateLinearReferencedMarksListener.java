@@ -970,11 +970,12 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 final Point2D point = trigger;
                 Coordinate snapPoint = null;
 
-                if (mc.isSnappingEnabled() && !mc.isSnappingOnLineEnabled()) {
+                if (mc.isSnappingEnabled() && MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())) {
                     snapPoint = PFeatureTools.getNearestCoordinateInArea(
                             mc,
                             mc.getCamera().viewToLocal((Point2D)trigger.clone()),
-                            false);
+                            false,
+                            null);
                 }
 
                 Coordinate triggerCoordinate = snapPoint;
