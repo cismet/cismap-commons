@@ -14,7 +14,10 @@ package de.cismet.cismap.commons.gui.printing;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JExcelApiExporter;
+
+import java.io.File;
 
 /**
  * DOCUMENT ME!
@@ -51,7 +54,7 @@ public class JasperReportExcelDownload extends JasperReportDownload {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected void exportReportFile() throws JRException {
+    protected void exportReportFile(final JasperPrint print, final File fileToSaveTo) throws JRException {
         final JExcelApiExporter exporter = new JExcelApiExporter();
         exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
         exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fileToSaveTo.toString());
