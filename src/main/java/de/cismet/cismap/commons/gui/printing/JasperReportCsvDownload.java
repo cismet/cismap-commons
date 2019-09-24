@@ -14,9 +14,10 @@ package de.cismet.cismap.commons.gui.printing;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
+import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
 
-import java.util.Map;
+import java.io.File;
 
 /**
  * DOCUMENT ME!
@@ -55,7 +56,7 @@ public class JasperReportCsvDownload extends JasperReportDownload {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected void exportReportFile() throws JRException {
+    protected void exportReportFile(final JasperPrint print, final File fileToSaveTo) throws JRException {
         final JRCsvExporter exporter = new JRCsvExporter();
         exporter.setParameter(JRExporterParameter.JASPER_PRINT, print);
         exporter.setParameter(JRExporterParameter.OUTPUT_FILE_NAME, fileToSaveTo.toString());
