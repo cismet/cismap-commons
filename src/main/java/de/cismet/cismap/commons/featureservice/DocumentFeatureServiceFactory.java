@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.featureservice;
 import org.deegree.io.shpapi.FileHeader;
 
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -29,6 +30,8 @@ import java.security.MessageDigest;
 
 import java.util.List;
 import java.util.StringTokenizer;
+
+import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
@@ -170,6 +173,16 @@ public class DocumentFeatureServiceFactory {
                         String fileName = documentFile.getName();
                         fileName = fileName.substring(0, fileName.lastIndexOf("."));
                         final String tableName = fileName + "_" + hexString;
+                        if (H2FeatureService.tableAlreadyExists(tableName)) {
+                            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                                NbBundle.getMessage(
+                                    DocumentFeatureServiceFactory.class,
+                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.message"),
+                                NbBundle.getMessage(
+                                    DocumentFeatureServiceFactory.class,
+                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.title"),
+                                JOptionPane.WARNING_MESSAGE);
+                        }
                         return new H2FeatureService(
                                 fileName,
                                 H2FeatureServiceFactory.DB_NAME,
