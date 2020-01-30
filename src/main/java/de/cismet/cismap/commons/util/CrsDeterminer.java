@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import org.geotools.referencing.wkt.Parser;
 
+import org.opengis.referencing.ReferenceIdentifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.text.ParseException;
@@ -44,14 +45,26 @@ public class CrsDeterminer {
     /**
      * Compares the given crs.
      *
-     * @param   crs       DOCUMENT ME!
-     * @param   otherCrs  DOCUMENT ME!
+     * @param   authority  DOCUMENT ME!
+     * @param   crs        DOCUMENT ME!
+     * @param   otherCrs   DOCUMENT ME!
      *
      * @return  true, if the given crs are equal
      */
-    public static boolean isCrsEqual(final CoordinateReferenceSystem crs, final CoordinateReferenceSystem otherCrs) {
+    public static boolean isCrsEqual(final String authority,
+            final CoordinateReferenceSystem crs,
+            final CoordinateReferenceSystem otherCrs) {
         final String definitionWithoutName = crs.toWKT().substring(crs.toWKT().indexOf("\n") + 1);
         final String otherDefinitionWithoutName = otherCrs.toWKT().substring(otherCrs.toWKT().indexOf("\n") + 1);
+
+        if ((crs.getCoordinateSystem() != null) && (crs.getCoordinateSystem().getIdentifiers() != null)
+                    && !crs.getCoordinateSystem().getIdentifiers().isEmpty()) {
+            for (final ReferenceIdentifier ri : crs.getCoordinateSystem().getIdentifiers()) {
+                if (ri.toString().equals(authority)) {
+                    return true;
+                }
+            }
+        }
 
         return definitionWithoutName.equals(otherDefinitionWithoutName);
     }

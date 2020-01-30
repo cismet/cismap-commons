@@ -599,7 +599,7 @@ public class DxfReader {
                             crsDefinition);
 
                     for (final Crs key : prjMapping.keySet()) {
-                        if (CrsDeterminer.isCrsEqual(prjMapping.get(key), crs)) {
+                        if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crs)) {
                             return key.getCode();
                         }
                     }
