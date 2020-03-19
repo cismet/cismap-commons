@@ -690,8 +690,27 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
                     @Override
                     public void run() {
-                        ((FeatureCollectionTableModel)FeatureControl.this.jxtFeatures.getModel())
-                                .fireTableDataChanged();
+                        final FeatureCollection fc = new DefaultFeatureCollection();
+
+                        // remembering all selected Features
+                        for (final int row : jxtFeatures.getSelectedRows()) {
+                            final int mappedRow = mapRowToModel(row);
+                            final Feature feature = getFeatureCollection().getFeature(mappedRow);
+                            fc.addFeature(feature);
+                        }
+                        fc.select(fc.getAllFeatures());
+
+                        // updating model, but suppressing updateSelection by disabling theListSelectionListener
+                        try {
+                            jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
+                            ((FeatureCollectionTableModel)FeatureControl.this.jxtFeatures.getModel())
+                                    .fireTableDataChanged();
+                        } finally {
+                            jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
+                        }
+
+                        // reselecting previously selected Features
+                        addFeatureToSelection(fc);
                     }
                 });
         }
@@ -725,7 +744,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         final SubFeature sf = (SubFeature)current;
                         current = FeatureGroups.getRootFeature(sf);
                     }
-                    final int collectionIndex = fc.getAllFeatures().indexOf(current);
+                    final int collectionIndex = mappingComponent.getFeatureCollection()
+                                .getAllFeatures()
+                                .indexOf(current);
                     if (collectionIndex != -1) {
                         final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
                         jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
@@ -1282,7 +1303,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          */
         public void setArmed(final boolean armed) {
             this.armed = armed;
-            model.fireTableDataChanged();
+            FeatureControl.this.fireTableDataChanged();
         }
     }
 }

@@ -15,6 +15,8 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
 
+import java.io.File;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,13 +44,13 @@ public class JasperReportDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
-    protected JasperPrint print;
-    protected String reportResourceName;
-    protected Map parameters;
-    protected JasperReportParametersGenerator parametersGenerator;
-    protected JRDataSource dataSource;
-    protected JasperReportDataSourceGenerator dataSourceGenerator;
-    protected JasperReport reportResource;
+    private JasperPrint print;
+    private String reportResourceName;
+    private Map parameters;
+    private JasperReportParametersGenerator parametersGenerator;
+    private JRDataSource dataSource;
+    private JasperReportDataSourceGenerator dataSourceGenerator;
+    private JasperReport reportResource;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -198,6 +200,9 @@ public class JasperReportDownload extends AbstractCancellableDownload {
             }
         } catch (Exception ex) {
             error(ex);
+        } finally {
+            dataSourceGenerator = null;
+            parametersGenerator = null;
         }
 
         try {
@@ -209,12 +214,17 @@ public class JasperReportDownload extends AbstractCancellableDownload {
             print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
         } catch (JRException ex) {
             error(ex);
+        } finally {
+            parameters = null;
+            dataSource = null;
+            reportResource = null;
+            reportResourceName = null;
         }
 
         if (print != null) {
             try {
                 if (!Thread.interrupted()) {
-                    exportReportFile();
+                    exportReportFile(print, fileToSaveTo);
                 } else {
                     log.info("Download was interuppted");
                     deleteFile();
@@ -222,6 +232,8 @@ public class JasperReportDownload extends AbstractCancellableDownload {
                 }
             } catch (JRException ex) {
                 error(ex);
+            } finally {
+                print = null;
             }
         }
 
@@ -234,9 +246,12 @@ public class JasperReportDownload extends AbstractCancellableDownload {
     /**
      * DOCUMENT ME!
      *
+     * @param   print         DOCUMENT ME!
+     * @param   fileToSaveTo  DOCUMENT ME!
+     *
      * @throws  JRException  DOCUMENT ME!
      */
-    protected void exportReportFile() throws JRException {
+    protected void exportReportFile(final JasperPrint print, final File fileToSaveTo) throws JRException {
         JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
     }
 
