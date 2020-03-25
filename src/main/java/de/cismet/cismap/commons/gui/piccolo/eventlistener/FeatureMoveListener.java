@@ -33,6 +33,7 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.RequestForHidingHandles;
+import de.cismet.cismap.commons.features.RequestNoAutoSelectionWhenMoving;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
@@ -107,7 +108,8 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                         features.add(pFeature);
                         pFeature.moveToFront();
                     }
-                    if (!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) {
+                    if ((!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1))
+                                && !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)) {
                         mc.getFeatureCollection().unselectAll();
                         mc.getFeatureCollection().select(pFeature.getFeature());
                         postSelectionChanged();
@@ -191,7 +193,8 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                 final Object o = it.next();
                 if (o instanceof PFeature) {
                     final PFeature f = (PFeature)o;
-                    if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                    if ((mc.getFeatureCollection() instanceof DefaultFeatureCollection)
+                                && !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)) {
                         final Vector v = new Vector();
                         v.add(f.getFeature());
                         ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
