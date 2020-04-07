@@ -14,14 +14,18 @@ package de.cismet.cismap.commons.drophandler.builtin;
 
 import lombok.Getter;
 
+import org.apache.log4j.Logger;
+
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.io.File;
 
 import javax.swing.ImageIcon;
 
 import de.cismet.tools.BrowserLauncher;
+import de.cismet.tools.ExifReader;
 
 import de.cismet.tools.gui.ImageUtil;
 
@@ -59,7 +63,8 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
      */
     public MappingComponentGeoImageFileDropHandlerInfoComponent(final File imageFile) {
         this.imageFile = imageFile;
-        final Image origImage = new ImageIcon(imageFile.getAbsolutePath()).getImage();
+        final Image origImage = ImageUtil.loadImageAccordingToExifOrientation(imageFile);
+
         reducedIcon = new ImageIcon(ImageUtil.resizeOnScale(origImage, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
         reducedWidth = reducedIcon.getIconWidth();
         reducedHeight = reducedIcon.getIconHeight();

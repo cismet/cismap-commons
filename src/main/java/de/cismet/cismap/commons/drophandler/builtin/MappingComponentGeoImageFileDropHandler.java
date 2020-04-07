@@ -122,6 +122,10 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
                     Double direction;
                     try {
                         direction = reader.getGpsDirection();
+
+                        if ((reader.getModel() != null) && reader.getModel().toLowerCase().contains("iphone")) {
+                            direction *= -1;
+                        }
                     } catch (final Exception ex) {
                         direction = null;
                     }
