@@ -36,6 +36,7 @@ import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
+import de.cismet.cismap.commons.gui.options.GPSDirectionOptions;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchFacade;
@@ -118,6 +119,7 @@ public class CismapBroker {
     private Color measurementFillingColor;
     private Color measurementLineColor;
     private Integer measurementLineWidth;
+    private GPSDirectionOptions.GPSDirection gpsAngleDirection = GPSDirectionOptions.GPSDirection.AUTO;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -129,6 +131,24 @@ public class CismapBroker {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the gpsAngleDirection
+     */
+    public GPSDirectionOptions.GPSDirection getGpsAngleDirection() {
+        return gpsAngleDirection;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  gpsAngleDirection  the gpsAngleDirection to set
+     */
+    public void setGpsAngleDirection(final GPSDirectionOptions.GPSDirection gpsAngleDirection) {
+        this.gpsAngleDirection = gpsAngleDirection;
+    }
 
     /**
      * DOCUMENT ME!
