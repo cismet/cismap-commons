@@ -57,9 +57,9 @@ public class CrsDeterminer {
         final String definitionWithoutName = crs.toWKT().substring(crs.toWKT().indexOf("\n") + 1);
         final String otherDefinitionWithoutName = otherCrs.toWKT().substring(otherCrs.toWKT().indexOf("\n") + 1);
 
-        if ((crs.getCoordinateSystem() != null) && (crs.getCoordinateSystem().getIdentifiers() != null)
-                    && !crs.getCoordinateSystem().getIdentifiers().isEmpty()) {
-            for (final ReferenceIdentifier ri : crs.getCoordinateSystem().getIdentifiers()) {
+        if ((otherCrs.getCoordinateSystem() != null) && (otherCrs.getCoordinateSystem().getIdentifiers() != null)
+                    && !otherCrs.getCoordinateSystem().getIdentifiers().isEmpty()) {
+            for (final ReferenceIdentifier ri : otherCrs.getCoordinateSystem().getIdentifiers()) {
                 if (ri.toString().equals(authority)) {
                     return true;
                 }

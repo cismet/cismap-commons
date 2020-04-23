@@ -1286,8 +1286,8 @@ public class InternalDbTree extends JTree {
         }
 
         /**
-         * Rename the currently used layer. Without renaming, the layer cannot be used, 
-         * caused by a wrong table reference.
+         * Rename the currently used layer. Without renaming, the layer cannot be used, caused by a wrong table
+         * reference.
          *
          * @param  oldName  DOCUMENT ME!
          * @param  newName  DOCUMENT ME!
