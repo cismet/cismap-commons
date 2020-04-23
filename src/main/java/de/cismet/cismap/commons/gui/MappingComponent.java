@@ -305,6 +305,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private volatile Coordinate currentCrosshairPoint;
     private Thread specialFeatureZoomThread;
     private long specialFeatureZoomTime;
+    private boolean selectionInProgress = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1791,7 +1792,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         y2 = getWtst().getScreenY(mappingModel.getInitialBoundingBox().getY2());
         final Rectangle2D home = new Rectangle2D.Double();
         home.setRect(x1, y2, x2 - x1, y1 - y2);
-        getCamera().animateViewToCenterBounds(home, true, animationDuration);
+        getCamera().setViewBounds(home);
         if (getCamera().getViewTransform().getScaleY() < 0) {
             LOG.fatal("gotoInitialBoundingBox: Problem :-( mit getViewTransform"); // NOI18N
         }
@@ -2110,7 +2111,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     if (rs instanceof FeatureAwareRasterService) {
                                         ((FeatureAwareRasterService)rs).setFeatureCollection(featureCollection);
                                     }
-                                    rs.retrieve(forced);
+
+                                    final Crs currentCrs = CismapBroker.getInstance().getSrs();
+                                    final int currentSrid = CrsTransformer.extractSridFromCrs(currentCrs.getCode());
+                                    final boolean isMetric = currentCrs.isMetric();
+                                    final XBoundingBox xbb = new XBoundingBox(bb.getGeometry(currentSrid),
+                                            currentCrs.getCode(),
+                                            isMetric);
+
+                                    if (!((rs instanceof AbstractFeatureService)
+                                                    && !((AbstractFeatureService)rs).isVisibleInBoundingBox(xbb))) {
+                                        rs.retrieve(forced);
+                                    }
                                 } finally {
                                     serviceFuturesMap.remove(rs);
                                 }
@@ -2272,6 +2284,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final ArrayList<PFeature> all = new ArrayList<PFeature>();
         final SelectionListener sl = (SelectionListener)getInputEventListener().get(MappingComponent.SELECT);
         boolean selectionChangedBySelectionListener = false;
+
+        if (selectionInProgress) {
+            return;
+        }
 
         if (sl != null) {
             selectionChangedBySelectionListener = sl.isSelectionInProgress();
@@ -3166,6 +3182,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  selectionInProgress  show DOCUMENT ME!
+     */
+    public void setSelectionInProgress(final boolean selectionInProgress) {
+        this.selectionInProgress = selectionInProgress;
+    }
+
+    /**
      * Deletes all present handles from the handlelayer. Tells all selected features in the featurecollection to create
      * their handles and to add them to the handlelayer.
      *
@@ -3173,6 +3198,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void showHandles(final boolean waitTillAllAnimationsAreComplete) {
         // are there features selected?
+        if (selectionInProgress) {
+            return;
+        }
         if (featureCollection.getSelectedFeatures().size() > 0) {
             // DANGER Mehrfachzeichnen von Handles durch parallelen Aufruf
             final Runnable handle = new Thread("MappingComponent showHandles()") {
@@ -3232,29 +3260,37 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             } else {
                                 final LinkedHashSet<Feature> copy = new LinkedHashSet(
                                         featureCollection.getSelectedFeatures());
+                                final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
+                                                .getCode());
+                                final Geometry currentBoundingBoxGeometry = getCurrentBoundingBoxFromCamera()
+                                            .getGeometry(srid);
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature != null) && selectedFeature.isEditable()
                                                 && !(selectedFeature instanceof RequestForHidingHandles)) {
                                         if ((pFeatureHM.get(selectedFeature) != null)
                                                     && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
-                                            EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
+                                            if (selectedFeature.getGeometry().getEnvelope().intersects(
+                                                            currentBoundingBoxGeometry)) {
+                                                EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
 
-                                                    @Override
-                                                    public void run() {
-                                                        try {
-                                                            final PFeature feature = pFeatureHM.get(selectedFeature);
+                                                        @Override
+                                                        public void run() {
+                                                            try {
+                                                                final PFeature feature = pFeatureHM.get(
+                                                                        selectedFeature);
 
-                                                            if (feature != null) {
-                                                                feature.addHandles(handleLayer);
+                                                                if (feature != null) {
+                                                                    feature.addHandles(handleLayer);
+                                                                }
+                                                            } catch (final Exception e) {
+                                                                LOG.error("Error bei addHandles: ", e); // NOI18N
                                                             }
-                                                        } catch (final Exception e) {
-                                                            LOG.error("Error bei addHandles: ", e); // NOI18N
                                                         }
-                                                    }
-                                                });
+                                                    });
+                                            }
                                         } else {
-                                            LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null"); // NOI18N
+                                            LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null");  // NOI18N
                                         }
                                         // DANGER mit break werden nur die Handles EINES slektierten Features angezeigt
                                         // wird break auskommentiert werden jedoch zu viele Handles angezeigt break;
