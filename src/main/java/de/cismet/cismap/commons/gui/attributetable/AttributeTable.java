@@ -425,6 +425,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                                         return null;
                                                     }
                                                 }
+                                                CismapBroker.getInstance().getMappingComponent().showHandles(false);
                                             } finally {
                                                 CismapBroker.getInstance()
                                                         .getMappingComponent()
