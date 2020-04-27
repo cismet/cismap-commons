@@ -41,6 +41,7 @@ import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
@@ -561,17 +562,30 @@ public class HeadlessMapProvider {
             map.setPrintingResolution(printingResolution);
         }
 
+        int invisibleServices = 0;
+
+        for (final MapService m : mappingModel.getMapServices().values()) {
+            if (m instanceof AbstractFeatureService) {
+                final AbstractFeatureService afs = (AbstractFeatureService)m;
+
+                if (!afs.isVisibleInBoundingBox((XBoundingBox)map.getCurrentBoundingBoxFromCamera())) {
+                    ++invisibleServices;
+                }
+            }
+        }
+
         final HeadlessMapProvider.HeadlessMapProviderRetrievalListener listener =
             new HeadlessMapProvider.HeadlessMapProviderRetrievalListener(
                 correctedWidthPixels,
                 correctedHeightPixels,
                 propertyChangeListener,
                 mappingModel.getFeatureServices().size()
-                        + mappingModel.getMapServices().size());
+                        + mappingModel.getMapServices().size()
+                        - invisibleServices);
         map.addRepaintListener(listener);
 
         map.unlockWithoutReload();
-        if (mappingModel.getMapServices().size() > 0) {
+        if ((mappingModel.getMapServices().size() - invisibleServices) > 0) {
             map.queryServices();
         } else {
             listener.createImageFromFeatures();
