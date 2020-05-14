@@ -52,6 +52,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         super(jfs);
         this.databasePath = jfs.databasePath;
         this.tableName = jfs.tableName;
+        this.query = jfs.query;
     }
 
     /**

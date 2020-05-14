@@ -638,12 +638,14 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
 
         try {
-            final PreparedStatement ps = featureInfo.getGeometryStatement();
-            ps.setInt(1, getId());
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                g = (Geometry)rs.getObject(1);
-                g.setSRID(featureInfo.getSrid());
+            synchronized (sync) {
+                final PreparedStatement ps = featureInfo.getGeometryStatement();
+                ps.setInt(1, getId());
+                rs = ps.executeQuery();
+                if (rs.next()) {
+                    g = (Geometry)rs.getObject(1);
+                    g.setSRID(featureInfo.getSrid());
+                }
             }
         } catch (final Exception e) {
             logger.error("Cannot read geometry from the database.", e);

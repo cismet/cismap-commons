@@ -35,10 +35,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -81,6 +84,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private static final String CHECK_LOCKED_FEATURE_TABLE = "SELECT \"lock_time\" FROM \""
                 + H2FeatureServiceFactory.LOCK_TABLE_NAME + "\" where \"table\" = '%s'";
     private static final String CLEAR_LOCKS = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME + "\"";
+    private static final String REMOVE_UNUSED_SEQUENCES = "DROP FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
+                + "\"";
     private static final String UNLOCK = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
                 + "\" where \"id\" = %s and \"table\" = '%s'";
     private static final String UNLOCK_TABLE = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
@@ -958,13 +963,58 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     LOG.warn("Cannot close statement", ex);
                 }
             }
-//            if (conn != null) {
-//                try {
-//                    conn.close();
-//                } catch (SQLException ex) {
-//                    LOG.warn("Cannot close connection", ex);
-//                }
-//            }
+        }
+    }
+
+    /**
+     * remove all unused sequences.
+     */
+    public static void removeUnusedSequences() {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
+            st = conn.createStatement();
+
+            ResultSet rs = st.executeQuery(String.format("select * from INFORMATION_SCHEMA.SEQUENCES"));
+            final Set<String> sequs = new TreeSet<String>();
+
+            while (rs.next()) {
+                final String seqName = rs.getString("SEQUENCE_NAME");
+
+                if (seqName.endsWith("_seq")) {
+                    sequs.add(seqName);
+                }
+            }
+
+            rs.close();
+
+            for (final String seqName : new ArrayList<String>(sequs)) {
+                rs = st.executeQuery(
+                        "select 1 from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA = 'PUBLIC' AND TABLE_NAME = '"
+                                + seqName.substring(0, seqName.length() - 4)
+                                + "'");
+
+                if (rs.next()) {
+                    sequs.remove(seqName);
+                }
+            }
+
+            for (final String seqName : sequs) {
+                st.execute("DROP SEQUENCE \"" + seqName + "\"");
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
         }
     }
 

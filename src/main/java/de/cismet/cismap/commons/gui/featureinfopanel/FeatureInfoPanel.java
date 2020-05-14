@@ -1151,7 +1151,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 }
             }
 
-            if ((features.size() == 1) && !(features.get(0) instanceof WMSFeature)) {
+            if ((features.size() == 1) && !(features.get(0) instanceof WMSFeature)
+                        && (features.get(0) instanceof FeatureServiceFeature)) {
                 final Feature f = features.get(0);
                 final AbstractFeatureService service = ((FeatureServiceFeature)f).getLayerProperties()
                             .getFeatureService();

@@ -42,6 +42,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -70,6 +71,7 @@ import javax.swing.tree.TreeSelectionModel;
 
 import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
@@ -1248,6 +1250,7 @@ public class InternalDbTree extends JTree {
                             newName = entry.getFolderName() + "->" + newName;
                         }
                         st.execute("alter table \"" + entry.getName() + "\" rename to \"" + newName + "\"");
+                        renameExistingService(entry.getName(), newName);
                         entry.setName(newName);
                     }
                 }
@@ -1272,12 +1275,41 @@ public class InternalDbTree extends JTree {
                     } else {
                         final String name = newName + "->" + e.getNameWithoutFolder();
                         st.execute("alter table \"" + e.getName() + "\" rename to \"" + name + "\"");
+                        renameExistingService(e.getName(), name);
                         e.setName(name);
                     }
                 }
                 folder.setName(newName);
             } catch (Exception e) {
                 LOG.error("Error during rename operation.", e);
+            }
+        }
+
+        /**
+         * Rename the currently used layer. Without renaming, the layer cannot be used, caused by a wrong table
+         * reference.
+         *
+         * @param  oldName  DOCUMENT ME!
+         * @param  newName  DOCUMENT ME!
+         */
+        private void renameExistingService(final String oldName, final String newName) {
+            final ActiveLayerModel mappingModel = (ActiveLayerModel)CismapBroker.getInstance().getMappingComponent()
+                        .getMappingModel();
+
+            final TreeMap treeMap = mappingModel.getMapServices();
+            final List<Integer> keyList = new ArrayList<Integer>(treeMap.keySet());
+            final Iterator it = keyList.iterator();
+
+            while (it.hasNext()) {
+                final Object service = treeMap.get(it.next());
+
+                if (service instanceof H2FeatureService) {
+                    final H2FeatureService featureService = (H2FeatureService)service;
+
+                    if ((featureService.getTableName() != null) && featureService.getTableName().equals(oldName)) {
+                        featureService.setTableName(newName);
+                    }
+                }
             }
         }
 

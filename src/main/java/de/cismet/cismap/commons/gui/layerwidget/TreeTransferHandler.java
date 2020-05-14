@@ -72,13 +72,21 @@ public class TreeTransferHandler extends TransferHandler {
             return false;
         }
         support.setShowDropLocation(true);
-        if (!support.isDataFlavorSupported(nodesFlavor)) {
-            return true;
-        }
-        // Do not allow a drop on the drag source selections
         final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
         final JTree tree = (JTree)support.getComponent();
         final int dropRow = tree.getRowForPath(dl.getPath());
+        final Object targetNode = ((dl.getPath() != null) ? dl.getPath().getLastPathComponent() : null);
+
+        // Do not allow a drop on a layer that is not a collection
+        if ((targetNode != null) && !(targetNode instanceof LayerCollection) && !targetNode.equals("Layer")) {
+            return false;
+        }
+
+        if (!support.isDataFlavorSupported(nodesFlavor)) {
+            // Die Drag Operation wurde nicht aus dem Themenbaum gestartet
+            return true;
+        }
+        // Do not allow a drop on the drag source selections
         final int[] selRows = tree.getSelectionRows();
         for (int i = 0; i < selRows.length; i++) {
             if (selRows[i] == dropRow) {
@@ -88,13 +96,6 @@ public class TreeTransferHandler extends TransferHandler {
             if (selRows[i] == 0) {
                 return false;
             }
-        }
-
-        // Do not allow a drop on a layer that is not a collection
-        final Object targetNode = dl.getPath().getLastPathComponent();
-
-        if (!(targetNode instanceof LayerCollection) && !targetNode.equals("Layer")) {
-            return false;
         }
 
         if ((targetNode instanceof LayerCollection) && containsDescendantPath(dl.getPath(), tree.getSelectionPaths())) {
@@ -194,13 +195,13 @@ public class TreeTransferHandler extends TransferHandler {
         final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
         final int childIndex = dl.getChildIndex();
         final TreePath dest = dl.getPath();
-        final Object parent = dest.getLastPathComponent();
+        final Object parent = ((dest != null) ? dest.getLastPathComponent() : null);
         final JTree tree = (JTree)support.getComponent();
         final ActiveLayerModel model = (ActiveLayerModel)((ActiveLayerModelWrapperWithoutProgress)tree.getModel())
                     .getModel();
         // Configure for drop mode.
-        int index = childIndex; // DropMode.INSERT
-        if (childIndex == -1) { // DropMode.ON
+        int index = childIndex;                       // DropMode.INSERT
+        if ((childIndex == -1) && (parent != null)) { // DropMode.ON
             index = model.getChildCount(parent);
         }
 

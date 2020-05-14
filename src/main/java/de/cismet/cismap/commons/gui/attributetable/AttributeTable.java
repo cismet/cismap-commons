@@ -4388,9 +4388,9 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
                 }
             } else {
-                selectionChangeFromMap = true;
-                fireContentsChanged();
-                selectionChangeFromMap = false;
+                // use a repaint instead of the fireContentsChanged method, because fireContentsChanged removes the
+                // selection selectionChangeFromMap = true; fireContentsChanged(); selectionChangeFromMap = false;
+                table.repaint();
             }
         }
     }

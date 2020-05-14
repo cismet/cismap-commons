@@ -84,6 +84,7 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
+import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
@@ -562,6 +563,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 ((MapService)objectToChange).setBoundingBox(
                     CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera());
                 ((RetrievalServiceLayer)objectToChange).retrieve(true);
+
+                if (((RetrievalServiceLayer)objectToChange).isEnabled() != visible) {
+                    // if the layer was a dummy layer, the visibility can be changed during the retrieve method
+                    ((RetrievalServiceLayer)objectToChange).setEnabled(visible);
+
+                    if (objectToChange instanceof AbstractWMS) {
+                        ((AbstractWMS)objectToChange).setVisible(visible);
+                    }
+                }
             }
         }
     }
@@ -1890,6 +1900,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         }
 
         //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isVisible() {
+            return false;
+        }
 
         @Override
         public Component getTreeCellRendererComponent(final JTree tree,
