@@ -91,6 +91,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
     public static final String GET_FEATURE_INFO_MULTI_GEOM_NOTIFICATION = "GET_FEATURE_INFO_MULTI_GEOM_NOTIFICATION"; // NOI18N
     private static final String WMS_GML_FORMAT = "application/vnd.ogc.gml";
     private static final String ENCODING_ATTR = "encoding=\"";
+    private static final String ENCODING_ATTR_ALT = "encoding='";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -349,6 +350,10 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
             encodingString = res.substring(res.indexOf(ENCODING_ATTR) + ENCODING_ATTR.length());
 
             encodingString = encodingString.substring(0, encodingString.indexOf("\""));
+        } else if (res.contains(ENCODING_ATTR_ALT)) {
+            encodingString = res.substring(res.indexOf(ENCODING_ATTR_ALT) + ENCODING_ATTR_ALT.length());
+
+            encodingString = encodingString.substring(0, encodingString.indexOf("'"));
         }
 
         if (encodingString != null) {

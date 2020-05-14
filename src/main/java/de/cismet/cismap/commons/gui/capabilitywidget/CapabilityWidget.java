@@ -27,6 +27,7 @@ import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -89,6 +90,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeCellRenderer;
@@ -2134,6 +2137,44 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     private void addPopupMenu(final JTree trvCap) {
         trvCap.addMouseListener(new DefaultPopupMenuListener(treePopMenu));
+        treePopMenu.addPopupMenuListener(new PopupMenuListener() {
+
+                @Override
+                public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {
+                    synchronized (treePopMenu.getTreeLock()) {
+                        if (treePopMenu.getInvoker() instanceof JTree) {
+                            final TreePath[] paths = ((JTree)treePopMenu.getInvoker()).getSelectionPaths();
+                            final Component c = treePopMenu.getComponent(0);
+                            if (c instanceof JMenuItem) {
+                                if ((paths != null) && (paths.length == 1)) {
+                                    if ((paths[0].getLastPathComponent() instanceof TreeFolder)
+                                                || (paths[0].getLastPathComponent() instanceof String)) {
+                                        final JMenuItem item = (JMenuItem)c;
+                                        item.setText(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addPopupMenu.popupMenuWillBecomeVisible"));
+                                    } else {
+                                        final JMenuItem item = (JMenuItem)c;
+                                        item.setText(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuCanceled(final PopupMenuEvent e) {
+                }
+            });
     }
 
     /**
@@ -2644,18 +2685,20 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                 trans = new DefaultTransferable(files.toArray(new File[files.size()]));
             } else if (this.getModel().getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayerTreeModel")) {
-                final List<LayerConfig> objects = new ArrayList<LayerConfig>();
+                final List<CidsLayerTransferable> objects = new ArrayList<CidsLayerTransferable>();
                 final TreePath[] paths = getSelectionModel().getSelectionPaths();
 
                 for (final TreePath path : paths) {
                     final Object o = path.getLastPathComponent();
 
                     if (o instanceof LayerConfig) {
-                        objects.add((LayerConfig)o);
+                        objects.add(new CidsLayerTransferable((LayerConfig)o));
+                    } else if (o instanceof TreeFolder) {
+                        objects.add(new CidsLayerTransferable((TreeFolder)o));
                     }
                 }
 
-                trans = new DefaultTransferable(objects.toArray(new LayerConfig[objects.size()]));
+                trans = new DefaultTransferable(objects.toArray(new CidsLayerTransferable[objects.size()]));
 //                trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);

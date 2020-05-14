@@ -23,6 +23,10 @@ import edu.umd.cs.piccolo.util.PObjectOutputStream;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.io.shpapi.ShapeFile;
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.spatialschema.JTSAdapter;
+
 import org.geotools.referencing.wkt.Parser;
 
 import org.h2.jdbc.JdbcSQLException;
@@ -92,6 +96,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
@@ -223,6 +228,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         this.featureServiceAttributes = (Vector<FeatureServiceAttribute>)hff.featureServiceAttributes.clone();
         this.geometryField = hff.geometryField;
         this.idField = hff.idField;
+        this.name = hff.name;
         initConnection();
     }
 
@@ -762,6 +768,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StringBuilder atts = new StringBuilder();
             final StringBuilder attsRef = new StringBuilder();
             final List<String> attributeNames = new ArrayList<String>();
+            final Map<String, String> typeMap = new HashMap<String, String>();
 
             rs = st.executeQuery("select * from \"" + tmpTableReference + "\" limit 1");
             for (int i = 2; i <= rs.getMetaData().getColumnCount(); ++i) {
@@ -780,17 +787,113 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         .append(columnName)
                         .append("\" ")
                         .append(rs.getMetaData().getColumnTypeName(i));
+                typeMap.put(rs.getMetaData().getColumnName(i), rs.getMetaData().getColumnTypeName(i));
                 atts.append("\"").append(columnName).append("\"");
-                attsRef.append(rs.getMetaData().getColumnName(i).toLowerCase());
+                attsRef.append("\"").append(rs.getMetaData().getColumnName(i)).append("\"");
             }
             rs.close();
             st.execute(String.format(CREATE_TABLE_TEMPLATE, tableName, attsAndTypes.toString()));
-            st.execute(String.format(
-                    "INSERT INTO \"%s\" (%s) (select %s from \"%s\")",
-                    tableName,
-                    atts,
-                    attsRef,
-                    tmpTableReference));
+            try {
+                st.execute(String.format(
+                        "INSERT INTO \"%s\" (%s) (select %s from \"%s\")",
+                        tableName,
+                        atts,
+                        attsRef,
+                        tmpTableReference));
+            } catch (JdbcSQLException e) {
+                // This can happen, when the shp file has less data sets as the dbf file
+                // Check if this was the reason for NPE
+                if (e.getOriginalCause() instanceof NullPointerException) {
+                    if (file.getPath().endsWith(".shp")) {
+                        final ShapeFile shapeFile = new ShapeFile(file.getPath().substring(
+                                    0,
+                                    file.getPath().length()
+                                            - 4));
+                        final int records = shapeFile.getRecordNum();
+                        boolean hasNullGeometries = false;
+                        int nullGeometries = 0;
+
+                        for (int i = 1; i <= records; ++i) {
+                            if (shapeFile.getGeometryByRecNo(i) == null) {
+                                hasNullGeometries = true;
+                                ++nullGeometries;
+                            }
+                        }
+
+                        if (hasNullGeometries) {
+                            final String[] attr = attsRef.toString().split("\",\"");
+                            attr[0] = attr[0].substring(1);
+                            attr[attr.length - 1] = attr[attr.length - 1].substring(
+                                    0,
+                                    attr[attr.length
+                                                - 1].length()
+                                            - 1);
+
+                            for (int i = 1; i <= records; ++i) {
+                                StringBuffer attrValues = null;
+                                final org.deegree.model.feature.Feature f = shapeFile.getFeatureByRecNo(i);
+                                final Map<String, Object> container = new HashMap<String, Object>();
+                                final org.deegree.model.spatialschema.Geometry geometry = shapeFile.getGeometryByRecNo(
+                                        i);
+                                final FeatureProperty[] featureProperties = f.getProperties();
+
+                                if (geometry == null) {
+                                    continue;
+                                }
+
+                                for (final FeatureProperty fp : featureProperties) {
+                                    container.put(fp.getName().getLocalName(), fp.getValue());
+                                }
+
+                                for (final String attribute : attr) {
+                                    final String type = typeMap.get(attribute);
+
+                                    if (attrValues == null) {
+                                        attrValues = new StringBuffer();
+                                    } else {
+                                        attrValues.append(",");
+                                    }
+
+                                    if (type.equalsIgnoreCase("geometry")) {
+                                        final Geometry g = JTSAdapter.export(geometry);
+                                        attrValues.append("'").append(g.toText()).append("'");
+                                    } else {
+                                        if (container.get(attribute) == null) {
+                                            attrValues.append("null");
+                                        } else {
+                                            if (type.equalsIgnoreCase("char")) {
+                                                attrValues.append("'").append(container.get(attribute)).append("'");
+                                            } else {
+                                                attrValues.append(container.get(attribute));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                st.execute(String.format(
+                                        "INSERT INTO \"%s\" (%s) values (%s)",
+                                        tableName,
+                                        atts,
+                                        attrValues));
+                            }
+
+                            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                                NbBundle.getMessage(
+                                    H2FeatureServiceFactory.class,
+                                    "H2FeatureServiceFactory.createTableFromSHP.nullGeom.message",
+                                    new Object[] { nullGeometries }),
+                                NbBundle.getMessage(
+                                    H2FeatureServiceFactory.class,
+                                    "H2FeatureServiceFactory.createTableFromSHP.nullGeom.title"),
+                                JOptionPane.WARNING_MESSAGE);
+                        } else {
+                            throw e;
+                        }
+                    }
+                } else {
+                    throw e;
+                }
+            }
 
             saveAttributeOrder(tableName, attributeNames.toArray(new String[0]));
 
@@ -1054,7 +1157,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                                 crsDefinition);
 
                         for (final Crs key : prjMapping.keySet()) {
-                            if (CrsDeterminer.isCrsEqual(prjMapping.get(key), crsFromShape)) {
+                            if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crsFromShape)) {
                                 return key.getCode();
                             }
                         }

@@ -503,7 +503,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                                 crsDefinition);
 
                         for (final Crs key : prjMapping.keySet()) {
-                            if (CrsDeterminer.isCrsEqual(prjMapping.get(key), crsFromShape)) {
+                            if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crsFromShape)) {
                                 return key.getCode();
                             }
                         }
