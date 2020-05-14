@@ -39,7 +39,9 @@ import de.cismet.cismap.commons.featureservice.LayerAlreadyAddedException;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.capabilitywidget.CidsLayerTransferable;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
+import de.cismet.cismap.commons.gui.capabilitywidget.TreeFolder;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
@@ -247,15 +249,30 @@ public class LayerDropUtils {
                     }
 
                     return true;
-                } else if (o instanceof LayerConfig[]) {
-                    for (int i = ((LayerConfig[])o).length - 1; i >= 0; --i) {
-                        final LayerConfig config = ((LayerConfig[])o)[i];
-                        if (index != -1) {
-                            activeLayerModel.addLayer((config).createConfiguredLayer(),
-                                activeLayerModel.layers.size()
-                                        - index);
+                } else if (o instanceof CidsLayerTransferable[]) {
+                    for (int i = ((CidsLayerTransferable[])o).length - 1; i >= 0; --i) {
+                        final CidsLayerTransferable transferable = ((CidsLayerTransferable[])o)[i];
+
+                        if (transferable.isFolder()) {
+                            final TreeFolder folder = transferable.getFolder();
+
+                            final LayerCollection lc = createTreeFolder(folder);
+                            lc.setModel(activeLayerModel);
+
+                            if (index != -1) {
+                                activeLayerModel.addLayer(lc, activeLayerModel.layers.size() - index);
+                            } else {
+                                activeLayerModel.addLayer(lc, 0);
+                            }
                         } else {
-                            activeLayerModel.addLayer((config).createConfiguredLayer());
+                            final LayerConfig config = transferable.getLayerConfig();
+                            if (index != -1) {
+                                activeLayerModel.addLayer((config).createConfiguredLayer(),
+                                    activeLayerModel.layers.size()
+                                            - index);
+                            } else {
+                                activeLayerModel.addLayer((config).createConfiguredLayer());
+                            }
                         }
                     }
 
@@ -338,6 +355,30 @@ public class LayerDropUtils {
                         null);
 
                 lc.add(layer);
+            }
+        }
+
+        return lc;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   folder  i DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private static LayerCollection createTreeFolder(final TreeFolder folder) throws Exception {
+        final LayerCollection lc = new LayerCollection();
+        lc.setName(folder.getName());
+
+        for (final Object tmp : folder) {
+            if (tmp instanceof TreeFolder) {
+                lc.add(createTreeFolder((TreeFolder)tmp));
+            } else {
+                lc.add(((LayerConfig)tmp).createConfiguredLayer());
             }
         }
 
@@ -438,10 +479,24 @@ public class LayerDropUtils {
         try {
             final AbstractFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(
                     currentFile);
-            if (index != -1) {
-                activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
-            } else {
-                activeLayerModel.addLayer(dfs);
+
+            try {
+                if (index != -1) {
+                    activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
+                } else {
+                    activeLayerModel.addLayer(dfs);
+                }
+            } catch (final IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(
+                    parent,
+                    org.openide.util.NbBundle.getMessage(
+                        LayerWidget.class,
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                    org.openide.util.NbBundle.getMessage(
+                        LayerWidget.class,
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
+                    JOptionPane.ERROR_MESSAGE);
+                throw ex;
             }
 
             if (dfs instanceof ShapeFileFeatureService) {
