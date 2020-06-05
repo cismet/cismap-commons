@@ -3486,15 +3486,6 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
-        if (features.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                this,
-                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.text"),
-                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.title"),
-                JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
         try {
             // every download needs its own instance of the Download class
             File outputFile = file;
@@ -3550,6 +3541,19 @@ public class AttributeTable extends javax.swing.JPanel {
                                 featureService,
                                 attributeNames);
                     } else {
+                        if (features.isEmpty()
+                                    && featureService.getGeometryType().equals(AbstractFeatureService.UNKNOWN)) {
+                            JOptionPane.showMessageDialog(
+                                this,
+                                NbBundle.getMessage(
+                                    AttributeTable.class,
+                                    "AttributeTable.butExportActionPerformed.noFeatures.text"),
+                                NbBundle.getMessage(
+                                    AttributeTable.class,
+                                    "AttributeTable.butExportActionPerformed.noFeatures.title"),
+                                JOptionPane.INFORMATION_MESSAGE);
+                            return;
+                        }
                         downloader = new ExportShapeDownload();
                         downloader.init(outputFile.getAbsolutePath(),
                             "",

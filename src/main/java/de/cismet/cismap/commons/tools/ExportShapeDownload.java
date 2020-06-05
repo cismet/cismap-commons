@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -92,7 +94,65 @@ public class ExportShapeDownload extends ExportDownload {
                     ((PersistentFeature)features[0]).getPersistenceManager().close();
                 }
             } else {
-                error(new Exception("No features found"));
+                try {
+                    final FeatureServiceFeature feature = service.getFeatureFactory().createNewFeature();
+                    final String geometryType = service.getGeometryType();
+
+                    if (!getDefaultExtension().equalsIgnoreCase(".dbf")) {
+                        final Geometry g = GeometryUtils.createDummyGeometry(geometryType);
+                        feature.setGeometry(g);
+                    }
+
+                    features = new FeatureServiceFeature[] { feature };
+                    String filenameStem = fileToSaveTo.getAbsolutePath();
+
+                    if (filenameStem.contains(".")) {
+                        filenameStem = filenameStem.substring(0, filenameStem.indexOf("."));
+                    }
+
+                    final Collection<? extends ShapeWriter> writer = Lookup.getDefault().lookupAll(ShapeWriter.class);
+
+                    if (writer.size() > 0) {
+                        if (getDefaultExtension().equalsIgnoreCase(".dbf")) {
+                            writer.iterator().next().writeDbf(features, aliasAttributeList, fileToSaveTo);
+                        } else {
+                            writer.iterator().next().writeShape(features, aliasAttributeList, fileToSaveTo);
+                        }
+                    }
+
+                    final int shpGeoType = GeometryUtils.getShpGeometryType(geometryType);
+
+                    try {
+                        GeometryUtils.clearShpOrShxFile(filenameStem + ".shp", shpGeoType);
+                        GeometryUtils.clearShpOrShxFile(filenameStem + ".shx", shpGeoType);
+                        GeometryUtils.clearDbfFile(filenameStem + ".dbf");
+                    } catch (Exception e) {
+                        log.error("Cannot remove content from shape. So remove it completely", e);
+                        final File shapeFile = new File(filenameStem + ".shp");
+                        final File shxFile = new File(filenameStem + ".shx");
+                        final File dbfFile = new File(filenameStem + ".dbf");
+
+                        if (shapeFile.exists()) {
+                            shapeFile.delete();
+                        }
+                        if (shxFile.exists()) {
+                            shxFile.delete();
+                        }
+                        if (dbfFile.exists()) {
+                            dbfFile.delete();
+                        }
+                    }
+
+                    if (getDefaultExtension().equalsIgnoreCase(".dbf")) {
+                        String shpFileName = filenameStem + ".shp";
+
+                        deleteFileIfExists(shpFileName);
+                        shpFileName = filenameStem + ".shx";
+                        deleteFileIfExists(shpFileName);
+                    }
+                } catch (Exception e) {
+                    error(e);
+                }
             }
 
             if (status == Download.State.RUNNING) {
