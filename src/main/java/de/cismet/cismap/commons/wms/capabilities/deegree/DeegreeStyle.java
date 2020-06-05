@@ -75,6 +75,14 @@ public class DeegreeStyle implements Style {
 
         for (int i = 0; i < legendUrls.length; ++i) {
             result[i] = legendUrls[i].getOnlineResource();
+
+            if (result[i] != null) {
+                try {
+                    result[i] = new URL(result[i].toString() + "&legend_options=forceLabels:on");
+                } catch (Exception e) {
+                    // nothing to do here
+                }
+            }
         }
 
         return result;
