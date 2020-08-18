@@ -30,7 +30,8 @@ import java.util.Vector;
 import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.wms.capabilities.Envelope;
+
+import de.cismet.commons.wms.capabilities.Envelope;
 
 /**
  * DOCUMENT ME!

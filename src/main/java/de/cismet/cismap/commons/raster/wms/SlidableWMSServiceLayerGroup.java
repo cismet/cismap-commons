@@ -55,11 +55,12 @@ import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
-import de.cismet.cismap.commons.wms.capabilities.Position;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.Envelope;
+import de.cismet.commons.wms.capabilities.Layer;
+import de.cismet.commons.wms.capabilities.LayerBoundingBox;
+import de.cismet.commons.wms.capabilities.Position;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!
@@ -199,7 +200,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         originalTreePaths = treePaths;
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
-        final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        final Layer selectedLayer = (de.cismet.commons.wms.capabilities.Layer)tp.getLastPathComponent();
         evaluateLayerKeywords(selectedLayer);
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 

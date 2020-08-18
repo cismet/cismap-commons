@@ -102,6 +102,7 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
+import de.cismet.cismap.commons.capabilities.CapabilitiesCache;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFolderTreeCellRenderer;
@@ -122,9 +123,10 @@ import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-import de.cismet.cismap.commons.wms.capabilities.*;
 
 import de.cismet.commons.security.AccessHandler;
+
+import de.cismet.commons.wms.capabilities.*;
 
 import de.cismet.security.WebAccessManager;
 
@@ -1375,7 +1377,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 public void run() {
                     try {
                         final DragTree trvCap = new DragTree();
-                        final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
+                        final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory(CapabilitiesCache
+                                        .getInstance());
                         final CismapBroker broker = CismapBroker.getInstance();
                         if (log.isDebugEnabled()) {
                             log.debug("Capability Widget: Creating WMScapabilities for URL: " + link); // NOI18N
@@ -1566,7 +1569,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                 + WSSAccessHandler.SECURED_SERVICE_TYPE.WMS); // NOI18N
                                 }
                                 try {
-                                    final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
+                                    final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory(CapabilitiesCache
+                                                    .getInstance());
                                     if (log.isDebugEnabled()) {
                                         log.debug("Capability Widget: Creating WMScapabilities for URL: "
                                                     + link);                                  // NOI18N

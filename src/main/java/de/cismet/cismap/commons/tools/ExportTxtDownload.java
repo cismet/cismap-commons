@@ -93,48 +93,46 @@ public class ExportTxtDownload extends ExportDownload {
                 return;
             }
 
-            if ((features != null) && (features.length > 0)) {
-                final List<String> attributeList = toAttributeList(aliasAttributeList);
-                BufferedWriter bw = null;
-                boolean firstLine = true;
-                try {
-                    bw = new BufferedWriter(new FileWriter(fileToSaveTo));
+            if (features == null) {
+                features = new FeatureServiceFeature[0];
+            }
 
-                    for (final FeatureServiceFeature feature : features) {
-                        if (Thread.interrupted()) {
-                            bw.close();
-                            fileToSaveTo.delete();
-                            bw = null;
-                            break;
-                        }
-                        if (firstLine && (aliasAttributeList != null)) {
-                            if (writeHeader) {
-                                bw.write(toString(toAliasList(aliasAttributeList), true));
-                                bw.newLine();
-                            }
+            final List<String> attributeList = toAttributeList(aliasAttributeList);
+            BufferedWriter bw = null;
+            try {
+                bw = new BufferedWriter(new FileWriter(fileToSaveTo));
 
-                            firstLine = false;
-                        }
-                        bw.write(toString(attributeList, feature));
+                if ((aliasAttributeList != null)) {
+                    if (writeHeader) {
+                        bw.write(toString(toAliasList(aliasAttributeList), true));
                         bw.newLine();
                     }
-                } catch (final Exception ex) {
-                    error(ex);
-                } finally {
-                    if (bw != null) {
-                        try {
-                            bw.close();
-                        } catch (final IOException e) {
-                            log.error("Error while closing file", e);
-                        }
-                    }
                 }
 
-                if (features[0] instanceof PersistentFeature) {
-                    ((PersistentFeature)features[0]).getPersistenceManager().close();
+                for (final FeatureServiceFeature feature : features) {
+                    if (Thread.interrupted()) {
+                        bw.close();
+                        fileToSaveTo.delete();
+                        bw = null;
+                        break;
+                    }
+                    bw.write(toString(attributeList, feature));
+                    bw.newLine();
                 }
-            } else {
-                error(new Exception("No features found"));
+            } catch (final Exception ex) {
+                error(ex);
+            } finally {
+                if (bw != null) {
+                    try {
+                        bw.close();
+                    } catch (final IOException e) {
+                        log.error("Error while closing file", e);
+                    }
+                }
+            }
+
+            if ((features.length > 0) && (features[0] instanceof PersistentFeature)) {
+                ((PersistentFeature)features[0]).getPersistenceManager().close();
             }
 
             if (status == Download.State.RUNNING) {

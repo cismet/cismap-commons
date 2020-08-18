@@ -94,7 +94,8 @@ import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 import de.cismet.tools.Static2DTools;
 

@@ -29,7 +29,7 @@ import org.deegree.ogcwebservices.getcapabilities.ServiceProvider;
 
 import java.util.ArrayList;
 
-import de.cismet.cismap.commons.capabilities.Service;
+import de.cismet.commons.capabilities.Service;
 
 /**
  * DOCUMENT ME!

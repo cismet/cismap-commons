@@ -27,9 +27,9 @@ import java.io.IOException;
 
 import java.net.URL;
 
-import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.wfs.WFSFacade;
-import de.cismet.cismap.commons.wms.capabilities.FeatureTypeList;
+
+import de.cismet.commons.capabilities.Service;
 
 /**
  * DOCUMENT ME!

@@ -34,7 +34,8 @@ import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.PropertyEqualsProvider;
 import de.cismet.tools.Static2DTools;

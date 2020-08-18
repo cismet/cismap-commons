@@ -9,7 +9,7 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

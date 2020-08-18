@@ -19,14 +19,16 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
-import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.capabilities.Service;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.Static2DTools;
 
