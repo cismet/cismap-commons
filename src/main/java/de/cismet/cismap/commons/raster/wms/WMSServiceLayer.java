@@ -36,6 +36,7 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.capabilities.CapabilitiesCache;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -43,11 +44,12 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.Operation;
-import de.cismet.cismap.commons.wms.capabilities.Style;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
+
+import de.cismet.commons.wms.capabilities.Layer;
+import de.cismet.commons.wms.capabilities.Operation;
+import de.cismet.commons.wms.capabilities.Style;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.commons.wms.capabilities.WMSCapabilitiesFactory;
 
 import de.cismet.tools.PropertyEqualsProvider;
 
@@ -660,7 +662,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @throws  Exception  DOCUMENT ME!
      */
     private WMSCapabilities createCapabilitiesDocument() throws Exception {
-        final WMSCapabilitiesFactory factory = new WMSCapabilitiesFactory();
+        final WMSCapabilitiesFactory factory = new WMSCapabilitiesFactory(CapabilitiesCache.getInstance());
         final CapabilityLink link = new CapabilityLink(wmsServiceLayerElement);
         return factory.createCapabilities(link.getLink());
     }

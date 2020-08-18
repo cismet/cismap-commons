@@ -29,7 +29,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 /**
  * DOCUMENT ME!

@@ -7,7 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

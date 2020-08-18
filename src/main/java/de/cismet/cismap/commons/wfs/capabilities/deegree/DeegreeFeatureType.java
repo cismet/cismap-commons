@@ -31,9 +31,10 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.OperationType;
 import de.cismet.cismap.commons.wfs.capabilities.OutputFormatType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeCoordinateSystem;
-import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
+
+import de.cismet.commons.wms.capabilities.Envelope;
+import de.cismet.commons.wms.capabilities.deegree.DeegreeCoordinateSystem;
+import de.cismet.commons.wms.capabilities.deegree.DeegreeEnvelope;
 
 /**
  * DOCUMENT ME!

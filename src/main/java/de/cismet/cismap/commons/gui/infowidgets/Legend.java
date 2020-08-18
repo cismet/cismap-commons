@@ -48,7 +48,8 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleLegendProvider;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.Static2DTools;
 

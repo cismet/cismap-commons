@@ -45,7 +45,8 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 /**
  * This class provides access to a Web Feature service. Requests will be send to a WFS instance. The response will be

@@ -36,7 +36,8 @@ import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.exceptions.CannotReadFromURLException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.security.*;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

@@ -35,7 +35,8 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

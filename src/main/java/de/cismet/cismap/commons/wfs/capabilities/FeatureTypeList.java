@@ -21,14 +21,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cismet.cismap.commons.wms.capabilities;
+package de.cismet.cismap.commons.wfs.capabilities;
 
 import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.xml.namespace.QName;
-
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
 /**
  * DOCUMENT ME!

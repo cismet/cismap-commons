@@ -52,7 +52,8 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.util.SLDStyleUtil;
-import de.cismet.cismap.commons.wms.capabilities.Style;
+
+import de.cismet.commons.wms.capabilities.Style;
 
 import de.cismet.tools.CurrentStackTrace;
 

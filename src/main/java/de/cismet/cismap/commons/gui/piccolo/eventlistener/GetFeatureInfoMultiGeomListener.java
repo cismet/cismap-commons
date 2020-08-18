@@ -69,9 +69,10 @@ import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-import de.cismet.cismap.commons.wms.capabilities.Parameter;
 
 import de.cismet.commons.concurrency.CismetExecutors;
+
+import de.cismet.commons.wms.capabilities.Parameter;
 
 import de.cismet.security.WebAccessManager;
 

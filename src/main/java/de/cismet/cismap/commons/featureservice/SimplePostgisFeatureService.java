@@ -23,7 +23,8 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 import de.cismet.tools.ConnectionInfo;
 

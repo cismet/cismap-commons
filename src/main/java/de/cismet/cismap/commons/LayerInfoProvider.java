@@ -23,7 +23,7 @@
  */
 package de.cismet.cismap.commons;
 
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.commons.wms.capabilities.Layer;
 
 /**
  * DOCUMENT ME!

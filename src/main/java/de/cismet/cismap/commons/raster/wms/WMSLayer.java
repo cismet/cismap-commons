@@ -8,8 +8,9 @@
 package de.cismet.cismap.commons.raster.wms;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.Style;
+
+import de.cismet.commons.wms.capabilities.Layer;
+import de.cismet.commons.wms.capabilities.Style;
 
 /**
  * DOCUMENT ME!
