@@ -25,7 +25,8 @@ import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 /**
  * DOCUMENT ME!

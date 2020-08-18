@@ -41,9 +41,10 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
-import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.Envelope;
+import de.cismet.commons.wms.capabilities.Layer;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

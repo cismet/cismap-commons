@@ -29,7 +29,8 @@ import javax.swing.JSlider;
 import javax.swing.border.EmptyBorder;
 
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 import de.cismet.tools.gui.VerticalTextIcon;
 

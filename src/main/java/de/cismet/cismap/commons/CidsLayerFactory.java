@@ -36,7 +36,8 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.ImageFileRetrieval;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!

@@ -28,7 +28,8 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
+
+import de.cismet.commons.wms.capabilities.Layer;
 
 /**
  * Document FeatureService that supports GML Documents.

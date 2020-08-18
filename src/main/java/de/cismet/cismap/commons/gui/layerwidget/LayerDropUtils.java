@@ -554,10 +554,10 @@ public class LayerDropUtils {
      * @return  true, if the given object is a SlidableWMSServiceLayerGroup
      */
     private static boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
-        de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
+        de.cismet.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
 
-        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer) {
-            layer = (de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
+        if (lastPathComponent instanceof de.cismet.commons.wms.capabilities.deegree.DeegreeLayer) {
+            layer = (de.cismet.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
         } else {
             return false;
         }

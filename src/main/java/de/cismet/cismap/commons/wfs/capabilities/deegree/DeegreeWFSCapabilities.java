@@ -20,16 +20,17 @@ import java.io.InputStream;
 
 import java.net.URL;
 
-import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.wfs.FeatureTypeDescription;
 import de.cismet.cismap.commons.wfs.ResponseParserFactory;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureTypeList;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.deegree.DeegreeFeatureTypeDescription;
-import de.cismet.cismap.commons.wms.capabilities.FeatureTypeList;
+
+import de.cismet.commons.capabilities.Service;
 
 import de.cismet.tools.CalculationCache;
 import de.cismet.tools.Calculator;

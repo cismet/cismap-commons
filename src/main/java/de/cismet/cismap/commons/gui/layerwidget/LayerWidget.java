@@ -58,7 +58,8 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.wms.capabilities.*;
+
+import de.cismet.commons.wms.capabilities.*;
 
 import de.cismet.tools.Static2DTools;
 
@@ -1010,10 +1011,10 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      * @return  DOCUMENT ME!
      */
     private boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
-        de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
+        de.cismet.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
 
-        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer) {
-            layer = (de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
+        if (lastPathComponent instanceof de.cismet.commons.wms.capabilities.deegree.DeegreeLayer) {
+            layer = (de.cismet.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
         } else {
             return false;
         }
