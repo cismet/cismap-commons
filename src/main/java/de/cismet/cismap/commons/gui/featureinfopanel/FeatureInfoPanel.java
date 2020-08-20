@@ -150,6 +150,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree jtFeatures;
     private de.cismet.cismap.commons.gui.layerwidget.LayerCombobox layerCombobox1;
+    private javax.swing.JMenuItem miDelete;
     private javax.swing.JMenuItem miEdit;
     private javax.swing.JMenuItem miPrint;
     private javax.swing.JMenuItem miZoom;
@@ -346,53 +347,54 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         popupMenu = new javax.swing.JPopupMenu();
         miZoom = new javax.swing.JMenuItem();
         miPrint = new javax.swing.JMenuItem();
+        miDelete = new javax.swing.JMenuItem();
         miEdit = new javax.swing.JMenuItem();
         layerCombobox1 = new LayerCombobox(layerModel, themeLayerWidget);
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jtFeatures = new javax.swing.JTree();
         sbAttributes = new javax.swing.JScrollPane();
-        tabAttributes = new CellSpecificRenderedTable();
+        tabAttributes = new de.cismet.tools.gui.CellSpecificRenderedTable();
 
         miZoom.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miZoom.text")); // NOI18N
         miZoom.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    miZoomActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miZoomActionPerformed(evt);
+            }
+        });
         popupMenu.add(miZoom);
 
         miPrint.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miPrint.text")); // NOI18N
         miPrint.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    miPrintActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miPrintActionPerformed(evt);
+            }
+        });
         popupMenu.add(miPrint);
+
+        miDelete.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miDelete.text")); // NOI18N
+        miDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miDeleteActionPerformed(evt);
+            }
+        });
+        popupMenu.add(miDelete);
 
         miEdit.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text")); // NOI18N
         miEdit.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    miEditActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miEditActionPerformed(evt);
+            }
+        });
         popupMenu.add(miEdit);
 
         setLayout(new java.awt.GridBagLayout());
 
         layerCombobox1.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    layerCombobox1ItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                layerCombobox1ItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -411,12 +413,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jLabel1, gridBagConstraints);
 
         jtFeatures.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-
-                @Override
-                public void valueChanged(final javax.swing.event.TreeSelectionEvent evt) {
-                    jtFeaturesValueChanged(evt);
-                }
-            });
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                jtFeaturesValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(jtFeatures);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -429,9 +429,6 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
-        tabAttributes.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] {}));
         sbAttributes.setViewportView(tabAttributes);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -443,26 +440,26 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sbAttributes, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
         if ((evt.getStateChange() == ItemEvent.SELECTED) && (model != null)) {
             model.setLayerFilter((LayerFilter)evt.getItem());
             expandAll(new TreePath(model.getRoot()));
         }
-    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
+    }//GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         createPopupMenu();
@@ -514,14 +511,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    } //GEN-LAST:event_jtFeaturesValueChanged
+    }//GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -546,14 +543,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     new Feature[featureList.size()]),
                 10);
         worker.execute();
-    } //GEN-LAST:event_miZoomActionPerformed
+    }//GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
+    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         boolean editModeStopped = false;
 
@@ -600,14 +597,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         }
 
         createPopupMenu();
-    } //GEN-LAST:event_miEditActionPerformed
+    }//GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miPrintActionPerformed
+    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miPrintActionPerformed
         final TreePath tps = jtFeatures.getSelectionPath();
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
@@ -651,7 +648,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_miPrintActionPerformed
+    }//GEN-LAST:event_miPrintActionPerformed
+
+    private void miDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miDeleteActionPerformed
+        
+    }//GEN-LAST:event_miDeleteActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -963,6 +964,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         miEdit.setText(NbBundle.getMessage(
                                 FeatureInfoPanel.class,
                                 "FeatureInfoPanel.miEdit.text.editable"));
+                        popupMenu.add(miDelete);
                     } else {
                         miEdit.setText(NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text"));
                     }
