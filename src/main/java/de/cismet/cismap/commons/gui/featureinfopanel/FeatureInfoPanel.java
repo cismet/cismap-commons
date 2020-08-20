@@ -112,6 +112,7 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.FeatureTools;
+import de.cismet.cismap.commons.util.SelectionManager;
 
 import de.cismet.tools.gui.CellSpecificRenderedTable;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
@@ -283,6 +284,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
                 @Override
                 public void mouseClicked(final MouseEvent e) {
+                    if (currentTableModel == null) {
+                        // avoid NullPointerException
+                        return;
+                    }
                     int col = tabAttributes.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
                     col = tabAttributes.convertColumnIndexToModel(col);
                     final FeatureServiceFeature fsf = currentTableModel.getFeature();
@@ -358,43 +363,55 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         miZoom.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miZoom.text")); // NOI18N
         miZoom.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miZoomActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miZoomActionPerformed(evt);
+                }
+            });
         popupMenu.add(miZoom);
 
         miPrint.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miPrint.text")); // NOI18N
         miPrint.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miPrintActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miPrintActionPerformed(evt);
+                }
+            });
         popupMenu.add(miPrint);
 
-        miDelete.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miDelete.text")); // NOI18N
+        miDelete.setText(org.openide.util.NbBundle.getMessage(
+                FeatureInfoPanel.class,
+                "FeatureInfoPanel.miDelete.text")); // NOI18N
         miDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miDeleteActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miDeleteActionPerformed(evt);
+                }
+            });
         popupMenu.add(miDelete);
 
         miEdit.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text")); // NOI18N
         miEdit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miEditActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miEditActionPerformed(evt);
+                }
+            });
         popupMenu.add(miEdit);
 
         setLayout(new java.awt.GridBagLayout());
 
         layerCombobox1.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                layerCombobox1ItemStateChanged(evt);
-            }
-        });
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    layerCombobox1ItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -413,10 +430,12 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jLabel1, gridBagConstraints);
 
         jtFeatures.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
-                jtFeaturesValueChanged(evt);
-            }
-        });
+
+                @Override
+                public void valueChanged(final javax.swing.event.TreeSelectionEvent evt) {
+                    jtFeaturesValueChanged(evt);
+                }
+            });
         jScrollPane1.setViewportView(jtFeatures);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -440,26 +459,26 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sbAttributes, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
         if ((evt.getStateChange() == ItemEvent.SELECTED) && (model != null)) {
             model.setLayerFilter((LayerFilter)evt.getItem());
             expandAll(new TreePath(model.getRoot()));
         }
-    }//GEN-LAST:event_layerCombobox1ItemStateChanged
+    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         createPopupMenu();
@@ -511,14 +530,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    }//GEN-LAST:event_jtFeaturesValueChanged
+    } //GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -543,14 +562,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     new Feature[featureList.size()]),
                 10);
         worker.execute();
-    }//GEN-LAST:event_miZoomActionPerformed
+    } //GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
+    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         boolean editModeStopped = false;
 
@@ -597,14 +616,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         }
 
         createPopupMenu();
-    }//GEN-LAST:event_miEditActionPerformed
+    } //GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miPrintActionPerformed
+    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miPrintActionPerformed
         final TreePath tps = jtFeatures.getSelectionPath();
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
@@ -648,11 +667,63 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             };
 
         wdt.start();
-    }//GEN-LAST:event_miPrintActionPerformed
+    } //GEN-LAST:event_miPrintActionPerformed
 
-    private void miDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miDeleteActionPerformed
-        
-    }//GEN-LAST:event_miDeleteActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void miDeleteActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miDeleteActionPerformed
+        final Object o = jtFeatures.getSelectionPath().getLastPathComponent();
+        final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)o;
+
+        if (feature instanceof ModifiableFeature) {
+            try {
+                ((ModifiableFeature)feature).delete();
+                final AttributeTable table = AttributeTableFactory.getInstance()
+                            .getAttributeTable(feature.getLayerProperties().getFeatureService());
+
+                // stop edit mode
+                final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
+                            .getLockerForFeatureService(feature.getLayerProperties().getFeatureService());
+
+                // stop the cell renderer, if it is active
+                if ((tabAttributes.getEditingColumn() != -1) && (tabAttributes.getEditingRow() != -1)) {
+                    tabAttributes.getCellEditor(tabAttributes.getEditingRow(),
+                        tabAttributes.getEditingColumn()).stopCellEditing();
+                }
+
+                if (locker != null) {
+                    final Object lockingObject = lockMap.get(feature);
+
+                    if (lockingObject != null) {
+                        locker.unlock(lockingObject);
+                        lockMap.remove(feature);
+                        lockedFeatures.remove(feature);
+                    }
+                }
+                modifiedFeature.remove(feature);
+
+                // if the bounding box == null, this layer wasn't be shown on the map and so it should not be refreshed
+                if ((feature.getLayerProperties().getFeatureService() != null)
+                            && (feature.getLayerProperties().getFeatureService().getBoundingBox() != null)) {
+                    feature.getLayerProperties().getFeatureService().retrieve(true);
+                }
+                feature.setEditable(false);
+
+                // remove feature from model
+                if (table != null) {
+                    table.removeFeatureFromModel(feature);
+                }
+
+                model.removeFeature(feature);
+                SelectionManager.getInstance().removeSelectedFeatures(feature);
+            } catch (Exception e) {
+                LOG.error("Cannot delete feature", e);
+            }
+        }
+    } //GEN-LAST:event_miDeleteActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -1278,6 +1349,16 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 // should never happen
                 return null;
             }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  f  DOCUMENT ME!
+         */
+        public void removeFeature(final FeatureServiceFeature f) {
+            lastFeatures.remove(f);
+            init(lastFeatures);
         }
 
         @Override
