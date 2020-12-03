@@ -42,6 +42,7 @@ import de.cismet.cismap.commons.features.RequestForUnaddableHandles;
 import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
 import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.DeregistrationListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.InvalidPolygonTooltip;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
@@ -59,7 +60,7 @@ import de.cismet.tools.StaticDecimalTools;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class TransformationPHandle extends PHandle {
+public class TransformationPHandle extends PHandle implements DeregistrationListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -780,6 +781,13 @@ public class TransformationPHandle extends PHandle {
         for (final Point2D p : snappedCoordinates.keySet()) {
             pfeature.getViewer().getWtst().removeXCoordinate((float)p.getX());
             pfeature.getViewer().getWtst().removeYCoordinate((float)p.getY());
+        }
+    }
+
+    @Override
+    public void deregistration() {
+        if ((polygonTooltip != null) && polygonTooltip.getVisible()) {
+            polygonTooltip.setVisible(false);
         }
     }
 }

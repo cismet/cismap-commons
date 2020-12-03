@@ -89,6 +89,15 @@ public abstract class JDBCFeatureFactory<FT extends FeatureServiceFeature, QT> e
     /**
      * DOCUMENT ME!
      *
+     * @param  envelope  DOCUMENT ME!
+     */
+    public void setEnvelope(final Geometry envelope) {
+        this.envelope = envelope;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  tableName  DOCUMENT ME!
      */
     public void setTableName(final String tableName) {

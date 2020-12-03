@@ -418,6 +418,20 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         while (res.next()) {
                             final int id = res.getInt(1);
                             final Geometry geom = (Geometry)res.getObject(2);
+                            if (crs.equalsIgnoreCase("EPSG:5650")) {
+                                final double minX = geom.getEnvelopeInternal().getMinX();
+                                final double maxX = geom.getEnvelopeInternal().getMaxX();
+
+                                if ((minX < 33000000) || (maxX > 33999999)) {
+                                    JOptionPane.showMessageDialog(
+                                        CismapBroker.getInstance().getMappingComponent(),
+                                        "Die Shapedatei enthält Rechtwerte, die kleiner 33000000 oder größer 33999999 sind",
+                                        org.openide.util.NbBundle.getMessage(
+                                            H2FeatureServiceFactory.class,
+                                            "H2FeatureServiceFactory.importFile().title"), // NOI18N
+                                        JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
                             geom.setSRID(CrsTransformer.extractSridFromCrs(crs));
                             final Geometry crsTransformed = CrsTransformer.transformToGivenCrs(
                                     geom,

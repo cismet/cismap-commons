@@ -2304,6 +2304,13 @@ public class AttributeTable extends javax.swing.JPanel {
                 "AttributeTable.txtCurrentPage.toolTipText")); // NOI18N
         txtCurrentPage.setMinimumSize(new java.awt.Dimension(50, 27));
         txtCurrentPage.setPreferredSize(new java.awt.Dimension(50, 27));
+        txtCurrentPage.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    txtCurrentPageActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(txtCurrentPage, gridBagConstraints);
@@ -3262,6 +3269,22 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void txtCurrentPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_txtCurrentPageActionPerformed
+        try {
+            final Integer page = Integer.parseInt(txtCurrentPage.getText());
+            if ((page > 0) && (((page - 1) * pageSize) < itemCount)) {
+                currentPage = page;
+                loadModel(currentPage);
+            }
+        } catch (NumberFormatException e) {
+        }
+    }                                                                                  //GEN-LAST:event_txtCurrentPageActionPerformed
+
+    /**
+     * DOCUMENT ME!
      */
     private void copySelectedFeaturesToClipboard() {
         clipboard = getSelectedFeatures();
@@ -3527,7 +3550,8 @@ public class AttributeTable extends javax.swing.JPanel {
                             "",
                             features.toArray(new FeatureServiceFeature[features.size()]),
                             featureService,
-                            attributeNames);
+                            attributeNames,
+                            null);
                     } else if (outputFile.getName().toLowerCase().endsWith("csv")) {
                         downloader = new ExportCsvDownload(outputFile.getAbsolutePath(),
                                 "",
@@ -3559,7 +3583,8 @@ public class AttributeTable extends javax.swing.JPanel {
                             "",
                             features.toArray(new FeatureServiceFeature[features.size()]),
                             featureService,
-                            attributeNames);
+                            attributeNames,
+                            null);
                     }
 
                     lastExportPath = outputFile.getParent();
@@ -3592,7 +3617,8 @@ public class AttributeTable extends javax.swing.JPanel {
                         "",
                         features.toArray(new FeatureServiceFeature[features.size()]),
                         featureService,
-                        attributeNames);
+                        attributeNames,
+                        null);
 
                     DownloadManager.instance().add(ed);
                 }

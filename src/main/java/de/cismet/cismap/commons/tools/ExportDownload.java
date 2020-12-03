@@ -50,6 +50,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected AbstractFeatureService service;
     protected List<String[]> aliasAttributeList;
     protected String extension;
+    protected String query;
     private boolean absoluteFileName;
     private final int id = getId();
 
@@ -74,14 +75,17 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
      * @param  aliasAttributeList  A list with string arrays. Every array should have 2 elements. The first element is
      *                             the alias of the column and the second element is the name of the attribute, that
      *                             should be shown in the column
+     * @param  query               DOCUMENT ME!
      */
     public void init(final String filename,
             final String extension,
             final FeatureServiceFeature[] features,
             final AbstractFeatureService service,
-            final List<String[]> aliasAttributeList) {
+            final List<String[]> aliasAttributeList,
+            final String query) {
         this.features = features;
         this.service = service;
+        this.query = query;
         this.aliasAttributeList = aliasAttributeList;
         this.title = "Export " + ((features != null) ? features.length : "") + " Features";
         this.extension = extension;
@@ -130,7 +134,8 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             if ((pageSize < 0)
                         || ((service.getFeatureServiceAttributes() == null)
                             || (service.getFeatureServiceAttributes().get("id") == null))) {
-                featureList = service.getFeatureFactory().createFeatures(service.getQuery(), null, null, 0, 0, null);
+                featureList = service.getFeatureFactory()
+                            .createFeatures(((query != null) ? query : service.getQuery()), null, null, 0, 0, null);
                 features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
             } else {
                 final List<FeatureServiceFeature> tmpFeatureList = new ArrayList<FeatureServiceFeature>();
@@ -154,7 +159,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                     bb = null;
                 }
 
-                final int count = service.getFeatureCount(service.getQuery(), bb);
+                final int count = service.getFeatureCount(((query != null) ? query : service.getQuery()), bb);
                 int index = 0;
                 final FilePersistenceManager pm = new FilePersistenceManager(fileToSaveTo.getParentFile());
 
@@ -165,7 +170,12 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                         return;
                     }
                     featureList = service.getFeatureFactory()
-                                .createFeatures(service.getQuery(), null, null, index, pageSize, idAttr);
+                                .createFeatures(((query != null) ? query : service.getQuery()),
+                                        null,
+                                        null,
+                                        index,
+                                        pageSize,
+                                        idAttr);
                     index += featureList.size();
 
                     for (final FeatureServiceFeature f : featureList) {

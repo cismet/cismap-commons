@@ -1902,6 +1902,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     }
 
                                     if (!service.isVisibleInBoundingBox(currentBox)) {
+                                        service.getPNode().removeAllChildren();
                                         continue;
                                     }
                                 }
@@ -2122,6 +2123,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     if (!((rs instanceof AbstractFeatureService)
                                                     && !((AbstractFeatureService)rs).isVisibleInBoundingBox(xbb))) {
                                         rs.retrieve(forced);
+                                    } else if ((rs instanceof AbstractFeatureService)
+                                                && !((AbstractFeatureService)rs).isVisibleInBoundingBox(xbb)) {
+                                        rs.getPNode().removeAllChildren();
                                     }
                                 } finally {
                                     serviceFuturesMap.remove(rs);

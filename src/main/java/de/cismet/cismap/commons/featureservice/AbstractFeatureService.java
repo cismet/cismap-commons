@@ -139,8 +139,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     }
                 }
             });
-        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Is"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Null"));
     }
 
     //~ Instance fields --------------------------------------------------------
