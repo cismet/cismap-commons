@@ -382,6 +382,49 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      *
      * @throws  Exception  DOCUMENT ME!
      */
+    public void saveChangesWithoutUpdateEnvelope(final Statement st) throws Exception {
+        if (!existProperties() || deleted) {
+            // no changes
+            return;
+        }
+
+        if (stations != null) {
+            for (final String name : stations.keySet()) {
+                setGeometry(stations.get(name).getGeometry());
+                if (stations.get(name).getGeometry() instanceof LineString) {
+                    break;
+                }
+            }
+        }
+
+        if (existsInDB()) {
+            updateFeature(st);
+        } else {
+            addFeature(st);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Statement getStatement() {
+        try {
+            return featureInfo.getConnection().createStatement();
+        } catch (Exception e) {
+            logger.error("Cannot create statement", e);
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   st  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     private void updateFeature(final Statement st) throws Exception {
         final HashMap map = super.getProperties();
         final StringBuilder update = new StringBuilder("UPDATE \"");
@@ -422,8 +465,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private void addFeature(final Statement st) throws Exception {
         final HashMap map = super.getProperties();
         final String insertSql = "INSERT INTO \"%1s\" (%2s) VALUES (%3s)";
-        final List<String> attributes = new ArrayList<String>();
-        final List<String> values = new ArrayList<String>();
+        final List<String> attributes = new ArrayList<String>(map.keySet().size());
+        final List<String> values = new ArrayList<String>(map.keySet().size());
         boolean idExists = false;
 
         for (final Object name : map.keySet()) {
@@ -431,12 +474,12 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             String valueString;
 
             if ((value instanceof String) || (value instanceof Geometry) || (value instanceof java.sql.Timestamp)) {
-                valueString = "'" + value + "'";
+                valueString = "'" + value + '\'';
             } else {
                 valueString = String.valueOf(value);
             }
 
-            attributes.add("\"" + String.valueOf(name) + "\"");
+            attributes.add("\"" + String.valueOf(name) + '\"');
             values.add(valueString);
 
             if (name.equals("id")) {
@@ -444,7 +487,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             }
         }
         if (!idExists) {
-            attributes.add("\"" + String.valueOf("id") + "\"");
+            attributes.add("\"" + String.valueOf("id") + '\"');
             values.add(String.valueOf(getId()));
         }
 
@@ -468,7 +511,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      */
     private String listToString(final List<String> attributes) {
         boolean firstElement = true;
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(32);
 
         for (final String element : attributes) {
             if (firstElement) {
