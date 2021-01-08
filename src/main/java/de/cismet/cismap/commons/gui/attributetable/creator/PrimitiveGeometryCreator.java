@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -68,6 +70,8 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     private PNode tmpFeature;
     private MappingComponent mc = null;
     private boolean activateResume = false;
+    private double minArea;
+    private double minLength;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -114,6 +118,42 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the minArea
+     */
+    public double getMinArea() {
+        return minArea;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  minArea  the minArea to set
+     */
+    public void setMinArea(final double minArea) {
+        this.minArea = minArea;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the minLength
+     */
+    public double getMinLength() {
+        return minLength;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  minLength  the minLength to set
+     */
+    public void setMinLength(final double minLength) {
+        this.minLength = minLength;
+    }
 
     @Override
     public void createFeature(final MappingComponent mc,
@@ -165,6 +205,36 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
                                                     geom = StaticGeometryFunctions.toSimpleGeometry(geom);
                                                 }
 
+                                                if ((minArea != 0.0)
+                                                            && mode.equals(CreateGeometryListenerInterface.POLYGON)
+                                                            && (geom.getArea() < minArea)) {
+                                                    JOptionPane.showMessageDialog(
+                                                        CismapBroker.getInstance().getMappingComponent(),
+                                                        NbBundle.getMessage(
+                                                            PrimitiveGeometryCreator.class,
+                                                            "PrimitiveGeometryCreator.createFeature().tooSmall.message",
+                                                            new Object[] { minArea }),
+                                                        NbBundle.getMessage(
+                                                            PrimitiveGeometryCreator.class,
+                                                            "PrimitiveGeometryCreator.createFeature().tooSmall.title"),
+                                                        JOptionPane.WARNING_MESSAGE);
+                                                    return null;
+                                                }
+                                                if ((minLength != 0.0)
+                                                            && mode.equals(CreateGeometryListenerInterface.LINESTRING)
+                                                            && (geom.getLength() < minLength)) {
+                                                    JOptionPane.showMessageDialog(
+                                                        CismapBroker.getInstance().getMappingComponent(),
+                                                        NbBundle.getMessage(
+                                                            PrimitiveGeometryCreator.class,
+                                                            "PrimitiveGeometryCreator.createFeature().tooShort.message",
+                                                            new Object[] { minLength }),
+                                                        NbBundle.getMessage(
+                                                            PrimitiveGeometryCreator.class,
+                                                            "PrimitiveGeometryCreator.createFeature().tooShort.title"),
+                                                        JOptionPane.WARNING_MESSAGE);
+                                                    return null;
+                                                }
                                                 feature.setGeometry(geom);
                                                 // mc.setInteractionMode(oldInteractionMode);
 
