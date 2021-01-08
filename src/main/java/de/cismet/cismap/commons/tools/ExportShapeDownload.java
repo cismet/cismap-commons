@@ -52,7 +52,7 @@ public class ExportShapeDownload extends ExportDownload {
     public ExportShapeDownload(final String filename,
             final String extension,
             final FeatureServiceFeature[] features) {
-        init(filename, extension, features, null, null);
+        init(filename, extension, features, null, null, null);
     }
 
     //~ Methods ----------------------------------------------------------------

@@ -44,7 +44,7 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class DeleteFeatureListener extends PBasicInputEventHandler {
+public class DeleteFeatureListener extends PBasicInputEventHandler implements DeregistrationListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -241,6 +241,13 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
 
         if (allowedFeatureClassesToDelete != null) {
             Arrays.sort(this.allowedFeatureClassesToDelete, comparator);
+        }
+    }
+
+    @Override
+    public void deregistration() {
+        if ((multiPolygonPointerAnnotation != null) && multiPolygonPointerAnnotation.getVisible()) {
+            multiPolygonPointerAnnotation.setVisible(false);
         }
     }
 

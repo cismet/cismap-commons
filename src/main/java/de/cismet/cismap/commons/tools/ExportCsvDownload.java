@@ -65,8 +65,9 @@ public class ExportCsvDownload extends ExportTxtDownload {
             final String extension,
             final FeatureServiceFeature[] features,
             final AbstractFeatureService service,
-            final List<String[]> aliasAttributeList) {
-        super.init(filename, extension, features, service, aliasAttributeList);
+            final List<String[]> aliasAttributeList,
+            final String query) {
+        super.init(filename, extension, features, service, aliasAttributeList, null);
         separator = ",";
         writeHeader = true;
         nullValue = "";

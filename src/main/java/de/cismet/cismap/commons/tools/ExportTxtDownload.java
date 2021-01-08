@@ -71,7 +71,7 @@ public class ExportTxtDownload extends ExportDownload {
             final FeatureServiceFeature[] features,
             final AbstractFeatureService service,
             final List<String[]> attributeNames) {
-        init(filename, extension, features, service, attributeNames);
+        init(filename, extension, features, service, attributeNames, null);
     }
 
     //~ Methods ----------------------------------------------------------------
