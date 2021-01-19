@@ -17,6 +17,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import org.deegree.gml.feature.GMLFeatureReader;
+import org.deegree.model.feature.DefaultFeature;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.FeatureProperty;
@@ -33,8 +35,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 import java.net.URL;
+
+import java.nio.charset.Charset;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -70,6 +75,10 @@ import de.cismet.security.WebAccessManager;
  * @version  $Revision$, $Date$
  */
 public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String ENCODING_STRING = "encoding='";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -239,7 +248,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 return null;
             }
             // check if canceled .......................................................
-
             final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
             final FeatureCollection featureCollection;
 
@@ -253,17 +261,29 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 // check if canceled .......................................................
 
                 // debug
-                String res = "";
+                final StringBuilder res = new StringBuilder();
+                String charset = null;
                 String tmp;
                 final BufferedReader br = new BufferedReader(reader);
+
                 while ((tmp = br.readLine()) != null) {
-                    res += tmp;
+                    if (charset != null) {
+                        try {
+                            res.append(new String(tmp.getBytes(), charset));
+                        } catch (UnsupportedEncodingException e) {
+                            logger.error("Unsupported encoding found: " + charset, e);
+                            res.append(new String(tmp.getBytes(), charset));
+                        }
+                    } else {
+                        charset = checkForCharset(tmp);
+                        res.append(new String(tmp.getBytes(), charset));
+                    }
                 }
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("wfs response: " + res);
+                    logger.debug("wfs response: " + res.toString());
                 }
-                final StringReader re = new StringReader(res);
+                final StringReader re = new StringReader(res.toString());
                 // debug
 
                 featureCollectionDocument.load(re, "http://dummyID");
@@ -358,6 +378,35 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     }
 
     /**
+     * Checks, if the given string contains the charset.
+     *
+     * @param   data  DOCUMENT ME!
+     *
+     * @return  the charset contained in the given string or null if no charset is contained
+     */
+    private String checkForCharset(final String data) {
+        int index = data.indexOf(ENCODING_STRING);
+
+        if (index != -1) {
+            final String subdata = data.substring(index + ENCODING_STRING.length());
+            index = subdata.indexOf("'");
+
+            if (index != -1) {
+                try {
+                    final String charsetName = subdata.substring(0, index);
+                    Charset.forName(charsetName);
+
+                    return charsetName;
+                } catch (Exception e) {
+                    // no valid charset name. Nothing to do
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @param   workerThread  DOCUMENT ME!
@@ -387,6 +436,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         // creating geometry
         if (featureServiceFeature.getGeometry() == null) {
             try {
+//                final DefaultFeature f = ((DefaultFeature)degreeFeature.getProperties()[5].getValue()).getProperties()[0];
                 Geometry geom = JTSAdapter.export(
                         degreeFeature.getGeometryPropertyValues()[geometryIndex]);
                 if (reverseAxisOrder) {
