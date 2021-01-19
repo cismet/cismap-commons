@@ -128,16 +128,32 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                                 + "\n\n" + desc.toString());
                 }
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
-                    final QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
+                    QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
                                 .getType()
                                 .getName();
                     final ComplexTypeDeclaration compTypeDec = xmlSchema.getComplexTypeDeclaration(typeName);
+                    ElementDeclaration[] elementDeclaration;
 
-                    if (getFirstGeometryName(compTypeDec.getElements()) != null) {
+                    if (compTypeDec == null) {
+                        typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName())).getName();
+
+                        if (xmlSchema.getElementDeclaration(typeName).getType().getTypeDeclaration()
+                                    instanceof ComplexTypeDeclaration) {
+                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)xmlSchema.getElementDeclaration(
+                                    typeName).getType().getTypeDeclaration();
+                            elementDeclaration = type.getElements();
+                        } else {
+                            elementDeclaration = new ElementDeclaration[0];
+                        }
+                    } else {
+                        elementDeclaration = compTypeDec.getElements();
+                    }
+
+                    if (getFirstGeometryName(elementDeclaration) != null) {
                         final Vector<FeatureServiceAttribute> fsaVector = new Vector<FeatureServiceAttribute>(
-                                compTypeDec.getElements().length);
+                                elementDeclaration.length);
 
-                        for (final ElementDeclaration e : compTypeDec.getElements()) {
+                        for (final ElementDeclaration e : elementDeclaration) {
                             fsaVector.add(new FeatureServiceAttribute(
                                     feature.getName().getPrefix()
                                             + ":"
@@ -149,12 +165,12 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                         return fsaVector;
                     }
                     if (logger.isDebugEnabled()) {
-                        logger.debug("complextypes found: " + compTypeDec.getElements()); // NOI18N
+                        logger.debug("complextypes found: " + elementDeclaration); // NOI18N
                     }
                 }
             }
         } catch (Throwable ex) {
-            logger.fatal("Error in getElementDeclarations", ex);                          // NOI18N
+            logger.fatal("Error in getElementDeclarations", ex);                   // NOI18N
         }
 
         return null;
@@ -184,12 +200,25 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                             feature.getName()));
 
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
-                    final QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
+                    QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
                                 .getType()
                                 .getName();
                     final ComplexTypeDeclaration compTypeDec = xmlSchema.getComplexTypeDeclaration(typeName);
 
-                    return getFirstGeometryName(compTypeDec.getElements());
+                    if (compTypeDec == null) {
+                        typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName())).getName();
+
+                        if (xmlSchema.getElementDeclaration(typeName).getType().getTypeDeclaration()
+                                    instanceof ComplexTypeDeclaration) {
+                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)xmlSchema.getElementDeclaration(
+                                    typeName).getType().getTypeDeclaration();
+                            return getFirstGeometryName(type.getElements());
+                        } else {
+                            return getFirstGeometryName(new ElementDeclaration[0]);
+                        }
+                    } else {
+                        return getFirstGeometryName(compTypeDec.getElements());
+                    }
                 }
             }
         } catch (Throwable ex) {
