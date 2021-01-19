@@ -249,31 +249,32 @@ public class WFSFacade {
             logger.debug("optimal crs: " + crs);
         }
 
-        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                                 // NOI18N
-            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()      // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                       // NOI18N
-                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";          // NOI18N
-        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                          // NOI18N
+        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                                  // NOI18N
+            envelope = "<gml:Box srsName=\"" + bbox.getSrs() + "\"><gml:coord><gml:X>" + tbbox.getX1()
+                        + "</gml:X><gml:Y>" + tbbox.getY1()                                                    // NOI18N
+                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                        // NOI18N
+                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";           // NOI18N
+        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                           // NOI18N
             if (reverseAxisOrder) {
-                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
-                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getY1() // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
             } else {
-                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getX1() // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
             }
         } else {
-            logger.error("unknown service version used: " + cap.getVersion()                                  // NOI18N
-                        + ". Try to use a version 1.1.0 request");                                            // NOI18N
+            logger.error("unknown service version used: " + cap.getVersion()                                   // NOI18N
+                        + ". Try to use a version 1.1.0 request");                                             // NOI18N
             if (reverseAxisOrder) {
-                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
-                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getY1() // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
             } else {
-                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getX1() // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
             }
         }
 
