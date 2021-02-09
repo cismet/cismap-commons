@@ -25,6 +25,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PersistentFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.util.FilePersistenceManager;
@@ -190,6 +191,13 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                     this.aliasAttributeList = getAttributeNames(features[0]);
                 }
             }
+        }
+
+        if ((service != null) && (service.getLayerProperties() != null)
+                    && (service.getLayerProperties().getAttributeTableRuleSet() != null)) {
+            final AttributeTableRuleSet atr = service.getLayerProperties().getAttributeTableRuleSet();
+
+            features = atr.prepareFeaturesForExport(features);
         }
     }
 

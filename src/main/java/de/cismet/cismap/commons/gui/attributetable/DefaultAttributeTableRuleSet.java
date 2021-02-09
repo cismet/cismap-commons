@@ -237,4 +237,9 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     public Class<? extends FeatureServiceFeature> getFeatureClass() {
         return null;
     }
+
+    @Override
+    public FeatureServiceFeature[] prepareFeaturesForExport(final FeatureServiceFeature[] features) {
+        return features;
+    }
 }
