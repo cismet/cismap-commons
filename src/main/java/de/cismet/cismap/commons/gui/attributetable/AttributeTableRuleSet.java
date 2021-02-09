@@ -233,4 +233,13 @@ public interface AttributeTableRuleSet {
      * @return  The class that should be used to store the features
      */
     Class<? extends FeatureServiceFeature> getFeatureClass();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   features  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    FeatureServiceFeature[] prepareFeaturesForExport(FeatureServiceFeature[] features);
 }
