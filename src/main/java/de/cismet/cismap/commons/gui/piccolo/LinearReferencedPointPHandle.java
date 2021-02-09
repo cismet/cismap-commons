@@ -8,6 +8,7 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
@@ -22,6 +23,7 @@ import java.awt.geom.Point2D;
 import java.text.Format;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeatureListener;
@@ -142,6 +144,20 @@ public class LinearReferencedPointPHandle extends PHandle {
                                 (Point2D)dragPoint.clone()),
                             false,
                             null);
+                } else if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
+                            && MappingComponent.SnappingMode.LINE.equals(
+                                CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
+                    final Geometry g = ((LinearReferencedPointFeature)pfeature.getFeature()).getLineGeometry();
+                    final Feature routeFeature = getFeatureFromGeom(g);
+                    CismapBroker.getInstance()
+                            .setSnappingVetoFeature(CismapBroker.getInstance().getMappingComponent().getPFeatureHM()
+                                .get(routeFeature));
+                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
+                            CismapBroker.getInstance().getMappingComponent(),
+                            CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
+                                (Point2D)dragPoint.clone()),
+                            true,
+                            null);
                 }
 
                 if (snapPoint != null) {
@@ -156,6 +172,17 @@ public class LinearReferencedPointPHandle extends PHandle {
                 LOG.debug("Error in dragHandle.", t);
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   g  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Feature getFeatureFromGeom(final Geometry g) {
+        return null;
     }
 
     @Override
