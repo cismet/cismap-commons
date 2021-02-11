@@ -4317,6 +4317,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());                  // NOI18N
         ret.setAttribute("snappingMode", getSnappingMode().toString());
 
+        final Object selectionInputListener = getInputListener(MappingComponent.SELECT);
+        if (selectionInputListener instanceof SelectionListener) {
+            final SelectionListener listener = (SelectionListener)selectionInputListener;
+
+            ret.setAttribute("createSelectionMode", listener.getMode());
+        }
+
         final Object inputListener = getInputListener(CREATE_SEARCH_POLYGON);
         if (inputListener instanceof CreateSearchGeometryListener) {
             final CreateSearchGeometryListener listener = (CreateSearchGeometryListener)inputListener;
@@ -4619,6 +4626,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final CreateSearchGeometryListener listener = (CreateSearchGeometryListener)inputListener;
 
                 listener.setMode(createSearchMode);
+            }
+        } catch (final Exception ex) {
+            LOG.warn("Fehler beim Setzen des CreateSearchMode", ex); // NOI18N
+        }
+
+        try {
+            final String selectionMode = prefs.getAttribute("createSelectionMode").getValue();
+            final Object inputListener = getInputListener(MappingComponent.SELECT);
+
+            if ((inputListener instanceof SelectionListener) && (selectionMode != null)) {
+                final SelectionListener listener = (SelectionListener)inputListener;
+
+                listener.setMode(selectionMode);
             }
         } catch (final Exception ex) {
             LOG.warn("Fehler beim Setzen des CreateSearchMode", ex); // NOI18N
