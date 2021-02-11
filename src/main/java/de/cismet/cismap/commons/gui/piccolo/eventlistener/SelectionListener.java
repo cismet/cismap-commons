@@ -52,6 +52,7 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.CommonFeaturePreciseAction;
+import de.cismet.cismap.commons.features.CommonMultiAndSingleFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DoubleClickableFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -262,7 +263,22 @@ public class SelectionListener extends CreateGeometryListener {
 
                         if (cfa instanceof FeaturesProvider) {
                             if (((FeaturesProvider)cfa).isResponsibleFor(pFeature.getFeature())) {
-                                multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
+                                if (!(cfa instanceof CommonMultiAndSingleFeatureAction) || (pFeatures.size() > 1)) {
+                                    multipleCommonFeatureActionProvider.put(cfa, pFeature.getFeature());
+                                }
+                            }
+
+                            if ((cfa instanceof CommonMultiAndSingleFeatureAction)
+                                        && (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature))) {
+                                final CommonFeatureAction cfa2;
+                                try {
+                                    cfa2 = cfaTemplate.getClass().newInstance();
+                                } catch (final Exception ex) {
+                                    break;
+                                }
+                                cfa2.setSourceFeature(pFeature.getFeature());
+
+                                commonFeatureActionsMap.put(pFeature, cfa2);
                             }
                         } else if (multiFeaturePopupEnabled || pFeature.equals(clickedPFeature)) {
                             commonFeatureActionsMap.put(pFeature, cfa);
