@@ -42,6 +42,8 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 
+import java.util.List;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -50,7 +52,9 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 
 import de.cismet.cismap.commons.features.CommonFeatureAction;
+import de.cismet.cismap.commons.features.CommonMultiAndSingleFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeaturesProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -63,11 +67,14 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = CommonFeatureAction.class)
-public class DuplicateGeometryFeatureAction extends AbstractAction implements CommonFeatureAction {
+public class DuplicateGeometryFeatureAction extends AbstractAction implements CommonFeatureAction,
+    FeaturesProvider,
+    CommonMultiAndSingleFeatureAction {
 
     //~ Instance fields --------------------------------------------------------
 
     Feature f = null;
+    List<Feature> featureList;
 
     private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
@@ -123,24 +130,47 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
                 protected Void doInBackground() throws Exception {
                     Thread.currentThread().setName("DuplicateGeometryFeatureAction");
 
-                    final Geometry geom = (Geometry)f.getGeometry().clone();
-                    final PureNewFeature pnf = new PureNewFeature(geom);
+                    if (featureList != null) {
+                        for (final Feature feature : featureList) {
+                            final Geometry geom = (Geometry)feature.getGeometry().clone();
+                            final PureNewFeature pnf = new PureNewFeature(geom);
 
-                    if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
-                        pnf.setGeometryType(PureNewFeature.geomTypes.LINESTRING);
-                    } else if (geom instanceof Polygon) {
-                        pnf.setGeometryType(PureNewFeature.geomTypes.POLYGON);
-                    } else if (geom instanceof MultiPolygon) {
-                        pnf.setGeometryType(PureNewFeature.geomTypes.MULTIPOLYGON);
-                    } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
-                        pnf.setGeometryType(PureNewFeature.geomTypes.POINT);
+                            if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
+                                pnf.setGeometryType(PureNewFeature.geomTypes.LINESTRING);
+                            } else if (geom instanceof Polygon) {
+                                pnf.setGeometryType(PureNewFeature.geomTypes.POLYGON);
+                            } else if (geom instanceof MultiPolygon) {
+                                pnf.setGeometryType(PureNewFeature.geomTypes.MULTIPOLYGON);
+                            } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
+                                pnf.setGeometryType(PureNewFeature.geomTypes.POINT);
+                            } else {
+                                pnf.setGeometryType(PureNewFeature.geomTypes.UNKNOWN);
+                            }
+
+                            pnf.setEditable(true);
+                            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
+                            CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
+                        }
                     } else {
-                        pnf.setGeometryType(PureNewFeature.geomTypes.UNKNOWN);
-                    }
+                        final Geometry geom = (Geometry)f.getGeometry().clone();
+                        final PureNewFeature pnf = new PureNewFeature(geom);
 
-                    pnf.setEditable(true);
-                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
-                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
+                        if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
+                            pnf.setGeometryType(PureNewFeature.geomTypes.LINESTRING);
+                        } else if (geom instanceof Polygon) {
+                            pnf.setGeometryType(PureNewFeature.geomTypes.POLYGON);
+                        } else if (geom instanceof MultiPolygon) {
+                            pnf.setGeometryType(PureNewFeature.geomTypes.MULTIPOLYGON);
+                        } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
+                            pnf.setGeometryType(PureNewFeature.geomTypes.POINT);
+                        } else {
+                            pnf.setGeometryType(PureNewFeature.geomTypes.UNKNOWN);
+                        }
+
+                        pnf.setEditable(true);
+                        CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
+                        CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
+                    }
                     return null;
                 }
 
@@ -160,6 +190,28 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
     public static void main(final String[] args) {
         final WaitDialog w = new WaitDialog();
         w.setVisible(true);
+    }
+
+    @Override
+    public void setSourceFeatures(final List<Feature> sourceList) {
+        this.featureList = sourceList;
+
+        super.putValue(
+            Action.NAME,
+            NbBundle.getMessage(
+                DuplicateGeometryFeatureAction.class,
+                "DuplicateGeometryFeatureAction.DuplicateGeometriesFeatureAction()",
+                new Object[] { sourceList.size() }));
+    }
+
+    @Override
+    public List<Feature> getSourceFeatures() {
+        return featureList;
+    }
+
+    @Override
+    public boolean isResponsibleFor(final Feature feature) {
+        return true;
     }
 }
 /**
