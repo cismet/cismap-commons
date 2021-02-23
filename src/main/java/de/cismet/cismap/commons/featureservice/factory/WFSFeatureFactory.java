@@ -79,6 +79,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String ENCODING_STRING = "encoding='";
+    private static final String ALTERNATE_ENCODING_STRING = "encoding=\"";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -272,11 +273,20 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                             res.append(new String(tmp.getBytes(), charset));
                         } catch (UnsupportedEncodingException e) {
                             logger.error("Unsupported encoding found: " + charset, e);
-                            res.append(new String(tmp.getBytes(), charset));
+                            res.append(new String(tmp.getBytes()));
                         }
                     } else {
                         charset = checkForCharset(tmp);
-                        res.append(new String(tmp.getBytes(), charset));
+                        if (charset != null) {
+                            try {
+                                res.append(new String(tmp.getBytes(), charset));
+                            } catch (UnsupportedEncodingException e) {
+                                logger.error("Unsupported encoding found: " + charset, e);
+                                res.append(new String(tmp.getBytes()));
+                            }
+                        } else {
+                            res.append(new String(tmp.getBytes()));
+                        }
                     }
                 }
 
@@ -387,9 +397,17 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     private String checkForCharset(final String data) {
         int index = data.indexOf(ENCODING_STRING);
 
+        if (index == -1) {
+            index = data.indexOf(ALTERNATE_ENCODING_STRING);
+        }
+
         if (index != -1) {
             final String subdata = data.substring(index + ENCODING_STRING.length());
             index = subdata.indexOf("'");
+
+            if (index == -1) {
+                index = subdata.indexOf("\"");
+            }
 
             if (index != -1) {
                 try {
