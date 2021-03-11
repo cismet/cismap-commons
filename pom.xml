@@ -105,7 +105,7 @@
         <!-- version and exclusions managed in cismet-ext-bom -->
         <dependency>
             <groupId>de.cismet.custom</groupId>
-            <artifactId>cismet-deegree</artifactId>
+            <artifactId>cismet-deegree2.3</artifactId>
             <scope>compile</scope>
             <type>jar</type>
         </dependency>
