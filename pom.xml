@@ -177,8 +177,8 @@
 
         <dependency>
             <groupId>de.cismet.custom</groupId>
-            <artifactId>ycad</artifactId>
-            <version>1.0.2</version>
+            <artifactId>ycad1.0.2</artifactId>
+            <version>7.0</version>
         </dependency>
         <!--
             deegree exclusions managed in cismet-ext-bom!
