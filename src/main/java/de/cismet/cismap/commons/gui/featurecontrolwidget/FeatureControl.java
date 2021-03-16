@@ -1129,7 +1129,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     }
                     case 5: {
                         // L\u00E4nge
-                        if (f.getGeometry() != null) {
+                        if ((f != null) && (f.getGeometry() != null)) {
                             final Geometry geom = CrsTransformer.transformToMetricCrs(f.getGeometry(),
                                     mappingComponent.getCrsList());
 

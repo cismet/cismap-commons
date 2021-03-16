@@ -50,6 +50,7 @@ import javax.swing.JSeparator;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
+import de.cismet.cismap.commons.features.CheckedFeaturesProvider;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.CommonFeaturePreciseAction;
 import de.cismet.cismap.commons.features.CommonMultiAndSingleFeatureAction;
@@ -175,9 +176,26 @@ public class SelectionListener extends CreateGeometryListener {
                 true);
 
         // COLLECT ALL PFEATURES UNDER THE POINTER
-        final Collection<PFeature> allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class });
+        Collection<PFeature> allClickedPFeatures;
+
+        if ((clickedPFeature != null) && (clickedPFeature.getFeature() != null)
+                    && (clickedPFeature.getFeature().getGeometry() instanceof Point)) {
+            final Point p = (Point)clickedPFeature.getFeature().getGeometry();
+
+            // PFeatureTools.getAllValidObjectsUnderPointer(...) will not find anything,
+            // if the user clicked on the point icon, but not near the handle of the point
+            allClickedPFeatures = (List)PFeatureTools.getValidObjectsUnderPointer(
+                    pInputEvent,
+                    p.getX(),
+                    p.getY(),
+                    new Class[] { PFeature.class },
+                    0.003d,
+                    false);
+        } else {
+            allClickedPFeatures = (List)PFeatureTools.getAllValidObjectsUnderPointer(
+                    pInputEvent,
+                    new Class[] { PFeature.class });
+        }
 
         // COLLECT ALL SELECTED PFEATURES that are SelectableServiceFeatures
         final Collection<PFeature> selectedPFeatures = new ArrayList<>(selectedFeatures.size());
@@ -384,8 +402,13 @@ public class SelectionListener extends CreateGeometryListener {
                     : (Collection<FeaturesProvider>)multipleCommonFeatureActionProvider.keySet()) {
             final Collection<Feature> multipleCommonFeature = multipleCommonFeatureActionProvider.getCollection(action);
             if (!multipleCommonFeature.isEmpty()) {
-                action.setSourceFeatures(new ArrayList<>(multipleCommonFeature));
-                addItemToMenu(action, popup);
+                if (!(action instanceof CheckedFeaturesProvider)
+                            || ((action instanceof CheckedFeaturesProvider)
+                                && ((CheckedFeaturesProvider)action).isActiveForFeatures(
+                                    new ArrayList<>(multipleCommonFeature)))) {
+                    action.setSourceFeatures(new ArrayList<>(multipleCommonFeature));
+                    addItemToMenu(action, popup);
+                }
             }
         }
 
