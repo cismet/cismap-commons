@@ -40,6 +40,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.features.CheckedFeaturesProvider;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeaturesProvider;
@@ -53,7 +54,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = CommonFeatureAction.class)
-public class MergeFeatureAction extends AbstractAction implements CommonFeatureAction, FeaturesProvider {
+public class MergeFeatureAction extends AbstractAction implements CommonFeatureAction, CheckedFeaturesProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -179,5 +180,49 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
     @Override
     public List<Feature> getSourceFeatures() {
         return features;
+    }
+
+    @Override
+    public boolean isActiveForFeatures(final List<Feature> source) {
+        String type = null;
+
+        for (final Feature tmp : source) {
+            if ((tmp != null) && (tmp.getGeometry() != null)) {
+                if (type == null) {
+                    type = getGeometryType(tmp.getGeometry());
+                } else {
+                    if (!type.equals(getGeometryType(tmp.getGeometry()))) {
+                        // different types will result in a geometry collection
+                        return false;
+                    }
+                }
+
+                if ((tmp.getGeometry() instanceof Point) || (tmp.getGeometry() instanceof MultiPoint)) {
+                    // points will result in a MultiPoint, which cannot be handled properly by the
+                    return false;
+                }
+            }
+        }
+
+        return source.size() > 1;
+    }
+
+    /**
+     * Determine the geometry type of the given geometry. Make no difference between multi geoms and single geoms
+     *
+     * @param   geom  DOCUMENT ME!
+     *
+     * @return  the geometry type as string
+     */
+    private String getGeometryType(final Geometry geom) {
+        if ((geom instanceof MultiPolygon) || (geom instanceof Polygon)) {
+            return "polygon";
+        } else if ((geom instanceof MultiLineString) || (geom instanceof LineString)) {
+            return "linestring";
+        } else if ((geom instanceof MultiPoint) || (geom instanceof Point)) {
+            return "point";
+        } else {
+            return "unknown";
+        }
     }
 }

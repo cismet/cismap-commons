@@ -138,16 +138,39 @@ public class PFeatureTools {
             final boolean stopAfterFirstValid) {
         final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
         final WorldToScreenTransform wtst = mc.getWtst();
+        final double x1 = wtst.getWorldX(pInputEvent.getPosition().getX());
+        final double y1 = wtst.getWorldY(pInputEvent.getPosition().getY());
+
+        return getValidObjectsUnderPointer(pInputEvent, x1, y1, validClasses, halo, stopAfterFirstValid);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent          mc DOCUMENT ME!
+     * @param   xCoor                DOCUMENT ME!
+     * @param   yCoord               DOCUMENT ME!
+     * @param   validClasses         DOCUMENT ME!
+     * @param   halo                 DOCUMENT ME!
+     * @param   stopAfterFirstValid  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
+            final double xCoor,
+            final double yCoord,
+            final Class[] validClasses,
+            final double halo,
+            final boolean stopAfterFirstValid) {
+        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
 
         final int srs = CrsTransformer.extractSridFromCrs(mc.getMappingModel().getSrs().getCode());
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srs);
-        final double x1 = wtst.getWorldX(pInputEvent.getPosition().getX());
-        final double y1 = wtst.getWorldY(pInputEvent.getPosition().getY());
         final Geometry point;
         if (halo > 0) {
-            point = gf.createPoint(new Coordinate(x1, y1)).buffer(halo * mc.getScaleDenominator());
+            point = gf.createPoint(new Coordinate(xCoor, yCoord)).buffer(halo * mc.getScaleDenominator());
         } else {
-            point = gf.createPoint(new Coordinate(x1, y1));
+            point = gf.createPoint(new Coordinate(xCoor, yCoord));
         }
 
         final List<PNode> pNodes = new ArrayList<PNode>(findIntersectingPFeatures(mc.getFeatureLayer(), point));

@@ -71,9 +71,14 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     @Override
     public Feature getFeature(final int index) {
         try {
-            return features.get(index);
+            if (index < features.size()) {
+                return features.get(index);
+            } else {
+                log.warn("feature does not exist anymore:" + index); // NOI18N
+                return null;
+            }
         } catch (Exception e) {
-            log.fatal("error in getFeature:" + index, e); // NOI18N
+            log.fatal("error in getFeature:" + index, e);            // NOI18N
             return null;
         }
     }
