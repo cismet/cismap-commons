@@ -180,7 +180,8 @@ public class SelectionListener extends CreateGeometryListener {
 
         if ((clickedPFeature != null) && (clickedPFeature.getFeature() != null)
                     && (clickedPFeature.getFeature().getGeometry() instanceof Point)) {
-            final Point p = (Point)clickedPFeature.getFeature().getGeometry();
+            Point p = (Point)clickedPFeature.getFeature().getGeometry();
+            p = CrsTransformer.transformToCurrentCrs(p);
 
             // PFeatureTools.getAllValidObjectsUnderPointer(...) will not find anything,
             // if the user clicked on the point icon, but not near the handle of the point
