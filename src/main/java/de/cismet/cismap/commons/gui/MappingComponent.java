@@ -1087,7 +1087,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 } else {
                     LOG.warn("this.getInputListener(this.interactionMode)==null");                                    // NOI18N
                 }
-                if (interactionMode.equals(NEW_POLYGON) || interactionMode.equals(CREATE_SEARCH_POLYGON)) {           // ||interactionMode==SELECT) {
+                if (interactionMode.equals(NEW_POLYGON)) {
                     featureCollection.unselectAll();
                 }
                 if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEAR_REFERENCING)
