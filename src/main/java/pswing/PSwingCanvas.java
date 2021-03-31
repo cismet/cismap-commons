@@ -238,7 +238,7 @@ public class PSwingCanvas extends PCanvas {
          * @return  DOCUMENT ME!
          */
         private boolean isLightweight(final Component comp) {
-            return (comp.getPeer() == null) || comp.isLightweight();
+            return comp.isDisplayable() || comp.isLightweight();
         }
 
         /**
