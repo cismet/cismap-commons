@@ -486,6 +486,13 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         if (evaluateExpressions) {
             this.evaluateExpressions(featureServiceFeature, index);
         }
+
+        if (featureServiceFeature.getId() == -1) {
+            try {
+                featureServiceFeature.setId(Integer.parseInt(featureServiceFeature.toString()));
+            } catch (NumberFormatException e) {
+            }
+        }
     }
 
     /**

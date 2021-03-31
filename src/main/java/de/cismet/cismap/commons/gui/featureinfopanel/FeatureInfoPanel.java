@@ -1028,9 +1028,6 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 }
 
                 if (!noEdit) {
-                    if (lockedFeatures.contains((DefaultFeatureServiceFeature)c) || lockedFeatures.isEmpty()) {
-                        popupMenu.add(miEdit);
-                    }
                     if (((DefaultFeatureServiceFeature)c).isEditable()) {
                         miEdit.setText(NbBundle.getMessage(
                                 FeatureInfoPanel.class,
@@ -1038,6 +1035,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         popupMenu.add(miDelete);
                     } else {
                         miEdit.setText(NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text"));
+                    }
+                    if (lockedFeatures.contains((DefaultFeatureServiceFeature)c) || lockedFeatures.isEmpty()) {
+                        popupMenu.add(miEdit);
                     }
                 }
             }
