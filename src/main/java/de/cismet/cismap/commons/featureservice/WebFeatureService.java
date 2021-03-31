@@ -187,7 +187,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         setHostname(host);
         // defaults for new services
         this.setTranslucency(0.2f);
-        this.setMaxFeatureCount(2900);
+        this.setMaxFeatureCount(5000);
         this.reverseAxisOrder = reverseAxisOrder;
     }
 
@@ -399,7 +399,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         // overwrite string representation of query
         if (this.wfsQueryElement != null) {
             // +1 reich nicht aus, daher +100
-            WFSFacade.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount + 100, getVersion());
+            WFSFacade.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount, getVersion());
             this.wfsQueryString = FeatureServiceUtilities.elementToString(wfsQuery);
         }
     }
