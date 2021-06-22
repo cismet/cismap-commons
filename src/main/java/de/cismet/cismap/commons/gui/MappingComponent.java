@@ -2399,10 +2399,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final PFeature node = pFeatureHM.get(f);
                 if (node != null) {
                     node.syncGeometry();
+                    node.refreshInfoNode();
                     node.visualize();
                     node.refreshDesign(); // without this, sld styled points will not be shown properly
                     node.resetInfoNodePosition();
-                    node.refreshInfoNode();
                     repaint();
                 }
             }
