@@ -2804,6 +2804,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             // is not null, but the object to delete does not exist)
                             pi.removeChild(infoNode);
                         }
+                        piSelected.removeAllChildren();
                         piSelected.addChild(infoNode);
                     }
                 } else if (wasSelected) {

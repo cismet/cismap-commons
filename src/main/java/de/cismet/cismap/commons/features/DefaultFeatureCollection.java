@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -426,7 +427,6 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         }
         final Set<Feature> v = new HashSet<Feature>(2);
         v.add(f);
-        checkForAndCorrectDoubleNaming();
         fireFeaturesRemoved(v);
         if (log.isDebugEnabled()) {
             log.debug("after removal:" + features);         // NOI18N
@@ -437,7 +437,6 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     public void removeFeatures(final Collection<Feature> cf) {
         features.removeAll(cf);
         holdFeatures.removeAll(cf);
-        checkForAndCorrectDoubleNaming();
         fireFeaturesRemoved(cf);
     }
 
@@ -450,7 +449,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
             features.add(f);
             final Set<Feature> v = new HashSet<Feature>(2);
             v.add(f);
-            checkForAndCorrectDoubleNaming();
+            checkForAndCorrectDoubleNaming(f);
             fireFeaturesAdded(v);
         } else {
             log.warn(
@@ -471,9 +470,10 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                     holdFeatures.add(f);
                 }
                 v.add(f);
+                checkForAndCorrectDoubleNaming(f);
             }
         }
-        checkForAndCorrectDoubleNaming();
+
         if (v.size() > 0) {
             fireFeaturesAdded(v);
         }
@@ -499,32 +499,43 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
      */
-    public void checkForAndCorrectDoubleNaming() {
-        final HashMap<String, ArrayList<PreventNamingDuplicates>> candidates =
-            new HashMap<String, ArrayList<PreventNamingDuplicates>>();
+    public void checkForAndCorrectDoubleNaming(final Feature feature) {
+        if (feature instanceof PreventNamingDuplicates) {
+            final PreventNamingDuplicates changeableFeature = (PreventNamingDuplicates)feature;
+            final ArrayList<PreventNamingDuplicates> list = new ArrayList<PreventNamingDuplicates>();
 
-        for (final Feature f : features) {
-            if (f instanceof PreventNamingDuplicates) {
-                ArrayList<PreventNamingDuplicates> list;
-                list = candidates.get(f.getClass().toString());
-                if (list != null) {
+            for (final Feature f : features) {
+                if (f.getClass().equals(feature.getClass()) && (f instanceof PreventNamingDuplicates)) {
                     list.add((PreventNamingDuplicates)f);
-                } else {
-                    list = new ArrayList<PreventNamingDuplicates>();
-                    list.add((PreventNamingDuplicates)f);
-                    candidates.put(f.getClass().toString(), list);
                 }
             }
-        }
-        for (final String key : candidates.keySet()) {
-            final ArrayList<PreventNamingDuplicates> list = candidates.get(key);
-            int counter = 1;
-            if (list.size() >= 1) {
+
+            if (list.size() > 1) {
+                final Map<PreventNamingDuplicates, Integer> sameNames = new HashMap<PreventNamingDuplicates, Integer>();
+
                 for (final PreventNamingDuplicates f : list) {
-                    f.setNumber(counter);
-                    counter++;
+                    if (f.getOriginalName().equals(changeableFeature.getOriginalName())) {
+                        sameNames.put(f, f.getNumber());
+                    }
                 }
+
+                if (sameNames.size() < 2) {
+                    changeableFeature.setNumber(1);
+                } else {
+                    int i = 1;
+                    sameNames.remove(changeableFeature);
+
+                    while ((i < 10000) && sameNames.containsValue(i)) {
+                        ++i;
+                    }
+
+                    changeableFeature.setNumber(i);
+                }
+            } else {
+                changeableFeature.setNumber(1);
             }
         }
     }
@@ -574,11 +585,12 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
             log.debug("reconsiderFeature(Feature f):" + f, new CurrentStackTrace()); // NOI18N
         }
 
+        checkForAndCorrectDoubleNaming(f);
+
         final Iterator<FeatureCollectionListener> it = getListenerIterator();
         while (it.hasNext()) {
             it.next().featureReconsiderationRequested(new FeatureCollectionEvent(this, reconsiderF));
         }
-        checkForAndCorrectDoubleNaming();
     }
 
     /**
