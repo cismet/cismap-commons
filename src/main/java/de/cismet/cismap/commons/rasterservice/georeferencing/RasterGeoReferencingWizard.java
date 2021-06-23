@@ -447,8 +447,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
 
             final PCanvas pCanvas = SelectionMode.POINT.equals(mode) ? getPointZoomViewCanvas()
                                                                      : getCoordinateZoomViewCanvas();
-            final MappingComponent zoomMap = SelectionMode.POINT.equals(mode) ? getPointZoomMap()
-                                                                              : getCoordinateZoomMap();
+            final MappingComponent zoomMap = getZoomMap(mode);
             final WorldToScreenTransform wtst = zoomMap.getWtst();
             final Point2D zoomPoint = pCanvas.getCamera().getViewBounds().getCenter2D();
             final Coordinate zoomCoordinate = (wtst != null)
@@ -501,7 +500,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
                         final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)rasterService;
                         final boolean including = ((retrievalServiceLayer instanceof ImageRasterService)
                                         && SelectionMode.POINT.equals(mode))
-                                    || (!(retrievalServiceLayer instanceof ImageRasterService)
+                                    || (!(getHandler().getService().equals(rasterService))
                                         && SelectionMode.COORDINATE.equals(mode));
                         if (including) {
                             final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(
