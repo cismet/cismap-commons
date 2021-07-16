@@ -7,9 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import com.google.common.io.ByteStreams;
-
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.io.IOUtils;
 
 import org.openide.util.Exceptions;
 
@@ -143,7 +142,7 @@ public class ImageRetrieval extends Thread {
                     new URL(urlBase),
                     requestParameter,
                     method);
-            final byte[] bs = ByteStreams.toByteArray(is);
+            final byte[] bs = IOUtils.toByteArray(is);
             in = new BufferedInputStream(new ByteArrayInputStream(bs));
 
             final RetrievalEvent e = new RetrievalEvent();
