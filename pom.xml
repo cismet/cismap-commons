@@ -333,11 +333,6 @@
             <artifactId>groovy-all</artifactId>
             <version>1.8.5</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>10.0</version>
-        </dependency>
         <!--
             FIXME: Wrong group id for jfree (required: org.jfree)!
             Dependecy brought in by Jasper!
