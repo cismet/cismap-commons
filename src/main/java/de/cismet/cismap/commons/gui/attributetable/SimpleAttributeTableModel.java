@@ -363,6 +363,22 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getColumnNameByAttributeName(final String name) {
+        for (int i = 0; i < attributeNames.length; ++i) {
+            if (attributeNames[i].equals(name)) {
+                return attributeAlias[i];
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the attribute name of the given column. This is not the name of the column. The name of the column is the
      * alias name of the attribute.
      *
