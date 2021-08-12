@@ -88,9 +88,11 @@ import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.RowSorter;
@@ -208,17 +210,23 @@ public class AttributeTable extends javax.swing.JPanel {
     private boolean resetSelection = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup bgSortOrder1;
+    private javax.swing.ButtonGroup bgSortOrder2;
+    private javax.swing.ButtonGroup bgSortOrder3;
+    private javax.swing.ButtonGroup bgSortOrder4;
     private javax.swing.JButton btnFirstPage;
     private javax.swing.JButton btnLastPage;
     private javax.swing.JButton btnNextPage;
     private javax.swing.JButton btnPrevPage;
     private javax.swing.JButton butAttrib;
     private javax.swing.JButton butCancel;
+    private javax.swing.JButton butCancel1;
     private javax.swing.JButton butClearSelection;
     private javax.swing.JButton butColWidth;
     private javax.swing.JButton butCopy;
     private javax.swing.JButton butDelete;
     private javax.swing.JButton butExpOk;
+    private javax.swing.JButton butExpOk1;
     private javax.swing.JButton butExport;
     private javax.swing.JButton butInvertSelection;
     private javax.swing.JButton butMoveSelectedRows;
@@ -231,19 +239,34 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butShowCols;
     private javax.swing.JButton butUndo;
     private javax.swing.JButton butZoomToSelection;
+    private javax.swing.JComboBox cbCol1;
+    private javax.swing.JComboBox cbCol2;
+    private javax.swing.JComboBox cbCol3;
+    private javax.swing.JComboBox cbCol4;
     private javax.swing.JDialog diaExport;
+    private javax.swing.JDialog diaSort;
     private javax.swing.JDialog diaStatistic;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JComboBox jcFormat;
     private javax.swing.JPanel jpControl;
     private javax.swing.JLabel labSegHint;
+    private javax.swing.JLabel labSortCol1;
+    private javax.swing.JLabel labSortCol2;
+    private javax.swing.JLabel labSortCol3;
+    private javax.swing.JLabel labSortCol4;
     private javax.swing.JLabel labStat;
     private javax.swing.JLabel labStatCol;
     private javax.swing.JLabel labWaitingImage;
@@ -268,8 +291,17 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JMenuItem miSpalteAusblenden;
     private javax.swing.JMenuItem miSpaltenUmbenennen;
     private javax.swing.JMenuItem miStatistik;
+    private javax.swing.JMenuItem mniAdvancedSorting;
     private javax.swing.JPanel panHint;
     private javax.swing.JPanel panWaiting;
+    private javax.swing.JRadioButton radOrderAsc1;
+    private javax.swing.JRadioButton radOrderAsc2;
+    private javax.swing.JRadioButton radOrderAsc3;
+    private javax.swing.JRadioButton radOrderAsc4;
+    private javax.swing.JRadioButton radOrderDesc1;
+    private javax.swing.JRadioButton radOrderDesc2;
+    private javax.swing.JRadioButton radOrderDesc3;
+    private javax.swing.JRadioButton radOrderDesc4;
     private org.jdesktop.swingx.JXTable table;
     private javax.swing.JScrollPane tableScrollPane;
     private javax.swing.JToggleButton tbProcessing;
@@ -1212,6 +1244,24 @@ public class AttributeTable extends javax.swing.JPanel {
                                     featureServiceAttributes,
                                     (List<FeatureServiceFeature>)featureList,
                                     tableRuleSet);
+                            final List<String> columnList = new ArrayList<String>();
+                            columnList.add(NbBundle.getMessage(
+                                    AttributeTable.class,
+                                    "AttributeTable.loadModel.column.none"));
+                            columnList.addAll(model.getAllColumnNames());
+
+                            // remove geometry attribute
+                            for (final String key : featureServiceAttributes.keySet()) {
+                                if (featureServiceAttributes.get(key).isGeometry()) {
+                                    final String geomAlias = model.getColumnNameByAttributeName(key);
+                                    columnList.remove(geomAlias);
+                                }
+                            }
+
+                            cbCol1.setModel(new DefaultComboBoxModel(columnList.toArray(new String[0])));
+                            cbCol2.setModel(new DefaultComboBoxModel(columnList.toArray(new String[0])));
+                            cbCol3.setModel(new DefaultComboBoxModel(columnList.toArray(new String[0])));
+                            cbCol4.setModel(new DefaultComboBoxModel(columnList.toArray(new String[0])));
                             table.setModel(model);
                             setTabMapping(table);
                             if (pageSize != -1) {
@@ -1490,6 +1540,7 @@ public class AttributeTable extends javax.swing.JPanel {
         miSpalteAusblenden = new javax.swing.JMenuItem();
         miSpaltenUmbenennen = new javax.swing.JMenuItem();
         miFeldberechnung = new javax.swing.JMenuItem();
+        mniAdvancedSorting = new javax.swing.JMenuItem();
         diaStatistic = new javax.swing.JDialog();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -1518,6 +1569,35 @@ public class AttributeTable extends javax.swing.JPanel {
         jcFormat = new javax.swing.JComboBox();
         butExpOk = new javax.swing.JButton();
         butCancel = new javax.swing.JButton();
+        diaSort = new javax.swing.JDialog();
+        jPanel6 = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        labSortCol1 = new javax.swing.JLabel();
+        cbCol1 = new javax.swing.JComboBox();
+        radOrderAsc1 = new javax.swing.JRadioButton();
+        radOrderDesc1 = new javax.swing.JRadioButton();
+        jPanel9 = new javax.swing.JPanel();
+        butExpOk1 = new javax.swing.JButton();
+        butCancel1 = new javax.swing.JButton();
+        jPanel10 = new javax.swing.JPanel();
+        labSortCol2 = new javax.swing.JLabel();
+        cbCol2 = new javax.swing.JComboBox();
+        radOrderAsc2 = new javax.swing.JRadioButton();
+        radOrderDesc2 = new javax.swing.JRadioButton();
+        jPanel11 = new javax.swing.JPanel();
+        labSortCol3 = new javax.swing.JLabel();
+        cbCol3 = new javax.swing.JComboBox();
+        radOrderAsc3 = new javax.swing.JRadioButton();
+        radOrderDesc3 = new javax.swing.JRadioButton();
+        jPanel12 = new javax.swing.JPanel();
+        labSortCol4 = new javax.swing.JLabel();
+        cbCol4 = new javax.swing.JComboBox();
+        radOrderAsc4 = new javax.swing.JRadioButton();
+        radOrderDesc4 = new javax.swing.JRadioButton();
+        bgSortOrder1 = new javax.swing.ButtonGroup();
+        bgSortOrder2 = new javax.swing.ButtonGroup();
+        bgSortOrder3 = new javax.swing.ButtonGroup();
+        bgSortOrder4 = new javax.swing.ButtonGroup();
         panHint = new javax.swing.JPanel();
         labSegHint = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
@@ -1603,6 +1683,18 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             });
         jPopupMenu1.add(miFeldberechnung);
+
+        mniAdvancedSorting.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.mniAdvancedSorting.text")); // NOI18N
+        mniAdvancedSorting.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    mniAdvancedSortingActionPerformed(evt);
+                }
+            });
+        jPopupMenu1.add(mniAdvancedSorting);
 
         diaStatistic.setTitle(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
@@ -1890,6 +1982,304 @@ public class AttributeTable extends javax.swing.JPanel {
         jPanel4.add(butCancel, gridBagConstraints);
 
         diaExport.getContentPane().add(jPanel4, java.awt.BorderLayout.CENTER);
+
+        diaSort.setTitle(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.diaSort.title")); // NOI18N
+        diaSort.setResizable(false);
+
+        jPanel6.setLayout(new java.awt.GridBagLayout());
+
+        jPanel8.setLayout(new java.awt.GridBagLayout());
+
+        labSortCol1.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labSortCol1.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        jPanel8.add(labSortCol1, gridBagConstraints);
+
+        cbCol1.setPreferredSize(new java.awt.Dimension(250, 27));
+        cbCol1.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    cbCol1ItemStateChanged(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        jPanel8.add(cbCol1, gridBagConstraints);
+
+        bgSortOrder1.add(radOrderAsc1);
+        radOrderAsc1.setSelected(true);
+        radOrderAsc1.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderAsc1.text",
+                new Object[] {})); // NOI18N
+        radOrderAsc1.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel8.add(radOrderAsc1, gridBagConstraints);
+
+        bgSortOrder1.add(radOrderDesc1);
+        radOrderDesc1.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderDesc1.text",
+                new Object[] {})); // NOI18N
+        radOrderDesc1.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel8.add(radOrderDesc1, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        jPanel6.add(jPanel8, gridBagConstraints);
+
+        jPanel9.setLayout(new java.awt.GridBagLayout());
+
+        butExpOk1.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExpOk1.text")); // NOI18N
+        butExpOk1.setPreferredSize(new java.awt.Dimension(90, 29));
+        butExpOk1.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butExpOk1ActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 15);
+        jPanel9.add(butExpOk1, gridBagConstraints);
+
+        butCancel1.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butCancel1.text")); // NOI18N
+        butCancel1.setPreferredSize(new java.awt.Dimension(90, 29));
+        butCancel1.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butCancel1ActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+        jPanel9.add(butCancel1, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        jPanel6.add(jPanel9, gridBagConstraints);
+
+        jPanel10.setLayout(new java.awt.GridBagLayout());
+
+        labSortCol2.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labSortCol2.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        jPanel10.add(labSortCol2, gridBagConstraints);
+
+        cbCol2.setPreferredSize(new java.awt.Dimension(250, 27));
+        cbCol2.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    cbCol2ItemStateChanged(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        jPanel10.add(cbCol2, gridBagConstraints);
+
+        bgSortOrder2.add(radOrderAsc2);
+        radOrderAsc2.setSelected(true);
+        radOrderAsc2.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderAsc2.text",
+                new Object[] {})); // NOI18N
+        radOrderAsc2.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel10.add(radOrderAsc2, gridBagConstraints);
+
+        bgSortOrder2.add(radOrderDesc2);
+        radOrderDesc2.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderDesc2.text",
+                new Object[] {})); // NOI18N
+        radOrderDesc2.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel10.add(radOrderDesc2, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        jPanel6.add(jPanel10, gridBagConstraints);
+
+        jPanel11.setLayout(new java.awt.GridBagLayout());
+
+        labSortCol3.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labSortCol3.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        jPanel11.add(labSortCol3, gridBagConstraints);
+
+        cbCol3.setPreferredSize(new java.awt.Dimension(250, 27));
+        cbCol3.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    cbCol3ItemStateChanged(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        jPanel11.add(cbCol3, gridBagConstraints);
+
+        bgSortOrder3.add(radOrderAsc3);
+        radOrderAsc3.setSelected(true);
+        radOrderAsc3.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderAsc3.text",
+                new Object[] {})); // NOI18N
+        radOrderAsc3.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel11.add(radOrderAsc3, gridBagConstraints);
+
+        bgSortOrder3.add(radOrderDesc3);
+        radOrderDesc3.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderDesc3.text",
+                new Object[] {})); // NOI18N
+        radOrderDesc3.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel11.add(radOrderDesc3, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        jPanel6.add(jPanel11, gridBagConstraints);
+
+        jPanel12.setLayout(new java.awt.GridBagLayout());
+
+        labSortCol4.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labSortCol4.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        jPanel12.add(labSortCol4, gridBagConstraints);
+
+        cbCol4.setPreferredSize(new java.awt.Dimension(250, 27));
+        cbCol4.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    cbCol4ItemStateChanged(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        jPanel12.add(cbCol4, gridBagConstraints);
+
+        bgSortOrder4.add(radOrderAsc4);
+        radOrderAsc4.setSelected(true);
+        radOrderAsc4.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderAsc4.text",
+                new Object[] {})); // NOI18N
+        radOrderAsc4.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel12.add(radOrderAsc4, gridBagConstraints);
+
+        bgSortOrder4.add(radOrderDesc4);
+        radOrderDesc4.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.radOrderDesc4.text",
+                new Object[] {})); // NOI18N
+        radOrderDesc4.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        jPanel12.add(radOrderDesc4, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        jPanel6.add(jPanel12, gridBagConstraints);
+
+        diaSort.getContentPane().add(jPanel6, java.awt.BorderLayout.CENTER);
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -2603,19 +2993,26 @@ public class AttributeTable extends javax.swing.JPanel {
     private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         final FeatureWithIndex[] selectedFeatures = new FeatureWithIndex[selectedRows.length];
+        final List<FeatureServiceFeature> allFeatures = new ArrayList<FeatureServiceFeature>(model.getRowCount());
         final int selectedRowCount = selectedRows.length;
         Arrays.sort(selectedRows);
 
+        // keep the original sorts
+        for (int i = 0; i < model.getRowCount(); ++i) {
+            final int modelIndex = table.convertRowIndexToModel(i);
+            allFeatures.add(model.getFeatureServiceFeature(modelIndex));
+        }
+
         for (int i = 0; i < selectedRowCount; ++i) {
             final int modelIndex = table.convertRowIndexToModel(selectedRows[i]);
-            selectedFeatures[i] = new FeatureWithIndex(model.getFeatureServiceFeature(modelIndex), modelIndex);
+            selectedFeatures[i] = new FeatureWithIndex(model.getFeatureServiceFeature(modelIndex), selectedRows[i]);
         }
 
         for (int i = 0; i < model.getColumnCount(); ++i) {
             table.setSortOrder(i, SortOrder.UNSORTED);
         }
 
-        final Comparator<Integer> reverseIntCompartor = new Comparator<Integer>() {
+        final Comparator<Integer> reverseIntComparator = new Comparator<Integer>() {
 
                 @Override
                 public int compare(final Integer o1, final Integer o2) {
@@ -2635,9 +3032,14 @@ public class AttributeTable extends javax.swing.JPanel {
                     wd.setMax(selectedRowCount);
                     final List<Integer> ts = new ArrayList<Integer>();
 
+                    model.setNewFeatureList(allFeatures);
+
                     for (int i = (selectedRowCount - 1); i >= 0; --i) {
                         final int index = -1
-                                    * (Collections.binarySearch(ts, selectedFeatures[i].getIndex(), reverseIntCompartor)
+                                    * (Collections.binarySearch(
+                                            ts,
+                                            selectedFeatures[i].getIndex(),
+                                            reverseIntComparator)
                                         + 1);
                         model.moveRowUp(
                             selectedFeatures[i].getIndex()
@@ -2666,7 +3068,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
             for (int i = (selectedRowCount - 1); i >= 0; --i) {
                 final int index = -1
-                            * (Collections.binarySearch(ts, selectedFeatures[i].getIndex(), reverseIntCompartor) + 1);
+                            * (Collections.binarySearch(ts, selectedFeatures[i].getIndex(), reverseIntComparator) + 1);
                 model.moveRowUp(
                     selectedFeatures[i].getIndex()
                             + (index),
@@ -3286,6 +3688,103 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void mniAdvancedSortingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_mniAdvancedSortingActionPerformed
+        diaSort.setSize(400, 400);
+        diaSort.setResizable(false);
+        diaSort.setModal(true);
+        StaticSwingTools.showDialog(diaSort);
+    }                                                                                      //GEN-LAST:event_mniAdvancedSortingActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbCol1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbCol1ItemStateChanged
+        final Object o = cbCol1.getSelectedItem();
+        final boolean enableBoxes = (o != null) && model.getAllColumnNames().contains((String)o);
+        radOrderAsc1.setEnabled(enableBoxes);
+        radOrderDesc1.setEnabled(enableBoxes);
+    }                                                                         //GEN-LAST:event_cbCol1ItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butExpOk1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExpOk1ActionPerformed
+        final List<String> cols = new ArrayList<String>();
+        final List<Boolean> isAscOrder = new ArrayList<Boolean>();
+        final List<String> colNames = model.getAllColumnNames();
+        final JComboBox[] cbCols = new JComboBox[] { cbCol1, cbCol2, cbCol3, cbCol4 };
+        final JRadioButton[] rdButtons = new JRadioButton[] { radOrderAsc1, radOrderAsc2, radOrderAsc3, radOrderAsc4 };
+
+        for (int i = 0; i < cbCols.length; ++i) {
+            final String tmp = (String)cbCols[i].getSelectedItem();
+
+            if ((tmp != null) && colNames.contains(tmp)) {
+                cols.add(tmp);
+                isAscOrder.add(rdButtons[i].isSelected());
+            }
+        }
+
+        if (cols.size() > 0) {
+            model.sortOrder(cols.toArray(new String[cols.size()]), isAscOrder.toArray(new Boolean[isAscOrder.size()]));
+        }
+
+        diaSort.setVisible(false);
+    } //GEN-LAST:event_butExpOk1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butCancel1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancel1ActionPerformed
+        diaSort.setVisible(false);
+    }                                                                              //GEN-LAST:event_butCancel1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbCol2ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbCol2ItemStateChanged
+        final Object o = cbCol2.getSelectedItem();
+        final boolean enableBoxes = (o != null) && model.getAllColumnNames().contains((String)o);
+        radOrderAsc2.setEnabled(enableBoxes);
+        radOrderDesc2.setEnabled(enableBoxes);
+    }                                                                         //GEN-LAST:event_cbCol2ItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbCol3ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbCol3ItemStateChanged
+        final Object o = cbCol3.getSelectedItem();
+        final boolean enableBoxes = (o != null) && model.getAllColumnNames().contains((String)o);
+        radOrderAsc3.setEnabled(enableBoxes);
+        radOrderDesc3.setEnabled(enableBoxes);
+    }                                                                         //GEN-LAST:event_cbCol3ItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbCol4ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbCol4ItemStateChanged
+        final Object o = cbCol4.getSelectedItem();
+        final boolean enableBoxes = (o != null) && model.getAllColumnNames().contains((String)o);
+        radOrderAsc4.setEnabled(enableBoxes);
+        radOrderDesc4.setEnabled(enableBoxes);
+    }                                                                         //GEN-LAST:event_cbCol4ItemStateChanged
+
+    /**
+     * DOCUMENT ME!
      */
     private void copySelectedFeaturesToClipboard() {
         clipboard = getSelectedFeatures();
@@ -3652,6 +4151,10 @@ public class AttributeTable extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     public boolean saveChangedRows(final boolean forceSave, final boolean changeProcessingMode) {
+        if ((table.getEditingRow() != -1) && (table.getEditingColumn() != -1)) {
+            table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
+        }
+
         boolean save = forceSave;
         refreshModifiedFeaturesSet();
 
@@ -4293,6 +4796,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
+        protected List<FeatureServiceFeature> selectedFeatures;
+
         private boolean editable = false;
 
         //~ Constructors -------------------------------------------------------
@@ -4321,6 +4826,71 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         public boolean isEditable() {
             return editable;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  columns     DOCUMENT ME!
+         * @param  isAscOrder  DOCUMENT ME!
+         */
+        public void sortOrder(final String[] columns, final Boolean[] isAscOrder) {
+            for (int i = 0; i < model.getColumnCount(); ++i) {
+                table.setSortOrder(i, SortOrder.UNSORTED);
+            }
+
+            Collections.sort(featureList, new Comparator<FeatureServiceFeature>() {
+
+                    @Override
+                    public int compare(final FeatureServiceFeature o1, final FeatureServiceFeature o2) {
+                        for (int i = 0; i < columns.length; ++i) {
+                            final int result = compareObjects(
+                                    o1.getProperty(columns[i]),
+                                    o2.getProperty(columns[i]),
+                                    isAscOrder[i]);
+
+                            if (result != 0) {
+                                return result;
+                            }
+                        }
+
+                        return 0;
+                    }
+
+                    private int compareObjects(final Object o1, final Object o2, final boolean isAscOrder) {
+                        if ((o1 == null) && (o2 == null)) {
+                            return 0;
+                        } else if (o1 == null) {
+                            if (isAscOrder) {
+                                return -1;
+                            } else {
+                                return 1;
+                            }
+                        } else if (o2 == null) {
+                            if (isAscOrder) {
+                                return -1;
+                            } else {
+                                return 1;
+                            }
+                        } else {
+                            if ((o1 instanceof Comparable) && (o2 instanceof Comparable)) {
+                                final Comparable c1 = (Comparable)o1;
+                                final Comparable c2 = (Comparable)o2;
+
+                                if (isAscOrder) {
+                                    return c1.compareTo(c2);
+                                } else {
+                                    return c1.compareTo(c2) * -1;
+                                }
+                            } else {
+                                LOG.error("Sort table with non comparable types");
+                                return 0;
+                            }
+                        }
+                    }
+                });
+
+            fireContentsChanged();
         }
 
         /**
@@ -4363,6 +4933,15 @@ public class AttributeTable extends javax.swing.JPanel {
             } else {
                 return false;
             }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public List<String> getAllColumnNames() {
+            return Arrays.asList(attributeAlias);
         }
 
         /**
