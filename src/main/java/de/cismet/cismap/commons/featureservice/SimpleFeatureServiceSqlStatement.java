@@ -215,31 +215,6 @@ public class SimpleFeatureServiceSqlStatement {
     /**
      * DOCUMENT ME!
      *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final SimpleFeatureServiceSqlStatement sqlStatement = new SimpleFeatureServiceSqlStatement(
-                "select <cismap::AllFields> from geom, cs_attr_object where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)", // NOI18N
-                "<cismap::AllFields>",
-                "<cismap::x1>",
-                "<cismap::y1>",
-                "<cismap::x2>",
-                "<cismap::y2>"); // NOI18N
-        sqlStatement.setAllFields(
-            "'Kassenzeichen' as Type,object_id as GroupingKey, object_id as ObjectName,geo_field as Geom"); // NOI18N
-        sqlStatement.setX1(1);
-        sqlStatement.setY1(2);
-        sqlStatement.setX2(3);
-        sqlStatement.setY2(4);
-
-//         System.out.println(sqlStatement.getCountFeaturesStatement());
-//         System.out.println(sqlStatement.getFeaturesStatement());
-
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public String getOrderBy() {
