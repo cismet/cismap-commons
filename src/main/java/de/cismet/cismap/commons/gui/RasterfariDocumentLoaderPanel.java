@@ -212,10 +212,14 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
     public void dispose() {
         // TODO:
         // this is a quick fix for the memory leak that some mapping components can not be garbage collected
-        panCenter.remove(map);
-        map.removeInputEventListener(mapListener);
-        map.dispose();
-        map = null;
+// panCenter.remove(map);
+        if (map != null) {
+            map.removeInputEventListener(mapListener);
+            map.dispose();
+        }
+//        map = null;
+        ((DefaultListModel)FEHLER_MODEL).removeAllElements();
+        ((DefaultListModel)MODEL_LOAD).removeAllElements();
     }
 
     /**
