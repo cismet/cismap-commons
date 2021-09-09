@@ -279,7 +279,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private final Timer showHandleDelay;
     private final Map<MapService, Future<?>> serviceFuturesMap = new HashMap<MapService, Future<?>>();
     /** Utility field used by bound properties. */
-    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private ButtonGroup interactionButtonGroup;
     private boolean mainMappingComponent = false;
     private volatile boolean rescaleStickyNodesEnabled = true;
@@ -556,6 +556,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void dispose() {
         CismapBroker.getInstance().removeCrsChangeListener(this);
         getFeatureCollection().removeAllFeatures();
+
+        mapListeners.clear();
+        inputEventListener.clear();
     }
 
     /**
