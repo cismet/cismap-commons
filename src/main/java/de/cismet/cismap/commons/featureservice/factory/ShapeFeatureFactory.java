@@ -189,6 +189,11 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.crs = shpff.crs;
         this.shapeCrs = shpff.shapeCrs;
         this.fc = shpff.fc;
+        this.filename = shpff.filename;
+        this.envelope = shpff.envelope;
+        this.geometryType = shpff.geometryType;
+        this.noGeometryRecognised = shpff.noGeometryRecognised;
+        this.errorInGeometryFound = shpff.errorInGeometryFound;
     }
 
     //~ Methods ----------------------------------------------------------------

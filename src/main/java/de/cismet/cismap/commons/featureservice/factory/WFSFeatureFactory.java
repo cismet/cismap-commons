@@ -144,6 +144,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         this.hostname = wfsff.hostname;
         this.featureType = wfsff.featureType;
         this.crs = wfsff.crs;
+        this.reverseAxisOrder = wfsff.reverseAxisOrder;
     }
 
     //~ Methods ----------------------------------------------------------------

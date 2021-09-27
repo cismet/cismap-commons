@@ -175,6 +175,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     protected ShapeFileFeatureService(final ShapeFileFeatureService sfs) {
         super(sfs);
+        this.geometryType = sfs.geometryType;
         checkFile();
     }
 
