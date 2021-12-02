@@ -298,7 +298,10 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                         executor.awaitTermination(1, TimeUnit.HOURS);
 
                         for (final MapService service : featureMap.keySet()) {
-                            toBeSelected.addAll(featureMap.get(service));
+                            if (featureMap.get(service) != null) {
+                                // featureMap.get(service) of web feature services returns null
+                                toBeSelected.addAll(featureMap.get(service));
+                            }
                         }
                     }
 
