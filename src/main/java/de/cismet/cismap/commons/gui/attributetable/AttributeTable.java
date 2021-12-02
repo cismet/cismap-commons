@@ -983,6 +983,10 @@ public class AttributeTable extends javax.swing.JPanel {
         selectionListener.clear();
         model.setNewFeatureList(new ArrayList<FeatureServiceFeature>());
         model = null;
+
+        if (calculationDialog != null) {
+            calculationDialog = null;
+        }
         return true;
     }
 
@@ -2638,6 +2642,13 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(panWaiting, gridBagConstraints);
 
+        table.addMouseListener(new java.awt.event.MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    tableMouseClicked(evt);
+                }
+            });
         tableScrollPane.setViewportView(table);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -3633,7 +3644,13 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         if (featureList != null) {
-            final boolean changes = calculationDialog.openPanel(this, featureService, attr, featureList);
+            List<FeatureServiceFeature> allFeatures = null;
+
+            if (pageSize == -1) {
+                allFeatures = model.getFeatureServiceFeatures();
+            }
+
+            final boolean changes = calculationDialog.openPanel(this, featureService, attr, featureList, allFeatures);
 
             if (changes) {
                 for (final FeatureServiceFeature feature : featureList) {
@@ -3782,6 +3799,26 @@ public class AttributeTable extends javax.swing.JPanel {
         radOrderAsc4.setEnabled(enableBoxes);
         radOrderDesc4.setEnabled(enableBoxes);
     }                                                                         //GEN-LAST:event_cbCol4ItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tableMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_tableMouseClicked
+        if (evt.getClickCount() == 2) {
+            final int selectedRow = table.getSelectedRow();
+            final Geometry g = model.getGeometryFromRow(table.convertRowIndexToModel(selectedRow));
+
+            if (mappingComponent != null) {
+                final XBoundingBox bbox = new XBoundingBox(g);
+                bbox.increase(10);
+                mappingComponent.gotoBoundingBoxWithHistory(bbox);
+            } else {
+                LOG.error("MappingComponent is not set");
+            }
+        }
+    } //GEN-LAST:event_tableMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -4018,12 +4055,41 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 if ((geometryType == null) || geometryType.equals(AbstractFeatureService.UNKNOWN)
                             || geometryType.equals(AbstractFeatureService.NONE)) {
-                    outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
-                            lastExportPath,
-                            true,
-                            new String[] { "dbf", "csv", "txt" },
-                            new String[] { "dbf", "csv", "txt" },
-                            this);
+                    boolean first = true;
+                    String featureGeometryType = null;
+
+                    for (final Feature f : features) {
+                        if (first) {
+                            if (f.getGeometry() != null) {
+                                featureGeometryType = f.getGeometry().getGeometryType();
+                            } else {
+                                break;
+                            }
+                            first = false;
+                        } else {
+                            if ((f.getGeometry() == null)
+                                        || !f.getGeometry().getGeometryType().equals(featureGeometryType)) {
+                                featureGeometryType = null;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (featureGeometryType == null) {
+                        outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
+                                lastExportPath,
+                                true,
+                                new String[] { "dbf", "csv", "txt" },
+                                new String[] { "dbf", "csv", "txt" },
+                                this);
+                    } else {
+                        outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
+                                lastExportPath,
+                                true,
+                                new String[] { "shp", "dbf", "csv", "txt" },
+                                new String[] { "shp", "dbf", "csv", "txt" },
+                                this);
+                    }
                 } else {
                     outputFile = StaticSwingTools.chooseFileWithMultipleFilters(
                             lastExportPath,
@@ -4184,7 +4250,36 @@ public class AttributeTable extends javax.swing.JPanel {
                     modifiedFeatures);
             featuresPrepareForSave.removeAll(allFeaturesToDelete);
 
-            if ((tableRuleSet != null)
+            if (tableRuleSet instanceof AttributeTableExtendedRuleSet) {
+                final AttributeTableExtendedRuleSet exTableRuleSet = (AttributeTableExtendedRuleSet)tableRuleSet;
+                final AttributeTableExtendedRuleSet.ErrorDetails details = exTableRuleSet.prepareForSaveWithDetails(
+                        featuresPrepareForSave);
+                if (details != null) {
+                    if (details.getFeature() != null) {
+                        final int featureIndex = table.convertRowIndexToView(model.getRowByFeature(
+                                    details.getFeature()));
+
+                        if (featureIndex != -1) {
+                            table.getSelectionModel().setSelectionInterval(featureIndex, featureIndex);
+
+                            if (details.getColumn() != null) {
+                                try {
+                                    final String columnName = model.getColumnNameByAttributeName(details.getColumn());
+                                    final int col = table.getColumnModel().getColumnIndex(columnName);
+
+                                    if (col != -1) {
+                                        table.editCellAt(featureIndex, col);
+                                    }
+                                } catch (IllegalArgumentException e) {
+                                    LOG.error("Cell not found.", e);
+                                }
+                            }
+                        }
+                    }
+                    tbProcessing.setSelected(true);
+                    return false;
+                }
+            } else if ((tableRuleSet != null)
                         && !tableRuleSet.prepareForSave(featuresPrepareForSave)) {
                 tbProcessing.setSelected(true);
                 return false;
