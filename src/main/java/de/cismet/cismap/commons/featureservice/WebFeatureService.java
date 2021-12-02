@@ -187,7 +187,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         setHostname(host);
         // defaults for new services
         this.setTranslucency(0.2f);
-        this.setMaxFeatureCount(5000);
+        this.setMaxFeatureCount(100000);
         this.reverseAxisOrder = reverseAxisOrder;
     }
 
