@@ -41,4 +41,21 @@ public interface AttributeTableFieldCalculation {
             AbstractFeatureService service,
             FeatureServiceAttribute attribute,
             final List<FeatureServiceFeature> featureList);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   table                   DOCUMENT ME!
+     * @param   service                 DOCUMENT ME!
+     * @param   attribute               DOCUMENT ME!
+     * @param   featureList             DOCUMENT ME!
+     * @param   allFeaturesFromService  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean openPanel(final AttributeTable table,
+            final AbstractFeatureService service,
+            final FeatureServiceAttribute attribute,
+            final List<FeatureServiceFeature> featureList,
+            final List<FeatureServiceFeature> allFeaturesFromService);
 }

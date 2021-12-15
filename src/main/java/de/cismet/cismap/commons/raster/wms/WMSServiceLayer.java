@@ -1351,7 +1351,25 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     @Override
     public Layer getLayerInformation() {
         if (wmsCapabilities != null) {
-            Layer layer = searchForLayer(wmsCapabilities.getLayer(), name);
+            Layer layer = null;
+            final List layerList = getWMSLayers();
+
+            if ((layerList != null) && (layerList.size() == 1)) {
+                // The name is not really the name, but the title (of a layer or a layer group or a subset of the WMS
+                // layers) and the title is not unique and can also be a custom title that is not known by the wms. If
+                // the WMSServiceLayer contains only one WMS layer, than the layer information for this layer can be
+                // determined, but if this is not the case, the layer information for the whole WMS should be used.
+                final Object wmsLayer = layerList.get(0);
+
+                if (wmsLayer instanceof WMSLayer) {
+                    layer = searchForLayer(wmsCapabilities.getLayer(),
+                            ((WMSLayer)wmsLayer).getOgcCapabilitiesLayer().getName());
+                }
+            }
+
+            if (layer == null) {
+                layer = searchForLayer(wmsCapabilities.getLayer(), name);
+            }
 
             if (layer == null) {
                 layer = wmsCapabilities.getLayer();

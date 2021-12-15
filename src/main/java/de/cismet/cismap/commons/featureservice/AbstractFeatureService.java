@@ -397,6 +397,30 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("init(): Feature Service Attributes already created");                                // NOI18N
                 }
             }
+            try {
+                final List<FeatureServiceAttribute> l = featureFactory.createAttributes(layerInitWorker);
+                final Map<String, FeatureServiceAttribute> currentAttributes =
+                    new HashMap<String, FeatureServiceAttribute>();
+
+                for (final FeatureServiceAttribute attr : l) {
+                    currentAttributes.put(attr.getName(), attr);
+                }
+
+                for (final String curName : featureServiceAttributes.keySet()) {
+                    final FeatureServiceAttribute fsa = currentAttributes.get(curName);
+
+                    if ((fsa == null) || !fsa.getType().equals(featureServiceAttributes.get(curName).getType())) {
+                        // todo show warning
+                    }
+                }
+            } catch (UnsupportedOperationException uoe) {
+                if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Feature Factory '" + this.getFeatureFactory().getClass().getSimpleName()
+                                    + "' does not support Attributes"); // NOI18N
+                    }
+                }
+            }
         }
 
         // check if canceled .......................................................

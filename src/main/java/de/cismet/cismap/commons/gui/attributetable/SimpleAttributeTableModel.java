@@ -21,15 +21,12 @@ import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.jdesktop.swingx.JXTable;
 
-import org.openide.util.Exceptions;
-
 import java.lang.reflect.Constructor;
 
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -336,6 +333,17 @@ public class SimpleAttributeTableModel implements TableModel {
         }
 
         return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getRowByFeature(final FeatureServiceFeature feature) {
+        return featureList.indexOf(feature);
     }
 
     /**

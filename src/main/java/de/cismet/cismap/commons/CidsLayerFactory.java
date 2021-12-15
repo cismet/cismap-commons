@@ -313,6 +313,8 @@ public class CidsLayerFactory {
                     return getKeyForRetrievalService(slidableWms);
                 } else if (layerelement.getName().equals("ModeLayer")) {
                     return "ModeLayer#" + layerelement.getAttributeValue("key");
+                } else if (layerelement.getName().equals(LayerCollection.XML_ELEMENT_NAME)) {
+                    return "LayerCollection#" + layerelement.getAttributeValue("name");
                 } else {
                     final RetrievalServiceLayer layer = (RetrievalServiceLayer)XMLObjectFactory
                                 .restoreObjectfromElement(layerelement);
