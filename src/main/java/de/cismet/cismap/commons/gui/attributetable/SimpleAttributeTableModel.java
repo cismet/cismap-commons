@@ -21,7 +21,6 @@ import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.jdesktop.swingx.JXTable;
 
-
 import java.lang.reflect.Constructor;
 
 import java.sql.Timestamp;
