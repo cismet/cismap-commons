@@ -209,66 +209,75 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         long start = System.currentTimeMillis();
         final Vector<WFSFeature> features;
 
-        if (featuresAlreadyInMemory(bbox.getGeometry(), query)) {
-            features = createFeaturesFromMemory(query, bbox.getGeometry());
-        } else {
-            final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
-            final String postString = facade.setGetFeatureBoundingBox(
-                    query,
-                    bbox,
+//        if (featuresAlreadyInMemory(bbox.getGeometry(), query)) {
+//            features = createFeaturesFromMemory(query, bbox.getGeometry());
+//        } else {
+        final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
+        final String postString = facade.setGetFeatureBoundingBox(
+                query,
+                bbox,
+                featureType,
+                getCrs().getCode(),
+                reverseAxisOrder);
+        featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
                     featureType,
-                    getCrs().getCode(),
-                    reverseAxisOrder);
-            featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
-                        featureType,
-                        getCrs().getCode()));
+                    getCrs().getCode()));
+
+        // check if canceled .......................................................
+        if (this.checkCancelled(workerThread, "creating post string")) {
+            return null;
+        }
+        // check if canceled .......................................................
+        if (logger.isDebugEnabled()) {
+            logger.debug("FRW[" + workerThread + "]: Host name: " + hostname + "\nWFS Query: \n" + postString);
+        }
+
+        final InputStream respIs = WebAccessManager.getInstance()
+                    .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+
+        // check if canceled .......................................................
+        if (this.checkCancelled(workerThread, "executing http request")) {
+            return null;
+        }
+        // check if canceled .......................................................
+
+        logger.info("FRW[" + workerThread + "]: WFS request took " + (System.currentTimeMillis() - start) + " ms");
+
+        final InputStreamReader reader = new InputStreamReader(new BufferedInputStream(respIs));
+
+        // check if canceled .......................................................
+        if (this.checkCancelled(workerThread, "creating InputStreamReader")) {
+            return null;
+        }
+        // check if canceled .......................................................
+        final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
+        final FeatureCollection featureCollection;
+
+        try {
+            start = System.currentTimeMillis();
 
             // check if canceled .......................................................
-            if (this.checkCancelled(workerThread, "creating post string")) {
+            if (this.checkCancelled(workerThread, "creating GMLFeatureCollectionDocument")) {
                 return null;
             }
             // check if canceled .......................................................
-            if (logger.isDebugEnabled()) {
-                logger.debug("FRW[" + workerThread + "]: Host name: " + hostname + "\nWFS Query: \n" + postString);
-            }
 
-            final InputStream respIs = WebAccessManager.getInstance()
-                        .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+            // debug
+            final StringBuilder res = new StringBuilder();
+            String charset = null;
+            String tmp;
+            final BufferedReader br = new BufferedReader(reader);
 
-            // check if canceled .......................................................
-            if (this.checkCancelled(workerThread, "executing http request")) {
-                return null;
-            }
-            // check if canceled .......................................................
-
-            logger.info("FRW[" + workerThread + "]: WFS request took " + (System.currentTimeMillis() - start) + " ms");
-
-            final InputStreamReader reader = new InputStreamReader(new BufferedInputStream(respIs));
-
-            // check if canceled .......................................................
-            if (this.checkCancelled(workerThread, "creating InputStreamReader")) {
-                return null;
-            }
-            // check if canceled .......................................................
-            final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
-            final FeatureCollection featureCollection;
-
-            try {
-                start = System.currentTimeMillis();
-
-                // check if canceled .......................................................
-                if (this.checkCancelled(workerThread, "creating GMLFeatureCollectionDocument")) {
-                    return null;
-                }
-                // check if canceled .......................................................
-
-                // debug
-                final StringBuilder res = new StringBuilder();
-                String charset = null;
-                String tmp;
-                final BufferedReader br = new BufferedReader(reader);
-
-                while ((tmp = br.readLine()) != null) {
+            while ((tmp = br.readLine()) != null) {
+                if (charset != null) {
+                    try {
+                        res.append(new String(tmp.getBytes(), charset));
+                    } catch (UnsupportedEncodingException e) {
+                        logger.error("Unsupported encoding found: " + charset, e);
+                        res.append(new String(tmp.getBytes()));
+                    }
+                } else {
+                    charset = checkForCharset(tmp);
                     if (charset != null) {
                         try {
                             res.append(new String(tmp.getBytes(), charset));
@@ -277,103 +286,93 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                             res.append(new String(tmp.getBytes()));
                         }
                     } else {
-                        charset = checkForCharset(tmp);
-                        if (charset != null) {
-                            try {
-                                res.append(new String(tmp.getBytes(), charset));
-                            } catch (UnsupportedEncodingException e) {
-                                logger.error("Unsupported encoding found: " + charset, e);
-                                res.append(new String(tmp.getBytes()));
-                            }
-                        } else {
-                            res.append(new String(tmp.getBytes()));
-                        }
+                        res.append(new String(tmp.getBytes()));
                     }
                 }
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug("wfs response: " + res.toString());
-                }
-                final StringReader re = new StringReader(res.toString());
-                // debug
-
-                featureCollectionDocument.load(re, "http://dummyID");
-
-                // check if canceled .......................................................
-                if (this.checkCancelled(workerThread, "loading features")) {
-                    return null;
-                }
-                // check if canceled .......................................................
-
-                // getFeatureCount() stimmt nicht mit der zahl der geparsten features überein!?
-                /*
-                 * if (featureCollectionDocument.getFeatureCount() > this.getMaxFeatureCount()) { throw new
-                 * TooManyFeaturesException("feature in feature document " + featureCollectionDocument.getFeatureCount()
-                 * + " exceeds max feature count " + this.getMaxFeatureCount()); } else
-                 */
-                if (featureCollectionDocument.getFeatureCount() == 0) {
-                    logger.warn("FRW[" + workerThread + "]: no features found before parsing");
-                    // if(DEBUG)logger.debug(featureCollectionDocument.getAsString());
-                    return null;
-                }
-
-                if (DEBUG) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("FRW[" + workerThread + "]: parsing " + featureCollectionDocument
-                                    .getFeatureCount()
-                                    + " features");
-                    }
-                }
-
-                // StringWriter sw = new StringWriter();
-                // featureCollectionDocument.write(sw);
-                featureCollection = featureCollectionDocument.parse();
-
-                // check if canceled .......................................................
-                if (this.checkCancelled(workerThread, "parsing features")) {
-                    return null;
-                }
-                // check if canceled .......................................................
-
-                if ((featureCollection.size() == 1) && (featureCollection.getFeature(0).getName() != null)
-                            && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
-                    logger.warn(
-                        "The wfs response contains only one feature with the name ExceptionText. "
-                                + "So an error occured. Trying to extract the error message.");
-                    try {
-                        final String errorMessage = featureCollectionDocument.getRootElement()
-                                    .getFirstChild()
-                                    .getFirstChild()
-                                    .getTextContent();
-
-                        throw new Exception(errorMessage);
-                    } catch (NullPointerException e) {
-                        logger.error("Cannot extract the error message from the wfs response.");
-                        throw new Exception(
-                            "The wfs replies with an Exception, but the error text cannot be extracted.");
-                    }
-                }
-
-                logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
-                            + (System.currentTimeMillis() - start) + " ms");
-
-                if (featureCollection.size() > this.getMaxFeatureCount()) {
-                    throw new TooManyFeaturesException("FRW[" + workerThread + "]: feature in feature document "
-                                + featureCollection.size() + " exceeds max feature count " + this.getMaxFeatureCount());
-                } else if (featureCollection.size() == 0) {
-                    logger.warn("FRW[" + workerThread + "]: no features found after parsing");
-                    return null;
-                }
-
-                features = processFeatureCollection(
-                        workerThread,
-                        featureCollection.toArray(),
-                        true);
-            } catch (Exception t) {
-                logger.error("FRW[" + workerThread + "]: error parsing features: " + t.getMessage(), t);
-                throw t;
             }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("wfs response: " + res.toString());
+            }
+            final StringReader re = new StringReader(res.toString());
+            // debug
+
+            featureCollectionDocument.load(re, "http://dummyID");
+
+            // check if canceled .......................................................
+            if (this.checkCancelled(workerThread, "loading features")) {
+                return null;
+            }
+            // check if canceled .......................................................
+
+            // getFeatureCount() stimmt nicht mit der zahl der geparsten features überein!?
+            /*
+             * if (featureCollectionDocument.getFeatureCount() > this.getMaxFeatureCount()) { throw new
+             * TooManyFeaturesException("feature in feature document " + featureCollectionDocument.getFeatureCount() + "
+             * exceeds max feature count " + this.getMaxFeatureCount()); } else
+             */
+            if (featureCollectionDocument.getFeatureCount() == 0) {
+                logger.warn("FRW[" + workerThread + "]: no features found before parsing");
+                // if(DEBUG)logger.debug(featureCollectionDocument.getAsString());
+                return null;
+            }
+
+            if (DEBUG) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("FRW[" + workerThread + "]: parsing " + featureCollectionDocument.getFeatureCount()
+                                + " features");
+                }
+            }
+
+            // StringWriter sw = new StringWriter();
+            // featureCollectionDocument.write(sw);
+            featureCollection = featureCollectionDocument.parse();
+
+            // check if canceled .......................................................
+            if (this.checkCancelled(workerThread, "parsing features")) {
+                return null;
+            }
+            // check if canceled .......................................................
+
+            if ((featureCollection.size() == 1) && (featureCollection.getFeature(0).getName() != null)
+                        && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
+                logger.warn(
+                    "The wfs response contains only one feature with the name ExceptionText. "
+                            + "So an error occured. Trying to extract the error message.");
+                try {
+                    final String errorMessage = featureCollectionDocument.getRootElement()
+                                .getFirstChild()
+                                .getFirstChild()
+                                .getTextContent();
+
+                    throw new Exception(errorMessage);
+                } catch (NullPointerException e) {
+                    logger.error("Cannot extract the error message from the wfs response.");
+                    throw new Exception(
+                        "The wfs replies with an Exception, but the error text cannot be extracted.");
+                }
+            }
+
+            logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
+                        + (System.currentTimeMillis() - start) + " ms");
+
+            if (featureCollection.size() > this.getMaxFeatureCount()) {
+                throw new TooManyFeaturesException("FRW[" + workerThread + "]: feature in feature document "
+                            + featureCollection.size() + " exceeds max feature count " + this.getMaxFeatureCount());
+            } else if (featureCollection.size() == 0) {
+                logger.warn("FRW[" + workerThread + "]: no features found after parsing");
+                return null;
+            }
+
+            features = processFeatureCollection(
+                    workerThread,
+                    featureCollection.toArray(),
+                    true);
+        } catch (Exception t) {
+            logger.error("FRW[" + workerThread + "]: error parsing features: " + t.getMessage(), t);
+            throw t;
         }
+//        }
 
         // check if thread is canceled .........................................
         if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
