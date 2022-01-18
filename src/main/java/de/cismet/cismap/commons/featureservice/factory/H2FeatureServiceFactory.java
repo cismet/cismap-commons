@@ -2347,6 +2347,47 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
+     * Tries to create a connection to the internal database.
+     *
+     * @param   databasePath  the path to the database. if null, {@link DB_NAME} will be used
+     *
+     * @throws  SQLException  DOCUMENT ME!
+     */
+    public static void tryDBConnection(final String databasePath) throws SQLException {
+        final String path = ((databasePath == null) ? DB_NAME : databasePath);
+
+        ConnectionWrapper connection = DB_CONNECTIONS.get(path);
+        boolean isConnectionClosed = false;
+
+        try {
+            if (connection != null) {
+                isConnectionClosed = connection.isClosed() || !connection.isValid(100);
+            }
+        } catch (Exception e) {
+            isConnectionClosed = true;
+        }
+
+        if ((connection == null) || isConnectionClosed) {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                Class.forName("org.h2.Driver");
+                connection = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                            "jdbc:h2:"
+                                    + path));
+                DB_CONNECTIONS.put(path, connection);
+            } catch (ClassNotFoundException e) {
+                LOG.error("Error while creating database connection.", e);
+            } catch (SQLException e) {
+                LOG.error("Error while creating database connection.", e);
+
+                throw e;
+            }
+        }
+    }
+
+    /**
      * Creates a new statement on the givven connection.
      *
      * @param   conn  the connection, the statement should be created on
