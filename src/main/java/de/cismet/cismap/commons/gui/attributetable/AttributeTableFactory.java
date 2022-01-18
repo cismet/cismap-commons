@@ -172,7 +172,7 @@ public class AttributeTableFactory {
      * @return  DOCUMENT ME!
      */
     public static String createId(final AbstractFeatureService service) {
-        return "Attributtabelle " + service.getName();
+        return "Attributtabelle " + service.getId();
     }
 
     //~ Inner Classes ----------------------------------------------------------
