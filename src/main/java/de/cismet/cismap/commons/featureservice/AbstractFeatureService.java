@@ -1073,6 +1073,15 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      *
      * @return  DOCUMENT ME!
      */
+    public String getId() {
+        return this.getName();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Element toElement() {
         final Element element = new Element(getFeatureLayerType());
