@@ -5050,10 +5050,15 @@ public class AttributeTable extends javax.swing.JPanel {
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
             final FeatureServiceFeature feature = featureList.get(rowIndex);
             final String attrName = attributeNames[columnIndex];
-            Object newObject = aValue;
+            Object newObject = (((aValue != null) && aValue.equals("")) ? null : aValue);
 
             if (tableRuleSet != null) {
-                newObject = tableRuleSet.afterEdit(feature, attrName, rowIndex, feature.getProperty(attrName), aValue);
+                newObject = tableRuleSet.afterEdit(
+                        feature,
+                        attrName,
+                        rowIndex,
+                        feature.getProperty(attrName),
+                        newObject);
             }
             feature.setProperty(attrName, newObject);
             modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
