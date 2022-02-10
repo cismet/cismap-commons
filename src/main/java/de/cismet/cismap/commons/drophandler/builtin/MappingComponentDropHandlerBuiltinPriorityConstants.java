@@ -25,6 +25,7 @@ public class MappingComponentDropHandlerBuiltinPriorityConstants {
     public static final int UNKNOWN = Integer.MIN_VALUE;
     public static final int GML = 10000;
     public static final int SHAPE = 10000;
+    public static final int GPX = 10000;
     public static final int WORLD = 10000;
     public static final int GEOIMAGE = 1000;
     public static final int IMAGE = 999;

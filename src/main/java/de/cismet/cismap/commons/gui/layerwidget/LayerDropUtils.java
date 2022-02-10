@@ -11,15 +11,21 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +38,7 @@ import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.LayerConfig;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
@@ -39,19 +46,26 @@ import de.cismet.cismap.commons.featureservice.LayerAlreadyAddedException;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CidsLayerTransferable;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.TreeFolder;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
+import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
+import de.cismet.commons.cismap.io.converters.GeometriesFromGPXConverter;
+import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
+
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 
 /**
  * DOCUMENT ME!
@@ -209,6 +223,12 @@ public class LayerDropUtils {
 
                     for (final FeatureType feature : sac.getFeatures()) {
                         try {
+//                            final WebFeatureService wfs = new WebFeatureService(feature.getName().getLocalPart(),
+//                                    feature.getWFSCapabilities().getURL().toString(),
+//                                    feature.getWFSQuery(),
+//                                    feature.getFeatureAttributes(),
+//                                    feature,
+//                                    sac.isReverseAxisOrder());
                             final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
                                     feature.getWFSCapabilities().getURL().toString(),
                                     feature.getWFSQuery(),
@@ -459,6 +479,112 @@ public class LayerDropUtils {
         } else {
             activeLayerModel.addLayer(irs);
         }
+        return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   currentFile       DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   index             DOCUMENT ME!
+     * @param   parent            DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean handleGPXFile(final File currentFile,
+            final ActiveLayerModel activeLayerModel,
+            final int index,
+            final Component parent) {
+        final GeometriesFromGPXConverter converter = new GeometriesFromGPXConverter();
+
+        final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
+                StaticSwingTools.getFirstParentFrame(parent),
+                true,
+                NbBundle.getMessage(
+                    LayerDropUtils.class,
+                    "LayerDropUtils.handleGPXFile().waitingDialogThread.message"), // NOI18N
+                null,
+                50) {
+
+                @Override
+                protected Geometry doInBackground() throws Exception {
+                    final BufferedReader fileReader = new BufferedReader(new FileReader(currentFile));
+                    final StringBuilder sb = new StringBuilder();
+                    String line;
+
+                    while ((line = fileReader.readLine()) != null) {
+                        sb.append(line).append('\n');
+                    }
+
+                    final Geometry geom = converter.convertForward(sb.toString(),
+                            CismapBroker.getInstance().getSrs().getCode());
+
+                    return geom;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final Geometry geom = get();
+                        final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+
+                        final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
+                        String featureName = currentFile.getName();
+
+                        if (featureName.contains(".")) {
+                            featureName = featureName.substring(0, currentFile.getName().indexOf("."));
+                        }
+
+                        if ((converter instanceof MultiGeometriesProvider)
+                                    && (geom instanceof GeometryCollection)) {
+                            final GeometryCollection gc = (GeometryCollection)geom;
+
+                            for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                                final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
+                                feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
+                                feature.setEditable(true);
+                                feature.setName(featureName + "-" + i);
+                                featureList.add(feature);
+                            }
+                        } else {
+                            final PureNewFeature feature = new PureNewFeature(geom);
+                            feature.setGeometryType(FeatureTools.getGeomType(geom));
+                            feature.setEditable(true);
+                            feature.setName(featureName);
+                            featureList.add(feature);
+                        }
+
+                        map.getFeatureCollection().addFeatures(featureList);
+
+                        for (final PureNewFeature feature : featureList) {
+                            map.getFeatureCollection().holdFeature(feature);
+                        }
+
+                        // fixed extent means, don't move map at all
+                        if (!map.isFixedMapExtent()) {
+                            map.zoomToAFeatureCollection(featureList,
+                                true,
+                                map.isFixedMapScale());
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error whiel parsing gpx file");
+                    }
+                }
+            };
+
+        if (EventQueue.isDispatchThread()) {
+            wdt.start();
+        } else {
+            EventQueue.invokeLater(new Thread("GPXParser-Thread") {
+
+                    @Override
+                    public void run() {
+                        wdt.start();
+                    }
+                });
+        }
+
         return true;
     }
 
