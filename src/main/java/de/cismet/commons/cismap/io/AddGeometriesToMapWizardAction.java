@@ -9,8 +9,16 @@ package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.WKTReader;
 
 import org.apache.log4j.Logger;
+
+import org.deegree.io.gpx.GPXReader;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.model.spatialschema.WKTAdapter;
 
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
@@ -30,14 +38,16 @@ import java.awt.Frame;
 import java.awt.event.ActionEvent;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import java.text.MessageFormat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -53,6 +63,7 @@ import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
+import de.cismet.cismap.commons.tools.FeatureTools;
 
 import de.cismet.commons.cismap.io.converters.AbstractGeometryFromTextConverter;
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
@@ -286,13 +297,13 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
                                 for (int i = 0; i < gc.getNumGeometries(); ++i) {
                                     final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
-                                    feature.setGeometryType(getGeomType(gc.getGeometryN(i)));
+                                    feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
                                     feature.setEditable(true);
                                     featureList.add(feature);
                                 }
                             } else {
                                 final PureNewFeature feature = new PureNewFeature(geom);
-                                feature.setGeometryType(getGeomType(geom));
+                                feature.setGeometryType(FeatureTools.getGeomType(geom));
                                 feature.setEditable(true);
                                 featureList.add(feature);
                             }
@@ -343,28 +354,6 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                             }
 
                             JXErrorPane.showDialog(parent, errorInfo);
-                        }
-                    }
-
-                    // cannot map to ellipse
-                    private geomTypes getGeomType(final Geometry geom) {
-                        final String jtsGeomType = geom.getGeometryType();
-
-                        // JTS v1.12 strings
-                        if ("Polygon".equals(jtsGeomType)) {             // NOI18N
-                            if (geom.isRectangle()) {
-                                return geomTypes.RECTANGLE;
-                            } else {
-                                return geomTypes.POLYGON;
-                            }
-                        } else if ("Point".equals(jtsGeomType)) {        // NOI18N
-                            return geomTypes.POINT;
-                        } else if ("LineString".equals(jtsGeomType)) {   // NOI18N
-                            return geomTypes.LINESTRING;
-                        } else if ("MultiPolygon".equals(jtsGeomType)) { // NOI18N
-                            return geomTypes.MULTIPOLYGON;
-                        } else {
-                            return geomTypes.UNKNOWN;
                         }
                     }
                 };

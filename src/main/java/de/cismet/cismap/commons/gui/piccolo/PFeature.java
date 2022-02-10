@@ -3928,8 +3928,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         public void setScale(final double scale) {
             offset(-scaledDisplacementX, -scaledDisplacementY);
             super.setScale(scale);
-            scaledDisplacementX = (displacementX + ((-anchorPointX) * (double)this.getWidth())) / scale;
-            scaledDisplacementY = (displacementY + ((anchorPointY) * (double)this.getHeight())) / scale;
+            scaledDisplacementX = (displacementX + ((-anchorPointX) * (double)this.getWidth())) * scale;
+            scaledDisplacementY = (displacementY + ((anchorPointY) * (double)this.getHeight())) * scale;
             offset(scaledDisplacementX, scaledDisplacementY);
         }
 

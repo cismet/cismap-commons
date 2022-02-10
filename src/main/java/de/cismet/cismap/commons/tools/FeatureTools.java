@@ -28,6 +28,7 @@ import java.text.DecimalFormatSymbols;
 
 import java.util.Date;
 
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 
 /**
@@ -231,6 +232,34 @@ public class FeatureTools {
                     "FeatureTools.convertObjectToClass.message",
                     objectAsString,
                     cl.getName()));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static AbstractNewFeature.geomTypes getGeomType(final Geometry geom) {
+        final String jtsGeomType = geom.getGeometryType();
+
+        // JTS v1.12 strings
+        if ("Polygon".equals(jtsGeomType)) {             // NOI18N
+            if (geom.isRectangle()) {
+                return AbstractNewFeature.geomTypes.RECTANGLE;
+            } else {
+                return AbstractNewFeature.geomTypes.POLYGON;
+            }
+        } else if ("Point".equals(jtsGeomType)) {        // NOI18N
+            return AbstractNewFeature.geomTypes.POINT;
+        } else if ("LineString".equals(jtsGeomType)) {   // NOI18N
+            return AbstractNewFeature.geomTypes.LINESTRING;
+        } else if ("MultiPolygon".equals(jtsGeomType)) { // NOI18N
+            return AbstractNewFeature.geomTypes.MULTIPOLYGON;
+        } else {
+            return AbstractNewFeature.geomTypes.UNKNOWN;
         }
     }
 }
