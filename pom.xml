@@ -13,7 +13,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>7.0.12</version>
+    <version>7.0.13</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-        <tag>v7.0.12</tag>
+        <tag>v7.0.13</tag>
     </scm>
 
     <ciManagement>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>de.cismet</groupId>
                 <artifactId>cismet-ext-bom</artifactId>
-                <version>7.2</version>
+                <version>7.2.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -55,13 +55,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.2.6</version>
+                <version>7.2.7</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.2.6</version>
+                <version>7.2.7</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -198,6 +198,16 @@
         <dependency>
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-geometry</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.postgis</groupId>
+                    <artifactId>postgis-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.deegree</groupId>
@@ -342,11 +352,11 @@
             <artifactId>jcommon</artifactId>
             <version>1.0.15</version>
         </dependency>
-        <dependency>
-            <groupId>postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>9.1-903.jdbc4</version>
-        </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.2.25</version>
+            </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-opengis</artifactId>
@@ -364,7 +374,7 @@
             <version>1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.postgis</groupId>
+            <groupId>net.postgis</groupId>
             <artifactId>postgis-jdbc</artifactId>
             <scope>compile</scope>
         </dependency>
