@@ -48,6 +48,7 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -557,12 +558,27 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
 
         if ((name == null) && (featureType != null) && (featureType.getName() != null)) {
-            name = featureType.getName().getPrefix() + ":" + featureType.getName().getLocalPart();
+            name = convertFeatureQnameToName(featureType.getName());
         }
 
         f.setSLDStyles(getStyle(name));
 
         return f;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   qname  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String convertFeatureQnameToName(final QName qname) {
+        if ((qname.getPrefix() == null) || qname.getPrefix().equals("")) {
+            return qname.getLocalPart();
+        } else {
+            return qname.getPrefix() + ":" + qname.getLocalPart();
+        }
     }
 
     /**

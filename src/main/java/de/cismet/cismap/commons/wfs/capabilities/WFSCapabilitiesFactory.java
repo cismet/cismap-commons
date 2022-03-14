@@ -84,6 +84,7 @@ public class WFSCapabilitiesFactory {
                 logger.debug("create capabilities from link: " + link);
             }
             String document = getCapabilitiesDocument(link);
+            document = document.replace("xlink:href=\"\"", "xlink:href=\"http://test.de/"");
             ByteArrayInputStream docStream = new ByteArrayInputStream(document.getBytes());
             WFSCapabilities result = null;
             String errorMsg = "";
