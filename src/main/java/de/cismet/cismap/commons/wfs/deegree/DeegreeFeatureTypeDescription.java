@@ -39,12 +39,15 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import java.net.URI;
+
 import java.util.Arrays;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.wfs.FeatureTypeDescription;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
@@ -121,21 +124,25 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                 final XMLSchema xmlSchema = xsDoc.parseXMLSchema();
 
                 // check if the FeatureType-name is in the current FeatureTypeDescription
-                final ElementDeclaration requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
-                            feature.getName()));
+                final ElementDeclaration requestedElement;
+
+                if ((feature.getName().getPrefix() == null) || feature.getName().getPrefix().equals("")) {
+                    requestedElement = xmlSchema.getElementDeclaration(feature.getName().getLocalPart());
+                } else {
+                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
+                                feature.getName()));
+                }
                 if (requestedElement == null) {
                     logger.fatal("Error requestedElement == null " + feature.getName() + " " + caps.getURL().toString()
                                 + "\n\n" + desc.toString());
                 }
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
-                    QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
-                                .getType()
-                                .getName();
+                    QualifiedName typeName = requestedElement.getType().getName();
                     final ComplexTypeDeclaration compTypeDec = xmlSchema.getComplexTypeDeclaration(typeName);
                     ElementDeclaration[] elementDeclaration;
 
                     if (compTypeDec == null) {
-                        typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName())).getName();
+                        typeName = requestedElement.getName();
 
                         if (xmlSchema.getElementDeclaration(typeName).getType().getTypeDeclaration()
                                     instanceof ComplexTypeDeclaration) {
@@ -154,10 +161,17 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                                 elementDeclaration.length);
 
                         for (final ElementDeclaration e : elementDeclaration) {
-                            fsaVector.add(new FeatureServiceAttribute(
-                                    feature.getName().getPrefix()
+                            final String elementName;
+
+                            if ((e.getName().getPrefix() == null) || e.getName().getPrefix().equals("")) {
+                                elementName = e.getName().getLocalName();
+                            } else {
+                                elementName = e.getName().getPrefix()
                                             + ":"
-                                            + e.getName().getLocalName(),
+                                            + e.getName().getLocalName();
+                            }
+                            fsaVector.add(new FeatureServiceAttribute(
+                                    elementName,
                                     e.getType().getName().getPrefixedName(),
                                     true)); // NOI18N
                         }
@@ -196,22 +210,24 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                 final XMLSchema xmlSchema = xsDoc.parseXMLSchema();
 
                 // check if the FeatureType-name is in the current FeatureTypeDescription
-                final ElementDeclaration requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
-                            feature.getName()));
+                final ElementDeclaration requestedElement;
+
+                if ((feature.getName().getPrefix() == null) || feature.getName().getPrefix().equals("")) {
+                    requestedElement = xmlSchema.getElementDeclaration(feature.getName().getLocalPart());
+                } else {
+                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
+                                feature.getName()));
+                }
 
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
-                    QualifiedName typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()))
-                                .getType()
-                                .getName();
+                    final QualifiedName typeName = requestedElement.getType().getName();
                     final ComplexTypeDeclaration compTypeDec = xmlSchema.getComplexTypeDeclaration(typeName);
 
                     if (compTypeDec == null) {
-                        typeName = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName())).getName();
-
-                        if (xmlSchema.getElementDeclaration(typeName).getType().getTypeDeclaration()
+                        if (requestedElement.getType().getTypeDeclaration()
                                     instanceof ComplexTypeDeclaration) {
-                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)xmlSchema.getElementDeclaration(
-                                    typeName).getType().getTypeDeclaration();
+                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)requestedElement
+                                        .getType().getTypeDeclaration();
                             return getFirstGeometryName(type.getElements());
                         } else {
                             return getFirstGeometryName(new ElementDeclaration[0]);
@@ -242,7 +258,11 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
             }
             if (FeatureServiceUtilities.isElementOfGeometryType(e.getType().getName().getLocalName())) {
                 // TODO: warum wird hier das Praefix des Features genutzt?? Siehe auch Methode getAllFeatureAttributes
-                return feature.getName().getPrefix() + ":" + e.getName().getLocalName();
+                if ((e.getName().getPrefix() == null) || e.getName().getPrefix().equals("")) {
+                    return e.getName().getLocalName();
+                } else {
+                    return e.getName().getPrefix() + ":" + e.getName().getLocalName();
+                }
             }
         }
         return null;

@@ -942,14 +942,14 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 url += getStylesString();
             }
 
-            url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName(); // NOI18N
-            url += "&INFO_FORMAT=" + format;                                 // NOI18N
+            url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20"); // NOI18N
+            url += "&INFO_FORMAT=" + format;                                                        // NOI18N
             if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
-                url += "&I=" + x;                                            // NOI18N
-                url += "&J=" + y;                                            // NOI18N
+                url += "&I=" + x;                                                                   // NOI18N
+                url += "&J=" + y;                                                                   // NOI18N
             } else {
-                url += "&X=" + x;                                            // NOI18N
-                url += "&Y=" + y;                                            // NOI18N
+                url += "&X=" + x;                                                                   // NOI18N
+                url += "&Y=" + y;                                                                   // NOI18N
             }
             return url;
         } else {
