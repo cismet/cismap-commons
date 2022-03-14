@@ -285,6 +285,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private volatile boolean rescaleStickyNodesEnabled = true;
     private volatile int retrievalCompleteInProgressCount = 0;
     private double featurePrintingDpi = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
+    private Color crossHairColor = new Color(100, 100, 100, 255);
+    private int crossHairThickness = 2;
 
     /**
      * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
@@ -487,6 +489,42 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the crossHairThickness
+     */
+    public int getCrossHairThickness() {
+        return crossHairThickness;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crossHairThickness  the crossHairThickness to set
+     */
+    public void setCrossHairThickness(final int crossHairThickness) {
+        this.crossHairThickness = crossHairThickness;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the crossHairColor
+     */
+    public Color getCrossHairColor() {
+        return crossHairColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crossHairColor  the crossHairColor to set
+     */
+    public void setCrossHairColor(final Color crossHairColor) {
+        this.crossHairColor = crossHairColor;
+    }
 
     /**
      * If <code>resizeEventActivated</code> is true, then the mapping component makes a new query for its services, when
@@ -2646,7 +2684,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         com.vividsolutions.jts.geom.Point centroid = feature.getGeometry().getCentroid();
         centroid = CrsTransformer.transformToCurrentCrs(centroid);
         currentCrosshairPoint = new Coordinate(centroid.getX(), centroid.getY());
-        crossHairPoint(currentCrosshairPoint, 2);
+        crossHairPoint(currentCrosshairPoint, crossHairThickness);
         final Coordinate newCrosshairPoint = currentCrosshairPoint;
 
         final Timer t = new Timer(duration, new ActionListener() {
@@ -4286,9 +4324,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             final PPath lineX = new PPath();
             final PPath lineY = new PPath();
             lineX.setStroke(new CustomFixedWidthStroke(thickness, this));
-            lineX.setStrokePaint(new Color(100, 100, 100, 255));
+            lineX.setStrokePaint(crossHairColor);
             lineY.setStroke(new CustomFixedWidthStroke(thickness, this));
-            lineY.setStrokePaint(new Color(100, 100, 100, 255));
+            lineY.setStrokePaint(crossHairColor);
 
             final PBounds current = getCamera().getViewBounds();
             final PBounds x = new PBounds(current.x, p.y, current.width, 1);
