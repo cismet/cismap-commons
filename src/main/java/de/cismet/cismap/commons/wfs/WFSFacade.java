@@ -156,7 +156,8 @@ public class WFSFacade {
         requestElement.getAttribute(VERSION_ATTR).setValue(version);                                    // NOI18N
 
         // set namespace
-        if ((featureName.getPrefix() != null) && (featureName.getNamespaceURI() != null)) {
+        if ((featureName.getPrefix() != null) && (!featureName.getPrefix().equals(""))
+                    && (featureName.getNamespaceURI() != null) && !featureName.getNamespaceURI().equals("")) {
             final Namespace ns = Namespace.getNamespace(featureName.getPrefix(), featureName.getNamespaceURI());
             requestElement.addNamespaceDeclaration(ns);
         }
@@ -164,8 +165,9 @@ public class WFSFacade {
         // set feature type
         requestElement.getChild(TYPENAME, WFS).setText(feature.getPrefixedNameString());
 
-        request = out.outputString(requestElement);
-        final String response = postRequest(cap.getURL(), request);
+        request = "SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=" + version + "&TYPENAME="
+                    + feature.getPrefixedNameString();
+        final String response = getRequest(cap.getURL(), request);
 
         try {
             return parserFactory.getFeatureTypeDescription(response, feature);
@@ -550,6 +552,36 @@ public class WFSFacade {
 
         final InputStream resp = WebAccessManager.getInstance()
                     .doRequest(serverURL, request, ACCESS_METHODS.POST_REQUEST);
+        final char[] buffer = new char[256];
+        final StringBuilder response = new StringBuilder();
+        final BufferedReader br = new BufferedReader(new InputStreamReader(resp));
+        int count = br.read(buffer, 0, buffer.length);
+
+        while (count != -1) {
+            response.append(buffer, 0, count);
+            count = br.read(buffer, 0, buffer.length);
+        }
+        br.close();
+
+        return response.toString();
+    }
+
+    /**
+     * Sends a http Post request to the server and returns the response of the server as String.
+     *
+     * @param   serverURL  URL of the server
+     * @param   request    Request-String
+     *
+     * @return  server response as string or null, if an error occurs
+     *
+     * @throws  IOException  DOCUMENT ME!
+     * @throws  Exception    DOCUMENT ME!
+     */
+    private String getRequest(final URL serverURL, final String request) throws IOException, Exception {
+        logger.info("post request (" + serverURL + ")"); // NOI18N
+
+        final InputStream resp = WebAccessManager.getInstance()
+                    .doRequest(serverURL, request, ACCESS_METHODS.GET_REQUEST);
         final char[] buffer = new char[256];
         final StringBuilder response = new StringBuilder();
         final BufferedReader br = new BufferedReader(new InputStreamReader(resp));

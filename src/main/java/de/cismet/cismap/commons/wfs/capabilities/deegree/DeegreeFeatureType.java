@@ -26,6 +26,7 @@ import java.util.Vector;
 import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.wfs.FeatureTypeDescription;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.OperationType;
@@ -78,9 +79,13 @@ public class DeegreeFeatureType implements FeatureType {
 
     @Override
     public QName getName() {
-        return new QName(feature.getName().getNamespace().toString(),
+        final String nameSpace = ((feature.getName().getNamespace() != null)
+                ? feature.getName().getNamespace().toString() : null);
+        final String prefix = ((feature.getName().getPrefix() == null) ? "" : feature.getName().getPrefix());
+
+        return new QName(nameSpace,
                 feature.getName().getLocalName(),
-                feature.getName().getPrefix());
+                prefix);
     }
 
     @Override
@@ -205,13 +210,9 @@ public class DeegreeFeatureType implements FeatureType {
     @Override
     public String getPrefixedNameString() {
         final QName qname = getName();
-        String name;
+        final String name;
 
-        if (qname.getPrefix() != null) {
-            name = qname.getPrefix() + ":" + qname.getLocalPart();
-        } else {
-            name = qname.getLocalPart();
-        }
+        name = WFSFeatureFactory.convertFeatureQnameToName(qname);
 
         return name;
     }

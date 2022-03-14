@@ -27,6 +27,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -301,7 +302,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         } catch (Exception e) {
         }
         try {
-            v.name = feature.getName().getPrefix() + ":" + feature.getName().getLocalPart();
+            v.name = WFSFeatureFactory.convertFeatureQnameToName(feature.getName());
         } catch (Exception e) {
         }
 
