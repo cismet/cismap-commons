@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 
 import java.net.URL;
 
+import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+
 import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.CalculationCache;
@@ -103,7 +105,6 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
             InputStream is = null;
 
             try {
-                final StringBuilder sb = new StringBuilder("");                       // NOI18N
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("send Getcapabilities request to the service: " + url); // NOI18N
                 }
@@ -114,14 +115,8 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
                     return;
                 }
 
-                final BufferedReader br = new BufferedReader(new InputStreamReader(is));
-                String buffer = null;
-
-                while ((buffer = br.readLine()) != null) {
-                    sb.append(buffer).append("\n"); // NOI18N
-                }
-
-                result = sb;
+                final InputStreamReader isr = new InputStreamReader(is);
+                result = FeatureServiceUtilities.readInputStream(isr);
             } catch (Exception e) {
                 exception = e;
             } finally {

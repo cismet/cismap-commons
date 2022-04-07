@@ -19,7 +19,12 @@ import org.jdom.Namespace;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+
+import java.nio.charset.Charset;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +44,9 @@ import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 public class FeatureServiceUtilities {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final String ENCODING_STRING = "encoding='";
+    private static final String ALTERNATE_ENCODING_STRING = "encoding=\"";
 
     public static final String[] GEO_PROPERTY_TYPES = {
             "GeometryPropertyType",
@@ -279,5 +287,83 @@ public class FeatureServiceUtilities {
             }
         }
         return fsaList;
+    }
+
+    /**
+     * Reads the given stream and uses the charset that was given in the first line (if there is any).
+     *
+     * @param   reader  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    public static StringBuilder readInputStream(final InputStreamReader reader) throws IOException {
+        final StringBuilder res = new StringBuilder();
+        String charset = null;
+        String tmp;
+        final BufferedReader br = new BufferedReader(reader);
+
+        while ((tmp = br.readLine()) != null) {
+            if (charset != null) {
+                try {
+                    res.append(new String(tmp.getBytes(), charset));
+                } catch (UnsupportedEncodingException e) {
+                    log.error("Unsupported encoding found: " + charset, e);
+                    res.append(new String(tmp.getBytes()));
+                }
+            } else {
+                charset = checkForCharset(tmp);
+                if (charset != null) {
+                    try {
+                        res.append(new String(tmp.getBytes(), charset));
+                    } catch (UnsupportedEncodingException e) {
+                        log.error("Unsupported encoding found: " + charset, e);
+                        res.append(new String(tmp.getBytes()));
+                    }
+                } else {
+                    res.append(new String(tmp.getBytes()));
+                }
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * Checks, if the given string contains the charset.
+     *
+     * @param   data  DOCUMENT ME!
+     *
+     * @return  the charset contained in the given string or null if no charset is contained
+     */
+    private static String checkForCharset(final String data) {
+        int index = data.indexOf(ENCODING_STRING);
+
+        if (index == -1) {
+            index = data.indexOf(ALTERNATE_ENCODING_STRING);
+        }
+
+        if (index != -1) {
+            final String subdata = data.substring(index + ENCODING_STRING.length());
+            index = subdata.indexOf("'");
+
+            if (index == -1) {
+                index = subdata.indexOf("\"");
+            }
+
+            if (index != -1) {
+                try {
+                    final String charsetName = subdata.substring(0, index);
+                    Charset.forName(charsetName);
+
+                    return charsetName;
+                } catch (Exception e) {
+                    // no valid charset name. Nothing to do
+                }
+            }
+        }
+
+        return null;
     }
 }
