@@ -45,6 +45,7 @@ import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerAlreadyAddedException;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
+import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CidsLayerTransferable;
@@ -229,7 +230,9 @@ public class LayerDropUtils {
 //                                    feature.getFeatureAttributes(),
 //                                    feature,
 //                                    sac.isReverseAxisOrder());
-                            final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
+                            final WebFeatureService wfs = new WebFeatureService(
+                                    ((WFSCapabilitiesTreeCellRenderer.showTitle && (feature.getTitle() != null))
+                                        ? feature.getTitle() : feature.getPrefixedNameString()),
                                     feature.getWFSCapabilities().getURL().toString(),
                                     feature.getWFSQuery(),
                                     feature.getFeatureAttributes(),
