@@ -28,6 +28,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
             "de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer"); // NOI18N
+    public static boolean showTitle = false;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -100,7 +101,12 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
 //                    setIcon(featureIcon);
 //                }
                 setIcon(featureIcon);
-                setText(e.getName().getLocalPart());
+
+                if (showTitle) {
+                    setText(e.getTitle());
+                } else {
+                    setText(e.getName().getLocalPart());
+                }
             } else if (value instanceof FeatureServiceAttribute) {
                 final FeatureServiceAttribute fsf = (FeatureServiceAttribute)value;
                 String type;
