@@ -20,7 +20,12 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
@@ -292,39 +297,32 @@ public class FeatureServiceUtilities {
     /**
      * Reads the given stream and uses the charset that was given in the first line (if there is any).
      *
-     * @param   reader  DOCUMENT ME!
+     * @param   is  reader is reader DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  IOException  DOCUMENT ME!
      */
-    public static StringBuilder readInputStream(final InputStreamReader reader) throws IOException {
+    public static StringBuilder readInputStream(final InputStream is) throws IOException {
         final StringBuilder res = new StringBuilder();
-        String charset = null;
+        final String charset = null;
         String tmp;
+        final byte[] byteTmp = new byte[128];
+        int count;
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+        while ((count = is.read(byteTmp)) != -1) {
+            bos.write(byteTmp, 0, count);
+        }
+
+        final byte[] bytesArray = bos.toByteArray();
+        bos.close();
+
+        final InputStreamReader reader = new InputStreamReader(new ByteArrayInputStream(bytesArray));
         final BufferedReader br = new BufferedReader(reader);
 
         while ((tmp = br.readLine()) != null) {
-            if (charset != null) {
-                try {
-                    res.append(new String(tmp.getBytes(), charset));
-                } catch (UnsupportedEncodingException e) {
-                    log.error("Unsupported encoding found: " + charset, e);
-                    res.append(new String(tmp.getBytes()));
-                }
-            } else {
-                charset = checkForCharset(tmp);
-                if (charset != null) {
-                    try {
-                        res.append(new String(tmp.getBytes(), charset));
-                    } catch (UnsupportedEncodingException e) {
-                        log.error("Unsupported encoding found: " + charset, e);
-                        res.append(new String(tmp.getBytes()));
-                    }
-                } else {
-                    res.append(new String(tmp.getBytes()));
-                }
-            }
+            res.append(tmp);
         }
 
         return res;
