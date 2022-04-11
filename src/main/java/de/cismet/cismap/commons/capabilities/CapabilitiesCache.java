@@ -8,11 +8,14 @@
 package de.cismet.cismap.commons.capabilities;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.net.URL;
+
+import java.nio.charset.Charset;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 
@@ -115,8 +118,20 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
                     return;
                 }
 
-                final InputStreamReader isr = new InputStreamReader(is);
-                result = FeatureServiceUtilities.readInputStream(isr);
+                result = FeatureServiceUtilities.readInputStream(is);
+                boolean invalidCharacter = false;
+                invalidCharacter = hasInvalidCharacter(result.toString().getBytes());
+                int attempts = 0;
+
+                while (invalidCharacter && (attempts < 3)) {
+                    //Sometimes, the inputstream delivers invalid characters. So try to get the correct data
+                    LOG.warn("invalid character found. Reload capabilities document");
+                    is.close();
+                    is = WebAccessManager.getInstance().doRequest(getCapURL);
+                    result = FeatureServiceUtilities.readInputStream(is);
+                    invalidCharacter = hasInvalidCharacter(result.toString().getBytes());
+                    ++attempts;
+                }
             } catch (Exception e) {
                 exception = e;
             } finally {
@@ -128,6 +143,35 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
                     }
                 }
             }
+        }
+
+        /**
+         * Check for the byte sequence EF BF BD
+         *
+         * @param   bytes  string DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private static boolean hasInvalidCharacter(final byte[] bytes) {
+            boolean efFound = false;
+            boolean bfFound = false;
+
+            for (int i = 0; i < bytes.length; ++i) {
+                if (bytes[i] == -17) {
+                    efFound = true;
+                    bfFound = false;
+                } else if ((bytes[i] == -65) && efFound && !bfFound) {
+                    efFound = true;
+                    bfFound = true;
+                } else if ((bytes[i] == -67) && efFound && bfFound) {
+                    return true;
+                } else {
+                    efFound = false;
+                    bfFound = false;
+                }
+            }
+
+            return false;
         }
     }
 }
