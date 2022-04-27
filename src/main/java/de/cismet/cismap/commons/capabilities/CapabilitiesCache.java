@@ -124,7 +124,7 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
                 int attempts = 0;
 
                 while (invalidCharacter && (attempts < 3)) {
-                    //Sometimes, the inputstream delivers invalid characters. So try to get the correct data
+                    // Sometimes, the inputstream delivers invalid characters. So try to get the correct data
                     LOG.warn("invalid character found. Reload capabilities document");
                     is.close();
                     is = WebAccessManager.getInstance().doRequest(getCapURL);
@@ -146,7 +146,7 @@ public class CapabilitiesCache extends CalculationCache<String, String> {
         }
 
         /**
-         * Check for the byte sequence EF BF BD
+         * Check for the byte sequence EF BF BD.
          *
          * @param   bytes  string DOCUMENT ME!
          *

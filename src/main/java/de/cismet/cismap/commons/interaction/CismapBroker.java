@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -474,8 +475,8 @@ public class CismapBroker {
      * @param  ale  DOCUMENT ME!
      */
     public void fireLayerRemoved(final ActiveLayerEvent ale) {
-        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
-            it.next().layerRemoved(ale);
+        for (final ActiveLayerListener listener : new ArrayList<ActiveLayerListener>(activeLayerListeners)) {
+            listener.layerRemoved(ale);
         }
     }
 
