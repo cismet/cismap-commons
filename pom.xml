@@ -55,13 +55,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.2.8</version>
+                <version>7.2.10</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.2.8</version>
+                <version>7.2.10</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
