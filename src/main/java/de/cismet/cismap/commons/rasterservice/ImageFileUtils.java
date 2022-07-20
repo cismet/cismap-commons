@@ -158,7 +158,7 @@ public class ImageFileUtils {
      */
     public static boolean isImageFileEnding(final String fileName) {
         for (final String ending : SUPPORTED_IMAGE_FORMATS) {
-            if (fileName.endsWith(ending)) {
+            if (fileName.toLowerCase().endsWith(ending)) {
                 return true;
             }
         }
