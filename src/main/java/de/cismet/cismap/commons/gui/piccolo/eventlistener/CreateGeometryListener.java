@@ -296,10 +296,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             }
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
             // snappingpoint ermitteln falls snapping enabled
-            final Point2D snappingPoint = (mappingComponent.isSnappingEnabled())
-                ? PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition()) : null;
+            final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
+                    mappingComponent,
+                    pInputEvent.getCanvasPosition(),
+                    true,
+                    null);
             // wenn snappingpoint vorhanden, dann den nehmen, ansonsten normalen punkt unter der maus ermitteln
-            final Point2D point = (snappingPoint != null) ? snappingPoint : pInputEvent.getPosition();
+            final Point2D point = (snappedPoint != null) ? snappedPoint.getPoint() : pInputEvent.getPosition();
 
             if (pInputEvent.isLeftMouseButton()) {
                 if (!inProgress) {
