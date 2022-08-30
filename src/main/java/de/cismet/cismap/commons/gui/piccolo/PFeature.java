@@ -1729,19 +1729,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             allBounds = new PBounds(tmpBounds);
         }
-        final Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
-        for (final Object o : selArr) {
-            final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
-            pf.setPivotPoint(allBounds.getCenter2D());
-            mid = allBounds.getCenter2D();
-        }
-        if (!(getFeature() instanceof RequestForRotatingPivotLock)) {
-            pivotHandle = new PivotPHandle(this, mid);
-            pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
-            handleLayer.addChild(pivotHandle);
-            for (final Object o : selArr) {
-                final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
-                pf.pivotHandle = this.pivotHandle;
+        if (allBounds != null) {
+            final Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
+            if (selArr != null) {
+                for (final Object o : selArr) {
+                    final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
+                    if (pf != null) {
+                        pf.setPivotPoint(allBounds.getCenter2D());
+                    }
+                    mid = allBounds.getCenter2D();
+                }
+                if (mid != null) {
+                    if (!(getFeature() instanceof RequestForRotatingPivotLock)) {
+                        pivotHandle = new PivotPHandle(this, mid);
+                        pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
+                        handleLayer.addChild(pivotHandle);
+                        for (final Object o : selArr) {
+                            final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
+                            pf.pivotHandle = this.pivotHandle;
+                        }
+                    }
+                }
             }
         }
     }
