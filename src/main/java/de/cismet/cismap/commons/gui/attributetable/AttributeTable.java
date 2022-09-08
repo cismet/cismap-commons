@@ -3810,7 +3810,7 @@ public class AttributeTable extends javax.swing.JPanel {
             final int selectedRow = table.getSelectedRow();
             final Geometry g = model.getGeometryFromRow(table.convertRowIndexToModel(selectedRow));
 
-            if (mappingComponent != null) {
+            if ((mappingComponent != null) && (g != null)) {
                 final XBoundingBox bbox = new XBoundingBox(g);
                 bbox.increase(10);
                 mappingComponent.gotoBoundingBoxWithHistory(bbox);
