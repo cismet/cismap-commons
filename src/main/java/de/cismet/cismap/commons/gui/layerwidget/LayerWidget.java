@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 import org.jdom.Element;
 
 import org.openide.util.NbBundle;
@@ -44,22 +42,12 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
-import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
-import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
-import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
-import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
-import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
-
-import de.cismet.commons.wms.capabilities.*;
 
 import de.cismet.tools.Static2DTools;
 
@@ -682,109 +670,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      */
     private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
-        final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
-                @Override
-                protected Geometry doInBackground() throws Exception {
-                    Geometry geom = null;
-
-                    for (final TreePath path : tps) {
-                        Geometry g = null;
-                        RetrievalServiceLayer rsl = null;
-                        if ((path != null) && (path.getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                            rsl = (RetrievalServiceLayer)path.getLastPathComponent();
-                        } else if ((path != null)
-                                    && (path.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                            rsl = (RetrievalServiceLayer)path.getParentPath().getLastPathComponent();
-                        }
-
-                        if (rsl != null) {
-                            if (rsl instanceof WMSServiceLayer) {
-                                final Layer l = ((WMSServiceLayer)rsl).getLayerInformation();
-                                Envelope envelope = null;
-
-                                if (l != null) {
-                                    envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
-                                } else {
-                                    final WMSCapabilities caps = ((WMSServiceLayer)rsl).getWmsCapabilities();
-
-                                    if (caps != null) {
-                                        envelope = CapabilityWidget.getEnvelopeForWmsCaps(caps);
-                                    }
-                                }
-
-                                if (envelope != null) {
-                                    g = CapabilityWidget.createGeometryFromEnvelope(envelope);
-                                }
-                            } else if (rsl instanceof WebFeatureService) {
-                                final WebFeatureService l = ((WebFeatureService)rsl);
-                                final Envelope envelope = CapabilityWidget.getEnvelopeFromFeatureType(l.getFeature());
-
-                                if (envelope != null) {
-                                    g = CapabilityWidget.createGeometryFromEnvelope(envelope);
-                                }
-                            } else if (rsl instanceof SlidableWMSServiceLayerGroup) {
-                                final Layer l = ((SlidableWMSServiceLayerGroup)rsl).getLayerInformation();
-
-                                if (l != null) {
-                                    final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
-
-                                    if (envelope != null) {
-                                        g = CapabilityWidget.createGeometryFromEnvelope(envelope);
-                                    }
-                                }
-                            } else if (rsl instanceof SimpleWMS) {
-                                final SimpleWMS wms = ((SimpleWMS)rsl);
-                                final Layer l = wms.getLayerInformation();
-
-                                if (l != null) {
-                                    final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
-
-                                    if (envelope != null) {
-                                        g = CapabilityWidget.createGeometryFromEnvelope(envelope);
-                                    }
-                                }
-                            } else if (rsl instanceof ShapeFileFeatureService) {
-                                final ShapeFileFeatureService sffs = (ShapeFileFeatureService)rsl;
-                                g = ((ShapeFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
-                            } else if (rsl instanceof JDBCFeatureService) {
-                                final JDBCFeatureService sffs = (JDBCFeatureService)rsl;
-                                g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
-                            }
-                        }
-
-                        if (g != null) {
-                            if (geom == null) {
-                                geom = g.getEnvelope();
-                                geom.setSRID(g.getSRID());
-                            } else {
-                                if (geom.getSRID() != g.getSRID()) {
-                                    g = CrsTransformer.transformToGivenCrs(
-                                            g,
-                                            CrsTransformer.createCrsFromSrid(geom.getSRID()));
-                                }
-                                final Geometry ge = g.getEnvelope();
-                                ge.setSRID(geom.getSRID());
-                                geom = geom.union(g);
-                            }
-                        }
-                    }
-                    return geom;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        final Geometry geom = get();
-                        CismapBroker.getInstance()
-                                .getMappingComponent()
-                                .gotoBoundingBoxWithHistory(new XBoundingBox(geom));
-                    } catch (Exception e) {
-                        log.error("Error while zooming to extend", e);
-                    }
-                }
-            };
-
+        final ZoomToLayerWorker worker = new ZoomToLayerWorker(tps, 10);
         worker.execute();
     } //GEN-LAST:event_cmdZoomToFullExtentActionPerformed
 

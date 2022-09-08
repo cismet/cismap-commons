@@ -12,13 +12,15 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import org.jdesktop.swingx.JXDatePicker;
 
 import java.awt.Component;
 
-import java.util.Date;
+import java.text.Format;
+import java.text.ParseException;
+
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
@@ -28,30 +30,33 @@ import javax.swing.table.TableCellEditor;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class DateCellEditor extends AbstractCellEditor implements TableCellEditor {
+public class FormattedTextCellEditor extends AbstractCellEditor implements TableCellEditor {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final JXDatePicker datePicker;
+    private JFormattedTextField textField;
     private boolean useSqlDate = true;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new DateCellEditor object.
+     *
+     * @param  formatter  DOCUMENT ME!
      */
-    public DateCellEditor() {
-        datePicker = new JXDatePicker();
+    public FormattedTextCellEditor(final Format formatter) {
+        textField = new JFormattedTextField(formatter);
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public Object getCellEditorValue() {
-        if (useSqlDate) {
-            return new java.sql.Date(datePicker.getDate().getTime());
-        } else {
-            return datePicker.getDate();
+//        return textField.getText();
+        try {
+            return textField.getFormatter().valueToString(textField.getValue());
+        } catch (ParseException ex) {
+            return null;
         }
     }
 
@@ -61,17 +66,10 @@ public class DateCellEditor extends AbstractCellEditor implements TableCellEdito
             final boolean isSelected,
             final int row,
             final int column) {
-        if (value instanceof Date) {
-            useSqlDate = false;
-            datePicker.setDate((Date)value);
+        if (value instanceof String) {
+            textField.setText((String)value);
         }
 
-        if (value instanceof java.sql.Date) {
-            useSqlDate = true;
-            final java.sql.Date date = (java.sql.Date)value;
-            datePicker.setDate(new Date(date.getTime()));
-        }
-
-        return datePicker;
+        return textField;
     }
 }
