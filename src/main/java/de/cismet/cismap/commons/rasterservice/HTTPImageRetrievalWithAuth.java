@@ -46,11 +46,13 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
- * DOCUMENT ME!
+ * This class should not be used anymore. This class still uses the proxy configuration from the system properties and
+ * not the proxy configuration from the options dialog.
  *
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
+@Deprecated
 public class HTTPImageRetrievalWithAuth extends Thread {
 
     //~ Instance fields --------------------------------------------------------
