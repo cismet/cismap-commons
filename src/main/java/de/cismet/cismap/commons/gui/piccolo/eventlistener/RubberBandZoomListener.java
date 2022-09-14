@@ -17,13 +17,13 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
 
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
 import javax.swing.Timer;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import java.awt.event.MouseEvent;
 
 /**
  * DOCUMENT ME!
@@ -58,7 +58,9 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     @Override
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
-        if (e.getButton() == MouseEvent.BUTTON1 && rectangle != null) { // rectangle can be null, if the drag request started on a sticky node. See Issue 21
+        if ((e.getButton() == MouseEvent.BUTTON1) && (rectangle != null)) {    // rectangle can be null, if the drag
+                                                                               // request started on a sticky node. See
+                                                                               // Issue 21
             final PBounds b = new PBounds(rectangle.getBounds());
             final PBounds bb = (PBounds)b.clone();
             e.getCamera().viewToLocal(bb);
