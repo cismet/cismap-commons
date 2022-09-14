@@ -12,12 +12,10 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-
 import java.awt.Component;
 
 import java.text.Format;
 import java.text.ParseException;
-
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.JFormattedTextField;
