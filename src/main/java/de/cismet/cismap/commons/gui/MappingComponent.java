@@ -3315,7 +3315,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         if ((pFeatureHM.get(selectedFeature) != null)
                                                     && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
-                                            if (selectedFeature.getGeometry().getEnvelope().intersects(
+                                            if (selectedFeature.getGeometry() != null && selectedFeature.getGeometry().getEnvelope().intersects(
                                                             currentBoundingBoxGeometry)) {
                                                 EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
 
