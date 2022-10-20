@@ -310,6 +310,8 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         // Beschreibung
         if ((v.abstractText != null) && !v.abstractText.trim().equals("")) { // NOI18N
             lblInfo.setToolTipText(v.abstractText.trim());
+        } else {
+            lblInfo.setToolTipText("");
         }
 
         // Keywords
