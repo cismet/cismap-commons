@@ -681,7 +681,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     updatePolygon(null);
                 }
             }
-        } else if (!inProgress && points != null && points.isEmpty() && event.isControlDown()) {
+        } else if (!inProgress && (points != null) && points.isEmpty() && event.isControlDown()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
             }

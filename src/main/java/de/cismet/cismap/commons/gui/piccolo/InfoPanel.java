@@ -73,6 +73,7 @@ public class InfoPanel extends JPanel {
             initComponents();
             cmdMore.setIcon(icoMore);
             cmdMore.setText("");           // NOI18N
+            cmdMore.setOpaque(false);
             this.more = more;
             if (more == null) {
                 cmdMore.setVisible(false); // macht die Komponente zu klein
@@ -216,7 +217,7 @@ public class InfoPanel extends JPanel {
      * @param  rescale   DOCUMENT ME!
      */
     public void setExpanded(final boolean expanded, final boolean rescale) {
-        if (more != null) {
+        if ((more != null) && (more.getComponentCount() > 0)) {
             more.setVisible(expanded);
 
             revalidate();

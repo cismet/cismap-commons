@@ -1106,7 +1106,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     return true;
                 } else if ((node instanceof WMSLayer)
                             && (((WMSLayer)node).getOgcCapabilitiesLayer().getStyles().length > 1)) {
-                    return true;
+                    // only WMSServiceLayer have a editable style. The ActiveLayerTableCellEditor cannot handle the 2.
+                    // column of a WMSLayer
+                    return false;
                 } else if (node instanceof AbstractFeatureService) {
                     return true;
                 } else {
