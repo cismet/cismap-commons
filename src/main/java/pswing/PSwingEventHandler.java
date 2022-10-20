@@ -504,9 +504,9 @@ public class PSwingEventHandler implements PInputEventListener {
 
                 @Override
                 public void run() {
-                    if (!event.getSource().getClass().getName().endsWith("MappingComponent")
-                                && event.paramString().contains("RELEASED")
-                                && (target instanceof JButton)) {
+                    if (!(event.getSource().getClass().getName().endsWith("MappingComponent")
+                                    && event.paramString().contains("RELEASED")
+                                    && (target instanceof JButton))) {
                         // If the mouse was released on a button and the source is the mapping component, an error will
                         // be thrown. So the event should not be invoked.
                         target.dispatchEvent(event);
