@@ -58,9 +58,9 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     @Override
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
-        if ((e.getButton() == MouseEvent.BUTTON1) && (rectangle != null)) {    // rectangle can be null, if the drag
-                                                                               // request started on a sticky node. See
-                                                                               // Issue 21
+        if ((e.getButton() == MouseEvent.BUTTON1) && (rectangle != null)) { // rectangle can be null, if the drag
+                                                                            // request started on a sticky node. See
+                                                                            // Issue 21
             final PBounds b = new PBounds(rectangle.getBounds());
             final PBounds bb = (PBounds)b.clone();
             e.getCamera().viewToLocal(bb);
