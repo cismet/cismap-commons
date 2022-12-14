@@ -723,12 +723,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     protected void updatePolygon(final Point2D lastPoint) {
         createCurrentNewFeature(lastPoint);
         if (!(currentFeature instanceof SearchFeature)) {
-            final ArrayList<Feature> features = new ArrayList<Feature>();
+            final ArrayList<Feature> features = new ArrayList<>();
             features.add(currentFeature);
             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).fireFeaturesChanged(features);
         }
-        tempFeature.setPathToPolyline(getPoints(lastPoint));
-        tempFeature.repaint();
+        if (tempFeature != null) {
+            tempFeature.setPathToPolyline(getPoints(lastPoint));
+            tempFeature.repaint();
+        }
     }
 
     /**
