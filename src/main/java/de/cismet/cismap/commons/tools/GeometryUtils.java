@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -87,6 +88,50 @@ public class GeometryUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Convert the given 2d/3d geometry to a 2d geometry.
+     *
+     * @param   g  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Geometry force2d(final Geometry g) {
+        if (g != null) {
+            g.apply(new CoordinateFilter() {
+
+                    @Override
+                    public void filter(final Coordinate coord) {
+                        coord.y = 0.0;
+                    }
+                });
+
+            g.geometryChanged();
+        }
+
+        return g;
+    }
+
+    /**
+     * The axis order of the coordinates of the given geometry will be changed.
+     *
+     * @param   g  the geometry to change the axis order
+     *
+     * @return  the given geometry with a changed axis order.
+     */
+    public static Geometry reverseGeometryCoordinates(final Geometry g) {
+        g.apply(new CoordinateFilter() {
+
+                @Override
+                public void filter(final Coordinate crdnt) {
+                    final double newX = crdnt.y;
+                    crdnt.y = crdnt.x;
+                    crdnt.x = newX;
+                }
+            });
+        g.geometryChanged();
+        return g;
     }
 
     /**

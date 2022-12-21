@@ -38,4 +38,16 @@ public class WFSFeature extends DefaultFeatureServiceFeature {
     public String getName() {
         return name;
     }
+
+    @Override
+    public Object getProperty(String propertyName) {
+        final Object ret = super.getProperty(propertyName);
+
+        if ((ret == null) && (propertyName.indexOf(":") != -1)) {
+            propertyName = propertyName.substring(propertyName.indexOf(":") + 1);
+            return super.getProperty("app:" + propertyName);
+        }
+
+        return ret;
+    }
 }

@@ -282,7 +282,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                         final TreeMap<Integer, MapService> serviceTree =
                             ((ActiveLayerModel)mappingComponent.getMappingModel()).getMapServices();
 
-                        final ExecutorService executor = CismetExecutors.newFixedThreadPool(8);
+                        final ExecutorService executor = CismetExecutors.newFixedThreadPool(10);
                         Map<MapService, List<Feature>> featureMap = new HashMap<MapService, List<Feature>>(
                                 serviceTree.size());
                         featureMap = Collections.synchronizedMap(featureMap);

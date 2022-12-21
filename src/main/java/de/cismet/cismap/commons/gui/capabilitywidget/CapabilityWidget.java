@@ -1451,7 +1451,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
                         if ((e instanceof RequestFailedException) || (e.getMessage() == null)
                                     || e.getMessage().equals("null")) { // NOI18N
-                            message = e.getCause().getMessage();
+                            if (e.getCause() != null) {
+                                message = e.getCause().getMessage();
+                            } else {
+                                if (e.getMessage() != null) {
+                                    message = e.getMessage();
+                                } else {
+                                    message = "e.getMessage() = null";
+                                }
+                            }
                         } else {
                             message = e.getMessage();
                         }
