@@ -15,6 +15,8 @@ import ar.com.fdvs.dj.core.DynamicJasperHelper;
 import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
 import ar.com.fdvs.dj.domain.DynamicReport;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -140,6 +142,7 @@ import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.cismap.commons.tools.FeatureTools;
+import de.cismet.cismap.commons.tools.GeometryUtils;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
@@ -3849,6 +3852,22 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void pasteSelectedFeaturesfromClipboard() {
         if ((clipboard != null) && featureService.isEditable()) {
+            for (final FeatureServiceFeature feature : clipboard) {
+                if (feature.getGeometry() != null) {
+                    boolean hasZCoordinate = false;
+
+                    for (final Coordinate c : feature.getGeometry().getCoordinates()) {
+                        if (c.z != 0.0) {
+                            hasZCoordinate = true;
+                            break;
+                        }
+                    }
+
+                    if (hasZCoordinate) {
+                        feature.setGeometry(GeometryUtils.force2d(feature.getGeometry()));
+                    }
+                }
+            }
             final WaitingDialogThread<List<FeatureServiceFeature>> wdt =
                 new WaitingDialogThread<List<FeatureServiceFeature>>(StaticSwingTools.getParentFrame(this),
                     true,
@@ -4963,9 +4982,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                         } else if (o2 == null) {
                             if (isAscOrder) {
-                                return -1;
-                            } else {
                                 return 1;
+                            } else {
+                                return -1;
                             }
                         } else {
                             if ((o1 instanceof Comparable) && (o2 instanceof Comparable)) {
