@@ -59,6 +59,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
+import de.cismet.cismap.commons.tools.GeometryUtils;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
@@ -459,14 +460,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 Geometry geom = JTSAdapter.export(
                         degreeFeature.getGeometryPropertyValues()[geometryIndex]);
                 if (reverseAxisOrder) {
-                    geom = reverseGeometryCoordinates(geom);
+                    geom = GeometryUtils.reverseGeometryCoordinates(geom);
                 }
                 featureServiceFeature.setGeometry(geom);
             } catch (Exception e) {
                 Geometry geom = JTSAdapter.export(
                         degreeFeature.getGeometryPropertyValues()[geometryIndex]);
                 if (reverseAxisOrder) {
-                    geom = reverseGeometryCoordinates(geom);
+                    geom = GeometryUtils.reverseGeometryCoordinates(geom);
                 }
                 featureServiceFeature.setGeometry(geom);
             }
@@ -494,27 +495,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             } catch (NumberFormatException e) {
             }
         }
-    }
-
-    /**
-     * The axis order of the coordinates of the given geometry will be changed.
-     *
-     * @param   g  the geometry to change the axis order
-     *
-     * @return  the given geometry with a changed axis order.
-     */
-    private Geometry reverseGeometryCoordinates(final Geometry g) {
-        g.apply(new CoordinateFilter() {
-
-                @Override
-                public void filter(final Coordinate crdnt) {
-                    final double newX = crdnt.y;
-                    crdnt.y = crdnt.x;
-                    crdnt.x = newX;
-                }
-            });
-        g.geometryChanged();
-        return g;
     }
 
     /**

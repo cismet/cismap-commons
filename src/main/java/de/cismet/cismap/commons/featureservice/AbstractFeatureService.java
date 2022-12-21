@@ -493,7 +493,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public void initAndWait() throws Exception {
         if (!initialized && ((layerInitWorker == null) || layerInitWorker.isCancelled())) {
             layerInitWorker = new LayerInitWorker();
-            init();
+            try {
+                init();
+            } catch (Exception e) {
+                LOG.error("Cannot initialise feature service", e);
+            }
             layerInitWorker = null;
         } else if (!initialized) {
             if (!EventQueue.isDispatchThread()) {
