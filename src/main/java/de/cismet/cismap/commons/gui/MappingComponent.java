@@ -942,8 +942,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     private void adjustLayers() {
         int counter = 0;
+        // remove layer
+        getCamera().removeLayer(mapServicelayer);
+        getCamera().removeLayer(featureLayer);
+        getCamera().removeLayer(tmpFeatureLayer);
+        getCamera().removeLayer(rubberBandLayer);
+        getCamera().removeLayer(dragPerformanceImproverLayer);
+
+        // add layer
         getCamera().addLayer(counter++, mapServicelayer);
         for (int i = 0; i < featureServiceLayer.getChildrenCount(); ++i) {
+            getCamera().removeLayer((PLayer)featureServiceLayer.getChild(i));
             getCamera().addLayer(counter++, (PLayer)featureServiceLayer.getChild(i));
         }
         getCamera().addLayer(counter++, featureLayer);
@@ -1484,6 +1493,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final TreeMap rs = mappingModel.getRasterServices();
 
                     // Rückwärts wegen der Reihenfolge der Layer im Layer Widget
+                    mapServicelayer.removeAllChildren();
                     final Iterator it = rs.keySet().iterator();
                     while (it.hasNext()) {
                         final Object key = it.next();
