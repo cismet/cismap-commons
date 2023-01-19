@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -142,9 +143,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
      * DOCUMENT ME!
      *
      * @param  layerurl  DOCUMENT ME!
+     * @param  name      DOCUMENT ME!
      */
-    public void removeLegendByUrl(final String layerurl) {
-        tableModel.removeLegendByUrl(layerurl);
+    public void removeLegendByUrl(final String layerurl, final String name) {
+        tableModel.removeLegendByUrl(layerurl, name);
     }
 
     /**
@@ -186,7 +188,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             removeWMSLayer((WMSLayer)e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
             final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
-            removeLegendByUrl(slp.getLegendUrl());
+            removeLegendByUrl(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
             final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
             final List v = wmsLayer.getLayers();
@@ -236,6 +238,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             }
         } else {
             final String title = wl.getOgcCapabilitiesLayer().getTitle();
+            final String name = wl.getOgcCapabilitiesLayer().getName();
             String url = null;
             try {
                 final URL[] lua = wl.getSelectedStyle().getLegendURL();
@@ -246,7 +249,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 }
             }
             if (url != null) {
-                this.removeLegendByUrl(url);
+                this.removeLegendByUrl(url, name);
             }
         }
     }
@@ -712,6 +715,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         private List<LegendPanel> panels = new ArrayList<LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();
+        private HashMap<String, TreeSet<String>> urlByLayername = new HashMap<>();
 
         //~ Methods ------------------------------------------------------------
 
@@ -748,6 +752,16 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 panelsByUrl.put(url, lp);
             }
 
+            final TreeSet<String> allLayers = urlByLayername.get(url);
+
+            if (allLayers == null) {
+                final TreeSet<String> names = new TreeSet<>();
+                names.add(name);
+                urlByLayername.put(url, names);
+            } else {
+                allLayers.add(name);
+            }
+
             EventQueue.invokeLater(new Runnable() {
 
                     @Override
@@ -760,16 +774,30 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param  url  layerurl DOCUMENT ME!
+         * @param  url   layerurl DOCUMENT ME!
+         * @param  name  DOCUMENT ME!
          */
-        public void removeLegendByUrl(final String url) {
+        public void removeLegendByUrl(final String url, final String name) {
             if (panelsByUrl.containsKey(url)) {
                 final LegendPanel lp = new LegendPanel(url);
                 if (panels.contains(lp)) {
-                    panels.remove(new LegendPanel(url));
-                    panelsByUrl.remove(url);
-                    final int index = panels.indexOf(lp);
-                    super.fireTableRowsDeleted(index, index);
+                    final TreeSet<String> names = urlByLayername.get(url);
+                    boolean removeUrl = true;
+
+                    if (names != null) {
+                        names.remove(name);
+
+                        if (names.size() > 0) {
+                            removeUrl = false;
+                        }
+                    }
+
+                    if (removeUrl) {
+                        final int index = panels.indexOf(lp);
+                        panels.remove(new LegendPanel(url));
+                        panelsByUrl.remove(url);
+                        super.fireTableRowsDeleted(index, index);
+                    }
                 }
             }
         }
