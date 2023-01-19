@@ -3857,7 +3857,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     boolean hasZCoordinate = false;
 
                     for (final Coordinate c : feature.getGeometry().getCoordinates()) {
-                        if (c.z != 0.0) {
+                        if ((c.z != 0.0) && !Double.isNaN(c.z)) {
                             hasZCoordinate = true;
                             break;
                         }
