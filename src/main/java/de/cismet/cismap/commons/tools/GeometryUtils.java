@@ -103,7 +103,7 @@ public class GeometryUtils {
 
                     @Override
                     public void filter(final Coordinate coord) {
-                        coord.y = 0.0;
+                        coord.z = 0.0;
                     }
                 });
 
