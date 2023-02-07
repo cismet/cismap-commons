@@ -762,13 +762,17 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 allLayers.add(name);
             }
 
-            EventQueue.invokeLater(new Runnable() {
+            if (EventQueue.isDispatchThread()) {
+                fireTableStructureChanged();
+            } else {
+                EventQueue.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        LegendModel.super.fireTableStructureChanged();
-                    }
-                });
+                        @Override
+                        public void run() {
+                            LegendModel.super.fireTableStructureChanged();
+                        }
+                    });
+            }
         }
 
         /**
@@ -789,12 +793,14 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
                         if (names.size() > 0) {
                             removeUrl = false;
+                        } else {
+                            urlByLayername.remove(url);
                         }
                     }
 
                     if (removeUrl) {
                         final int index = panels.indexOf(lp);
-                        panels.remove(new LegendPanel(url));
+                        panels.remove(lp);
                         panelsByUrl.remove(url);
                         super.fireTableRowsDeleted(index, index);
                     }
