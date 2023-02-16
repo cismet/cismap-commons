@@ -91,6 +91,7 @@ import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
@@ -386,6 +387,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         boolean multi = false;
         boolean root = false;
         boolean feature = false;
+        boolean rasterService = false;
         boolean geometry = false;
         boolean featureSelected = false;
         int mask = 0;
@@ -430,21 +432,23 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
 
             if (o instanceof RetrievalServiceLayer) {
-                feature = true;
-
                 if (!geometry) {
                     final RetrievalServiceLayer rsl = ((RetrievalServiceLayer)o);
                     Geometry bounds = null;
-                    
+
                     try {
                         bounds = ZoomToLayerWorker.getServiceBounds(rsl);
                     } catch (NullPointerException e) {
-                        //nothing to do bounds is still null
+                        // nothing to do bounds is still null
                     }
                     if ((bounds != null) && !bounds.isEmpty()) {
                         geometry = true;
                     }
                 }
+            }
+
+            if (o instanceof RasterMapService) {
+                rasterService = true;
             }
         }
 
@@ -453,6 +457,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         mask += (node ? ThemeLayerMenuItem.NODE : 0);
         mask += (multi ? ThemeLayerMenuItem.MULTI : 0);
         mask += (feature ? ThemeLayerMenuItem.FEATURE_SERVICE : 0);
+        mask += (rasterService ? ThemeLayerMenuItem.RASTER_MAP_SERVICE : 0);
         mask += (geometry ? ThemeLayerMenuItem.GEOMETRY : 0);
         mask += (featureSelected ? ThemeLayerMenuItem.FEATURE_SELECTED : 0);
         mask += ((!geometry) ? ThemeLayerMenuItem.NO_GEOMETRY : 0);
@@ -1239,6 +1244,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         | FEATURE_SELECTED
                         | GEOMETRY
                         | NO_FEATURE_SELECTED
+                        | RASTER_MAP_SERVICE
                         | NO_GEOMETRY);
         }
 
@@ -1370,7 +1376,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         | FEATURE_SERVICE
                         | GEOMETRY
                         | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED);
+                        | NO_FEATURE_SELECTED
+                        | RASTER_MAP_SERVICE);
             newSection = true;
         }
 

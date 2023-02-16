@@ -40,7 +40,8 @@ public abstract class ThemeLayerMenuItem extends JMenuItem implements ActionList
     public static final int FEATURE_SELECTED = 64;
     public static final int NO_GEOMETRY = 128;
     public static final int NO_FEATURE_SELECTED = 256;
-    public static final int EVER = 511;
+    public static final int RASTER_MAP_SERVICE = 512;
+    public static final int EVER = 1023;
 
     //~ Instance fields --------------------------------------------------------
 
