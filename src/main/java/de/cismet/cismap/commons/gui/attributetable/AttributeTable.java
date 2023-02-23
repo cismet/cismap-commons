@@ -130,6 +130,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.gui.layerwidget.ZoomToFeaturesWorker;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
@@ -3099,44 +3100,12 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butZoomToSelectionActionPerformed
-        final int[] selectedRows = table.getSelectedRows();
-        boolean first = true;
-        int srid = 0;
-        final List<Geometry> geomList = new ArrayList<Geometry>(selectedRows.length);
+        final List<? extends Feature> featureList = getSelectedFeatures();
 
-        for (final int row : selectedRows) {
-            Geometry g = model.getGeometryFromRow(table.convertRowIndexToModel(row));
-
-            if (g != null) {
-                g = g.getEnvelope();
-
-                if (first) {
-                    srid = g.getSRID();
-                    first = false;
-                } else {
-                    if (g.getSRID() != srid) {
-                        g = CrsTransformer.transformToGivenCrs(g, CrsTransformer.createCrsFromSrid(srid));
-                    }
-                }
-
-                geomList.add(g);
-            }
-        }
-
-        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
-        Geometry union = factory.buildGeometry(geomList);
-
-        if (union instanceof GeometryCollection) {
-            union = ((GeometryCollection)union).union();
-        }
-
-        if (mappingComponent != null) {
-            final XBoundingBox bbox = new XBoundingBox(union);
-            bbox.increase(10);
-            mappingComponent.gotoBoundingBoxWithHistory(bbox);
-        } else {
-            LOG.error("MappingComponent is not set");
-        }
+        final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(featureList.toArray(
+                    new Feature[featureList.size()]),
+                10);
+        worker.execute();
     } //GEN-LAST:event_butZoomToSelectionActionPerformed
 
     /**
