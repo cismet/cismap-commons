@@ -8,12 +8,12 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>7.0</version>
+        <version>8.0</version>
     </parent>
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>7.0.35</version>
+    <version>8.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-        <tag>v7.0.35</tag>
+        <tag>v8.0</tag>
     </scm>
 
     <ciManagement>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>de.cismet</groupId>
                 <artifactId>cismet-ext-bom</artifactId>
-                <version>7.2.2</version>
+                <version>8.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -55,13 +55,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.4.1</version>
+                <version>8.0</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>7.4.1</version>
+                <version>8.0</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -69,13 +69,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>7.2.4</version>
+                <version>8.0</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>7.2.4</version>
+                <version>8.0</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -449,6 +449,10 @@
                     <groupId>javax.xml.stream</groupId>
                     <artifactId>stax-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.woodstox</groupId>
+                    <artifactId>woodstox-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -460,6 +464,10 @@
                     <groupId>javax.xml.stream</groupId>
                     <artifactId>stax-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.fasterxml.woodstox</groupId>
+                    <artifactId>woodstox-core</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -470,6 +478,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -498,8 +512,6 @@
                             <configuration>
                                 <excludes>
                                     <exclude>**/*.jar</exclude>
-                                    <exclude>**/*.jpg</exclude>
-                                    <exclude>**/*.tif</exclude>
                                 </excludes>
                             </configuration>
                         </execution>
