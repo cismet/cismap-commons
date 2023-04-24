@@ -79,7 +79,8 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 + "&LAYERS=<rasterfari:document>"
                 + "&CUSTOMSCALE=<rasterfari:scale>"
                 + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
-                + "&CUSTOMOFFSETY=<rasterfari:offsetY>";
+                + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
+                + "&TRANSPARENT=false";
     private static final String DOWNLOAD_TEMPLATE =
         "<rasterfari:url>?REQUEST=GetMap&SERVICE=WMS&customDocumentInfo=download&LAYERS=<rasterfari:document>";
     private static final String MY_MESSEN_MODE = "MY_MESSEN_MODE";
@@ -531,8 +532,8 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                                     + currentPage
                                     + "]",
                                     "UTF-8") : ""));
-            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 1, true, false, "prefetching_Lageplan"));
-            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 0, true, false, "Lageplan"));
+            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 0, true, false, "prefetching_Lageplan"));
+            mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 1, true, false, "Lageplan"));
 
             togPan.setSelected(true);
             showFullDocument();
