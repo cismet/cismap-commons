@@ -1242,6 +1242,115 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     /**
      * DOCUMENT ME!
      *
+     * @param   origLayer  DOCUMENT ME!
+     * @param   newLayer   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean switchLayer(final Object origLayer, final Object newLayer) {
+        final List l = new ArrayList(layers);
+        final Iterator it = l.iterator();
+
+        for (int i = 0; i < l.size(); ++i) {
+            final Object o = l.get(i);
+
+            if (o instanceof MapService) {
+                if (origLayer.equals(o)) {
+                    // remove old layer
+                    layers.remove(origLayer);
+                    final ActiveLayerEvent ale = new ActiveLayerEvent();
+                    ale.setLayer(origLayer);
+                    CismapBroker.getInstance().fireLayerRemoved(ale);
+                    fireMapServiceRemoved((MapService)origLayer);
+
+                    // add new layer
+                    registerRetrievalServiceLayer((RetrievalServiceLayer)newLayer);
+
+                    layers.add(i, newLayer);
+                    if (DEBUG) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("layer '" + ((RetrievalServiceLayer)newLayer).getName() + "' added"); // NOI18N
+                        }
+                    }
+                    fireTreeStructureChanged(
+                        this,
+                        new Object[] { root },
+                        null,
+                        null);
+
+                    reorderLayer();
+                    return true;
+                }
+            } else if (o instanceof LayerCollection) {
+                if (switchLayerInLayerCollection((LayerCollection)o, origLayer, newLayer)) {
+                    return true;
+                }
+            } else {
+                log.warn("service is not of type MapService: " + o); // NOI18N
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   collection  DOCUMENT ME!
+     * @param   origLayer   DOCUMENT ME!
+     * @param   newLayer    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean switchLayerInLayerCollection(final LayerCollection collection,
+            final Object origLayer,
+            final Object newLayer) {
+        for (int i = 0; i < collection.size(); ++i) {
+            final Object o = collection.get(i);
+
+            if (o instanceof LayerCollection) {
+                final boolean found = switchLayerInLayerCollection((LayerCollection)o, origLayer, newLayer);
+
+                if (found) {
+                    return true;
+                }
+            } else if (o.equals(origLayer)) {
+                // remove old layer
+                layers.remove(origLayer);
+                collection.remove(origLayer);
+                final ActiveLayerEvent ale = new ActiveLayerEvent();
+                ale.setLayer(origLayer);
+                CismapBroker.getInstance().fireLayerRemoved(ale);
+                fireMapServiceRemoved((MapService)origLayer);
+
+                // add new layer
+                registerRetrievalServiceLayer((RetrievalServiceLayer)newLayer);
+
+                layers.add(i, newLayer);
+                collection.add(i, newLayer);
+                if (DEBUG) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("layer '" + ((RetrievalServiceLayer)newLayer).getName() + "' added"); // NOI18N
+                    }
+                }
+                fireTreeStructureChanged(
+                    this,
+                    new Object[] { root },
+                    null,
+                    null);
+
+                reorderLayer();
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public java.util.TreeMap<Integer, Object> getMapServicesAndCollections() {

@@ -10,8 +10,8 @@ package de.cismet.cismap.commons.featureservice;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
@@ -30,7 +30,7 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
 
     private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSCapabilities capabilities;
-    private HashMap<FeatureType, Vector<FeatureServiceAttribute>> nodes;
+    private TreeMap<FeatureType, Vector<FeatureServiceAttribute>> nodes;
     private Vector listener = new Vector();
 
     //~ Constructors -----------------------------------------------------------
@@ -78,7 +78,7 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
         if (node instanceof WFSCapabilities) {
             return false;
         } else {
-            if (nodes.get(node) != null) {
+            if ((node instanceof FeatureType) && (nodes.get(node) != null)) {
                 return false;
             } else {
                 return true;
@@ -103,7 +103,7 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
                 return nodes.size();
             }
         } else {
-            return (nodes.get(parent) != null) ? nodes.get(parent).size() : 0;
+            return ((parent instanceof FeatureType) && (nodes.get(parent) != null)) ? nodes.get(parent).size() : 0;
         }
     }
 
@@ -176,9 +176,11 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
                 }
             } else {
                 if (index < childs) {
-                    return (nodes.get(parent) != null) ? nodes.get(parent).get(index) : null;
+                    return ((parent instanceof FeatureType) && (nodes.get(parent) != null))
+                        ? nodes.get(parent).get(index) : null;
                 } else {
-                    return (nodes.get(parent) != null) ? nodes.get(parent).get(index - childs) : null;
+                    return ((parent instanceof FeatureType) && (nodes.get(parent) != null))
+                        ? nodes.get(parent).get(index - childs) : null;
                 }
             }
         }
