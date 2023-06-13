@@ -31,7 +31,10 @@ import org.w3c.dom.Document;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -252,8 +255,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             return null;
         }
         // check if canceled .......................................................
-        final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
-        final FeatureCollection featureCollection;
+        GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
+        FeatureCollection featureCollection;
 
         try {
             start = System.currentTimeMillis();
@@ -265,10 +268,10 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             // check if canceled .......................................................
 
             // debug
-            final StringBuilder res = new StringBuilder();
+            StringBuilder res = new StringBuilder();
             String charset = null;
             String tmp;
-            final BufferedReader br = new BufferedReader(reader);
+            BufferedReader br = new BufferedReader(reader);
 
             while ((tmp = br.readLine()) != null) {
                 if (charset != null) {
@@ -293,14 +296,24 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 }
             }
 
-            if (logger.isDebugEnabled()) {
+            br.close();
+            br = null;
+            System.gc();
+
+            final BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/therter/wfs.test.gml")));
+            bw.write(res.toString());
+            bw.close();
+
+            if (logger.isDebugEnabled() && (res.length() < 10000000)) {
                 logger.debug("wfs response: " + res.toString());
             }
-            final StringReader re = new StringReader(res.toString());
+            StringReader re = new StringReader(res.toString());
+            res = null;
             // debug
 
             featureCollectionDocument.load(re, "http://dummyID");
-
+            re.close();
+            re = null;
             // check if canceled .......................................................
             if (this.checkCancelled(workerThread, "loading features")) {
                 return null;
@@ -355,6 +368,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 }
             }
 
+            featureCollectionDocument = null;
+            System.gc();
             logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
                         + (System.currentTimeMillis() - start) + " ms");
 
@@ -366,9 +381,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 return null;
             }
 
+            final org.deegree.model.feature.Feature[] featureArray = featureCollection.toArray();
+            featureCollection = null;
+            System.gc();
             features = processFeatureCollection(
                     workerThread,
-                    featureCollection.toArray(),
+                    featureArray,
                     true);
         } catch (Exception t) {
             logger.error("FRW[" + workerThread + "]: error parsing features: " + t.getMessage(), t);
