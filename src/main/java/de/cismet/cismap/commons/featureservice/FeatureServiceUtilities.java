@@ -22,19 +22,18 @@ import org.jdom.output.XMLOutputter;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import java.nio.charset.Charset;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -213,14 +212,31 @@ public class FeatureServiceUtilities {
      * @throws  IOException  DOCUMENT ME!
      * @throws  Exception    DOCUMENT ME!
      */
-    public static HashMap<FeatureType, Vector<FeatureServiceAttribute>> getElementDeclarations(
+    public static TreeMap<FeatureType, Vector<FeatureServiceAttribute>> getElementDeclarations(
             final WFSCapabilities cap) throws IOException, Exception {
         if (log.isDebugEnabled()) {
             log.debug("getElementDeclarations(" + cap.getURL() + ")"); // NOI18N
         }
         // create hashmap that will be returned
-        final HashMap<FeatureType, Vector<FeatureServiceAttribute>> result =
-            new HashMap<FeatureType, Vector<FeatureServiceAttribute>>();
+        final TreeMap<FeatureType, Vector<FeatureServiceAttribute>> result = new TreeMap<>(
+                new Comparator<FeatureType>() {
+
+                    @Override
+                    public int compare(final FeatureType o1, final FeatureType o2) {
+                        final String title1 = ((o1 == null) ? null : o1.getTitle());
+                        final String title2 = ((o2 == null) ? null : o2.getTitle());
+
+                        if ((title1 == null) && (title2 == null)) {
+                            return 0;
+                        } else if (title1 == null) {
+                            return -1;
+                        } else if (title2 == null) {
+                            return 1;
+                        } else {
+                            return title1.compareTo(title2);
+                        }
+                    }
+                });
 
         for (final FeatureType ft : cap.getFeatureTypeList()) {
             final Vector<FeatureServiceAttribute> attributes = ft.getFeatureAttributes();
