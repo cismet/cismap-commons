@@ -16,6 +16,8 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.ogcwebservices.wms.capabilities.Layer;
+
 import org.openide.util.NbBundle;
 
 import java.awt.Component;
@@ -30,6 +32,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -210,6 +213,36 @@ public class LayerDropUtils {
 
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
+
+                        if (CismapBroker.getInstance().isWMSLayerNamesWithPath() && (v.size() == 1)) {
+                            final List<de.cismet.commons.wms.capabilities.Layer> parents = new ArrayList<>();
+                            TreePath tp = v.get(0);
+
+                            if ((tp.getLastPathComponent() instanceof de.cismet.commons.wms.capabilities.Layer)) {
+                                parents.add((de.cismet.commons.wms.capabilities.Layer)tp.getLastPathComponent());
+                            }
+
+                            while ((tp.getParentPath() != null)
+                                        && (tp.getParentPath().getLastPathComponent()
+                                            instanceof de.cismet.commons.wms.capabilities.Layer)) {
+                                parents.add((de.cismet.commons.wms.capabilities.Layer)tp.getParentPath()
+                                            .getLastPathComponent());
+                                tp = tp.getParentPath();
+                            }
+
+                            Collections.reverse(parents);
+                            StringBuffer parentsString = null;
+
+                            for (final de.cismet.commons.wms.capabilities.Layer p : parents) {
+                                if (parentsString == null) {
+                                    parentsString = new StringBuffer(p.getTitle());
+                                } else {
+                                    parentsString.append("->").append(p.getTitle());
+                                }
+                            }
+
+                            l.setName(parentsString.toString());
+                        }
 
                         if (index != -1) {
                             activeLayerModel.addLayer(l, activeLayerModel.layers.size() - index);
