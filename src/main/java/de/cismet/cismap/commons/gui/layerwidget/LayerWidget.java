@@ -37,15 +37,20 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
 import javax.swing.SwingWorker;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
+import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 
@@ -223,6 +228,69 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
                 @Override
                 public void keyReleased(final KeyEvent e) {
+                }
+            });
+
+        treeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+                @Override
+                public void valueChanged(final ListSelectionEvent e) {
+                    final TreePath[] tps = treeTable.getTree().getSelectionPaths();
+                    boolean zoomToLayerAllowd = false;
+
+                    if (tps != null) {
+                        for (final TreePath tp : tps) {
+                            if (tp.getLastPathComponent() instanceof WMSServiceLayer) {
+                                final WMSServiceLayer rsl = (WMSServiceLayer)tp.getLastPathComponent();
+
+                                if ((rsl.getLayerInformation() == null)
+                                            || (rsl.getLayerInformation().getAbstract() == null)
+                                            || !rsl.getLayerInformation().getAbstract().contains(
+                                                CapabilityWidget.MASSSTABSBEGRENZUNG)) {
+                                    zoomToLayerAllowd = true;
+                                    break;
+                                } else {
+                                    try {
+                                        final String abstr = rsl.getLayerInformation().getAbstract();
+                                        final String relevantSubString = abstr.substring(
+                                                abstr.indexOf(CapabilityWidget.MASSSTABSBEGRENZUNG)
+                                                        + CapabilityWidget.MASSSTABSBEGRENZUNG.length());
+                                        final StringTokenizer st = new StringTokenizer(relevantSubString, ",");
+                                        final List<String> relevantLayerNames = new ArrayList<>();
+
+                                        while (st.hasMoreTokens()) {
+                                            final String token = st.nextToken();
+
+                                            if ((token.contains("\""))
+                                                        && (token.indexOf("\"") != token.lastIndexOf("\""))) {
+                                                relevantLayerNames.add(
+                                                    token.substring(token.indexOf("\"") + 1, token.lastIndexOf("\""))
+                                                                .toLowerCase());
+                                            }
+                                        }
+
+                                        final List<WMSLayer> layers = rsl.getWMSLayers();
+
+                                        if (layers != null) {
+                                            for (final WMSLayer l : layers) {
+                                                if (!relevantLayerNames.contains(l.getStyleName().toLowerCase())) {
+                                                    zoomToLayerAllowd = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } catch (Throwable t) {
+                                        // do nothing
+                                    }
+                                }
+                            } else {
+                                zoomToLayerAllowd = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    cmdZoomToFullExtent.setEnabled(zoomToLayerAllowd);
                 }
             });
 

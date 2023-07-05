@@ -160,6 +160,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
             "de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget"); // NOI18N
+    public static final String MASSSTABSBEGRENZUNG = "Maßstabsbegrenzung:";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -2157,20 +2158,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                             final TreePath[] paths = ((JTree)treePopMenu.getInvoker()).getSelectionPaths();
                             final Component c = treePopMenu.getComponent(0);
                             if (c instanceof JMenuItem) {
+                                final JMenuItem item = (JMenuItem)c;
+                                item.setEnabled(true);
+
                                 if ((paths != null) && (paths.length == 1)) {
                                     if ((paths[0].getLastPathComponent() instanceof TreeFolder)
                                                 || (paths[0].getLastPathComponent() instanceof String)) {
-                                        final JMenuItem item = (JMenuItem)c;
                                         item.setText(
                                             NbBundle.getMessage(
                                                 CapabilityWidget.class,
                                                 "CapabilityWidget.addPopupMenu.popupMenuWillBecomeVisible"));
                                     } else {
-                                        final JMenuItem item = (JMenuItem)c;
                                         item.setText(
                                             NbBundle.getMessage(
                                                 CapabilityWidget.class,
                                                 "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
+
+                                        if (paths[0].getLastPathComponent() instanceof Layer) {
+                                            final Layer l = (Layer)paths[0].getLastPathComponent();
+                                            final String abstr = l.getAbstract();
+
+                                            if ((abstr != null) && abstr.contains(MASSSTABSBEGRENZUNG)) {
+                                                item.setEnabled(false);
+                                            }
+                                        }
                                     }
                                 }
                             }

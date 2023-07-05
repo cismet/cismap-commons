@@ -121,6 +121,7 @@ public class CismapBroker {
     private Color measurementLineColor;
     private Integer measurementLineWidth;
     private GPSDirectionOptions.GPSDirection gpsAngleDirection = GPSDirectionOptions.GPSDirection.AUTO;
+    private boolean WMSLayerNamesWithPath = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -132,6 +133,24 @@ public class CismapBroker {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the WMSLayerNamesWithPath
+     */
+    public boolean isWMSLayerNamesWithPath() {
+        return WMSLayerNamesWithPath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  WMSLayerNamesWithPath  the WMSLayerNamesWithPath to set
+     */
+    public void setWMSLayerNamesWithPath(final boolean WMSLayerNamesWithPath) {
+        this.WMSLayerNamesWithPath = WMSLayerNamesWithPath;
+    }
 
     /**
      * DOCUMENT ME!
