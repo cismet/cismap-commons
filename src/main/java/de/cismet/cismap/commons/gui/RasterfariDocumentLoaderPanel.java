@@ -81,6 +81,21 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
                 + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
                 + "&TRANSPARENT=false";
+
+    private static final String MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED = "<rasterfari:url>"
+                + "?REQUEST=GetMap"
+                + "&SERVICE=WMS"
+                + "&SRS=EPSG:25832"
+                + "&BBOX=<cismap:boundingBox>"
+                + "&WIDTH=<cismap:width>"
+                + "&HEIGHT=<cismap:height>"
+                + "&LAYERS=<rasterfari:document>"
+                + "&CUSTOMSCALE=<rasterfari:scale>"
+                + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
+                + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
+                + "&TRANSPARENT=false"
+                + "&REBUILDCACHE=ifneeded";
+
     private static final String DOWNLOAD_TEMPLATE =
         "<rasterfari:url>?REQUEST=GetMap&SERVICE=WMS&customDocumentInfo=download&LAYERS=<rasterfari:document>";
     private static final String MY_MESSEN_MODE = "MY_MESSEN_MODE";
@@ -708,7 +723,9 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 @Override
                 protected Integer doInBackground() throws Exception {
                     // We just want the header.
-                    final String template = MAP_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl)
+                    final String template = MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED.replace(
+                                "<rasterfari:url>",
+                                rasterfariUrl)
                                 .replace("<cismap:boundingBox>", "-0.5,-0.5,0.5,0.5")
                                 .replace("<cismap:width>", "10")
                                 .replace("<cismap:height>", "10")
