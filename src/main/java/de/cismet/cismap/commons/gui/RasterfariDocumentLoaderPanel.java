@@ -80,7 +80,8 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 + "&CUSTOMSCALE=<rasterfari:scale>"
                 + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
                 + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
-                + "&TRANSPARENT=false";
+                + "&TRANSPARENT=false"
+                + "&REBUILDCACHE=no";
 
     private static final String MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED = "<rasterfari:url>"
                 + "?REQUEST=GetMap"
@@ -93,8 +94,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                 + "&CUSTOMSCALE=<rasterfari:scale>"
                 + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
                 + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
-                + "&TRANSPARENT=false"
-                + "&REBUILDCACHE=ifneeded";
+                + "&TRANSPARENT=false";
 
     private static final String DOWNLOAD_TEMPLATE =
         "<rasterfari:url>?REQUEST=GetMap&SERVICE=WMS&customDocumentInfo=download&LAYERS=<rasterfari:document>";
