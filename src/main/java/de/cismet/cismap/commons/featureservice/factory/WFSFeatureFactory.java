@@ -300,10 +300,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             br = null;
             System.gc();
 
-            final BufferedWriter bw = new BufferedWriter(new FileWriter(new File("/home/therter/wfs.test.gml")));
-            bw.write(res.toString());
-            bw.close();
-
             if (logger.isDebugEnabled() && (res.length() < 10000000)) {
                 logger.debug("wfs response: " + res.toString());
             }
