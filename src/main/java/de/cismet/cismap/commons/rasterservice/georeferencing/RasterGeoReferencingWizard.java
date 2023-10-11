@@ -500,7 +500,8 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
                         final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)rasterService;
                         final boolean including = ((retrievalServiceLayer instanceof ImageRasterService)
                                         && SelectionMode.POINT.equals(mode))
-                                    || (!(getHandler().getService().equals(rasterService))
+                                    || (!((getHandler() != null) && (getHandler().getService() != null)
+                                            && getHandler().getService().equals(rasterService))
                                         && SelectionMode.COORDINATE.equals(mode));
                         if (including) {
                             final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(
