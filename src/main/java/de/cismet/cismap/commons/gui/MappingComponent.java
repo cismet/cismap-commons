@@ -482,8 +482,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     if (transform != null) {
                         lastScale = transform.getScale();
                     }
-                    CismapBroker.getInstance()
-                            .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
+                    if (MappingComponent.this.mainMappingComponent) {
+                        CismapBroker.getInstance()
+                                .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
+                    }
                 }
             });
     }
@@ -1164,8 +1166,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (pivl != null) {
                 addInputEventListener(pivl);
                 propertyChangeSupport.firePropertyChange(interactionModeChangedEvent);
-                CismapBroker.getInstance()
-                        .fireStatusValueChanged(new StatusEvent(StatusEvent.MAPPING_MODE, interactionMode));
+                if (mainMappingComponent) {
+                    CismapBroker.getInstance()
+                            .fireStatusValueChanged(new StatusEvent(StatusEvent.MAPPING_MODE, interactionMode));
+                }
             } else {
                 LOG.warn("this.getInputListener(this.interactionMode)==null bei interactionMode=" + interactionMode); // NOI18N
             }
