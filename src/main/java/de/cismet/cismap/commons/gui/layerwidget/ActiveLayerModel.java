@@ -1089,7 +1089,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 return true;
             }
             case 1: {
-                if ((node instanceof WMSServiceLayer) && (((WMSServiceLayer)node).getWMSLayers().size() > 1)) {
+                if ((node instanceof WMSServiceLayer)) {
                     return true;
                 } else if ((node instanceof LayerCollection) && (((LayerCollection)node).size() > 0)) {
                     return true;
