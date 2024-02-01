@@ -641,7 +641,9 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         final Feature feature = (Feature)jList1.getSelectedValue();
-        getMappingComponent().getFeatureCollection().removeFeature(feature);
+        if (feature != null) {
+            getMappingComponent().getFeatureCollection().removeFeature(feature);
+        }
     }                                                                            //GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -651,14 +653,18 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      */
     private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton2ActionPerformed
         final Feature feature = (Feature)jList2.getSelectedValue();
-        getMappingComponent().getFeatureCollection().removeFeature(feature);
+        if (feature != null) {
+            getMappingComponent().getFeatureCollection().removeFeature(feature);
+        }
     }                                                                            //GEN-LAST:event_jButton2ActionPerformed
 
     @Override
     public void dispose() {
         setFeatureCollectionListenerEnabled(false);
         try {
-            getMappingComponent().getTmpFeatureLayer().removeChild(tempFeature);
+            if (tempFeature != null) {
+                getMappingComponent().getTmpFeatureLayer().removeChild(tempFeature);
+            }
         } catch (final Exception ex) {
         }
         featureCollectionListModel.clear();
