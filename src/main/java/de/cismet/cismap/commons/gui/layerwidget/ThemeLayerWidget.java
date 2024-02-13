@@ -2034,7 +2034,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 if (service != null) {
                     final Integer selectedFeatureCount = SelectionManager.getInstance()
                                 .getSelectedFeaturesCount(service);
-
+                    if (log.isDebugEnabled()) {
+                        log.debug("selection " + String.valueOf(service) + " Anzahl: " + selectedFeatureCount);
+                    }
                     if ((selectedFeatureCount != null) && (selectedFeatureCount != 0)) {
                         label += " | " + selectedFeatureCount;
                     }
