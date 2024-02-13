@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.util;
 
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import org.apache.log4j.Logger;
+
 import java.awt.EventQueue;
 
 import java.util.ArrayList;
@@ -69,21 +71,18 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final Logger LOG = Logger.getLogger(SelectionManager.class);
     private static final AbstractFeatureService DUMMY = new DummyFeatureService();
 
     //~ Instance fields --------------------------------------------------------
 
     // this maps contains pre-calculated values
-    private final Map<AbstractFeatureService, Set<Feature>> selectedFeatures =
-        new ConcurrentHashMap<AbstractFeatureService, Set<Feature>>();
-    private final Map<AbstractFeatureService, Integer> modifiableFeaturesCount =
-        new HashMap<AbstractFeatureService, Integer>();
+    private final Map<AbstractFeatureService, Set<Feature>> selectedFeatures = new ConcurrentHashMap<>();
 
     // The selected elements of this table will be considered
-    private final HashMap<AbstractFeatureService, AttributeTable> consideredAttributeTables =
-        new HashMap<AbstractFeatureService, AttributeTable>();
-    private List<AbstractFeatureService> editableServices = new ArrayList<AbstractFeatureService>();
-    private final List<SelectionChangedListener> listener = new ArrayList<SelectionChangedListener>();
+    private final HashMap<AbstractFeatureService, AttributeTable> consideredAttributeTables = new HashMap<>();
+    private List<AbstractFeatureService> editableServices = new ArrayList<>();
+    private final List<SelectionChangedListener> listener = new ArrayList<>();
     private boolean selectionChangeInProgress = false;
     private MapSelectionRefresher mapRefresher = new MapSelectionRefresher();
 
@@ -134,7 +133,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  service  DOCUMENT ME!
      */
     private void synchronizeSelectionWithMap(final AbstractFeatureService service) {
-        final List<PFeature> features = new ArrayList<PFeature>();
+        final List<PFeature> features = new ArrayList<>();
+        
         if (service.getPNode() != null) {
             features.addAll(service.getPNode().getChildrenReference());
         }
@@ -142,8 +142,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         if (selectedServiceFeatures != null) {
             final int[] selectedFeatureIds = new int[selectedServiceFeatures.size()];
-            final List<Feature> featuresToSelect = new ArrayList<Feature>();
-            final List<Feature> featuresToUnselect = new ArrayList<Feature>();
+            final List<Feature> featuresToSelect = new ArrayList<>();
+            final List<Feature> featuresToUnselect = new ArrayList<>();
             int index = -1;
 
             for (final Feature f : selectedServiceFeatures) {
@@ -226,6 +226,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     public void setSelectedFeaturesForService(final AbstractFeatureService service,
             final List<? extends Feature> featureList) {
         AbstractFeatureService s = service;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setSelectedFeaturesForService invoked");
+        }
 
         if (s == null) {
             s = DUMMY;
@@ -270,6 +273,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     public void removeSelectedFeatures(final List<? extends Feature> featureList) {
         final Map<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>> selectedFeaturesToRemove =
             new HashMap<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>>();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("removeSelectedFeatures invoked");
+        }
 
         if (featureList == null) {
             return;
@@ -346,6 +352,10 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             final boolean removeOldSelection,
             final boolean syncMap) {
         boolean added = false;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setSelectedFeatures invoked");
+        }
+
         if (removeOldSelection) {
             selectedFeatures.clear();
 
@@ -702,11 +712,6 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-//        for (final AttributeTable table : consideredAttributeTables.values()) {
-//            table.applySelection(this, new ArrayList<Feature>(), true);
-//        }
-//
-//        selectedStandaloneFeatures.clear();
         if (selectionChangeInProgress) {
             return;
         }

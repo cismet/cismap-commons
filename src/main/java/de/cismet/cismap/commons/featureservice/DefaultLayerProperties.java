@@ -19,6 +19,8 @@ import java.util.Map;
 
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.XMLObjectFactory;
+import de.cismet.cismap.commons.features.DefaultFeatureSimplifier;
+import de.cismet.cismap.commons.features.FeatureSimplifier;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
@@ -53,6 +55,7 @@ public class DefaultLayerProperties implements LayerProperties {
     private boolean idExpressionEnabled = true;
     private AbstractFeatureService featureService;
     private AttributeTableRuleSet attributeTableRuleSet;
+    private FeatureSimplifier featureSimplifier;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -439,5 +442,43 @@ public class DefaultLayerProperties implements LayerProperties {
      */
     public void setAttributeTableRuleSet(final AttributeTableRuleSet attributeTableRuleSet) {
         this.attributeTableRuleSet = attributeTableRuleSet;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureSimplifier  DOCUMENT ME!
+     */
+    public void setFeatureSimplifier(final FeatureSimplifier featureSimplifier) {
+        this.featureSimplifier = featureSimplifier;
+    }
+
+    @Override
+    public FeatureSimplifier getFeatureSimplifier() {
+        if (featureSimplifier != null) {
+            return featureSimplifier;
+        }
+        if (featureService == null) {
+            return null;
+        }
+
+        final String ruleSetName = camelize(featureService.getName()) + "FeatureSimplifier";
+
+        try {
+            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.simplifier." + ruleSetName);
+            final Object o = ruleSetClass.newInstance();
+
+            if (o instanceof FeatureSimplifier) {
+                featureSimplifier = (FeatureSimplifier)o;
+
+                return featureSimplifier;
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+
+        featureSimplifier = new DefaultFeatureSimplifier();
+
+        return featureSimplifier;
     }
 }

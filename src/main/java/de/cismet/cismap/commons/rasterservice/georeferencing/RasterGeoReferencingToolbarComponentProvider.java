@@ -123,9 +123,9 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnRasterGeoRefActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRasterGeoRefActionPerformed
+    private void btnRasterGeoRefActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnRasterGeoRefActionPerformed
         CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
-    }//GEN-LAST:event_btnRasterGeoRefActionPerformed
+    }                                                                                   //GEN-LAST:event_btnRasterGeoRefActionPerformed
 
     @Override
     public String getPluginName() {
