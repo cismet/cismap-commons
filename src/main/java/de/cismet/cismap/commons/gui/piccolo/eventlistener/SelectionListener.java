@@ -882,7 +882,7 @@ public class SelectionListener extends CreateGeometryListener {
                             !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
                                         pf.getFeature())) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Feature markiert: " + pf); // NOI18N
+                                log.debug("Feature markiert: " + pf + " feature: " + String.valueOf(pf.getFeature())); // NOI18N
                             }
                             toBeSelected.add(pf.getFeature());
                         } else {
@@ -892,7 +892,7 @@ public class SelectionListener extends CreateGeometryListener {
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Feature cannot be selected");      // NOI18N
+                        log.debug("Feature cannot be selected");                                                       // NOI18N
                     }
                     if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                         toBeUnselected.add(pf.getFeature());
