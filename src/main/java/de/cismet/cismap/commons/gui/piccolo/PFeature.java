@@ -337,7 +337,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        final Geometry geom = CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode());
+        Geometry geom = null;
+
+        if (feature instanceof DefaultFeatureServiceFeature) {
+            final FeatureSimplifier simplifier = ((DefaultFeatureServiceFeature)feature).getLayerProperties()
+                        .getFeatureSimplifier();
+
+            if (simplifier != null) {
+                geom = CrsTransformer.transformToGivenCrs(simplifier.simplify(feature), getViewerCrs().getCode());
+            } else {
+                geom = CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode());
+            }
+        } else {
+            geom = CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode());
+        }
+
         if (feature instanceof RasterDocumentFeature) {
             final RasterDocumentFeature rdf = (RasterDocumentFeature)feature;
             try {
@@ -3601,13 +3615,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void updatePath() {
         getPathReference().reset();
-        Geometry geom;
-
-        if (feature instanceof DefaultFeatureServiceFeature) {
-            geom = ((DefaultFeatureServiceFeature)feature).getSimpleGeometry();
-        } else {
-            geom = feature.getGeometry();
-        }
+        final Geometry geom = feature.getGeometry();
 
         if (geom instanceof Point) {
             setPathToPolyline(

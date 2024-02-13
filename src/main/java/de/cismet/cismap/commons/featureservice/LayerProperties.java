@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.ConvertableToXML;
+import de.cismet.cismap.commons.features.FeatureSimplifier;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 
@@ -219,4 +220,11 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
     //J+
 
     AttributeTableRuleSet getAttributeTableRuleSet();
+
+    /**
+     * The FeatureSimplifier is used to simplify geometrie when they were drawing to the map.
+     *
+     * @return  the feature simplifier or null, if no FeatureSimplifier exists for this layer
+     */
+    FeatureSimplifier getFeatureSimplifier();
 }

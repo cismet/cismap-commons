@@ -166,8 +166,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     private LayerProperties layerProperties;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private Paint customFillingStyle;
-    private Geometry simplifiedGeometry;
-    private boolean simplifiedGeometryAllowed = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -578,33 +576,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public Geometry getGeometry() {
         return this.geometry;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Geometry getSimpleGeometry() {
-        final Geometry geom = getGeometry();
-
-        if (simplifiedGeometryAllowed
-                    && ((geom instanceof Polygon) || (geom instanceof MultiPolygon)
-                        || (geom instanceof LineString)
-                        || (geom instanceof MultiLineString))
-                    && (geom.getCoordinates().length > 1000)
-                    && (CismapBroker.getInstance().getMappingComponent().getScaleDenominator() > 50000)) {
-            if (simplifiedGeometry == null) {
-                simplifiedGeometry = TopologyPreservingSimplifier.simplify(geom, 30);
-            }
-            if (logger.isDebugEnabled()) {
-                logger.debug("length of the geometry: " + geom.getCoordinates().length + " "
-                            + " Geometry will be simplified to a length of: "
-                            + simplifiedGeometry.getCoordinates().length);
-            }
-            return simplifiedGeometry;
-        }
-        return geom;
     }
 
     /**
@@ -2235,24 +2206,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public int compareTo(final DefaultFeatureServiceFeature o) {
         return Integer.compare(id, o.id);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the simplifiedGeometryAllowed
-     */
-    public boolean isSimplifiedGeometryAllowed() {
-        return simplifiedGeometryAllowed;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  simplifiedGeometryAllowed  the simplifiedGeometryAllowed to set
-     */
-    public void setSimplifiedGeometryAllowed(final boolean simplifiedGeometryAllowed) {
-        this.simplifiedGeometryAllowed = simplifiedGeometryAllowed;
     }
 
     @Override
