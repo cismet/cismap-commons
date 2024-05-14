@@ -74,4 +74,11 @@ public interface WFSCapabilities {
      * @return  DOCUMENT ME!
      */
     WFSFacade getServiceFacade();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getOriginalLink();
 }

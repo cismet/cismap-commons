@@ -20,8 +20,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -122,6 +124,8 @@ public class CismapBroker {
     private Integer measurementLineWidth;
     private GPSDirectionOptions.GPSDirection gpsAngleDirection = GPSDirectionOptions.GPSDirection.AUTO;
     private boolean WMSLayerNamesWithPath = false;
+    private Map<String, String> urlAliasMapping = new HashMap<>();
+    private Map<String, String> variableMapping = new HashMap<>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -133,6 +137,42 @@ public class CismapBroker {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the urlAliasMapping
+     */
+    public Map<String, String> getUrlAliasMapping() {
+        return urlAliasMapping;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  urlAliasMapping  the urlAliasMapping to set
+     */
+    public void setUrlAliasMapping(final Map<String, String> urlAliasMapping) {
+        this.urlAliasMapping = urlAliasMapping;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the urlAliasMapping
+     */
+    public Map<String, String> getVariableMapping() {
+        return variableMapping;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  variableMapping  the urlAliasMapping to set
+     */
+    public void setVariableMapping(final Map<String, String> variableMapping) {
+        this.variableMapping = variableMapping;
+    }
 
     /**
      * DOCUMENT ME!
@@ -560,7 +600,9 @@ public class CismapBroker {
      * @param  se  DOCUMENT ME!
      */
     public void fireStatusValueChanged(final StatusEvent se) {
-        for (final Iterator<StatusListener> it = statusListeners.iterator(); it.hasNext();) {
+        final List<StatusListener> listenerCopy = new ArrayList<>(statusListeners);
+
+        for (final Iterator<StatusListener> it = listenerCopy.iterator(); it.hasNext();) {
             it.next().statusValueChanged(se);
         }
     }
@@ -850,6 +892,89 @@ public class CismapBroker {
      */
     public MappingComponent getMappingComponent() {
         return mappingComponent;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String aliasToUrl(final String url) {
+        for (final String alias : urlAliasMapping.keySet()) {
+            if (url.equals(alias)) {
+                return replaceVariableInAlias(urlAliasMapping.get(alias));
+            }
+        }
+
+        return url;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String urlToAlias(final String url) {
+        for (final String alias : urlAliasMapping.keySet()) {
+            final String urlPart = urlAliasMapping.get(alias);
+
+            if (url.equals(urlPart) || url.equals(replaceVariableInAlias(urlPart))) {
+                return alias;
+            }
+        }
+
+        return url;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String replaceVariableInAlias(final String url) {
+        for (final String alias : variableMapping.keySet()) {
+            if (url.contains("${{" + alias + "}}")) {
+                return url.replace("${{" + alias + "}}", variableMapping.get(alias));
+            }
+        }
+
+        return url;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   link  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isAlias(final String link) {
+        return urlAliasMapping.containsKey(link);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isAliasDefinedForUrl(final String url) {
+        for (final String alias : urlAliasMapping.keySet()) {
+            final String urlPart = urlAliasMapping.get(alias);
+
+            if (url.equals(urlPart) || url.equals(replaceVariableInAlias(urlPart))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

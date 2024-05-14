@@ -45,16 +45,17 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Logger logger = Logger.getLogger(DeegreeWFSCapabilities.class);
+    private static final Logger LOG = Logger.getLogger(DeegreeWFSCapabilities.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities cap;
-    private CalculationCache<String, FeatureTypeList> cache = new CalculationCache<String, FeatureTypeList>(
+    private final org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities cap;
+    private final CalculationCache<String, FeatureTypeList> cache = new CalculationCache<String, FeatureTypeList>(
             new FeatureTypeListRetriever());
-    private URL url;
+    private final URL url;
     private Service service;
     private WFSFacade facade;
+    private final String originalLink;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -71,6 +72,7 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
     public DeegreeWFSCapabilities(final InputStream in, final String link) throws InvalidCapabilitiesException,
         IOException,
         SAXException {
+        originalLink = link;
         String urlString = link;
         final WFSCapabilitiesDocument parser = new WFSCapabilitiesDocument();
 
@@ -85,11 +87,19 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the originalLink
+     */
+    @Override
+    public String getOriginalLink() {
+        return originalLink;
+    }
+
     @Override
     public FeatureTypeList getFeatureTypeList() throws IOException, Exception {
-        // the String "id" is arbitrarily value that is only required to fulfil the
-        // requirement of the class CalculationCache
-        return cache.calcValue("id");
+        return cache.calcValue(originalLink);
     }
 
     @Override
@@ -138,9 +148,9 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
             for (final WFSFeatureType type : tmpList.getFeatureTypes()) {
                 if (type == null) {
-                    logger.error("TEST feature type == null " + type);
+                    LOG.error("TEST feature type == null " + type);
                 }
-                final DeegreeFeatureType tmpType = new DeegreeFeatureType(type, DeegreeWFSCapabilities.this);
+                final DeegreeFeatureType tmpType = new DeegreeFeatureType(type, DeegreeWFSCapabilities.this, input);
                 list.put(tmpType.getName(), tmpType);
             }
 

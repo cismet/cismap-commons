@@ -1135,6 +1135,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     if (pivl instanceof DeregistrationListener) {
                         ((DeregistrationListener)pivl).deregistration();
                     }
+                    if (pivl instanceof FeatureMoveListener) {
+                        ((FeatureMoveListener)pivl).cleanup();
+                    }
                     removeInputEventListener(pivl);
                 } else {
                     LOG.warn("this.getInputListener(this.interactionMode)==null");                                    // NOI18N
@@ -4484,6 +4487,50 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             } catch (final Exception ex) {
                 LOG.error("Cannot create a GeoTransformer for the crs EPSG:31466", ex); // NOI18N
             }
+        }
+
+        final Element variablesList = e.getChild("TextAliasList");
+
+        if (variablesList != null) {
+            final List aliasList = variablesList.getChildren("alias");
+            final Map<String, String> aliasVariables = new HashMap<>();
+
+            if (aliasList != null) {
+                for (final Object elem : aliasList) {
+                    if (elem instanceof Element) {
+                        final String name = ((Element)elem).getAttributeValue("name");
+                        final String url = ((Element)elem).getTextTrim();
+
+                        if ((name != null) && (url != null)) {
+                            aliasVariables.put(name, url);
+                        }
+                    }
+                }
+            }
+
+            CismapBroker.getInstance().setVariableMapping(aliasVariables);
+        }
+
+        final Element capsList = e.getChild("capabilitiesAliasList");
+
+        if (capsList != null) {
+            final List aliasList = capsList.getChildren("alias");
+            final Map<String, String> urlAliasMapping = new HashMap<>();
+
+            if (aliasList != null) {
+                for (final Object elem : aliasList) {
+                    if (elem instanceof Element) {
+                        final String name = ((Element)elem).getAttributeValue("name");
+                        final String url = ((Element)elem).getTextTrim();
+
+                        if ((name != null) && (url != null)) {
+                            urlAliasMapping.put(name, url);
+                        }
+                    }
+                }
+            }
+
+            CismapBroker.getInstance().setUrlAliasMapping(urlAliasMapping);
         }
 
         // HOME

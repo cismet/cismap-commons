@@ -21,6 +21,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * @version  $Revision$, $Date$
  */
 public class DefaultFeatureSimplifier implements FeatureSimplifier {
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
