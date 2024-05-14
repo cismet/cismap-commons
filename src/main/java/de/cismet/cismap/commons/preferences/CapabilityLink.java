@@ -11,6 +11,8 @@ import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
 /**
  * DOCUMENT ME!
  *
@@ -31,6 +33,7 @@ public class CapabilityLink {
     private String type;
     private String subparent;
     private String link;
+    private String alias;
     private String title;
     // contains the version of the represented capabilities document
     private String version;
@@ -56,9 +59,12 @@ public class CapabilityLink {
         } catch (Exception notHandled) {
             // nothing to do
         }
+        alias = e.getAttributeValue("alias");                                        // NOI18N
+
         link = e.getTextTrim();
+        link = CismapBroker.getInstance().urlToAlias(link);
         if (e.getAttribute("version") != null) {
-            version = e.getAttribute("version").getValue();                          // NOI18N
+            version = e.getAttribute("version").getValue(); // NOI18N
         }
     }
 
@@ -71,7 +77,7 @@ public class CapabilityLink {
      * @param  active            DOCUMENT ME!
      */
     public CapabilityLink(final String type, final String link, final boolean reverseAxisOrder, final boolean active) {
-        this(type, link, reverseAxisOrder, active, null);
+        this(type, link, reverseAxisOrder, active, null, CismapBroker.getInstance().urlToAlias(link));
     }
 
     /**
@@ -92,18 +98,42 @@ public class CapabilityLink {
      * @param  type              DOCUMENT ME!
      * @param  link              DOCUMENT ME!
      * @param  reverseAxisOrder  DOCUMENT ME!
-     * @param  active            DOCUMENT ME!
+     * @param  title             DOCUMENT ME!
      * @param  subparent         DOCUMENT ME!
      */
     public CapabilityLink(final String type,
             final String link,
             final boolean reverseAxisOrder,
-            final boolean active,
+            final String title,
             final String subparent) {
+        this.type = type;
+        this.link = CismapBroker.getInstance().urlToAlias(link);
+        this.title = title;
+        this.subparent = subparent;
+        this.reverseAxisOrder = reverseAxisOrder;
+    }
+
+    /**
+     * Creates a new CapabilityLink object.
+     *
+     * @param  type              DOCUMENT ME!
+     * @param  link              DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     * @param  active            DOCUMENT ME!
+     * @param  subparent         DOCUMENT ME!
+     * @param  alias             DOCUMENT ME!
+     */
+    public CapabilityLink(final String type,
+            final String link,
+            final boolean reverseAxisOrder,
+            final boolean active,
+            final String subparent,
+            final String alias) {
         this.type = type;
         this.link = link;
         this.active = active;
         this.subparent = subparent;
+        this.alias = alias;
         this.reverseAxisOrder = reverseAxisOrder;
     }
 
@@ -115,35 +145,17 @@ public class CapabilityLink {
      * @param  reverseAxisOrder  DOCUMENT ME!
      * @param  version           DOCUMENT ME!
      * @param  active            DOCUMENT ME!
+     * @param  alias             DOCUMENT ME!
      */
     public CapabilityLink(final String type,
             final String link,
             final boolean reverseAxisOrder,
             final String version,
-            final boolean active) {
+            final boolean active,
+            final String alias) {
         this(type, link, active, null);
         this.version = version;
-    }
-
-    /**
-     * Creates a new CapabilityLink object.
-     *
-     * @param  type              DOCUMENT ME!
-     * @param  link              DOCUMENT ME!
-     * @param  reverseAxisOrder  DOCUMENT ME!
-     * @param  title             DOCUMENT ME!
-     * @param  subparent         DOCUMENT ME!
-     */
-    public CapabilityLink(final String type,
-            final String link,
-            final boolean reverseAxisOrder,
-            final String title,
-            final String subparent) {
-        this.type = type;
-        this.link = link;
-        this.title = title;
-        this.subparent = subparent;
-        this.reverseAxisOrder = reverseAxisOrder;
+        this.alias = alias;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -172,7 +184,11 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public String getLink() {
-        return link;
+        if (alias != null) {
+            return CismapBroker.getInstance().aliasToUrl(alias);
+        } else {
+            return CismapBroker.getInstance().aliasToUrl(link);
+        }
     }
 
     /**
@@ -190,9 +206,16 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element elem = new Element("capabilities");                                // NOI18N
-        final CDATA cd = new CDATA(link);
+        final Element elem = new Element("capabilities");                            // NOI18N
+        if (CismapBroker.getInstance().isAlias(link)) {
+            elem.setAttribute("alias", link);                                        // NOI18N
+        } else if (CismapBroker.getInstance().isAliasDefinedForUrl(link)) {
+            elem.setAttribute("alias", CismapBroker.getInstance().urlToAlias(link)); // NOI18N
+        }
+
+        final CDATA cd = new CDATA(CismapBroker.getInstance().aliasToUrl(link));
         elem.addContent(cd);
+
         elem.setAttribute(new Attribute("type", type));                                  // NOI18N
         if (isReverseAxisOrder()) {
             elem.setAttribute("reverseAxisOrder", String.valueOf(isReverseAxisOrder())); // NOI18N

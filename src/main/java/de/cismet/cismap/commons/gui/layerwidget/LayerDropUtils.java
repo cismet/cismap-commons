@@ -263,10 +263,13 @@ public class LayerDropUtils {
 //                                    feature.getFeatureAttributes(),
 //                                    feature,
 //                                    sac.isReverseAxisOrder());
+                            final String hostname = ((feature.getWFSCapabilities().getOriginalLink() != null)
+                                    ? feature.getWFSCapabilities().getOriginalLink()
+                                    : feature.getWFSCapabilities().getURL().toString());
                             final WebFeatureService wfs = new WebFeatureService(
                                     ((WFSCapabilitiesTreeCellRenderer.showTitle && (feature.getTitle() != null))
                                         ? feature.getTitle() : feature.getPrefixedNameString()),
-                                    feature.getWFSCapabilities().getURL().toString(),
+                                    hostname,
                                     feature.getWFSQuery(),
                                     feature.getFeatureAttributes(),
                                     feature,

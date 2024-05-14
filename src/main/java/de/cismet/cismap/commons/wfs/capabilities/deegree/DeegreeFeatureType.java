@@ -47,12 +47,13 @@ public class DeegreeFeatureType implements FeatureType {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Logger logger = Logger.getLogger(DeegreeFeatureType.class);
+    private static final Logger LOG = Logger.getLogger(DeegreeFeatureType.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature;
-    private WFSCapabilities caps;
+    private final org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature;
+    private final WFSCapabilities caps;
+    private final String capabilitiesUrl;
     private Element query;
     private Vector<FeatureServiceAttribute> attributes;
     private String geometryName;
@@ -62,20 +63,32 @@ public class DeegreeFeatureType implements FeatureType {
     /**
      * Creates a new DeegreeFeatureType object.
      *
-     * @param   feature  DOCUMENT ME!
-     * @param   caps     DOCUMENT ME!
+     * @param   feature          DOCUMENT ME!
+     * @param   caps             DOCUMENT ME!
+     * @param   capabilitiesUrl  DOCUMENT ME!
      *
      * @throws  IOException  DOCUMENT ME!
      * @throws  Exception    DOCUMENT ME!
      */
     public DeegreeFeatureType(final org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature,
-            final WFSCapabilities caps) throws IOException, Exception {
+            final WFSCapabilities caps,
+            final String capabilitiesUrl) throws IOException, Exception {
+        this.capabilitiesUrl = capabilitiesUrl;
         this.feature = feature;
         this.caps = caps;
         analyseStructure();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the capabilitiesUrl
+     */
+    public String getCapabilitiesUrl() {
+        return capabilitiesUrl;
+    }
 
     @Override
     public QName getName() {
@@ -197,8 +210,8 @@ public class DeegreeFeatureType implements FeatureType {
      * @throws  Exception    DOCUMENT ME!
      */
     private void analyseStructure() throws IOException, Exception {
-        if (logger.isDebugEnabled()) {
-            logger.debug("analyseStructure " + getName().toString()); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("analyseStructure " + getName().toString()); // NOI18N
         }
         final FeatureTypeDescription featTypeDesc = caps.getServiceFacade().describeFeatureType(this);
 
@@ -231,7 +244,7 @@ public class DeegreeFeatureType implements FeatureType {
                     final DeegreeCoordinateSystem dcs = new DeegreeCoordinateSystem(cs);
                     ((DeegreeEnvelope)envelopes[i]).setCoordinateSystem(dcs);
                 } catch (Exception e) {
-                    logger.error("CRS EPSG:4326 not found.", e);
+                    LOG.error("CRS EPSG:4326 not found.", e);
                 }
             }
         }

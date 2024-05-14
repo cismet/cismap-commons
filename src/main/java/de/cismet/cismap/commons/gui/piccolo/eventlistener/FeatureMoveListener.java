@@ -258,4 +258,12 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         }
         features = new Vector();
     }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void cleanup() {
+        pFeature = null;
+        features.clear();
+    }
 }

@@ -981,7 +981,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     }
                 }
             }
-            return prefix;
+            return CismapBroker.getInstance().aliasToUrl(prefix);
         } catch (Throwable npe) {
             LOG.warn("Throwable in getMapPrefix", npe); // NOI18N
             return null;
@@ -1021,7 +1021,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 prefix = op.getGet().toString();
                 prefix = addUserAndPasswordToUrlIfRequired(prefix);
             }
-            return prefix;
+            return CismapBroker.getInstance().aliasToUrl(prefix);
         } catch (NullPointerException npe) {
             LOG.warn("NPE in getGetMapPrefix()", npe); // NOI18N
             return null;

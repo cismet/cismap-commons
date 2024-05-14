@@ -81,6 +81,7 @@ public class CapabilitiesPreferences {
                 try {
                     final Element elem = it.next();
                     final String type = elem.getAttribute("type").getValue();     // NOI18N
+                    final String alias = elem.getAttribute("alias").getValue();   // NOI18N
                     final String link = elem.getTextTrim();
                     final String subparent = elem.getAttributeValue("subparent"); // NOI18N
                     boolean active = false;
@@ -96,7 +97,7 @@ public class CapabilitiesPreferences {
                     } // NOI18N
 
                     capabilities.put(new Integer(counter++),
-                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent));
+                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent, alias));
                 } catch (Throwable t) {
                     log.warn("Error while reading the CapabilityPreferences.", t); // NOI18N
                 }
@@ -141,7 +142,14 @@ public class CapabilitiesPreferences {
                     node.addSubnode(createCapabilitiesListTreeNode(title, elem));
                 } else {
                     // CapabilitiesList-Eintrag erzeugen
-                    final String link = elem.getTextTrim();
+                    final String alias = elem.getAttributeValue("alias");
+                    String link;
+
+                    if (alias != null) {
+                        link = alias;
+                    } else {
+                        link = elem.getTextTrim();
+                    }
                     final String subparent = elem.getAttributeValue("subparent");  // NOI18N
                     capabilitiesList.put(new Integer(listCounter++),
                         new CapabilityLink(type, link, reverseAxisOrder, title, subparent));
