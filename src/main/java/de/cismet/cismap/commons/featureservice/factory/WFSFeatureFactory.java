@@ -62,6 +62,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.GeometryUtils;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -237,8 +238,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             logger.debug("FRW[" + workerThread + "]: Host name: " + hostname + "\nWFS Query: \n" + postString);
         }
 
+        String baseUrl = CismapBroker.getInstance().aliasToUrl(hostname);
+        if (baseUrl.contains("?")) {
+            baseUrl = baseUrl.substring(0, baseUrl.indexOf("?"));
+        }
         final InputStream respIs = WebAccessManager.getInstance()
-                    .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+                    .doRequest(new URL(baseUrl),
+                        postString,
+                        ACCESS_METHODS.POST_REQUEST);
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "executing http request")) {

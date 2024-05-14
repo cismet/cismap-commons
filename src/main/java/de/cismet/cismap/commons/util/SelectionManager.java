@@ -134,7 +134,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     private void synchronizeSelectionWithMap(final AbstractFeatureService service) {
         final List<PFeature> features = new ArrayList<>();
-        
+
         if (service.getPNode() != null) {
             features.addAll(service.getPNode().getChildrenReference());
         }

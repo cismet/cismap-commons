@@ -96,6 +96,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     private Element wfsQueryElement;
     /** the hostname of the WFS server. */
     private String hostname;
+    private String capabilitiesLink;
     /** the version of the wfs. */
     private FeatureType feature;
     private String backupVersion = "";
@@ -184,7 +185,8 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         crs = CismapBroker.getInstance().getSrs();
         setFeature(feature);
         setQueryElement(query);
-        setHostname(host);
+        setHostname(CismapBroker.getInstance().urlToAlias(host));
+        this.capabilitiesLink = host;
         // defaults for new services
         this.setTranslucency(0.2f);
         this.setMaxFeatureCount(100000);
@@ -210,6 +212,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         this.setInitialisationError(wfs.getInitialisationError());
         this.errorObject = wfs.errorObject;
         this.reverseAxisOrder = wfs.reverseAxisOrder;
+        this.capabilitiesLink = wfs.capabilitiesLink;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -240,7 +243,8 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
                 hostname,
                 reverseAxisOrder,
                 getVersion(),
-                false);
+                false,
+                CismapBroker.getInstance().urlToAlias((capabilitiesLink == null) ? hostname : capabilitiesLink));
 
         if (reverseAxisOrder) {
             parentElement.setAttribute("reverseAxisOrder", "true");

@@ -1136,21 +1136,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             };
         CismetThreadPool.execute(new Thread(r, "CapabilityWidget addCidsCapabilitesTree()"));
-        /*try {
-         *  treeModelClass =
-         * ClassLoader.getSystemClassLoader().loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel"); final
-         * TreeModel tm = (TreeModel) treeModelClass.getConstructor(String.class).newInstance(cl.getLink()); final
-         * DragTree tree = new DragTree(); final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
-         * //final ListMenuItem lmi = new ListMenuItem("cidsLayer", cl); lmi.addActionListener(new ActionListener() {
-         * @Override     public void actionPerformed(ActionEvent e) {
-         *
-         * } }); menu.add(lmi); } catch (ClassNotFoundException ex) { log.error("ClassNotFoundException", ex); } catch
-         * (NoSuchMethodException ex) { log.error("NoSuchMethodException", ex); } catch (SecurityException ex) {
-         * log.error("SecurityException", ex); } catch (InstantiationException ex) { log.error("InstantiationException",
-         * ex); } catch (IllegalAccessException ex) { log.error("IllegalAccessException", ex); } catch
-         * (IllegalArgumentException ex) { log.error("IllegalArgumentException", ex); } catch (InvocationTargetException
-         * ex) {
-         * log.error("InvocationTargetException", ex);}*/
     }
 
     /**
@@ -1325,7 +1310,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
                         // TODO: Error \u00FCber die Statuszeile bekanntgeben
                         log.error("Error while loading Shape folder: " + message, e); // NOI18N
-                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                        EventQueue.invokeLater(new Thread("RemoveShapeFolderCapabilitiesAfterError") {
+
+                                @Override
+                                public void run() {
+                                    tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                }
+                            });
 
                         final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
                         capabilityUrls.remove(new LinkWithSubparent(link, null));
@@ -1386,7 +1377,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         // final WMSCapabilities cap =
                         // capFact.createCapabilities(HttpAuthentication.getInputStreamReaderFromURL(CapabilityWidget.this,
                         // getCapURL));
-                        final WMSCapabilities cap = capFact.createCapabilities(link);
+                        final WMSCapabilities cap = capFact.createCapabilities(CismapBroker.getInstance().aliasToUrl(
+                                    link));
                         if (log.isDebugEnabled()) {
                             log.debug("finished creating Capabilties"); // NOI18N
                         }
@@ -1481,7 +1473,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
                         // TODO: Error \u00FCber die Statuszeile bekanntgeben
                         log.error("Error while loading server capabilities: " + message, e); // NOI18N
-                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                        EventQueue.invokeLater(new Thread("RemoveWmsCapabilitiesAfterError") {
+
+                                @Override
+                                public void run() {
+                                    tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                }
+                            });
 
                         final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
                         capabilityUrls.remove(new LinkWithSubparent(link, null));
@@ -1584,7 +1582,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                     + link);                                  // NOI18N
                                     }
                                     // ToDO Langsam
-                                    final WMSCapabilities capWMS = capFact.createCapabilities(link);
+                                    final WMSCapabilities capWMS = capFact.createCapabilities(CismapBroker.getInstance()
+                                                    .aliasToUrl(link));
                                     if (log.isDebugEnabled()) {
                                         log.debug("Erstelle WMSCapabilitiesTreeModel");  // NOI18N
                                     }
@@ -1617,10 +1616,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 }
                                 wmsCapabilities.remove(comp);
                                 wmsCapabilitiesTrees.remove(comp);
-                                tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                EventQueue.invokeLater(new Thread("RemoveOGCCapabilities") {
+
+                                        @Override
+                                        public void run() {
+                                            tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                        }
+                                    });
                             } else if (wfsCapabilities.get(comp) != null) {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Entferne WFSCapabilities-Tree");                                // NOI18N
+                                    log.debug("Entferne WFSCapabilities-Tree");  // NOI18N
                                 }
                                 wfsCapabilities.remove(comp);
                                 wfsCapabilitiesTrees.remove(comp);
@@ -1628,12 +1633,12 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                             } else if (shapeFolderTrees.get(comp) != null) {
                                 shapeFolderTrees.remove(comp);
                             } else {
-                                log.warn("Keine Component zum entfernen aktiv");                               // NOI18N
+                                log.warn("Keine Component zum entfernen aktiv"); // NOI18N
                             }
                             return;
                         } else {
                             if (log.isDebugEnabled()) {
-                                log.debug("Capabilitespanel noch vorhanden --> stelle baum dar");              // NOI18N
+                                log.debug("Capabilitespanel noch vorhanden --> stelle baum dar"); // NOI18N
                             }
                         }
                         EventQueue.invokeLater(new Runnable() {
@@ -1741,7 +1746,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 JOptionPane.ERROR_MESSAGE);
                         }
                         log.error("Error during the loading of the capabilities of the server. " + message, e);              // NOI18N
-                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                        EventQueue.invokeLater(new Thread("RemoveOGCFolderCapabilitiesAfterError") {
+
+                                @Override
+                                public void run() {
+                                    tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                }
+                            });
 
                         final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
                         capabilityUrls.remove(new LinkWithSubparent(link, null));
@@ -1874,7 +1885,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
 
                         log.error("Loading of the server capabilities failed. " + message, e); // NOI18N
-                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                        EventQueue.invokeLater(new Thread("RemoveWFSCapabilitiesAfterError") {
+
+                                @Override
+                                public void run() {
+                                    tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+                                }
+                            });
 
                         final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
                         capabilityUrls.remove(new LinkWithSubparent(link, null));
@@ -1985,7 +2002,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         linkText,
                         reverseAxisOrder.contains(link.getLink()),
                         link.equals(selectedLink),
-                        link.getSubparent());
+                        link.getSubparent(),
+                        link.getAlias());
                 ret.addContent(cl.getElement());
             }
         }
@@ -2931,6 +2949,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         String link = null;
         String subparent = null;
         String service = null;
+        String alias = null;
 
         //~ Constructors -------------------------------------------------------
 
@@ -2943,6 +2962,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         public LinkWithSubparent(final String link, final String subparent) {
             this.link = link;
             this.subparent = subparent;
+            this.alias = CismapBroker.getInstance().urlToAlias(link);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -2953,7 +2973,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          * @return  DOCUMENT ME!
          */
         public String getLink() {
-            return link;
+            if ((alias != null) && CismapBroker.getInstance().isAlias(alias)) {
+                return CismapBroker.getInstance().aliasToUrl(alias);
+            } else {
+                return link;
+            }
         }
 
         /**
@@ -2981,6 +3005,24 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          */
         public void setSubparent(final String subparent) {
             this.subparent = subparent;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getAlias() {
+            return alias;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  alias  subparent DOCUMENT ME!
+         */
+        public void setAlias(final String alias) {
+            this.alias = alias;
         }
 
         /**
