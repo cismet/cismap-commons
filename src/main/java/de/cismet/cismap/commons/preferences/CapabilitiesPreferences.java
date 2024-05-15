@@ -81,7 +81,7 @@ public class CapabilitiesPreferences {
                 try {
                     final Element elem = it.next();
                     final String type = elem.getAttribute("type").getValue();     // NOI18N
-                    final String alias = elem.getAttribute("alias").getValue();   // NOI18N
+                    final String alias = elem.getAttributeValue("alias");         // NOI18N
                     final String link = elem.getTextTrim();
                     final String subparent = elem.getAttributeValue("subparent"); // NOI18N
                     boolean active = false;
