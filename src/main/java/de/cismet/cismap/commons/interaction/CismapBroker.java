@@ -12,6 +12,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 
+import org.openide.util.Exceptions;
+
 import java.awt.Color;
 
 import java.io.File;
@@ -19,12 +21,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -919,15 +925,85 @@ public class CismapBroker {
      * @return  DOCUMENT ME!
      */
     public String urlToAlias(final String url) {
+        final String alias = toAliasIfExists(url);
+
+        if (alias != null) {
+            return alias;
+        } else {
+            return url;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  null, if the given string does not contain an alias
+     */
+    private String toAliasIfExists(String url) {
+        if (url == null) {
+            return null;
+        }
+
         for (final String alias : urlAliasMapping.keySet()) {
-            final String urlPart = urlAliasMapping.get(alias);
+            String urlPart = urlAliasMapping.get(alias);
+
+            if (urlPart.endsWith("&")) {
+                urlPart = urlPart.substring(0, urlPart.length() - 1);
+            }
+            if (url.endsWith("&")) {
+                url = url.substring(0, url.length() - 1);
+            }
 
             if (url.equals(urlPart) || url.equals(replaceVariableInAlias(urlPart))) {
                 return alias;
+            } else {
+                final String aliasUrl = replaceVariableInAlias(urlPart);
+
+                if (url.contains("?") && (aliasUrl != null) && aliasUrl.contains("?")) {
+                    if (url.substring(0, url.indexOf("?")).equalsIgnoreCase(
+                                    aliasUrl.substring(0, aliasUrl.indexOf("?")))) {
+                        final Map<String, String> urlMap = getParameterMap(url);
+                        final Map<String, String> urlAliasMap = getParameterMap(aliasUrl);
+
+                        if (urlMap.equals(urlAliasMap)) {
+                            return alias;
+                        }
+                    }
+                }
             }
         }
 
-        return url;
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Map<String, String> getParameterMap(final String url) {
+        final Map<String, String> map = new HashMap<>();
+
+        if (url.contains("?") && (url.length() > (url.indexOf("?") + 1))) {
+            final String parameters = url.substring(url.indexOf("?") + 1);
+            final StringTokenizer st = new StringTokenizer(parameters, "&");
+
+            while (st.hasMoreTokens()) {
+                final String param = st.nextToken();
+
+                if (param.contains("=")) {
+                    map.put(param.substring(0, param.indexOf("=")), param.substring(param.indexOf("=") + 1));
+                } else {
+                    map.put(param, "");
+                }
+            }
+        }
+
+        return map;
     }
 
     /**
@@ -966,15 +1042,13 @@ public class CismapBroker {
      * @return  DOCUMENT ME!
      */
     public boolean isAliasDefinedForUrl(final String url) {
-        for (final String alias : urlAliasMapping.keySet()) {
-            final String urlPart = urlAliasMapping.get(alias);
+        final String alias = toAliasIfExists(url);
 
-            if (url.equals(urlPart) || url.equals(replaceVariableInAlias(urlPart))) {
-                return true;
-            }
+        if (alias != null) {
+            return true;
+        } else {
+            return false;
         }
-
-        return false;
     }
 
     /**
