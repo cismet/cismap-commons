@@ -1014,13 +1014,15 @@ public class CismapBroker {
      * @return  DOCUMENT ME!
      */
     public String replaceVariableInAlias(final String url) {
+        String result = url;
+
         for (final String alias : variableMapping.keySet()) {
-            if (url.contains("${{" + alias + "}}")) {
-                return url.replace("${{" + alias + "}}", variableMapping.get(alias));
+            if (result.contains("${{" + alias + "}}")) {
+                result = result.replace("${{" + alias + "}}", variableMapping.get(alias));
             }
         }
 
-        return url;
+        return result;
     }
 
     /**
