@@ -76,6 +76,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
     private Crs defaultHomeSrs;
     private List<TreeModelListener> listenerWithOutProgress = new ArrayList<TreeModelListener>();
+    private final HashMap<String, WMSCapabilities> capabilities = new HashMap<String, WMSCapabilities>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1793,6 +1794,17 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      */
     @Override
     public synchronized void configure(final Element e) {
+        configure(e, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e      DOCUMENT ME!
+     * @param  merge  DOCUMENT ME!
+     */
+    @Override
+    public synchronized void configure(final Element e, final boolean merge) {
         if (DEBUG) {
             if (log.isDebugEnabled()) {
                 log.debug("ActiveLayerModel configure(" + e.getName() + ")");  // NOI18N
@@ -1806,17 +1818,16 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     log.debug("Capabilties links: " + links);                  // NOI18N
                 }
             }
-            final HashMap<String, WMSCapabilities> capabilities = new HashMap<String, WMSCapabilities>();
 
             if (links.size() > 0) {
-                createLayers(conf, capabilities);
+                createLayers(conf, capabilities, merge);
             } else {
                 if (DEBUG) {
                     if (log.isDebugEnabled()) {
                         log.debug("No Capabilities links"); // NOI18N
                     }
                 }
-                createLayers(conf, capabilities);
+                createLayers(conf, capabilities, merge);
             }
         } catch (Throwable ex) {
             log.error("Error during the configuration of the ActiveLayerModell", ex); // NOI18N
@@ -1828,14 +1839,19 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      *
      * @param  conf          DOCUMENT ME!
      * @param  capabilities  DOCUMENT ME!
+     * @param  merge         DOCUMENT ME!
      */
-    private void createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
+    private void createLayers(final Element conf,
+            final HashMap<String, WMSCapabilities> capabilities,
+            final boolean merge) {
         if (DEBUG) {
             if (log.isDebugEnabled()) {
                 log.debug("removing all existing layers");                                             // NOI18N
             }
         }
-        removeAllLayers();
+        if (!merge) {
+            removeAllLayers();
+        }
         Element layerElement = conf.getChild("Layers");                                                // NOI18N
         if (layerElement == null) {
             log.warn("LayerElement not found! Check for old version child \"RasterLayers\"");          // NOI18N
@@ -1873,8 +1889,21 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         try {
             final ServiceLayer layer = CidsLayerFactory.createLayer(element, capabilities, this);
+            boolean layerAlreadyExists = layers.contains(layer);
 
-            if (layer != null) {
+            if (!layerAlreadyExists) {
+                if (layer instanceof PropertyEqualsProvider) {
+                    for (final Object o : layers) {
+                        if ((o instanceof PropertyEqualsProvider)
+                                    && ((PropertyEqualsProvider)o).propertyEquals(layer)) {
+                            layerAlreadyExists = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if ((layer != null) && !layerAlreadyExists) {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override

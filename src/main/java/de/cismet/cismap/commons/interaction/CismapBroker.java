@@ -908,6 +908,10 @@ public class CismapBroker {
      * @return  DOCUMENT ME!
      */
     public String aliasToUrl(final String url) {
+        if (url == null) {
+            return null;
+        }
+
         for (final String alias : urlAliasMapping.keySet()) {
             if (url.equals(alias)) {
                 return replaceVariableInAlias(urlAliasMapping.get(alias));
@@ -988,7 +992,7 @@ public class CismapBroker {
     private Map<String, String> getParameterMap(final String url) {
         final Map<String, String> map = new HashMap<>();
 
-        if (url.contains("?") && (url.length() > (url.indexOf("?") + 1))) {
+        if ((url != null) && url.contains("?") && (url.length() > (url.indexOf("?") + 1))) {
             final String parameters = url.substring(url.indexOf("?") + 1);
             final StringTokenizer st = new StringTokenizer(parameters, "&");
 
@@ -1015,6 +1019,10 @@ public class CismapBroker {
      */
     public String replaceVariableInAlias(final String url) {
         String result = url;
+
+        if (result == null) {
+            return null;
+        }
 
         for (final String alias : variableMapping.keySet()) {
             if (result.contains("${{" + alias + "}}")) {
