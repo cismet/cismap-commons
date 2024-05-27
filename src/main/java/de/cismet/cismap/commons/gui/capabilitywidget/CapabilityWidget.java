@@ -2028,8 +2028,23 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     @Override
     public void configure(final Element e) {
-        preferences = new CapabilitiesPreferences(serverElement, e);
-        configure(preferences);
+        configure(e, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e      DOCUMENT ME!
+     * @param  merge  DOCUMENT ME!
+     */
+    @Override
+    public void configure(final Element e, final boolean merge) {
+        if (!merge) {
+            preferences = new CapabilitiesPreferences(serverElement, e);
+            configure(preferences, merge);
+        } else {
+            configure(new CapabilitiesPreferences(serverElement, e), merge);
+        }
     }
 
     /**
@@ -2041,16 +2056,22 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
 
     //J-
-    public void configure(final CapabilitiesPreferences cp) {
-        removeAllServer();
+    public void configure(final CapabilitiesPreferences cp, final boolean merge) {
+        if (!merge) {
+            removeAllServer();
+        }
+
         final Iterator<Integer> it = cp.getCapabilities().keySet().iterator();
         LinkWithSubparent activeLink = null;
         while (it.hasNext()) {
             final Integer i = it.next();
             final CapabilityLink cl = cp.getCapabilities().get(i);
             LinkWithSubparent link = new LinkWithSubparent(cl.getLink(), cl.getSubparent());
+
             if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)|| cl.getType().equals("cidsLayer") || cl.getType().equals(CapabilityLink.INTERNAL_DB)) {
-                addLinkManually(link);
+                if (!merge || capabilityUrls.get(new LinkWithSubparent(link.getLink(), link.getSubparent())) == null ) {
+                    addLinkManually(link);
+                }
             }
 
             if (cl.isActive()) {
@@ -2058,7 +2079,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
 // TODO Hier WFS, ESRI, Google, ...
         }
-        if (activeLink != null) {
+
+        if (activeLink != null && !merge) {
             final LinkWithSubparent componentToSelect = activeLink;
             EventQueue.invokeLater(new Runnable() {
 
@@ -2070,13 +2092,18 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         }
 
         // CapabilityList-Baum neu aufbauen
-        capabilityList.removeAll();
-        final JMenu menu = createCapabilitiesListSubmenu(cp.getCapabilitiesListTree());
-        for (final Component component : menu.getMenuComponents()) {
-            capabilityList.add(component);
-        }
+        if (!merge) {
+            capabilityList.removeAll();
 
-        setSearchEnabled(cp.isSearchActivated());
+            final JMenu menu = createCapabilitiesListSubmenu(cp.getCapabilitiesListTree());
+            for (final Component component : menu.getMenuComponents()) {
+                capabilityList.add(component);
+            }
+
+            if (!merge) {
+                setSearchEnabled(cp.isSearchActivated());
+            }
+        }
     }
     //J+
 

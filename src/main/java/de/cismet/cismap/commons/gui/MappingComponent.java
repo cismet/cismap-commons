@@ -3768,7 +3768,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  Use <code>getMapServiceLayer()</code> instead
      */
     @Deprecated
     public PLayer getRasterServiceLayer() {

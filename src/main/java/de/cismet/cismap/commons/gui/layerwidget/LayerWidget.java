@@ -919,6 +919,17 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     /**
      * DOCUMENT ME!
      *
+     * @param  e      DOCUMENT ME!
+     * @param  merge  DOCUMENT ME!
+     */
+    @Override
+    public void configure(final Element e, final boolean merge) {
+        activeLayerModel.configure(e, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   e  DOCUMENT ME!
      * @param   v  DOCUMENT ME!
      *
