@@ -184,7 +184,7 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public String getLink() {
-        if (alias != null) {
+        if ((alias != null) && CismapBroker.getInstance().isAlias(alias)) {
             return CismapBroker.getInstance().aliasToUrl(alias);
         } else {
             return CismapBroker.getInstance().aliasToUrl(link);
