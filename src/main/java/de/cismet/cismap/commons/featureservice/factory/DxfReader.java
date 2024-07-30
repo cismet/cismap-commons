@@ -42,23 +42,16 @@ import org.apache.log4j.Logger;
 
 import org.deegree.datatypes.Types;
 
-import org.geotools.referencing.wkt.Parser;
-
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-
-import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -581,34 +574,15 @@ public class DxfReader {
      * @return  the crs of the corresponding prj file or null, if the initialisation of the shape file should be
      *          cancelled.
      */
-    private String determineCrs(String crsDefinition) {
-        final Map<Crs, CoordinateReferenceSystem> prjMapping = CrsDeterminer.getKnownCrsMappings();
+    private String determineCrs(final String crsDefinition) {
+        if (crsDefinition != null) {
+            final String epsg = CrsDeterminer.getEpsgCode(crsDefinition);
 
-        if ((prjMapping != null) && !prjMapping.isEmpty()) {
-            // if no mapping file is defined, it will be assumed that the shape file ueses the current crs
-
-            try {
-                if (crsDefinition != null) {
-                    final Parser parser = new Parser();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("crs definition: " + crsDefinition + " found");
-                    }
-
-                    crsDefinition = CrsDeterminer.crsDefinitionAdjustments(crsDefinition);
-                    final CoordinateReferenceSystem crs = parser.parseCoordinateReferenceSystem(
-                            crsDefinition);
-
-                    for (final Crs key : prjMapping.keySet()) {
-                        if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crs)) {
-                            return key.getCode();
-                        }
-                    }
-                } else {
-                    LOG.warn("No crs found. Assume that the default crs is used");
-                }
-            } catch (ParseException e) {
-                LOG.error("Error while parsing the crs definition.", e);
+            if (epsg != null) {
+                return epsg;
             }
+        } else {
+            LOG.warn("No crs found. Assume that the default crs is used");
         }
 
         return CismapBroker.getInstance().getSrs().getCode();

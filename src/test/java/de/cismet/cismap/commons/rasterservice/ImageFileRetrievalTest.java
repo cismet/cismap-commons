@@ -39,7 +39,7 @@ public class ImageFileRetrievalTest {
 
     @Test
     public void testGeoTiffReader() throws IOException, GeoTiffException, URISyntaxException {
-
+        
         final String geoTiffName = "geotiff.tif";
         assertNotNull(this.getClass().getResource(geoTiffName));
         

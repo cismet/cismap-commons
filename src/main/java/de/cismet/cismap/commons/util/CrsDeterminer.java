@@ -14,13 +14,6 @@ package de.cismet.cismap.commons.util;
 
 import org.apache.log4j.Logger;
 
-import org.geotools.referencing.wkt.Parser;
-
-import org.opengis.referencing.ReferenceIdentifier;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
-import java.text.ParseException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,21 +45,19 @@ public class CrsDeterminer {
      * @return  true, if the given crs are equal
      */
     public static boolean isCrsEqual(final String authority,
-            final CoordinateReferenceSystem crs,
-            final CoordinateReferenceSystem otherCrs) {
-        final String definitionWithoutName = crs.toWKT().substring(crs.toWKT().indexOf("\n") + 1);
-        final String otherDefinitionWithoutName = otherCrs.toWKT().substring(otherCrs.toWKT().indexOf("\n") + 1);
-
-        if ((otherCrs.getCoordinateSystem() != null) && (otherCrs.getCoordinateSystem().getIdentifiers() != null)
-                    && !otherCrs.getCoordinateSystem().getIdentifiers().isEmpty()) {
-            for (final ReferenceIdentifier ri : otherCrs.getCoordinateSystem().getIdentifiers()) {
-                if (ri.toString().equals(authority)) {
-                    return true;
-                }
-            }
+            final WKTCrs crs,
+            final WKTCrs otherCrs) {
+        if ((crs == null) || (otherCrs == null)) {
+            return false;
         }
 
-        return definitionWithoutName.equals(otherDefinitionWithoutName);
+        if (((otherCrs.getIdentifier() != null) && (authority != null)
+                        && otherCrs.getIdentifier().equalsIgnoreCase(authority))
+                    || otherCrs.equals(crs)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -75,21 +66,19 @@ public class CrsDeterminer {
      * @return  all crs definitions from the cismapPrjMapping properties file. The key of the map is the epsg code of
      *          the crs.
      */
-    public static Map<Crs, CoordinateReferenceSystem> getKnownCrsMappings() {
-        final Map<Crs, CoordinateReferenceSystem> prjMap = new HashMap<Crs, CoordinateReferenceSystem>();
+    public static Map<Crs, WKTCrs> getKnownCrsMappings() {
+        final Map<Crs, WKTCrs> prjMap = new HashMap<>();
 
         final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
 
         if (crsList != null) {
-            final Parser parser = new Parser();
-
             for (final Crs crs : crsList) {
                 if (crs.hasEsriDefinition()) {
                     try {
                         prjMap.put(
                             crs,
-                            parser.parseCoordinateReferenceSystem(crsDefinitionAdjustments(crs.getEsriDefinition())));
-                    } catch (ParseException e) {
+                            new WKTCrs(crs.getEsriDefinition()));
+                    } catch (Exception e) {
                         LOG.error("Cannot parse the crs definition for " + crs.getCode() + ":\n"
                                     + crs.getEsriDefinition(),
                             e);
@@ -103,6 +92,38 @@ public class CrsDeterminer {
         }
 
         return prjMap;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   crsDefinition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getEpsgCode(String crsDefinition) {
+        final Map<Crs, WKTCrs> prjMapping = CrsDeterminer.getKnownCrsMappings();
+
+        if ((prjMapping != null) && !prjMapping.isEmpty()) {
+            try {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("prj file with definition: " + crsDefinition + " found");
+                }
+
+                crsDefinition = CrsDeterminer.crsDefinitionAdjustments(crsDefinition);
+                final WKTCrs crsFromShape = new WKTCrs(crsDefinition);
+
+                for (final Crs key : prjMapping.keySet()) {
+                    if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crsFromShape)) {
+                        return key.getCode();
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error while parsing crs " + crsDefinition, e);
+            }
+        }
+
+        return null;
     }
 
     /**
