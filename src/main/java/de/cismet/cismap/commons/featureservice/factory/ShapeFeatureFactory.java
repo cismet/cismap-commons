@@ -27,10 +27,6 @@ import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
-import org.geotools.referencing.wkt.Parser;
-
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
@@ -42,15 +38,12 @@ import java.net.URI;
 
 import java.nio.charset.Charset;
 
-import java.text.ParseException;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import javax.script.ScriptEngine;
@@ -64,7 +57,6 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.features.ShapeInfo;
@@ -476,94 +468,78 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         String prjFilename;
         File prjFile;
 
-        final Map<Crs, CoordinateReferenceSystem> prjMapping = CrsDeterminer.getKnownCrsMappings();
-
-        if ((prjMapping != null) && !prjMapping.isEmpty()) {
-            // if no mapping file is defined, it will be assumed that the shape file ueses the current crs
-            if (this.documentURI.getPath().endsWith(".shp")) {
-                prjFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
-            } else {
-                prjFilename = this.documentURI.getPath();
-            }
-
-            prjFile = new File(prjFilename + ".prj");
-            if (!prjFile.exists()) {
-                prjFile = new File(prjFilename + ".PRJ");
-            }
-
-            try {
-                if (prjFile.exists()) {
-                    final BufferedReader br = new BufferedReader(new FileReader(prjFile));
-                    String crsDefinition = br.readLine();
-                    br.close();
-
-                    if (crsDefinition != null) {
-                        final Parser parser = new Parser();
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("prj file with definition: " + crsDefinition + " found");
-                        }
-
-                        crsDefinition = CrsDeterminer.crsDefinitionAdjustments(crsDefinition);
-                        final CoordinateReferenceSystem crsFromShape = parser.parseCoordinateReferenceSystem(
-                                crsDefinition);
-
-                        for (final Crs key : prjMapping.keySet()) {
-                            if (CrsDeterminer.isCrsEqual(key.getCode(), prjMapping.get(key), crsFromShape)) {
-                                return key.getCode();
-                            }
-                        }
-                    } else {
-                        logger.warn("The prj file is empty.");
-                    }
-                } else {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("No prj file found.");
-                    }
-                }
-            } catch (IOException e) {
-                logger.error("Error while reading the prj file.", e);
-            } catch (ParseException e) {
-                logger.error("Error while parsing the prj file.", e);
-            }
-
-            if (featureSrid == null) {
-                // the featureSrid must be set before the getEnvelope method will be called.
-                featureSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
-            }
-            final BoundingBox currentBBox = CismapBroker.getInstance()
-                        .getMappingComponent()
-                        .getCurrentBoundingBoxFromCamera();
-
-            if (getEnvelope().intersects(currentBBox.getGeometry(featureSrid))) {
-                return CismapBroker.getInstance().getSrs().getCode();
-            } else {
-                // Ask the user, what crs should be used
-                final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
-                final List<Object> definedMappings = new ArrayList<Object>();
-
-                for (final Crs tmpCrs : crsList) {
-                    if (tmpCrs.hasEsriDefinition()) {
-                        definedMappings.add(new CrsWrapper(tmpCrs));
-                    }
-                }
-
-                final Object userAnswer = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
-                        NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.message"),
-                        NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.title"),
-                        JOptionPane.OK_CANCEL_OPTION,
-                        null,
-                        definedMappings.toArray(),
-                        definedMappings.get(0));
-
-                if (userAnswer instanceof CrsWrapper) {
-                    return ((CrsWrapper)userAnswer).getCrs().getCode();
-                } else {
-                    return null;
-                }
-            }
+        if (this.documentURI.getPath().endsWith(".shp")) {
+            prjFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+        } else {
+            prjFilename = this.documentURI.getPath();
         }
 
-        return CismapBroker.getInstance().getSrs().getCode();
+        prjFile = new File(prjFilename + ".prj");
+        if (!prjFile.exists()) {
+            prjFile = new File(prjFilename + ".PRJ");
+        }
+
+        try {
+            if (prjFile.exists()) {
+                final BufferedReader br = new BufferedReader(new FileReader(prjFile));
+                final String crsDefinition = br.readLine();
+                br.close();
+
+                if (crsDefinition != null) {
+                    final String epsg = CrsDeterminer.getEpsgCode(crsDefinition);
+
+                    if (epsg != null) {
+                        return epsg;
+                    } else {
+                        return CismapBroker.getInstance().getSrs().getCode();
+                    }
+                } else {
+                    logger.warn("The prj file is empty.");
+                }
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("No prj file found.");
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error while reading the prj file.", e);
+        }
+
+        if (featureSrid == null) {
+            // the featureSrid must be set before the getEnvelope method will be called.
+            featureSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+        }
+        final BoundingBox currentBBox = CismapBroker.getInstance()
+                    .getMappingComponent()
+                    .getCurrentBoundingBoxFromCamera();
+
+        if (getEnvelope().intersects(currentBBox.getGeometry(featureSrid))) {
+            return CismapBroker.getInstance().getSrs().getCode();
+        } else {
+            // Ask the user, what crs should be used
+            final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+            final List<Object> definedMappings = new ArrayList<Object>();
+
+            for (final Crs tmpCrs : crsList) {
+                if (tmpCrs.hasEsriDefinition()) {
+                    definedMappings.add(new CrsWrapper(tmpCrs));
+                }
+            }
+
+            final Object userAnswer = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
+                    NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.message"),
+                    NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.title"),
+                    JOptionPane.OK_CANCEL_OPTION,
+                    null,
+                    definedMappings.toArray(),
+                    definedMappings.get(0));
+
+            if (userAnswer instanceof CrsWrapper) {
+                return ((CrsWrapper)userAnswer).getCrs().getCode();
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
