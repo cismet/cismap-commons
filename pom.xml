@@ -8,7 +8,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>8.0</version>
+        <version>9.0</version>
     </parent>
 
     <groupId>de.cismet.commons</groupId>
@@ -46,7 +46,7 @@
             <dependency>
                 <groupId>de.cismet</groupId>
                 <artifactId>cismet-ext-bom</artifactId>
-                <version>8.0</version>
+                <version>9.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -55,13 +55,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>8.0.3</version>
+                <version>9.0</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>8.0.3</version>
+                <version>9.0</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -69,13 +69,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>8.1.1</version>
+                <version>9.0</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>8.1.1</version>
+                <version>9.0</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -83,7 +83,7 @@
             <dependency>
                 <groupId>de.cismet.custom</groupId>
                 <artifactId>beansbinding</artifactId>
-                <version>7.0</version>
+                <version>9.0</version>
             </dependency>
             <!-- END: managed cids-dependencies -->
         </dependencies>
@@ -131,10 +131,18 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-        </dependency>      
+        </dependency>
         <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-1.2-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
         </dependency>
         <!-- this is only a helper library that is needed at compile time -->
         <dependency>
@@ -190,6 +198,12 @@
         <dependency>
             <groupId>org.deegree</groupId>
             <artifactId>deegree-core-commons</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.deegree</groupId>
@@ -465,8 +479,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- END: test dependencies -->
@@ -479,11 +493,13 @@
         -->
         <pluginManagement>
             <plugins>
-                <!--<plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <executions>
                         <execution>
+                            <!-- put it in the phase before to ensure, that the test-jar was built before the sign plugin is running-->
+                            <phase>prepare-package</phase>
                             <goals>
                                 <goal>test-jar</goal>
                             </goals>
@@ -494,7 +510,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>-->
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>

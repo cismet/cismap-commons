@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="30">
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="cismetKonsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-5p [%t] - %m%n"/>
+        </Console>
+
+        <!-- File Appender -->
+        <File name="File" fileName="import.log" append="false">
+            <XMLLayout />
+        </File>
+
+        <!-- Socket Appender (Chainsaw) -->
+        <Socket name="Chainsaw" host="localhost" port="4445">
+            <JsonLayout compact="true" eventEol="true"/>
+        </Socket>
+    </Appenders>
+
+    <Loggers>
+        <!-- Root Logger -->
+        <Root level="DEBUG">
+            <AppenderRef ref="Chainsaw"/>
+        </Root>
+    </Loggers>
+</Configuration>
