@@ -14,6 +14,12 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
@@ -888,15 +894,19 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     public static void main(final String[] args) {
         try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
-                    "/de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
+            try(final InputStream configStream = ClassLoader.getSystemResourceAsStream(
+                                "de/cismet/cismap/commons/demo/log4j.xml")) {
+                final ConfigurationSource source = new ConfigurationSource(configStream);
+                final LoggerContext context = (LoggerContext)LogManager.getContext(false);
+                context.start(new XmlConfiguration(context, source)); // Apply new configuration
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         try {
             UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
         } catch (Exception e) {
-            log.warn("Error while setting LookAndFeel", e);              // NOI18N
+            log.warn("Error while setting LookAndFeel", e);           // NOI18N
         }
         EventQueue.invokeLater(new Runnable() {
 

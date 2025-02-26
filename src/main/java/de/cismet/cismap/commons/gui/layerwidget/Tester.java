@@ -6,7 +6,15 @@
 *
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
+
 import java.awt.dnd.DnDConstants;
+
+import java.io.InputStream;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
@@ -48,8 +56,12 @@ public class Tester extends javax.swing.JFrame {
      */
     public Tester() {
         try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
-                    "de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
+            try(final InputStream configStream = ClassLoader.getSystemResourceAsStream(
+                                "de/cismet/cismap/commons/demo/log4j.xml")) {
+                final ConfigurationSource source = new ConfigurationSource(configStream);
+                final LoggerContext context = (LoggerContext)LogManager.getContext(false);
+                context.start(new XmlConfiguration(context, source)); // Apply new configuration
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -17,20 +17,15 @@ import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.event.PNotification;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
-import org.postgis.PGgeometry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.InputStream;
 
-import java.util.ResourceBundle;
-import java.util.Vector;
-
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.preferences.CismapPreferences;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -81,12 +76,16 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
      */
     public SimpleMappingClient() {
         try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
-                    "de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
+            try(final InputStream configStream = ClassLoader.getSystemResourceAsStream(
+                                "de/cismet/cismap/commons/demo/log4j.xml")) {
+                final ConfigurationSource source = new ConfigurationSource(configStream);
+                final LoggerContext context = (LoggerContext)LogManager.getContext(false);
+                context.start(new XmlConfiguration(context, source)); // Apply new configuration
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        log.info("Simple Mapping Client started");                      // NOI18N
+        log.info("Simple Mapping Client started");                    // NOI18N
         // ClearLookManager.setMode(ClearLookMode.ON);
         // PlasticLookAndFeel.setMyCurrentTheme(new DesertBlue());
         try {
