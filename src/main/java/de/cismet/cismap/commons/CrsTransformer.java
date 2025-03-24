@@ -12,6 +12,8 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PNode;
 
+import groovy.lang.GroovyShell;
+
 import org.apache.log4j.Logger;
 
 import org.deegree.crs.components.Unit;
@@ -29,7 +31,11 @@ import org.deegree.ogcwebservices.wcts.data.GeometryData;
 
 import java.security.InvalidParameterException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -44,12 +50,28 @@ public class CrsTransformer {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(CrsTransformer.class);
+    private static final Map<String, String> CRS_CORRECTION_FORMULA;
+    private static final GroovyShell shell = new GroovyShell();
+
+    static {
+        CRS_CORRECTION_FORMULA = new HashMap<>();
+
+        try {
+            final ResourceBundle srsCalc = ResourceBundle.getBundle("crsCorrection", Locale.getDefault());
+
+            for (final String key : srsCalc.keySet()) {
+                CRS_CORRECTION_FORMULA.put(key, srsCalc.getString(key));
+            }
+        } catch (Exception e) {
+            LOG.warn("No crs factor calculation rules found", e);
+        }
+    }
 
     //~ Instance fields --------------------------------------------------------
 
-    private GeoTransformer transformer;
-    private CoordinateSystem crs;
-    private String destCrsAsString;
+    private final GeoTransformer transformer;
+    private final CoordinateSystem crs;
+    private final String destCrsAsString;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -562,5 +584,53 @@ public class CrsTransformer {
         } else {
             return false;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coord  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static double getCrsFactor(final com.vividsolutions.jts.geom.Point coord) {
+        String calculationRule;
+        final String currentSrs;
+
+        if ((coord != null) && (coord.getSRID() != 0)) {
+            currentSrs = createCrsFromSrid(coord.getSRID());
+
+            calculationRule = CRS_CORRECTION_FORMULA.get(currentSrs);
+        } else {
+            currentSrs = CismapBroker.getInstance().getSrs().getCode();
+
+            calculationRule = CRS_CORRECTION_FORMULA.get(currentSrs);
+        }
+
+        if (calculationRule != null) {
+            if (coord != null) {
+                final com.vividsolutions.jts.geom.Point coord4326 = transformToGivenCrs(coord, "EPSG:4326");
+                calculationRule = calculationRule.replace("long", String.valueOf(coord4326.getCoordinate().x));
+                calculationRule = calculationRule.replace("lat", String.valueOf(coord4326.getCoordinate().y));
+            } else {
+                final com.vividsolutions.jts.geom.Point mapCentroid = CismapBroker.getInstance()
+                            .getMappingComponent()
+                            .getCurrentBoundingBoxFromCamera()
+                            .getGeometry(extractSridFromCrs(currentSrs))
+                            .getCentroid();
+                final com.vividsolutions.jts.geom.Point coord4326 = transformToGivenCrs(mapCentroid, "EPSG:4326");
+
+                calculationRule = calculationRule.replace("long", String.valueOf(coord4326.getCoordinate().x));
+                calculationRule = calculationRule.replace("lat", String.valueOf(coord4326.getCoordinate().y));
+            }
+
+            final Object o = shell.evaluate(calculationRule);
+
+            if (o instanceof Number) {
+                return ((Number)o).doubleValue();
+            }
+        }
+
+        return 1.0;
     }
 }

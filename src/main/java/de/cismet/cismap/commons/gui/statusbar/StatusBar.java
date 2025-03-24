@@ -754,8 +754,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         for (final Feature f : cf) {
             if ((f != null) && (f.getGeometry() != null)) {
                 final Geometry geo = CrsTransformer.transformToMetricCrs(f.getGeometry());
-                area += geo.getArea();
-                umfang += geo.getLength();
+                final double correctionFactor = CrsTransformer.getCrsFactor(geo.getCentroid());
+                area += geo.getArea() / correctionFactor;
+                umfang += geo.getLength() / correctionFactor;
             }
         }
         if (((area == 0.0) && (umfang == 0.0)) || (cf.size() == 0)) {

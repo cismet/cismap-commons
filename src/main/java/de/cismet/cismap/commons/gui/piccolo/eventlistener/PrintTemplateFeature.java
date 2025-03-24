@@ -221,6 +221,11 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         double realWorldHeight = 0d;
         double realWorldWidth = 0d;
 
+        scaleDenominator *= CrsTransformer.getCrsFactor(null);
+//        if (CrsTransformer.getCurrentSrid() == 3857) {
+//            scaleDenominator *= EPSG3857_FACTOR;
+//        }
+
         // calculate realworldsize
         if ((scaleDenominator == -1) && !cloning) {
             final String s = JOptionPane.showInputDialog(
@@ -420,7 +425,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
         final double denom = realwidth / paperwidth;
 
-        return Math.round(denom);
+        return Math.round(denom / CrsTransformer.getCrsFactor(getGeometry().getCentroid()));
     }
 
     /**

@@ -1121,8 +1121,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         if (f.getGeometry() != null) {
                             final Geometry geom = CrsTransformer.transformToMetricCrs(f.getGeometry(),
                                     mappingComponent.getCrsList());
+                            final double correctionFactor = CrsTransformer.getCrsFactor(geom.getCentroid());
 
-                            return StaticDecimalTools.round(geom.getArea());
+                            return StaticDecimalTools.round(geom.getArea()
+                                            / (correctionFactor * correctionFactor));
                         } else {
                             return 0.0;
                         }
@@ -1133,7 +1135,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                             final Geometry geom = CrsTransformer.transformToMetricCrs(f.getGeometry(),
                                     mappingComponent.getCrsList());
 
-                            return StaticDecimalTools.round(geom.getLength());
+                            return StaticDecimalTools.round(geom.getLength()
+                                            / CrsTransformer.getCrsFactor(geom.getCentroid()));
                         } else {
                             return 0.0;
                         }
