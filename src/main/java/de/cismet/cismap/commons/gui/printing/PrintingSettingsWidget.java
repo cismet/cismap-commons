@@ -19,6 +19,7 @@ import java.awt.Paint;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -505,7 +506,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     @Override
     public void masterConfigure(final Element parent) {
         try {
-            final Element prefs = parent.getChild("printing");                             // NOI18N
+            final Element prefs = parent.getChild("printing");                            // NOI18N
             configuration = (Element)prefs.clone();
             try {
                 featureFillingColor = Color.decode(prefs.getAttributeValue("featureFillingColor"));
@@ -513,10 +514,10 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 log.info("could not parse featureFillingColor", ex);
                 featureFillingColor = javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground");
             }
-            final List scalesList = prefs.getChildren("scale");                            // NOI18N
-            final List resolutionsList = prefs.getChildren("resolution");                  // NOI18N
-            final List templatesList = prefs.getChildren("template");                      // NOI18N
-            final List actionList = prefs.getChildren("action");                           // NOI18N
+            final List scalesList = prefs.getChildren("scale");                           // NOI18N
+            final List resolutionsList = prefs.getChildren("resolution");                 // NOI18N
+            final List templatesList = prefs.getChildren("template");                     // NOI18N
+            final List actionList = prefs.getChildren("action");                          // NOI18N
             Scale selectedScale = null;
             Resolution selectedResolution = null;
             Template selectedTemplate = null;
@@ -530,7 +531,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                     if (elem instanceof Element) {
                         final Scale s = new Scale((Element)elem);
                         scales.add(s);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) {  // NOI18N
+                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedScale = s;
                         }
                     }
@@ -539,7 +540,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                     if (elem instanceof Element) {
                         final Resolution r = new Resolution((Element)elem);
                         resolutions.add(r);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) {  // NOI18N
+                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedResolution = r;
                         }
                     }
@@ -548,16 +549,43 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                     if (elem instanceof Element) {
                         final Template t = new Template((Element)elem);
                         templates.add(t);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) {  // NOI18N
+                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedTemplate = t;
                         }
                     }
                 }
+                templates.sort(new Comparator<Object>() {
+
+                        @Override
+                        public int compare(final Object o1, final Object o2) {
+                            if ((o1 instanceof Template) && (o2 instanceof Template)) {
+                                try {
+                                    if ((((Template)o1).getTitle() != null) && (((Template)o2).getTitle() != null)) {
+                                        return ((Template)o1).getTitle().compareTo(((Template)o2).getTitle());
+                                    } else if (((Template)o1).getTitle() != null) {
+                                        return 1;
+                                    } else {
+                                        return -1;
+                                    }
+                                } catch (Exception e) {
+                                    return 0;
+                                }
+                            } else {
+                                if (o1 instanceof Element) {
+                                    return 1;
+                                } else if (o2 instanceof Element) {
+                                    return -1;
+                                } else {
+                                    return 0;
+                                }
+                            }
+                        }
+                    });
                 for (final Object elem : actionList) {
                     if (elem instanceof Element) {
                         final Action a = new Action((Element)elem);
                         actions.add(a);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) {  // NOI18N
+                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedAction = a;
                         }
                     }
@@ -571,7 +599,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 cboTemplates.setSelectedItem(selectedTemplate);
                 cboAction.setSelectedItem(selectedAction);
             } catch (Exception e) {
-                log.error("Error during initialization of the printingDialog", e);         // NOI18N
+                log.error("Error during initialization of the printingDialog", e);        // NOI18N
             }
         } catch (Exception ex) {
             log.error("Error during initialization of the PrintingWidgets. catched.", ex); // NOI18N
