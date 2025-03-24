@@ -163,7 +163,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";                   // NOI18N
     public static final String OVERVIEW = "OVERVIEW";                                       // NOI18N
     static final double OGC_DEGREE_TO_METERS = 6378137.0 * 2.0 * Math.PI / 360;
-    private static MappingComponent THIS;
     /** Name of the internal Simple Layer Widget. */
     public static final String LAYERWIDGET = "SimpleInternalLayerWidget"; // NOI18N
     /** Name of the internal Document Progress Widget. */
@@ -328,7 +327,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         this.mainMappingComponent = mainMappingComponent;
 
         locked = true;
-        THIS = this;
         // wird in der Regel wieder ueberschrieben
         setSnappingRectSize(20);
         setSnappingMode(SnappingMode.OFF);
@@ -5049,8 +5047,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final double screenHeightInInch = getHeight() / screenResolution;
         final double screenHeightInMeter = screenHeightInInch * 0.0254;
 
-        final double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator;
-        final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
+        final double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator * CrsTransformer.getCrsFactor(null);
+        final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator
+                    * CrsTransformer.getCrsFactor(null);
         BoundingBox xbb = bb;
         int metricSrid = 0;
 
@@ -5113,7 +5112,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         final double realWorldWidthInMeter = boundingBox.getWidth();
 
-        return realWorldWidthInMeter / screenWidthInMeter;
+        return realWorldWidthInMeter / screenWidthInMeter / CrsTransformer.getCrsFactor(null);
     }
 
     /**
