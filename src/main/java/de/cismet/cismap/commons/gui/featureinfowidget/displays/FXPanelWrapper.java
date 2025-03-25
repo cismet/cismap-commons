@@ -60,4 +60,11 @@ public class FXPanelWrapper extends JPanel {
     public void setJfxPanel(final FXWebViewPanel jfxPanel) {
         this.jfxPanel = jfxPanel;
     }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refresh() {
+        this.jfxPanel.refresh();
+    }
 }
