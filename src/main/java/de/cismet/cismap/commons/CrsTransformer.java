@@ -29,6 +29,8 @@ import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.model.spatialschema.Point;
 import org.deegree.ogcwebservices.wcts.data.GeometryData;
 
+import org.openide.util.NbBundle;
+
 import java.security.InvalidParameterException;
 
 import java.util.HashMap;
@@ -37,6 +39,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import javax.swing.JOptionPane;
+
+import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -51,9 +56,21 @@ public class CrsTransformer {
 
     private static final transient Logger LOG = Logger.getLogger(CrsTransformer.class);
     private static final Map<String, String> CRS_CORRECTION_FORMULA;
-    private static final GroovyShell shell = new GroovyShell();
+    private static GroovyShell SHELL = null;
 
     static {
+        try {
+            SHELL = new GroovyShell();
+        } catch (Throwable th) {
+            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    CrsTransformer.class,
+                    "CrsTransformer.static.message"),
+                NbBundle.getMessage(
+                    CrsTransformer.class,
+                    "CrsTransformer.static.title"),
+                JOptionPane.WARNING_MESSAGE);
+        }
         CRS_CORRECTION_FORMULA = new HashMap<>();
 
         try {
@@ -597,6 +614,10 @@ public class CrsTransformer {
         String calculationRule;
         final String currentSrs;
 
+        if (SHELL == null) {
+            return 1.0;
+        }
+
         if ((coord != null) && (coord.getSRID() != 0)) {
             currentSrs = createCrsFromSrid(coord.getSRID());
 
@@ -624,7 +645,7 @@ public class CrsTransformer {
                 calculationRule = calculationRule.replace("lat", String.valueOf(coord4326.getCoordinate().y));
             }
 
-            final Object o = shell.evaluate(calculationRule);
+            final Object o = SHELL.evaluate(calculationRule);
 
             if (o instanceof Number) {
                 return ((Number)o).doubleValue();
