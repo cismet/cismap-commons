@@ -127,8 +127,11 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     private boolean fxIniterror = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdOpenExternal;
+    private javax.swing.JButton cmdRefresh;
     private javax.swing.JTextPane htmlPane_;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel pnlWebView;
+    private javax.swing.JToolBar tbLeft;
     private javax.swing.JToolBar tbRight;
     // End of variables declaration//GEN-END:variables
 
@@ -319,7 +322,13 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
         htmlPane_ = new javax.swing.JTextPane();
+        jPanel1 = new javax.swing.JPanel();
+        tbLeft = new javax.swing.JToolBar();
+        tbLeft.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        cmdRefresh = new javax.swing.JButton();
         tbRight = new javax.swing.JToolBar();
         tbRight.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         cmdOpenExternal = new javax.swing.JButton();
@@ -343,6 +352,38 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
 
         setLayout(new java.awt.BorderLayout());
 
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        tbLeft.setFloatable(false);
+
+        cmdRefresh.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/reload16.gif"))); // NOI18N
+        cmdRefresh.setText(org.openide.util.NbBundle.getMessage(
+                OGCWMSGetFeatureInfoRequestHtmlDisplay.class,
+                "OGCWMSGetFeatureInfoRequestHtmlDisplay.cmdRefresh.text"));                                   // NOI18N
+        cmdRefresh.setToolTipText(org.openide.util.NbBundle.getMessage(
+                OGCWMSGetFeatureInfoRequestHtmlDisplay.class,
+                "OGCWMSGetFeatureInfoRequestHtmlDisplay.cmdRefresh.toolTipText"));                            // NOI18N
+        cmdRefresh.setBorderPainted(false);
+        cmdRefresh.setFocusable(false);
+        cmdRefresh.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cmdRefresh.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cmdRefresh.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdRefreshActionPerformed(evt);
+                }
+            });
+        tbLeft.add(cmdRefresh);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        jPanel1.add(tbLeft, gridBagConstraints);
+
         tbRight.setFloatable(false);
 
         cmdOpenExternal.setIcon(new javax.swing.ImageIcon(
@@ -363,7 +404,12 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
             });
         tbRight.add(cmdOpenExternal);
 
-        add(tbRight, java.awt.BorderLayout.NORTH);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        jPanel1.add(tbRight, gridBagConstraints);
+
+        add(jPanel1, java.awt.BorderLayout.NORTH);
 
         pnlWebView.setLayout(new java.awt.BorderLayout());
         add(pnlWebView, java.awt.BorderLayout.CENTER);
@@ -424,6 +470,15 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
      */
     private void htmlPane_KeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_htmlPane_KeyPressed
     }                                                                     //GEN-LAST:event_htmlPane_KeyPressed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+        fxBrowserPanel.refresh();
+    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
 
     //~ Inner Classes ----------------------------------------------------------
 
