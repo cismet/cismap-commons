@@ -69,13 +69,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>9.0</version>
+                <version>9.0.1</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>9.0</version>
+                <version>9.0.1</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
