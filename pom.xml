@@ -13,7 +13,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>9.0.3</version>
+    <version>9.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -27,7 +27,7 @@
         <connection>https://github.com/cismet/cismap-commons.git</connection>
         <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
         <url>https://github.com/cismet/cismap-commons</url>
-        <tag>v9.0.3</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <ciManagement>
