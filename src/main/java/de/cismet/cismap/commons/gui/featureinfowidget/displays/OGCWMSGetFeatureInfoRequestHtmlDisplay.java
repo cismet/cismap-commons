@@ -154,6 +154,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
         htmlPrefs.setLoadImages(true);
 
         initComponents();
+        tbLeft.setVisible(false);
         /*
          *If something wents wrong with the initialistion of the JavaFX WebView we fall back to calpa to ensure backward
          * compatibilty
