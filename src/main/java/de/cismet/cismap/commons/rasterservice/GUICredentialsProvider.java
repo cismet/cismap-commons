@@ -44,6 +44,8 @@ import javax.swing.JFrame;
 
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.DialogOpenedEvent;
+import de.cismet.tools.gui.DialogSupport;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -219,6 +221,9 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
         } catch (Exception skip) {
         }
         dialog.setAlwaysOnTop(true);
+        dialog.toFront();
+        dialog.setAlwaysOnTop(false);
+        DialogSupport.fireNewDialogOpened(new DialogOpenedEvent(dialog));
         StaticSwingTools.showDialog(dialog);
 
         if (!isAuthenticationDone) {

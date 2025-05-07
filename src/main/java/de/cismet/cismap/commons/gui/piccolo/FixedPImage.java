@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
+import com.vividsolutions.jts.geom.Point;
+
 import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.Image;
@@ -26,6 +28,7 @@ public class FixedPImage extends PImage implements PSticky {
 
     private double sweetSpotX = 0d;
     private double sweetSpotY = 0d;
+    private Point originalGeometry;
     private double originalOffsetX = 0;
     private double originalOffsetY = 0;
     private double multiplier = 1.0d;
@@ -67,6 +70,24 @@ public class FixedPImage extends PImage implements PSticky {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the originalGeometry
+     */
+    public Point getOriginalGeometry() {
+        return originalGeometry;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  originalGeometry  the originalGeometry to set
+     */
+    public void setOriginalGeometry(final Point originalGeometry) {
+        this.originalGeometry = originalGeometry;
+    }
 
     /**
      * DOCUMENT ME!
