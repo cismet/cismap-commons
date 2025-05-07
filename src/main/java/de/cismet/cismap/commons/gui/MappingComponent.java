@@ -1974,6 +1974,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 }
                             }
                         }
+                        for (int i = 0; i < rubberBandLayer.getChildrenCount(); ++i) {
+                            final PNode node = rubberBandLayer.getChild(i);
+                            if (node instanceof FixedPImage) {
+                                rescaleStickyNode((FixedPImage)node);
+                            }
+                        }
                     }
                 };
             CismetThreadPool.execute(new Thread(r, "MappingComponent queryServicesWithoutHistory()"));
@@ -5626,6 +5632,38 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     getWtst());
                                 if (node instanceof PSticky) {
                                     rescaleStickyNode((PSticky)node);
+                                }
+                            }
+
+                            // transform the rubberBand layer
+                            for (int i = 0; i < rubberBandLayer.getChildrenCount(); ++i) {
+                                final PNode node = rubberBandLayer.getChild(i);
+
+                                if ((node instanceof FixedPImage)
+                                            && (((FixedPImage)node).getOriginalGeometry() != null)) {
+                                    final com.vividsolutions.jts.geom.Point p = ((FixedPImage)node)
+                                                .getOriginalGeometry();
+                                    final com.vividsolutions.jts.geom.Point transformedP =
+                                        crsTransformer.transformGeometry((com.vividsolutions.jts.geom.Point)p.clone(),
+                                            CrsTransformer.createCrsFromSrid(p.getSRID()));
+                                    getWtst().getScreenX(transformedP.getX());
+                                    getWtst().getScreenY(transformedP.getY());
+                                    node.setOffset(getWtst().getScreenX(transformedP.getX()),
+                                        getWtst().getScreenY(transformedP.getY()));
+
+                                    if (node instanceof PSticky) {
+                                        rescaleStickyNode((PSticky)node);
+                                    }
+                                } else {
+                                    CrsTransformer.transformPNodeToGivenCrs(
+                                        node,
+                                        event.getFormerCrs().getCode(),
+                                        event.getCurrentCrs().getCode(),
+                                        oldWtst,
+                                        getWtst());
+                                    if (node instanceof PSticky) {
+                                        rescaleStickyNode((PSticky)node);
+                                    }
                                 }
                             }
                         } catch (final Exception e) {

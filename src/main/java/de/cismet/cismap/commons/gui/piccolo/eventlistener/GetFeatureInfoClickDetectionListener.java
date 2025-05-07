@@ -7,6 +7,9 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
 import org.apache.log4j.Logger;
@@ -29,6 +32,7 @@ import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.SignaturedFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -41,6 +45,8 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
+
+import static de.cismet.cismap.commons.CrsTransformer.extractSridFromCrs;
 
 /**
  * DOCUMENT ME!
@@ -127,6 +133,15 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
 //                pInfo = new PImage(info.getImage());
                 mc.getRubberBandLayer().addChild(getPInfo());
                 getPInfo().setScale(1 / mc.getCamera().getViewScale());
+
+                final com.vividsolutions.jts.geom.GeometryFactory fac = new com.vividsolutions.jts.geom.GeometryFactory(
+                        new PrecisionModel(PrecisionModel.FLOATING),
+                        CrsTransformer.getCurrentSrid());
+                final double xCoord = mc.getWtst().getWorldX(pInputEvent.getPosition().getX());
+                final double yCoord = mc.getWtst().getWorldY(pInputEvent.getPosition().getY());
+                final com.vividsolutions.jts.geom.Point p = fac.createPoint(new Coordinate(xCoord, yCoord));
+
+                getPInfo().setOriginalGeometry(p);
                 getPInfo().setOffset(pInputEvent.getPosition().getX(), pInputEvent.getPosition().getY());
                 if (log.isDebugEnabled()) {
                     log.debug(getPInfo().getGlobalBounds().getWidth());
