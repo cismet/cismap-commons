@@ -801,6 +801,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             url.append("&REQUEST=GetMap");           // NOI18N
         }
 
+        url.append("&SERVICE=WMS");                     // NOI18N
         url.append("&BBOX=").append(bb.getURLString()); // NOI18N
         url.append("&WIDTH=").append(width);            // NOI18N
         url.append("&HEIGHT=").append(height);          // NOI18N
