@@ -30,6 +30,7 @@ import java.awt.geom.Point2D;
 
 import java.util.Collection;
 
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.Highlightable;
@@ -205,10 +206,13 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 }
                             }
                         }
-                        xCoord = mappingComponent.getWtst()
-                                    .getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
-                        yCoord = mappingComponent.getWtst()
-                                    .getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
+                        final WorldToScreenTransform wtst = mappingComponent.getWtst();
+
+                        if (wtst == null) {
+                            return;
+                        }
+                        xCoord = wtst.getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
+                        yCoord = wtst.getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
 
                         refreshPointerAnnotation(event);
 

@@ -490,7 +490,6 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                 log.debug("substitute: add:" + cf);                         // NOI18N
             }
             addFeatures(cf);
-            final Feature f = (Feature)cf.toArray()[cf.size() - 1];
         } catch (Exception e) {
             log.error("Error in substituteFeatures new features:" + cf, e); // NOI18N
         }
