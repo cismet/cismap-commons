@@ -2216,7 +2216,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public WorldToScreenTransform getWtst() {
         try {
-            if (wtst == null) {
+            if ((wtst == null) && (mappingModel != null)) {
                 final double y_real = mappingModel.getInitialBoundingBox().getY2()
                             - mappingModel.getInitialBoundingBox().getY1();
                 final double x_real = mappingModel.getInitialBoundingBox().getX2()
