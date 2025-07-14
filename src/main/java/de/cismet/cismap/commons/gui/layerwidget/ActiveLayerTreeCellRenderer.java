@@ -9,7 +9,6 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 
 import java.util.HashMap;
 
@@ -42,25 +41,24 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static int SINGLE = 4;
-    private static int MULTI = 8;
-    private static int INFO = 16;
-    private static int DL = 32;
-    private static int SUPPORTER = 32;
-    private static int ASCII = 64;
-    private static int GML = 96;
-    private static int POSTGIS = 160;
-    private static int SHAPE = 192;
-    private static int SIMPLEWMS = 224;
-    private static int WFS = 256;
-    private static int WFST = 288;
-    private static int H2 = 300;
+    private static final int SINGLE = 4;
+    private static final int MULTI = 8;
+    private static final int INFO = 16;
+    private static final int DL = 32;
+    private static final int SUPPORTER = 32;
+    private static final int ASCII = 64;
+    private static final int GML = 96;
+    private static final int POSTGIS = 160;
+    private static final int SHAPE = 192;
+    private static final int SIMPLEWMS = 224;
+    private static final int WFS = 256;
+    private static final int WFST = 288;
+    private static final int H2 = 300;
 
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private DefaultTreeCellRenderer defaultRenderer;
-    private HashMap icons = new HashMap();
+    private final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(this.getClass());
+    private final HashMap icons = new HashMap();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -273,6 +271,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
         if (value instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer layer = (RetrievalServiceLayer)value;
             ret.setText(layer.toString());
+
             if (value instanceof WMSServiceLayer) {
                 final WMSServiceLayer wmsLayer = (WMSServiceLayer)layer;
                 if (wmsLayer.getWMSLayers().size() == 1) {
@@ -310,7 +309,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             } else if (value instanceof SimplePostgisFeatureService) {
                 ret.setIcon(getRightIcon(POSTGIS, layer.getPNode().getVisible(), layer.isEnabled()));
             } else if (value instanceof H2FeatureService) {
-                int type = 0;
+                int type;
 
                 if (layer.getPNode().getVisible()) {
                     if (layer.isEnabled()) {
@@ -374,10 +373,11 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 }
             }
         } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem", e); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem", e); // NOI18N
             }
         }
+
         return ret;
     }
 
@@ -395,7 +395,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
         if ((o != null) && (o instanceof ImageIcon)) {
             return (ImageIcon)o;
         } else {
-            log.warn("Icon not found, used default icon."); // NOI18N
+            LOG.warn("Icon not found, used default icon."); // NOI18N
             return (ImageIcon)icons.get(new IconType(SINGLE, true, true));
         }
     }

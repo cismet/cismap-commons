@@ -13,6 +13,7 @@ import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.dnd.DnDConstants;
@@ -25,10 +26,13 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
 
 import java.util.*;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.Icon;
@@ -36,6 +40,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
+import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -44,14 +49,19 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
+import de.cismet.cismap.commons.featureservice.GMLFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
+import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 
 import de.cismet.tools.Static2DTools;
@@ -77,25 +87,66 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static DataFlavor uriListFlavor;
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LayerWidget.class);
+    private static final Map<String, String[]> URL_TRANSFORMATION_RULES = new HashMap<>();
+    private static final String SEARCH_STRING = "_search";
+    private static final String EXTRACTION_STRING = "_extraction";
+    private static final String PREFIX_STRING = "_prefix";
+    private static final String POSTFIX_STRING = "_postfix";
+    private static final String CONCAT_STRING = "_concat";
+    private static final List<String> URL_TRANSFORMATION_RULES_ORDER = new ArrayList<>();
 
     static {
         try {
-            uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String"); // NOI18N
-        } catch (ClassNotFoundException e) {                                        // can't happen
-            e.printStackTrace();
+            final ResourceBundle transformkRules = ResourceBundle.getBundle("UrlDisplayTransform", Locale.getDefault());
+
+            for (final String key : transformkRules.keySet()) {
+                String transformKey = null;
+                int index = -1;
+
+                if (key.endsWith(SEARCH_STRING)) {
+                    transformKey = key.substring(0, key.length() - SEARCH_STRING.length());
+                    index = 0;
+                } else if (key.endsWith(EXTRACTION_STRING)) {
+                    transformKey = key.substring(0, key.length() - EXTRACTION_STRING.length());
+                    index = 1;
+                } else if (key.endsWith(PREFIX_STRING)) {
+                    transformKey = key.substring(0, key.length() - PREFIX_STRING.length());
+                    index = 2;
+                } else if (key.endsWith(POSTFIX_STRING)) {
+                    transformKey = key.substring(0, key.length() - POSTFIX_STRING.length());
+                    index = 3;
+                } else if (key.endsWith(CONCAT_STRING)) {
+                    transformKey = key.substring(0, key.length() - CONCAT_STRING.length());
+                    index = 4;
+                }
+
+                if (transformKey != null) {
+                    String[] rule = URL_TRANSFORMATION_RULES.get(transformKey);
+
+                    if (rule == null) {
+                        rule = new String[5];
+
+                        URL_TRANSFORMATION_RULES.put(transformKey, rule);
+                        URL_TRANSFORMATION_RULES_ORDER.add(transformKey);
+                    }
+
+                    rule[index] = transformkRules.getString(key);
+                }
+            }
+
+            Collections.sort(URL_TRANSFORMATION_RULES_ORDER);
+        } catch (Exception e) {
+            LOG.warn("No rules found to transform urls", e);
         }
     }
 
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private DragSource dragSource;
-    private DragGestureListener dgListener;
-    private DragSourceListener dsListener;
-    private ActiveLayerModel activeLayerModel = new ActiveLayerModel();
+    private final ActiveLayerModel activeLayerModel = new ActiveLayerModel();
     private JTreeTable treeTable;
-    private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
+    private final int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
     private Image errorImage;
     private MappingComponent mapC = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -155,6 +206,75 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         return new ImageToolTip(getErrorImage());
                     } else {
                         return super.createToolTip();
+                    }
+                }
+
+                @Override
+                public String getToolTipText(final MouseEvent event) {
+                    final int row = rowAtPoint(event.getPoint());
+                    final int column = columnAtPoint(event.getPoint());
+
+                    if ((row == -1) || (column == -1)) {
+                        return null;
+                    }
+
+                    // Assume the tree is in the first column
+                    if (column == 1) {
+                        // Convert table coordinates to tree coordinates
+                        final JTree tree = getTree();
+
+                        final Rectangle cellRect = getCellRect(row, column, false);
+
+                        final MouseEvent treeEvent = new MouseEvent(
+                                tree,
+                                event.getID(),
+                                event.getWhen(),
+                                event.getModifiersEx(),
+                                event.getX()
+                                        - cellRect.x,
+                                event.getY()
+                                        - cellRect.y,
+                                event.getClickCount(),
+                                event.isPopupTrigger(),
+                                event.getButton());
+
+                        final TreePath path = tree.getPathForLocation(event.getX(), event.getY());
+                        if (path != null) {
+                            final Object node = path.getLastPathComponent();
+                            String url = null;
+
+                            if (node instanceof RetrievalServiceLayer) {
+                                final RetrievalServiceLayer layer = (RetrievalServiceLayer)node;
+
+                                if (node instanceof WMSServiceLayer) {
+                                    final WMSServiceLayer wmsLayer = (WMSServiceLayer)node;
+                                    url = wmsLayer.getServerURI();
+                                } else if (node instanceof SimpleWMS) {
+                                    url = ((SimpleWMS)layer).getServerURI();
+                                } else if (node instanceof WebFeatureService) {
+                                    url = ((WebFeatureService)layer).getServerURI();
+                                } else if (node instanceof GMLFeatureService) {
+                                    url = ((GMLFeatureService)layer).getServerURI();
+                                } else if (node instanceof ShapeFileFeatureService) {
+                                    url = ((ShapeFileFeatureService)layer).getDocumentURI().toString();
+                                } else if (node instanceof SimplePostgisFeatureService) {
+                                } else if (node instanceof H2FeatureService) {
+                                } else {
+                                }
+                            } else if (node instanceof WMSLayer) {
+                                url = ((WMSLayer)node).getServerURI();
+                            } else if (node instanceof SimpleWMS) {
+                                url = ((SimpleWMS)node).getServerURI();
+                            }
+
+                            if (url != null) {
+                                return transformURL(url);
+                            }
+                        }
+
+                        return null;
+                    } else {
+                        return super.getToolTipText(event);
                     }
                 }
             };
@@ -331,6 +451,47 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
                 }
             });
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   url  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static String transformURL(final String url) {
+        String result = url;
+
+        for (final String key : URL_TRANSFORMATION_RULES_ORDER) {
+            final String[] rule = URL_TRANSFORMATION_RULES.get(key);
+
+            if ((rule[0] != null) && (rule[1] != null)) {
+                final Pattern searchPattern = Pattern.compile(rule[0]);
+                final Matcher searchMatcher = searchPattern.matcher(url);
+
+                if (searchMatcher.find()) {
+                    final Pattern pattern = Pattern.compile(rule[1]);
+                    final Matcher matcher = pattern.matcher(result);
+
+                    if (matcher.find()) {
+                        result = "";
+
+                        for (int i = 1; i <= matcher.groupCount(); ++i) {
+                            result += ((!result.equals("") && (rule[4] != null)) ? rule[4] : "") + matcher.group(i);
+                        }
+
+                        return result;
+                    } else {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Kein Match gefunden für: " + url);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -956,7 +1117,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             }
             return v;
         } catch (Exception ex) {
-            return new ArrayList<String>(0);
+            return new ArrayList<>(0);
         }
     }
 
@@ -977,7 +1138,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      * @return  DOCUMENT ME!
      */
     private boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
-        de.cismet.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
+        final de.cismet.commons.wms.capabilities.deegree.DeegreeLayer layer;
 
         if (lastPathComponent instanceof de.cismet.commons.wms.capabilities.deegree.DeegreeLayer) {
             layer = (de.cismet.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
