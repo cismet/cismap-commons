@@ -14,7 +14,10 @@ import org.openide.util.NbBundle;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
@@ -150,6 +153,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     private Image errorImage;
     private MappingComponent mapC = null;
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdCopyToClipboard;
     private javax.swing.JButton cmdDisable;
     private javax.swing.JButton cmdDown;
     private javax.swing.JButton cmdMakeInvisible;
@@ -243,29 +247,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                             final Object node = path.getLastPathComponent();
                             String url = null;
 
-                            if (node instanceof RetrievalServiceLayer) {
-                                final RetrievalServiceLayer layer = (RetrievalServiceLayer)node;
-
-                                if (node instanceof WMSServiceLayer) {
-                                    final WMSServiceLayer wmsLayer = (WMSServiceLayer)node;
-                                    url = wmsLayer.getServerURI();
-                                } else if (node instanceof SimpleWMS) {
-                                    url = ((SimpleWMS)layer).getServerURI();
-                                } else if (node instanceof WebFeatureService) {
-                                    url = ((WebFeatureService)layer).getServerURI();
-                                } else if (node instanceof GMLFeatureService) {
-                                    url = ((GMLFeatureService)layer).getServerURI();
-                                } else if (node instanceof ShapeFileFeatureService) {
-                                    url = ((ShapeFileFeatureService)layer).getDocumentURI().toString();
-                                } else if (node instanceof SimplePostgisFeatureService) {
-                                } else if (node instanceof H2FeatureService) {
-                                } else {
-                                }
-                            } else if (node instanceof WMSLayer) {
-                                url = ((WMSLayer)node).getServerURI();
-                            } else if (node instanceof SimpleWMS) {
-                                url = ((SimpleWMS)node).getServerURI();
-                            }
+                            url = extractUrlFromServie(node);
 
                             if (url != null) {
                                 return transformURL(url);
@@ -456,6 +438,43 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     /**
      * DOCUMENT ME!
      *
+     * @param   node  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String extractUrlFromServie(final Object node) {
+        String url = null;
+
+        if (node instanceof RetrievalServiceLayer) {
+            final RetrievalServiceLayer layer = (RetrievalServiceLayer)node;
+
+            if (node instanceof WMSServiceLayer) {
+                final WMSServiceLayer wmsLayer = (WMSServiceLayer)node;
+                url = wmsLayer.getServerURI();
+            } else if (node instanceof SimpleWMS) {
+                url = ((SimpleWMS)layer).getServerURI();
+            } else if (node instanceof WebFeatureService) {
+                url = ((WebFeatureService)layer).getServerURI();
+            } else if (node instanceof GMLFeatureService) {
+                url = ((GMLFeatureService)layer).getServerURI();
+            } else if (node instanceof ShapeFileFeatureService) {
+                url = ((ShapeFileFeatureService)layer).getDocumentURI().toString();
+            } else if (node instanceof SimplePostgisFeatureService) {
+            } else if (node instanceof H2FeatureService) {
+            } else {
+            }
+        } else if (node instanceof WMSLayer) {
+            url = ((WMSLayer)node).getServerURI();
+        } else if (node instanceof SimpleWMS) {
+            url = ((SimpleWMS)node).getServerURI();
+        }
+
+        return url;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   url  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -511,6 +530,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         cmdDisable = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
         cmdMakeInvisible = new javax.swing.JButton();
+        cmdCopyToClipboard = new javax.swing.JButton();
 
         setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createEtchedBorder(),
@@ -644,6 +664,24 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             });
         jToolBar1.add(cmdMakeInvisible);
+
+        cmdCopyToClipboard.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/clipboard16.png"))); // NOI18N
+        cmdCopyToClipboard.setToolTipText(org.openide.util.NbBundle.getMessage(
+                LayerWidget.class,
+                "LayerWidget.cmdCopyToClipboard.toolTipText"));                                            // NOI18N
+        cmdCopyToClipboard.setFocusable(false);
+        cmdCopyToClipboard.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cmdCopyToClipboard.setMargin(new java.awt.Insets(2, 1, 2, 1));
+        cmdCopyToClipboard.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cmdCopyToClipboard.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdCopyToClipboardActionPerformed(evt);
+                }
+            });
+        jToolBar1.add(cmdCopyToClipboard);
 
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
@@ -922,6 +960,25 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             log.error("IllegalAccessException", ex);
         }
     }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdCopyToClipboardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCopyToClipboardActionPerformed
+        final TreePath tp = treeTable.getTree().getSelectionPath();
+
+        if (tp != null) {
+            final String url = extractUrlFromServie(tp.getLastPathComponent());
+
+            if (url != null) {
+                final StringSelection selection = new StringSelection(url);
+                final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(selection, null);
+            }
+        }
+    } //GEN-LAST:event_cmdCopyToClipboardActionPerformed
 
     /**
      * DOCUMENT ME!
