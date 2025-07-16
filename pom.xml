@@ -13,7 +13,7 @@
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>9.1-SNAPSHOT</version>
+    <version>9.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
