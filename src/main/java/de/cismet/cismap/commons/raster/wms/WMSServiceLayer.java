@@ -990,7 +990,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     }
 
     /**
-     * adds the username/password combination to the url, if the capabilities url contains one.
+     * adds the username/password combination to the url, if the capabilities url contains one. Use the capabilities url
+     * with jwt if required
      *
      * @param   url  DOCUMENT ME!
      *
@@ -1003,6 +1004,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     capabilitiesUrl.indexOf("@"));
 
             return url.substring(0, url.indexOf("://") + 3) + userPwd + "@" + url.substring(url.indexOf("://") + 3);
+        } else if (capabilitiesUrl.contains("secres/$(user-jwt)")) {
+            // Use the capabilities url with jwt if required
+            if (capabilitiesUrl.contains("?")) {
+                return capabilitiesUrl.substring(0, capabilitiesUrl.indexOf("?"));
+            } else {
+                return capabilitiesUrl;
+            }
         }
 
         return url;
