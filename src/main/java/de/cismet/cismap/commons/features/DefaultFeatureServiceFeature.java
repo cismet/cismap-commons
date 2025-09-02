@@ -68,8 +68,6 @@ import org.deegree.style.styling.components.Stroke;
 
 import org.jfree.util.Log;
 
-import sun.awt.image.ToolkitImage;
-
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -1884,14 +1882,16 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         final Image image = icon.getImage();
         if (image instanceof BufferedImage) {
             return (BufferedImage)image;
-        } else if (image instanceof ToolkitImage) {
-            logger.warn(
-                "sun.awt.image.ToolkitImage is internal proprietary API and may be removed in a future release ("
-                        + mark
-                        + ")");
-            return ((ToolkitImage)image).getBufferedImage();
         } else {
-            throw new RuntimeException("No BufferedImage" + mark);
+            final BufferedImage bimage = new BufferedImage(
+                    image.getWidth(null),
+                    image.getHeight(null),
+                    BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D g2d = bimage.createGraphics();
+            g2d.drawImage(image, 0, 0, null);
+            g2d.dispose();
+
+            return bimage;
         }
     }
 
