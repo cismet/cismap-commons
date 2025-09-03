@@ -6,7 +6,7 @@
 *
 ****************************************************/
 package de.cismet.cismap.commons.demo;
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+//import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
 import java.awt.Image;
 
@@ -72,7 +72,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
             // javax.swing.UIManager.setLookAndFeel(new com.jgoodies.plaf.plastic.PlasticXPLookAndFeel());
             // UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
             // UIManager.setLookAndFeel(new PlasticLookAndFeel());
-            UIManager.setLookAndFeel(new WindowsLookAndFeel());
+            // UIManager.setLookAndFeel(new WindowsLookAndFeel());
         } catch (Exception e) {
             log.warn("Fehler beim Einstellen des Look&Feels's!", e); // NOI18N
         }
@@ -211,7 +211,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         prBar.setValue(0);
         prBar.setIndeterminate(true);
         if (ir == null) {
@@ -230,16 +230,16 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
                 "http://localhost:8080/deegree2/ogcwebservice?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&WIDTH=674&HEIGHT=527&LAYERS=StateBoundary&TRANSPARENT=TRUE&FORMAT=image/jpg&BBOX=-39862.32289224541,3995357.845975933,919186.2219233183,4745237.049414809&SRS=EPSG:26912&STYLES="); // NOI18N
             ir.start();
         }
-    }                                                                                                                                                                                                                                                                                      //GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
+    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
-    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+    }//GEN-LAST:event_exitMenuItemActionPerformed
 
     /**
      * DOCUMENT ME!
