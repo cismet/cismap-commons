@@ -10,13 +10,6 @@ package de.cismet.cismap.commons.demo;
 
 import java.awt.Image;
 
-import java.util.Locale;
-
-import javax.swing.UIManager;
-
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.rasterservice.HTTPImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 

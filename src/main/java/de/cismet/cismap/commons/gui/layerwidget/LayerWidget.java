@@ -195,6 +195,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     public void init(final MappingComponent mapC) {
         hackDragAndDropDataFlavors();
         initComponents();
+        cmdCopyToClipboard.setVisible(false);
         this.mapC = mapC;
         log.info("LayerWidget: " + activeLayerModel); // NOI18N
         final DropTarget dt = new DropTarget(this, acceptableActions, this);
@@ -213,52 +214,39 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     }
                 }
 
-                @Override
-                public String getToolTipText(final MouseEvent event) {
-                    final int row = rowAtPoint(event.getPoint());
-                    final int column = columnAtPoint(event.getPoint());
-
-                    if ((row == -1) || (column == -1)) {
-                        return null;
-                    }
-
-                    // Assume the tree is in the first column
-                    if (column == 1) {
-                        // Convert table coordinates to tree coordinates
-                        final JTree tree = getTree();
-
-                        final Rectangle cellRect = getCellRect(row, column, false);
-
-                        final MouseEvent treeEvent = new MouseEvent(
-                                tree,
-                                event.getID(),
-                                event.getWhen(),
-                                event.getModifiersEx(),
-                                event.getX()
-                                        - cellRect.x,
-                                event.getY()
-                                        - cellRect.y,
-                                event.getClickCount(),
-                                event.isPopupTrigger(),
-                                event.getButton());
-
-                        final TreePath path = tree.getPathForLocation(event.getX(), event.getY());
-                        if (path != null) {
-                            final Object node = path.getLastPathComponent();
-                            String url = null;
-
-                            url = extractUrlFromServie(node);
-
-                            if (url != null) {
-                                return transformURL(url);
-                            }
-                        }
-
-                        return null;
-                    } else {
-                        return super.getToolTipText(event);
-                    }
-                }
+//                @Override
+//                public String getToolTipText(final MouseEvent event) {
+//                    final int row = rowAtPoint(event.getPoint());
+//                    final int column = columnAtPoint(event.getPoint());
+//
+//                    if ((row == -1) || (column == -1)) {
+//                        return null;
+//                    }
+//
+//                    // Assume the tree is in the first column
+//                    if (column == 1) {
+//                        // Convert table coordinates to tree coordinates
+//                        final JTree tree = getTree();
+//
+//                        final Rectangle cellRect = getCellRect(row, column, false);
+//
+//                        final TreePath path = tree.getPathForLocation(event.getX(), event.getY());
+//                        if (path != null) {
+//                            final Object node = path.getLastPathComponent();
+//                            String url = null;
+//
+//                            url = extractUrlFromServie(node);
+//
+//                            if (url != null) {
+//                                return transformURL(url);
+//                            }
+//                        }
+//
+//                        return null;
+//                    } else {
+//                        return super.getToolTipText(event);
+//                    }
+//                }
             };
 
         treeTable.setAutoCreateColumnsFromModel(true);
