@@ -379,6 +379,9 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
         final Element element = new Element("ModeLayer");                                             // NOI18N
         element.setAttribute("mode", getCurrentMode());                                               // NOI18N
         element.setAttribute("key", layerKey);                                                        // NOI18N
+        if (layerPosition != -1) {
+            element.setAttribute("layerPosition", String.valueOf(layerPosition));                     // NOI18N
+        }
         element.setAttribute("translucency", Float.toString(getCurrentLayer().getTranslucency()));    // NOI18N
         element.setAttribute("enabled", Boolean.toString(getCurrentLayer().isEnabled()));             // NOI18N
         element.setAttribute("visible", Boolean.toString(getCurrentLayer().getPNode().getVisible())); // NOI18N

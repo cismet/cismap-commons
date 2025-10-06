@@ -12,6 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import com.github.slugify.Slugify;
+
 import edu.umd.cs.piccolo.event.PInputEventListener;
 
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -29,6 +31,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
@@ -107,15 +110,16 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private ImageIcon errorImage = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/error.png")); // NOI18N
     private BufferedImage northArrowImage = null;
-    private Style styleTip;
-    private Style styleSuccess;
-    private Style styleInfo;
-    private Style styleExpert;
-    private Style styleWarn;
-    private Style styleError;
-    private Style styleErrorReason;
-    private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
+    private final Style styleTip;
+    private final Style styleSuccess;
+    private final Style styleInfo;
+    private final Style styleExpert;
+    private final Style styleWarn;
+    private final Style styleError;
+    private final Style styleErrorReason;
+    private EnumMap<NotificationLevel, Style> styles = new EnumMap<>(NotificationLevel.class);
     private Future<Image> futureMapImage;
+    private boolean stopSync = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
     private javax.swing.JButton cmdCancel;
@@ -133,7 +137,10 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JLabel lbl1;
     private javax.swing.JLabel lbl2;
+    private javax.swing.JLabel lblEnding;
+    private javax.swing.JLabel lblFilename;
     private javax.swing.JPanel panDesc;
+    private javax.swing.JPanel panFilename;
     private javax.swing.JPanel panInscribe;
     private javax.swing.JPanel panLoadAndInscribe;
     private javax.swing.JPanel panProgress;
@@ -142,6 +149,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private javax.swing.JTextPane txpLoadingStatus;
     private javax.swing.JTextField txt1;
     private javax.swing.JTextField txt2;
+    private javax.swing.JTextField txtFilename;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -235,6 +243,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
         lbl1 = new javax.swing.JLabel();
         txt1 = new javax.swing.JTextField();
         lbl2 = new javax.swing.JLabel();
@@ -255,6 +265,10 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
         panInscribe = new javax.swing.JPanel();
+        panFilename = new javax.swing.JPanel();
+        lblFilename = new javax.swing.JLabel();
+        txtFilename = new javax.swing.JTextField();
+        lblEnding = new javax.swing.JLabel();
         panProgress = new javax.swing.JPanel();
         scpLoadingStatus = new javax.swing.JScrollPane();
         txpLoadingStatus = new javax.swing.JTextPane();
@@ -330,7 +344,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel3).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel4).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.RELATED,
-                    63,
+                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                     Short.MAX_VALUE).add(jLabel5).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
                     jSeparator3,
                     org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
@@ -362,8 +376,43 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
         panInscribe.setLayout(new java.awt.BorderLayout());
 
-        txpLoadingStatus.setBackground(java.awt.SystemColor.control);
+        panFilename.setLayout(new java.awt.GridBagLayout());
+
+        lblFilename.setText(org.openide.util.NbBundle.getMessage(
+                PrintingWidget.class,
+                "PrintingWidget.lblFilename.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 10, 3, 5);
+        panFilename.add(lblFilename, gridBagConstraints);
+
+        txtFilename.setBackground(new java.awt.Color(230, 230, 230));
+        txtFilename.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtFilename.setText(org.openide.util.NbBundle.getMessage(
+                PrintingWidget.class,
+                "PrintingWidget.txtFilename.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        panFilename.add(txtFilename, gridBagConstraints);
+
+        lblEnding.setText(org.openide.util.NbBundle.getMessage(
+                PrintingWidget.class,
+                "PrintingWidget.lblEnding.text",
+                new Object[] {})); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 12);
+        panFilename.add(lblEnding, gridBagConstraints);
+
         txpLoadingStatus.setEditable(false);
+        txpLoadingStatus.setBackground(java.awt.SystemColor.control);
         scpLoadingStatus.setViewportView(txpLoadingStatus);
 
         prbLoading.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -410,12 +459,20 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                         org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                         449,
                         Short.MAX_VALUE).add(
+                        org.jdesktop.layout.GroupLayout.TRAILING,
                         panLoadAndInscribeLayout.createSequentialGroup().add(
-                            panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
+                            panLoadAndInscribeLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING).add(
+                                org.jdesktop.layout.GroupLayout.LEADING,
+                                panFilename,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                Short.MAX_VALUE).add(
+                                org.jdesktop.layout.GroupLayout.LEADING,
                                 panProgress,
                                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                                 Short.MAX_VALUE).add(
+                                org.jdesktop.layout.GroupLayout.LEADING,
                                 panInscribe,
                                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                                 439,
@@ -431,8 +488,13 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     org.jdesktop.layout.LayoutStyle.RELATED).add(
                     panInscribe,
                     org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    125,
+                    139,
                     Short.MAX_VALUE).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
+                    panFilename,
+                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                    26,
+                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
+                    org.jdesktop.layout.LayoutStyle.RELATED).add(
                     panProgress,
                     org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
                     org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
@@ -518,15 +580,51 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     public void startLoading() {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("startLoading()");                        // NOI18N
+                LOG.debug("startLoading()"); // NOI18N
             }
         }
-        txpLoadingStatus.setText("");                               // NOI18N
+        txpLoadingStatus.setText("");        // NOI18N
         try {
             final Class c = Class.forName(mappingComponent.getPrintingSettingsDialog().getSelectedTemplate()
                             .getClassName());
             final Constructor constructor = c.getConstructor();
             inscriber = (AbstractPrintingInscriber)constructor.newInstance();
+
+            if (inscriber instanceof FilenamePrintingInscriber) {
+                final Slugify slg = new Slugify();
+                final String currentFilename = ((FilenamePrintingInscriber)inscriber).getFileName();
+
+                txtFilename.setText(slg.slugify(currentFilename));
+
+                txtFilename.addKeyListener(new KeyListener() {
+
+                        @Override
+                        public void keyTyped(final KeyEvent e) {
+                            stopSync = true;
+                        }
+
+                        @Override
+                        public void keyPressed(final KeyEvent e) {
+                        }
+
+                        @Override
+                        public void keyReleased(final KeyEvent e) {
+                        }
+                    });
+
+                ((FilenamePrintingInscriber)inscriber).addFilenameChangeListener(
+                    new FilenamePrintingInscriberListener() {
+
+                        @Override
+                        public void fileNameChanged(final FileNameChangedEvent e) {
+                            if (!stopSync) {
+                                txtFilename.setText(slg.slugify(e.getNewFileName()));
+                            }
+                        }
+                    });
+            } else {
+                panFilename.setVisible(false);
+            }
         } catch (Exception e) {
             LOG.error("Error while loading the print template", e); // NOI18N
         }
@@ -798,12 +896,17 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                                 prints.get(i),
                                                 jobname,
                                                 "Cismap-Druck",
-                                                "cismap_"
+                                                ((!txtFilename.getText().equals("")) ? (txtFilename.getText() + "_")
+                                                                                     : "cismap_")
                                                         + (i + 1)));
                                     }
                                     download = new MultipleDownload(singleDownloads, "Cismap-Druck");
                                 } else {
-                                    download = new JasperDownload(prints, jobname, "Cismap-Druck", "cismap");
+                                    download = new JasperDownload(
+                                            prints,
+                                            jobname,
+                                            "Cismap-Druck",
+                                            ((!txtFilename.getText().equals("")) ? txtFilename.getText() : "cismap"));
                                 }
                                 DownloadManager.instance().add(download);
                             }
