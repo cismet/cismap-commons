@@ -194,30 +194,30 @@ public class Tester extends javax.swing.JFrame {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
         mapC.getRasterServiceLayer().removeAllChildren();                        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton3ActionPerformed
         synchronized (getTreeLock()) {
             validateTree();
         }
         mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(), 500);
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }                                                                            //GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         mapC.setMappingModel(layerWidget.getMappingModel());
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!

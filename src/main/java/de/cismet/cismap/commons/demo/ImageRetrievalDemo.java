@@ -205,7 +205,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         prBar.setValue(0);
         prBar.setIndeterminate(true);
 
@@ -221,16 +221,16 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
                 "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig"); // NOI18N
             ir.start();
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }                                                                                                                                                                                                                                                                                                                                                                                           //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
-    }//GEN-LAST:event_exitMenuItemActionPerformed
+    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
 
     /**
      * DOCUMENT ME!
