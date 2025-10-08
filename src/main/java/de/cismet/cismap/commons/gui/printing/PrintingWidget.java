@@ -591,7 +591,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
             inscriber = (AbstractPrintingInscriber)constructor.newInstance();
 
             if (inscriber instanceof FilenamePrintingInscriber) {
-                final Slugify slg = new Slugify();
+                final Slugify slg = new Slugify().withLowerCase(false);
                 final String currentFilename = ((FilenamePrintingInscriber)inscriber).getFileName();
 
                 txtFilename.setText(slg.slugify(currentFilename));
