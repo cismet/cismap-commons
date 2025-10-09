@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -17,27 +17,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.index.strtree.STRtree;
-
-import org.deegree.model.feature.Feature;
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.feature.GMLFeatureCollectionDocument;
-import org.deegree.model.feature.schema.FeatureType;
-import org.deegree.model.feature.schema.PropertyType;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
-import java.net.URI;
-
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
@@ -46,6 +25,21 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.util.List;
+import java.util.Vector;
+import javax.swing.SwingWorker;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.GMLFeatureCollectionDocument;
+import org.deegree.model.feature.schema.FeatureType;
+import org.deegree.model.feature.schema.PropertyType;
+import org.deegree.model.spatialschema.JTSAdapter;
 
 /**
  * Feature Factory that supports of GML documents.<br/>
@@ -54,8 +48,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServiceFeature, String>
-        implements CachingFeatureFactory<DefaultFeatureServiceFeature, String> {
+public class GMLFeatureFactory
+    extends DegreeFeatureFactory<DefaultFeatureServiceFeature, String>
+    implements CachingFeatureFactory<DefaultFeatureServiceFeature, String> {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -80,10 +75,12 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public GMLFeatureFactory(final LayerProperties layerProperties,
-            final URI documentURL,
-            final int maxCachedFeatureCount,
-            final SwingWorker workerThread) throws Exception {
+    public GMLFeatureFactory(
+        final LayerProperties layerProperties,
+        final URI documentURL,
+        final int maxCachedFeatureCount,
+        final SwingWorker workerThread
+    ) throws Exception {
         this.layerProperties = layerProperties;
         this.documentURI = documentURL;
         this.maxCachedFeatureCount = maxCachedFeatureCount;
@@ -131,7 +128,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
      */
     @Override
     protected DefaultFeatureServiceFeature createFeatureInstance(final Feature degreeFeature, final int index)
-            throws Exception {
+        throws Exception {
         final DefaultFeatureServiceFeature gmlFeature = new DefaultFeatureServiceFeature();
         int currentSrid = -1;
         // auto generate Ids!
@@ -139,8 +136,10 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         try {
             gmlFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
-            currentSrid = CrsTransformer.extractSridFromCrs(degreeFeature.getGeometryPropertyValues()[geometryIndex]
-                            .getCoordinateSystem().getPrefixedName());
+            currentSrid =
+                CrsTransformer.extractSridFromCrs(
+                    degreeFeature.getGeometryPropertyValues()[geometryIndex].getCoordinateSystem().getPrefixedName()
+                );
             gmlFeature.getGeometry().setSRID(currentSrid);
         } catch (Exception e) {
             gmlFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
@@ -167,8 +166,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         if (this.documentReader != null) {
             try {
                 documentReader.close();
-            } catch (IOException ex) {
-            }
+            } catch (IOException ex) {}
             documentReader = null;
             System.gc();
         }
@@ -198,8 +196,8 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         final long start = System.currentTimeMillis();
 
         envelope = null;
-        this.documentReader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(new File(this.documentURI))));
+        this.documentReader =
+            new BufferedReader(new InputStreamReader(new FileInputStream(new File(this.documentURI))));
         this.gmlDocument = new GMLFeatureCollectionDocument();
         this.gmlDocument.load(this.documentReader, "http://dummyID");
 
@@ -217,8 +215,15 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
             }
         }
         if (max > this.maxCachedFeatureCount) {
-            logger.error("SW[" + workerThread + "]: number of features in gml file (" + max
-                        + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
+            logger.error(
+                "SW[" +
+                workerThread +
+                "]: number of features in gml file (" +
+                max +
+                ") exceeds maximum of supported features (" +
+                this.maxCachedFeatureCount +
+                ")"
+            );
             max = this.maxCachedFeatureCount;
         }
         if (max == 0) {
@@ -230,8 +235,8 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         // parse features ........................................................
 
-//    ParsingProgressListener progressListener = new ParsingProgressListener(workerThread, max, 100);
-//    this.gmlDocument.addFeatureProgressListener(progressListener);
+        //    ParsingProgressListener progressListener = new ParsingProgressListener(workerThread, max, 100);
+        //    this.gmlDocument.addFeatureProgressListener(progressListener);
         final FeatureCollection featureCollection = gmlDocument.parse();
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
@@ -248,13 +253,19 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         if (featureCollection.size() > 0) {
             final Feature type = featureCollection.getFeature(0);
-            logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
-                        + " featureServiceAttributes from first parsed degree feature");
+            logger.info(
+                "SW[" +
+                workerThread +
+                "]: creating " +
+                type.getProperties().length +
+                " featureServiceAttributes from first parsed degree feature"
+            );
             featureServiceAttributes = new Vector(type.getProperties().length);
             for (final PropertyType pt : type.getFeatureType().getProperties()) {
                 // ToDo was ist wenn zwei Geometrien dabei sind
                 featureServiceAttributes.add(
-                    new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
+                    new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true)
+                );
             }
         } else {
             logger.error("could not create feature service attributes, no valid gml fetures found");
@@ -274,8 +285,13 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         }
         // check if thread is canceled .........................................
 
-        logger.info("parsing, converting and initialising " + max + " gml features took "
-                    + (System.currentTimeMillis() - start) + " ms");
+        logger.info(
+            "parsing, converting and initialising " +
+            max +
+            " gml features took " +
+            (System.currentTimeMillis() - start) +
+            " ms"
+        );
     }
 
     /**
@@ -338,9 +354,11 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
      * @throws  Exception                 DOCUMENT ME!
      */
     @Override
-    public synchronized List<DefaultFeatureServiceFeature> createFeatures(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
+    public synchronized List<DefaultFeatureServiceFeature> createFeatures(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread
+    ) throws TooManyFeaturesException, Exception {
         return createFeatures_internal(query, boundingBox, workerThread, 0, 0, null, true);
     }
 
@@ -356,7 +374,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
      */
     @Override
     public synchronized Vector<FeatureServiceAttribute> createAttributes(final SwingWorker workerThread)
-            throws TooManyFeaturesException, Exception {
+        throws TooManyFeaturesException, Exception {
         if ((this.featureServiceAttributes == null) || (this.featureServiceAttributes.size() == 0)) {
             logger.warn("SW[" + workerThread + "]: Factory not correctopy initialised, parsing gml file");
             this.parseGMLFile(workerThread);
@@ -390,21 +408,21 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         return new GMLFeatureFactory(this);
     }
 
-//  public static void main(String args[])
-//  {
-//    BasicConfigurator.configure();
-//
-//    try
-//    {
-//      Logger.getLogger(GMLFeatureFactory.class).setLevel(org.apache.log4j.Level.ALL);
-//      GMLFeatureFactory gmlFeatureFactory = new GMLFeatureFactory(
-//              new DefaultLayerProperties(), new URI("file:///D:/W/fs.gml"), 50000, null);
-//      gmlFeatureFactory.logger.info("OK");
-//    } catch (Throwable t)
-//    {
-//      t.printStackTrace();
-//    }
-//  }
+    //  public static void main(String args[])
+    //  {
+    //    BasicConfigurator.configure();
+    //
+    //    try
+    //    {
+    //      Logger.getLogger(GMLFeatureFactory.class).setLevel(org.apache.log4j.Level.ALL);
+    //      GMLFeatureFactory gmlFeatureFactory = new GMLFeatureFactory(
+    //              new DefaultLayerProperties(), new URI("file:///D:/W/fs.gml"), 50000, null);
+    //      gmlFeatureFactory.logger.info("OK");
+    //    } catch (Throwable t)
+    //    {
+    //      t.printStackTrace();
+    //    }
+    //  }
 
     @Override
     public int getFeatureCount(final String query, final BoundingBox bb) {
@@ -412,12 +430,14 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     }
 
     @Override
-    public synchronized List<DefaultFeatureServiceFeature> createFeatures(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread,
-            final int offset,
-            final int limit,
-            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+    public synchronized List<DefaultFeatureServiceFeature> createFeatures(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread,
+        final int offset,
+        final int limit,
+        final FeatureServiceAttribute[] orderBy
+    ) throws TooManyFeaturesException, Exception {
         return createFeatures_internal(query, boundingBox, workerThread, offset, limit, orderBy, false);
     }
 
@@ -437,13 +457,15 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
      * @throws  TooManyFeaturesException  DOCUMENT ME!
      * @throws  Exception                 DOCUMENT ME!
      */
-    private synchronized List<DefaultFeatureServiceFeature> createFeatures_internal(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread,
-            final int offset,
-            final int limit,
-            final FeatureServiceAttribute[] orderBy,
-            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
+    private synchronized List<DefaultFeatureServiceFeature> createFeatures_internal(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread,
+        final int offset,
+        final int limit,
+        final FeatureServiceAttribute[] orderBy,
+        final boolean saveAsLastCreated
+    ) throws TooManyFeaturesException, Exception {
         if (!this.initialised) {
             logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing gml file");
             this.parseGMLFile(workerThread);
@@ -463,16 +485,17 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
         polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
         polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+        final GeometryFactory geomFactory = new GeometryFactory(
+            new PrecisionModel(PrecisionModel.FLOATING),
+            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+        );
         final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
         List<DefaultFeatureServiceFeature> selectedFeatures;
 
         if (featuresAlreadyInMemory(boundingPolygon, query)) {
             selectedFeatures = createFeaturesFromMemory(query, boundingPolygon);
         } else {
-            selectedFeatures = this.degreeFeaturesTree.query(
-                    boundingPolygon.getEnvelopeInternal());
+            selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
 
             // check if thread is canceled .........................................
             if (this.checkCancelled(workerThread, " quering spatial index structure")) {
@@ -480,20 +503,35 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
             }
             // check if thread is canceled .........................................
 
-            logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                        + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
-                        + " in spatial index");
+            logger.info(
+                "SW[" +
+                workerThread +
+                "]: " +
+                selectedFeatures.size() +
+                " features selected by bounding box out of " +
+                this.degreeFeaturesTree.size() +
+                " in spatial index"
+            );
             if (DEBUG) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
-                                + (System.currentTimeMillis() - start) + " ms");
+                    logger.debug(
+                        "SW[" +
+                        workerThread +
+                        "]: quering spatial index for bounding box took " +
+                        (System.currentTimeMillis() - start) +
+                        " ms"
+                    );
                 }
             }
         }
 
         if (selectedFeatures.size() > this.getMaxFeatureCount()) {
-            throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
-                        + " exceeds max feature count " + this.getMaxFeatureCount());
+            throw new TooManyFeaturesException(
+                "features in selected area " +
+                selectedFeatures.size() +
+                " exceeds max feature count " +
+                this.getMaxFeatureCount()
+            );
         } else if (selectedFeatures.isEmpty()) {
             logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
             return null;

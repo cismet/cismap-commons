@@ -1,16 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.attributetable;
-
-import java.util.List;
 
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import java.util.List;
 
 /**
  * This interface is used to lock and unlock features. See also {@link FeatureLockerFactory}
@@ -19,7 +18,6 @@ import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
  * @version  $Revision$, $Date$
  */
 public interface FeatureLockingInterface {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -34,8 +32,8 @@ public interface FeatureLockingInterface {
      * @throws  LockAlreadyExistsException  if the given feature is already locked
      * @throws  Exception                   if the locking failed for some reason
      */
-    Object lock(final Feature feature, boolean multiLockForSameUserAllowed) throws LockAlreadyExistsException,
-        Exception;
+    Object lock(final Feature feature, boolean multiLockForSameUserAllowed)
+        throws LockAlreadyExistsException, Exception;
 
     /**
      * locks the given feature list.
@@ -49,8 +47,8 @@ public interface FeatureLockingInterface {
      * @throws  LockAlreadyExistsException  if the given feature is already locked
      * @throws  Exception                   if the locking failed for some reason
      */
-    Object lock(final List<Feature> feature, boolean multiLockForSameUserAllowed) throws LockAlreadyExistsException,
-        Exception;
+    Object lock(final List<Feature> feature, boolean multiLockForSameUserAllowed)
+        throws LockAlreadyExistsException, Exception;
 
     /**
      * locks the given feature service.
@@ -65,7 +63,7 @@ public interface FeatureLockingInterface {
      * @throws  Exception                   if the locking failed for some reason
      */
     Object lock(final AbstractFeatureService service, boolean multiLockForSameUserAllowed)
-            throws LockAlreadyExistsException, Exception;
+        throws LockAlreadyExistsException, Exception;
 
     /**
      * Unlocks the feature, that is associated with the given unlock-object.

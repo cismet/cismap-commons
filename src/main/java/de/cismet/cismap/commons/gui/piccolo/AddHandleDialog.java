@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -16,12 +16,13 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-
 import javax.swing.JComponent;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
@@ -30,10 +31,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicSliderUI;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -85,6 +82,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panFooter;
     private javax.swing.JSlider sliDistance;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -94,7 +92,6 @@ public class AddHandleDialog extends javax.swing.JDialog {
      */
     private AddHandleDialog() {
         super(StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()), true);
-
         allLocked = true;
         initComponents();
         sliDistance.setUI(new mySliderUI(sliDistance));
@@ -103,7 +100,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
         StaticSwingTools.doClickButtonOnKeyStroke(
             btnCancel,
             KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-            getRootPane());
+            getRootPane()
+        );
         pack();
         allLocked = false;
     }
@@ -153,18 +151,19 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        sliDistance.setMajorTickSpacing((int)PRECISION);
+        sliDistance.setMajorTickSpacing((int) PRECISION);
         sliDistance.setValue(0);
         sliDistance.setFocusable(false);
         sliDistance.setMaximumSize(new java.awt.Dimension(206, 54));
         sliDistance.setMinimumSize(new java.awt.Dimension(206, 54));
-        sliDistance.addChangeListener(new javax.swing.event.ChangeListener() {
-
+        sliDistance.addChangeListener(
+            new javax.swing.event.ChangeListener() {
                 @Override
                 public void stateChanged(final javax.swing.event.ChangeEvent evt) {
                     sliDistanceStateChanged(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -174,9 +173,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(sliDistance, gridBagConstraints);
 
         lblLeftNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lblLeftNeighbour.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.lblLeftNeighbour.text")); // NOI18N
+        lblLeftNeighbour.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblLeftNeighbour.text")
+        ); // NOI18N
         lblLeftNeighbour.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         lblLeftNeighbour.setMaximumSize(new java.awt.Dimension(150, 17));
         lblLeftNeighbour.setMinimumSize(new java.awt.Dimension(150, 17));
@@ -189,9 +188,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(lblLeftNeighbour, gridBagConstraints);
 
         lblRightNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblRightNeighbour.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.lblRightNeighbour.text")); // NOI18N
+        lblRightNeighbour.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblRightNeighbour.text")
+        ); // NOI18N
         lblRightNeighbour.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         lblRightNeighbour.setMaximumSize(new java.awt.Dimension(150, 17));
         lblRightNeighbour.setMinimumSize(new java.awt.Dimension(150, 17));
@@ -204,9 +203,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(lblRightNeighbour, gridBagConstraints);
 
         lblDistanceLeft.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblDistanceLeft.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.lblDistanceLeft.text")); // NOI18N
+        lblDistanceLeft.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDistanceLeft.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -215,9 +214,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(lblDistanceLeft, gridBagConstraints);
 
         lblRightDistance.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lblRightDistance.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.lblDistanceRight.text")); // NOI18N
+        lblRightDistance.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDistanceRight.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -226,8 +225,11 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(lblRightDistance, gridBagConstraints);
 
         lblLeftPoint.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblLeftPoint.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/neighbourPoint.png"))); // NOI18N
+        lblLeftPoint.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/neighbourPoint.png")
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -237,8 +239,11 @@ public class AddHandleDialog extends javax.swing.JDialog {
         jPanel1.add(lblLeftPoint, gridBagConstraints);
 
         lblRightPoint.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblRightPoint.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/neighbourPoint.png"))); // NOI18N
+        lblRightPoint.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/neighbourPoint.png")
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 2;
@@ -249,9 +254,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
         panFooter.setLayout(new java.awt.GridBagLayout());
 
-        lblDescriptionImage.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.lblDescriptionImage.text")); // NOI18N
+        lblDescriptionImage.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDescriptionImage.text")
+        ); // NOI18N
         lblDescriptionImage.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         lblDescriptionImage.setPreferredSize(new java.awt.Dimension(250, 120));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -262,8 +267,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         panFooter.add(lblDescriptionImage, gridBagConstraints);
 
-        lblDescription.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/addHandle.png"))); // NOI18N
+        lblDescription.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/addHandle.png"))
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -279,11 +285,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
         jPanel1.add(panFooter, gridBagConstraints);
 
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(
-                Double.valueOf(0.0d),
-                Double.valueOf(0.0d),
-                null,
-                Double.valueOf(1.0d)));
+        jSpinner1.setModel(
+            new javax.swing.SpinnerNumberModel(Double.valueOf(0.0d), Double.valueOf(0.0d), null, Double.valueOf(1.0d))
+        );
         jSpinner1.setMinimumSize(new java.awt.Dimension(75, 26));
         jSpinner1.setPreferredSize(new java.awt.Dimension(75, 26));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -292,15 +296,13 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         jPanel1.add(jSpinner1, gridBagConstraints);
-        ((JSpinner.DefaultEditor)jSpinner1.getEditor()).getTextField()
-                .getDocument()
-                .addDocumentListener(new LeftDocumentListener());
+        ((JSpinner.DefaultEditor) jSpinner1.getEditor()).getTextField()
+            .getDocument()
+            .addDocumentListener(new LeftDocumentListener());
 
-        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(
-                Double.valueOf(0.0d),
-                Double.valueOf(0.0d),
-                null,
-                Double.valueOf(1.0d)));
+        jSpinner2.setModel(
+            new javax.swing.SpinnerNumberModel(Double.valueOf(0.0d), Double.valueOf(0.0d), null, Double.valueOf(1.0d))
+        );
         jSpinner2.setMinimumSize(new java.awt.Dimension(75, 26));
         jSpinner2.setPreferredSize(new java.awt.Dimension(75, 26));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -309,23 +311,25 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         jPanel1.add(jSpinner2, gridBagConstraints);
-        ((JSpinner.DefaultEditor)jSpinner2.getEditor()).getTextField()
-                .getDocument()
-                .addDocumentListener(new RightDocumentListener());
+        ((JSpinner.DefaultEditor) jSpinner2.getEditor()).getTextField()
+            .getDocument()
+            .addDocumentListener(new RightDocumentListener());
 
-        jButton1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/arrow-step.png")));                       // NOI18N
+        jButton1.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/arrow-step.png"))
+        ); // NOI18N
         jButton1.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.jButton1.text")); // NOI18N
-        jButton1.setToolTipText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.jButton1.toolTipText"));                                                               // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.setToolTipText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.jButton1.toolTipText")
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -337,25 +341,27 @@ public class AddHandleDialog extends javax.swing.JDialog {
         panButtons.setLayout(new java.awt.GridLayout(1, 0, 10, 0));
 
         btnOK.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.btnOK.text")); // NOI18N
-        btnOK.addActionListener(new java.awt.event.ActionListener() {
-
+        btnOK.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnOKActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(btnOK);
 
-        btnCancel.setText(org.openide.util.NbBundle.getMessage(
-                AddHandleDialog.class,
-                "AddHandleDialog.btnCancel.text")); // NOI18N
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-
+        btnCancel.setText(
+            org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.btnCancel.text")
+        ); // NOI18N
+        btnCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(btnCancel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -383,7 +389,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         returnStatus = STATUS_OK;
         dispose();
-    }                                                                         //GEN-LAST:event_btnOKActionPerformed
+    } //GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -393,7 +399,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    } //GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -402,7 +408,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      */
     private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sliDistanceStateChanged
         sliderValueChanged();
-    }                                                                               //GEN-LAST:event_sliDistanceStateChanged
+    } //GEN-LAST:event_sliDistanceStateChanged
 
     /**
      * DOCUMENT ME!
@@ -411,7 +417,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         setDistanceToLeft(distanceTotal / 2d);
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -421,7 +427,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     private double cut(final double value) {
-        return (int)(value * PRECISION) / PRECISION;
+        return (int) (value * PRECISION) / PRECISION;
     }
 
     /**
@@ -431,7 +437,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für den Slider kurzfristig deaktivieren (sonst endlos-Schleife)
         sliderLocked = true;
         try {
-            setDistanceToLeft((sliDistance.getValue() / (double)sliDistance.getMaximum()) * distanceTotal);
+            setDistanceToLeft((sliDistance.getValue() / (double) sliDistance.getMaximum()) * distanceTotal);
         } finally {
             // update für den Slider wieder aktivieren
             sliderLocked = false;
@@ -451,10 +457,10 @@ public class AddHandleDialog extends javax.swing.JDialog {
             allLocked = true;
             this.distanceToLeft = distanceToLeft;
             try {
-                if (!sliderLocked) {      // Endlos-Schleife vermeiden
-                    sliDistance.setValue((int)((this.distanceToLeft / this.distanceTotal) * sliDistance.getMaximum()));
+                if (!sliderLocked) { // Endlos-Schleife vermeiden
+                    sliDistance.setValue((int) ((this.distanceToLeft / this.distanceTotal) * sliDistance.getMaximum()));
                 }
-                if (!updateLeftLocked) {  // Endlos-Schleife vermeiden
+                if (!updateLeftLocked) { // Endlos-Schleife vermeiden
                     jSpinner1.setValue(cut(this.distanceToLeft));
                 }
                 if (!updateRightLocked) { // Endlos-Schleife vermeiden
@@ -482,7 +488,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für das linke Feld kurzfristig deaktivieren (sonst endlos-Schleife)
         updateLeftLocked = true;
         try {
-            final double value = (Double)jSpinner1.getValue();
+            final double value = (Double) jSpinner1.getValue();
             if (cut(this.distanceToLeft) != value) {
                 // Abstand vom linken Punkt anhand des linken Feldes setzen
                 setDistanceToLeft(value);
@@ -500,7 +506,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für das rechte Feld kurzfristig deaktivieren (sonst endlos-Schleife)
         updateRightLocked = true;
         try {
-            final double value = (Double)jSpinner2.getValue();
+            final double value = (Double) jSpinner2.getValue();
             if (cut(getDistanceToRight()) != value) {
                 // Abstand vom linken Punkt anhand des Wertes im linken Feld berechnen
                 setDistanceToRight(value);
@@ -558,8 +564,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
         allLocked = true;
         try {
             sliDistance.setMaximum(sliDistance.getWidth());
-            ((SpinnerNumberModel)jSpinner1.getModel()).setMaximum(distanceTotal);
-            ((SpinnerNumberModel)jSpinner2.getModel()).setMaximum(distanceTotal);
+            ((SpinnerNumberModel) jSpinner1.getModel()).setMaximum(distanceTotal);
+            ((SpinnerNumberModel) jSpinner2.getModel()).setMaximum(distanceTotal);
         } finally {
             allLocked = false;
         }
@@ -572,22 +578,24 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final AddHandleDialog dialog = getInstance();
                     dialog.pack();
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
+                    dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
                             @Override
                             public void windowClosing(final java.awt.event.WindowEvent e) {
                                 System.exit(0);
                             }
-                        });
+                        }
+                    );
                     dialog.setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     @Override
@@ -667,8 +675,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
          */
         public mySliderUI(final JSlider aSlider) {
             super(aSlider);
-            this.newPointImage = new javax.swing.ImageIcon(getClass().getResource(
-                        "/de/cismet/cismap/commons/gui/piccolo/newPoint.png")).getImage();
+            this.newPointImage =
+                new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/newPoint.png"))
+                    .getImage();
         }
 
         //~ Methods ------------------------------------------------------------

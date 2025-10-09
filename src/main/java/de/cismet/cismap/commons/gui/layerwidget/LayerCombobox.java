@@ -1,27 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import java.awt.Component;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
-
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.Icon;
@@ -36,9 +34,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.rasterservice.MapService;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -57,8 +53,7 @@ public class LayerCombobox extends JComboBox {
     /**
      * Creates a new LayerCombobox object.
      */
-    public LayerCombobox() {
-    }
+    public LayerCombobox() {}
 
     /**
      * Creates a new LayerCombobox object.
@@ -98,18 +93,20 @@ public class LayerCombobox extends JComboBox {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public Component getListCellRendererComponent(final JList<?> list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
+        public Component getListCellRendererComponent(
+            final JList<?> list,
+            final Object value,
+            final int index,
+            final boolean isSelected,
+            final boolean cellHasFocus
+        ) {
             final Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
             if (c instanceof JLabel) {
-                final JLabel lbl = (JLabel)c;
+                final JLabel lbl = (JLabel) c;
 
                 if (value instanceof DefaultLayerFilter) {
-                    final DefaultLayerFilter lf = (DefaultLayerFilter)value;
+                    final DefaultLayerFilter lf = (DefaultLayerFilter) value;
 
                     if (lf.getIcon() != null) {
                         lbl.setIcon(lf.getIcon());
@@ -117,7 +114,7 @@ public class LayerCombobox extends JComboBox {
                 }
 
                 if (value instanceof SingleLayerFilter) {
-                    final SingleLayerFilter lf = (SingleLayerFilter)value;
+                    final SingleLayerFilter lf = (SingleLayerFilter) value;
 
                     if (lf.getDepth() > 0) {
                         lbl.setBorder(new EmptyBorder(0, lf.getDepth() * indent, 0, 0));
@@ -154,8 +151,8 @@ public class LayerCombobox extends JComboBox {
             this.layerModel = layerModel;
             this.themeLayerWidget = themeLayerWidget;
 
-            layerModel.addTreeModelListener(new TreeModelListener() {
-
+            layerModel.addTreeModelListener(
+                new TreeModelListener() {
                     @Override
                     public void treeNodesChanged(final TreeModelEvent e) {
                         // This means, that the layer was disabled, the visibility was changed, the name was changed or
@@ -176,7 +173,8 @@ public class LayerCombobox extends JComboBox {
                     public void treeStructureChanged(final TreeModelEvent e) {
                         initModel();
                     }
-                });
+                }
+            );
 
             initModel();
         }
@@ -219,7 +217,7 @@ public class LayerCombobox extends JComboBox {
                 final Object layer = map.get(key);
 
                 if (layer instanceof Collection) {
-                    entryList.addAll(getLayersFromCollection((Collection)layer, 1));
+                    entryList.addAll(getLayersFromCollection((Collection) layer, 1));
                 } else {
                     entryList.add(new SingleLayerFilter(layer, 0));
                 }
@@ -250,7 +248,7 @@ public class LayerCombobox extends JComboBox {
 
             for (final Object subLayer : layer) {
                 if (subLayer instanceof Collection) {
-                    entryList.addAll(getLayersFromCollection((Collection)subLayer, depth + 1));
+                    entryList.addAll(getLayersFromCollection((Collection) subLayer, depth + 1));
                 } else {
                     entryList.add(new SingleLayerFilter(subLayer, depth));
                 }
@@ -333,8 +331,8 @@ public class LayerCombobox extends JComboBox {
             this.model = model;
             setTopMostLayer();
 
-            model.addTreeModelListener(new TreeModelListener() {
-
+            model.addTreeModelListener(
+                new TreeModelListener() {
                     @Override
                     public void treeNodesChanged(final TreeModelEvent e) {
                         setTopMostLayer();
@@ -354,7 +352,8 @@ public class LayerCombobox extends JComboBox {
                     public void treeStructureChanged(final TreeModelEvent e) {
                         setTopMostLayer();
                     }
-                });
+                }
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -415,8 +414,8 @@ public class LayerCombobox extends JComboBox {
             this.model = model;
             setVisibleLayerFilterLayer();
 
-            model.addTreeModelListener(new TreeModelListener() {
-
+            model.addTreeModelListener(
+                new TreeModelListener() {
                     @Override
                     public void treeNodesChanged(final TreeModelEvent e) {
                         setVisibleLayerFilterLayer();
@@ -436,7 +435,8 @@ public class LayerCombobox extends JComboBox {
                     public void treeStructureChanged(final TreeModelEvent e) {
                         setVisibleLayerFilterLayer();
                     }
-                });
+                }
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -486,8 +486,8 @@ public class LayerCombobox extends JComboBox {
             this.model = model;
             setSelectableLayerFilterLayer();
 
-            model.addTreeModelListener(new TreeModelListener() {
-
+            model.addTreeModelListener(
+                new TreeModelListener() {
                     @Override
                     public void treeNodesChanged(final TreeModelEvent e) {
                         setSelectableLayerFilterLayer();
@@ -507,7 +507,8 @@ public class LayerCombobox extends JComboBox {
                     public void treeStructureChanged(final TreeModelEvent e) {
                         setSelectableLayerFilterLayer();
                     }
-                });
+                }
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -521,7 +522,7 @@ public class LayerCombobox extends JComboBox {
 
             for (final Integer key : map.keySet()) {
                 final MapService service = map.get(key);
-                if ((service instanceof AbstractFeatureService) && ((AbstractFeatureService)service).isSelectable()) {
+                if ((service instanceof AbstractFeatureService) && ((AbstractFeatureService) service).isSelectable()) {
                     selectableLayer.add(service);
                 }
             }
@@ -557,14 +558,15 @@ public class LayerCombobox extends JComboBox {
             this.themeLayer = themeLayer;
             setSelectedLayers();
 
-            themeLayer.addTreeSelectionListener(new TreeSelectionListener() {
-
+            themeLayer.addTreeSelectionListener(
+                new TreeSelectionListener() {
                     @Override
                     public void valueChanged(final TreeSelectionEvent e) {
                         setSelectedLayers();
                         model.initModel();
                     }
-                });
+                }
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -581,7 +583,7 @@ public class LayerCombobox extends JComboBox {
                     final Object o = path.getLastPathComponent();
 
                     if (o instanceof MapService) {
-                        selectedLayer.add((MapService)o);
+                        selectedLayer.add((MapService) o);
                     }
                 }
             }

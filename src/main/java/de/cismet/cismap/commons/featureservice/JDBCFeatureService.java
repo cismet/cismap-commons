@@ -1,25 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
+import java.util.List;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -38,8 +35,9 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
     protected String databasePath;
     protected String tableName;
     protected String query;
-//    protected String encryptedDatabasePassword;
-//    protected String databaseUser;
+
+    //    protected String encryptedDatabasePassword;
+    //    protected String databaseUser;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -76,10 +74,12 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public JDBCFeatureService(final String name,
-            final String databasePath,
-            final String tableName,
-            final List<FeatureServiceAttribute> attributes) throws Exception {
+    public JDBCFeatureService(
+        final String name,
+        final String databasePath,
+        final String tableName,
+        final List<FeatureServiceAttribute> attributes
+    ) throws Exception {
         super(name, attributes);
         this.databasePath = databasePath;
         substituteHome();
@@ -95,7 +95,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
      * DOCUMENT ME!
      */
     private void substituteHome() {
-        final String home = System.getProperty("user.home");         // NOI18N
+        final String home = System.getProperty("user.home"); // NOI18N
         final String fileSep = System.getProperty("file.separator"); // NOI18N
         databasePath = databasePath.replace("~", home);
     }
@@ -119,9 +119,9 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         final Element parentElement = super.toElement();
         final Element daPath = new Element("databasePath"); // NOI18N
         daPath.setText(databasePath);
-        final Element tabName = new Element("tableName");   // NOI18N
+        final Element tabName = new Element("tableName"); // NOI18N
         tabName.setText(tableName);
-        final Element queryElement = new Element("query");  // NOI18N
+        final Element queryElement = new Element("query"); // NOI18N
         queryElement.setText(query);
         parentElement.addContent(queryElement);
         parentElement.addContent(daPath);
@@ -140,8 +140,8 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
         this.setDatabasePath(element.getChildText("databasePath").trim()); // NOI18N
-        this.setTableName(element.getChildText("tableName").trim());       // NOI18N
-        this.setQuery(element.getChildText("query").trim());               // NOI18N
+        this.setTableName(element.getChildText("tableName").trim()); // NOI18N
+        this.setQuery(element.getChildText("query").trim()); // NOI18N
     }
 
     @Override
@@ -194,7 +194,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
     public void setTableName(final String tableName) {
         this.tableName = tableName;
         if (featureFactory != null) {
-            ((JDBCFeatureFactory)featureFactory).setTableName(tableName);
+            ((JDBCFeatureFactory) featureFactory).setTableName(tableName);
         }
     }
 
@@ -204,6 +204,6 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
      * @param  crs  DOCUMENT ME!
      */
     public void setCrs(final Crs crs) {
-        ((JDBCFeatureFactory)featureFactory).setCrs(crs);
+        ((JDBCFeatureFactory) featureFactory).setCrs(crs);
     }
 }

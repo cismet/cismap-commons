@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.demo;
-//import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
-
-import java.awt.Image;
 
 import de.cismet.cismap.commons.rasterservice.HTTPImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+//import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+import java.awt.Image;
 
 /**
  * DOCUMENT ME!
@@ -46,6 +45,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
     private javax.swing.JProgressBar prBar;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -107,89 +107,124 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
         panMain.setMinimumSize(new java.awt.Dimension(100, 100));
         getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalAuthDemo.class, "ImageRetrievalAuthDemo.jButton1.text")
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         getContentPane().add(jButton1, java.awt.BorderLayout.NORTH);
 
-        fileMenu.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.fileMenu.text")); // NOI18N
+        fileMenu.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalAuthDemo.class, "ImageRetrievalAuthDemo.fileMenu.text")
+        ); // NOI18N
 
-        openMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        openMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.openMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.openMenuItem.text"
+            )
+        ); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        saveMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.saveMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.saveMenuItem.text"
+            )
+        ); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        saveAsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.saveAsMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.saveAsMenuItem.text"
+            )
+        ); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        exitMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.exitMenuItem.text")); // NOI18N
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-
+                "ImageRetrievalAuthDemo.exitMenuItem.text"
+            )
+        ); // NOI18N
+        exitMenuItem.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     exitMenuItemActionPerformed(evt);
                 }
-            });
+            }
+        );
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(org.openide.util.NbBundle.getMessage(
+        editMenu.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.editMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.editMenuItem.text"
+            )
+        ); // NOI18N
 
-        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        cutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.cutMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.cutMenuItem.text"
+            )
+        ); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        copyMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.copyMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.copyMenuItem.text"
+            )
+        ); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        pasteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.pasteMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.pasteMenuItem.text"
+            )
+        ); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        deleteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.deleteMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.deleteMenuItem.text"
+            )
+        ); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.helpMenu.text")); // NOI18N
+        helpMenu.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalAuthDemo.class, "ImageRetrievalAuthDemo.helpMenu.text")
+        ); // NOI18N
 
-        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        contentsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.contentsMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.contentsMenuItem.text"
+            )
+        ); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+        aboutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(
                 ImageRetrievalAuthDemo.class,
-                "ImageRetrievalAuthDemo.aboutMenuItem.text")); // NOI18N
+                "ImageRetrievalAuthDemo.aboutMenuItem.text"
+            )
+        ); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -199,6 +234,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
         final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((screenSize.width - 400) / 2, (screenSize.height - 300) / 2, 400, 300);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * new.
      *
@@ -212,7 +248,8 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
             // ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");
             // ir.setUrl("http://demo.deegree.org:8080/deegree/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/jpg&TRANSPARENT=false&WIDTH=400&HEIGHT=400&EXCEPTIONS=application/vnd.ogc.se_inimage&BGCOLOR=0xffffff&BBOX=3435804.0066602235,5790675.39930195,3437080.4463269715,5791951.838968698&LAYERS=osnabrueck%3Agruenpolyl,osnabrueck%3Agewaessepoly,osnabrueck%3Agewaesserlinien,osnabrueck%3Astrassen,osnabrueck%3Asights&STYLES=default,default,default,default,default&SRS=EPSG:31467");
             ir.setUrl(
-                "http://localhost:8080/deegree2/ogcwebservice?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&WIDTH=674&HEIGHT=527&LAYERS=StateBoundary&TRANSPARENT=TRUE&FORMAT=image/jpg&BBOX=-39862.32289224541,3995357.845975933,919186.2219233183,4745237.049414809&SRS=EPSG:26912&STYLES="); // NOI18N
+                "http://localhost:8080/deegree2/ogcwebservice?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&WIDTH=674&HEIGHT=527&LAYERS=StateBoundary&TRANSPARENT=TRUE&FORMAT=image/jpg&BBOX=-39862.32289224541,3995357.845975933,919186.2219233183,4745237.049414809&SRS=EPSG:26912&STYLES="
+            ); // NOI18N
             ir.start();
         } else {
             ir.endRetrieval();
@@ -220,10 +257,11 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
             // ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");
             // ir.setUrl("http://demo.deegree.org:8080/deegree/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/jpg&TRANSPARENT=false&WIDTH=400&HEIGHT=400&EXCEPTIONS=application/vnd.ogc.se_inimage&BGCOLOR=0xffffff&BBOX=3435804.0066602235,5790675.39930195,3437080.4463269715,5791951.838968698&LAYERS=osnabrueck%3Agruenpolyl,osnabrueck%3Agewaessepoly,osnabrueck%3Agewaesserlinien,osnabrueck%3Astrassen,osnabrueck%3Asights&STYLES=default,default,default,default,default&SRS=EPSG:31467");
             ir.setUrl(
-                "http://localhost:8080/deegree2/ogcwebservice?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&WIDTH=674&HEIGHT=527&LAYERS=StateBoundary&TRANSPARENT=TRUE&FORMAT=image/jpg&BBOX=-39862.32289224541,3995357.845975933,919186.2219233183,4745237.049414809&SRS=EPSG:26912&STYLES="); // NOI18N
+                "http://localhost:8080/deegree2/ogcwebservice?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&WIDTH=674&HEIGHT=527&LAYERS=StateBoundary&TRANSPARENT=TRUE&FORMAT=image/jpg&BBOX=-39862.32289224541,3995357.845975933,919186.2219233183,4745237.049414809&SRS=EPSG:26912&STYLES="
+            ); // NOI18N
             ir.start();
         }
-    }                                                                                                                                                                                                                                                                                      //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -232,7 +270,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
      */
     private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
-    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+    } //GEN-LAST:event_exitMenuItemActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -240,35 +278,36 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     new ImageRetrievalDemo().setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     @Override
-    public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-    }
+    public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {}
 
     @Override
     public void retrievalProgress(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         final double p = e.getPercentageDone();
         System.out.println(p);
         if (true || (p > prBar.getValue())) {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-
+            java.awt.EventQueue.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         if (prBar.isIndeterminate()) {
                             prBar.setIndeterminate(false);
                         }
-                        prBar.setValue((int)p);
+                        prBar.setValue((int) p);
                         // prBar.setString(new Double(p).toString());
                     }
-                });
+                }
+            );
         }
     }
 
@@ -282,7 +321,7 @@ public class ImageRetrievalAuthDemo extends javax.swing.JFrame implements Retrie
         final Object o = e.getRetrievedObject();
         Image i = null;
         if (o instanceof Image) {
-            i = (Image)o;
+            i = (Image) o;
         }
         panMain.getGraphics().drawImage(i, 0, 0, this);
     }

@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.demo;
-//import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
-
-import java.awt.Image;
 
 import de.cismet.cismap.commons.rasterservice.HTTPImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+//import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
+
+import java.awt.Image;
 
 /**
  * DOCUMENT ME!
@@ -46,6 +45,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
     private javax.swing.JProgressBar prBar;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -107,89 +107,91 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         panMain.setMinimumSize(new java.awt.Dimension(100, 100));
         getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.jButton1.text")
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         getContentPane().add(jButton1, java.awt.BorderLayout.NORTH);
 
-        fileMenu.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.fileMenu.text")); // NOI18N
+        fileMenu.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.fileMenu.text")
+        ); // NOI18N
 
-        openMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.openMenuItem.text")
+        ); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.saveMenuItem.text")
+        ); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.saveAsMenuItem.text")); // NOI18N
+        saveAsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.saveAsMenuItem.text")
+        ); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.exitMenuItem.text")); // NOI18N
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-
+        exitMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.exitMenuItem.text")
+        ); // NOI18N
+        exitMenuItem.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     exitMenuItemActionPerformed(evt);
                 }
-            });
+            }
+        );
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.editMenu.text")); // NOI18N
+        editMenu.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.editMenu.text")
+        ); // NOI18N
 
-        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.cutMenuItem.text")); // NOI18N
+        cutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.cutMenuItem.text")
+        ); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.copyMenuItem.text")
+        ); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.pasteMenuItem.text")
+        ); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.deleteMenuItem.text")
+        ); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.helpMenu.text")); // NOI18N
+        helpMenu.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.helpMenu.text")
+        ); // NOI18N
 
-        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.contentsMenuItem.text")
+        ); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                ImageRetrievalDemo.class,
-                "ImageRetrievalDemo.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.aboutMenuItem.text")
+        ); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -212,16 +214,18 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         if (ir == null) {
             ir = new HTTPImageRetrieval(this);
             ir.setUrl(
-                "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig"); // NOI18N
+                "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig"
+            ); // NOI18N
             ir.start();
         } else {
             ir.endRetrieval();
             ir = new HTTPImageRetrieval(this);
             ir.setUrl(
-                "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig"); // NOI18N
+                "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig"
+            ); // NOI18N
             ir.start();
         }
-    }                                                                                                                                                                                                                                                                                                                                                                                           //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -230,7 +234,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
      */
     private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
-    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+    } //GEN-LAST:event_exitMenuItemActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -238,35 +242,36 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     new ImageRetrievalDemo().setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     @Override
-    public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-    }
+    public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {}
 
     @Override
     public void retrievalProgress(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         final double p = e.getPercentageDone();
         System.out.println(p);
         if (true || (p > prBar.getValue())) {
-            java.awt.EventQueue.invokeLater(new Runnable() {
-
+            java.awt.EventQueue.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         if (prBar.isIndeterminate()) {
                             prBar.setIndeterminate(false);
                         }
-                        prBar.setValue((int)p);
+                        prBar.setValue((int) p);
                         // prBar.setString(new Double(p).toString());
                     }
-                });
+                }
+            );
         }
     }
 
@@ -280,12 +285,11 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         final Object o = e.getRetrievedObject();
         Image i = null;
         if (o instanceof Image) {
-            i = (Image)o;
+            i = (Image) o;
         }
         panMain.getGraphics().drawImage(i, 0, 0, this);
     }
 
     @Override
-    public void retrievalAborted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-    }
+    public void retrievalAborted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {}
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -15,7 +15,6 @@
 package de.cismet.cismap.commons.gpx;
 
 import java.math.BigDecimal;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -49,25 +48,16 @@ public class BoundsType {
 
     //~ Instance fields --------------------------------------------------------
 
-    @XmlAttribute(
-        name = "minlat",
-        required = true
-    )
+    @XmlAttribute(name = "minlat", required = true)
     protected BigDecimal minlat;
-    @XmlAttribute(
-        name = "minlon",
-        required = true
-    )
+
+    @XmlAttribute(name = "minlon", required = true)
     protected BigDecimal minlon;
-    @XmlAttribute(
-        name = "maxlat",
-        required = true
-    )
+
+    @XmlAttribute(name = "maxlat", required = true)
     protected BigDecimal maxlat;
-    @XmlAttribute(
-        name = "maxlon",
-        required = true
-    )
+
+    @XmlAttribute(name = "maxlon", required = true)
     protected BigDecimal maxlon;
 
     //~ Methods ----------------------------------------------------------------

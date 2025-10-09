@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
 import de.cismet.cismap.commons.features.Feature;
@@ -19,7 +19,6 @@ import de.cismet.cismap.commons.features.FeatureNameProvider;
  * @version  1.0, 15.11.2011
  */
 public interface FeatureGroupMember extends Feature, FeatureNameProvider {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

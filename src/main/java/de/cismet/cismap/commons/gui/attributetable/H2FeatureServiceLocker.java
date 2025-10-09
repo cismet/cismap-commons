@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,15 +12,13 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import org.apache.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -39,11 +37,11 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
 
     @Override
     public Object lock(final List<Feature> features, final boolean multiLockForSameUserAllowed)
-            throws LockAlreadyExistsException, Exception {
+        throws LockAlreadyExistsException, Exception {
         final List<Lock> locks = new ArrayList<Lock>();
 
         for (final Feature f : features) {
-            locks.add((Lock)lock(f, multiLockForSameUserAllowed));
+            locks.add((Lock) lock(f, multiLockForSameUserAllowed));
         }
 
         return locks;
@@ -51,12 +49,16 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
 
     @Override
     public Object lock(final Feature feature, final boolean multiLockForSameUserAllowed)
-            throws LockAlreadyExistsException, Exception {
-        if ((feature instanceof JDBCFeature)
-                    && (((JDBCFeature)feature).getLayerProperties().getFeatureService() instanceof H2FeatureService)) {
-            final JDBCFeature jdbcFeature = (JDBCFeature)feature;
+        throws LockAlreadyExistsException, Exception {
+        if (
+            (feature instanceof JDBCFeature) &&
+            (((JDBCFeature) feature).getLayerProperties().getFeatureService() instanceof H2FeatureService)
+        ) {
+            final JDBCFeature jdbcFeature = (JDBCFeature) feature;
             try {
-                final H2FeatureService service = (H2FeatureService)jdbcFeature.getLayerProperties().getFeatureService();
+                final H2FeatureService service = (H2FeatureService) jdbcFeature
+                    .getLayerProperties()
+                    .getFeatureService();
 
                 try {
                     H2FeatureService.lockFeature(jdbcFeature.getId(), service.getTableName());
@@ -80,10 +82,10 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
 
     @Override
     public Object lock(final AbstractFeatureService service, final boolean multiLockForSameUserAllowed)
-            throws LockAlreadyExistsException, Exception {
+        throws LockAlreadyExistsException, Exception {
         if (service instanceof H2FeatureService) {
             try {
-                final H2FeatureService h2Service = (H2FeatureService)service;
+                final H2FeatureService h2Service = (H2FeatureService) service;
 
                 try {
                     H2FeatureService.lockFeature(null, h2Service.getTableName());
@@ -109,7 +111,7 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
     public void unlock(final Object unlockObject) throws Exception {
         if (unlockObject instanceof Lock) {
             try {
-                final Lock lock = (Lock)unlockObject;
+                final Lock lock = (Lock) unlockObject;
 
                 H2FeatureService.unlockFeature(lock.getFeatureId(), lock.getTableName());
             } catch (Exception e) {
@@ -117,7 +119,7 @@ public class H2FeatureServiceLocker implements FeatureLockingInterface {
                 throw new Exception("Cannot lock object");
             }
         } else if (unlockObject instanceof List) {
-            for (final Object o : (List)unlockObject) {
+            for (final Object o : (List) unlockObject) {
                 unlock(o);
             }
         } else {

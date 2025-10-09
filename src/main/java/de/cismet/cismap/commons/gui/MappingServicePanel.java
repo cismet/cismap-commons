@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
 /**
@@ -24,6 +24,7 @@ public class MappingServicePanel extends javax.swing.JPanel {
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToggleButton jToggleButton2;
     private javax.swing.JToggleButton jToggleButton3;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -55,38 +56,39 @@ public class MappingServicePanel extends javax.swing.JPanel {
         setLayout(new java.awt.BorderLayout());
         add(jTabbedPane1, java.awt.BorderLayout.CENTER);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(
-                MappingServicePanel.class,
-                "MappingServicePanel.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.setText(
+            org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jButton1.text")
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton1);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                MappingServicePanel.class,
-                "MappingServicePanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jLabel1.text")
+        ); // NOI18N
         jPanel2.add(jLabel1);
 
-        jToggleButton1.setText(org.openide.util.NbBundle.getMessage(
-                MappingServicePanel.class,
-                "MappingServicePanel.jToggleButton1.text")); // NOI18N
+        jToggleButton1.setText(
+            org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton1.text")
+        ); // NOI18N
         jPanel2.add(jToggleButton1);
 
-        jToggleButton2.setText(org.openide.util.NbBundle.getMessage(
-                MappingServicePanel.class,
-                "MappingServicePanel.jToggleButton2.text")); // NOI18N
+        jToggleButton2.setText(
+            org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton2.text")
+        ); // NOI18N
         jPanel2.add(jToggleButton2);
 
-        jToggleButton3.setText(org.openide.util.NbBundle.getMessage(
-                MappingServicePanel.class,
-                "MappingServicePanel.jToggleButton3.text")); // NOI18N
+        jToggleButton3.setText(
+            org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton3.text")
+        ); // NOI18N
         jPanel2.add(jToggleButton3);
 
         add(jPanel2, java.awt.BorderLayout.SOUTH);
@@ -98,6 +100,6 @@ public class MappingServicePanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
-// TODO add your handling code here:
+        // TODO add your handling code here:
     } //GEN-LAST:event_jButton1ActionPerformed
 }

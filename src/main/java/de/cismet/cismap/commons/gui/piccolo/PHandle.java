@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * Copyright (c) 2002-@year@, University of Maryland
  * All rights reserved.
@@ -36,6 +36,7 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PDragSequenceEventHandler;
@@ -46,20 +47,15 @@ import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
-
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.InputEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
 
 /**
  * <b>PHandle</b> is used to modify some aspect of Piccolo when it is dragged. Each handle has a PLocator that it uses
@@ -75,10 +71,11 @@ public class PHandle extends PPath {
 
     public static final double DEFAULT_HANDLE_SIZE = 8;
     public static final Shape DEFAULT_HANDLE_SHAPE = new Ellipse2D.Double(
-            0f,
-            0f,
-            DEFAULT_HANDLE_SIZE,
-            DEFAULT_HANDLE_SIZE);
+        0f,
+        0f,
+        DEFAULT_HANDLE_SIZE,
+        DEFAULT_HANDLE_SIZE
+    );
     // public static Shape DEFAULT_HANDLE_SHAPE = new Rectangle.Double(0f, 0f, DEFAULT_HANDLE_SIZE,
     // DEFAULT_HANDLE_SIZE);
     public static final Color DEFAULT_COLOR = new Color(1f, 1f, 1f, 0.4f); // Color.white;
@@ -104,7 +101,7 @@ public class PHandle extends PPath {
      * @param  mc        DOCUMENT ME!
      */
     public PHandle(final PLocator aLocator, final MappingComponent mc) {
-//                super(new Rectangle2D.Double(0f, 0f, 1f,1f));
+        //                super(new Rectangle2D.Double(0f, 0f, 1f,1f));
         super(DEFAULT_HANDLE_SHAPE);
         this.mc = mc;
         // setStroke(new FixedWidthStroke());
@@ -139,21 +136,19 @@ public class PHandle extends PPath {
     /**
      * zum \u00FCberschreiben.
      */
-    public void removeHandle() {
-    }
+    public void removeHandle() {}
 
     /**
      * DOCUMENT ME!
      */
-    public void duplicateHandle() {
-    }
+    public void duplicateHandle() {}
 
     /**
      * DOCUMENT ME!
      */
     protected void installHandleEventHandlers() {
-        handleDragger = new PDragSequenceEventHandler() {
-
+        handleDragger =
+            new PDragSequenceEventHandler() {
                 @Override
                 protected void startDrag(final PInputEvent event) {
                     if (log.isDebugEnabled()) {
@@ -187,13 +182,15 @@ public class PHandle extends PPath {
                 }
             };
 
-        addPropertyChangeListener(PNode.PROPERTY_TRANSFORM, new PropertyChangeListener() {
-
+        addPropertyChangeListener(
+            PNode.PROPERTY_TRANSFORM,
+            new PropertyChangeListener() {
                 @Override
                 public void propertyChange(final PropertyChangeEvent evt) {
                     relocateHandle();
                 }
-            });
+            }
+        );
 
         handleDragger.setEventFilter(new PInputEventFilter(InputEvent.BUTTON1_MASK));
         handleDragger.getEventFilter().setMarksAcceptedEventsAsHandled(true);
@@ -205,23 +202,22 @@ public class PHandle extends PPath {
 
         // Test
         final PBasicInputEventHandler moveAndClickListener = new PBasicInputEventHandler() {
-
-                @Override
-                public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Handle Mouse Clicked"); // NOI18N
-                    }
-                    handleClicked(pInputEvent);
+            @Override
+            public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Handle Mouse Clicked"); // NOI18N
                 }
+                handleClicked(pInputEvent);
+            }
 
-                @Override
-                public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                    // log.debug("Handle Mouse Moved");
-                    if (!inDragOperation) {
-                        mouseMovedNotInDragOperation(pInputEvent);
-                    }
+            @Override
+            public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+                // log.debug("Handle Mouse Moved");
+                if (!inDragOperation) {
+                    mouseMovedNotInDragOperation(pInputEvent);
                 }
-            };
+            }
+        };
         addInputEventListener(moveAndClickListener);
     }
 
@@ -264,8 +260,7 @@ public class PHandle extends PPath {
      * @param  aLocalPoint  DOCUMENT ME!
      * @param  aEvent       DOCUMENT ME!
      */
-    public void startHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {
-    }
+    public void startHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {}
 
     /**
      * Override this method to get notified as the handle is dragged.
@@ -273,8 +268,7 @@ public class PHandle extends PPath {
      * @param  aLocalDimension  DOCUMENT ME!
      * @param  aEvent           DOCUMENT ME!
      */
-    public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
-    }
+    public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {}
 
     /**
      * Override this method to get notified when the handle stops getting dragged.
@@ -282,24 +276,21 @@ public class PHandle extends PPath {
      * @param  aLocalPoint  DOCUMENT ME!
      * @param  aEvent       DOCUMENT ME!
      */
-    public void endHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {
-    }
+    public void endHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {}
 
     /**
      * DOCUMENT ME!
      *
      * @param  pInputEvent  DOCUMENT ME!
      */
-    public void handleClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-    }
+    public void handleClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {}
 
     /**
      * DOCUMENT ME!
      *
      * @param  pInputEvent  DOCUMENT ME!
      */
-    public void mouseMovedNotInDragOperation(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-    }
+    public void mouseMovedNotInDragOperation(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {}
 
     // ****************************************************************
     // Layout - When a handle's parent's layout changes the handle
@@ -329,28 +320,28 @@ public class PHandle extends PPath {
             mc.getCamera().viewToLocal(aPoint);
             // log.fatal("*nachher:" +  aPoint);
 
-//                      if (locator instanceof PNodeLocator) {
-//                              PNode located = ((PNodeLocator)locator).getNode();
-//                              PNode parent = getParent();
-//
-//                              located.localToGlobal(aPoint);
-//                              globalToLocal(aPoint);
-//
-//                              if (parent != located && parent instanceof PCamera) {
-//                                      ((PCamera)parent).viewToLocal(aPoint);
-//                              }
-//                      }
+            //                      if (locator instanceof PNodeLocator) {
+            //                              PNode located = ((PNodeLocator)locator).getNode();
+            //                              PNode parent = getParent();
+            //
+            //                              located.localToGlobal(aPoint);
+            //                              globalToLocal(aPoint);
+            //
+            //                              if (parent != located && parent instanceof PCamera) {
+            //                                      ((PCamera)parent).viewToLocal(aPoint);
+            //                              }
+            //                      }
 
             final double newCenterX = aPoint.getX();
             final double newCenterY = aPoint.getY();
 
-            if ((newCenterX != b.getCenterX())
-                        || (newCenterY != b.getCenterY())) {
+            if ((newCenterX != b.getCenterX()) || (newCenterY != b.getCenterY())) {
                 this.setBounds(0, 0, DEFAULT_HANDLE_SIZE, DEFAULT_HANDLE_SIZE);
                 centerBoundsOnPoint(newCenterX, newCenterY);
             }
         }
     }
+
     /**
      * Serialization.****************************************************************
      *
@@ -363,6 +354,7 @@ public class PHandle extends PPath {
         in.defaultReadObject();
         installHandleEventHandlers();
     }
+
     /**
      * double scale=-1; public void paint(PPaintContext aPaintContext) { super.paint(aPaintContext); //// double
      * newscale=aPaintContext.getScale(); //// if (scale!=newscale) { //// double

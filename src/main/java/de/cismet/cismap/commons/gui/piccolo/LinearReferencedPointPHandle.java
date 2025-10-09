@@ -1,27 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.util.PBounds;
-import edu.umd.cs.piccolo.util.PDimension;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import pswing.PSwing;
-import pswing.PSwingCanvas;
-
-import java.awt.geom.Point2D;
-
-import java.text.Format;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -29,6 +16,14 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointF
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeatureListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.util.PBounds;
+import edu.umd.cs.piccolo.util.PDimension;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.geom.Point2D;
+import java.text.Format;
+import pswing.PSwing;
+import pswing.PSwingCanvas;
 
 /**
  * DOCUMENT ME!
@@ -41,7 +36,8 @@ public class LinearReferencedPointPHandle extends PHandle {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            LinearReferencedPointPHandle.class);
+        LinearReferencedPointPHandle.class
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -57,8 +53,8 @@ public class LinearReferencedPointPHandle extends PHandle {
      * @param  pfeature  DOCUMENT ME!
      */
     public LinearReferencedPointPHandle(final PFeature pfeature) {
-        super(new PLocator() {
-
+        super(
+            new PLocator() {
                 @Override
                 public double locateX() {
                     try {
@@ -76,24 +72,27 @@ public class LinearReferencedPointPHandle extends PHandle {
                         return -1;
                     }
                 }
-            }, pfeature.getViewer());
-
+            },
+            pfeature.getViewer()
+        );
         this.pfeature = pfeature;
 
         initPanel();
 
-        ((LinearReferencedPointFeature)pfeature.getFeature()).addListener(new LinearReferencedPointFeatureListener() {
+        ((LinearReferencedPointFeature) pfeature.getFeature()).addListener(
+                new LinearReferencedPointFeatureListener() {
+                    @Override
+                    public void featureMoved(final LinearReferencedPointFeature pointFeature) {
+                        relocateHandle();
+                    }
 
-                @Override
-                public void featureMoved(final LinearReferencedPointFeature pointFeature) {
-                    relocateHandle();
+                    @Override
+                    public void featureMerged(
+                        final LinearReferencedPointFeature withPoint,
+                        final LinearReferencedPointFeature mergePoint
+                    ) {}
                 }
-
-                @Override
-                public void featureMerged(final LinearReferencedPointFeature withPoint,
-                        final LinearReferencedPointFeature mergePoint) {
-                }
-            });
+            );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -113,7 +112,7 @@ public class LinearReferencedPointPHandle extends PHandle {
     private void initPanel() {
         infoPanel = new LinearReferencedPointInfoPanel();
 
-        pswingComp = new PSwing((PSwingCanvas)pfeature.getViewer(), infoPanel);
+        pswingComp = new PSwing((PSwingCanvas) pfeature.getViewer(), infoPanel);
         infoPanel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
@@ -126,38 +125,57 @@ public class LinearReferencedPointPHandle extends PHandle {
 
                 final WorldToScreenTransform wtst = pfeature.getViewer().getWtst();
 
-                final LinearReferencedPointFeature linref = (LinearReferencedPointFeature)pfeature.getFeature();
+                final LinearReferencedPointFeature linref = (LinearReferencedPointFeature) pfeature.getFeature();
 
                 final Point2D dragPoint = pInputEvent.getPosition();
                 final Coordinate coord = new Coordinate(
-                        wtst.getSourceX(dragPoint.getX()),
-                        wtst.getSourceY(dragPoint.getY()));
+                    wtst.getSourceX(dragPoint.getX()),
+                    wtst.getSourceY(dragPoint.getY())
+                );
 
                 Coordinate snapPoint = null;
 
-                if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
-                            && MappingComponent.SnappingMode.POINT.equals(
-                                CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
-                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
+                if (
+                    CismapBroker.getInstance().getMappingComponent().isSnappingEnabled() &&
+                    MappingComponent.SnappingMode.POINT.equals(
+                        CismapBroker.getInstance().getMappingComponent().getSnappingMode()
+                    )
+                ) {
+                    snapPoint =
+                        PFeatureTools.getNearestCoordinateInArea(
                             CismapBroker.getInstance().getMappingComponent(),
-                            CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
-                                (Point2D)dragPoint.clone()),
+                            CismapBroker
+                                .getInstance()
+                                .getMappingComponent()
+                                .getCamera()
+                                .viewToLocal((Point2D) dragPoint.clone()),
                             false,
-                            null);
-                } else if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
-                            && MappingComponent.SnappingMode.LINE.equals(
-                                CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
-                    final Geometry g = ((LinearReferencedPointFeature)pfeature.getFeature()).getLineGeometry();
+                            null
+                        );
+                } else if (
+                    CismapBroker.getInstance().getMappingComponent().isSnappingEnabled() &&
+                    MappingComponent.SnappingMode.LINE.equals(
+                        CismapBroker.getInstance().getMappingComponent().getSnappingMode()
+                    )
+                ) {
+                    final Geometry g = ((LinearReferencedPointFeature) pfeature.getFeature()).getLineGeometry();
                     final Feature routeFeature = getFeatureFromGeom(g);
-                    CismapBroker.getInstance()
-                            .setSnappingVetoFeature(CismapBroker.getInstance().getMappingComponent().getPFeatureHM()
-                                .get(routeFeature));
-                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
+                    CismapBroker
+                        .getInstance()
+                        .setSnappingVetoFeature(
+                            CismapBroker.getInstance().getMappingComponent().getPFeatureHM().get(routeFeature)
+                        );
+                    snapPoint =
+                        PFeatureTools.getNearestCoordinateInArea(
                             CismapBroker.getInstance().getMappingComponent(),
-                            CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
-                                (Point2D)dragPoint.clone()),
+                            CismapBroker
+                                .getInstance()
+                                .getMappingComponent()
+                                .getCamera()
+                                .viewToLocal((Point2D) dragPoint.clone()),
                             true,
-                            null);
+                            null
+                        );
                 }
 
                 if (snapPoint != null) {
@@ -188,7 +206,7 @@ public class LinearReferencedPointPHandle extends PHandle {
     @Override
     public void endHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {
         super.endHandleDrag(aLocalPoint, aEvent);
-        final LinearReferencedPointFeature linref = (LinearReferencedPointFeature)pfeature.getFeature();
+        final LinearReferencedPointFeature linref = (LinearReferencedPointFeature) pfeature.getFeature();
         linref.moveFinished();
     }
 
@@ -197,11 +215,11 @@ public class LinearReferencedPointPHandle extends PHandle {
         super.relocateHandle();
 
         if (pfeature != null) {
-            final LinearReferencedPointFeature linref = (LinearReferencedPointFeature)pfeature.getFeature();
+            final LinearReferencedPointFeature linref = (LinearReferencedPointFeature) pfeature.getFeature();
 
             String info = "";
 
-            final Format infoFormat = ((LinearReferencedPointFeature)pfeature.getFeature()).getInfoFormat();
+            final Format infoFormat = ((LinearReferencedPointFeature) pfeature.getFeature()).getInfoFormat();
             if (infoFormat != null) {
                 info = infoFormat.format(linref.getCurrentPosition());
             } else {

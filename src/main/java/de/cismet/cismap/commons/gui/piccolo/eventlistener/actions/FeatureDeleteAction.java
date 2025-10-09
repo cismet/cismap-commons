@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureDeleteAction.java
  *
@@ -65,9 +65,10 @@ public class FeatureDeleteAction implements CustomAction {
     public String info() {
         //
         return org.openide.util.NbBundle.getMessage(
-                FeatureDeleteAction.class,
-                "FeatureDeleteAction.info().return",
-                new Object[] { f }); // NOI18N
+            FeatureDeleteAction.class,
+            "FeatureDeleteAction.info().return",
+            new Object[] { f }
+        ); // NOI18N
     }
 
     /**

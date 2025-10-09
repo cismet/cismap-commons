@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -19,5 +19,4 @@ import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class OverviewModeListener extends PBasicInputEventHandler {
-}
+public class OverviewModeListener extends PBasicInputEventHandler {}

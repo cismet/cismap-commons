@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
@@ -16,7 +16,6 @@ import edu.umd.cs.piccolo.PNode;
  * @version  $Revision$, $Date$
  */
 public interface PSticky {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,32 +1,27 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.tools;
 
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
+import org.apache.log4j.Logger;
 
 /**
  * A Download which can be added to the DownloadManager and saves an image to a file. The transparency of the files gets
@@ -57,16 +52,15 @@ public class MapImageDownload extends AbstractCancellableDownload {
      * @param  map           image futureImage DOCUMENT ME!
      */
     public MapImageDownload(
-            final String filename,
-            final String extension,
-            final File fileToSaveTo,
-            final MappingComponent map) {
+        final String filename,
+        final String extension,
+        final File fileToSaveTo,
+        final MappingComponent map
+    ) {
         this.extension = extension;
         this.map = map;
 
-        title = org.openide.util.NbBundle.getMessage(
-                MapImageDownload.class,
-                "MapImageDownload.title");
+        title = org.openide.util.NbBundle.getMessage(MapImageDownload.class, "MapImageDownload.title");
 
         status = State.WAITING;
         this.fileToSaveTo = fileToSaveTo;
@@ -117,15 +111,16 @@ public class MapImageDownload extends AbstractCancellableDownload {
      * @return  DOCUMENT ME!
      */
     private BufferedImage removeTransparency(final Image transparentImage) {
-        final BufferedImage whiteBackgroundImage = new BufferedImage(transparentImage.getWidth(null),
-                transparentImage.getHeight(null),
-                BufferedImage.TYPE_INT_RGB);
+        final BufferedImage whiteBackgroundImage = new BufferedImage(
+            transparentImage.getWidth(null),
+            transparentImage.getHeight(null),
+            BufferedImage.TYPE_INT_RGB
+        );
 
         Graphics2D g2 = null;
         try {
             g2 = whiteBackgroundImage.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
             g2.setColor(Color.WHITE);
             g2.fillRect(0, 0, whiteBackgroundImage.getWidth(), whiteBackgroundImage.getHeight());
@@ -136,7 +131,8 @@ public class MapImageDownload extends AbstractCancellableDownload {
                 0,
                 whiteBackgroundImage.getWidth(),
                 whiteBackgroundImage.getHeight(),
-                null);
+                null
+            );
         } finally {
             if (g2 != null) {
                 g2.dispose();
@@ -158,9 +154,9 @@ public class MapImageDownload extends AbstractCancellableDownload {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = (37 * hash)
-                    + ((this.fileToSaveTo.getAbsolutePath() != null) ? this.fileToSaveTo.getAbsolutePath().hashCode()
-                                                                     : 0);
+        hash =
+            (37 * hash) +
+            ((this.fileToSaveTo.getAbsolutePath() != null) ? this.fileToSaveTo.getAbsolutePath().hashCode() : 0);
         return hash;
     }
 

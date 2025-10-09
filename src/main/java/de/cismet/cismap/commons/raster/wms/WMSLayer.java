@@ -1,14 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
+
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.Style;
 

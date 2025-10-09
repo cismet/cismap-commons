@@ -1,32 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.featureservice;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import java.awt.Color;
-
-import java.util.HashMap;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
-
 import de.cismet.commons.wms.capabilities.Layer;
-
 import de.cismet.tools.ConnectionInfo;
+import java.awt.Color;
+import java.util.HashMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import org.apache.log4j.Logger;
+import org.jdom.CDATA;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -36,7 +29,8 @@ import de.cismet.tools.ConnectionInfo;
  * @version  $Revision$, $Date$
  */
 public class SimplePostgisFeatureService
-        extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement> implements LayerInfoProvider {
+    extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement>
+    implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -50,22 +44,34 @@ public class SimplePostgisFeatureService
             LAYER_ENABLED_VISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgis.png")));                   // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgis.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_ENABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgisInvisible.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgisInvisible.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_VISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgis.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgis.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png"))); // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png"
+                    )
+            )
+        ); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -110,23 +116,27 @@ public class SimplePostgisFeatureService
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
 
-        if (element.getChild("dbConnectionInfo") != null)                                                      // NOI18N
-        {
+        if (element.getChild("dbConnectionInfo") != null) { // NOI18N
             final ConnectionInfo newConnectionInfo = new ConnectionInfo(element.getChild("dbConnectionInfo")); // NOI18N
             this.setConnectionInfo(newConnectionInfo);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("SimplePostgisFeatureService initialised with connection: \n"
-                            + this.getConnectionInfo().getUrl() + ", " + this.getConnectionInfo().getDriver() + ", "
-                            + this.getConnectionInfo().getUser());                                             // NOI18N
+                LOG.debug(
+                    "SimplePostgisFeatureService initialised with connection: \n" +
+                    this.getConnectionInfo().getUrl() +
+                    ", " +
+                    this.getConnectionInfo().getDriver() +
+                    ", " +
+                    this.getConnectionInfo().getUser()
+                ); // NOI18N
             }
         } else {
-            LOG.error("missing element 'dbConnectionInfo' in xml configuration");                              // NOI18N
+            LOG.error("missing element 'dbConnectionInfo' in xml configuration"); // NOI18N
         }
 
         // TODO: SimpleFeatureServiceSqlStatement should implement ConvertableToXML
         this.sqlStatement = new SimpleFeatureServiceSqlStatement(element.getChild("statement").getTextTrim()); // NOI18N
-        this.sqlStatement.setAllFields(element.getChild("allFields").getTextTrim());                           // NOI18N
-        this.sqlStatement.setOrderBy(element.getChild("orderBy").getTextTrim());                               // NOI18N
+        this.sqlStatement.setAllFields(element.getChild("allFields").getTextTrim()); // NOI18N
+        this.sqlStatement.setOrderBy(element.getChild("orderBy").getTextTrim()); // NOI18N
     }
 
     /**
@@ -139,13 +149,13 @@ public class SimplePostgisFeatureService
         final Element e = super.toElement();
 
         if (this.sqlStatement != null) {
-            final Element stmnt = new Element("statement");        // NOI18N
+            final Element stmnt = new Element("statement"); // NOI18N
             stmnt.addContent(new CDATA(sqlStatement.getSqlTemplate()));
             e.addContent(stmnt);
-            final Element allFields = new Element("allFields");    // NOI18N
+            final Element allFields = new Element("allFields"); // NOI18N
             allFields.addContent(new CDATA(sqlStatement.getAllFields()));
             e.addContent(allFields);
-            final Element orderBy = new Element("orderBy");        // NOI18N
+            final Element orderBy = new Element("orderBy"); // NOI18N
             orderBy.addContent(new CDATA(sqlStatement.getOrderBy()));
             e.addContent(orderBy);
         } else {
@@ -154,14 +164,14 @@ public class SimplePostgisFeatureService
 
         if (this.connectionInfo != null) {
             // TODO: ConnectionInfo should implement ConvertableToXML
-            final Element connectionElement = new Element("dbConnectionInfo");                                         // NOI18N
+            final Element connectionElement = new Element("dbConnectionInfo"); // NOI18N
             connectionElement.addContent(new Element("driverClass").addContent(this.getConnectionInfo().getDriver())); // NOI18N
-            connectionElement.addContent(new Element("dbUrl").addContent(this.getConnectionInfo().getUrl()));          // NOI18N
-            connectionElement.addContent(new Element("user").addContent(this.getConnectionInfo().getUser()));          // NOI18N
-            connectionElement.addContent(new Element("pass").addContent(this.getConnectionInfo().getPass()));          // NOI18N
+            connectionElement.addContent(new Element("dbUrl").addContent(this.getConnectionInfo().getUrl())); // NOI18N
+            connectionElement.addContent(new Element("user").addContent(this.getConnectionInfo().getUser())); // NOI18N
+            connectionElement.addContent(new Element("pass").addContent(this.getConnectionInfo().getPass())); // NOI18N
             e.addContent(connectionElement);
         } else {
-            LOG.warn("connection info is null and cannot be saved");                                                   // NOI18N
+            LOG.warn("connection info is null and cannot be saved"); // NOI18N
         }
 
         return e;
@@ -314,8 +324,7 @@ public class SimplePostgisFeatureService
      * @param  selected  DOCUMENT ME!
      */
     @Override
-    public void setLayerQuerySelected(final boolean selected) {
-    }
+    public void setLayerQuerySelected(final boolean selected) {}
 
     /**
      * DOCUMENT ME!

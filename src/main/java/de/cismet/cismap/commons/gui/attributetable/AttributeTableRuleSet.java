@@ -1,26 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
-
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * DOCUMENT ME!
@@ -29,7 +27,6 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  * @version  $Revision$, $Date$
  */
 public interface AttributeTableRuleSet {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -43,11 +40,13 @@ public interface AttributeTableRuleSet {
      *
      * @return  the new value of the cell. Usually, the new value, if it was valid.
      */
-    Object afterEdit(final FeatureServiceFeature feature,
-            final String column,
-            final int row,
-            final Object oldValue,
-            final Object newValue);
+    Object afterEdit(
+        final FeatureServiceFeature feature,
+        final String column,
+        final int row,
+        final Object oldValue,
+        final Object newValue
+    );
 
     /**
      * DOCUMENT ME!

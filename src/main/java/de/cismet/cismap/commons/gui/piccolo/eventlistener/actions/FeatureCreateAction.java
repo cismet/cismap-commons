@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureCreateAction.java
  *
@@ -65,9 +65,10 @@ public class FeatureCreateAction implements CustomAction {
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
-                FeatureCreateAction.class,
-                "FeatureCreateAction.info().return",
-                new Object[] { f }); // NOI18N
+            FeatureCreateAction.class,
+            "FeatureCreateAction.info().return",
+            new Object[] { f }
+        ); // NOI18N
     }
 
     /**

@@ -1,17 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
-
 import java.awt.Color;
 import java.awt.Graphics;
-
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
@@ -29,13 +27,15 @@ public class LinearReferencedPointInfoPanel extends JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private ImageIcon icoRuler = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/ruler-triangle.png")); // NOI18N
+    private ImageIcon icoRuler = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/ruler-triangle.png")
+    ); // NOI18N
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private PNode pNodeParent;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblLength;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -72,13 +72,14 @@ public class LinearReferencedPointInfoPanel extends JPanel {
         lblLength.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblLength.setFont(new java.awt.Font("Tahoma", 0, 12));
         lblLength.setIcon(icoRuler);
-        lblLength.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblLength.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblLengthMouseClicked(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -92,8 +93,7 @@ public class LinearReferencedPointInfoPanel extends JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblLengthMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblLengthMouseClicked
-    }                                                                         //GEN-LAST:event_lblLengthMouseClicked
+    private void lblLengthMouseClicked(final java.awt.event.MouseEvent evt) {} //GEN-FIRST:event_lblLengthMouseClicked //GEN-LAST:event_lblLengthMouseClicked
 
     @Override
     public void paintComponent(final Graphics g) {

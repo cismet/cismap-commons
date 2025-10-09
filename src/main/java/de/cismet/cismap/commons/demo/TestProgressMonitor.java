@@ -1,16 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * TestProgressMonitor.java
  *
  * Created on 27. Juni 2005, 10:51
  */
 package de.cismet.cismap.commons.demo;
+
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
 import javax.swing.JSlider;
@@ -55,6 +56,7 @@ public class TestProgressMonitor extends javax.swing.JFrame {
     private javax.swing.JMenuItem pasteMenuItem;
     private javax.swing.JMenuItem saveAsMenuItem;
     private javax.swing.JMenuItem saveMenuItem;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -68,70 +70,71 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         jProgressBar1.add(js);
         js.setBounds(0, 0, jProgressBar1.getWidth(), jProgressBar1.getHeight());
         js.setOpaque(false);
-        js.addChangeListener(new ChangeListener() {
-
+        js.addChangeListener(
+            new ChangeListener() {
                 @Override
                 public void stateChanged(final ChangeEvent e) {
-                    jProgressBar1.setValue(((JSlider)(e.getSource())).getValue());
+                    jProgressBar1.setValue(((JSlider) (e.getSource())).getValue());
                 }
-            });
+            }
+        );
         pack();
-//        panTest.setBounds(0, 0, jdp.getWidth(), jdp.getHeight());
-//        jdp.add(panTest, 0-1);
-//        palette.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);
-//
-//
-//        jdp.add(palette);
-//        //getLayeredPane().add(palette,6);
-//
-////        p.setSize(1000,1000);
-////        p.setOpaque(false);
-//       // p.add(palette);
-//        System.out.println(palette.getDesktopPane());
-//
-//
-//
-//
-//        palette.pack();
-//        palette.show();
-//        palette.setVisible(true);
-//        palette.addMouseMotionListener(new MouseMotionAdapter() {
-//                public void   mouseDragged(MouseEvent e) {
-//                    System.out.println("+");
-//                }
-//        });
-//        palette.getDesktopPane().setDesktopManager(new DefaultDesktopManager() {
-//            int x=0;
-//            int y=0;
-//            long startTime=0;
-//            public void beginDraggingFrame(JComponent component) {
-//                x=(int)component.getLocation().getX();
-//                y=(int)component.getLocation().getY();
-//                super.beginDraggingFrame(component);
-//                startTime=System.currentTimeMillis();
-//
-//            }
-//            public void dragFrame(JComponent component, int newX, int newY) {
-//                super.dragFrame(component, newX, newY);
-//            }
-//            public void endDraggingFrame(JComponent component) {
-//                super.endDraggingFrame(component);
-//                int duration=(int)(System.currentTimeMillis()-startTime);
-//                int x2=(int)component.getLocation().getX();
-//                int y2=(int)component.getLocation().getY();
-//                double xx=((x2-x)*(x2-x));
-//                double yy=((y2-y)*(y2-y));
-//                double length=Math.sqrt(xx+yy);
-//                double velocity=length/duration;
-//                if (velocity>0.2) {
-//                    System.out.println("Schnapp");
-//                }
-//
-//
-//
-//
-//            }
-//        });
+        //        panTest.setBounds(0, 0, jdp.getWidth(), jdp.getHeight());
+        //        jdp.add(panTest, 0-1);
+        //        palette.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);
+        //
+        //
+        //        jdp.add(palette);
+        //        //getLayeredPane().add(palette,6);
+        //
+        ////        p.setSize(1000,1000);
+        ////        p.setOpaque(false);
+        //       // p.add(palette);
+        //        System.out.println(palette.getDesktopPane());
+        //
+        //
+        //
+        //
+        //        palette.pack();
+        //        palette.show();
+        //        palette.setVisible(true);
+        //        palette.addMouseMotionListener(new MouseMotionAdapter() {
+        //                public void   mouseDragged(MouseEvent e) {
+        //                    System.out.println("+");
+        //                }
+        //        });
+        //        palette.getDesktopPane().setDesktopManager(new DefaultDesktopManager() {
+        //            int x=0;
+        //            int y=0;
+        //            long startTime=0;
+        //            public void beginDraggingFrame(JComponent component) {
+        //                x=(int)component.getLocation().getX();
+        //                y=(int)component.getLocation().getY();
+        //                super.beginDraggingFrame(component);
+        //                startTime=System.currentTimeMillis();
+        //
+        //            }
+        //            public void dragFrame(JComponent component, int newX, int newY) {
+        //                super.dragFrame(component, newX, newY);
+        //            }
+        //            public void endDraggingFrame(JComponent component) {
+        //                super.endDraggingFrame(component);
+        //                int duration=(int)(System.currentTimeMillis()-startTime);
+        //                int x2=(int)component.getLocation().getX();
+        //                int y2=(int)component.getLocation().getY();
+        //                double xx=((x2-x)*(x2-x));
+        //                double yy=((y2-y)*(y2-y));
+        //                double length=Math.sqrt(xx+yy);
+        //                double velocity=length/duration;
+        //                if (velocity>0.2) {
+        //                    System.out.println("Schnapp");
+        //                }
+        //
+        //
+        //
+        //
+        //            }
+        //        });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -175,27 +178,30 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         palette.setClosable(true);
         palette.setResizable(true);
         palette.setVisible(true);
-        palette.addComponentListener(new java.awt.event.ComponentAdapter() {
-
+        palette.addComponentListener(
+            new java.awt.event.ComponentAdapter() {
                 @Override
                 public void componentMoved(final java.awt.event.ComponentEvent evt) {
                     paletteComponentMoved(evt);
                 }
-            });
-        palette.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-
+            }
+        );
+        palette.addMouseMotionListener(
+            new java.awt.event.MouseMotionAdapter() {
                 @Override
                 public void mouseDragged(final java.awt.event.MouseEvent evt) {
                     paletteMouseDragged(evt);
                 }
-            });
-        palette.addMouseListener(new java.awt.event.MouseAdapter() {
-
+            }
+        );
+        palette.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     paletteMousePressed(evt);
                 }
-            });
+            }
+        );
 
         jLabel1.setText("jLabel1");
         palette.getContentPane().add(jLabel1, java.awt.BorderLayout.EAST);
@@ -216,13 +222,14 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         panTest.add(jTextArea1, java.awt.BorderLayout.CENTER);
 
         jButton2.setText("jButton2");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton2.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton2ActionPerformed(evt);
                 }
-            });
+            }
+        );
         panTest.add(jButton2, java.awt.BorderLayout.SOUTH);
 
         jLabel5.setText("jLabel5");
@@ -243,84 +250,86 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         getContentPane().add(jSlider1);
         jSlider1.setBounds(230, 160, 200, 40);
 
-        fileMenu.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.fileMenu.text")); // NOI18N
+        fileMenu.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.fileMenu.text")
+        ); // NOI18N
 
-        openMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.openMenuItem.text")); // NOI18N
-        openMenuItem.addActionListener(new java.awt.event.ActionListener() {
-
+        openMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.openMenuItem.text")
+        ); // NOI18N
+        openMenuItem.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     openMenuItemActionPerformed(evt);
                 }
-            });
+            }
+        );
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.saveMenuItem.text")
+        ); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.saveAsMenuItem")); // NOI18N
+        saveAsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.saveAsMenuItem")
+        ); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.exitMenuItem.text")); // NOI18N
-        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-
+        exitMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.exitMenuItem.text")
+        ); // NOI18N
+        exitMenuItem.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     exitMenuItemActionPerformed(evt);
                 }
-            });
+            }
+        );
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.editMenu")); // NOI18N
+        editMenu.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.editMenu")
+        ); // NOI18N
 
-        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.cutMenuItem")); // NOI18N
+        cutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.cutMenuItem")
+        ); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.copyMenuItem.text")
+        ); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.pasteMenuItem.text")
+        ); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.deleteMenuItem.text")
+        ); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.helpMenu")); // NOI18N
+        helpMenu.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.helpMenu")
+        ); // NOI18N
 
-        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.contentsMenuItem.text")
+        ); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(
-                TestProgressMonitor.class,
-                "TestProgressMonitor.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(
+            org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.aboutMenuItem.text")
+        ); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -336,24 +345,21 @@ public class TestProgressMonitor extends javax.swing.JFrame {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void paletteMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_paletteMousePressed
-    }                                                                       //GEN-LAST:event_paletteMousePressed
+    private void paletteMousePressed(final java.awt.event.MouseEvent evt) {} //GEN-FIRST:event_paletteMousePressed //GEN-LAST:event_paletteMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void paletteMouseDragged(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_paletteMouseDragged
-    }                                                                       //GEN-LAST:event_paletteMouseDragged
+    private void paletteMouseDragged(final java.awt.event.MouseEvent evt) {} //GEN-FIRST:event_paletteMouseDragged //GEN-LAST:event_paletteMouseDragged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void paletteComponentMoved(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_paletteComponentMoved
-    }                                                                             //GEN-LAST:event_paletteComponentMoved
+    private void paletteComponentMoved(final java.awt.event.ComponentEvent evt) {} //GEN-FIRST:event_paletteComponentMoved //GEN-LAST:event_paletteComponentMoved
 
     /**
      * DOCUMENT ME!
@@ -362,7 +368,7 @@ public class TestProgressMonitor extends javax.swing.JFrame {
      */
     private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
         System.exit(0);
-    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+    } //GEN-LAST:event_exitMenuItemActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -388,13 +394,14 @@ public class TestProgressMonitor extends javax.swing.JFrame {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     new TestProgressMonitor().setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -423,7 +430,6 @@ public class TestProgressMonitor extends javax.swing.JFrame {
          *
          * @param  boundaryComponent  DOCUMENT ME!
          */
-        public void setBoundaryComponent(final JComponent boundaryComponent) {
-        }
+        public void setBoundaryComponent(final JComponent boundaryComponent) {}
     }
 }

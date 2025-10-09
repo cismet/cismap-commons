@@ -1,29 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
+import de.cismet.tools.CismetThreadPool;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.net.URL;
 import java.net.URLConnection;
-
 import java.util.Vector;
-
 import javax.swing.JComponent;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -145,12 +140,12 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
         public void run() {
             try {
                 if (log.isDebugEnabled()) {
-                    log.debug("start of ImageRetrieval");             // NOI18N
+                    log.debug("start of ImageRetrieval"); // NOI18N
                 }
                 listener.retrievalStarted(new RetrievalEvent());
                 final URL u = new URL(url.toString());
                 if (log.isDebugEnabled()) {
-                    log.debug("Retrieve: " + url.toString());         // NOI18N
+                    log.debug("Retrieve: " + url.toString()); // NOI18N
                 }
                 uc = u.openConnection();
                 if (log.isDebugEnabled()) {
@@ -174,7 +169,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
                         return;
                     }
                 }
-                if (uc.getContentType().indexOf("image") != -1) {    // NOI18N
+                if (uc.getContentType().indexOf("image") != -1) { // NOI18N
                     observer = new ImageObserverInterceptor();
                     // Image image =Toolkit.getDefaultToolkit().getImage(is);
                     image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
@@ -196,13 +191,12 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
                     if (!youngerCall) {
                         listener.retrievalComplete(e);
                         if (log.isDebugEnabled()) {
-                            log.debug("Retrieval complete");              // NOI18N
+                            log.debug("Retrieval complete"); // NOI18N
                         }
                     } else {
                         fireLoadingAborted();
                     }
-                } else if (uc.getContentType().indexOf("text") != -1) {   // NOI18N
-
+                } else if (uc.getContentType().indexOf("text") != -1) { // NOI18N
                     final RetrievalEvent e = new RetrievalEvent();
                     e.setContentType(contentType);
                     e.setIsComplete(true);
@@ -224,23 +218,23 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
                     try {
                         final String cause = e.getCause().getMessage();
                         re.setRetrievedObject(cause);
-                    } catch (Exception ee) {
-                    }
+                    } catch (Exception ee) {}
                 } else {
                     re.setRetrievedObject(e.getMessage());
                 }
                 listener.retrievalError(re);
-                log.error("Fehler beim Laden des Bildes ", e);                   // NOI18N
+                log.error("Fehler beim Laden des Bildes ", e); // NOI18N
             }
         }
+
         /**
          * DOCUMENT ME!
          */
         public void fireLoadingAborted() {
-//        RetrievalEvent e=new RetrievalEvent();
-//        listener.retrievalAborted(e);
+            //        RetrievalEvent e=new RetrievalEvent();
+            //        listener.retrievalAborted(e);
             // TODO nochmal anschauen
-            log.info("Retrieval interrupted");                                              // NOI18N
+            log.info("Retrieval interrupted"); // NOI18N
             image = null;
             observer = null;
             if (is != null) {
@@ -265,23 +259,24 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
             //~ Methods --------------------------------------------------------
 
             @Override
-            public boolean imageUpdate(final Image img,
-                    final int infoflags,
-                    final int x,
-                    final int y,
-                    final int width,
-                    final int height) {
+            public boolean imageUpdate(
+                final Image img,
+                final int infoflags,
+                final int x,
+                final int y,
+                final int width,
+                final int height
+            ) {
                 final boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
-//            log.debug("ImageUpdate");
-//            log.debug("y "+height);
-//            log.debug("img.getHeight"+img.getHeight(this));
+                //            log.debug("ImageUpdate");
+                //            log.debug("y "+height);
+                //            log.debug("img.getHeight"+img.getHeight(this));
 
                 if ((infoflags & ImageObserver.SOMEBITS) != 0) {
                     final RetrievalEvent e = new RetrievalEvent();
-                    e.setPercentageDone((int)(y / (img.getHeight(this) - 1.0) * 100));
+                    e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                     listener.retrievalProgress(e);
-                } else if ((infoflags & ImageObserver.ABORT) != 0) {
-                } else if ((infoflags & ImageObserver.ERROR) != 0) {
+                } else if ((infoflags & ImageObserver.ABORT) != 0) {} else if ((infoflags & ImageObserver.ERROR) != 0) {
                     final RetrievalEvent e = new RetrievalEvent();
                     e.setHasErrors(true);
                     final String error = new String(byteArrayOut.toByteArray());

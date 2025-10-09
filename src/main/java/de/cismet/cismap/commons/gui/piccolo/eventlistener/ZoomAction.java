@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 srichter
  *
@@ -23,13 +23,11 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
 
 /**
  * DOCUMENT ME!
@@ -54,8 +52,9 @@ public final class ZoomAction implements ActionListener {
      */
     public ZoomAction(final PBounds bounds, final PInputEvent pInputEvent) {
         this.bounds = bounds;
-        this.map = (MappingComponent)pInputEvent.getComponent();
+        this.map = (MappingComponent) pInputEvent.getComponent();
     }
+
     /**
      * Creates a new ZoomAction object.
      *

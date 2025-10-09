@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * PrintingSettingsWidget.java
  *
@@ -12,27 +12,21 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
-import org.jdom.Element;
-
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.configuration.Configurable;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.Color;
 import java.awt.Paint;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
-
 import javax.swing.DefaultComboBoxModel;
-
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.configuration.Configurable;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -82,6 +76,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JPanel panDesc;
     private javax.swing.JPanel panSettings;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -164,244 +159,386 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         panDesc.setBackground(new java.awt.Color(216, 228, 248));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11));
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel1.text")); // NOI18N
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel1.text")
+        ); // NOI18N
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel2.text")); // NOI18N
+        jLabel2.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel2.text")
+        ); // NOI18N
 
-        jLabel3.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel3.text")); // NOI18N
+        jLabel3.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel3.text")
+        ); // NOI18N
 
-        jLabel4.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel4.text")); // NOI18N
+        jLabel4.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel4.text")
+        ); // NOI18N
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint.png"))); // NOI18N
+        jLabel5.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint.png"))
+        ); // NOI18N
 
         final org.jdesktop.layout.GroupLayout panDescLayout = new org.jdesktop.layout.GroupLayout(panDesc);
         panDesc.setLayout(panDescLayout);
         panDescLayout.setHorizontalGroup(
-            panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                jSeparator3,
-                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                254,
-                Short.MAX_VALUE).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                panDescLayout.createSequentialGroup().addContainerGap(116, Short.MAX_VALUE).add(jLabel5)
-                            .addContainerGap()).add(
-                panDescLayout.createSequentialGroup().addContainerGap().add(
-                    panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        panDescLayout.createSequentialGroup().add(
-                            jSeparator2,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            234,
-                            Short.MAX_VALUE).addContainerGap()).add(
-                        panDescLayout.createSequentialGroup().add(
-                            panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                jLabel1).add(jLabel2).add(jLabel3).add(jLabel4)).add(83, 83, 83)))));
+            panDescLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(jSeparator3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                .add(
+                    org.jdesktop.layout.GroupLayout.TRAILING,
+                    panDescLayout
+                        .createSequentialGroup()
+                        .addContainerGap(116, Short.MAX_VALUE)
+                        .add(jLabel5)
+                        .addContainerGap()
+                )
+                .add(
+                    panDescLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(
+                            panDescLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(
+                                    panDescLayout
+                                        .createSequentialGroup()
+                                        .add(
+                                            jSeparator2,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            234,
+                                            Short.MAX_VALUE
+                                        )
+                                        .addContainerGap()
+                                )
+                                .add(
+                                    panDescLayout
+                                        .createSequentialGroup()
+                                        .add(
+                                            panDescLayout
+                                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                .add(jLabel1)
+                                                .add(jLabel2)
+                                                .add(jLabel3)
+                                                .add(jLabel4)
+                                        )
+                                        .add(83, 83, 83)
+                                )
+                        )
+                )
+        );
         panDescLayout.setVerticalGroup(
-            panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                panDescLayout.createSequentialGroup().addContainerGap().add(jLabel1).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    jSeparator2,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    2,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel2).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel3).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel4).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED,
-                    26,
-                    Short.MAX_VALUE).add(jLabel5).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    jSeparator3,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)));
+            panDescLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    panDescLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jLabel1)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            jSeparator2,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            2,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jLabel2)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jLabel3)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(jLabel4)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 26, Short.MAX_VALUE)
+                        .add(jLabel5)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            jSeparator3,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                )
+        );
 
         cmdOk.setMnemonic('O');
-        cmdOk.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.cmdOk.text")); // NOI18N
-        cmdOk.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdOk.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.cmdOk.text")
+        ); // NOI18N
+        cmdOk.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdOkActionPerformed(evt);
                 }
-            });
+            }
+        );
 
         cmdCancel.setMnemonic('A');
-        cmdCancel.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.cmdCancel.text")); // NOI18N
-        cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdCancel.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.cmdCancel.text")
+        ); // NOI18N
+        cmdCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11));
-        jLabel6.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel6.text")); // NOI18N
+        jLabel6.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel6.text")
+        ); // NOI18N
 
-        jLabel7.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel7.text")); // NOI18N
+        jLabel7.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel7.text")
+        ); // NOI18N
 
-        jLabel8.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel8.text")); // NOI18N
+        jLabel8.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel8.text")
+        ); // NOI18N
 
-        jLabel9.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel9.text")); // NOI18N
+        jLabel9.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel9.text")
+        ); // NOI18N
 
-        jLabel10.setText(org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel10.text")); // NOI18N
+        jLabel10.setText(
+            org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel10.text")
+        ); // NOI18N
 
-        cboTemplates.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cboTemplates.setModel(
+            new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" })
+        );
 
-        cboScales.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        cboScales.addActionListener(new java.awt.event.ActionListener() {
-
+        cboScales.setModel(
+            new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" })
+        );
+        cboScales.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cboScalesActionPerformed(evt);
                 }
-            });
+            }
+        );
 
-        cboResolution.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cboResolution.setModel(
+            new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" })
+        );
 
-        cboAction.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cboAction.setModel(
+            new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" })
+        );
 
         final org.jdesktop.layout.GroupLayout panSettingsLayout = new org.jdesktop.layout.GroupLayout(panSettings);
         panSettings.setLayout(panSettingsLayout);
         panSettingsLayout.setHorizontalGroup(
-            panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                panSettingsLayout.createSequentialGroup().addContainerGap().add(
-                    panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        panSettingsLayout.createSequentialGroup().add(jLabel6).add(14, 14, 14)).add(
-                        panSettingsLayout.createSequentialGroup().add(
-                            panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                jLabel7).add(jLabel8).add(jLabel9).add(jLabel10)).addPreferredGap(
-                            org.jdesktop.layout.LayoutStyle.RELATED).add(
-                            panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                                cboAction,
-                                0,
-                                302,
-                                Short.MAX_VALUE).add(cboResolution, 0, 302, Short.MAX_VALUE).add(
-                                cboScales,
-                                0,
-                                302,
-                                Short.MAX_VALUE).add(cboTemplates, 0, 302, Short.MAX_VALUE)))).addContainerGap()).add(
-                jSeparator4,
-                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                376,
-                Short.MAX_VALUE).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                panSettingsLayout.createSequentialGroup().addContainerGap().add(
-                    jSeparator1,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    366,
-                    Short.MAX_VALUE)));
+            panSettingsLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    panSettingsLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(
+                            panSettingsLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(panSettingsLayout.createSequentialGroup().add(jLabel6).add(14, 14, 14))
+                                .add(
+                                    panSettingsLayout
+                                        .createSequentialGroup()
+                                        .add(
+                                            panSettingsLayout
+                                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                .add(jLabel7)
+                                                .add(jLabel8)
+                                                .add(jLabel9)
+                                                .add(jLabel10)
+                                        )
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(
+                                            panSettingsLayout
+                                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                                .add(cboAction, 0, 302, Short.MAX_VALUE)
+                                                .add(cboResolution, 0, 302, Short.MAX_VALUE)
+                                                .add(cboScales, 0, 302, Short.MAX_VALUE)
+                                                .add(cboTemplates, 0, 302, Short.MAX_VALUE)
+                                        )
+                                )
+                        )
+                        .addContainerGap()
+                )
+                .add(jSeparator4, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 376, Short.MAX_VALUE)
+                .add(
+                    org.jdesktop.layout.GroupLayout.TRAILING,
+                    panSettingsLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jSeparator1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
+                )
+        );
         panSettingsLayout.setVerticalGroup(
-            panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                panSettingsLayout.createSequentialGroup().addContainerGap().add(jLabel6).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    jSeparator1,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    10,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(jLabel7).add(
-                        cboTemplates,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(jLabel8).add(
-                        cboScales,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(jLabel9).add(
-                        cboResolution,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(jLabel10).add(
-                        cboAction,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED,
-                    108,
-                    Short.MAX_VALUE).add(
-                    jSeparator4,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)));
+            panSettingsLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    panSettingsLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jLabel6)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            jSeparator1,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            10,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            panSettingsLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(jLabel7)
+                                .add(
+                                    cboTemplates,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            panSettingsLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(jLabel8)
+                                .add(
+                                    cboScales,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            panSettingsLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(jLabel9)
+                                .add(
+                                    cboResolution,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            panSettingsLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(jLabel10)
+                                .add(
+                                    cboAction,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 108, Short.MAX_VALUE)
+                        .add(
+                            jSeparator4,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                )
+        );
 
         final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING).add(
-                        layout.createSequentialGroup().addContainerGap().add(
-                            cmdCancel,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            110,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                            org.jdesktop.layout.LayoutStyle.RELATED).add(
-                            cmdOk,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            107,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        layout.createSequentialGroup().add(
-                            panDesc,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(18, 18, 18).add(
-                            panSettings,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            Short.MAX_VALUE))).addContainerGap()));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    layout
+                        .createSequentialGroup()
+                        .add(
+                            layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                                .add(
+                                    layout
+                                        .createSequentialGroup()
+                                        .addContainerGap()
+                                        .add(
+                                            cmdCancel,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                            110,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                        )
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(
+                                            cmdOk,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                            107,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                        )
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    layout
+                                        .createSequentialGroup()
+                                        .add(
+                                            panDesc,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                        )
+                                        .add(18, 18, 18)
+                                        .add(
+                                            panSettings,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            Short.MAX_VALUE
+                                        )
+                                )
+                        )
+                        .addContainerGap()
+                )
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                layout.createSequentialGroup().add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        panSettings,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE).add(
-                        org.jdesktop.layout.GroupLayout.TRAILING,
-                        panDesc,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        Short.MAX_VALUE)).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(cmdOk).add(cmdCancel))
-                            .addContainerGap()));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    org.jdesktop.layout.GroupLayout.TRAILING,
+                    layout
+                        .createSequentialGroup()
+                        .add(
+                            layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(
+                                    panSettings,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    Short.MAX_VALUE
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.TRAILING,
+                                    panDesc,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    Short.MAX_VALUE
+                                )
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(cmdOk)
+                                .add(cmdCancel)
+                        )
+                        .addContainerGap()
+                )
+        );
 
         pack();
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
@@ -409,18 +546,19 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         try {
-            final Scale selectedScale = (Scale)cboScales.getSelectedItem();
-            final Resolution selectedResolution = (Resolution)cboResolution.getSelectedItem();
-            mappingComponent.setPrintingResolution(selectedResolution.getResolution()
-                        / mappingComponent.getFeaturePrintingDpi());
-            final Template selectedTemplate = (Template)cboTemplates.getSelectedItem();
+            final Scale selectedScale = (Scale) cboScales.getSelectedItem();
+            final Resolution selectedResolution = (Resolution) cboResolution.getSelectedItem();
+            mappingComponent.setPrintingResolution(
+                selectedResolution.getResolution() / mappingComponent.getFeaturePrintingDpi()
+            );
+            final Template selectedTemplate = (Template) cboTemplates.getSelectedItem();
             final PrintTemplateFeature printTemplateStyledFeature = new PrintTemplateFeature(
-                    selectedTemplate,
-                    selectedResolution,
-                    selectedScale,
-                    mappingComponent);
-            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
-                mappingComponent.getFeatureCollection();
+                selectedTemplate,
+                selectedResolution,
+                selectedScale,
+                mappingComponent
+            );
+            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
             mapFeatureCol.holdFeature(printTemplateStyledFeature);
             mapFeatureCol.addFeature(printTemplateStyledFeature);
             mappingComponent.adjustMapForSpecialFeatureClasses(PrintTemplateFeature.class);
@@ -430,9 +568,10 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
             dispose();
         } catch (Exception e) {
-            log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
+            log.error("Fehler beim Verarbeiten der Druckeinstellungen", e); // NOI18N
         }
-    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
+    } //GEN-LAST:event_cmdOkActionPerformed
+
     /**
      * DOCUMENT ME!
      *
@@ -443,14 +582,14 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
         }
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    } //GEN-LAST:event_cmdCancelActionPerformed
+
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboScalesActionPerformed
-    }                                                                             //GEN-LAST:event_cboScalesActionPerformed
+    private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) {} //GEN-FIRST:event_cboScalesActionPerformed //GEN-LAST:event_cboScalesActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -476,13 +615,14 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     // new PrintingSettingsWidget(new javax.swing.JFrame(), true).setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     @Override
@@ -506,18 +646,18 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     @Override
     public void masterConfigure(final Element parent) {
         try {
-            final Element prefs = parent.getChild("printing");                            // NOI18N
-            configuration = (Element)prefs.clone();
+            final Element prefs = parent.getChild("printing"); // NOI18N
+            configuration = (Element) prefs.clone();
             try {
                 featureFillingColor = Color.decode(prefs.getAttributeValue("featureFillingColor"));
             } catch (final Exception ex) {
                 log.info("could not parse featureFillingColor", ex);
                 featureFillingColor = javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground");
             }
-            final List scalesList = prefs.getChildren("scale");                           // NOI18N
-            final List resolutionsList = prefs.getChildren("resolution");                 // NOI18N
-            final List templatesList = prefs.getChildren("template");                     // NOI18N
-            final List actionList = prefs.getChildren("action");                          // NOI18N
+            final List scalesList = prefs.getChildren("scale"); // NOI18N
+            final List resolutionsList = prefs.getChildren("resolution"); // NOI18N
+            final List templatesList = prefs.getChildren("template"); // NOI18N
+            final List actionList = prefs.getChildren("action"); // NOI18N
             Scale selectedScale = null;
             Resolution selectedResolution = null;
             Template selectedTemplate = null;
@@ -529,40 +669,40 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             try {
                 for (final Object elem : scalesList) {
                     if (elem instanceof Element) {
-                        final Scale s = new Scale((Element)elem);
+                        final Scale s = new Scale((Element) elem);
                         scales.add(s);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                        if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedScale = s;
                         }
                     }
                 }
                 for (final Object elem : resolutionsList) {
                     if (elem instanceof Element) {
-                        final Resolution r = new Resolution((Element)elem);
+                        final Resolution r = new Resolution((Element) elem);
                         resolutions.add(r);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                        if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedResolution = r;
                         }
                     }
                 }
                 for (final Object elem : templatesList) {
                     if (elem instanceof Element) {
-                        final Template t = new Template((Element)elem);
+                        final Template t = new Template((Element) elem);
                         templates.add(t);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                        if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedTemplate = t;
                         }
                     }
                 }
-                templates.sort(new Comparator<Object>() {
-
+                templates.sort(
+                    new Comparator<Object>() {
                         @Override
                         public int compare(final Object o1, final Object o2) {
                             if ((o1 instanceof Template) && (o2 instanceof Template)) {
                                 try {
-                                    if ((((Template)o1).getTitle() != null) && (((Template)o2).getTitle() != null)) {
-                                        return ((Template)o1).getTitle().compareTo(((Template)o2).getTitle());
-                                    } else if (((Template)o1).getTitle() != null) {
+                                    if ((((Template) o1).getTitle() != null) && (((Template) o2).getTitle() != null)) {
+                                        return ((Template) o1).getTitle().compareTo(((Template) o2).getTitle());
+                                    } else if (((Template) o1).getTitle() != null) {
                                         return 1;
                                     } else {
                                         return -1;
@@ -580,12 +720,13 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                                 }
                             }
                         }
-                    });
+                    }
+                );
                 for (final Object elem : actionList) {
                     if (elem instanceof Element) {
-                        final Action a = new Action((Element)elem);
+                        final Action a = new Action((Element) elem);
                         actions.add(a);
-                        if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                        if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                             selectedAction = a;
                         }
                     }
@@ -599,7 +740,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 cboTemplates.setSelectedItem(selectedTemplate);
                 cboAction.setSelectedItem(selectedAction);
             } catch (Exception e) {
-                log.error("Error during initialization of the printingDialog", e);        // NOI18N
+                log.error("Error during initialization of the printingDialog", e); // NOI18N
             }
         } catch (Exception ex) {
             log.error("Error during initialization of the PrintingWidgets. catched.", ex); // NOI18N
@@ -609,13 +750,13 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     @Override
     public void configure(final Element parent) {
         if (parent != null) {
-            final Element prefs = parent.getChild("printing");                // NOI18N
+            final Element prefs = parent.getChild("printing"); // NOI18N
             if (prefs != null) {
-                configuration = (Element)prefs.clone();
-                final List scalesList = prefs.getChildren("scale");           // NOI18N
+                configuration = (Element) prefs.clone();
+                final List scalesList = prefs.getChildren("scale"); // NOI18N
                 final List resolutionsList = prefs.getChildren("resolution"); // NOI18N
-                final List templatesList = prefs.getChildren("template");     // NOI18N
-                final List actionList = prefs.getChildren("action");          // NOI18N
+                final List templatesList = prefs.getChildren("template"); // NOI18N
+                final List actionList = prefs.getChildren("action"); // NOI18N
                 Scale selectedScale = null;
                 Resolution selectedResolution = null;
                 Template selectedTemplate = null;
@@ -627,36 +768,36 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 try {
                     for (final Object elem : scalesList) {
                         if (elem instanceof Element) {
-                            final Scale s = new Scale((Element)elem);
+                            final Scale s = new Scale((Element) elem);
                             // scales.add(s);
-                            if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                            if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                                 selectedScale = s;
                             }
                         }
                     }
                     for (final Object elem : resolutionsList) {
                         if (elem instanceof Element) {
-                            final Resolution r = new Resolution((Element)elem);
+                            final Resolution r = new Resolution((Element) elem);
                             // resolutions.add(r);
-                            if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                            if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                                 selectedResolution = r;
                             }
                         }
                     }
                     for (final Object elem : templatesList) {
                         if (elem instanceof Element) {
-                            final Template t = new Template((Element)elem);
+                            final Template t = new Template((Element) elem);
                             // templates.add(t);
-                            if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                            if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                                 selectedTemplate = t;
                             }
                         }
                     }
                     for (final Object elem : actionList) {
                         if (elem instanceof Element) {
-                            final Action a = new Action((Element)elem);
+                            final Action a = new Action((Element) elem);
                             // actions.add(a);
-                            if (((Element)elem).getAttribute("selected").getBooleanValue()) { // NOI18N
+                            if (((Element) elem).getAttribute("selected").getBooleanValue()) { // NOI18N
                                 selectedAction = a;
                             }
                         }
@@ -674,7 +815,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                         cboAction.setSelectedItem(selectedAction);
                     }
                 } catch (Exception e) {
-                    log.error("Error during initialization of the printingDialog", e);        // NOI18N
+                    log.error("Error during initialization of the printingDialog", e); // NOI18N
                 }
             }
         }
@@ -686,7 +827,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @return  DOCUMENT ME!
      */
     public Scale getSelectedScale() {
-        return (Scale)cboScales.getSelectedItem();
+        return (Scale) cboScales.getSelectedItem();
     }
 
     /**
@@ -695,7 +836,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @return  DOCUMENT ME!
      */
     public Template getSelectedTemplate() {
-        return (Template)cboTemplates.getSelectedItem();
+        return (Template) cboTemplates.getSelectedItem();
     }
 
     /**
@@ -704,7 +845,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @return  DOCUMENT ME!
      */
     public Resolution getSelectedResolution() {
-        return (Resolution)cboResolution.getSelectedItem();
+        return (Resolution) cboResolution.getSelectedItem();
     }
 
     /**
@@ -713,7 +854,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @return  DOCUMENT ME!
      */
     public Action getSelectedAction() {
-        return (Action)cboAction.getSelectedItem();
+        return (Action) cboAction.getSelectedItem();
     }
 
     /**
@@ -768,8 +909,9 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public String getTemplateString() {
         return org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel7.text");
+            PrintingSettingsWidget.class,
+            "PrintingSettingsWidget.jLabel7.text"
+        );
     }
 
     /**
@@ -779,8 +921,9 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public String getScaleString() {
         return org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel8.text");
+            PrintingSettingsWidget.class,
+            "PrintingSettingsWidget.jLabel8.text"
+        );
     }
 
     /**
@@ -790,7 +933,8 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public String getResolutionString() {
         return org.openide.util.NbBundle.getMessage(
-                PrintingSettingsWidget.class,
-                "PrintingSettingsWidget.jLabel9.text");
+            PrintingSettingsWidget.class,
+            "PrintingSettingsWidget.jLabel9.text"
+        );
     }
 }

@@ -1,5 +1,8 @@
 package de.cismet.commons.cismap;
 
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
+
 import de.cismet.cismap.commons.rasterservice.HTTPImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -9,8 +12,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.*;
-import static org.junit.Assume.assumeTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,19 +22,17 @@ import org.junit.Test;
  */
 public class ImageRetrievalTest implements RetrievalListener {
 
-    final String wmsURL = "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX=-184,-90,180,90&SRS=EPSG:4326&WIDTH=1471&HEIGHT=728&LAYERS=Countries&STYLES=&FORMAT=image/png&DPI=96&MAP_RESOLUTION=96&FORMAT_OPTIONS=dpi:96&TRANSPARENT=TRUE";
+    final String wmsURL =
+        "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX=-184,-90,180,90&SRS=EPSG:4326&WIDTH=1471&HEIGHT=728&LAYERS=Countries&STYLES=&FORMAT=image/png&DPI=96&MAP_RESOLUTION=96&FORMAT_OPTIONS=dpi:96&TRANSPARENT=TRUE";
     HTTPImageRetrieval imageRetrieval = null;
 
-    public ImageRetrievalTest() {
-    }
+    public ImageRetrievalTest() {}
 
     @BeforeClass
-    public static void setUpClass() {
-    }
+    public static void setUpClass() {}
 
     @AfterClass
-    public static void tearDownClass() {
-    }
+    public static void tearDownClass() {}
 
     @Before
     public void setUp() {
@@ -42,16 +41,14 @@ public class ImageRetrievalTest implements RetrievalListener {
         try {
             WebAccessManager.getInstance().doRequest(new URL(wmsURL));
         } catch (Exception ex) {
-            System.out.println("WARNING: test010ImageRetieval NOT COMPLETED due to Exception: "
-                    + ex.getMessage());
+            System.out.println("WARNING: test010ImageRetieval NOT COMPLETED due to Exception: " + ex.getMessage());
             canRead = false;
         }
         assumeTrue("Can read from " + wmsURL, canRead);
     }
 
     @After
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     @Test
     public void test010ImageRetieval() throws MalformedURLException, IOException {

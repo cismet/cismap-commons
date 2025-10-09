@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import java.awt.Image;
-
 import java.net.URL;
 
 /**
@@ -22,7 +21,8 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            FeatureAnnotationSymbol.class);
+        FeatureAnnotationSymbol.class
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -105,8 +105,10 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      *
      * @return  DOCUMENT ME!
      */
-    public static FeatureAnnotationSymbol newCenteredFeatureAnnotationSymbol(final Image unselected,
-            final Image selected) {
+    public static FeatureAnnotationSymbol newCenteredFeatureAnnotationSymbol(
+        final Image unselected,
+        final Image selected
+    ) {
         final FeatureAnnotationSymbol tmpSymbol = new FeatureAnnotationSymbol(unselected);
         tmpSymbol.setSelectedFeatureAnnotationSymbol(selected);
         tmpSymbol.setSweetSpotX(0.5d);
@@ -124,10 +126,12 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      *
      * @return  DOCUMENT ME!
      */
-    public static FeatureAnnotationSymbol newCustomSweetSpotFeatureAnnotationSymbol(final Image unselected,
-            final Image selected,
-            final double sweetSpotX,
-            final double sweetSpotY) {
+    public static FeatureAnnotationSymbol newCustomSweetSpotFeatureAnnotationSymbol(
+        final Image unselected,
+        final Image selected,
+        final double sweetSpotX,
+        final double sweetSpotY
+    ) {
         final FeatureAnnotationSymbol tmpSymbol = new FeatureAnnotationSymbol(unselected);
         tmpSymbol.setSelectedFeatureAnnotationSymbol(selected);
         tmpSymbol.setSweetSpotX(sweetSpotX);

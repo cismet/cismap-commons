@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleBackgroundedJPanel.java
  *
@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.gui;
 
 import edu.umd.cs.piccolo.PCanvas;
-
 import javax.swing.JPanel;
 
 /**
@@ -35,13 +34,14 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
      * Creates a new instance of SimpleBackgroundedJPanel.
      */
     public SimpleBackgroundedJPanel() {
-        addComponentListener(new java.awt.event.ComponentAdapter() {
-
+        addComponentListener(
+            new java.awt.event.ComponentAdapter() {
                 @Override
                 public void componentResized(final java.awt.event.ComponentEvent evt) {
                     formComponentResized(evt);
                 }
-            });
+            }
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -74,8 +74,7 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
         if (viewer != null) { // &&backgroundEnabled==true) {
             try {
                 viewer.paint(g);
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
         // g.setColor(new Color(g.getColor().getRed(),g.getColor().getGreen(),g.getColor().getBlue(),200));
         super.paintChildren(g);
@@ -84,13 +83,14 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
 
     @Override
     public void propertyChange(final java.beans.PropertyChangeEvent evt) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     repaint();
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -109,20 +109,20 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
      */
     public void setBackgroundEnabled(final boolean enabled) {
         if (viewer != null) {
-//            if (enabled!=backgroundEnabled) {
+            //            if (enabled!=backgroundEnabled) {
             if (!enabled) {
                 viewer.getCamera().animateToTransparency(0, 1000);
             } else {
                 viewer.getCamera().animateToTransparency(0.3f, 1000);
             }
-//            }
+            //            }
         }
         backgroundEnabled = enabled;
-//        this.backgroundEnabled = enabled;
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                repaint();
-//            }
-//        });
+        //        this.backgroundEnabled = enabled;
+        //        java.awt.EventQueue.invokeLater(new Runnable() {
+        //            public void run() {
+        //                repaint();
+        //            }
+        //        });
     }
 }

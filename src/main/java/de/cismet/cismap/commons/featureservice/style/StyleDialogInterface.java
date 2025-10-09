@@ -1,24 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import java.awt.Frame;
-
-import java.util.ArrayList;
-
-import javax.swing.JDialog;
-
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import java.awt.Frame;
+import java.util.ArrayList;
+import javax.swing.JDialog;
 
 /**
  * DOCUMENT ME!
@@ -27,7 +24,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
  * @version  $Revision$, $Date$
  */
 public interface StyleDialogInterface {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -41,10 +37,12 @@ public interface StyleDialogInterface {
      *
      * @return  DOCUMENT ME!
      */
-    JDialog configureDialog(final AbstractFeatureService FeatureService,
-            final Frame parentFrame,
-            final MappingComponent mappingComponent,
-            ArrayList<String> configTabs);
+    JDialog configureDialog(
+        final AbstractFeatureService FeatureService,
+        final Frame parentFrame,
+        final MappingComponent mappingComponent,
+        ArrayList<String> configTabs
+    );
     /**
      * DOCUMENT ME!
      *

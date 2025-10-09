@@ -1,25 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.net.URI;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import java.net.URI;
+import java.util.List;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * Base class for document-based feature services.
@@ -29,7 +25,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
  * @version  $Revision$, $Date$
  */
 public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, QT>
-        extends AbstractFeatureService<FT, QT> {
+    extends AbstractFeatureService<FT, QT> {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -75,10 +71,12 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public DocumentFeatureService(final String name,
-            final URI documentURI,
-            final long documentSize,
-            final List<FeatureServiceAttribute> attributes) throws Exception {
+    public DocumentFeatureService(
+        final String name,
+        final URI documentURI,
+        final long documentSize,
+        final List<FeatureServiceAttribute> attributes
+    ) throws Exception {
         super(name, attributes);
         this.documentURI = documentURI;
         this.documentSize = documentSize;
@@ -108,11 +106,11 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public Element toElement() {
         final Element parentElement = super.toElement();
-        final Element docURI = new Element("documentURI");                                                     // NOI18N
+        final Element docURI = new Element("documentURI"); // NOI18N
         docURI.setText(documentURI.toString());
         parentElement.addContent(docURI);
         parentElement.setAttribute("maxSupportedFeatureCount", String.valueOf(this.maxSupportedFeatureCount)); // NOI18N
-        parentElement.setAttribute("documentSize", String.valueOf(this.documentSize));                         // NOI18N
+        parentElement.setAttribute("documentSize", String.valueOf(this.documentSize)); // NOI18N
         return parentElement;
     }
 
@@ -126,12 +124,12 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
-        this.setDocumentURI(new URI(element.getChildText("documentURI").trim()));                           // NOI18N
-        if (element.getAttribute("maxSupportedFeatureCount") != null) {                                     // NOI18N
+        this.setDocumentURI(new URI(element.getChildText("documentURI").trim())); // NOI18N
+        if (element.getAttribute("maxSupportedFeatureCount") != null) { // NOI18N
             this.maxSupportedFeatureCount = element.getAttribute("maxSupportedFeatureCount").getIntValue(); // NOI18N
         }
 
-        if (element.getAttribute("documentSize") != null) {                         // NOI18N
+        if (element.getAttribute("documentSize") != null) { // NOI18N
             this.documentSize = element.getAttribute("documentSize").getIntValue(); // NOI18N
         }
     }

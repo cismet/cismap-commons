@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
@@ -35,6 +35,7 @@ public class Scale {
         denominator = e.getAttribute("denominator").getIntValue(); // NOI18N
         text = e.getText();
     }
+
     /**
      * Creates a new Scale object.
      *
@@ -52,10 +53,12 @@ public class Scale {
     public String toString() {
         return text;
     }
+
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Scale) && (((Scale)obj).denominator == denominator);
+        return (obj instanceof Scale) && (((Scale) obj).denominator == denominator);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -64,9 +67,9 @@ public class Scale {
      * @return  DOCUMENT ME!
      */
     public Element getElement(final boolean selected) {
-        final Element e = new Element("scale");                       // NOI18N
+        final Element e = new Element("scale"); // NOI18N
         e.setAttribute("selected", new Boolean(selected).toString()); // NOI18N
-        e.setAttribute("denominator", denominator + "");              // NOI18N
+        e.setAttribute("denominator", denominator + ""); // NOI18N
         e.setText(text);
         return e;
     }

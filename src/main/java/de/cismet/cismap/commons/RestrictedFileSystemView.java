@@ -1,19 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import java.io.File;
 import java.io.IOException;
-
 import java.text.MessageFormat;
-
 import java.util.Vector;
-
 import javax.swing.Icon;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileSystemView;
@@ -383,7 +380,7 @@ public class RestrictedFileSystemView extends FileSystemView {
             }
         }
 
-        return (File[])files.toArray(new File[files.size()]);
+        return (File[]) files.toArray(new File[files.size()]);
     }
 
     /**
@@ -439,10 +436,8 @@ public class RestrictedFileSystemView extends FileSystemView {
         newFolder = createFileObject(containingDir, newFolderString);
         int i = 2;
         while (newFolder.exists() && (i < 100)) {
-            newFolder = createFileObject(
-                    containingDir,
-                    MessageFormat.format(newFolderString,
-                        new Object[] { new Integer(i) }));
+            newFolder =
+                createFileObject(containingDir, MessageFormat.format(newFolderString, new Object[] { new Integer(i) }));
             i++;
         }
 

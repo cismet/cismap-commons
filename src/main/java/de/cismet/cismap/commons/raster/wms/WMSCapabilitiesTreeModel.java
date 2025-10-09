@@ -1,19 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 
-import java.util.Vector;
-
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.Style;
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import java.util.Vector;
 
 /**
  * DOCUMENT ME!
@@ -39,6 +37,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     public WMSCapabilitiesTreeModel(final WMSCapabilities capabilities) {
         this(capabilities, null);
     }
+
     /**
      * Creates a new WMSCapabilitiesTreeModel object.
      *
@@ -53,8 +52,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     /**
      * Creates a new instance of WMSCapabilitiesTreeModel.
      */
-    private WMSCapabilitiesTreeModel() {
-    }
+    private WMSCapabilitiesTreeModel() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -87,9 +85,14 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      */
     @Override
     public boolean isLeaf(final Object node) {
-        if (((node instanceof Layer) && (((Layer)node).getChildren().length == 0)
-                        && (((Layer)node).getStyles().length == 0))
-                    || (node instanceof Style)) {
+        if (
+            (
+                (node instanceof Layer) &&
+                (((Layer) node).getChildren().length == 0) &&
+                (((Layer) node).getStyles().length == 0)
+            ) ||
+            (node instanceof Style)
+        ) {
             return true;
         } else {
             return false;
@@ -107,8 +110,8 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     @Override
     public int getChildCount(final Object parent) {
         if (parent instanceof Layer) {
-            final int layerChilds = ((Layer)parent).getChildren().length;
-            final int styleChilds = ((Layer)parent).getStyles().length;
+            final int layerChilds = ((Layer) parent).getChildren().length;
+            final int styleChilds = ((Layer) parent).getStyles().length;
             return layerChilds + styleChilds;
         }
         return 0;
@@ -123,8 +126,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      * @param  newValue  the new value from the TreeCellEditor
      */
     @Override
-    public void valueForPathChanged(final javax.swing.tree.TreePath path, final Object newValue) {
-    }
+    public void valueForPathChanged(final javax.swing.tree.TreePath path, final Object newValue) {}
 
     /**
      * Removes a listener previously added with <code>addTreeModelListener</code>.
@@ -164,11 +166,11 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     @Override
     public Object getChild(final Object parent, final int index) {
         if (parent instanceof Layer) {
-            final int layerChilds = ((Layer)parent).getChildren().length;
+            final int layerChilds = ((Layer) parent).getChildren().length;
             if (index < layerChilds) {
-                return ((Layer)parent).getChildren()[index];
+                return ((Layer) parent).getChildren()[index];
             } else {
-                return ((Layer)parent).getStyles()[index - layerChilds];
+                return ((Layer) parent).getStyles()[index - layerChilds];
             }
         }
         return null;

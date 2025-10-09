@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MapScaleUnfixedPanel.java
  *
@@ -24,6 +24,7 @@ public class MapScaleUnfixedPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler gluFiller;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -44,9 +45,12 @@ public class MapScaleUnfixedPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        gluFiller = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        gluFiller =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(16, 16),
-                new java.awt.Dimension(32767, 32767));
+                new java.awt.Dimension(32767, 32767)
+            );
 
         setLayout(new java.awt.BorderLayout());
         add(gluFiller, java.awt.BorderLayout.CENTER);

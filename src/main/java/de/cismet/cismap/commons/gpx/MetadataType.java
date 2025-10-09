@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -16,7 +16,6 @@ package de.cismet.cismap.commons.gpx;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlSchemaType;
@@ -56,17 +55,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "metadataType",
-    propOrder = {
-            "name",
-            "desc",
-            "author",
-            "copyright",
-            "link",
-            "time",
-            "keywords",
-            "bounds",
-            "extensions"
-        }
+    propOrder = { "name", "desc", "author", "copyright", "link", "time", "keywords", "bounds", "extensions" }
 )
 public class MetadataType {
 
@@ -77,8 +66,10 @@ public class MetadataType {
     protected PersonType author;
     protected CopyrightType copyright;
     protected List<LinkType> link;
+
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar time;
+
     protected String keywords;
     protected BoundsType bounds;
     protected ExtensionsType extensions;

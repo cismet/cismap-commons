@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 thorsten
  *
@@ -32,7 +32,6 @@ import javax.swing.Action;
  * @version  $Revision$, $Date$
  */
 public interface CommonFeatureAction extends Action {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

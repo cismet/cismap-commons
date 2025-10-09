@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -21,13 +21,14 @@ import de.cismet.cismap.commons.PropertyContainer;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public interface FeatureServiceFeature extends StyledFeature,
-    CloneableFeature,
-    AnnotatedFeature,
-    PropertyContainer,
-    AnnotatedByPropertyFeature,
-    FeatureWithId,
-    InheritsLayerProperties,
-    SLDStyledFeature,
-    FeatureNameProvider /*,ConvertableToXML*/ {
-}
+public interface FeatureServiceFeature
+    extends
+        StyledFeature,
+        CloneableFeature,
+        AnnotatedFeature,
+        PropertyContainer,
+        AnnotatedByPropertyFeature,
+        FeatureWithId,
+        InheritsLayerProperties,
+        SLDStyledFeature,
+        FeatureNameProvider /*,ConvertableToXML*/{}

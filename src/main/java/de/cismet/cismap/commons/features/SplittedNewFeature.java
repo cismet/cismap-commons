@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
@@ -38,11 +37,12 @@ public class SplittedNewFeature extends PureNewFeature {
      * @param  wtst                  DOCUMENT ME!
      * @param  splittedFromPFeature  DOCUMENT ME!
      */
-    public SplittedNewFeature(final Coordinate[] coordArr,
-            final WorldToScreenTransform wtst,
-            final PFeature splittedFromPFeature) {
+    public SplittedNewFeature(
+        final Coordinate[] coordArr,
+        final WorldToScreenTransform wtst,
+        final PFeature splittedFromPFeature
+    ) {
         super(coordArr, wtst);
-
         this.splittedFromPFeature = splittedFromPFeature;
     }
 

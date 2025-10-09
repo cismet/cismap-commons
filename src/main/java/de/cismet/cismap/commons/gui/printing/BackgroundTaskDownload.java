@@ -1,24 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import java.io.File;
-
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-
 import javax.swing.SwingWorker;
-
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A Download which can immediately be added to the download manager and afterwards executes some task, containing the
@@ -53,11 +50,13 @@ public class BackgroundTaskDownload extends AbstractCancellableDownload {
      * @param  filename      DOCUMENT ME!
      * @param  extension     DOCUMENT ME!
      */
-    public BackgroundTaskDownload(final DownloadTask downloadTask,
-            final String title,
-            final String directory,
-            final String filename,
-            final String extension) {
+    public BackgroundTaskDownload(
+        final DownloadTask downloadTask,
+        final String title,
+        final String directory,
+        final String filename,
+        final String extension
+    ) {
         this.title = title;
         this.directory = directory;
         this.downloadTask = downloadTask;
@@ -70,8 +69,8 @@ public class BackgroundTaskDownload extends AbstractCancellableDownload {
 
     @Override
     public void run() {
-        worker = new SwingWorker<Void, Void>() {
-
+        worker =
+            new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     downloadTask.download(fileToSaveTo);
@@ -116,7 +115,6 @@ public class BackgroundTaskDownload extends AbstractCancellableDownload {
      * @version  $Revision$, $Date$
      */
     public interface DownloadTask {
-
         //~ Methods ------------------------------------------------------------
 
         /**

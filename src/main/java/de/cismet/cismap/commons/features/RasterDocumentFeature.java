@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 srichter
  *
@@ -32,7 +32,6 @@ import java.awt.image.BufferedImage;
  * @version  $Revision$, $Date$
  */
 public interface RasterDocumentFeature extends Feature {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

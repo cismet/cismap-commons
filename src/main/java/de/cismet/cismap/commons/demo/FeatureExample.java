@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureExample.java
  *
@@ -12,13 +12,12 @@
  */
 package de.cismet.cismap.commons.demo;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Paint;
-
 import de.cismet.cismap.commons.features.AnnotatedFeature;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.styling.TextStyle;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Paint;
 
 /**
  * DOCUMENT ME!
@@ -39,8 +38,7 @@ public class FeatureExample implements AnnotatedFeature {
     /**
      * Creates a new instance of FeatureExample.
      */
-    public FeatureExample() {
-    }
+    public FeatureExample() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -52,6 +50,7 @@ public class FeatureExample implements AnnotatedFeature {
     public com.vividsolutions.jts.geom.Geometry getGeometry() {
         return geom;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -60,6 +59,7 @@ public class FeatureExample implements AnnotatedFeature {
     public void setGeometry(final com.vividsolutions.jts.geom.Geometry geom) {
         this.geom = geom;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -139,9 +139,10 @@ public class FeatureExample implements AnnotatedFeature {
      */
     public String getToolTipText() {
         return org.openide.util.NbBundle.getMessage(
-                FeatureExample.class,
-                "FeatureExample.getToolTipText().return",
-                new Object[] { name }); // NOI18N
+            FeatureExample.class,
+            "FeatureExample.getToolTipText().return",
+            new Object[] { name }
+        ); // NOI18N
     }
 
     /**
@@ -168,6 +169,7 @@ public class FeatureExample implements AnnotatedFeature {
     public java.awt.Paint getLinePaint() {
         return Color.black;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -175,29 +177,37 @@ public class FeatureExample implements AnnotatedFeature {
      */
     public java.awt.Paint getFillingStyle() {
         switch (art) {
-            case 1: {
-                return new java.awt.Color(162, 76, 41, 150);   // Dach
-            }
-            case 2: {
-                return new java.awt.Color(106, 122, 23, 150);  // Gr\u00FCndach
-            }
-            case 3: {
-                return new java.awt.Color(120, 129, 128, 150); // versiegelte Fl\u00E4che
-            }
-            case 4: {
-                return new java.awt.Color(159, 155, 108, 150); // \u00D6kopflaster
-            }
-            case 5: {
-                return new java.awt.Color(138, 134, 132, 150); // st\u00E4dtische Strassenflaeche
-            }
-            case 6: {
-                return new java.awt.Color(126, 91, 71, 150);   // staedtische Strassenflaeche Oekopflaster
-            }
-            default: {
-                return null;
-            }
+            case 1:
+                {
+                    return new java.awt.Color(162, 76, 41, 150); // Dach
+                }
+            case 2:
+                {
+                    return new java.awt.Color(106, 122, 23, 150); // Gr\u00FCndach
+                }
+            case 3:
+                {
+                    return new java.awt.Color(120, 129, 128, 150); // versiegelte Fl\u00E4che
+                }
+            case 4:
+                {
+                    return new java.awt.Color(159, 155, 108, 150); // \u00D6kopflaster
+                }
+            case 5:
+                {
+                    return new java.awt.Color(138, 134, 132, 150); // st\u00E4dtische Strassenflaeche
+                }
+            case 6:
+                {
+                    return new java.awt.Color(126, 91, 71, 150); // staedtische Strassenflaeche Oekopflaster
+                }
+            default:
+                {
+                    return null;
+                }
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -221,16 +231,14 @@ public class FeatureExample implements AnnotatedFeature {
      *
      * @param  editable  DOCUMENT ME!
      */
-    public void setEditable(final boolean editable) {
-    }
+    public void setEditable(final boolean editable) {}
 
     /**
      * DOCUMENT ME!
      *
      * @param  hiding  DOCUMENT ME!
      */
-    public void hide(final boolean hiding) {
-    }
+    public void hide(final boolean hiding) {}
 
     /**
      * DOCUMENT ME!

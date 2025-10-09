@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -18,15 +18,13 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import org.apache.log4j.Logger;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import org.apache.log4j.Logger;
 
 /**
  * Contains some useful geometry processing operations.
@@ -60,29 +58,33 @@ public class GeometryUtils {
             return factory.createLineString(new Coordinate[] { new Coordinate(1, 2), new Coordinate(2, 2) });
         } else if (geometryType.equalsIgnoreCase("MultiLineString")) {
             final LineString ls1 = factory.createLineString(
-                    new Coordinate[] { new Coordinate(1, 2), new Coordinate(2, 2) });
+                new Coordinate[] { new Coordinate(1, 2), new Coordinate(2, 2) }
+            );
             final LineString ls2 = factory.createLineString(
-                    new Coordinate[] { new Coordinate(3, 3), new Coordinate(4, 3) });
+                new Coordinate[] { new Coordinate(3, 3), new Coordinate(4, 3) }
+            );
 
             return factory.createMultiLineString(new LineString[] { ls1, ls2 });
         } else if (geometryType.equalsIgnoreCase("Polygon")) {
             return factory.createPolygon(
-                    new Coordinate[] {
-                        new Coordinate(1, 2),
-                        new Coordinate(2, 2),
-                        new Coordinate(2, 3),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 2)
-                    });
+                new Coordinate[] {
+                    new Coordinate(1, 2),
+                    new Coordinate(2, 2),
+                    new Coordinate(2, 3),
+                    new Coordinate(1, 3),
+                    new Coordinate(1, 2),
+                }
+            );
         } else if (geometryType.equalsIgnoreCase("MultiPolygon")) {
             final Polygon p = factory.createPolygon(
-                    new Coordinate[] {
-                        new Coordinate(1, 2),
-                        new Coordinate(2, 2),
-                        new Coordinate(2, 3),
-                        new Coordinate(1, 3),
-                        new Coordinate(1, 2)
-                    });
+                new Coordinate[] {
+                    new Coordinate(1, 2),
+                    new Coordinate(2, 2),
+                    new Coordinate(2, 3),
+                    new Coordinate(1, 3),
+                    new Coordinate(1, 2),
+                }
+            );
 
             return factory.createMultiPolygon(new Polygon[] { p });
         }
@@ -99,13 +101,14 @@ public class GeometryUtils {
      */
     public static Geometry force2d(final Geometry g) {
         if (g != null) {
-            g.apply(new CoordinateFilter() {
-
+            g.apply(
+                new CoordinateFilter() {
                     @Override
                     public void filter(final Coordinate coord) {
                         coord.z = 0.0;
                     }
-                });
+                }
+            );
 
             g.geometryChanged();
         }
@@ -121,15 +124,16 @@ public class GeometryUtils {
      * @return  the given geometry with a changed axis order.
      */
     public static Geometry reverseGeometryCoordinates(final Geometry g) {
-        g.apply(new CoordinateFilter() {
-
+        g.apply(
+            new CoordinateFilter() {
                 @Override
                 public void filter(final Coordinate crdnt) {
                     final double newX = crdnt.y;
                     crdnt.y = crdnt.x;
                     crdnt.x = newX;
                 }
-            });
+            }
+        );
         g.geometryChanged();
         return g;
     }
@@ -176,8 +180,7 @@ public class GeometryUtils {
             origFile.delete();
 
             try {
-                is = GeometryUtils.class.getResourceAsStream(
-                        "/de/cismet/watergis/gui/actions/emptyShapeTemplate.shp");
+                is = GeometryUtils.class.getResourceAsStream("/de/cismet/watergis/gui/actions/emptyShapeTemplate.shp");
                 os = new FileOutputStream(new File(fileName));
                 int b;
                 int index = 0;
@@ -245,13 +248,12 @@ public class GeometryUtils {
                         tmpLength = content;
                     }
                     if (byteCounter == 10) {
-                        tmpLength += content
-                                    << 8;
+                        tmpLength += content << 8;
                         length = tmpLength;
                     }
                     os.write(content);
                     if ((byteCounter >= (length - 1)) && (content == 0xd)) { // 0xd is the last byte of
-                                                                             // the header
+                        // the header
                         break;
                     }
                 }

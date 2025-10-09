@@ -1,24 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.deegree.commons.utils.Pair;
-
 import java.awt.Graphics2D;
-
 import java.io.InputStream;
 import java.io.Reader;
-
 import java.util.List;
+import org.deegree.commons.utils.Pair;
 
 /**
  * DOCUMENT ME!
@@ -27,7 +24,6 @@ import java.util.List;
  * @version  $Revision$, $Date$
  */
 public interface SLDStyledLayer {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

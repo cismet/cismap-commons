@@ -1,23 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import org.jdom.Document;
-
 import java.util.LinkedList;
 import java.util.List;
-
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
+import org.jdom.Document;
 
 /**
  * DOCUMENT ME!
@@ -38,8 +36,7 @@ public class StyleRuleListModel implements ListModel {
     /**
      * Konstruktor mit leerer History.
      */
-    public StyleRuleListModel() {
-    }
+    public StyleRuleListModel() {}
 
     /**
      * Konstruktor mit bereits bestehender History.s.
@@ -86,10 +83,8 @@ public class StyleRuleListModel implements ListModel {
     }
 
     @Override
-    public void addListDataListener(final ListDataListener l) {
-    }
+    public void addListDataListener(final ListDataListener l) {}
 
     @Override
-    public void removeListDataListener(final ListDataListener l) {
-    }
+    public void removeListDataListener(final ListDataListener l) {}
 }

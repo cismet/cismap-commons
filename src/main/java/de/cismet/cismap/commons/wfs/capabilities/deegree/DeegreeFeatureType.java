@@ -1,29 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfs.capabilities.deegree;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.model.crs.CRSFactory;
-import org.deegree.model.metadata.iso19115.Keywords;
-import org.deegree.ogcwebservices.wfs.capabilities.FormatType;
-import org.deegree.ogcwebservices.wfs.capabilities.Operation;
-
-import org.jdom.Element;
-
-import java.io.IOException;
-
-import java.net.URI;
-
-import java.util.ArrayList;
-import java.util.Vector;
-
-import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
@@ -32,10 +14,20 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.OperationType;
 import de.cismet.cismap.commons.wfs.capabilities.OutputFormatType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-
 import de.cismet.commons.wms.capabilities.Envelope;
 import de.cismet.commons.wms.capabilities.deegree.DeegreeCoordinateSystem;
 import de.cismet.commons.wms.capabilities.deegree.DeegreeEnvelope;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Vector;
+import javax.xml.namespace.QName;
+import org.apache.log4j.Logger;
+import org.deegree.model.crs.CRSFactory;
+import org.deegree.model.metadata.iso19115.Keywords;
+import org.deegree.ogcwebservices.wfs.capabilities.FormatType;
+import org.deegree.ogcwebservices.wfs.capabilities.Operation;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -70,9 +62,11 @@ public class DeegreeFeatureType implements FeatureType {
      * @throws  IOException  DOCUMENT ME!
      * @throws  Exception    DOCUMENT ME!
      */
-    public DeegreeFeatureType(final org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature,
-            final WFSCapabilities caps,
-            final String capabilitiesUrl) throws IOException, Exception {
+    public DeegreeFeatureType(
+        final org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature,
+        final WFSCapabilities caps,
+        final String capabilitiesUrl
+    ) throws IOException, Exception {
         this.capabilitiesUrl = capabilitiesUrl;
         this.feature = feature;
         this.caps = caps;
@@ -92,13 +86,11 @@ public class DeegreeFeatureType implements FeatureType {
 
     @Override
     public QName getName() {
-        final String nameSpace = ((feature.getName().getNamespace() != null)
-                ? feature.getName().getNamespace().toString() : null);
+        final String nameSpace =
+            ((feature.getName().getNamespace() != null) ? feature.getName().getNamespace().toString() : null);
         final String prefix = ((feature.getName().getPrefix() == null) ? "" : feature.getName().getPrefix());
 
-        return new QName(nameSpace,
-                feature.getName().getLocalName(),
-                prefix);
+        return new QName(nameSpace, feature.getName().getLocalName(), prefix);
     }
 
     @Override
@@ -242,7 +234,7 @@ public class DeegreeFeatureType implements FeatureType {
                 try {
                     final org.deegree.model.crs.CoordinateSystem cs = CRSFactory.create("EPSG:4326");
                     final DeegreeCoordinateSystem dcs = new DeegreeCoordinateSystem(cs);
-                    ((DeegreeEnvelope)envelopes[i]).setCoordinateSystem(dcs);
+                    ((DeegreeEnvelope) envelopes[i]).setCoordinateSystem(dcs);
                 } catch (Exception e) {
                     LOG.error("CRS EPSG:4326 not found.", e);
                 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -56,7 +56,7 @@ public class DBEntry {
 
     @Override
     public boolean equals(final Object obj) {
-        return getClass().equals(obj.getClass()) && name.equals(((DBEntry)obj).name);
+        return getClass().equals(obj.getClass()) && name.equals(((DBEntry) obj).name);
     }
 
     /**

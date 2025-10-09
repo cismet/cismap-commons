@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -24,7 +24,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.RenderingHints;
-
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
@@ -41,22 +40,26 @@ public class StyleHistoryListCellRenderer implements ListCellRenderer {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Component getListCellRendererComponent(final JList list,
-            final Object value,
-            final int index,
-            final boolean isSelected,
-            final boolean cellHasFocus) {
+    public Component getListCellRendererComponent(
+        final JList list,
+        final Object value,
+        final int index,
+        final boolean isSelected,
+        final boolean cellHasFocus
+    ) {
         final JPanel panel = new JPanel();
         final HistoryPanel histPanel = new HistoryPanel();
         if (value instanceof Style) {
-            final Style s = (Style)value;
-            histPanel.setAttributes(s.isDrawFill() ? s.getFillColor() : null,
+            final Style s = (Style) value;
+            histPanel.setAttributes(
+                s.isDrawFill() ? s.getFillColor() : null,
                 s.getAlpha(),
                 s.isDrawLine() ? s.getLineColor() : null,
                 s.getLineWidth(),
                 s.isDrawLabel() ? s.getFont() : null,
                 s.getFontColor(),
-                (s.getLabel() != null) ? s.getLabel() : null);
+                (s.getLabel() != null) ? s.getLabel() : null
+            );
             histPanel.setCustomSize(new Dimension(45, 20));
             panel.setLayout(new GridBagLayout());
             panel.add(
@@ -72,7 +75,9 @@ public class StyleHistoryListCellRenderer implements ListCellRenderer {
                     GridBagConstraints.BOTH,
                     new Insets(1, 1, 1, 1),
                     0,
-                    0));
+                    0
+                )
+            );
 
             // sets default-colors for the selection
             if (isSelected) {
@@ -127,10 +132,10 @@ public class StyleHistoryListCellRenderer implements ListCellRenderer {
             super.paintComponent(g);
             final Color originalColor = g.getColor();
             g.setColor(getBackground());
-            ((Graphics2D)g).setStroke(stroke);
+            ((Graphics2D) g).setStroke(stroke);
             g.fillRect(0, 0, getWidth() - 1, getHeight() - 1);
             final AlphaComposite c = AlphaComposite.SrcOver.derive(alpha);
-            ((Graphics2D)g).setComposite(c);
+            ((Graphics2D) g).setComposite(c);
 
             if (fill != null) {
                 g.setColor(fill);
@@ -138,15 +143,16 @@ public class StyleHistoryListCellRenderer implements ListCellRenderer {
             }
             if (line != null) {
                 g.setColor(line);
-                ((Graphics2D)g).setStroke(stroke);
+                ((Graphics2D) g).setStroke(stroke);
                 g.drawRect(1, 1, getWidth() - 3, getHeight() - 3);
             }
             if (font != null) {
                 g.setColor(label);
                 g.setFont(font);
-                ((Graphics2D)g).setRenderingHint(
-                    RenderingHints.KEY_TEXT_ANTIALIASING,
-                    RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+                ((Graphics2D) g).setRenderingHint(
+                        RenderingHints.KEY_TEXT_ANTIALIASING,
+                        RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB
+                    );
                 final FontMetrics metrics = g.getFontMetrics(font);
                 int h = metrics.getHeight();
                 if (h > (getHeight() - 6)) {
@@ -179,13 +185,15 @@ public class StyleHistoryListCellRenderer implements ListCellRenderer {
          * @param  label  fontcolor
          * @param  text   string of the label to print
          */
-        public void setAttributes(final Color fill,
-                final float alpha,
-                final Color line,
-                final int width,
-                final Font font,
-                final Color label,
-                final String text) {
+        public void setAttributes(
+            final Color fill,
+            final float alpha,
+            final Color line,
+            final int width,
+            final Font font,
+            final Color label,
+            final String text
+        ) {
             this.fill = fill;
             this.line = line;
             this.alpha = alpha;

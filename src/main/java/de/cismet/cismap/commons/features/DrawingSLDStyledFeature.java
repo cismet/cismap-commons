@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -14,25 +14,6 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.nodes.PImage;
-import edu.umd.cs.piccolo.nodes.PPath;
-
-import org.deegree.commons.utils.Triple;
-import org.deegree.style.styling.LineStyling;
-import org.deegree.style.styling.PointStyling;
-import org.deegree.style.styling.PolygonStyling;
-import org.deegree.style.styling.Styling;
-import org.deegree.style.styling.TextStyling;
-
-import org.jfree.util.Log;
-
-import java.util.LinkedList;
-import java.util.ListIterator;
-
-import javax.swing.ImageIcon;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.featureservice.DefaultLayerProperties;
@@ -40,6 +21,19 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.nodes.PImage;
+import edu.umd.cs.piccolo.nodes.PPath;
+import java.util.LinkedList;
+import java.util.ListIterator;
+import javax.swing.ImageIcon;
+import org.deegree.commons.utils.Triple;
+import org.deegree.style.styling.LineStyling;
+import org.deegree.style.styling.PointStyling;
+import org.deegree.style.styling.PolygonStyling;
+import org.deegree.style.styling.Styling;
+import org.deegree.style.styling.TextStyling;
+import org.jfree.util.Log;
 
 /**
  * This feature class is used within the drawing mode.
@@ -47,13 +41,15 @@ import de.cismet.cismap.commons.gui.piccolo.PSticky;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implements DrawingFeatureInterface,
-    AnnotatedFeature {
+public class DrawingSLDStyledFeature
+    extends DefaultFeatureServiceFeature
+    implements DrawingFeatureInterface, AnnotatedFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final ImageIcon textAnnotationSymbol = new javax.swing.ImageIcon(DrawingFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/transparentPoint.png"));
+    private static final ImageIcon textAnnotationSymbol = new javax.swing.ImageIcon(
+        DrawingFeature.class.getResource("/de/cismet/cismap/commons/gui/res/transparentPoint.png")
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -74,8 +70,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
     /**
      * Creates a new DrawingSLDStyledFeature object.
      */
-    public DrawingSLDStyledFeature() {
-    }
+    public DrawingSLDStyledFeature() {}
 
     /**
      * Creates a new DrawingSLDStyledFeature object.
@@ -137,9 +132,12 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
         pfeature.setPaint(null);
         for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
             final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
-                    pfeature.getMappingComponent().getScaleDenominator());
-            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
-                filteredStyle.evaluate(getDeegreeFeature(), evaluator);
+                pfeature.getMappingComponent().getScaleDenominator()
+            );
+            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings = filteredStyle.evaluate(
+                getDeegreeFeature(),
+                evaluator
+            );
             if (stylings == null) {
                 stylings = tempStylings;
             } else {
@@ -149,7 +147,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
 
         for (final PImage image : pfeature.sldStyledImage) {
             if (image instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                pfeature.getMappingComponent().removeStickyNode((PSticky) image);
                 removeChildFromPfeature(pfeature, image);
             }
         }
@@ -157,7 +155,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
 
         for (final PImage image : pfeature.sldStyledSelectedImage) {
             if (image instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                pfeature.getMappingComponent().removeStickyNode((PSticky) image);
                 removeChildFromPfeature(pfeature, image);
             }
         }
@@ -172,7 +170,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
             while (it.hasNext()) {
                 final Object child = it.next();
                 if (child instanceof PSticky) {
-                    pfeature.getMappingComponent().removeStickyNode((PSticky)child);
+                    pfeature.getMappingComponent().removeStickyNode((PSticky) child);
                 }
             }
             pfeature.removeAllChildren();
@@ -198,8 +196,10 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
         int textNr = 0;
         int imageNr = 0;
         for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : stylings) {
-            if ((styling.first instanceof PolygonStyling)
-                        && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
+            if (
+                (styling.first instanceof PolygonStyling) &&
+                ((geom instanceof Polygon) || (geom instanceof MultiPolygon))
+            ) {
                 PPath path;
                 if (polygonNr < 0) {
                     path = pfeature;
@@ -213,10 +213,12 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                     }
                     path.setPathTo(pfeature.getPathReference());
                 }
-                applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
+                applyPolygonStyling(path, (PolygonStyling) styling.first, pfeature.getMappingComponent());
                 polygonNr++;
-            } else if ((styling.first instanceof LineStyling)
-                        && ((geom instanceof LineString) || (geom instanceof MultiLineString))) {
+            } else if (
+                (styling.first instanceof LineStyling) &&
+                ((geom instanceof LineString) || (geom instanceof MultiLineString))
+            ) {
                 PPath path;
                 if (polygonNr < 0) {
                     path = pfeature;
@@ -230,7 +232,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                     }
                     path.setPathTo(pfeature.getPathReference());
                 }
-                applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
+                applyLineStyling(path, (LineStyling) styling.first, pfeature.getMappingComponent());
                 polygonNr++;
             } else if (styling.first instanceof TextStyling) {
                 PFeature.PTextWithDisplacement text;
@@ -242,31 +244,35 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                     pfeature.addChild(text);
                     pfeature.getMappingComponent().addStickyNode(text);
                 }
-                final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                final Point intPoint = CrsTransformer
+                    .transformToGivenCrs(
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode()
+                    )
+                    .getInteriorPoint();
                 applyTextStyling(
                     text,
                     styling.third,
-                    (TextStyling)styling.first,
+                    (TextStyling) styling.first,
                     wtst,
                     intPoint.getX(),
-                    intPoint.getY());
+                    intPoint.getY()
+                );
                 rescaleStickyNode(pfeature, text);
-            } else if ((styling.first instanceof PointStyling)
-                        && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
+            } else if (
+                (styling.first instanceof PointStyling) && ((geom instanceof Point) || (geom instanceof MultiPoint))
+            ) {
                 PImage image;
                 PImage selectedImage;
                 try {
                     image = pfeature.sldStyledImage.get(imageNr);
                     selectedImage = pfeature.sldStyledSelectedImage.get(imageNr++);
                 } catch (IndexOutOfBoundsException ex) {
-                    if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                         image = new FixedPImage();
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
                         selectedImage = new FixedPImage();
-                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) selectedImage);
                     } else {
                         image = new PImage();
                         selectedImage = new PImage();
@@ -276,7 +282,7 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                     pfeature.sldStyledSelectedImage.add(selectedImage);
                     pfeature.addChild(image);
                 }
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                     if (!(image instanceof FixedPImage)) {
                         pfeature.removeChild(image);
                         pfeature.sldStyledImage.remove(image);
@@ -286,12 +292,12 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                         pfeature.sldStyledSelectedImage.add(selectedImage);
                         pfeature.addChild(image);
                         pfeature.addChild(selectedImage);
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
-                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) selectedImage);
                     }
                 } else {
                     if (image instanceof FixedPImage) {
-                        pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().removeStickyNode((PSticky) image);
                         pfeature.sldStyledImage.remove(image);
                         pfeature.sldStyledSelectedImage.remove(selectedImage);
                         pfeature.removeChild(image);
@@ -301,29 +307,33 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
                         pfeature.addChild(image);
                     }
                 }
-                final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                final Point intPoint = CrsTransformer
+                    .transformToGivenCrs(
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode()
+                    )
+                    .getInteriorPoint();
                 applyPointStyling(
                     image,
-                    (PointStyling)styling.first,
+                    (PointStyling) styling.first,
                     wtst,
                     intPoint.getX(),
                     intPoint.getY(),
                     pfeature.getMappingComponent().getCamera(),
-                    false);
+                    false
+                );
                 applyPointStyling(
                     selectedImage,
-                    (PointStyling)styling.first,
+                    (PointStyling) styling.first,
                     wtst,
                     intPoint.getX(),
                     intPoint.getY(),
                     pfeature.getMappingComponent().getCamera(),
-                    true);
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
-                    rescaleStickyNode(pfeature, (PSticky)image);
-                    rescaleStickyNode(pfeature, (PSticky)selectedImage);
+                    true
+                );
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    rescaleStickyNode(pfeature, (PSticky) image);
+                    rescaleStickyNode(pfeature, (PSticky) selectedImage);
                 }
             }
         }

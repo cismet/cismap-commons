@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -14,7 +14,6 @@ package de.cismet.cismap.commons.internaldb;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-
 import java.io.IOException;
 
 /**
@@ -28,8 +27,9 @@ public class DBTransferable implements Transferable {
     //~ Instance fields --------------------------------------------------------
 
     private DataFlavor TREEPATH_FLAVOR = new DataFlavor(
-            DataFlavor.javaJVMLocalObjectMimeType,
-            "SelectionAndCapabilities"); // NOI18N
+        DataFlavor.javaJVMLocalObjectMimeType,
+        "SelectionAndCapabilities"
+    ); // NOI18N
     private DBTableInformation[] transferObjects;
 
     //~ Constructors -----------------------------------------------------------

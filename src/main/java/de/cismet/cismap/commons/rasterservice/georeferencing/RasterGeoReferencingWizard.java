@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,34 +13,6 @@
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.umd.cs.piccolo.PCamera;
-import edu.umd.cs.piccolo.PCanvas;
-import edu.umd.cs.piccolo.PNode;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.tree.TreePath;
-
 import de.cismet.cismap.commons.PNodeProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
@@ -55,6 +27,27 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import edu.umd.cs.piccolo.PCamera;
+import edu.umd.cs.piccolo.PCanvas;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.tree.TreePath;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * DOCUMENT ME!
@@ -67,11 +60,13 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            RasterGeoReferencingWizard.class);
+        RasterGeoReferencingWizard.class
+    );
 
     private static final DataFlavor CAPABILITIES_DATA_FLAVOR = new DataFlavor(
-            DataFlavor.javaJVMLocalObjectMimeType,
-            "SelectionAndCapabilities"); // NOI18N
+        DataFlavor.javaJVMLocalObjectMimeType,
+        "SelectionAndCapabilities"
+    ); // NOI18N
 
     private static final int MAX_LAYER_COUNT = 3;
     private static final int DEFAULT_ZOOMVIEW_WIDTH = 200;
@@ -86,10 +81,11 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      * @version  $Revision$, $Date$
      */
     private enum SelectionMode {
-
         //~ Enum constants -----------------------------------------------------
 
-        POINT, COORDINATE, NONE
+        POINT,
+        COORDINATE,
+        NONE,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -98,24 +94,40 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
 
     private final ListenerHandler listenerHandler = new ListenerHandler();
 
-    @Getter private RasterGeoReferencingHandler handler;
+    @Getter
+    private RasterGeoReferencingHandler handler;
 
-    @Getter private Point selectedPoint;
+    @Getter
+    private Point selectedPoint;
 
-    @Getter private Coordinate selectedCoordinate;
+    @Getter
+    private Coordinate selectedCoordinate;
 
     private SelectionMode selectionMode = SelectionMode.NONE;
 
-    @Getter private int position = 0;
+    @Getter
+    private int position = 0;
 
     private final MappingComponent pointZoomMap = new MappingComponent();
     private final MappingComponent coordinateZoomMap = new MappingComponent();
 
-    @Getter @Setter private int zoomViewWidth = DEFAULT_ZOOMVIEW_WIDTH;
-    @Getter @Setter private int zoomViewHeight = DEFAULT_ZOOMVIEW_HEIGHT;
-    @Getter @Setter private double zoomViewFactor = DEFAULT_ZOOMVIEW_FACTOR;
-    @Getter private final PCanvas pointZoomViewCanvas = new PCanvas();
-    @Getter private final PCanvas coordinateZoomViewCanvas = new PCanvas();
+    @Getter
+    @Setter
+    private int zoomViewWidth = DEFAULT_ZOOMVIEW_WIDTH;
+
+    @Getter
+    @Setter
+    private int zoomViewHeight = DEFAULT_ZOOMVIEW_HEIGHT;
+
+    @Getter
+    @Setter
+    private double zoomViewFactor = DEFAULT_ZOOMVIEW_FACTOR;
+
+    @Getter
+    private final PCanvas pointZoomViewCanvas = new PCanvas();
+
+    @Getter
+    private final PCanvas coordinateZoomViewCanvas = new PCanvas();
 
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
@@ -133,6 +145,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     @Getter
     @Setter(AccessLevel.PRIVATE)
     private Collection<RetrievalServiceLayer> ignoreLayerList = new ArrayList<>();
+
     // IgnoreLayerList is needed because the main mapping component is firing layer events when layers are added or
     // removed from ANY mapping model (not only the main) That's why we use this list to ignore these events, if they
     // are concerning layers of one of the zoom mapping components.
@@ -209,10 +222,12 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      */
     private void updateZoom(final int position, final SelectionMode mode) {
         final RasterGeoReferencingHandler handler = getHandler();
-        final Coordinate coordinate = SelectionMode.POINT.equals(mode) ? handler.getPointCoordinate(position)
-                                                                       : handler.getCoordinate(position);
-        final WorldToScreenTransform wtst = SelectionMode.POINT.equals(mode) ? getPointZoomMap().getWtst()
-                                                                             : getCoordinateZoomMap().getWtst();
+        final Coordinate coordinate = SelectionMode.POINT.equals(mode)
+            ? handler.getPointCoordinate(position)
+            : handler.getCoordinate(position);
+        final WorldToScreenTransform wtst = SelectionMode.POINT.equals(mode)
+            ? getPointZoomMap().getWtst()
+            : getCoordinateZoomMap().getWtst();
         if (coordinate != null) {
             final Point2D screenPoint = getScreenPoint(coordinate, wtst);
             setZoom(screenPoint, mode);
@@ -271,14 +286,15 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         final double width = getZoomViewWidth() / factor;
         final double height = getZoomViewHeight() / factor;
 
-        final Rectangle2D viewBounds = new Rectangle2D.Double(screenPoint.getX()
-                        - (width / 2d),
-                screenPoint.getY()
-                        - (height / 2d),
-                width,
-                height);
-        final PCanvas pCanvas = SelectionMode.POINT.equals(mode) ? getPointZoomViewCanvas()
-                                                                 : getCoordinateZoomViewCanvas();
+        final Rectangle2D viewBounds = new Rectangle2D.Double(
+            screenPoint.getX() - (width / 2d),
+            screenPoint.getY() - (height / 2d),
+            width,
+            height
+        );
+        final PCanvas pCanvas = SelectionMode.POINT.equals(mode)
+            ? getPointZoomViewCanvas()
+            : getCoordinateZoomViewCanvas();
         pCanvas.getCamera().setViewBounds(viewBounds);
         pCanvas.getCamera().setViewScale(factor);
         getPropertyChangeListenerHandler().propertyChange(null);
@@ -329,8 +345,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      *
      * @return  DOCUMENT ME!
      */
-    public static RetrievalServiceLayer cloneRetrievalServiceLayer(
-            final RetrievalServiceLayer retrievalServiceLayer) {
+    public static RetrievalServiceLayer cloneRetrievalServiceLayer(final RetrievalServiceLayer retrievalServiceLayer) {
         if (!retrievalServiceLayer.isEnabled()) {
             return null;
         }
@@ -338,17 +353,17 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             return null;
         }
 
-        final PNodeProvider pnodeProvider = (PNodeProvider)retrievalServiceLayer;
+        final PNodeProvider pnodeProvider = (PNodeProvider) retrievalServiceLayer;
         final PNode pnode = pnodeProvider.getPNode();
         if ((pnode == null) || !pnode.getVisible()) {
             return null;
         }
 
         if (retrievalServiceLayer instanceof AbstractRetrievalService) {
-            final AbstractRetrievalService ars = (AbstractRetrievalService)retrievalServiceLayer;
+            final AbstractRetrievalService ars = (AbstractRetrievalService) retrievalServiceLayer;
             final Object clone = ars.cloneWithoutRetrievalListeners();
             if (clone instanceof RetrievalServiceLayer) {
-                return (RetrievalServiceLayer)clone;
+                return (RetrievalServiceLayer) clone;
             }
         }
 
@@ -407,21 +422,21 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
                 final List<TreePath> treePaths = new ArrayList<TreePath>();
                 dtde.dropComplete(true);
                 if (o instanceof SelectionAndCapabilities) {
-                    final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
+                    final TreePath[] tpa = ((SelectionAndCapabilities) o).getSelection();
                     for (int i = 0; i < tpa.length; ++i) {
                         treePaths.add(tpa[i]);
                     }
 
                     final WMSServiceLayer layer;
 
-                    if (((SelectionAndCapabilities)o).getUrl().contains("cismap.dont.touch.ordering=true")) {
+                    if (((SelectionAndCapabilities) o).getUrl().contains("cismap.dont.touch.ordering=true")) {
                         layer = new WMSServiceLayer(treePaths, false, false);
                     } else {
                         layer = new WMSServiceLayer(treePaths, true, true);
                     }
 
-                    layer.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                    layer.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
+                    layer.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
+                    layer.setCapabilitiesUrl(((SelectionAndCapabilities) o).getUrl());
 
                     setSingleLayer(layer);
 
@@ -442,45 +457,51 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     private void refreshZoomMap(final SelectionMode mode) {
         final MappingComponent origMap = getMainMap();
         if (origMap != null) {
-            final MappingComponent mappingComponent = SelectionMode.POINT.equals(mode) ? pointZoomMap
-                                                                                       : coordinateZoomMap;
+            final MappingComponent mappingComponent = SelectionMode.POINT.equals(mode)
+                ? pointZoomMap
+                : coordinateZoomMap;
 
-            final PCanvas pCanvas = SelectionMode.POINT.equals(mode) ? getPointZoomViewCanvas()
-                                                                     : getCoordinateZoomViewCanvas();
+            final PCanvas pCanvas = SelectionMode.POINT.equals(mode)
+                ? getPointZoomViewCanvas()
+                : getCoordinateZoomViewCanvas();
             final MappingComponent zoomMap = getZoomMap(mode);
             final WorldToScreenTransform wtst = zoomMap.getWtst();
             final Point2D zoomPoint = pCanvas.getCamera().getViewBounds().getCenter2D();
             final Coordinate zoomCoordinate = (wtst != null)
-                ? new Coordinate(wtst.getWorldX(zoomPoint.getX()),
-                    wtst.getWorldY(zoomPoint.getY())) : null;
+                ? new Coordinate(wtst.getWorldX(zoomPoint.getX()), wtst.getWorldY(zoomPoint.getY()))
+                : null;
 
             origMap.removePropertyChangeListener(this);
             origMap.addPropertyChangeListener(this);
 
-            final XBoundingBox origBb = (XBoundingBox)origMap.getCurrentBoundingBoxFromCamera();
+            final XBoundingBox origBb = (XBoundingBox) origMap.getCurrentBoundingBoxFromCamera();
             final WorldToScreenTransform origWtst = origMap.getWtst();
 
             final double zoomWidth = getZoomViewWidth() / getZoomViewFactor();
             final double zoomHeight = getZoomViewHeight() / getZoomViewFactor();
 
             final Point2D topLeft = new Point2D.Double(
-                    origWtst.getScreenX(origBb.getX1())
-                            - (zoomWidth / 2),
-                    origWtst.getScreenY(origBb.getY1())
-                            - (zoomHeight / 2));
-            final Point2D bottomRight = new Point2D.Double(origWtst.getScreenX(origBb.getX2()) + (zoomWidth / 2),
-                    origWtst.getScreenY(origBb.getY2())
-                            + (zoomHeight / 2));
-            final Rectangle mapBounds = new Rectangle((int)(origMap.getWidth() + zoomWidth),
-                    (int)(origMap.getHeight() + zoomHeight));
+                origWtst.getScreenX(origBb.getX1()) - (zoomWidth / 2),
+                origWtst.getScreenY(origBb.getY1()) - (zoomHeight / 2)
+            );
+            final Point2D bottomRight = new Point2D.Double(
+                origWtst.getScreenX(origBb.getX2()) + (zoomWidth / 2),
+                origWtst.getScreenY(origBb.getY2()) + (zoomHeight / 2)
+            );
+            final Rectangle mapBounds = new Rectangle(
+                (int) (origMap.getWidth() + zoomWidth),
+                (int) (origMap.getHeight() + zoomHeight)
+            );
 
             final Dimension zoomMapDimension = mapBounds.getSize();
-            final XBoundingBox bb = new XBoundingBox(origWtst.getWorldX(topLeft.getX()),
-                    origWtst.getWorldY(topLeft.getY()),
-                    origWtst.getWorldX(bottomRight.getX()),
-                    origWtst.getWorldY(bottomRight.getY()),
-                    origBb.getSrs(),
-                    origBb.isMetric());
+            final XBoundingBox bb = new XBoundingBox(
+                origWtst.getWorldX(topLeft.getX()),
+                origWtst.getWorldY(topLeft.getY()),
+                origWtst.getWorldX(bottomRight.getX()),
+                origWtst.getWorldY(bottomRight.getY()),
+                origBb.getSrs(),
+                origBb.isMetric()
+            );
 
             // new mapping model
             final ActiveLayerModel mappingModel = new ActiveLayerModel();
@@ -497,15 +518,22 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
                         break;
                     }
                     if (rasterService instanceof RetrievalServiceLayer) {
-                        final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)rasterService;
-                        final boolean including = ((retrievalServiceLayer instanceof ImageRasterService)
-                                        && SelectionMode.POINT.equals(mode))
-                                    || (!((getHandler() != null) && (getHandler().getService() != null)
-                                            && getHandler().getService().equals(rasterService))
-                                        && SelectionMode.COORDINATE.equals(mode));
+                        final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer) rasterService;
+                        final boolean including =
+                            (
+                                (retrievalServiceLayer instanceof ImageRasterService) &&
+                                SelectionMode.POINT.equals(mode)
+                            ) ||
+                            (
+                                !(
+                                    (getHandler() != null) &&
+                                    (getHandler().getService() != null) &&
+                                    getHandler().getService().equals(rasterService)
+                                ) &&
+                                SelectionMode.COORDINATE.equals(mode)
+                            );
                         if (including) {
-                            final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(
-                                    retrievalServiceLayer);
+                            final RetrievalServiceLayer clone = cloneRetrievalServiceLayer(retrievalServiceLayer);
                             if (SelectionMode.POINT.equals(mode)) {
                                 clone.setTranslucency(1f);
                             }
@@ -522,13 +550,13 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
 
             // remove old listener (preventling memory leak)
             // before setting new mapping model
-            final ActiveLayerModel oldMappingModel = (ActiveLayerModel)mappingComponent.getMappingModel();
+            final ActiveLayerModel oldMappingModel = (ActiveLayerModel) mappingComponent.getMappingModel();
             if (oldMappingModel != null) {
                 oldMappingModel.removeMappingModelListener(mappingComponent);
                 final Collection oldLayers = oldMappingModel.getMapServices().values();
-                for (final MapService mapService : (Collection<MapService>)oldMappingModel.getMapServices().values()) {
+                for (final MapService mapService : (Collection<MapService>) oldMappingModel.getMapServices().values()) {
                     if (mapService instanceof RetrievalServiceLayer) {
-                        final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer)mapService;
+                        final RetrievalServiceLayer retrievalServiceLayer = (RetrievalServiceLayer) mapService;
                         retrievalServiceLayer.removeRetrievalListener(getRetrievalListenerAdapter());
                     }
                 }
@@ -565,27 +593,27 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             if (getMainMap().equals(evt.getSource()) && !isIgnoreMapChange()) {
                 setIgnoreMapChange(true);
                 new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        Thread.sleep(1000);
+                        return null;
+                    }
 
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            Thread.sleep(1000);
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            try {
-                                if (isPointSelected()) {
-                                    refreshPointZoomMap();
-                                }
-                                if (isCoordinateSelected()) {
-                                    refreshCoordinateZoomMap();
-                                }
-                            } finally {
-                                setIgnoreMapChange(false);
+                    @Override
+                    protected void done() {
+                        try {
+                            if (isPointSelected()) {
+                                refreshPointZoomMap();
                             }
+                            if (isCoordinateSelected()) {
+                                refreshCoordinateZoomMap();
+                            }
+                        } finally {
+                            setIgnoreMapChange(false);
                         }
-                    }.execute();
+                    }
+                }
+                    .execute();
             }
         }
     }
@@ -636,8 +664,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      * @return  DOCUMENT ME!
      */
     public boolean isPointSelectionMode() {
-        return SelectionMode.POINT
-                    == selectionMode;
+        return SelectionMode.POINT == selectionMode;
     }
 
     /**
@@ -646,8 +673,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      * @return  DOCUMENT ME!
      */
     public boolean isCoordinateSelectionMode() {
-        return SelectionMode.COORDINATE
-                    == selectionMode;
+        return SelectionMode.COORDINATE == selectionMode;
     }
 
     /**
@@ -697,8 +723,8 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
     public void setHandler(final RasterGeoReferencingHandler newHandler) {
         final RasterGeoReferencingHandler oldHandler = getHandler();
 
-        final boolean handlerChanged = ((newHandler != null) && !newHandler.equals(oldHandler))
-                    || ((newHandler == null) && (oldHandler != null));
+        final boolean handlerChanged =
+            ((newHandler != null) && !newHandler.equals(oldHandler)) || ((newHandler == null) && (oldHandler != null));
         if (handlerChanged) {
             if (newHandler != null) {
                 newHandler.addListener(listenerHandler);
@@ -757,9 +783,10 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      */
     public void selectPoint(final int position) throws IndexOutOfBoundsException {
         final Point point = getHandler().getPoint(position);
-        final boolean changed = (selectedPoint == null)
-                    || ((point == null) && (selectedPoint != null))
-                    || ((point != null) && !point.equals(selectedPoint));
+        final boolean changed =
+            (selectedPoint == null) ||
+            ((point == null) && (selectedPoint != null)) ||
+            ((point != null) && !point.equals(selectedPoint));
         if (changed) {
             setPosition(position);
             selectionMode = SelectionMode.POINT;
@@ -780,9 +807,10 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
      */
     public void selectCoordinate(final int position) throws IndexOutOfBoundsException {
         final Coordinate coordinate = getHandler().getCoordinate(position);
-        final boolean changed = (selectedCoordinate == null)
-                    || ((coordinate == null) && (selectedCoordinate != null))
-                    || ((coordinate != null) && !coordinate.equals(selectedCoordinate));
+        final boolean changed =
+            (selectedCoordinate == null) ||
+            ((coordinate == null) && (selectedCoordinate != null)) ||
+            ((coordinate != null) && !coordinate.equals(selectedCoordinate));
         if (changed) {
             setPosition(position);
             selectionMode = SelectionMode.COORDINATE;
@@ -821,8 +849,7 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 
     /**
@@ -899,15 +926,16 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
             for (final RasterGeoReferencingWizardListener listener : getSyncedListeners()) {
                 listener.positionAdded(position);
             }
-            SwingUtilities.invokeLater(new Runnable() {
-
+            SwingUtilities.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         if (getHandler().getNumOfPairs() == 1) {
                             selectPoint(0);
                         }
                     }
-                });
+                }
+            );
         }
 
         @Override
@@ -959,12 +987,10 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void retrievalStarted(final RetrievalEvent e) {
-        }
+        public void retrievalStarted(final RetrievalEvent e) {}
 
         @Override
-        public void retrievalProgress(final RetrievalEvent e) {
-        }
+        public void retrievalProgress(final RetrievalEvent e) {}
 
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
@@ -972,11 +998,9 @@ public class RasterGeoReferencingWizard implements PropertyChangeListener {
         }
 
         @Override
-        public void retrievalAborted(final RetrievalEvent e) {
-        }
+        public void retrievalAborted(final RetrievalEvent e) {}
 
         @Override
-        public void retrievalError(final RetrievalEvent e) {
-        }
+        public void retrievalError(final RetrievalEvent e) {}
     }
 }

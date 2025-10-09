@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * LayerControlSelectionChangedListener.java
  *
@@ -22,7 +22,6 @@ package de.cismet.cismap.commons.gui.simplelayerwidget;
  * @version  $Revision$, $Date$
  */
 public interface LayerControlSelectionChangedListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,19 +12,14 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.event.KeyEvent;
-
 import java.util.logging.Level;
-
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 /**
  * DOCUMENT ME!
@@ -40,6 +35,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel panButtons;
     private de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingPanel rasterGeoReferencingPanel1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -57,11 +53,13 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         StaticSwingTools.doClickButtonOnKeyStroke(
             jButton4,
             KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
-            getRootPane());
+            getRootPane()
+        );
         StaticSwingTools.doClickButtonOnKeyStroke(
             jButton5,
             KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-            getRootPane());
+            getRootPane()
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -82,9 +80,9 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
 
-        setTitle(org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.title")); // NOI18N
+        setTitle(
+            org.openide.util.NbBundle.getMessage(RasterGeoReferencingDialog.class, "RasterGeoReferencingDialog.title")
+        ); // NOI18N
         setAlwaysOnTop(true);
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -103,28 +101,34 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
             jButton4,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.jButton4.text")); // NOI18N
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-
+                "RasterGeoReferencingDialog.jButton4.text"
+            )
+        ); // NOI18N
+        jButton4.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton4ActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(jButton4);
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton5,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingDialog.class,
-                "RasterGeoReferencingDialog.jButton5.text")); // NOI18N
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
-
+                "RasterGeoReferencingDialog.jButton5.text"
+            )
+        ); // NOI18N
+        jButton5.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton5ActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(jButton5);
 
         getContentPane().add(panButtons, java.awt.BorderLayout.SOUTH);
@@ -139,7 +143,7 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
      */
     private void jButton5ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton5ActionPerformed
         setVisible(false);
-    }                                                                            //GEN-LAST:event_jButton5ActionPerformed
+    } //GEN-LAST:event_jButton5ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -153,16 +157,17 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this.getParent(), "Das zugehörige WorldFile wurde erfolgreich geschrieben.");
         } catch (final Exception ex) {
             final ErrorInfo errorInfo = new ErrorInfo(
-                    "Fehler beim Anwenden",
-                    "Das zugehörige WorldFile konte nicht geschrieben werden.",
-                    null,
-                    null,
-                    ex,
-                    Level.ALL,
-                    null);
+                "Fehler beim Anwenden",
+                "Das zugehörige WorldFile konte nicht geschrieben werden.",
+                null,
+                null,
+                ex,
+                Level.ALL,
+                null
+            );
             JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
         }
-    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
+    } //GEN-LAST:event_jButton4ActionPerformed
 
     @Override
     public void setVisible(final boolean visible) {
@@ -194,16 +199,16 @@ public class RasterGeoReferencingDialog extends javax.swing.JDialog {
 
         //~ Static fields/initializers -----------------------------------------
 
-        private static final RasterGeoReferencingDialog INSTANCE = new RasterGeoReferencingDialog(StaticSwingTools
-                        .getParentFrame(CismapBroker.getInstance().getMappingComponent()),
-                false);
+        private static final RasterGeoReferencingDialog INSTANCE = new RasterGeoReferencingDialog(
+            StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()),
+            false
+        );
 
         //~ Constructors -------------------------------------------------------
 
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 }

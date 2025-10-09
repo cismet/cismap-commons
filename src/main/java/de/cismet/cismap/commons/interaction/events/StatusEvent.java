@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 /**
@@ -17,14 +17,14 @@ public class StatusEvent {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String ACTIVE_STATUS = "active_status";         // NOI18N
+    public static final String ACTIVE_STATUS = "active_status"; // NOI18N
     public static final String COORDINATE_STRING = "coordinate_string"; // NOI18N
-    public static final String ERROR_STATUS = "error_status";           // NOI18N
-    public static final String MAPPING_MODE = "mode";                   // NOI18N
-    public static final String MEASUREMENT_INFOS = "measurement";       // NOI18N
-    public static final String OBJECT_INFOS = "object_infos";           // NOI18N
-    public static final String SCALE = "scale";                         // NOI18N
-    public static final String CRS = "crs";                             // NOI18N
+    public static final String ERROR_STATUS = "error_status"; // NOI18N
+    public static final String MAPPING_MODE = "mode"; // NOI18N
+    public static final String MEASUREMENT_INFOS = "measurement"; // NOI18N
+    public static final String OBJECT_INFOS = "object_infos"; // NOI18N
+    public static final String SCALE = "scale"; // NOI18N
+    public static final String CRS = "crs"; // NOI18N
     public static final String RETRIEVAL_STARTED = "retrieval.started";
     public static final String RETRIEVAL_COMPLETED = "retrieval.completed";
     public static final String RETRIEVAL_ABORTED = "retrieval.aborted";

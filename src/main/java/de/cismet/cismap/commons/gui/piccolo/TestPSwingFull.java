@@ -1,25 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /* Copyright 2004, Sam Reid */
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
-
-import pswing.PSwing;
-import pswing.PSwingCanvas;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
-
 import java.io.IOException;
-
 import java.util.Vector;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -28,6 +21,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.table.TableColumn;
+import pswing.PSwing;
+import pswing.PSwingCanvas;
 
 /**
  * User: Sam Reid Date: Jul 11, 2005 Time: 12:15:55 PM Copyright (c) Jul 11, 2005 by Sam Reid
@@ -62,9 +57,9 @@ public class TestPSwingFull extends JFrame {
         final PSwing swing2;
 
         // JButton
-        final JButton button = new JButton(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.button.text")); // NOI18N
+        final JButton button = new JButton(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.button.text")
+        ); // NOI18N
         button.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
         swing = new PSwing(canvas, button);
         leaf = new ZVisualLeaf(swing);
@@ -93,9 +88,9 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild(transform);
 
         // Growable JTextArea
-        final JTextArea textArea = new JTextArea(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.textArea.text")); // NOI18N
+        final JTextArea textArea = new JTextArea(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textArea.text")
+        ); // NOI18N
         textArea.setBorder(new LineBorder(Color.blue, 3));
         swing = new PSwing(canvas, textArea);
         leaf = new ZVisualLeaf(swing);
@@ -105,9 +100,9 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild(transform);
 
         // Growable JTextField
-        JTextField textField = new JTextField(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.textField.text1")); // NOI18N
+        JTextField textField = new JTextField(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textField.text1")
+        ); // NOI18N
         swing = new PSwing(canvas, textField);
         leaf = new ZVisualLeaf(swing);
         transform = new ZTransformGroup();
@@ -137,8 +132,11 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild(transform);
 
         // A Scrollable JTextArea
-        JScrollPane pane = new JScrollPane(new JTextArea(
-                    org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.pane.textArea.text"))); // NOI18N
+        JScrollPane pane = new JScrollPane(
+            new JTextArea(
+                org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.pane.textArea.text")
+            )
+        ); // NOI18N
         pane.setPreferredSize(new Dimension(150, 150));
         swing = new PSwing(canvas, pane);
         leaf = new ZVisualLeaf(swing);
@@ -152,9 +150,10 @@ public class TestPSwingFull extends JFrame {
         // A non-scrollable JTextField
         // A panel MUST be created with double buffering off
         JPanel panel = new JPanel(false);
-        textField = new JTextField(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.textField.text2")); // NOI18N
+        textField =
+            new JTextField(
+                org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textField.text2")
+            ); // NOI18N
         panel.setLayout(new BorderLayout());
         panel.add(textField);
         swing = new PSwing(canvas, panel);
@@ -164,27 +163,31 @@ public class TestPSwingFull extends JFrame {
         transform.addChild(leaf);
         canvas.getLayer().addChild(transform);
 
-//        // A JComboBox
-//        String[] listItems = {"Summer Teeth", "Mermaid Avenue", "Being There", "A.M."};
-//        ZComboBox box = new ZComboBox( listItems );
-//        swing = new PSwing( canvas, box );
-//        leaf = new ZVisualLeaf( swing );
-//        transform = new ZTransformGroup();
-//        transform.translate( 0, -150 );
-//        transform.addChild( leaf );
-//        canvas.getLayer().addChild( transform );
+        //        // A JComboBox
+        //        String[] listItems = {"Summer Teeth", "Mermaid Avenue", "Being There", "A.M."};
+        //        ZComboBox box = new ZComboBox( listItems );
+        //        swing = new PSwing( canvas, box );
+        //        leaf = new ZVisualLeaf( swing );
+        //        transform = new ZTransformGroup();
+        //        transform.translate( 0, -150 );
+        //        transform.addChild( leaf );
+        //        canvas.getLayer().addChild( transform );
 
         // A panel with TitledBorder and JList
         panel = new JPanel(false);
         panel.setBackground(Color.lightGray);
         panel.setLayout(new BorderLayout());
-        panel.setBorder(new TitledBorder(
+        panel.setBorder(
+            new TitledBorder(
                 new EtchedBorder(EtchedBorder.RAISED),
                 org.openide.util.NbBundle.getMessage(
                     TestPSwingFull.class,
-                    "TestPSwingFull.panel.border.TitledBorder.title"),
+                    "TestPSwingFull.panel.border.TitledBorder.title"
+                ),
                 TitledBorder.LEFT,
-                TitledBorder.TOP));                                                                                 // NOI18N
+                TitledBorder.TOP
+            )
+        ); // NOI18N
         panel.setPreferredSize(new Dimension(200, 200));
         final Vector data = new Vector();
         data.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice1")); // NOI18N
@@ -203,10 +206,10 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild(transform);
 
         // A JLabel
-        JLabel label = new JLabel(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.data.label.text1")); // ,//NOI18N new ImageIcon( loader.getResource( "HCIL-logo.gif"
-                                                         // ) ), SwingConstants.CENTER );
+        JLabel label = new JLabel(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.label.text1")
+        ); // ,//NOI18N new ImageIcon( loader.getResource( "HCIL-logo.gif"
+        // ) ), SwingConstants.CENTER );
 
         swing = new PSwing(canvas, label);
         leaf = new ZVisualLeaf(swing);
@@ -228,23 +231,22 @@ public class TestPSwingFull extends JFrame {
         // A panel MUST be created with double buffering off
         panel = new JPanel(false);
         panel.setLayout(new BorderLayout());
-        final JButton button1 = new JButton(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.data.button1.text")); // NOI18N
-        final JButton button2 = new JButton(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.data.button2.text")); // NOI18N
-        label = new JLabel(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.data.label.text2"));  // NOI18N
+        final JButton button1 = new JButton(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.button1.text")
+        ); // NOI18N
+        final JButton button2 = new JButton(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.button2.text")
+        ); // NOI18N
+        label =
+            new JLabel(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.label.text2")); // NOI18N
         label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setForeground(Color.white);
         panel.setBackground(Color.red);
         panel.setPreferredSize(new Dimension(150, 150));
         panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        panel.add(button1, "North");                      // NOI18N
-        panel.add(button2, "South");                      // NOI18N
-        panel.add(label, "Center");                       // NOI18N
+        panel.add(button1, "North"); // NOI18N
+        panel.add(button2, "South"); // NOI18N
+        panel.add(label, "Center"); // NOI18N
         panel.revalidate();
         swing = new PSwing(canvas, panel);
         leaf = new ZVisualLeaf(swing);
@@ -255,60 +257,60 @@ public class TestPSwingFull extends JFrame {
 
         // JTable Example
         final Vector columns = new Vector();
-        columns.addElement(org.openide.util.NbBundle.getMessage(
-                TestPSwingFull.class,
-                "TestPSwingFull.columns.element1"));                                                                 // NOI18N
-        columns.addElement(org.openide.util.NbBundle.getMessage(
-                TestPSwingFull.class,
-                "TestPSwingFull.columns.element2"));                                                                 // NOI18N
-        columns.addElement(org.openide.util.NbBundle.getMessage(
-                TestPSwingFull.class,
-                "TestPSwingFull.columns.element3"));                                                                 // NOI18N
+        columns.addElement(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element1")
+        ); // NOI18N
+        columns.addElement(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element2")
+        ); // NOI18N
+        columns.addElement(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element3")
+        ); // NOI18N
         final Vector rows = new Vector();
         Vector row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element2"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element2")); // NOI18N
         row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row21.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.elemen"));    // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.elemen")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element3")); // NOI18N
         rows.addElement(row);
         row = new Vector();
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element1"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element2"));  // NOI18N
-        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element3"));  // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element1")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element2")); // NOI18N
+        row.addElement(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element3")); // NOI18N
         rows.addElement(row);
         final JTable table = new JTable(rows, columns);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -337,8 +339,8 @@ public class TestPSwingFull extends JFrame {
             pane = new JScrollPane(editorPane);
             pane.setDoubleBuffered(false);
             pane.setPreferredSize(new Dimension(400, 400));
-            editorPane.addHyperlinkListener(new HyperlinkListener() {
-
+            editorPane.addHyperlinkListener(
+                new HyperlinkListener() {
                     @Override
                     public void hyperlinkUpdate(final HyperlinkEvent e) {
                         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -349,7 +351,8 @@ public class TestPSwingFull extends JFrame {
                             }
                         }
                     }
-                });
+                }
+            );
             swing = new PSwing(canvas, pane);
             leaf = new ZVisualLeaf(swing);
             transform = new ZTransformGroup();
@@ -357,25 +360,25 @@ public class TestPSwingFull extends JFrame {
             transform.addChild(leaf);
             canvas.getLayer().addChild(transform);
         } catch (IOException ioe) {
-            System.out.println("Couldn't Load Web Page");                     // NOI18N
+            System.out.println("Couldn't Load Web Page"); // NOI18N
         }
 
         // A JInternalFrame with a JSplitPane - a JOptionPane - and a
         // JToolBar
-        final JInternalFrame iframe = new JInternalFrame(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.iframe.title"));               // NOI18N
+        final JInternalFrame iframe = new JInternalFrame(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.iframe.title")
+        ); // NOI18N
         iframe.getRootPane().setDoubleBuffered(false);
-        ((JComponent)iframe.getContentPane()).setDoubleBuffered(false);
+        ((JComponent) iframe.getContentPane()).setDoubleBuffered(false);
         iframe.setPreferredSize(new Dimension(500, 500));
         final JTabbedPane tabby = new JTabbedPane();
         tabby.setDoubleBuffered(false);
         iframe.getContentPane().setLayout(new BorderLayout());
-        final JOptionPane options = new JOptionPane(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.options.message"),             // NOI18N
-                JOptionPane.INFORMATION_MESSAGE,
-                JOptionPane.DEFAULT_OPTION);
+        final JOptionPane options = new JOptionPane(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.options.message"), // NOI18N
+            JOptionPane.INFORMATION_MESSAGE,
+            JOptionPane.DEFAULT_OPTION
+        );
         options.setDoubleBuffered(false);
         options.setMinimumSize(new Dimension(50, 50));
         options.setPreferredSize(new Dimension(225, 225));
@@ -383,33 +386,29 @@ public class TestPSwingFull extends JFrame {
         tools.setMinimumSize(new Dimension(150, 150));
         tools.setPreferredSize(new Dimension(225, 225));
         final JToolBar bar = new JToolBar();
-        final Action letter = new AbstractAction(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.letter.name"),
-                new ImageIcon(loader.getResource("letter.gif"))) { // NOI18N
+        final Action letter = new AbstractAction(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.letter.name"),
+            new ImageIcon(loader.getResource("letter.gif"))
+        ) { // NOI18N
+            @Override
+            public void actionPerformed(final ActionEvent e) {}
+        };
 
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                }
-            };
+        final Action hand = new AbstractAction(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.hand.name"),
+            new ImageIcon(loader.getResource("hand.gif"))
+        ) { // NOI18N
+            @Override
+            public void actionPerformed(final ActionEvent e) {}
+        };
 
-        final Action hand = new AbstractAction(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.hand.name"),
-                new ImageIcon(loader.getResource("hand.gif"))) { // NOI18N
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                }
-            };
-
-        final Action select = new AbstractAction(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.select.name"), // NOI18N
-                new ImageIcon(loader.getResource("select.gif"))) { // NOI18N
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                }
-            };
+        final Action select = new AbstractAction(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.select.name"), // NOI18N
+            new ImageIcon(loader.getResource("select.gif"))
+        ) { // NOI18N
+            @Override
+            public void actionPerformed(final ActionEvent e) {}
+        };
 
         label = new JLabel(org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.label.text")); // NOI18N
         label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -419,8 +418,8 @@ public class TestPSwingFull extends JFrame {
         bar.setFloatable(false);
         bar.setBorder(new LineBorder(Color.black, 2));
         tools.setLayout(new BorderLayout());
-        tools.add(bar, "North");                                                                                     // NOI18N
-        tools.add(label, "Center");                                                                                  // NOI18N
+        tools.add(bar, "North"); // NOI18N
+        tools.add(label, "Center"); // NOI18N
 
         final JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, options, tools);
         split.setDoubleBuffered(false);
@@ -432,22 +431,22 @@ public class TestPSwingFull extends JFrame {
         transform.addChild(leaf);
         canvas.getLayer().addChild(transform);
 
-//        JMenuBar menuBar = new JMenuBar();
-//        ZMenu menu = new ZMenu( "File" );
-//        ZMenu sub = new ZMenu( "Export" );
-//        JMenuItem gif = new JMenuItem( "Funds" );
-//        sub.add( gif );
-//        menu.add( sub );
-//        menuBar.add( menu );
-//        iframe.setJMenuBar( menuBar );
+        //        JMenuBar menuBar = new JMenuBar();
+        //        ZMenu menu = new ZMenu( "File" );
+        //        ZMenu sub = new ZMenu( "Export" );
+        //        JMenuItem gif = new JMenuItem( "Funds" );
+        //        sub.add( gif );
+        //        menu.add( sub );
+        //        menuBar.add( menu );
+        //        iframe.setJMenuBar( menuBar );
 
         iframe.setVisible(true);
 
         // A JColorChooser - also demonstrates JTabbedPane
-// JColorChooser chooser = new JColorChooser();
-        final JCheckBox chooser = new JCheckBox(org.openide.util.NbBundle.getMessage(
-                    TestPSwingFull.class,
-                    "TestPSwingFull.chooser.text")); // NOI18N
+        // JColorChooser chooser = new JColorChooser();
+        final JCheckBox chooser = new JCheckBox(
+            org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.chooser.text")
+        ); // NOI18N
         swing = new PSwing(canvas, chooser);
         leaf = new ZVisualLeaf(swing);
         transform = new ZTransformGroup();
@@ -506,7 +505,6 @@ public class TestPSwingFull extends JFrame {
          *
          * @param  b  DOCUMENT ME!
          */
-        public void setHasOneChild(final boolean b) {
-        }
+        public void setHasOneChild(final boolean b) {}
     }
 }

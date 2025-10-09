@@ -1,21 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
-import java.awt.Color;
-import java.awt.Component;
-
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeCellRenderer;
 
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.Style;
+import java.awt.Color;
+import java.awt.Component;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 /**
  * DOCUMENT ME!
@@ -46,51 +44,52 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
      * Creates a new instance of WMSCapabilitiesTreeCellRenderer.
      */
     public WMSCapabilitiesTreeCellRenderer() {
-        layersIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layers.png"));   // NOI18N
-        layerIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layer.png"));    // NOI18N
-        layersInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layers_i.png")); // NOI18N
-        layerInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));  // NOI18N
-        styleIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/style.png"));    // NOI18N
-        unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/style.png"));    // NOI18N
-        serverIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/server.png"));   // NOI18N
+        layersIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png")); // NOI18N
+        layerIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer.png")); // NOI18N
+        layersInfoIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers_i.png")); // NOI18N
+        layerInfoIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer_i.png")); // NOI18N
+        styleIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png")); // NOI18N
+        unselectedStyleIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png")); // NOI18N
+        serverIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/server.png")); // NOI18N
 
-        disabledLayersIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayers.png"));  // NOI18N
-        disabledLayerIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayer.png"));   // NOI18N
-        disabledLayerInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayer_i.png")); // NOI18N
+        disabledLayersIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayers.png")
+            ); // NOI18N
+        disabledLayerIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayer.png")
+            ); // NOI18N
+        disabledLayerInfoIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayer_i.png")
+            ); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Component getTreeCellRendererComponent(final JTree tree,
-            final Object value,
-            final boolean isSelected,
-            final boolean expanded,
-            final boolean leaf,
-            final int row,
-            final boolean hasFocus) {
-        super.getTreeCellRendererComponent(
-            tree,
-            value,
-            isSelected,
-            expanded,
-            leaf,
-            row,
-            hasFocus);
+    public Component getTreeCellRendererComponent(
+        final JTree tree,
+        final Object value,
+        final boolean isSelected,
+        final boolean expanded,
+        final boolean leaf,
+        final int row,
+        final boolean hasFocus
+    ) {
+        super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
         // setForeground(Color.black);
 
         if (value instanceof Layer) {
-            final Layer tmpLayer = (Layer)value;
+            final Layer tmpLayer = (Layer) value;
             boolean rightScale = true;
 
             try {
@@ -140,7 +139,7 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                 }
             }
         } else if (value instanceof Style) {
-            final Style tmpStyle = (Style)value;
+            final Style tmpStyle = (Style) value;
             if ((tmpStyle.getTitle() != null) && (tmpStyle.getTitle().trim().length() > 0)) {
                 setText(tmpStyle.getTitle());
             } else {

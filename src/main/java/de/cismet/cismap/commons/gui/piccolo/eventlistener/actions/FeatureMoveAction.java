@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureMoveAction.java
  *
@@ -15,16 +15,14 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
-import edu.umd.cs.piccolo.util.PDimension;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import edu.umd.cs.piccolo.util.PDimension;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein (oder mehrere) vom
@@ -52,10 +50,12 @@ public class FeatureMoveAction implements CustomAction {
      * @param  dim               PDimension-Objekt das die Bewegung darstellt
      * @param  dimensionInPixel  DOCUMENT ME!
      */
-    public FeatureMoveAction(final MappingComponent mc,
-            final List<PFeature> features,
-            final PDimension dim,
-            final boolean dimensionInPixel) {
+    public FeatureMoveAction(
+        final MappingComponent mc,
+        final List<PFeature> features,
+        final PDimension dim,
+        final boolean dimensionInPixel
+    ) {
         this.mc = mc;
         this.features = features;
         if (dimensionInPixel) {
@@ -73,7 +73,7 @@ public class FeatureMoveAction implements CustomAction {
     @Override
     public void doAction() {
         if (log.isDebugEnabled()) {
-            log.debug("X=" + dim.getWidth());  // NOI18N
+            log.debug("X=" + dim.getWidth()); // NOI18N
         }
         if (log.isDebugEnabled()) {
             log.debug("Y=" + dim.getHeight()); // NOI18N
@@ -81,9 +81,8 @@ public class FeatureMoveAction implements CustomAction {
         final Iterator<PFeature> it = features.iterator();
         while (it.hasNext()) {
             final PFeature o = it.next();
-            if (((PFeature)o).getFeature().isEditable()
-                        && ((PFeature)o).getFeature().canBeSelected()) {
-                PFeature f = (PFeature)o;
+            if (((PFeature) o).getFeature().isEditable() && ((PFeature) o).getFeature().canBeSelected()) {
+                PFeature f = (PFeature) o;
 
                 // the pfeature from the map should be used. Otherwise, the undo/redo buttons does not
                 // work properly (only one polygon of a multi polygon is moved),
@@ -95,7 +94,7 @@ public class FeatureMoveAction implements CustomAction {
                     if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                         final Vector v = new Vector();
                         v.add(f.getFeature());
-                        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
+                        ((DefaultFeatureCollection) mc.getFeatureCollection()).fireFeaturesChanged(v);
                     }
                 }
             }
@@ -110,9 +109,10 @@ public class FeatureMoveAction implements CustomAction {
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
-                FeatureMoveAction.class,
-                "FeatureMoveAction.info().return",
-                new Object[] { dim.getWidth(), dim.getHeight() }); // NOI18N
+            FeatureMoveAction.class,
+            "FeatureMoveAction.info().return",
+            new Object[] { dim.getWidth(), dim.getHeight() }
+        ); // NOI18N
     }
 
     /**

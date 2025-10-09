@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,18 +12,15 @@
  */
 package de.cismet.cismap.commons.drophandler;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
 
 /**
  * DOCUMENT ME!
@@ -47,8 +44,9 @@ public class MappingComponentDropHandlerRegistry {
      * Creates a new MappingComponentDropHandlerRegistry object.
      */
     private MappingComponentDropHandlerRegistry() {
-        final Lookup.Result<MappingComponentDropHandler> result = Lookup.getDefault()
-                    .lookupResult(MappingComponentDropHandler.class);
+        final Lookup.Result<MappingComponentDropHandler> result = Lookup
+            .getDefault()
+            .lookupResult(MappingComponentDropHandler.class);
         final Collection<? extends MappingComponentDropHandler> instances = result.allInstances();
         if (LOG.isDebugEnabled()) {
             LOG.debug("found " + instances.size() + " instances of MappingComponentDropHandler"); // NOI18N
@@ -119,7 +117,6 @@ public class MappingComponentDropHandlerRegistry {
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 }

@@ -1,26 +1,23 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 import java.io.File;
 import java.io.FileFilter;
-
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -69,7 +66,7 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
     @Override
     public Object getChild(final Object parent, final int index) {
         if (parent instanceof File) {
-            final File parentFile = (File)parent;
+            final File parentFile = (File) parent;
 
             if (parentFile.isDirectory()) {
                 return parentFile.listFiles(filter)[index];
@@ -82,7 +79,7 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
     @Override
     public int getChildCount(final Object parent) {
         if (parent instanceof File) {
-            final File parentFile = (File)parent;
+            final File parentFile = (File) parent;
 
             if (parentFile.isDirectory()) {
                 return parentFile.listFiles(filter).length;
@@ -95,7 +92,7 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
     @Override
     public boolean isLeaf(final Object node) {
         if (node instanceof File) {
-            final File parentFile = (File)node;
+            final File parentFile = (File) node;
 
             if (parentFile.isDirectory()) {
                 return parentFile.listFiles(filter).length == 0;
@@ -106,14 +103,13 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
     }
 
     @Override
-    public void valueForPathChanged(final TreePath path, final Object newValue) {
-    }
+    public void valueForPathChanged(final TreePath path, final Object newValue) {}
 
     @Override
     public int getIndexOfChild(final Object parent, final Object child) {
         if ((parent != null) && (child != null)) {
             if (parent instanceof File) {
-                final File parentFile = (File)parent;
+                final File parentFile = (File) parent;
                 final File[] list = parentFile.listFiles(filter);
 
                 for (int i = 0; i < list.length; ++i) {
@@ -128,12 +124,10 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
     }
 
     @Override
-    public void addTreeModelListener(final TreeModelListener l) {
-    }
+    public void addTreeModelListener(final TreeModelListener l) {}
 
     @Override
-    public void removeTreeModelListener(final TreeModelListener l) {
-    }
+    public void removeTreeModelListener(final TreeModelListener l) {}
 
     @Override
     public void setFilterString(final String filterString) {
@@ -188,9 +182,10 @@ public class ShapeFolderTreeModel implements TreeModel, StringFilter {
                     }
                 }
             } else {
-                return (pathname.getName().endsWith(".shp") || pathname.getName().endsWith(".gml"))
-                            && ((filterString == null)
-                                || pathname.getName().toLowerCase().contains(filterString.toLowerCase()));
+                return (
+                    (pathname.getName().endsWith(".shp") || pathname.getName().endsWith(".gml")) &&
+                    ((filterString == null) || pathname.getName().toLowerCase().contains(filterString.toLowerCase()))
+                );
             }
 
             return false;

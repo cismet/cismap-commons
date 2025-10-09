@@ -1,15 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
-import edu.umd.cs.piccolo.event.PInputEvent;
-
 import de.cismet.cismap.commons.gui.MappingComponent;
+import edu.umd.cs.piccolo.event.PInputEvent;
 
 /**
  * DOCUMENT ME!
@@ -40,7 +39,7 @@ public class MapClickedEvent {
     public MapClickedEvent(final String mode, final PInputEvent pInputEvent) {
         this.pInputEvent = pInputEvent;
         this.mode = mode;
-        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+        final MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
         xCoord = mc.getWtst().getSourceX(pInputEvent.getPosition().getX() - mc.getClip_offset_x());
         yCoord = mc.getWtst().getSourceY(pInputEvent.getPosition().getY() - mc.getClip_offset_y());
     }

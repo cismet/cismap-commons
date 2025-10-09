@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * HandleRemoveListener.java
  *
@@ -12,10 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
 /**
  * DOCUMENT ME!
@@ -33,21 +32,23 @@ public class HandleRemoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.info("remove Handle");     // NOI18N
+        log.info("remove Handle"); // NOI18N
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PHandle.class },
-                true);
+            pInputEvent,
+            new Class[] { PHandle.class },
+            true
+        );
         if (o instanceof PHandle) {
             log.info("remove Handle"); // NOI18N
-            ((PHandle)(o)).removeHandle();
+            ((PHandle) (o)).removeHandle();
         }
     }
 
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        if (PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PHandle.class })
-                    instanceof PHandle) {
+        if (
+            PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PHandle.class }) instanceof PHandle
+        ) {
             log.info("Over PHandle"); // NOI18N
         }
     }

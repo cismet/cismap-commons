@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * ServicesBusyPanel.java
  *
@@ -24,6 +24,7 @@ public class ServicesBusyPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblBusyIcon;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,14 +49,15 @@ public class ServicesBusyPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-        lblBusyIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/inProgress.png"))); // NOI18N
-        lblBusyIcon.setText(org.openide.util.NbBundle.getMessage(
-                ServicesBusyPanel.class,
-                "ServicesBusyPanel.lblBusyIcon.text"));                                             // NOI18N
-        lblBusyIcon.setToolTipText(org.openide.util.NbBundle.getMessage(
-                ServicesBusyPanel.class,
-                "ServicesBusyPanel.lblBusyIcon.toolTipText"));                                      // NOI18N
+        lblBusyIcon.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/inProgress.png"))
+        ); // NOI18N
+        lblBusyIcon.setText(
+            org.openide.util.NbBundle.getMessage(ServicesBusyPanel.class, "ServicesBusyPanel.lblBusyIcon.text")
+        ); // NOI18N
+        lblBusyIcon.setToolTipText(
+            org.openide.util.NbBundle.getMessage(ServicesBusyPanel.class, "ServicesBusyPanel.lblBusyIcon.toolTipText")
+        ); // NOI18N
         add(lblBusyIcon, java.awt.BorderLayout.CENTER);
-    }                                                                                               // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 }

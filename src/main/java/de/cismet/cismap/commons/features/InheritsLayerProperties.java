@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -21,7 +21,6 @@ import de.cismet.cismap.commons.featureservice.LayerProperties;
  * @version  $Revision$, $Date$
  */
 public interface InheritsLayerProperties {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

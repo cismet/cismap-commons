@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,13 +12,6 @@
 package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -29,9 +22,12 @@ import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.util.FilePersistenceManager;
-
 import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Every ExportDownload class needs a public constructor without arguments.
@@ -78,12 +74,14 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
      *                             should be shown in the column
      * @param  query               DOCUMENT ME!
      */
-    public void init(final String filename,
-            final String extension,
-            final FeatureServiceFeature[] features,
-            final AbstractFeatureService service,
-            final List<String[]> aliasAttributeList,
-            final String query) {
+    public void init(
+        final String filename,
+        final String extension,
+        final FeatureServiceFeature[] features,
+        final AbstractFeatureService service,
+        final List<String[]> aliasAttributeList,
+        final String query
+    ) {
         this.features = features;
         this.service = service;
         this.query = query;
@@ -132,26 +130,33 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             final int pageSize = service.getMaxFeaturesPerPage() * 2;
             List<FeatureServiceFeature> featureList;
 
-            if ((pageSize < 0)
-                        || ((service.getFeatureServiceAttributes() == null)
-                            || (service.getFeatureServiceAttributes().get("id") == null))) {
-                featureList = service.getFeatureFactory()
-                            .createFeatures(((query != null) ? query : service.getQuery()), null, null, 0, 0, null);
+            if (
+                (pageSize < 0) ||
+                (
+                    (service.getFeatureServiceAttributes() == null) ||
+                    (service.getFeatureServiceAttributes().get("id") == null)
+                )
+            ) {
+                featureList =
+                    service
+                        .getFeatureFactory()
+                        .createFeatures(((query != null) ? query : service.getQuery()), null, null, 0, 0, null);
                 features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
             } else {
                 final List<FeatureServiceFeature> tmpFeatureList = new ArrayList<FeatureServiceFeature>();
                 final Geometry g = ZoomToLayerWorker.getServiceBounds(service);
                 XBoundingBox bb;
                 final FeatureServiceAttribute[] idAttr = new FeatureServiceAttribute[] {
-                        (FeatureServiceAttribute)service.getFeatureServiceAttributes().get("id")
-                    };
+                    (FeatureServiceAttribute) service.getFeatureServiceAttributes().get("id"),
+                };
 
                 if (g != null) {
                     bb = new XBoundingBox(g);
 
                     try {
-                        final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs()
-                                        .getCode());
+                        final CrsTransformer transformer = new CrsTransformer(
+                            CismapBroker.getInstance().getSrs().getCode()
+                        );
                         bb = transformer.transformBoundingBox(bb);
                     } catch (Exception e) {
                         error(e);
@@ -170,13 +175,17 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
                         pm.close();
                         return;
                     }
-                    featureList = service.getFeatureFactory()
-                                .createFeatures(((query != null) ? query : service.getQuery()),
-                                        null,
-                                        null,
-                                        index,
-                                        pageSize,
-                                        idAttr);
+                    featureList =
+                        service
+                            .getFeatureFactory()
+                            .createFeatures(
+                                ((query != null) ? query : service.getQuery()),
+                                null,
+                                null,
+                                index,
+                                pageSize,
+                                idAttr
+                            );
                     index += featureList.size();
 
                     for (final FeatureServiceFeature f : featureList) {
@@ -193,8 +202,11 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             }
         }
 
-        if ((service != null) && (service.getLayerProperties() != null)
-                    && (service.getLayerProperties().getAttributeTableRuleSet() != null)) {
+        if (
+            (service != null) &&
+            (service.getLayerProperties() != null) &&
+            (service.getLayerProperties().getAttributeTableRuleSet() != null)
+        ) {
             final AttributeTableRuleSet atr = service.getLayerProperties().getAttributeTableRuleSet();
 
             features = atr.prepareFeaturesForExport(features);
@@ -226,7 +238,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
      */
     private List<String[]> getAttributeNames(final FeatureServiceFeature f) {
         final List<String[]> attrNames = new ArrayList<String[]>();
-        final Map<String, Object> hm = (Map<String, Object>)f.getProperties();
+        final Map<String, Object> hm = (Map<String, Object>) f.getProperties();
 
         for (final String attrName : hm.keySet()) {
             final String[] aliasName = new String[2];
@@ -280,7 +292,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof ExportDownload) {
-            return (((ExportDownload)obj).id == id) && (obj.getClass().getName().equals(this.getClass().getName()));
+            return (((ExportDownload) obj).id == id) && (obj.getClass().getName().equals(this.getClass().getName()));
         }
 
         return super.equals(obj);

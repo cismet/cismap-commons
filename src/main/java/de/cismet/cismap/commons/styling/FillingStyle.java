@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FillingStyle.java
  *
@@ -25,6 +25,5 @@ public class FillingStyle {
     /**
      * Creates a new instance of FillingStyle.
      */
-    public FillingStyle() {
-    }
+    public FillingStyle() {}
 }

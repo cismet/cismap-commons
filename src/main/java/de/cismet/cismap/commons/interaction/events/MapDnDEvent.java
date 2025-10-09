@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import java.awt.dnd.DropTargetEvent;
@@ -28,8 +28,7 @@ public class MapDnDEvent {
     /**
      * Creates a new instance of MapDnDEvent.
      */
-    public MapDnDEvent() {
-    }
+    public MapDnDEvent() {}
 
     //~ Methods ----------------------------------------------------------------
 

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,12 +12,10 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import de.cismet.cismap.commons.featureservice.style.FontChooserDialog;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.EventQueue;
 import java.awt.Font;
-
-import de.cismet.cismap.commons.featureservice.style.FontChooserDialog;
-
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -42,6 +40,7 @@ public class NewTextDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox jcHalo;
     private javax.swing.JCheckBox jcScale;
     private javax.swing.JTextArea taText;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -183,7 +182,8 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jcScale,
-            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jcScale.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jcScale.text", new Object[] {})
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -194,15 +194,17 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jbOk,
-            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jbOk.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jbOk.text", new Object[] {})
+        ); // NOI18N
         jbOk.setPreferredSize(new java.awt.Dimension(85, 30));
-        jbOk.addActionListener(new java.awt.event.ActionListener() {
-
+        jbOk.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jbOkActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -212,18 +214,17 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jbCancel,
-            org.openide.util.NbBundle.getMessage(
-                NewTextDialog.class,
-                "NewTextDialog.jbCancel.text",
-                new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jbCancel.text", new Object[] {})
+        ); // NOI18N
         jbCancel.setPreferredSize(new java.awt.Dimension(85, 30));
-        jbCancel.addActionListener(new java.awt.event.ActionListener() {
-
+        jbCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jbCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
@@ -233,7 +234,8 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jcHalo,
-            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jcHalo.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jcHalo.text", new Object[] {})
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -245,9 +247,11 @@ public class NewTextDialog extends javax.swing.JDialog {
         final javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE));
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE)
+        );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE));
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(0, 0, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 10;
@@ -258,17 +262,16 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton1,
-            org.openide.util.NbBundle.getMessage(
-                NewTextDialog.class,
-                "NewTextDialog.jButton1.text",
-                new Object[] {})); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jButton1.text", new Object[] {})
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -290,7 +293,7 @@ public class NewTextDialog extends javax.swing.JDialog {
             EventQueue.invokeLater(runWhenFinish);
         }
         setVisible(false);
-    }                                                                        //GEN-LAST:event_jbOkActionPerformed
+    } //GEN-LAST:event_jbOkActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -300,7 +303,7 @@ public class NewTextDialog extends javax.swing.JDialog {
     private void jbCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jbCancelActionPerformed
         confirmed = false;
         setVisible(false);
-    }                                                                            //GEN-LAST:event_jbCancelActionPerformed
+    } //GEN-LAST:event_jbCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -313,10 +316,9 @@ public class NewTextDialog extends javax.swing.JDialog {
             fontChooser.setSelectedFont(
                 font,
                 font.getSize(),
-                (font.getStyle() & Font.BOLD)
-                        == Font.BOLD,
-                (font.getStyle() & Font.ITALIC)
-                        == Font.ITALIC);
+                (font.getStyle() & Font.BOLD) == Font.BOLD,
+                (font.getStyle() & Font.ITALIC) == Font.ITALIC
+            );
         }
         StaticSwingTools.showDialog(fontChooser);
 

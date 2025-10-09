@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FixedWidthStroke.java
  *
@@ -12,11 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import edu.umd.cs.piccolo.util.PPaintContext;
-
-import java.awt.BasicStroke;
-
 import de.cismet.cismap.commons.gui.MappingComponent;
+import edu.umd.cs.piccolo.util.PPaintContext;
+import java.awt.BasicStroke;
 
 /**
  * DOCUMENT ME!
@@ -67,12 +65,14 @@ public class CustomFixedWidthStroke extends BasicStroke {
      * @param  dash        DOCUMENT ME!
      * @param  dash_phase  DOCUMENT ME!
      */
-    public CustomFixedWidthStroke(final float width,
-            final int lineCap,
-            final int lineJoin,
-            final float miterlimit,
-            final float[] dash,
-            final float dash_phase) {
+    public CustomFixedWidthStroke(
+        final float width,
+        final int lineCap,
+        final int lineJoin,
+        final float miterlimit,
+        final float[] dash,
+        final float dash_phase
+    ) {
         this(width, lineCap, lineJoin, miterlimit, dash, dash_phase, null);
     }
 
@@ -87,13 +87,15 @@ public class CustomFixedWidthStroke extends BasicStroke {
      * @param  dash_phase  DOCUMENT ME!
      * @param  mc          DOCUMENT ME!
      */
-    public CustomFixedWidthStroke(final float width,
-            final int lineCap,
-            final int lineJoin,
-            final float miterlimit,
-            final float[] dash,
-            final float dash_phase,
-            final MappingComponent mc) {
+    public CustomFixedWidthStroke(
+        final float width,
+        final int lineCap,
+        final int lineJoin,
+        final float miterlimit,
+        final float[] dash,
+        final float dash_phase,
+        final MappingComponent mc
+    ) {
         super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
         this.mc = mc;
     }
@@ -112,10 +114,14 @@ public class CustomFixedWidthStroke extends BasicStroke {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
             // log.fatal("LineWidth:"+super.getLineWidth() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale());
             if (mc != null) {
-                return super.getLineWidth() * multiplyer * (float)mc.getStickyFeatureCorrectionFactor()
-                            / (float)mc.getCamera().getViewScale();
+                return (
+                    super.getLineWidth() *
+                    multiplyer *
+                    (float) mc.getStickyFeatureCorrectionFactor() /
+                    (float) mc.getCamera().getViewScale()
+                );
             } else {
-                return super.getLineWidth() * multiplyer / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                return super.getLineWidth() * multiplyer / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
         } else {
             return super.getLineWidth() * multiplyer;
@@ -128,9 +134,9 @@ public class CustomFixedWidthStroke extends BasicStroke {
             float ml;
 
             if (mc != null) {
-                ml = super.getMiterLimit() / (float)mc.getCamera().getViewScale();
+                ml = super.getMiterLimit() / (float) mc.getCamera().getViewScale();
             } else {
-                ml = super.getMiterLimit() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                ml = super.getMiterLimit() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
 
             if (ml < 1.0f) {
@@ -153,9 +159,9 @@ public class CustomFixedWidthStroke extends BasicStroke {
             float scale;
 
             if (mc != null) {
-                scale = (float)mc.getCamera().getViewScale();
+                scale = (float) mc.getCamera().getViewScale();
             } else {
-                scale = (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                scale = (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
 
             final float[] temp = new float[dash.length];
@@ -172,9 +178,9 @@ public class CustomFixedWidthStroke extends BasicStroke {
     public float getDashPhase() {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
             if (mc != null) {
-                return super.getDashPhase() / (float)mc.getCamera().getViewScale();
+                return super.getDashPhase() / (float) mc.getCamera().getViewScale();
             } else {
-                return super.getDashPhase() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                return super.getDashPhase() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
         } else {
             return super.getDashPhase(); // To change body of generated methods, choose Tools | Templates.
@@ -189,7 +195,6 @@ public class CustomFixedWidthStroke extends BasicStroke {
     public void setMultiplyer(final float multiplyer) {
         this.multiplyer = multiplyer;
     }
-
     /*@Override
      * public int getEndCap() { return this.CAP_ROUND; }
      *

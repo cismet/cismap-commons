@@ -1,24 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
+import java.util.HashMap;
 import org.apache.log4j.Logger;
-
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.GeometryPropertyType;
 import org.deegree.model.spatialschema.Geometry;
-
-import java.util.HashMap;
 
 /**
  * DOCUMENT ME!
@@ -31,12 +29,12 @@ public class GeometryHeuristics {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger log = Logger.getLogger("de.cismet.cismap.commons.featureservice.GeometryHeuristics"); // NOI18N
-    private static final String POINT = "Point";                                                                      // NOI18N
-    private static final String MULTIPOINT = "MultiPoint";                                                            // NOI18N
-    private static final String LINESTRING = "LineString";                                                            // NOI18N
-    private static final String MULTILINESTRING = "MultiLineString";                                                  // NOI18N
-    private static final String POLYGON = "Polygon";                                                                  // NOI18N
-    private static final String MULTIPOLYGON = "MultiPolygon";                                                        // NOI18N
+    private static final String POINT = "Point"; // NOI18N
+    private static final String MULTIPOINT = "MultiPoint"; // NOI18N
+    private static final String LINESTRING = "LineString"; // NOI18N
+    private static final String MULTILINESTRING = "MultiLineString"; // NOI18N
+    private static final String POLYGON = "Polygon"; // NOI18N
+    private static final String MULTIPOLYGON = "MultiPolygon"; // NOI18N
     private static final HashMap<String, Integer> geomOrder = new HashMap<String, Integer>();
 
     // TODO: geomOrder vervollstaendigen
@@ -124,42 +122,42 @@ public class GeometryHeuristics {
         return bestIndex;
     }
 
-//    /**
-//     * The heuristic-method. Compares all GeometryPropertyTypes and returns the name of
-//     * the property with the highest complexity.
-//     * @param geometries array of GeometryPropertyTypes
-//     * @return Propertyname as String
-//     */
-//    public static Geometry findBestGeometry(Feature f) {
-//        Geometry bestGeom = null;
-//        GeometryPropertyType best = null;
-//        if (f != null) {
-//            FeatureType type = f.getFeatureType();
-//            GeometryPropertyType[] geoProp = type.getGeometryProperties();
-//            Geometry[] geo = f.getGeometryPropertyValues();
-//            if (geoProp.length == 1) {
-//                best = geoProp[0];
-//                bestGeom = geo[0];
-//            } else {
-//                for (int i = 0; i < geoProp.length; i++) {
-//                    if (best == null) {
-//                        if (!isBoundingBox(geo[i])) {
-//                            best = geoProp[i];
-//                            bestGeom = geo[i];
-//                        }
-//                    } else {
-//                        int bestValue = geomOrder.get(best.getTypeName().getLocalName());
-//                        int geomValue = geomOrder.get(geoProp[i].getTypeName().getLocalName());
-//                        if (geomValue > bestValue && !isBoundingBox(geo[i])) {
-//                            best = geoProp[i];
-//                            bestGeom = geo[i];
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        return bestGeom;
-//    }
+    //    /**
+    //     * The heuristic-method. Compares all GeometryPropertyTypes and returns the name of
+    //     * the property with the highest complexity.
+    //     * @param geometries array of GeometryPropertyTypes
+    //     * @return Propertyname as String
+    //     */
+    //    public static Geometry findBestGeometry(Feature f) {
+    //        Geometry bestGeom = null;
+    //        GeometryPropertyType best = null;
+    //        if (f != null) {
+    //            FeatureType type = f.getFeatureType();
+    //            GeometryPropertyType[] geoProp = type.getGeometryProperties();
+    //            Geometry[] geo = f.getGeometryPropertyValues();
+    //            if (geoProp.length == 1) {
+    //                best = geoProp[0];
+    //                bestGeom = geo[0];
+    //            } else {
+    //                for (int i = 0; i < geoProp.length; i++) {
+    //                    if (best == null) {
+    //                        if (!isBoundingBox(geo[i])) {
+    //                            best = geoProp[i];
+    //                            bestGeom = geo[i];
+    //                        }
+    //                    } else {
+    //                        int bestValue = geomOrder.get(best.getTypeName().getLocalName());
+    //                        int geomValue = geomOrder.get(geoProp[i].getTypeName().getLocalName());
+    //                        if (geomValue > bestValue && !isBoundingBox(geo[i])) {
+    //                            best = geoProp[i];
+    //                            bestGeom = geo[i];
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        return bestGeom;
+    //    }
 
     /**
      * Checks if the given Geometry-object is a BoundingBox.

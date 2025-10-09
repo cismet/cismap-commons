@@ -5,9 +5,10 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.After;
 import org.junit.AfterClass;
-import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -18,25 +19,20 @@ import org.junit.Test;
  * @author pd
  */
 public class PSwingFullTest {
-    
-    public PSwingFullTest() {
-    }
-    
+
+    public PSwingFullTest() {}
+
     @BeforeClass
-    public static void setUpClass() {
-    }
-    
+    public static void setUpClass() {}
+
     @AfterClass
-    public static void tearDownClass() {
-    }
-    
+    public static void tearDownClass() {}
+
     @Before
-    public void setUp() {
-    }
-    
+    public void setUp() {}
+
     @After
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     @Test
     @Ignore

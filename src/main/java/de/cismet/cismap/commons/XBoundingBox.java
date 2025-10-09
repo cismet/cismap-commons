@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -13,14 +13,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
-
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.util.List;
 import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
-
-import java.util.List;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -64,10 +61,9 @@ public class XBoundingBox extends BoundingBox {
      */
     public XBoundingBox(final Element boundingBoxElementParent) throws DataConversionException {
         super(boundingBoxElementParent);
-
         final Element conf = boundingBoxElementParent.getChild("BoundingBox"); // NOI18N
-        final Attribute attributeSrs = conf.getAttribute("srs");               // NOI18N
-        final Attribute attributeMetric = conf.getAttribute("metric");         // NOI18N
+        final Attribute attributeSrs = conf.getAttribute("srs"); // NOI18N
+        final Attribute attributeMetric = conf.getAttribute("metric"); // NOI18N
 
         if (attributeSrs != null) {
             this.srs = attributeSrs.getValue();
@@ -104,7 +100,7 @@ public class XBoundingBox extends BoundingBox {
      * @throws  DataConversionException  DOCUMENT ME!
      */
     public XBoundingBox(final Element boundingBoxElementParent, final String srs, final boolean metric)
-            throws DataConversionException {
+        throws DataConversionException {
         super(boundingBoxElementParent);
         this.srs = srs;
         this.metric = metric;
@@ -120,12 +116,14 @@ public class XBoundingBox extends BoundingBox {
      * @param  srs     DOCUMENT ME!
      * @param  metric  DOCUMENT ME!
      */
-    public XBoundingBox(final double x1,
-            final double y1,
-            final double x2,
-            final double y2,
-            final String srs,
-            final boolean metric) {
+    public XBoundingBox(
+        final double x1,
+        final double y1,
+        final double x2,
+        final double y2,
+        final String srs,
+        final boolean metric
+    ) {
         super(x1, y1, x2, y2);
         this.srs = srs;
         this.metric = metric;
@@ -176,8 +174,9 @@ public class XBoundingBox extends BoundingBox {
      */
     public Geometry getGeometry() {
         final GeometryFactory factory = new GeometryFactory(
-                new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(srs));
+            new PrecisionModel(PrecisionModel.FLOATING),
+            CrsTransformer.extractSridFromCrs(srs)
+        );
 
         final Coordinate[] bbox = new Coordinate[5];
         bbox[0] = new Coordinate(getX1(), getY1());
@@ -203,10 +202,17 @@ public class XBoundingBox extends BoundingBox {
     @Override
     public boolean equals(final Object other) {
         if (other instanceof XBoundingBox) {
-            final XBoundingBox bb = (XBoundingBox)other;
+            final XBoundingBox bb = (XBoundingBox) other;
 
-            return ((getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1())
-                            && (getY2() == bb.getY2())) && (getSrs() == bb.getSrs());
+            return (
+                (
+                    (getX1() == bb.getX1()) &&
+                    (getX2() == bb.getX2()) &&
+                    (getY1() == bb.getY1()) &&
+                    (getY2() == bb.getY2())
+                ) &&
+                (getSrs() == bb.getSrs())
+            );
         } else {
             return super.equals(other);
         }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * ServerInfo.java
  *
@@ -12,28 +12,22 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
-import org.openide.util.NbBundle;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-
 import de.cismet.commons.capabilities.Service;
-
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -64,6 +58,7 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     private javax.swing.JSeparator sepFees;
     private javax.swing.JSeparator sepKeywords;
     private javax.swing.JSeparator sepRestrictions;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -84,15 +79,14 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     public void serverChanged(final CapabilityEvent e) {
         final Object serverInfo = e.getCapabilityObject();
         if (serverInfo instanceof WMSCapabilities) {
-            setValues(((WMSCapabilities)serverInfo).getService());
+            setValues(((WMSCapabilities) serverInfo).getService());
         } else if (serverInfo instanceof WFSCapabilities) {
-            setValues(((WFSCapabilities)serverInfo).getService());
+            setValues(((WFSCapabilities) serverInfo).getService());
         }
     }
 
     @Override
-    public void layerChanged(final CapabilityEvent e) {
-    }
+    public void layerChanged(final CapabilityEvent e) {}
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -127,8 +121,9 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         lblTitle.setFont(new java.awt.Font("Tahoma", 1, 14));
         lblTitle.setText(null);
 
-        lblInfo.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/infowidgets/res/info.png")));
+        lblInfo.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/infowidgets/res/info.png"))
+        );
 
         lblName.setText(null);
 
@@ -154,89 +149,156 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         final org.jdesktop.layout.GroupLayout panMainLayout = new org.jdesktop.layout.GroupLayout(panMain);
         panMain.setLayout(panMainLayout);
         panMainLayout.setHorizontalGroup(
-            panMainLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                panMainLayout.createSequentialGroup().addContainerGap().add(
-                    panMainLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        sepKeywords,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        338,
-                        Short.MAX_VALUE).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        sepRestrictions,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        338,
-                        Short.MAX_VALUE).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        sepContact,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        338,
-                        Short.MAX_VALUE).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        sepFees,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        338,
-                        Short.MAX_VALUE).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        panMainLayout.createSequentialGroup().add(lblName).addPreferredGap(
-                            org.jdesktop.layout.LayoutStyle.RELATED).add(lblInfo)).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        panMainLayout.createSequentialGroup().add(lblKeywords).addPreferredGap(
-                            org.jdesktop.layout.LayoutStyle.RELATED).add(
-                            scpKeywords,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            322,
-                            Short.MAX_VALUE).add(12, 12, 12)).add(org.jdesktop.layout.GroupLayout.LEADING, lblTitle)
-                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblContactTitle).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        lblOrganisation).add(org.jdesktop.layout.GroupLayout.LEADING, lblFeesTitle).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        lblFees).add(org.jdesktop.layout.GroupLayout.LEADING, lblRestrictionsTitle).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        lblRestrictions).add(
-                        org.jdesktop.layout.GroupLayout.LEADING,
-                        lblContact,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        338,
-                        Short.MAX_VALUE)).addContainerGap()));
+            panMainLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    org.jdesktop.layout.GroupLayout.TRAILING,
+                    panMainLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(
+                            panMainLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    sepKeywords,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    338,
+                                    Short.MAX_VALUE
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    sepRestrictions,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    338,
+                                    Short.MAX_VALUE
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    sepContact,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    338,
+                                    Short.MAX_VALUE
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    sepFees,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    338,
+                                    Short.MAX_VALUE
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    panMainLayout
+                                        .createSequentialGroup()
+                                        .add(lblName)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(lblInfo)
+                                )
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    panMainLayout
+                                        .createSequentialGroup()
+                                        .add(lblKeywords)
+                                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                        .add(
+                                            scpKeywords,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            322,
+                                            Short.MAX_VALUE
+                                        )
+                                        .add(12, 12, 12)
+                                )
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblTitle)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblContactTitle)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblOrganisation)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblFeesTitle)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblFees)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblRestrictionsTitle)
+                                .add(org.jdesktop.layout.GroupLayout.LEADING, lblRestrictions)
+                                .add(
+                                    org.jdesktop.layout.GroupLayout.LEADING,
+                                    lblContact,
+                                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                    338,
+                                    Short.MAX_VALUE
+                                )
+                        )
+                        .addContainerGap()
+                )
+        );
         panMainLayout.setVerticalGroup(
-            panMainLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                panMainLayout.createSequentialGroup().addContainerGap().add(lblTitle).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    panMainLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE).add(lblName).add(
-                        lblInfo)).add(18, 18, 18).add(
-                    sepKeywords,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).add(8, 8, 8).add(
-                    panMainLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(lblKeywords).add(
-                        scpKeywords,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                        44,
-                        org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(8, 8, 8).add(
-                    sepContact,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblContactTitle).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblContact).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblOrganisation).add(12, 12, 12).add(
-                    sepFees,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblFeesTitle).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblFees).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(
-                    sepRestrictions,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                    2,
-                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblRestrictionsTitle).addPreferredGap(
-                    org.jdesktop.layout.LayoutStyle.RELATED).add(lblRestrictions).addContainerGap(
-                    229,
-                    Short.MAX_VALUE)));
+            panMainLayout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    panMainLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(lblTitle)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            panMainLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                                .add(lblName)
+                                .add(lblInfo)
+                        )
+                        .add(18, 18, 18)
+                        .add(
+                            sepKeywords,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .add(8, 8, 8)
+                        .add(
+                            panMainLayout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(lblKeywords)
+                                .add(
+                                    scpKeywords,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                    44,
+                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .add(8, 8, 8)
+                        .add(
+                            sepContact,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblContactTitle)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblContact)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblOrganisation)
+                        .add(12, 12, 12)
+                        .add(
+                            sepFees,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblFeesTitle)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblFees)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            sepRestrictions,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                            2,
+                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblRestrictionsTitle)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(lblRestrictions)
+                        .addContainerGap(229, Short.MAX_VALUE)
+                )
+        );
         scpMain.setViewportView(panMain);
 
         add(scpMain, java.awt.BorderLayout.CENTER);
@@ -251,42 +313,34 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         final Values v = new Values();
         try {
             v.name = service.getName();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         try {
             v.title = service.getTitle();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.abstractText = service.getAbstract();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.keywords = service.getKeywordList();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.contactName = service.getContactPerson();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.contactOrganisation = service.getContactOrganization();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.fees = service.getFees();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.restrictions = service.getAccessConstraints();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         setValues(v);
     }
@@ -298,7 +352,7 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
      */
     private void setValues(final Values v) {
         // Servername
-        if (v.title.trim().equals("")) {                                                                          // NOI18N
+        if (v.title.trim().equals("")) { // NOI18N
             lblTitle.setText(org.openide.util.NbBundle.getMessage(ServerInfo.class, "ServerInfo.lblTitle.text")); // NOI18N
         } else {
             lblTitle.setText(v.title.trim());
@@ -323,8 +377,10 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         }
 
         // Ansprechpartner
-        if (((v.contactName != null) && (v.contactName.trim().length() > 0))
-                    || ((v.contactOrganisation != null) && (v.contactOrganisation.trim().length() > 0))) {
+        if (
+            ((v.contactName != null) && (v.contactName.trim().length() > 0)) ||
+            ((v.contactOrganisation != null) && (v.contactOrganisation.trim().length() > 0))
+        ) {
             setContactSectionVisible(true);
             if ((v.contactName != null) && (v.contactName.trim().length() > 0)) {
                 lblContact.setText(v.contactName.trim());
@@ -402,38 +458,32 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     }
 
     @Override
-    public void layerVisibilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerVisibilityChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {}
 
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         final Object serverInfo = e.getCapabilities();
         if (serverInfo instanceof WMSCapabilities) {
-            setValues(((WMSCapabilities)serverInfo).getService());
+            setValues(((WMSCapabilities) serverInfo).getService());
         } else if (serverInfo instanceof WFSCapabilities) {
-            setValues(((WFSCapabilities)serverInfo).getService());
+            setValues(((WFSCapabilities) serverInfo).getService());
         }
     }
 
     @Override
-    public void layerRemoved(final ActiveLayerEvent e) {
-    }
+    public void layerRemoved(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerPositionChanged(final ActiveLayerEvent e) {
-    }
+    public void layerPositionChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-    }
+    public void layerInformationStatusChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerAdded(final ActiveLayerEvent e) {
-    }
+    public void layerAdded(final ActiveLayerEvent e) {}
 
     @Override
     public JComponent getGuiComponent() {
@@ -452,8 +502,9 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
 
     @Override
     public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/capabilitywidget/res/serverInfo.png"));
+        final Icon icoMap = new ImageIcon(
+            getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/serverInfo.png")
+        );
         return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 

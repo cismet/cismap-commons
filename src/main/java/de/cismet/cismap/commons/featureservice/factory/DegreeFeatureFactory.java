@@ -1,28 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.*;
+import java.util.Vector;
+import javax.swing.SwingWorker;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureProgressListener;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
-
-import java.util.Vector;
-
-import javax.swing.SwingWorker;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.featureservice.*;
 
 /**
  * Abstract Base class of features factories that make use of the degree framework to read features documents.
@@ -31,7 +28,7 @@ import de.cismet.cismap.commons.featureservice.*;
  * @version  $Revision$, $Date$
  */
 public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
-        extends AbstractFeatureFactory<FT, QT> {
+    extends AbstractFeatureFactory<FT, QT> {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -72,13 +69,20 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    protected Vector<FT> processFeatureCollection(final SwingWorker workerThread,
-            final Feature[] featureCollection,
-            final boolean evaluateExpressions) throws Exception {
+    protected Vector<FT> processFeatureCollection(
+        final SwingWorker workerThread,
+        final Feature[] featureCollection,
+        final boolean evaluateExpressions
+    ) throws Exception {
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SW[" + workerThread + "]: converting " + featureCollection.length
-                            + " degree features to FeatureServiceFeatures");
+                logger.debug(
+                    "SW[" +
+                    workerThread +
+                    "]: converting " +
+                    featureCollection.length +
+                    " degree features to FeatureServiceFeatures"
+                );
             }
         }
         final long start = System.currentTimeMillis();
@@ -104,8 +108,15 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
             i++;
         }
 
-        logger.info("SW[" + workerThread + "]: converting " + featureCollection.length + " degree features took "
-                    + (System.currentTimeMillis() - start) + " ms");
+        logger.info(
+            "SW[" +
+            workerThread +
+            "]: converting " +
+            featureCollection.length +
+            " degree features took " +
+            (System.currentTimeMillis() - start) +
+            " ms"
+        );
         return featureVector;
     }
 
@@ -122,18 +133,21 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
      *
      * @see     #processFeatureCollection(javax.swing.SwingWorker, org.deegree2.model.feature.Feature[], boolean)
      */
-    protected void initialiseFeature(final FT featureServiceFeature,
-            final Feature degreeFeature,
-            final boolean evaluateExpressions,
-            final int index) throws Exception {
+    protected void initialiseFeature(
+        final FT featureServiceFeature,
+        final Feature degreeFeature,
+        final boolean evaluateExpressions,
+        final int index
+    ) throws Exception {
         // perform standard initilaisation
         featureServiceFeature.setLayerProperties(this.getLayerProperties());
 
         // creating geometry
         if (featureServiceFeature.getGeometry() == null) {
             try {
-                featureServiceFeature.setGeometry(JTSAdapter.export(
-                        degreeFeature.getGeometryPropertyValues()[geometryIndex]));
+                featureServiceFeature.setGeometry(
+                    JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex])
+                );
             } catch (Exception e) {
                 featureServiceFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
             }
@@ -200,9 +214,11 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
          * @param  featureCount       DOCUMENT ME!
          * @param  progressThreshold  DOCUMENT ME!
          */
-        public ParsingProgressListener(final SwingWorker workerThread,
-                final int featureCount,
-                final int progressThreshold) {
+        public ParsingProgressListener(
+            final SwingWorker workerThread,
+            final int featureCount,
+            final int progressThreshold
+        ) {
             this.progressThreshold = progressThreshold;
             this.workerThread = workerThread;
             this.featureCount = featureCount;
@@ -222,7 +238,7 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
                     logger.debug("real feature parsing progress: " + progress);
                 }
             }
-            final int newProgress = (int)((double)progress / (double)featureCount * progressThreshold);
+            final int newProgress = (int) ((double) progress / (double) featureCount * progressThreshold);
             if ((workerThread != null) && (newProgress > currentProgress)) {
                 // set to progress to -1 (indeterminate progress bar)
                 currentProgress = (newProgress < progressThreshold) ? newProgress : -1;

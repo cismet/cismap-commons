@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
 import de.cismet.cismap.commons.*;
@@ -17,7 +17,6 @@ import de.cismet.cismap.commons.retrieval.RetrievalService;
  * @version  $Revision$, $Date$
  */
 public interface MapService extends RetrievalService, PNodeProvider {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

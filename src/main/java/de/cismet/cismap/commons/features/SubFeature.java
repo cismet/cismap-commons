@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 thorsten
  *
@@ -30,7 +30,6 @@ package de.cismet.cismap.commons.features;
  * @version  $Revision$, $Date$
  */
 public interface SubFeature extends Feature {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

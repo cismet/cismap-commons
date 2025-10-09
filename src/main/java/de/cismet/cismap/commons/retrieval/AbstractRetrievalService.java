@@ -1,24 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.Debug;
+import de.cismet.tools.CurrentStackTrace;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import de.cismet.cismap.commons.Debug;
-
-import de.cismet.tools.CurrentStackTrace;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -31,7 +27,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String PROGRESS_PROPERTY = "progress"; // NOI18N
-    public static final String PROGRESS_REFRESH = "refresh";   // NOI18N
+    public static final String PROGRESS_REFRESH = "refresh"; // NOI18N
 
     protected static final boolean DEBUG = Debug.DEBUG;
 
@@ -56,8 +52,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
     /**
      * Creates a new instance of AbstractRetrievalService.
      */
-    public AbstractRetrievalService() {
-    }
+    public AbstractRetrievalService() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -85,7 +80,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             for (int i = 0; i < listeners.size(); ++i) {
                 final Object l = listeners.get(i);
                 if (l instanceof RetrievalListener) {
-                    ((RetrievalListener)l).retrievalStarted(e);
+                    ((RetrievalListener) l).retrievalStarted(e);
                 }
             }
         }
@@ -104,7 +99,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             while (it.hasNext()) {
                 final Object l = it.next();
                 if (l instanceof RetrievalListener) {
-                    ((RetrievalListener)l).retrievalProgress(e);
+                    ((RetrievalListener) l).retrievalProgress(e);
                 }
             }
         }
@@ -123,7 +118,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             while (it.hasNext()) {
                 final Object l = it.next();
                 if (l instanceof RetrievalListener) {
-                    ((RetrievalListener)l).retrievalComplete(e);
+                    ((RetrievalListener) l).retrievalComplete(e);
                 }
             }
         }
@@ -142,7 +137,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             while (it.hasNext()) {
                 final Object l = it.next();
                 if (l instanceof RetrievalListener) {
-                    ((RetrievalListener)l).retrievalAborted(e);
+                    ((RetrievalListener) l).retrievalAborted(e);
                 }
             }
         }
@@ -162,7 +157,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             while (it.hasNext()) {
                 final Object l = it.next();
                 if (l instanceof RetrievalListener) {
-                    ((RetrievalListener)l).retrievalError(e);
+                    ((RetrievalListener) l).retrievalError(e);
                 }
             }
         }
@@ -170,6 +165,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
 
     @Override
     public abstract void retrieve(boolean forced);
+
     @Override
     public abstract Object clone();
 
@@ -179,7 +175,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
      * @return  DOCUMENT ME!
      */
     public AbstractRetrievalService cloneWithoutRetrievalListeners() {
-        final AbstractRetrievalService ret = (AbstractRetrievalService)clone();
+        final AbstractRetrievalService ret = (AbstractRetrievalService) clone();
         ret.listeners.clear();
         return ret;
     }

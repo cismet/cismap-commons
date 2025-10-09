@@ -1,14 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.demo;
+
 import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -87,13 +87,14 @@ public class Test extends JFrame {
             // (since we use a null layout manager) - the first time it will run
             // is when the frame is being packed
 
-            addComponentListener(new ComponentAdapter() {
-
+            addComponentListener(
+                new ComponentAdapter() {
                     @Override
                     public void componentResized(final ComponentEvent event) {
                         resizePanels();
                     }
-                });
+                }
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -118,18 +119,20 @@ public class Test extends JFrame {
             wall.setVisible(true);
 
             final JInternalFrame dialog = new TestFrame(message);
-            dialog.addInternalFrameListener(new InternalFrameAdapter() {
-
+            dialog.addInternalFrameListener(
+                new InternalFrameAdapter() {
                     @Override
                     public void internalFrameClosing(final InternalFrameEvent event) {
                         wall.setVisible(false);
                     }
-                });
+                }
+            );
 
             add(dialog);
-            dialog.setLocation((getWidth() / 2) - (dialog.getWidth() / 2),
-                (getHeight() / 2)
-                        - (dialog.getHeight() / 2));
+            dialog.setLocation(
+                (getWidth() / 2) - (dialog.getWidth() / 2),
+                (getHeight() / 2) - (dialog.getHeight() / 2)
+            );
             dialog.setVisible(true);
         }
     }
@@ -150,26 +153,28 @@ public class Test extends JFrame {
          */
         public TestPanel(final Desktop desktop) {
             setLayout(new FlowLayout(FlowLayout.LEFT));
-            add(new JButton(
-                    new AbstractAction(
-                        org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {             // NOI18N
+            add(
+                new JButton(
+                    new AbstractAction(org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) { // NOI18N
                         @Override
                         public void actionPerformed(final ActionEvent event) {
                             desktop.openModalDialog(
-                                org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text")); // NOI18N
+                                org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text")
+                            ); // NOI18N
                         }
-                    }));
+                    }
+                )
+            );
         }
-
-//        public void paintComponent (Graphics g) {
-//            super.paintComponent (g);
-//
-//            Graphics2D g2d = (Graphics2D) g;
-//
-//            g2d.setPaint (new GradientPaint (0, 0, Color.BLUE,
-//                getWidth (), getHeight (), Color.RED));
-//            g2d.fillRect (0, 0, getWidth (), getHeight ());
-//        }
+        //        public void paintComponent (Graphics g) {
+        //            super.paintComponent (g);
+        //
+        //            Graphics2D g2d = (Graphics2D) g;
+        //
+        //            g2d.setPaint (new GradientPaint (0, 0, Color.BLUE,
+        //                getWidth (), getHeight (), Color.RED));
+        //            g2d.fillRect (0, 0, getWidth (), getHeight ());
+        //        }
     }
 
     /**
@@ -212,9 +217,9 @@ public class Test extends JFrame {
          */
         public TestFrame(final String message) {
             putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
-//            setIconifiable (false);
-//            setMaximizable (false);
-//            setResizable (false);
+            //            setIconifiable (false);
+            //            setMaximizable (false);
+            //            setResizable (false);
             setClosable(true);
 
             setDefaultCloseOperation(HIDE_ON_CLOSE);

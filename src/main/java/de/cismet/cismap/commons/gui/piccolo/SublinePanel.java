@@ -1,17 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
-
 import java.awt.Color;
 import java.awt.Graphics;
-
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
@@ -29,8 +27,9 @@ public class SublinePanel extends JPanel {
 
     //~ Instance fields --------------------------------------------------------
 
-    private ImageIcon icoRuler = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/ruler-triangle.png")); // NOI18N
+    private ImageIcon icoRuler = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/ruler-triangle.png")
+    ); // NOI18N
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private PNode pNodeParent;
@@ -38,6 +37,7 @@ public class SublinePanel extends JPanel {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblEnd;
     private javax.swing.JLabel lblStart;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -75,14 +75,15 @@ public class SublinePanel extends JPanel {
 
         lblStart.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblStart.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        lblStart.setText("0.00");                             // NOI18N
-        lblStart.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblStart.setText("0.00"); // NOI18N
+        lblStart.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblStartMouseClicked(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -92,14 +93,15 @@ public class SublinePanel extends JPanel {
 
         lblEnd.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblEnd.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        lblEnd.setText("0.00");                             // NOI18N
-        lblEnd.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblEnd.setText("0.00"); // NOI18N
+        lblEnd.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblEndMouseClicked(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -122,8 +124,7 @@ public class SublinePanel extends JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblStartMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblStartMouseClicked
-    }                                                                        //GEN-LAST:event_lblStartMouseClicked
+    private void lblStartMouseClicked(final java.awt.event.MouseEvent evt) {} //GEN-FIRST:event_lblStartMouseClicked //GEN-LAST:event_lblStartMouseClicked
 
     /**
      * DOCUMENT ME!

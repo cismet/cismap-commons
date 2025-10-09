@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -32,7 +32,6 @@ import java.net.URI;
  * @version  $Revision$, $Date$
  */
 public interface OutputFormatType {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

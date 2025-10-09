@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
-
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
 import de.cismet.commons.converter.FormatHint;
@@ -20,7 +19,6 @@ import de.cismet.commons.converter.FormatHint;
  * @version  1.0
  */
 public interface GeometryConverter<FROM extends Object> extends Converter<FROM, Geometry>, FormatHint {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

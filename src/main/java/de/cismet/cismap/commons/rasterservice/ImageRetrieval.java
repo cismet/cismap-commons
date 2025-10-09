@@ -1,34 +1,26 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.io.IOUtils;
-
-import org.openide.util.Exceptions;
-
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.security.WebAccessManager;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.net.URL;
-
 import javax.imageio.ImageIO;
-
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
-import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
-
-import de.cismet.commons.wms.capabilities.WMSCapabilities;
-
-import de.cismet.security.WebAccessManager;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.io.IOUtils;
+import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -79,7 +71,7 @@ public class ImageRetrieval extends Thread {
         }
         if (in != null) {
             if (log.isDebugEnabled()) {
-                log.info("in!=null");                             // NOI18N
+                log.info("in!=null"); // NOI18N
                 try {
                     in.close();
                 } catch (IOException ex) {
@@ -103,7 +95,7 @@ public class ImageRetrieval extends Thread {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Retrieve: " + url.toString());                                                  // NOI18N
+                    log.debug("Retrieve: " + url.toString()); // NOI18N
                 }
             }
 
@@ -123,7 +115,7 @@ public class ImageRetrieval extends Thread {
                     }
                 } else {
                     urlBase = url;
-                    requestParameter = "";     // NOI18N
+                    requestParameter = ""; // NOI18N
                 }
 
                 method = ACCESS_METHODS.GET_REQUEST;
@@ -138,10 +130,7 @@ public class ImageRetrieval extends Thread {
                 }
             }
 
-            final InputStream is = WebAccessManager.getInstance().doRequest(
-                    new URL(urlBase),
-                    requestParameter,
-                    method);
+            final InputStream is = WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, method);
             final byte[] bs = IOUtils.toByteArray(is);
             in = new BufferedInputStream(new ByteArrayInputStream(bs));
 
@@ -166,15 +155,14 @@ public class ImageRetrieval extends Thread {
                 }
             }
         } catch (Exception e) {
-            log.error("Error in ImageRetrieval", e);                               // NOI18N
+            log.error("Error in ImageRetrieval", e); // NOI18N
             final RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(false);
-            if ((e.getMessage() == null) || e.getMessage().equals("null")) {       // NOI18N
+            if ((e.getMessage() == null) || e.getMessage().equals("null")) { // NOI18N
                 try {
                     final String cause = e.getCause().getMessage();
                     re.setRetrievedObject(cause);
-                } catch (Exception ee) {
-                }
+                } catch (Exception ee) {}
             } else {
                 re.setRetrievedObject(e.getMessage());
                 re.setErrorType(RetrievalEvent.CLIENTERROR);

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleSelectionEventHandler.java
  *
@@ -15,10 +15,8 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
-
 import java.awt.Color;
 import java.awt.Paint;
-
 import java.util.List;
 
 /**
@@ -62,15 +60,15 @@ public class SimpleSelectionEventHandler extends PSelectionEventHandler {
     public void decorateSelectedNode(final PNode node) {
         node.moveToFront();
         if (node instanceof PPath) {
-            notSelectedStrokePaint = ((PPath)node).getStrokePaint();
-            ((PPath)node).setStrokePaint(selectedStrokePaint);
+            notSelectedStrokePaint = ((PPath) node).getStrokePaint();
+            ((PPath) node).setStrokePaint(selectedStrokePaint);
         }
     }
 
     @Override
     public void undecorateSelectedNode(final PNode node) {
         if (node instanceof PPath) {
-            ((PPath)node).setStrokePaint(notSelectedStrokePaint);
+            ((PPath) node).setStrokePaint(notSelectedStrokePaint);
         }
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
 /**
@@ -14,10 +14,8 @@ package de.cismet.cismap.commons.gui.layerwidget;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.util.Observable;
 import java.util.Observer;
-
 import javax.swing.*;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -73,12 +71,14 @@ public class JTable_Observer extends JFrame implements Observer {
      * DOCUMENT ME!
      */
     private void createUI() {
-        dtm = new MyDefaultTableModel(
+        dtm =
+            new MyDefaultTableModel(
                 new Object[] {
                     org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title1"), // NOI18N
-                    org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2")
+                    org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2"),
                 },
-                0);                                                                                            // NOI18N
+                0
+            ); // NOI18N
         final CustomProgressBar progressBar = new CustomProgressBar();
         final CustomProgressBar progressBar2 = new CustomProgressBar();
         final CustomProgressBar progressBar3 = new CustomProgressBar();
@@ -91,18 +91,21 @@ public class JTable_Observer extends JFrame implements Observer {
         dtm.addRow(
             new Object[] {
                 org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row1"),
-                progressBar
-            });                                                                                                // NOI18N
+                progressBar,
+            }
+        ); // NOI18N
         dtm.addRow(
             new Object[] {
                 org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row2"),
-                progressBar2
-            });                                                                                                // NOI18N
+                progressBar2,
+            }
+        ); // NOI18N
         dtm.addRow(
             new Object[] {
                 org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row3"),
-                progressBar3
-            });                                                                                                // NOI18N
+                progressBar3,
+            }
+        ); // NOI18N
         table = new JTable(dtm);
         table.getColumnModel().getColumn(1).setCellRenderer(new CustomProgressBar());
         final JScrollPane jsp = new JScrollPane(table);
@@ -114,11 +117,12 @@ public class JTable_Observer extends JFrame implements Observer {
 
     @Override
     public void update(final Observable o, final Object arg) {
-        ((DefaultTableModel)table.getModel()).fireTableCellUpdated(0, 1);
-        ((DefaultTableModel)table.getModel()).fireTableCellUpdated(1, 1);
-        ((DefaultTableModel)table.getModel()).fireTableCellUpdated(2, 1);
+        ((DefaultTableModel) table.getModel()).fireTableCellUpdated(0, 1);
+        ((DefaultTableModel) table.getModel()).fireTableCellUpdated(1, 1);
+        ((DefaultTableModel) table.getModel()).fireTableCellUpdated(2, 1);
     }
 }
+
 /**
  * DOCUMENT ME!
  *
@@ -160,14 +164,16 @@ class CustomProgressBar extends JProgressBar implements TableCellRenderer {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Component getTableCellRendererComponent(final JTable table,
-            final Object value,
-            final boolean isSelected,
-            final boolean hasFocus,
-            final int row,
-            final int column) {
+    public Component getTableCellRendererComponent(
+        final JTable table,
+        final Object value,
+        final boolean isSelected,
+        final boolean hasFocus,
+        final int row,
+        final int column
+    ) {
         if (value instanceof JComponent) {
-            return (JComponent)value;
+            return (JComponent) value;
         } else {
             return null;
         }

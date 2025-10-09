@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /**
  * Copyright (C) 1998-2000 by University of Maryland, College Park, MD 20742, USA
  * All rights reserved.
@@ -12,17 +12,13 @@
 package pswing;
 
 import edu.umd.cs.piccolo.PCanvas;
-
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-
 import java.io.Serializable;
-
 import java.util.Vector;
-
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -143,7 +139,8 @@ public class PComboBox extends JComboBox implements Serializable {
     private Point2D getNodeLocationInFrame() {
         if ((pSwing == null) || (canvas == null)) {
             throw new RuntimeException(
-                "PComboBox.setEnvironment( swing, pCanvas );//has to be done manually at present"); // NOI18N
+                "PComboBox.setEnvironment( swing, pCanvas );//has to be done manually at present"
+            ); // NOI18N
         }
         final Point2D r1c = pSwing.getBounds().getOrigin();
         pSwing.localToGlobal(r1c);
@@ -235,12 +232,14 @@ public class PComboBox extends JComboBox implements Serializable {
                 // We need to modify the y position to reflect the true
                 // height of the ComboBox given the Jazz transformation
                 final Point2D pt = getNodeLocationInFrame();
-                final Rectangle2D bounds = new Rectangle2D.Double(pt.getX(),
-                        pt.getY(),
-                        (double)comboBox.getBounds().width,
-                        (double)comboBox.getBounds().height);
-//                currentEvent.getPath().getCamera().localToCamera( bounds, currentEvent.getNode() );
-                py = (int)(bounds.getHeight() + 0.5);
+                final Rectangle2D bounds = new Rectangle2D.Double(
+                    pt.getX(),
+                    pt.getY(),
+                    (double) comboBox.getBounds().width,
+                    (double) comboBox.getBounds().height
+                );
+                //                currentEvent.getPath().getCamera().localToCamera( bounds, currentEvent.getNode() );
+                py = (int) (bounds.getHeight() + 0.5);
 
                 Rectangle absBounds;
                 final Rectangle r = new Rectangle(px, py, pw, ph);
@@ -253,7 +252,7 @@ public class PComboBox extends JComboBox implements Serializable {
                     final Dialog dlg = getDialog();
                     Point p;
                     if (dlg instanceof JDialog) {
-                        final JRootPane rp = ((JDialog)dlg).getRootPane();
+                        final JRootPane rp = ((JDialog) dlg).getRootPane();
                         p = rp.getLocationOnScreen();
                         absBounds = rp.getBounds();
                         absBounds.x = p.x;
@@ -305,13 +304,15 @@ public class PComboBox extends JComboBox implements Serializable {
                             absBounds.y,
                             absBounds.width,
                             absBounds.height,
-                            r);
+                            r
+                        );
                         SwingUtilities.computeIntersection(
                             absBounds.x,
                             absBounds.y,
                             absBounds.width,
                             absBounds.height,
-                            r2);
+                            r2
+                        );
 
                         if (r.height > r2.height) {
                             r.x = r.x + offset.x;
@@ -359,9 +360,9 @@ public class PComboBox extends JComboBox implements Serializable {
                     pt.setLocation(pt.getX() + location.getX(), pt.getY() + location.getY());
                 }
                 pt = getNodeLocationInFrame();
-//                PCamera camera = currentEvent.getPath().getTopCamera();
-//                camera.localToCamera( pt, currentEvent.getNode() );
-                position = new Point((int)(pt.getX() + 0.5), (int)(pt.getY() + 0.5));
+                //                PCamera camera = currentEvent.getPath().getTopCamera();
+                //                camera.localToCamera( pt, currentEvent.getNode() );
+                position = new Point((int) (pt.getX() + 0.5), (int) (pt.getY() + 0.5));
 
                 final Point canvasOffset = c.getParent().getLocationOnScreen();
 
@@ -379,9 +380,10 @@ public class PComboBox extends JComboBox implements Serializable {
         private Point getJazzComboOffset() {
             final Point swing = comboBox.getLocationOnScreen();
             final Point jazz = getComboLocationOnScreen();
-            jazz.setLocation(jazz.getLocation().getX() - swing.getLocation().getX(),
-                jazz.getLocation().getY()
-                        - swing.getLocation().getY());
+            jazz.setLocation(
+                jazz.getLocation().getX() - swing.getLocation().getX(),
+                jazz.getLocation().getY() - swing.getLocation().getY()
+            );
             return jazz;
         }
 
@@ -392,14 +394,13 @@ public class PComboBox extends JComboBox implements Serializable {
          */
         private Dialog getDialog() {
             Container parent;
-            for (parent = comboBox.getParent();
-                        (parent != null)
-                        && !(parent instanceof Dialog)
-                        && !(parent instanceof Window); parent = parent.getParent()) {
-                ;
-            }
+            for (
+                parent = comboBox.getParent();
+                (parent != null) && !(parent instanceof Dialog) && !(parent instanceof Window);
+                parent = parent.getParent()
+            ) {}
             if (parent instanceof Dialog) {
-                return (Dialog)parent;
+                return (Dialog) parent;
             } else {
                 return null;
             }
@@ -427,7 +428,7 @@ public class PComboBox extends JComboBox implements Serializable {
         @Override
         public void mousePressed(final MouseEvent me) {
             if (me instanceof MouseEvent) {
-                setCurrentEvent((MouseEvent)me);
+                setCurrentEvent((MouseEvent) me);
             }
         }
     }

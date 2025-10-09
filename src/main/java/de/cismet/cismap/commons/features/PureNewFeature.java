@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * PureNewFeature.java
  *
@@ -18,12 +18,10 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
-
-import de.cismet.cismap.commons.WorldToScreenTransform;
 
 /**
  * DOCUMENT ME!
@@ -31,10 +29,9 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class PureNewFeature extends AbstractNewFeature implements Cloneable,
-    XStyledFeature,
-    Attachable,
-    PreventNamingDuplicates {
+public class PureNewFeature
+    extends AbstractNewFeature
+    implements Cloneable, XStyledFeature, Attachable, PreventNamingDuplicates {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -150,76 +147,102 @@ public class PureNewFeature extends AbstractNewFeature implements Cloneable,
         if (getGeometryType() != null) {
             if ((name != null) && name.trim().equals("")) {
                 switch (getGeometryType()) {
-                    case RECTANGLE: {
-                        return org.openide.util.NbBundle.getMessage(
+                    case RECTANGLE:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newRectangle");    // NOI18N
-                    }
-                    case LINESTRING: {
-                        return org.openide.util.NbBundle.getMessage(
+                                "PureNewFeature.getName().newRectangle"
+                            ); // NOI18N
+                        }
+                    case LINESTRING:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolyline");     // NOI18N
-                    }
-                    case ELLIPSE: {
-                        return org.openide.util.NbBundle.getMessage(
+                                "PureNewFeature.getName().newPolyline"
+                            ); // NOI18N
+                        }
+                    case ELLIPSE:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newEllipse");      // NOI18N
-                    }
-                    case POINT: {
-                        return org.openide.util.NbBundle.getMessage(
+                                "PureNewFeature.getName().newEllipse"
+                            ); // NOI18N
+                        }
+                    case POINT:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPoint");        // NOI18N
-                    }
-                    case POLYGON: {
-                        return org.openide.util.NbBundle.getMessage(
+                                "PureNewFeature.getName().newPoint"
+                            ); // NOI18N
+                        }
+                    case POLYGON:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolygon");      // NOI18N
-                    }
-                    case MULTIPOLYGON: {
-                        return org.openide.util.NbBundle.getMessage(
+                                "PureNewFeature.getName().newPolygon"
+                            ); // NOI18N
+                        }
+                    case MULTIPOLYGON:
+                        {
+                            return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newMultiPolygon"); // NOI18N
-                    }
-                    default: {
-//                        return org.openide.util.NbBundle.getMessage(
-//                                PureNewFeature.class,
-//                                "PureNewFeature.getName().errorInGetName");  // NOI18N
-                        return getGeometryType().toString() + " " + getGeometry().getGeometryType();
-                    }
+                                "PureNewFeature.getName().newMultiPolygon"
+                            ); // NOI18N
+                        }
+                    default:
+                        {
+                            //                        return org.openide.util.NbBundle.getMessage(
+                            //                                PureNewFeature.class,
+                            //                                "PureNewFeature.getName().errorInGetName");  // NOI18N
+                            return getGeometryType().toString() + " " + getGeometry().getGeometryType();
+                        }
                 }
             } else {
                 return name;
             }
         } else {
             try {
-                if (name.trim().equals("")) {                                 // NOI18N
+                if (name.trim().equals("")) { // NOI18N
                     if (getGeometry() instanceof Point) {
-                        setName(org.openide.util.NbBundle.getMessage(
+                        setName(
+                            org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPoint"));        // NOI18N
+                                "PureNewFeature.getName().newPoint"
+                            )
+                        ); // NOI18N
                     } else if (getGeometry() instanceof LineString) {
-                        setName(org.openide.util.NbBundle.getMessage(
+                        setName(
+                            org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolyline"));     // NOI18N
+                                "PureNewFeature.getName().newPolyline"
+                            )
+                        ); // NOI18N
                     } else if (getGeometry() instanceof Polygon) {
-                        setName(org.openide.util.NbBundle.getMessage(
+                        setName(
+                            org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolygon"));      // NOI18N
+                                "PureNewFeature.getName().newPolygon"
+                            )
+                        ); // NOI18N
                     } else if (getGeometry() instanceof MultiPolygon) {
-                        setName(org.openide.util.NbBundle.getMessage(
+                        setName(
+                            org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newMultiPolygon")); // NOI18N
+                                "PureNewFeature.getName().newMultiPolygon"
+                            )
+                        ); // NOI18N
                     } else {
-                        setName("-");                                         // NOI18N
+                        setName("-"); // NOI18N
                     }
                 }
                 return super.getName();
             } catch (Exception e) {
-                LOG.fatal("getName() error", e);                              // NOI18N
-                return "Error in getName()";                                  // NOI18N
+                LOG.fatal("getName() error", e); // NOI18N
+                return "Error in getName()"; // NOI18N
             }
         }
     }
+
     @Override
     public String getName() {
         if (number == 1) {

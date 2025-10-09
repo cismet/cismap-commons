@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -17,23 +17,19 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import java.io.StringReader;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import de.cismet.cismap.commons.gpx.GpxType;
 import de.cismet.cismap.commons.gpx.RteType;
 import de.cismet.cismap.commons.gpx.TrkType;
 import de.cismet.cismap.commons.gpx.TrksegType;
 import de.cismet.cismap.commons.gpx.WptType;
 import de.cismet.cismap.commons.jtsgeometryfactories.CoordinateM;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * DOCUMENT ME!
@@ -45,16 +41,17 @@ public class GpxReader {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-            4326);
+    private final GeometryFactory geometryFactory = new GeometryFactory(
+        new PrecisionModel(PrecisionModel.FLOATING),
+        4326
+    );
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new GpxReader object.
      */
-    public GpxReader() {
-    }
+    public GpxReader() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -71,7 +68,7 @@ public class GpxReader {
             final Unmarshaller unmarshaller = context.createUnmarshaller();
             final Object o = unmarshaller.unmarshal(new StringReader(gpx));
 
-            return (o instanceof JAXBElement) && GpxType.class.isAssignableFrom(((JAXBElement)o).getDeclaredType());
+            return (o instanceof JAXBElement) && GpxType.class.isAssignableFrom(((JAXBElement) o).getDeclaredType());
         } catch (Exception e) {
             return false;
         }
@@ -92,8 +89,8 @@ public class GpxReader {
         final Unmarshaller unmarshaller = context.createUnmarshaller();
         final Object o = unmarshaller.unmarshal(new StringReader(gpx));
 
-        if ((o instanceof JAXBElement) && GpxType.class.isAssignableFrom(((JAXBElement)o).getDeclaredType())) {
-            final GpxType gpxType = (GpxType)((JAXBElement)o).getValue();
+        if ((o instanceof JAXBElement) && GpxType.class.isAssignableFrom(((JAXBElement) o).getDeclaredType())) {
+            final GpxType gpxType = (GpxType) ((JAXBElement) o).getValue();
 
             if (gpxType.getRte() != null) {
                 for (final RteType rte : gpxType.getRte()) {
@@ -103,8 +100,9 @@ public class GpxReader {
                         coordinates.add(getCoordinateFromWaypoint(wayPoint));
                     }
 
-                    geometries.add(geometryFactory.createLineString(
-                            coordinates.toArray(new Coordinate[coordinates.size()])));
+                    geometries.add(
+                        geometryFactory.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]))
+                    );
                 }
             }
 
@@ -117,8 +115,9 @@ public class GpxReader {
                             coordinates.add(getCoordinateFromWaypoint(wayPoint));
                         }
 
-                        geometries.add(geometryFactory.createLineString(
-                                coordinates.toArray(new Coordinate[coordinates.size()])));
+                        geometries.add(
+                            geometryFactory.createLineString(coordinates.toArray(new Coordinate[coordinates.size()]))
+                        );
                     }
                 }
             }
@@ -156,10 +155,12 @@ public class GpxReader {
         final double timeInMillis = (calendar != null) ? calendar.toGregorianCalendar().getTimeInMillis() : 0.0;
         final double height = (wayPoint.getEle() != null) ? wayPoint.getEle().doubleValue() : 0.0;
 
-        final CoordinateM coord = new CoordinateM(wayPoint.getLon().doubleValue(),
-                wayPoint.getLat().doubleValue(),
-                height,
-                timeInMillis);
+        final CoordinateM coord = new CoordinateM(
+            wayPoint.getLon().doubleValue(),
+            wayPoint.getLat().doubleValue(),
+            height,
+            timeInMillis
+        );
 
         return coord;
     }

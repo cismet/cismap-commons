@@ -1,23 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.interaction;
 
-import org.apache.log4j.Logger;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -106,10 +104,12 @@ public class DefaultQueryButtonAction implements ActionListener {
      * @param  width          DOCUMENT ME!
      * @param  posCorrection  DOCUMENT ME!
      */
-    public DefaultQueryButtonAction(final String queryText,
-            final String text,
-            final int width,
-            final int posCorrection) {
+    public DefaultQueryButtonAction(
+        final String queryText,
+        final String text,
+        final int width,
+        final int posCorrection
+    ) {
         this.queryText = queryText;
         this.text = text;
         this.width = width;
@@ -187,19 +187,21 @@ public class DefaultQueryButtonAction implements ActionListener {
         if (text1.length() >= 1) {
             switch (text1.charAt(text1.length() - 1)) {
                 case ' ':
-                case '(': {
-                    text1 = text1 + " ";
-                    break;
-                }
+                case '(':
+                    {
+                        text1 = text1 + " ";
+                        break;
+                    }
             }
         }
         if (text2.length() >= 1) {
             switch (text2.charAt(0)) {
                 case ' ':
-                case '(': {
-                    text2 = " " + text2;
-                    break;
-                }
+                case '(':
+                    {
+                        text2 = " " + text2;
+                        break;
+                    }
             }
         }
         getQueryTextArea().setText(text1 + str + text2);

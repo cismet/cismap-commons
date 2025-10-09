@@ -1,27 +1,23 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.demo;
 
+import de.cismet.tools.CismetThreadPool;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
-
 import java.util.Observable;
-
 import javax.swing.ProgressMonitor;
 import javax.swing.Timer;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * Transfer data from one stream to another, providing a Swing ProgressMonitor to handle notifying the user and allowing
@@ -63,12 +59,14 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
      * @param  message      Progress monitor message object (usually String)
      * @param  close        If set, then close the streams at end of transfer
      */
-    public ProgressMonitoredDataTransfer(final Component par,
-            final InputStream from,
-            final OutputStream to,
-            final int maxtransfer,
-            final Object message,
-            final boolean close) {
+    public ProgressMonitoredDataTransfer(
+        final Component par,
+        final InputStream from,
+        final OutputStream to,
+        final int maxtransfer,
+        final Object message,
+        final boolean close
+    ) {
         readFrom = new BufferedInputStream(from);
         writeTo = to;
         max = maxtransfer;
@@ -130,6 +128,7 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
     public synchronized int getCurrent() {
         return current;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -147,6 +146,7 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
     public synchronized boolean isDone() {
         return done;
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -162,8 +162,7 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
     public void waitForDone() {
         try {
             mythread.join();
-        } catch (InterruptedException ie) {
-        }
+        } catch (InterruptedException ie) {}
         return;
     }
 
@@ -183,8 +182,11 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
                 notifyObservers(null);
             }
         } catch (InterruptedIOException ioe) {
-            handleProblem("Cancelled by user after " // NOI18N
-                        + current + " bytes."); // NOI18N
+            handleProblem(
+                "Cancelled by user after " + // NOI18N
+                current +
+                " bytes."
+            ); // NOI18N
         } catch (Exception ie) {
             handleProblem("IO exception: " + ie); // NOI18N
         } finally {
@@ -193,14 +195,12 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
                 if (readFrom != null) {
                     try {
                         readFrom.close();
-                    } catch (Exception e2) {
-                    }
+                    } catch (Exception e2) {}
                 }
                 if (writeTo != null) {
                     try {
                         writeTo.close();
-                    } catch (Exception e3) {
-                    }
+                    } catch (Exception e3) {}
                 }
             }
         }

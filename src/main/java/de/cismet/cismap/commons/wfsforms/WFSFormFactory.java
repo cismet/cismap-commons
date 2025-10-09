@@ -1,30 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
-import org.jdom.Element;
-
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.tools.configuration.Configurable;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.lang.reflect.Constructor;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-
-import de.cismet.tools.configuration.Configurable;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -89,11 +84,11 @@ public class WFSFormFactory implements Configurable {
     @Override
     public Element getConfiguration() {
         final Element ret = new Element("cismapWFSFormsPreferences"); // NOI18N
-//        Set<String> keySet=forms.keySet();
-//        for (String key:keySet) {
-//            Element form=forms.get(key).getElement();
-//            ret.addContent(form);
-//        }
+        //        Set<String> keySet=forms.keySet();
+        //        for (String key:keySet) {
+        //            Element form=forms.get(key).getElement();
+        //            ret.addContent(form);
+        //        }
         return ret;
     }
 
@@ -101,61 +96,60 @@ public class WFSFormFactory implements Configurable {
     public void masterConfigure(final Element parent) {
         forms.clear();
         try {
-            configuration = (Element)((Element)parent.clone()).getChild("cismapWFSFormsPreferences").detach();          // NOI18N
-            final List list = configuration.getChildren("wfsForm");                                                     // NOI18N
+            configuration = (Element) ((Element) parent.clone()).getChild("cismapWFSFormsPreferences").detach(); // NOI18N
+            final List list = configuration.getChildren("wfsForm"); // NOI18N
             for (final Object o : list) {
                 try {
-                    final Element e = (Element)o;
+                    final Element e = (Element) o;
                     if (log.isDebugEnabled()) {
-                        log.debug("Try to create WFSForm: " + e.getContent());                                          // NOI18N
+                        log.debug("Try to create WFSForm: " + e.getContent()); // NOI18N
                     }
-                    final String className = e.getAttribute("className").getValue();                                    // NOI18N
+                    final String className = e.getAttribute("className").getValue(); // NOI18N
                     final Class formClass = Class.forName(className);
                     final Constructor constructor = formClass.getConstructor();
-                    final AbstractWFSForm form = (AbstractWFSForm)constructor.newInstance();
+                    final AbstractWFSForm form = (AbstractWFSForm) constructor.newInstance();
                     form.setClassName(className);
-                    form.setId(e.getAttribute("id").getValue());                                                        // NOI18N
+                    form.setId(e.getAttribute("id").getValue()); // NOI18N
                     try {
-                        form.setSorter(e.getAttribute("sorter").getValue());                                            // NOI18N
-                    } catch (Exception skip) {
-                    }
-                    form.setTitle(e.getAttribute("title").getValue());                                                  // NOI18N
-                    form.setMenuString(e.getAttribute("menu").getValue());                                              // NOI18N
-                    form.setIconPath(e.getAttribute("icon").getValue());                                                // NOI18N
+                        form.setSorter(e.getAttribute("sorter").getValue()); // NOI18N
+                    } catch (Exception skip) {}
+                    form.setTitle(e.getAttribute("title").getValue()); // NOI18N
+                    form.setMenuString(e.getAttribute("menu").getValue()); // NOI18N
+                    form.setIconPath(e.getAttribute("icon").getValue()); // NOI18N
                     form.setIcon(new javax.swing.ImageIcon(getClass().getResource(e.getAttribute("icon").getValue()))); // NOI18N
                     final Vector<WFSFormQuery> queryVector = new Vector<WFSFormQuery>();
-                    final List queries = e.getChildren("wfsFormQuery");                                                 // NOI18N
+                    final List queries = e.getChildren("wfsFormQuery"); // NOI18N
                     for (final Object oq : queries) {
-                        final Element q = (Element)oq;
+                        final Element q = (Element) oq;
                         final WFSFormQuery query = new WFSFormQuery();
-                        query.setComponentName(q.getAttribute("componentName").getValue());                             // NOI18N
-                        query.setDisplayTextProperty(q.getAttribute("displayTextProperty").getValue());                 // NOI18N
-                        query.setExtentProperty(q.getAttribute("extentProperty").getValue());                           // NOI18N
-                        query.setFilename(q.getAttribute("queryFile").getValue());                                      // NOI18N
+                        query.setComponentName(q.getAttribute("componentName").getValue()); // NOI18N
+                        query.setDisplayTextProperty(q.getAttribute("displayTextProperty").getValue()); // NOI18N
+                        query.setExtentProperty(q.getAttribute("extentProperty").getValue()); // NOI18N
+                        query.setFilename(q.getAttribute("queryFile").getValue()); // NOI18N
                         query.setWfsQueryString(readFileFromClassPathAsString(query.getFilename()));
-                        query.setId(q.getAttribute("id").getValue());                                                   // NOI18N
-                        query.setIdProperty(q.getAttribute("idProperty").getValue());                                   // NOI18N
-                        query.setServerUrl(q.getAttribute("server").getValue());                                        // NOI18N
-                        query.setTitle(q.getAttribute("title").getValue());                                             // NOI18N
-                        query.setType(q.getAttribute("type").getValue());                                               // NOI18N
+                        query.setId(q.getAttribute("id").getValue()); // NOI18N
+                        query.setIdProperty(q.getAttribute("idProperty").getValue()); // NOI18N
+                        query.setServerUrl(q.getAttribute("server").getValue()); // NOI18N
+                        query.setTitle(q.getAttribute("title").getValue()); // NOI18N
+                        query.setType(q.getAttribute("type").getValue()); // NOI18N
                         try {
-                            query.setPropertyPrefix(q.getAttribute("propertyPrefix").getValue());                       // NOI18N
+                            query.setPropertyPrefix(q.getAttribute("propertyPrefix").getValue()); // NOI18N
                         } catch (Exception skip) {
                             query.setPropertyPrefix(null);
                         }
                         try {
-                            query.setPropertyNamespace(q.getAttribute("propertyNamespace").getValue());                 // NOI18N
+                            query.setPropertyNamespace(q.getAttribute("propertyNamespace").getValue()); // NOI18N
                         } catch (Exception skip) {
                             query.setPropertyNamespace(null);
                         }
                         try {
-                            query.setPositionProperty(q.getAttribute("positionProperty").getValue());                   // NOI18N
+                            query.setPositionProperty(q.getAttribute("positionProperty").getValue()); // NOI18N
                         } catch (Exception skip) {
                             query.setPositionProperty(null);
                         }
 
                         // optional
-                        if (q.getAttribute("queryPlaceholder") != null) {                             // NOI18N
+                        if (q.getAttribute("queryPlaceholder") != null) { // NOI18N
                             query.setQueryPlaceholder(q.getAttribute("queryPlaceholder").getValue()); // NOI18N
                         }
                         queryVector.add(query);
@@ -167,15 +161,16 @@ public class WFSFormFactory implements Configurable {
                         log.debug("WFSForm " + form.getId() + " added"); // NOI18N
                     }
                 } catch (Throwable t) {
-                    log.error("Could not create WFSForm", t);            // NOI18N
+                    log.error("Could not create WFSForm", t); // NOI18N
                 }
             }
             final LinkedHashMap lhs = new LinkedHashMap(forms.size());
 
             final List<String> keylistSorted = new Vector<String>(forms.keySet());
 
-            Collections.sort(keylistSorted, new Comparator<String>() {
-
+            Collections.sort(
+                keylistSorted,
+                new Comparator<String>() {
                     @Override
                     public int compare(final String o1, final String o2) {
                         try {
@@ -191,7 +186,8 @@ public class WFSFormFactory implements Configurable {
                         }
                         return o1.compareTo(o2);
                     }
-                });
+                }
+            );
 
             if (!problemDuringSorting) {
                 for (final String key : keylistSorted) {
@@ -203,7 +199,7 @@ public class WFSFormFactory implements Configurable {
                 log.warn("Error while sorting the WFSForms. The order of the config file will be retained."); // NOI18N
             }
         } catch (Throwable t) {
-            log.error("Could not create WFSForm", t);                                                         // NOI18N
+            log.error("Could not create WFSForm", t); // NOI18N
         }
     }
 

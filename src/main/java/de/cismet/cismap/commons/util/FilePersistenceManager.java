@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,17 +12,15 @@
  */
 package de.cismet.cismap.commons.util;
 
-import org.apache.log4j.Logger;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -62,8 +60,7 @@ public class FilePersistenceManager {
 
         try {
             raFile = new RandomAccessFile(file, "rw");
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
     }
 
     //~ Methods ----------------------------------------------------------------

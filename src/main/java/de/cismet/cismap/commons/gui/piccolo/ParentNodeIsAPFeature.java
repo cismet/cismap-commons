@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 /**
@@ -13,5 +13,4 @@ package de.cismet.cismap.commons.gui.piccolo;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface ParentNodeIsAPFeature {
-}
+public interface ParentNodeIsAPFeature {}

@@ -1,16 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
-
-import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import javax.swing.JComponent;
 
 /**
  * DOCUMENT ME!
@@ -19,7 +18,6 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  * @version  $Revision$, $Date$
  */
 public interface FeatureRenderer {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -23,13 +23,10 @@
  */
 package de.cismet.cismap.commons.wfs.capabilities;
 
-import java.io.IOException;
-
-import java.net.URL;
-
 import de.cismet.cismap.commons.wfs.WFSFacade;
-
 import de.cismet.commons.capabilities.Service;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * DOCUMENT ME!
@@ -38,7 +35,6 @@ import de.cismet.commons.capabilities.Service;
  * @version  $Revision$, $Date$
  */
 public interface WFSCapabilities {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,37 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.Attribute;
-import org.jdom.DataConversionException;
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-
-import java.awt.EventQueue;
-
-import java.beans.PropertyChangeSupport;
-
-import java.io.UnsupportedEncodingException;
-
-import java.net.URLEncoder;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
@@ -44,14 +18,28 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.Operation;
 import de.cismet.commons.wms.capabilities.Style;
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.commons.wms.capabilities.WMSCapabilitiesFactory;
-
 import de.cismet.tools.PropertyEqualsProvider;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.EventQueue;
+import java.beans.PropertyChangeSupport;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
+import org.jdom.Attribute;
+import org.jdom.DataConversionException;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -59,52 +47,67 @@ import de.cismet.tools.PropertyEqualsProvider;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public final class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer,
-    RasterMapService,
-    PropertyEqualsProvider,
-    LayerInfoProvider,
-    ChildrenProvider {
+public final class WMSServiceLayer
+    extends AbstractWMSServiceLayer
+    implements RetrievalServiceLayer, RasterMapService, PropertyEqualsProvider, LayerInfoProvider, ChildrenProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(WMSServiceLayer.class);
 
-    private static final String TEMPLATETOKEN_WIDTH = "<cismap:width>";                       // NOI18N
-    private static final String TEMPLATETOKEN_HEIGHT = "<cismap:height>";                     // NOI18N
+    private static final String TEMPLATETOKEN_WIDTH = "<cismap:width>"; // NOI18N
+    private static final String TEMPLATETOKEN_HEIGHT = "<cismap:height>"; // NOI18N
     private static final String TEMPLATETOKEN_BOUNDINGBOX_LL_X = "<cismap:boundingBox_ll_x>"; // NOI18N
     private static final String TEMPLATETOKEN_BOUNDINGBOX_LL_Y = "<cismap:boundingBox_ll_y>"; // NOI18N
     private static final String TEMPLATETOKEN_BOUNDINGBOX_UR_X = "<cismap:boundingBox_ur_x>"; // NOI18N
     private static final String TEMPLATETOKEN_BOUNDINGBOX_UR_Y = "<cismap:boundingBox_ur_y>"; // NOI18N
-    private static final String TEMPLATETOKEN_SRS = "<cismap:srs>";                           // NOI18N
-    private static final String TEMPLATETOKEN_CUSTOMSTYLE = "<cismap:customStyle>";           // NOI18N
-    public static final String TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME = "<cismap:layerName>";    // NOI18N
-    public static final String TEMPLATETOKEN_CUSTOMSTYLE_TITLE = "<cismap:title>";            // NOI18N
+    private static final String TEMPLATETOKEN_SRS = "<cismap:srs>"; // NOI18N
+    private static final String TEMPLATETOKEN_CUSTOMSTYLE = "<cismap:customStyle>"; // NOI18N
+    public static final String TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME = "<cismap:layerName>"; // NOI18N
+    public static final String TEMPLATETOKEN_CUSTOMSTYLE_TITLE = "<cismap:title>"; // NOI18N
 
     private static final String EPSG_NAMESPACE = "http://www.opengis.net/gml/srs/epsg.xml"; // NOI18N
 
-    private static final String TEMPLATE_GETMAP_PAYLOAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-                + "<GetMap xmlns:ows=\"http://www.opengis.net/ows\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.1.1\" service=\"WMS\">"
-                + TEMPLATETOKEN_CUSTOMSTYLE
-                + "<BoundingBox srsName=\"" + EPSG_NAMESPACE + "#" + TEMPLATETOKEN_SRS + "\">"
-                + "<gml:coord>"
-                + "<gml:X>" + TEMPLATETOKEN_BOUNDINGBOX_LL_X + "</gml:X>"
-                + "<gml:Y>" + TEMPLATETOKEN_BOUNDINGBOX_LL_Y + "</gml:Y>"
-                + "</gml:coord>"
-                + "<gml:coord>"
-                + "<gml:X>" + TEMPLATETOKEN_BOUNDINGBOX_UR_X + "</gml:X>"
-                + "<gml:Y>" + TEMPLATETOKEN_BOUNDINGBOX_UR_Y + "</gml:Y>"
-                + "</gml:coord>"
-                + "</BoundingBox>"
-                + "<Output>"
-                + "<Format>image/png</Format>"
-                + "<Size>"
-                + "<Width>" + TEMPLATETOKEN_WIDTH + "</Width>"
-                + "<Height>" + TEMPLATETOKEN_HEIGHT + "</Height>"
-                + "</Size>"
-                + "<Transparent>true</Transparent>"
-                + "</Output>"
-                + "<Exceptions>application/vnd.ogc.se+xml</Exceptions>"
-                + "</GetMap>";
+    private static final String TEMPLATE_GETMAP_PAYLOAD =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+        "<GetMap xmlns:ows=\"http://www.opengis.net/ows\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.1.1\" service=\"WMS\">" +
+        TEMPLATETOKEN_CUSTOMSTYLE +
+        "<BoundingBox srsName=\"" +
+        EPSG_NAMESPACE +
+        "#" +
+        TEMPLATETOKEN_SRS +
+        "\">" +
+        "<gml:coord>" +
+        "<gml:X>" +
+        TEMPLATETOKEN_BOUNDINGBOX_LL_X +
+        "</gml:X>" +
+        "<gml:Y>" +
+        TEMPLATETOKEN_BOUNDINGBOX_LL_Y +
+        "</gml:Y>" +
+        "</gml:coord>" +
+        "<gml:coord>" +
+        "<gml:X>" +
+        TEMPLATETOKEN_BOUNDINGBOX_UR_X +
+        "</gml:X>" +
+        "<gml:Y>" +
+        TEMPLATETOKEN_BOUNDINGBOX_UR_Y +
+        "</gml:Y>" +
+        "</gml:coord>" +
+        "</BoundingBox>" +
+        "<Output>" +
+        "<Format>image/png</Format>" +
+        "<Size>" +
+        "<Width>" +
+        TEMPLATETOKEN_WIDTH +
+        "</Width>" +
+        "<Height>" +
+        TEMPLATETOKEN_HEIGHT +
+        "</Height>" +
+        "</Size>" +
+        "<Transparent>true</Transparent>" +
+        "</Output>" +
+        "<Exceptions>application/vnd.ogc.se+xml</Exceptions>" +
+        "</GetMap>";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -133,8 +136,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * Creates a new WMSServiceLayer object.
      */
-    public WMSServiceLayer() {
-    }
+    public WMSServiceLayer() {}
 
     /**
      * Creates a new WMSServiceLayer object.
@@ -190,19 +192,18 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 final Object next = treePaths.get(i);
 
                 if (next instanceof TreePath) {
-                    final TreePath nextTreePath = (TreePath)next;
+                    final TreePath nextTreePath = (TreePath) next;
                     if (nextTreePath.getLastPathComponent() instanceof Layer) {
-                        final Layer nextLayer = (Layer)nextTreePath.getLastPathComponent();
+                        final Layer nextLayer = (Layer) nextTreePath.getLastPathComponent();
                         addLayer(nextLayer, null, true, false, true, reverseSubLayerOrder);
                         if (getName() == null) {
                             setName(nextLayer.getTitle());
                         }
                     } else if (nextTreePath.getLastPathComponent() instanceof Style) {
-                        final Style nextStyle = (Style)nextTreePath.getLastPathComponent();
+                        final Style nextStyle = (Style) nextTreePath.getLastPathComponent();
                         if (nextTreePath.getPathComponent(nextTreePath.getPathCount() - 2) instanceof Layer) {
-                            final Layer nextLayer = ((Layer)nextTreePath.getPathComponent(
-                                        nextTreePath.getPathCount()
-                                                - 2));
+                            final Layer nextLayer =
+                                ((Layer) nextTreePath.getPathComponent(nextTreePath.getPathCount() - 2));
                             addLayer(nextLayer, nextStyle);
                             if (getName() == null) {
                                 setName(nextLayer.getTitle());
@@ -247,9 +248,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  capabilities            DOCUMENT ME!
      * @param  loadCapDoc              refCaps DOCUMENT ME!
      */
-    private void init(final Element wmsServiceLayerElement,
-            final HashMap<String, WMSCapabilities> capabilities,
-            final boolean loadCapDoc) {
+    private void init(
+        final Element wmsServiceLayerElement,
+        final HashMap<String, WMSCapabilities> capabilities,
+        final boolean loadCapDoc
+    ) {
         setName(wmsServiceLayerElement.getAttribute("name").getValue()); // NOI18N
 
         final Attribute attributeTitle = wmsServiceLayerElement.getAttribute("title"); // NOI18N
@@ -268,27 +271,25 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         try {
             setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue()); // NOI18N
-        } catch (DataConversionException ex) {
-        }
+        } catch (DataConversionException ex) {}
 
         try {
             setTranslucency(wmsServiceLayerElement.getAttribute("translucency").getFloatValue()); // NOI18N
-        } catch (DataConversionException ex) {
-        }
+        } catch (DataConversionException ex) {}
 
         try {
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
             if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
-                this.setEnabled(false);                                                         // NOI18N
+                this.setEnabled(false); // NOI18N
             } else {
-                setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());   // NOI18N
+                setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue()); // NOI18N
             }
         } catch (DataConversionException ex) {
             LOG.error("Error while set WMSServiceLayer.enabled", ex);
         }
-        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());          // NOI18N
-        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());          // NOI18N
+        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue()); // NOI18N
+        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue()); // NOI18N
         setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue()); // NOI18N
         final CapabilityLink cp = new CapabilityLink(wmsServiceLayerElement);
         WMSCapabilities wmsCaps = capabilities.get(cp.getLink());
@@ -314,22 +315,19 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         while (it.hasNext()) {
             final Element elem = it.next();
-            final String lName = elem.getAttribute("name").getValue();      // NOI18N
+            final String lName = elem.getAttribute("name").getValue(); // NOI18N
             String styleName = null;
             boolean isEnabled = true;
             boolean info = false;
             try {
                 isEnabled = elem.getAttribute("enabled").getBooleanValue(); // NOI18N
-            } catch (Exception ex) {
-            }
+            } catch (Exception ex) {}
             try {
-                info = elem.getAttribute("info").getBooleanValue();         // NOI18N
-            } catch (Exception ex) {
-            }
+                info = elem.getAttribute("info").getBooleanValue(); // NOI18N
+            } catch (Exception ex) {}
             try {
-                styleName = elem.getAttribute("style").getValue();          // NOI18N
-            } catch (Exception ex) {
-            }
+                styleName = elem.getAttribute("style").getValue(); // NOI18N
+            } catch (Exception ex) {}
             if (wmsCaps != null) {
                 final Layer l = searchForLayer(getWmsCapabilities().getLayer(), lName);
 
@@ -363,10 +361,12 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  enabled        DOCUMENT ME!
      * @param  info           DOCUMENT ME!
      */
-    protected void addLayer(final Layer nextLayer,
-            final Style selectedStyle,
-            final boolean enabled,
-            final boolean info) {
+    protected void addLayer(
+        final Layer nextLayer,
+        final Style selectedStyle,
+        final boolean enabled,
+        final boolean info
+    ) {
         addLayer(nextLayer, selectedStyle, enabled, info, true);
     }
 
@@ -379,11 +379,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  info           DOCUMENT ME!
      * @param  addSubLayer    DOCUMENT ME!
      */
-    protected void addLayer(final Layer nextLayer,
-            final Style selectedStyle,
-            final boolean enabled,
-            final boolean info,
-            final boolean addSubLayer) {
+    protected void addLayer(
+        final Layer nextLayer,
+        final Style selectedStyle,
+        final boolean enabled,
+        final boolean info,
+        final boolean addSubLayer
+    ) {
         addLayer(nextLayer, selectedStyle, enabled, info, addSubLayer, false);
     }
 
@@ -397,17 +399,23 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  addSubLayer           DOCUMENT ME!
      * @param  reverseSubLayerOrder  DOCUMENT ME!
      */
-    protected void addLayer(final Layer nextLayer,
-            Style selectedStyle,
-            final boolean enabled,
-            final boolean info,
-            final boolean addSubLayer,
-            final boolean reverseSubLayerOrder) {
-        if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) // NOI18N
-        {
+    protected void addLayer(
+        final Layer nextLayer,
+        Style selectedStyle,
+        final boolean enabled,
+        final boolean info,
+        final boolean addSubLayer,
+        final boolean reverseSubLayerOrder
+    ) {
+        if (
+            (nextLayer.getName() != null) && !nextLayer.getName().equals("")
+        ) { // NOI18N
             if (selectedStyle == null) {
-                if ((nextLayer.getStyles() != null) && (nextLayer.getStyles().length > 0)
-                            && (nextLayer.getStyles()[0] != null)) {
+                if (
+                    (nextLayer.getStyles() != null) &&
+                    (nextLayer.getStyles().length > 0) &&
+                    (nextLayer.getStyles()[0] != null)
+                ) {
                     selectedStyle = nextLayer.getStyles()[0];
                 }
             }
@@ -419,15 +427,16 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 wmsLayers.add(wmsLayer);
                 ogcLayers.add(wmsLayer.getOgcCapabilitiesLayer());
             }
-            EventQueue.invokeLater(new Thread("fireLayerInformationStatusChanged") {
-
+            EventQueue.invokeLater(
+                new Thread("fireLayerInformationStatusChanged") {
                     @Override
                     public void run() {
                         final ActiveLayerEvent ale = new ActiveLayerEvent();
                         ale.setLayer(wmsLayer);
                         CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
                     }
-                });
+                }
+            );
         }
 
         if (addSubLayer) {
@@ -504,7 +513,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 final Object o = it.next();
 
                 if (o instanceof WMSLayer) {
-                    if (((WMSLayer)o).isEnabled()) {
+                    if (((WMSLayer) o).isEnabled()) {
                         enableAll = false;
                         break;
                     }
@@ -518,7 +527,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     final Object o = it.next();
 
                     if (o instanceof WMSLayer) {
-                        ((WMSLayer)o).setEnabled(enabled);
+                        ((WMSLayer) o).setEnabled(enabled);
                     }
                 }
             }
@@ -536,7 +545,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             final Object o = it.next();
 
             if (o instanceof WMSLayer) {
-                if (((WMSLayer)o).isEnabled()) {
+                if (((WMSLayer) o).isEnabled()) {
                     childrenDisabled = false;
                     break;
                 }
@@ -695,7 +704,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             return backgroundColor;
         } else {
             LOG.warn("backgroundcolor was null. Set it to 0xF0F0F0"); // NOI18N
-            backgroundColor = "0xF0F0F0";                             // NOI18N
+            backgroundColor = "0xF0F0F0"; // NOI18N
             return backgroundColor;
         }
     }
@@ -726,8 +735,12 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     public void setExceptionsFormat(final String exceptionsFormat) {
         final List<String> exceptions = ((wmsCapabilities != null) ? wmsCapabilities.getExceptions() : null);
 
-        if ((exceptionsFormat != null) && (exceptions != null) && (exceptions.size() > 0)
-                    && !exceptions.contains(exceptionsFormat)) {
+        if (
+            (exceptionsFormat != null) &&
+            (exceptions != null) &&
+            (exceptions.size() > 0) &&
+            !exceptions.contains(exceptionsFormat)
+        ) {
             // the preferred exception format is not supported. Use an other one
             String format = null;
             for (final String tmp : exceptions) {
@@ -798,13 +811,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             url.append("&WMTVER=1.0.0&REQUEST=map"); // NOI18N
         } else {
             url.append("&VERSION=").append(version);
-            url.append("&REQUEST=GetMap");           // NOI18N
+            url.append("&REQUEST=GetMap"); // NOI18N
         }
 
-        url.append("&SERVICE=WMS");                     // NOI18N
+        url.append("&SERVICE=WMS"); // NOI18N
         url.append("&BBOX=").append(bb.getURLString()); // NOI18N
-        url.append("&WIDTH=").append(width);            // NOI18N
-        url.append("&HEIGHT=").append(height);          // NOI18N
+        url.append("&WIDTH=").append(width); // NOI18N
+        url.append("&HEIGHT=").append(height); // NOI18N
 
         if (minimalUrl) {
             return url.toString();
@@ -817,10 +830,10 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         }
         url.append(srs);
 
-        url.append("&FORMAT=").append(imageFormat);                                                     // NOI18N
+        url.append("&FORMAT=").append(imageFormat); // NOI18N
         url.append("&TRANSPARENT=").append(Boolean.valueOf(transparentImage).toString().toUpperCase()); // NOI18N
-        url.append("&BGCOLOR=").append(getBackgroundColor());                                           // NOI18N
-        url.append("&EXCEPTIONS=").append(exceptionsFormat);                                            // NOI18N
+        url.append("&BGCOLOR=").append(getBackgroundColor()); // NOI18N
+        url.append("&EXCEPTIONS=").append(exceptionsFormat); // NOI18N
 
         url.append(getLayersString());
         if (hasEveryLayerAStyle()) {
@@ -831,8 +844,9 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
-                    "style parameter was added without a value to the getMap Request, because not every layer, " // NOI18N
-                            + "which is used within the request has a selected style");                          // NOI18N
+                    "style parameter was added without a value to the getMap Request, because not every layer, " + // NOI18N
+                    "which is used within the request has a selected style"
+                ); // NOI18N
             }
             url.append("&STYLES=");
         }
@@ -853,12 +867,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         String result = TEMPLATE_GETMAP_PAYLOAD;
 
-        result = result.replaceAll(
+        result =
+            result.replaceAll(
                 TEMPLATETOKEN_CUSTOMSTYLE,
-                customSLD.replaceAll(TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME, name));
-        result = result.replaceAll(
-                TEMPLATETOKEN_SRS,
-                srs.startsWith("EPSG:") ? srs.substring(srs.indexOf(':') + 1) : srs);
+                customSLD.replaceAll(TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME, name)
+            );
+        result =
+            result.replaceAll(TEMPLATETOKEN_SRS, srs.startsWith("EPSG:") ? srs.substring(srs.indexOf(':') + 1) : srs);
         result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_LL_X, Double.toString(bb.getX1()));
         result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_LL_Y, Double.toString(bb.getY1()));
         result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_UR_X, Double.toString(bb.getX2()));
@@ -910,29 +925,31 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         String url = getGetFeatureInfoPrefix();
 
         if ((bb != null) && (url != null)) {
-            if (url.indexOf("?") < 0)                                                                         // NOI18N
-            {
-                url += "?";                                                                                   // NOI18N
+            if (
+                url.indexOf("?") < 0
+            ) { // NOI18N
+                url += "?"; // NOI18N
             }
             final String version = getWmsCapabilities().getVersion();
-            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) // NOI18N
-            {
-                url += "&WMTVER=1.0.0&REQUEST=feature_info";                                                  // NOI18N
+            if (
+                version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")
+            ) { // NOI18N
+                url += "&WMTVER=1.0.0&REQUEST=feature_info"; // NOI18N
             } else {
-                url += "&VERSION=" + version + "&REQUEST=GetFeatureInfo";                                     // NOI18N
+                url += "&VERSION=" + version + "&REQUEST=GetFeatureInfo"; // NOI18N
             }
-            url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
-            url += "&WIDTH=" + width;                                                                         // NOI18N
-            url += "&HEIGHT=" + height;                                                                       // NOI18N
+            url += "&BBOX=" + bb.getURLString(); // NOI18N
+            url += "&WIDTH=" + width; // NOI18N
+            url += "&HEIGHT=" + height; // NOI18N
             if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
-                url += "&CRS=" + srs;                                                                         // NOI18N
+                url += "&CRS=" + srs; // NOI18N
             } else {
-                url += "&SRS=" + srs;                                                                         // NOI18N
+                url += "&SRS=" + srs; // NOI18N
             }
-            url += "&FORMAT=" + imageFormat;                                                                  // NOI18N
-            url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase();              // NOI18N
-            url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
-            url += "&EXCEPTIONS=" + exceptionsFormat;                                                         // exceptionsFormat;
+            url += "&FORMAT=" + imageFormat; // NOI18N
+            url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase(); // NOI18N
+            url += "&BGCOLOR=" + backgroundColor; // NOI18N
+            url += "&EXCEPTIONS=" + exceptionsFormat; // exceptionsFormat;
             url += "&FEATURE_COUNT=99";
             url += getLayersString();
 
@@ -944,13 +961,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             }
 
             url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20"); // NOI18N
-            url += "&INFO_FORMAT=" + format;                                                        // NOI18N
+            url += "&INFO_FORMAT=" + format; // NOI18N
             if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
-                url += "&I=" + x;                                                                   // NOI18N
-                url += "&J=" + y;                                                                   // NOI18N
+                url += "&I=" + x; // NOI18N
+                url += "&J=" + y; // NOI18N
             } else {
-                url += "&X=" + x;                                                                   // NOI18N
-                url += "&Y=" + y;                                                                   // NOI18N
+                url += "&X=" + x; // NOI18N
+                url += "&Y=" + y; // NOI18N
             }
             return url;
         } else {
@@ -998,10 +1015,16 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  the given url with the username/password combination
      */
     private String addUserAndPasswordToUrlIfRequired(final String url) {
-        if ((capabilitiesUrl != null) && capabilitiesUrl.contains("@") && capabilitiesUrl.contains("://")
-                    && (capabilitiesUrl.indexOf("@") > capabilitiesUrl.indexOf("://"))) {
-            final String userPwd = capabilitiesUrl.substring(capabilitiesUrl.indexOf("://") + 3,
-                    capabilitiesUrl.indexOf("@"));
+        if (
+            (capabilitiesUrl != null) &&
+            capabilitiesUrl.contains("@") &&
+            capabilitiesUrl.contains("://") &&
+            (capabilitiesUrl.indexOf("@") > capabilitiesUrl.indexOf("://"))
+        ) {
+            final String userPwd = capabilitiesUrl.substring(
+                capabilitiesUrl.indexOf("://") + 3,
+                capabilitiesUrl.indexOf("@")
+            );
 
             return url.substring(0, url.indexOf("://") + 3) + userPwd + "@" + url.substring(url.indexOf("://") + 3);
         } else if (capabilitiesUrl.contains("secres/$(user-jwt)")) {
@@ -1043,27 +1066,27 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getLayersString() {
-        final StringBuilder layerString = new StringBuilder("");                                                  // NOI18N
+        final StringBuilder layerString = new StringBuilder(""); // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
             final Object o = it.next();
-            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
+            if ((o instanceof WMSLayer) && ((WMSLayer) o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    layerString.append(",");                                                                      // NOI18N
+                    layerString.append(","); // NOI18N
                 }
                 if (!isDummy()) {
-                    layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+                    layerString.append(((WMSLayer) o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
                 } else {
-                    layerString.append(((WMSLayer)o).toString().replaceAll(" ", "%20"));                          // NOI18N
+                    layerString.append(((WMSLayer) o).toString().replaceAll(" ", "%20")); // NOI18N
                 }
             }
         }
         if (counter > 0) {
-            return "&LAYERS=" + layerString.toString();                                                           // NOI18N
+            return "&LAYERS=" + layerString.toString(); // NOI18N
         } else {
-            return "";                                                                                            // NOI18N
+            return ""; // NOI18N
         }
     }
 
@@ -1073,22 +1096,24 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getStylesString() {
-        final StringBuilder stylesString = new StringBuilder("");                        // NOI18N
+        final StringBuilder stylesString = new StringBuilder(""); // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
             final Object o = it.next();
-            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
-                if ((!isDummy() && (((WMSLayer)o).getSelectedStyle() != null))
-                            || (isDummy() && (((WMSLayer)o).getStyleName() != null))) {
+            if ((o instanceof WMSLayer) && ((WMSLayer) o).isEnabled()) {
+                if (
+                    (!isDummy() && (((WMSLayer) o).getSelectedStyle() != null)) ||
+                    (isDummy() && (((WMSLayer) o).getStyleName() != null))
+                ) {
                     counter++;
                     if (counter > 1) {
-                        stylesString.append(",");                                        // NOI18N
+                        stylesString.append(","); // NOI18N
                     }
                     if (!isDummy()) {
-                        stylesString.append(((WMSLayer)o).getSelectedStyle().getName()); // NOI18N
+                        stylesString.append(((WMSLayer) o).getSelectedStyle().getName()); // NOI18N
                     } else {
-                        stylesString.append(((WMSLayer)o).getStyleName());               // NOI18N
+                        stylesString.append(((WMSLayer) o).getStyleName()); // NOI18N
                     }
                 }
             }
@@ -1097,7 +1122,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         try {
             return "&STYLES=" + (URLEncoder.encode(stylesString.toString(), "UTF-8")); // LDS Bugfix//NOI18N
         } catch (UnsupportedEncodingException e) {
-            return "&STYLES=" + (URLEncoder.encode(stylesString.toString()));          // LDS Bugfix//NOI18N
+            return "&STYLES=" + (URLEncoder.encode(stylesString.toString())); // LDS Bugfix//NOI18N
         }
     }
 
@@ -1112,8 +1137,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         while (it.hasNext()) {
             final Object o = it.next();
 
-            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
-                if (((WMSLayer)o).getSelectedStyle() == null) {
+            if ((o instanceof WMSLayer) && ((WMSLayer) o).isEnabled()) {
+                if (((WMSLayer) o).getSelectedStyle() == null) {
                     return false;
                 }
             }
@@ -1186,40 +1211,41 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      */
     public Element getElement() {
         try {
-            final Element layerConf = new Element("WMSServiceLayer");                                          // NOI18N
-            layerConf.setAttribute("name", getName());                                                         // NOI18N
-            layerConf.setAttribute("title", (title == null) ? "" : title);                                     // NOI18N
-            layerConf.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString());            // NOI18N
-            layerConf.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                        // NOI18N
-            layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());                   // NOI18N
-            layerConf.setAttribute("bgColor", getBackgroundColor());                                           // NOI18N
-            layerConf.setAttribute("imageFormat", getImageFormat());                                           // NOI18N
-            layerConf.setAttribute("exceptionFormat", getExceptionsFormat());                                  // NOI18N
+            final Element layerConf = new Element("WMSServiceLayer"); // NOI18N
+            layerConf.setAttribute("name", getName()); // NOI18N
+            layerConf.setAttribute("title", (title == null) ? "" : title); // NOI18N
+            layerConf.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString()); // NOI18N
+            layerConf.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString()); // NOI18N
+            layerConf.setAttribute("translucency", new Float(getTranslucency()).toString()); // NOI18N
+            layerConf.setAttribute("bgColor", getBackgroundColor()); // NOI18N
+            layerConf.setAttribute("imageFormat", getImageFormat()); // NOI18N
+            layerConf.setAttribute("exceptionFormat", getExceptionsFormat()); // NOI18N
             final CapabilityLink capLink = new CapabilityLink(
-                    CapabilityLink.OGC,
-                    getCapabilitiesUrl(),
-                    reverseAxisOrder,
-                    false);
+                CapabilityLink.OGC,
+                getCapabilitiesUrl(),
+                reverseAxisOrder,
+                false
+            );
             layerConf.addContent(capLink.getElement());
             final Iterator lit = getWMSLayers().iterator();
             while (lit.hasNext()) {
                 final Object elem = lit.next();
                 if (elem instanceof WMSLayer) {
-                    final WMSLayer wmsLayer = (WMSLayer)elem;
-                    final Element wmsLayerConf = new Element("wmsLayer");                                      // NOI18N
+                    final WMSLayer wmsLayer = (WMSLayer) elem;
+                    final Element wmsLayerConf = new Element("wmsLayer"); // NOI18N
                     if (!isDummy()) {
-                        wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());       // NOI18N
-                        wmsLayerConf.setAttribute("title", wmsLayer.getOgcCapabilitiesLayer().getTitle());     // NOI18N
+                        wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName()); // NOI18N
+                        wmsLayerConf.setAttribute("title", wmsLayer.getOgcCapabilitiesLayer().getTitle()); // NOI18N
                     } else {
-                        wmsLayerConf.setAttribute("name", wmsLayer.toString());                                // NOI18N
-                        wmsLayerConf.setAttribute("title", wmsLayer.toString());                               // NOI18N
+                        wmsLayerConf.setAttribute("name", wmsLayer.toString()); // NOI18N
+                        wmsLayerConf.setAttribute("title", wmsLayer.toString()); // NOI18N
                     }
-                    wmsLayerConf.setAttribute("enabled", Boolean.valueOf(wmsLayer.isEnabled()).toString());    // NOI18N
+                    wmsLayerConf.setAttribute("enabled", Boolean.valueOf(wmsLayer.isEnabled()).toString()); // NOI18N
                     try {
                         if (!isDummy()) {
-                            wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());         // NOI18N
+                            wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName()); // NOI18N
                         } else {
-                            wmsLayerConf.setAttribute("style", wmsLayer.getStyleName());                       // NOI18N
+                            wmsLayerConf.setAttribute("style", wmsLayer.getStyleName()); // NOI18N
                         }
                     } catch (Exception e) {
                         // nothing to do. The layer has no style.
@@ -1300,7 +1326,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         final List<WMSLayer> layers = new ArrayList<WMSLayer>(wmsLayers.size());
 
         for (final Object layerObject : wmsLayers) {
-            final WMSLayer layer = (WMSLayer)layerObject;
+            final WMSLayer layer = (WMSLayer) layerObject;
             final WMSLayer newLayer = new WMSLayer(layer.getOgcCapabilitiesLayer(), layer.getSelectedStyle());
             newLayer.setParentServiceLayer(w);
             layers.add(newLayer);
@@ -1314,12 +1340,16 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     public boolean propertyEquals(final Object obj) {
         // TODO Dieses equals wird 10000 mal aufgerufen
         if (obj instanceof WMSServiceLayer) {
-            final WMSServiceLayer tester = (WMSServiceLayer)obj;
-            if (getName().equals(tester.getName())
-                        && ((getGetMapPrefix() == tester.getGetMapPrefix())
-                            || ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix())))
-                        && getLayersString().equals(tester.getLayersString())
-                        && getStylesString().equals(tester.getStylesString())) {
+            final WMSServiceLayer tester = (WMSServiceLayer) obj;
+            if (
+                getName().equals(tester.getName()) &&
+                (
+                    (getGetMapPrefix() == tester.getGetMapPrefix()) ||
+                    ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix()))
+                ) &&
+                getLayersString().equals(tester.getLayersString()) &&
+                getStylesString().equals(tester.getStylesString())
+            ) {
                 return true;
             }
         }
@@ -1344,17 +1374,17 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
     @Override
     public boolean isLayerQuerySelected() {
-        return ((WMSLayer)getWMSLayers().get(0)).isQuerySelected();
+        return ((WMSLayer) getWMSLayers().get(0)).isQuerySelected();
     }
 
     @Override
     public void setLayerQuerySelected(final boolean selected) {
-        ((WMSLayer)getWMSLayers().get(0)).setQuerySelected(selected);
+        ((WMSLayer) getWMSLayers().get(0)).setQuerySelected(selected);
     }
 
     @Override
     public boolean isQueryable() {
-        return ((getWMSLayers().size() == 1) && ((WMSLayer)getWMSLayers().get(0)).isQueryable());
+        return ((getWMSLayers().size() == 1) && ((WMSLayer) getWMSLayers().get(0)).isQueryable());
     }
 
     @Override
@@ -1371,8 +1401,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 final Object wmsLayer = layerList.get(0);
 
                 if (wmsLayer instanceof WMSLayer) {
-                    layer = searchForLayer(wmsCapabilities.getLayer(),
-                            ((WMSLayer)wmsLayer).getOgcCapabilitiesLayer().getName());
+                    layer =
+                        searchForLayer(
+                            wmsCapabilities.getLayer(),
+                            ((WMSLayer) wmsLayer).getOgcCapabilitiesLayer().getName()
+                        );
                 }
             }
 

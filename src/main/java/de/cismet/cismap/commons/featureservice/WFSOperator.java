@@ -1,47 +1,39 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.security.WebAccessManager;
+import de.cismet.tools.StaticHtmlTools;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 import org.deegree.ogcwebservices.wfs.capabilities.FeatureTypeList;
 import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities;
 import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
 import org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-
-import java.net.URL;
-
-import java.nio.charset.Charset;
-
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
-
-import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
-
-import de.cismet.security.WebAccessManager;
-
-import de.cismet.tools.StaticHtmlTools;
 
 /**
  * DOCUMENT ME!
@@ -57,21 +49,22 @@ public class WFSOperator {
 
     /** Log4J Initialisierung. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            "de.cismet.cismap.commons.raster.wfs.WFSQueryFactory");                      // NOI18N
-    public static final String CISMAP_QUERY = "CismapQuery";                             // NOI18N
-    public static final String QUERY = "Query";                                          // NOI18N
+        "de.cismet.cismap.commons.raster.wfs.WFSQueryFactory"
+    ); // NOI18N
+    public static final String CISMAP_QUERY = "CismapQuery"; // NOI18N
+    public static final String QUERY = "Query"; // NOI18N
     public static final String CISMAP_DESCRIBEFEATURETYPE = "CismapDescribeFeatureType"; // NOI18N
-    public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType";              // NOI18N
-    public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities";         // NOI18N
-    public static final String GETCAPABILITIES = "GetCapabilities";                      // NOI18N
-    public static final String SERVICE_IDENT = "ServiceIdentification";                  // NOI18N
-    public static final String FILTER = "Filter";                                        // NOI18N
-    public static final String BBOX = "BBOX";                                            // NOI18N
-    public static final String GET_FEATURE = "GetFeature";                               // NOI18N
-    public static final String TYPE_NAME = "typeName";                                   // NOI18N
-    public static final String DFT_TYPE_NAME = "TypeName";                               // NOI18N
-    public static final String PROPERTY_NAME = "PropertyName";                           // NOI18N
-    public static final String GEO_PROPERTY_TYPE = "gml:GeometryPropertyType";           // NOI18N
+    public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType"; // NOI18N
+    public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities"; // NOI18N
+    public static final String GETCAPABILITIES = "GetCapabilities"; // NOI18N
+    public static final String SERVICE_IDENT = "ServiceIdentification"; // NOI18N
+    public static final String FILTER = "Filter"; // NOI18N
+    public static final String BBOX = "BBOX"; // NOI18N
+    public static final String GET_FEATURE = "GetFeature"; // NOI18N
+    public static final String TYPE_NAME = "typeName"; // NOI18N
+    public static final String DFT_TYPE_NAME = "TypeName"; // NOI18N
+    public static final String PROPERTY_NAME = "PropertyName"; // NOI18N
+    public static final String GEO_PROPERTY_TYPE = "gml:GeometryPropertyType"; // NOI18N
     /** WFS-Namespace-Konstante. */
     public static final Namespace WFS = Namespace.getNamespace("wfs", "http://www.opengis.net/wfs"); // NOI18N
     /** OGC-Namespace-Konstante. */
@@ -98,7 +91,7 @@ public class WFSOperator {
      */
     public WFSOperator() {
         if (log.isDebugEnabled()) {
-            log.debug("createStandardQuery()");                           // NOI18N
+            log.debug("createStandardQuery()"); // NOI18N
         }
         try {
             final SAXBuilder builder = new SAXBuilder();
@@ -116,7 +109,7 @@ public class WFSOperator {
      */
     public WFSOperator(final String typeName) {
         if (log.isDebugEnabled()) {
-            log.debug("createStandardQuery(" + typeName + ")");             // NOI18N
+            log.debug("createStandardQuery(" + typeName + ")"); // NOI18N
         }
         try {
             final SAXBuilder builder = new SAXBuilder();
@@ -158,7 +151,7 @@ public class WFSOperator {
         try {
             for (final Object o : query.getChild(QUERY, WFS).getChildren(PROPERTY_NAME, WFS)) {
                 if (o instanceof Element) {
-                    result.add(((Element)o).getText());
+                    result.add(((Element) o).getText());
                 }
             }
             if (log.isDebugEnabled()) {
@@ -195,13 +188,14 @@ public class WFSOperator {
      * @param  e  geo Element mit dem Geometrie-Namen
      */
     public void setGeometry(final Element e) {
-        for (final Element tmp : (List<Element>)e.getChildren()) {
+        for (final Element tmp : (List<Element>) e.getChildren()) {
             if (tmp.getAttributeValue("type").equals(GEO_PROPERTY_TYPE)) { // NOI18N
-                getQuery().getChild(QUERY, WFS)
-                        .getChild(FILTER, OGC)
-                        .getChild(BBOX, OGC)
-                        .getChild(PROPERTY_NAME, OGC)
-                        .setText(tmp.getAttributeValue("name"));           // NOI18N
+                getQuery()
+                    .getChild(QUERY, WFS)
+                    .getChild(FILTER, OGC)
+                    .getChild(BBOX, OGC)
+                    .getChild(PROPERTY_NAME, OGC)
+                    .setText(tmp.getAttributeValue("name")); // NOI18N
                 break;
             }
         }
@@ -225,11 +219,12 @@ public class WFSOperator {
      * @return  String mit dem Geometrie-Namen
      */
     public static String getGeometry(final Element query) {
-        return query.getChild(QUERY, WFS)
-                    .getChild(FILTER, OGC)
-                    .getChild(BBOX, OGC)
-                    .getChild(PROPERTY_NAME, OGC)
-                    .getTextTrim();
+        return query
+            .getChild(QUERY, WFS)
+            .getChild(FILTER, OGC)
+            .getChild(BBOX, OGC)
+            .getChild(PROPERTY_NAME, OGC)
+            .getTextTrim();
     }
 
     /**
@@ -268,8 +263,9 @@ public class WFSOperator {
         if (log.isDebugEnabled()) {
             log.debug("Create DescribeFeatureTypeRequest for " + name); // NOI18N
         }
-        final Element describeFeatType = rootNode.getChild(CISMAP_DESCRIBEFEATURETYPE)
-                    .getChild(DESCRIBEFEATURETYPE, WFS);
+        final Element describeFeatType = rootNode
+            .getChild(CISMAP_DESCRIBEFEATURETYPE)
+            .getChild(DESCRIBEFEATURETYPE, WFS);
         describeFeatType.getChild(DFT_TYPE_NAME, WFS).setText(name);
         return elementToString(describeFeatType);
     }
@@ -301,7 +297,7 @@ public class WFSOperator {
         final String buf = out.outputString(capabilities);
         final WFSCapabilitiesDocument wfsDoc = new WFSCapabilitiesDocument();
         wfsDoc.load(new StringReader(buf), "http://test0r"); // NOI18N
-        return (WFSCapabilities)wfsDoc.parseCapabilities();
+        return (WFSCapabilities) wfsDoc.parseCapabilities();
     }
 
     /**
@@ -316,7 +312,7 @@ public class WFSOperator {
     public WFSCapabilities parseWFSCapabilites(final BufferedReader reader) throws Exception {
         final WFSCapabilitiesDocument wfsDoc = new WFSCapabilitiesDocument();
         wfsDoc.load(reader, "http://test0r"); // NOI18N
-        return (WFSCapabilities)wfsDoc.parseCapabilities();
+        return (WFSCapabilities) wfsDoc.parseCapabilities();
     }
 
     /**
@@ -326,12 +322,12 @@ public class WFSOperator {
      */
     public String getServiceName() {
         final Element id = capabilities.getRootElement().getChild(SERVICE_IDENT, OWS);
-        if ((id.getChild("Title", OWS) != null) && !id.getChild("Title", OWS).getText().equals("")) {              // NOI18N
-            return id.getChild("Title", OWS).getText();                                                            // NOI18N
+        if ((id.getChild("Title", OWS) != null) && !id.getChild("Title", OWS).getText().equals("")) { // NOI18N
+            return id.getChild("Title", OWS).getText(); // NOI18N
         } else if ((id.getChild("Abstract", OWS) != null) && !id.getChild("Abstract", OWS).getText().equals("")) { // NOI18N
-            return id.getChild("Abstract", OWS).getText();                                                         // NOI18N
+            return id.getChild("Abstract", OWS).getText(); // NOI18N
         } else {
-            return id.getChild("ServiceType", OWS).getText();                                                      // NOI18N
+            return id.getChild("ServiceType", OWS).getText(); // NOI18N
         }
     }
 
@@ -405,7 +401,7 @@ public class WFSOperator {
      * @return  true wenn Geometrietyp gefunden, sonst false
      */
     private boolean checkElementHasGeometry(final Element element) {
-        for (final Element e : (List<Element>)element.getChildren()) {
+        for (final Element e : (List<Element>) element.getChildren()) {
             if (e.getAttributeValue("type").equals(GEO_PROPERTY_TYPE)) { // NOI18N
                 return true;
             }
@@ -431,22 +427,22 @@ public class WFSOperator {
         try {
             for (final Object o : doc.getContent()) {
                 if (o instanceof Element) {
-                    final Element root = (Element)o;
+                    final Element root = (Element) o;
                     String prefix = null;
                     // Iteriere \u00FCber alle Element-Objekte die Kinder des Roots sind
                     for (final Object child : root.getChildren("element", xsd)) { // NOI18N
-                        final Element e = (Element)child;
+                        final Element e = (Element) child;
                         // Pr\u00FCfe jedes Kind des Root-Knotens, ob der Name \u00FCbereinstimmt
                         if ((e.getAttributeValue("name") != null) && e.getAttributeValue("name").equals(shortName)) { // NOI18N
                             if (log.isDebugEnabled()) {
                                 // Wenn ja, dann speichere ihn tempor\u00E4r und springe aus der Schleife
-                                log.debug(">> Element with name = \"" + name + "\" found");             // NOI18N
+                                log.debug(">> Element with name = \"" + name + "\" found"); // NOI18N
                             }
-                            e.setAttribute("name", name);                                               // NOI18N
+                            e.setAttribute("name", name); // NOI18N
                             result = e;
-                            prefix = e.getAttributeValue("type")
-                                        .substring(0, e.getAttributeValue("type").indexOf(":") + 1);    // NOI18N
-                            type = deleteApp(e.getAttributeValue("type"));                              // NOI18N
+                            prefix =
+                                e.getAttributeValue("type").substring(0, e.getAttributeValue("type").indexOf(":") + 1); // NOI18N
+                            type = deleteApp(e.getAttributeValue("type")); // NOI18N
                             if (log.isDebugEnabled()) {
                                 log.debug(">> searched Typ = \"" + e.getAttributeValue("type") + "\""); // NOI18N
                             }
@@ -454,22 +450,23 @@ public class WFSOperator {
                         }
                     }
                     // Iteriere \u00FCber alle complexType-Elemente die Kinder des Roots sind
-                    for (final Object child : ((Element)root).getChildren("complexType", xsd)) { // NOI18N
-                        final Element comp = (Element)child;
+                    for (final Object child : ((Element) root).getChildren("complexType", xsd)) { // NOI18N
+                        final Element comp = (Element) child;
                         // Pr\u00FCfe, ob der Name des complexType mit dem gesuchten Typ \u00FCbereinstimmt
                         if (comp.getAttributeValue("name").equals(type)) { // NOI18N
                             // Wenn ja, dann gib die Attribute des complexTypes zur\u00FCck
-                            final List l = comp.getChild("complexContent", xsd)
-                                        .getChild("extension", xsd)
-                                        .getChild("sequence", xsd)
-                                        .getChildren("element", xsd);                             // NOI18N
+                            final List l = comp
+                                .getChild("complexContent", xsd)
+                                .getChild("extension", xsd)
+                                .getChild("sequence", xsd)
+                                .getChildren("element", xsd); // NOI18N
                             while (l.size() > 0) {
-                                final Element neu = (Element)((Element)l.get(0)).detach();
+                                final Element neu = (Element) ((Element) l.get(0)).detach();
                                 neu.setAttribute("name", prefix + neu.getAttributeValue("name")); // NOI18N
                                 result.addContent(neu);
                             }
                             if (log.isDebugEnabled()) {
-                                log.debug("OK, result = " + result);                              // NOI18N
+                                log.debug("OK, result = " + result); // NOI18N
                             }
                             return result;
                         }
@@ -477,7 +474,7 @@ public class WFSOperator {
                 }
             }
         } catch (Exception ex) {
-            log.error("Error at getElements()", ex);                                              // NOI18N
+            log.error("Error at getElements()", ex); // NOI18N
         }
         return null;
     }
@@ -490,7 +487,7 @@ public class WFSOperator {
      * @return  String ohne "app:"
      */
     public static String deleteApp(final String s) {
-        if (s.startsWith("app:")) {          // NOI18N
+        if (s.startsWith("app:")) { // NOI18N
             return s.replaceAll("app:", ""); // NOI18N
         } else {
             return s;
@@ -509,60 +506,61 @@ public class WFSOperator {
      * @throws  Exception  DOCUMENT ME!
      */
     public static Document doRequest(final URL serverURL, final String request) throws Exception {
-//        log.info("HTTPCommunicator.doRequest()");
-//        // HTTP-Client erstellen
-//        HttpClient client = new HttpClient();
-//
-//        // Hole den Status, ob momentan ein Proxy gesetzt ist
-//        String proxySet = System.getProperty("proxySet");
-//
-//        // Proxy vorhanden ...
-//        if (proxySet != null && proxySet.equals("true")) {
-//            log.debug("Proxy vorhanden");
-//            log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
-//            log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
-//            try {
-//                // F\u00FCge den vorhandenen Proxy dem HTTP-Client hinzu
-//                client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"),
-//                        Integer.parseInt(System.getProperty("http.proxyPort")));
-//            } catch (Exception ex) {
-//                log.error("Proxy im HTTP-Client setzen fehlgeschlagen", ex);
-//            }
-//
-//        } else { // sonst tue nichts
-//            log.debug("kein Proxy");
-//        }
-//
-//        // Erstelle neue POST-Methode mit der Server-URL
-//        PostMethod httppost = new PostMethod(serverURL.toString());
-//        log.debug("ServerURL = " + httppost.getURI().toString());
-//
-//        // Requeststring speichern, damit das Original nicht ver\u00E4ndert wird.
+        //        log.info("HTTPCommunicator.doRequest()");
+        //        // HTTP-Client erstellen
+        //        HttpClient client = new HttpClient();
+        //
+        //        // Hole den Status, ob momentan ein Proxy gesetzt ist
+        //        String proxySet = System.getProperty("proxySet");
+        //
+        //        // Proxy vorhanden ...
+        //        if (proxySet != null && proxySet.equals("true")) {
+        //            log.debug("Proxy vorhanden");
+        //            log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
+        //            log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
+        //            try {
+        //                // F\u00FCge den vorhandenen Proxy dem HTTP-Client hinzu
+        //                client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"),
+        //                        Integer.parseInt(System.getProperty("http.proxyPort")));
+        //            } catch (Exception ex) {
+        //                log.error("Proxy im HTTP-Client setzen fehlgeschlagen", ex);
+        //            }
+        //
+        //        } else { // sonst tue nichts
+        //            log.debug("kein Proxy");
+        //        }
+        //
+        //        // Erstelle neue POST-Methode mit der Server-URL
+        //        PostMethod httppost = new PostMethod(serverURL.toString());
+        //        log.debug("ServerURL = " + httppost.getURI().toString());
+        //
+        //        // Requeststring speichern, damit das Original nicht ver\u00E4ndert wird.
         final String poststring = request;
         if (log.isDebugEnabled()) {
-//
-//        // Erstelle HTML aus dem Request und \u00E4ndere sein Charset auf ISO
+            //
+            //        // Erstelle HTML aus dem Request und \u00E4ndere sein Charset auf ISO
             log.debug("WFS Query = " + StaticHtmlTools.stringToHTMLString(poststring)); // NOI18N
         }
         // String modifiedString = new String(poststring.getBytes("UTF-8"), "ISO-8859-1");
-// httppost.setRequestEntity(new StringRequestEntity(modifiedString));
+        // httppost.setRequestEntity(new StringRequestEntity(modifiedString));
 
         try {
             // POST-Methode an den Server schicken
             // client.executeMethod(httppost);
-            final InputStream result = WebAccessManager.getInstance()
-                        .doRequest(serverURL, new StringReader(poststring), ACCESS_METHODS.POST_REQUEST);
+            final InputStream result = WebAccessManager
+                .getInstance()
+                .doRequest(serverURL, new StringReader(poststring), ACCESS_METHODS.POST_REQUEST);
             if (log.isDebugEnabled()) {
                 // Falls Antwort == OK
                 // if (httppost.getStatusCode() == HttpStatus.SC_OK) {
-                log.debug("Server has processed request and responds");                    // NOI18N
-                log.debug("parse InputStream");                                            // NOI18N
+                log.debug("Server has processed request and responds"); // NOI18N
+                log.debug("parse InputStream"); // NOI18N
             }
             final SAXBuilder builder = new SAXBuilder();
             return builder.build(new InputStreamReader(result, Charset.forName("UTF-8"))); // NOI18N
-//            } else {
-//                log.error("Unexpected failure: " + httppost.getStatusLine().toString());
-//            }
+            //            } else {
+            //                log.error("Unexpected failure: " + httppost.getStatusLine().toString());
+            //            }
         } catch (Exception ex) {
             log.error(ex);
         }

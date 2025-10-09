@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -140,7 +140,7 @@ public class WKTCrs {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof WKTCrs) {
-            final WKTCrs other = (WKTCrs)obj;
+            final WKTCrs other = (WKTCrs) obj;
 
             if ((other.authority != null) && (this.authority != null)) {
                 return other.authority.equalsIgnoreCase(this.authority);

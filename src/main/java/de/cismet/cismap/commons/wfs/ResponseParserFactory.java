@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -33,7 +33,6 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
  * @version  $Revision$, $Date$
  */
 public interface ResponseParserFactory {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -47,5 +46,5 @@ public interface ResponseParserFactory {
      * @throws  ParserException  DOCUMENT ME!
      */
     FeatureTypeDescription getFeatureTypeDescription(String featureTypeDescription, FeatureType feature)
-            throws ParserException;
+        throws ParserException;
 }

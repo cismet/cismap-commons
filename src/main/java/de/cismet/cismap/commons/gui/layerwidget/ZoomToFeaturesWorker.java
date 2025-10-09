@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -16,20 +16,16 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import org.apache.log4j.Logger;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.SwingWorker;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -121,7 +117,7 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
         Geometry union = factory.buildGeometry(geomList);
 
         if (union instanceof GeometryCollection) {
-            union = ((GeometryCollection)union).union();
+            union = ((GeometryCollection) union).union();
         }
 
         return union;

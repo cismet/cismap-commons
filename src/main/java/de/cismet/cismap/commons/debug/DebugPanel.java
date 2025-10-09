@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * DebugPanel.java
  *
@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.debug;
 
 import edu.umd.cs.piccolo.PCanvas;
-
 import groovy.ui.ConsoleSupport;
 
 /**
@@ -39,6 +38,7 @@ public class DebugPanel extends javax.swing.JPanel {
     private javax.swing.JTree treePCanvas;
     private javax.swing.JTree treePCanvas1;
     private javax.swing.JTextPane txtGroovy;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,13 +48,12 @@ public class DebugPanel extends javax.swing.JPanel {
      */
     public DebugPanel() {
         initComponents();
-
-//            Console console = new Console();
-//            console.setFrame((JFrame)StaticSwingTools.getParentFrame(this));
-//
-//            console.setVariable("map", mapC);
-//
-//            console.run();
+        //            Console console = new Console();
+        //            console.setFrame((JFrame)StaticSwingTools.getParentFrame(this));
+        //
+        //            console.setVariable("map", mapC);
+        //
+        //            console.run();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -94,70 +93,91 @@ public class DebugPanel extends javax.swing.JPanel {
         txtGroovy = new javax.swing.JTextPane();
 
         cmdRefresh.setText(org.openide.util.NbBundle.getMessage(DebugPanel.class, "DebugPanel.cmdRefresh.text")); // NOI18N
-        cmdRefresh.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdRefresh.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdRefreshActionPerformed(evt);
                 }
-            });
+            }
+        );
 
         jScrollPane1.setViewportView(treePCanvas);
 
         jScrollPane2.setViewportView(treePCanvas1);
 
         cmdRefresh1.setText(org.openide.util.NbBundle.getMessage(DebugPanel.class, "DebugPanel.cmdRefresh1.text")); // NOI18N
-        cmdRefresh1.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdRefresh1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdRefresh1ActionPerformed(evt);
                 }
-            });
+            }
+        );
 
         final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                jPanel1Layout.createSequentialGroup().addContainerGap().add(
-                    jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                        jScrollPane2,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        380,
-                        Short.MAX_VALUE).add(org.jdesktop.layout.GroupLayout.TRAILING, cmdRefresh1)).addContainerGap())
-                        .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE).add(
-                cmdRefresh));
+            jPanel1Layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    jPanel1Layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(
+                            jPanel1Layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                                .add(org.jdesktop.layout.GroupLayout.TRAILING, cmdRefresh1)
+                        )
+                        .addContainerGap()
+                )
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                .add(cmdRefresh)
+        );
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                jPanel1Layout.createSequentialGroup().addContainerGap().add(
-                    jScrollPane2,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    181,
-                    Short.MAX_VALUE).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED).add(cmdRefresh1)
-                            .addContainerGap()).add(
-                jScrollPane1,
-                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                181,
-                Short.MAX_VALUE).add(cmdRefresh));
+            jPanel1Layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    jPanel1Layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(cmdRefresh1)
+                        .addContainerGap()
+                )
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 181, Short.MAX_VALUE)
+                .add(cmdRefresh)
+        );
 
         jScrollPane3.setViewportView(txtGroovy);
 
         final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().addContainerGap().add(
-                    jScrollPane3,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    380,
-                    Short.MAX_VALUE).addContainerGap()));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 380, Short.MAX_VALUE)
+                        .addContainerGap()
+                )
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().addContainerGap().add(
-                    jScrollPane3,
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    210,
-                    Short.MAX_VALUE).addContainerGap()));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(jScrollPane3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addContainerGap()
+                )
+        );
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -166,7 +186,7 @@ public class DebugPanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void cmdRefresh1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefresh1ActionPerformed
-// TODO add your handling code here:
+        // TODO add your handling code here:
     } //GEN-LAST:event_cmdRefresh1ActionPerformed
 
     /**
@@ -176,5 +196,5 @@ public class DebugPanel extends javax.swing.JPanel {
      */
     private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
         treePCanvas.setModel(new PiccoloDebugTreeModel(pCanvas));
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    } //GEN-LAST:event_cmdRefreshActionPerformed
 }

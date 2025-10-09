@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
 import com.vividsolutions.jts.geom.Geometry;
-
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureNameProvider;
@@ -71,7 +70,7 @@ public class FeatureGroupWrapper implements FeatureGroupMember {
         final String subName;
         if (getFeature() != null) {
             if (getFeature() instanceof FeatureNameProvider) {
-                subName = ((FeatureNameProvider)getFeature()).getName();
+                subName = ((FeatureNameProvider) getFeature()).getName();
             } else {
                 subName = getFeature().toString();
             }

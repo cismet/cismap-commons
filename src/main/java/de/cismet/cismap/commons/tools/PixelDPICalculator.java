@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.tools;
 
 /**
@@ -60,10 +60,10 @@ public class PixelDPICalculator {
      * @param  newHeightPixel  DOCUMENT ME!
      */
     public void setHeightPixel(final int newHeightPixel) {
-        this.widthPixel = (int)Math.round(newHeightPixel * aspectRatio);
+        this.widthPixel = (int) Math.round(newHeightPixel * aspectRatio);
         final double newDpi = widthPixel / widthInches;
 
-        this.dpi = (int)Math.round(newDpi);
+        this.dpi = (int) Math.round(newDpi);
         this.heightPixel = newHeightPixel;
     }
 
@@ -83,9 +83,9 @@ public class PixelDPICalculator {
      */
     public void setDPI(final int newDpi) {
         final double newWidthPixel = widthPixel * 1d / dpi * newDpi;
-        this.widthPixel = (int)Math.round(newWidthPixel);
+        this.widthPixel = (int) Math.round(newWidthPixel);
 
-        this.heightPixel = (int)Math.round(widthPixel * 1d / aspectRatio);
+        this.heightPixel = (int) Math.round(widthPixel * 1d / aspectRatio);
 
         this.dpi = newDpi;
     }
@@ -105,10 +105,10 @@ public class PixelDPICalculator {
      * @param  newWidthPixel  DOCUMENT ME!
      */
     public void setWidthPixel(final int newWidthPixel) {
-        this.heightPixel = (int)Math.round(newWidthPixel * 1d / aspectRatio);
+        this.heightPixel = (int) Math.round(newWidthPixel * 1d / aspectRatio);
         this.widthPixel = newWidthPixel;
 
         final double newDpi = widthPixel / widthInches;
-        this.dpi = (int)Math.round(newDpi);
+        this.dpi = (int) Math.round(newDpi);
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -23,14 +23,16 @@ import java.util.List;
  * @version  $Revision$, $Date$
  */
 public interface DrawingFeatureInterface {
-
     //~ Instance fields --------------------------------------------------------
 
-    List<AbstractNewFeature.geomTypes> TYPE_ORDER = new ArrayList<AbstractNewFeature.geomTypes>(Arrays.asList(
-                AbstractNewFeature.geomTypes.TEXT,
-                AbstractNewFeature.geomTypes.POINT,
-                AbstractNewFeature.geomTypes.LINESTRING,
-                AbstractNewFeature.geomTypes.POLYGON));
+    List<AbstractNewFeature.geomTypes> TYPE_ORDER = new ArrayList<AbstractNewFeature.geomTypes>(
+        Arrays.asList(
+            AbstractNewFeature.geomTypes.TEXT,
+            AbstractNewFeature.geomTypes.POINT,
+            AbstractNewFeature.geomTypes.LINESTRING,
+            AbstractNewFeature.geomTypes.POLYGON
+        )
+    );
 
     //~ Methods ----------------------------------------------------------------
 

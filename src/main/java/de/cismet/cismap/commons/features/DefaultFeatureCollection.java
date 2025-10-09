@@ -1,12 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
+import de.cismet.cismap.commons.gui.MapListener;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.tools.CurrentStackTrace;
+import de.cismet.veto.VetoException;
+import de.cismet.veto.VetoListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,14 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import de.cismet.cismap.commons.gui.MapListener;
-import de.cismet.cismap.commons.gui.MappingComponent;
-
-import de.cismet.tools.CurrentStackTrace;
-
-import de.cismet.veto.VetoException;
-import de.cismet.veto.VetoListener;
 
 /**
  * DOCUMENT ME!
@@ -52,8 +49,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * Creates a new instance of DefaultFeatureCollection.
      */
-    public DefaultFeatureCollection() {
-    }
+    public DefaultFeatureCollection() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -79,7 +75,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                 return null;
             }
         } catch (Exception e) {
-            log.fatal("error in getFeature:" + index, e);            // NOI18N
+            log.fatal("error in getFeature:" + index, e); // NOI18N
             return null;
         }
     }
@@ -107,8 +103,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public void setEnabled(final boolean enabled) {
-    }
+    public void setEnabled(final boolean enabled) {}
 
     @Override
     public void addFeatureCollectionListener(final FeatureCollectionListener l) {
@@ -121,8 +116,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public void setTranslucency(final float t) {
-    }
+    public void setTranslucency(final float t) {}
 
     @Override
     public boolean canBeDisabled() {
@@ -140,8 +134,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public void setLayerPosition(final int layerPosition) {
-    }
+    public void setLayerPosition(final int layerPosition) {}
 
     @Override
     public int getLayerPosition() {
@@ -403,33 +396,33 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     @Override
     public void removeFeature(final Feature f) {
         if (log.isDebugEnabled()) {
-            log.debug("before removal:" + features);        // NOI18N
+            log.debug("before removal:" + features); // NOI18N
         }
         boolean removed = false;
         if (log.isDebugEnabled()) {
-            log.debug("featureToRemove: " + f);             // NOI18N
+            log.debug("featureToRemove: " + f); // NOI18N
             log.debug("Feature sizes: " + features.size()); // NOI18N
         }
         if (log.isDebugEnabled()) {
-            log.debug("Features: " + features);             // NOI18N
+            log.debug("Features: " + features); // NOI18N
         }
         removed = features.remove(f);
         if (log.isDebugEnabled()) {
-            log.debug("feature removed: " + removed);       // NOI18N
+            log.debug("feature removed: " + removed); // NOI18N
         }
         removed = holdFeatures.remove(f);
         if (log.isDebugEnabled()) {
-            log.debug("holdFeature removed: " + removed);   // NOI18N
+            log.debug("holdFeature removed: " + removed); // NOI18N
         }
         removed = selectedFeatures.remove(f);
         if (log.isDebugEnabled()) {
-            log.debug("selected removed: " + removed);      // NOI18N
+            log.debug("selected removed: " + removed); // NOI18N
         }
         final Set<Feature> v = new HashSet<Feature>(2);
         v.add(f);
         fireFeaturesRemoved(v);
         if (log.isDebugEnabled()) {
-            log.debug("after removal:" + features);         // NOI18N
+            log.debug("after removal:" + features); // NOI18N
         }
     }
 
@@ -443,7 +436,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     @Override
     public void addFeature(final Feature f) {
         if (log.isDebugEnabled()) {
-            log.debug("addFeature(Feature f):" + f);                                                                      // NOI18N
+            log.debug("addFeature(Feature f):" + f); // NOI18N
         }
         if ((f != null) && (f.getGeometry() != null) && !features.contains(f)) {
             features.add(f);
@@ -453,7 +446,8 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
             fireFeaturesAdded(v);
         } else {
             log.warn(
-                "Feature was not added. It is either null or getGeometry() is null or it is already in the Collection."); // NOI18N
+                "Feature was not added. It is either null or getGeometry() is null or it is already in the Collection."
+            ); // NOI18N
         }
     }
 
@@ -483,11 +477,11 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     public void substituteFeatures(final Collection<Feature> cf) {
         try {
             if (log.isDebugEnabled()) {
-                log.debug("substitute: delete all");                        // NOI18N
+                log.debug("substitute: delete all"); // NOI18N
             }
             removeAllFeatures();
             if (log.isDebugEnabled()) {
-                log.debug("substitute: add:" + cf);                         // NOI18N
+                log.debug("substitute: add:" + cf); // NOI18N
             }
             addFeatures(cf);
         } catch (Exception e) {
@@ -503,12 +497,12 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
      */
     public void checkForAndCorrectDoubleNaming(final Feature feature) {
         if (feature instanceof PreventNamingDuplicates) {
-            final PreventNamingDuplicates changeableFeature = (PreventNamingDuplicates)feature;
+            final PreventNamingDuplicates changeableFeature = (PreventNamingDuplicates) feature;
             final ArrayList<PreventNamingDuplicates> list = new ArrayList<PreventNamingDuplicates>();
 
             for (final Feature f : features) {
                 if (f.getClass().equals(feature.getClass()) && (f instanceof PreventNamingDuplicates)) {
-                    list.add((PreventNamingDuplicates)f);
+                    list.add((PreventNamingDuplicates) f);
                 }
             }
 
@@ -566,7 +560,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
         for (final Feature f : holdFeatures) {
             if (f instanceof FeatureGroup) {
-                list.addAll(FeatureGroups.expandAll((FeatureGroup)f));
+                list.addAll(FeatureGroups.expandAll((FeatureGroup) f));
             } else {
                 list.add(f);
             }
@@ -605,7 +599,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                 if (log.isDebugEnabled()) {
                     log.debug("adding featuresTo Map"); // NOI18N
                 }
-                ((MappingComponent)curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
+                ((MappingComponent) curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
             }
         }
     }
@@ -676,7 +670,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
      * DOCUMENT ME!
      */
     public void fireSelectionChanged() {
-        fireSelectionChanged((Collection<Feature>)null);
+        fireSelectionChanged((Collection<Feature>) null);
     }
 
     /**
@@ -707,8 +701,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public void setName(final String name) {
-    }
+    public void setName(final String name) {}
 
     /**
      * DOCUMENT ME!

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
 
  * StylePreviewPanel.java
@@ -16,6 +16,8 @@
  */
 package de.cismet.cismap.commons.featureservice.style;
 
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.tools.gui.PointSymbolCreator;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -24,12 +26,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JPanel;
-
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-
-import de.cismet.tools.gui.PointSymbolCreator;
 
 /**
  * The StylePreviewPanel is a JPanel that gives the user a visual feedback of the currently selected or created style of
@@ -44,8 +41,9 @@ public class StylePreviewPanel extends JPanel {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(
-            StylePreviewPanel.class,
-            "StylePreviewPanel.SAMPLE_TEXT"); // NOI18N
+        StylePreviewPanel.class,
+        "StylePreviewPanel.SAMPLE_TEXT"
+    ); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -103,23 +101,30 @@ public class StylePreviewPanel extends JPanel {
      */
     private BufferedImage createPointSymbol() {
         if (log.isDebugEnabled()) {
-            log.debug("createPointSymbol: PointSymbolSize=" + style.getPointSymbolSize() + ", LineWidth="
-                        + style.getLineWidth()); // NOI18N
+            log.debug(
+                "createPointSymbol: PointSymbolSize=" +
+                style.getPointSymbolSize() +
+                ", LineWidth=" +
+                style.getLineWidth()
+            ); // NOI18N
         }
-        return PointSymbolCreator.createPointSymbol(style.isDrawLine(),
-                style.isDrawFill(),
-                (style.getPointSymbolSize() > Style.MIN_POINTSYMBOLSIZE) ? style.getPointSymbolSize()
-                                                                         : Style.MIN_POINTSYMBOLSIZE,
-                style.getLineWidth(),
-                fillColor,
-                lineColor);
+        return PointSymbolCreator.createPointSymbol(
+            style.isDrawLine(),
+            style.isDrawFill(),
+            (style.getPointSymbolSize() > Style.MIN_POINTSYMBOLSIZE)
+                ? style.getPointSymbolSize()
+                : Style.MIN_POINTSYMBOLSIZE,
+            style.getLineWidth(),
+            fillColor,
+            lineColor
+        );
     }
 
     @Override
     protected void paintComponent(final Graphics g) {
         super.paintComponent(g);
 
-        final Graphics2D g2d = (Graphics2D)g;
+        final Graphics2D g2d = (Graphics2D) g;
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -161,13 +166,10 @@ public class StylePreviewPanel extends JPanel {
 
         g2d.drawImage(
             pointSymbol,
-            getWidth()
-                    - (pointSymbol.getWidth(null) / 2)
-                    - 40,
-            getHeight()
-                    - (pointSymbol.getWidth(null) / 2)
-                    - 20,
-            null);
+            getWidth() - (pointSymbol.getWidth(null) / 2) - 40,
+            getHeight() - (pointSymbol.getWidth(null) / 2) - 20,
+            null
+        );
 
         g2d.dispose();
     }

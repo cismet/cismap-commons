@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,35 +13,27 @@
 package de.cismet.cismap.commons.drophandler.builtin;
 
 import com.vividsolutions.jts.geom.Point;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.jackrabbit.commons.json.JsonParser;
-import org.apache.log4j.Logger;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.filematcher.builtin.MappingComponentDropHandlerFileTypeMatcher;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.options.GPSDirectionOptions;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.ExifReader;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import javax.swing.SwingUtilities;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.jackrabbit.commons.json.JsonParser;
+import org.apache.log4j.Logger;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -58,7 +50,8 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final ExifGeoImageFileMatcher fileMatcher = new ExifGeoImageFileMatcher();
+    @Getter
+    private final ExifGeoImageFileMatcher fileMatcher = new ExifGeoImageFileMatcher();
 
     private Map<File, GpsData> gpsDataMap = new HashMap<>();
 
@@ -76,14 +69,17 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
             final GpsData gpsData = gpsDataMap.get(file);
             final Point point = gpsData.getPoint();
             final Double direction = gpsData.getDirection();
-            final MappingComponentGeoImageFileFeatureRenderer featureRenderer =
-                new MappingComponentGeoImageFileFeatureRenderer(file, point, direction);
+            final MappingComponentGeoImageFileFeatureRenderer featureRenderer = new MappingComponentGeoImageFileFeatureRenderer(
+                file,
+                point,
+                direction
+            );
             featureRenderer.setGeometry(point);
             featuresToAdd.add(featureRenderer);
         }
         CismapBroker.getInstance().getMappingComponent().getFeatureCollection().substituteFeatures(featuresToAdd);
-        SwingUtilities.invokeLater(new Runnable() {
-
+        SwingUtilities.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final MappingComponent mappingComponent = CismapBroker.getInstance().getMappingComponent();
@@ -91,10 +87,12 @@ public class MappingComponentGeoImageFileDropHandler implements MappingComponent
                         mappingComponent.zoomToAFeatureCollection(
                             featuresToAdd,
                             true,
-                            mappingComponent.isFixedMapScale());
+                            mappingComponent.isFixedMapScale()
+                        );
                     }
                 }
-            });
+            }
+        );
     }
 
     /**

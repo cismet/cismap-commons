@@ -1,25 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.options;
-
-import org.jdom.Element;
-
-import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.RubberBandZoomListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.lookupoptions.*;
-
 import de.cismet.tools.configuration.NoWriteError;
+import org.jdom.Element;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -33,8 +29,9 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String OPTION_NAME = org.openide.util.NbBundle.getMessage(
-            MapInteractionOptionsPanel.class,
-            "MapInteractionOptionsPanel.jLabel3.text");
+        MapInteractionOptionsPanel.class,
+        "MapInteractionOptionsPanel.jLabel3.text"
+    );
     private static final String CONFIGURATION = "MapInteractionOptionsPanel";
     private static final String CONF_INVERTSCROLLDIRECTION = "InvertScrollDirection";
     private static final String CONF_SHOW_LINE_LENGTH = "ShowLineLength";
@@ -58,6 +55,7 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -127,16 +125,19 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
 
     @Override
     public boolean isChanged() {
-        return (this.invertScrollDirection != jCheckBox1.isSelected())
-                    || (this.showLineLength != cbShowLineLength.isSelected())
-                    || (this.showHandleDistanceNeighours != cbShowDistanceToNeighbours.isSelected());
+        return (
+            (this.invertScrollDirection != jCheckBox1.isSelected()) ||
+            (this.showLineLength != cbShowLineLength.isSelected()) ||
+            (this.showHandleDistanceNeighours != cbShowDistanceToNeighbours.isSelected())
+        );
     }
 
     @Override
     public String getTooltip() {
         return org.openide.util.NbBundle.getMessage(
-                MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.jLabel3.toolTipText"); // NOI18N
+            MapInteractionOptionsPanel.class,
+            "MapInteractionOptionsPanel.jLabel3.toolTipText"
+        ); // NOI18N
     }
 
     /**
@@ -147,8 +148,11 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
     private RubberBandZoomListener getListener() {
         RubberBandZoomListener result = null;
         if ((CismapBroker.getInstance() != null) && (CismapBroker.getInstance().getMappingComponent() != null)) {
-            result = (RubberBandZoomListener)CismapBroker.getInstance().getMappingComponent()
-                        .getInputListener(MappingComponent.ZOOM);
+            result =
+                (RubberBandZoomListener) CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.ZOOM);
         }
 
         return result;
@@ -163,8 +167,11 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
         CreateNewGeometryListener result = null;
 
         if ((CismapBroker.getInstance() != null) && (CismapBroker.getInstance().getMappingComponent() != null)) {
-            result = (CreateNewGeometryListener)CismapBroker.getInstance().getMappingComponent()
-                        .getInputListener(MappingComponent.NEW_POLYGON);
+            result =
+                (CreateNewGeometryListener) CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.NEW_POLYGON);
         }
 
         return result;
@@ -179,8 +186,11 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
         SelectionListener result = null;
 
         if ((CismapBroker.getInstance() != null) && (CismapBroker.getInstance().getMappingComponent() != null)) {
-            result = (SelectionListener)CismapBroker.getInstance().getMappingComponent()
-                        .getInputListener(MappingComponent.SELECT);
+            result =
+                (SelectionListener) CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.SELECT);
         }
 
         return result;
@@ -194,17 +204,22 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
                     final Element conf = parent.getChild(CONFIGURATION);
                     if (conf != null) {
                         final String elementInvertScrollDirection = conf.getChildText(CONF_INVERTSCROLLDIRECTION);
-                        invertScrollDirection = (elementInvertScrollDirection != null)
-                            ? Boolean.valueOf(elementInvertScrollDirection) : false;
+                        invertScrollDirection =
+                            (elementInvertScrollDirection != null)
+                                ? Boolean.valueOf(elementInvertScrollDirection)
+                                : false;
 
                         final String elementShowLineLength = conf.getChildText(CONF_SHOW_LINE_LENGTH);
-                        showLineLength = (elementShowLineLength != null) ? Boolean.valueOf(elementShowLineLength)
-                                                                         : false;
+                        showLineLength =
+                            (elementShowLineLength != null) ? Boolean.valueOf(elementShowLineLength) : false;
 
                         final String elementHandleDistanceNeighbours = conf.getChildText(
-                                CONF_SHOW_HANDLE_DISTANCE_NEIGHBOURS);
-                        showHandleDistanceNeighours = (elementHandleDistanceNeighbours != null)
-                            ? Boolean.valueOf(elementHandleDistanceNeighbours) : true;
+                            CONF_SHOW_HANDLE_DISTANCE_NEIGHBOURS
+                        );
+                        showHandleDistanceNeighours =
+                            (elementHandleDistanceNeighbours != null)
+                                ? Boolean.valueOf(elementHandleDistanceNeighbours)
+                                : true;
                     }
                 }
             } catch (Exception ex) {
@@ -260,45 +275,66 @@ public class MapInteractionOptionsPanel extends AbstractOptionsPanel implements 
         jCheckBox1 = new javax.swing.JCheckBox();
         cbShowLineLength = new javax.swing.JCheckBox();
         cbShowDistanceToNeighbours = new javax.swing.JCheckBox();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        filler1 =
+            new javax.swing.Box.Filler(
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(32767, 0));
-        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(0, 0));
+                new java.awt.Dimension(32767, 0)
+            );
+        filler2 =
+            new javax.swing.Box.Filler(
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0)
+            );
 
-        jLabel3.setText(org.openide.util.NbBundle.getMessage(
+        jLabel3.setText(
+            org.openide.util.NbBundle.getMessage(
                 MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.jLabel3.text"));        // NOI18N
-        jLabel3.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "MapInteractionOptionsPanel.jLabel3.text"
+            )
+        ); // NOI18N
+        jLabel3.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.jLabel3.toolTipText")); // NOI18N
+                "MapInteractionOptionsPanel.jLabel3.toolTipText"
+            )
+        ); // NOI18N
 
         setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        jCheckBox1.setText(org.openide.util.NbBundle.getMessage(
+        jCheckBox1.setText(
+            org.openide.util.NbBundle.getMessage(
                 MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.jCheckBox1.text")); // NOI18N
+                "MapInteractionOptionsPanel.jCheckBox1.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         jPanel1.add(jCheckBox1, gridBagConstraints);
 
-        cbShowLineLength.setText(org.openide.util.NbBundle.getMessage(
+        cbShowLineLength.setText(
+            org.openide.util.NbBundle.getMessage(
                 MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.cbShowLineLength.text")); // NOI18N
+                "MapInteractionOptionsPanel.cbShowLineLength.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.FIRST_LINE_START;
         jPanel1.add(cbShowLineLength, gridBagConstraints);
 
-        cbShowDistanceToNeighbours.setText(org.openide.util.NbBundle.getMessage(
+        cbShowDistanceToNeighbours.setText(
+            org.openide.util.NbBundle.getMessage(
                 MapInteractionOptionsPanel.class,
-                "MapInteractionOptionsPanel.cbShowDistanceToNeighbours.text")); // NOI18N
+                "MapInteractionOptionsPanel.cbShowDistanceToNeighbours.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;

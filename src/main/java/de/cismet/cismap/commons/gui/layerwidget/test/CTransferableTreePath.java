@@ -1,13 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget.test;
-import java.awt.datatransfer.*;
 
+import java.awt.datatransfer.*;
 import javax.swing.tree.TreePath;
 
 /**

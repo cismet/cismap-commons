@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * LineStyle.java
  *
@@ -25,6 +25,5 @@ public class LineStyle {
     /**
      * Creates a new instance of LineStyle.
      */
-    public LineStyle() {
-    }
+    public LineStyle() {}
 }

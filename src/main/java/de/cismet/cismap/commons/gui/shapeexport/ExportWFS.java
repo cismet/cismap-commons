@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 jweintraut
  *
@@ -128,7 +128,7 @@ public class ExportWFS implements Comparable {
             return false;
         }
 
-        final ExportWFS other = (ExportWFS)obj;
+        final ExportWFS other = (ExportWFS) obj;
 
         boolean result = true;
 
@@ -164,7 +164,7 @@ public class ExportWFS implements Comparable {
             return 1;
         }
 
-        final ExportWFS other = (ExportWFS)o;
+        final ExportWFS other = (ExportWFS) o;
 
         return topic.compareTo(other.topic);
     }

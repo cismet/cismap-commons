@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -41,8 +39,7 @@ public class AttributeTableFactory {
     /**
      * Creates a new AttributeTableFactory object.
      */
-    private AttributeTableFactory() {
-    }
+    private AttributeTableFactory() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -71,8 +68,10 @@ public class AttributeTableFactory {
                 NbBundle.getMessage(
                     AttributeTableFactory.class,
                     "AttributeTableFactory.showAttributeTable().name",
-                    featureService.getName()),
-                featureService.getName());
+                    featureService.getName()
+                ),
+                featureService.getName()
+            );
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }
@@ -115,9 +114,7 @@ public class AttributeTableFactory {
      */
     public void changeAttributeTableName(final AbstractFeatureService featureService, final String newName) {
         try {
-            listener.changeName(
-                createId(featureService),
-                newName);
+            listener.changeName(createId(featureService), newName);
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }
@@ -193,7 +190,6 @@ public class AttributeTableFactory {
         /**
          * Creates a new LazyInitializer object.
          */
-        private LazyInitializer() {
-        }
+        private LazyInitializer() {}
     }
 }

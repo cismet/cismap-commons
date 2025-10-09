@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -12,37 +12,31 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
-
-import edu.umd.cs.piccolo.PLayer;
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-
 import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.LinearReferencedPointMarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /**
  * DOCUMENT ME!
@@ -64,10 +58,11 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      * @version  $Revision$, $Date$
      */
     public static enum Modus {
-
         //~ Enum constants -----------------------------------------------------
 
-        MARK_SELECTION, MARK_ADD, MEASUREMENT
+        MARK_SELECTION,
+        MARK_ADD,
+        MEASUREMENT,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -83,37 +78,37 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @version  $Revision$, $Date$
      */
-// public static enum SelectionType {
-//
-// //~ Enum constants -----------------------------------------------------
-//
-// NONE, MARK, SUBLINE
-// }
+    // public static enum SelectionType {
+    //
+    // //~ Enum constants -----------------------------------------------------
+    //
+    // NONE, MARK, SUBLINE
+    // }
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
-//    private double cursorPosition = -1;
+    //    private double cursorPosition = -1;
     // use double instead of float to minimize rounding differences when snap with an other station
     private double cursorX = Float.MIN_VALUE;
     private double cursorY = Float.MIN_VALUE;
     private final LinearReferencedPointMarkPHandle cursorPHandle;
     private final Collection<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
 
-//    private double lineStartPosition = -1;
-//    private float lineStartX = Float.MIN_VALUE;
-//    private float lineStartY = Float.MIN_VALUE;
-//    private final MeasurementPHandle lineStartPHandle;
+    //    private double lineStartPosition = -1;
+    //    private float lineStartX = Float.MIN_VALUE;
+    //    private float lineStartY = Float.MIN_VALUE;
+    //    private final MeasurementPHandle lineStartPHandle;
 
     private HashMap<PFeature, Collection<PointMark>> featurePointMarks = new HashMap<PFeature, Collection<PointMark>>();
-//    private HashMap<PFeature, Collection<LineMark>> featureLineMarks = new HashMap<PFeature, Collection<LineMark>>();
+    //    private HashMap<PFeature, Collection<LineMark>> featureLineMarks = new HashMap<PFeature, Collection<LineMark>>();
     private PointMark selectedPointMark;
-//    private LineMark selectedLineMark;
+    //    private LineMark selectedLineMark;
 
-//    private PFeature currentLineMarkPFeature = null;
+    //    private PFeature currentLineMarkPFeature = null;
 
     private Modus modus = Modus.MARK_ADD;
     private JPopupMenu menu;
-//    private SelectionType selectionType = SelectionType.NONE;
+    //    private SelectionType selectionType = SelectionType.NONE;
 
     private JMenuItem cmdRemoveMark;
     private JMenuItem cmdRemoveAllMarks;
@@ -130,58 +125,62 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         this.mc = mc;
 
         final PLocator l = new PLocator() {
+            @Override
+            public double locateX() {
+                return cursorX;
+            }
 
-                @Override
-                public double locateX() {
-                    return cursorX;
-                }
-
-                @Override
-                public double locateY() {
-                    return cursorY;
-                }
-            };
+            @Override
+            public double locateY() {
+                return cursorY;
+            }
+        };
         cursorPHandle = new LinearReferencedPointMarkPHandle(l, this, mc);
         cursorPHandle.setInfoPanelTransparency(CURSOR_PANEL_TRANSPARENCY);
         cursorPHandle.setPaint(null);
 
         if (mc != null) {
-            mc.getFeatureCollection().addFeatureCollectionListener(new FeatureCollectionAdapter() {
+            mc
+                .getFeatureCollection()
+                .addFeatureCollectionListener(
+                    new FeatureCollectionAdapter() {
+                        @Override
+                        public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                            final Collection<Feature> sel = fce.getEventFeatures();
 
-                    @Override
-                    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                        final Collection<Feature> sel = fce.getEventFeatures();
+                            // wenn genau 1 Objekt selektiert ist
+                            if ((sel != null) && (sel.size() == 1)) {
+                                // selektiertes feature holen
+                                final Feature[] sels = sel.toArray(new Feature[0]);
+                                final Geometry geom = sels[0].getGeometry();
+                                if (
+                                    (geom != null) || (geom instanceof MultiLineString) || (geom instanceof LineString)
+                                ) {
+                                    // zugehöriges pfeature holen
+                                    // final PFeature pf = mc.getPFeatureHM().get(sels[0]);
+                                    // zugehörige geometrie holen
 
-                        // wenn genau 1 Objekt selektiert ist
-                        if ((sel != null) && (sel.size() == 1)) {
-                            // selektiertes feature holen
-                            final Feature[] sels = sel.toArray(new Feature[0]);
-                            final Geometry geom = sels[0].getGeometry();
-                            if ((geom != null) || (geom instanceof MultiLineString) || (geom instanceof LineString)) {
-                                // zugehöriges pfeature holen
-                                // final PFeature pf = mc.getPFeatureHM().get(sels[0]);
-                                // zugehörige geometrie holen
-
-                                // TODO sauberes event
-                                firePropertyChange(null);
+                                    // TODO sauberes event
+                                    firePropertyChange(null);
+                                }
                             }
                         }
                     }
-                });
+                );
         }
-//        final PLocator lsl = new PLocator() {
-//
-//                @Override
-//                public double locateX() {
-//                    return lineStartX;
-//                }
-//
-//                @Override
-//                public double locateY() {
-//                    return lineStartY;
-//                }
-//            };
-//        lineStartPHandle = new MeasurementPHandle(lsl, mc);
+        //        final PLocator lsl = new PLocator() {
+        //
+        //                @Override
+        //                public double locateX() {
+        //                    return lineStartX;
+        //                }
+        //
+        //                @Override
+        //                public double locateY() {
+        //                    return lineStartY;
+        //                }
+        //            };
+        //        lineStartPHandle = new MeasurementPHandle(lsl, mc);
 
         initContextMenu();
     }
@@ -213,9 +212,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// public SelectionType getSelectionType() {
-// return selectionType;
-// }
+    // public SelectionType getSelectionType() {
+    // return selectionType;
+    // }
 
     /**
      * DOCUMENT ME!
@@ -224,9 +223,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// private void setSelectionType(final SelectionType selectionType) {
-// this.selectionType = selectionType;
-// }
+    // private void setSelectionType(final SelectionType selectionType) {
+    // this.selectionType = selectionType;
+    // }
 
     /**
      * DOCUMENT ME!
@@ -235,53 +234,53 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// private Feature createSublineFeature() {
-// final Feature feature = new Feature() {
-//
-// private Geometry geom;
-//
-// @Override
-// public Geometry getGeometry() {
-// return geom;
-// }
-//
-// @Override
-// public void setGeometry(final Geometry geom) {
-// this.geom = geom;
-// }
-//
-// @Override
-// public boolean canBeSelected() {
-// return false;
-// }
-//
-// @Override
-// public void setCanBeSelected(final boolean canBeSelected) {
-// throw new UnsupportedOperationException("Not supported yet.");
-// }
-//
-// @Override
-// public boolean isEditable() {
-// return false;
-// }
-//
-// @Override
-// public void setEditable(final boolean editable) {
-// throw new UnsupportedOperationException("Not supported yet.");
-// }
-//
-// @Override
-// public boolean isHidden() {
-// return false;
-// }
-//
-// @Override
-// public void hide(final boolean hiding) {
-// throw new UnsupportedOperationException("Not supported yet.");
-// }
-// };
-// return feature;
-// }
+    // private Feature createSublineFeature() {
+    // final Feature feature = new Feature() {
+    //
+    // private Geometry geom;
+    //
+    // @Override
+    // public Geometry getGeometry() {
+    // return geom;
+    // }
+    //
+    // @Override
+    // public void setGeometry(final Geometry geom) {
+    // this.geom = geom;
+    // }
+    //
+    // @Override
+    // public boolean canBeSelected() {
+    // return false;
+    // }
+    //
+    // @Override
+    // public void setCanBeSelected(final boolean canBeSelected) {
+    // throw new UnsupportedOperationException("Not supported yet.");
+    // }
+    //
+    // @Override
+    // public boolean isEditable() {
+    // return false;
+    // }
+    //
+    // @Override
+    // public void setEditable(final boolean editable) {
+    // throw new UnsupportedOperationException("Not supported yet.");
+    // }
+    //
+    // @Override
+    // public boolean isHidden() {
+    // return false;
+    // }
+    //
+    // @Override
+    // public void hide(final boolean hiding) {
+    // throw new UnsupportedOperationException("Not supported yet.");
+    // }
+    // };
+    // return feature;
+    // }
 
     /**
      * DOCUMENT ME!
@@ -290,24 +289,24 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// private void startLineMark() {
-// // addMarkHandle(handleX, handleY);
-// lineStartPosition = getCurrentPosition();
-// lineStartX = cursorX;
-// lineStartY = cursorY;
-////        setModus(Modus.DRAWING_SUBLINE);
-//
-//        currentLineMarkPFeature = new PFeature(createSublineFeature(), mc);
-//        currentLineMarkPFeature.setStroke(new CustomFixedWidthStroke(5));
-////        currentLineMarkPFeature.setStrokePaint(COLOR_SUBLINE);
-//
-//        currentLineMarkPFeature.addChild(lineStartPHandle);
-//        currentLineMarkPFeature.addChild(cursorPHandle);
-//
-//        final PFeature pf = getSelectedLinePFeature();
-//        pf.addChild(currentLineMarkPFeature);
-//        pf.repaint();
-//    }
+    // private void startLineMark() {
+    // // addMarkHandle(handleX, handleY);
+    // lineStartPosition = getCurrentPosition();
+    // lineStartX = cursorX;
+    // lineStartY = cursorY;
+    ////        setModus(Modus.DRAWING_SUBLINE);
+    //
+    //        currentLineMarkPFeature = new PFeature(createSublineFeature(), mc);
+    //        currentLineMarkPFeature.setStroke(new CustomFixedWidthStroke(5));
+    ////        currentLineMarkPFeature.setStrokePaint(COLOR_SUBLINE);
+    //
+    //        currentLineMarkPFeature.addChild(lineStartPHandle);
+    //        currentLineMarkPFeature.addChild(cursorPHandle);
+    //
+    //        final PFeature pf = getSelectedLinePFeature();
+    //        pf.addChild(currentLineMarkPFeature);
+    //        pf.repaint();
+    //    }
 
     /**
      * DOCUMENT ME!
@@ -316,14 +315,14 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-//    private void updateLineMark() {
-//        final LengthIndexedLine lil = new LengthIndexedLine(getSelectedLinePFeature().getFeature().getGeometry());
-//        final LineString subline = (LineString)lil.extractLine(lineStartPosition, cursorPosition);
-//
-//        currentLineMarkPFeature.getFeature().setGeometry(subline);
-//        currentLineMarkPFeature.syncGeometry();
-//        currentLineMarkPFeature.visualize();
-//    }
+    //    private void updateLineMark() {
+    //        final LengthIndexedLine lil = new LengthIndexedLine(getSelectedLinePFeature().getFeature().getGeometry());
+    //        final LineString subline = (LineString)lil.extractLine(lineStartPosition, cursorPosition);
+    //
+    //        currentLineMarkPFeature.getFeature().setGeometry(subline);
+    //        currentLineMarkPFeature.syncGeometry();
+    //        currentLineMarkPFeature.visualize();
+    //    }
 
     /**
      * DOCUMENT ME!
@@ -332,12 +331,12 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-//    private void finishLineMark() {
-//        // addMarkHandle(handleX, handleY);
-//        addSublinePHandle(lineStartPosition, cursorPosition);
-//        setModus(Modus.MARK_ADD);
-//        currentLineMarkPFeature = null;
-//    }
+    //    private void finishLineMark() {
+    //        // addMarkHandle(handleX, handleY);
+    //        addSublinePHandle(lineStartPosition, cursorPosition);
+    //        setModus(Modus.MARK_ADD);
+    //        currentLineMarkPFeature = null;
+    //    }
 
     public boolean addPropertyChangeListener(final PropertyChangeListener listener) {
         return listeners.add(listener);
@@ -372,14 +371,14 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      */
     @Override
     public void mouseDragged(final PInputEvent event) {
-//        if (!isDragging() && event.isShiftDown()) {
-//            startLineMark();
-//        }
-//        updateCursor(event.getPosition());
-//        cursorPHandle.setMarkPosition(getCurrentPosition());
-//        if (isDragging()) {
-//            updateLineMark();
-//        }
+        //        if (!isDragging() && event.isShiftDown()) {
+        //            startLineMark();
+        //        }
+        //        updateCursor(event.getPosition());
+        //        cursorPHandle.setMarkPosition(getCurrentPosition());
+        //        if (isDragging()) {
+        //            updateLineMark();
+        //        }
     }
 
     /**
@@ -389,10 +388,10 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      */
     @Override
     public void mouseReleased(final PInputEvent event) {
-//        log.fatal("mouse released");
-//        if (isDragging()) {
-//            finishLineMark();
-//        }
+        //        log.fatal("mouse released");
+        //        if (isDragging()) {
+        //            finishLineMark();
+        //        }
     }
 
     /**
@@ -416,10 +415,10 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @param  event  DOCUMENT ME!
      */
-// private boolean isDragging() {
-// log.fatal("isDragging: " + currentLineMarkPFeature + " = " + currentLineMarkPFeature != null);
-// return currentLineMarkPFeature != null;
-// }
+    // private boolean isDragging() {
+    // log.fatal("isDragging: " + currentLineMarkPFeature + " = " + currentLineMarkPFeature != null);
+    // return currentLineMarkPFeature != null;
+    // }
 
     /**
      * DOCUMENT ME!
@@ -430,13 +429,14 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     public void mouseClicked(final PInputEvent event) {
         if (event.isLeftMouseButton()) {
             switch (modus) {
-                case MARK_ADD: {
-                    final PFeature selPFeature = getSelectedLinePFeature();
-                    if (selPFeature != null) {
-                        addMarkPHandle(new Coordinate(cursorX, cursorY));
+                case MARK_ADD:
+                    {
+                        final PFeature selPFeature = getSelectedLinePFeature();
+                        if (selPFeature != null) {
+                            addMarkPHandle(new Coordinate(cursorX, cursorY));
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
     }
@@ -467,26 +467,26 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// public double getSelectedSublineStart() {
-// if (selectedLineMark != null) {
-// return selectedLineMark.getPositionStart();
-// } else {
-// return 0;
-// }
-// }
+    // public double getSelectedSublineStart() {
+    // if (selectedLineMark != null) {
+    // return selectedLineMark.getPositionStart();
+    // } else {
+    // return 0;
+    // }
+    // }
 
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-// public double getSelectedSublineEnd() {
-// if (selectedLineMark != null) {
-// return selectedLineMark.getPositionEnd();
-// } else {
-// return 0;
-// }
-// }
+    // public double getSelectedSublineEnd() {
+    // if (selectedLineMark != null) {
+    // return selectedLineMark.getPositionEnd();
+    // } else {
+    // return 0;
+    // }
+    // }
 
     /**
      * DOCUMENT ME!
@@ -513,7 +513,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             for (final PointMark mark : getPointMarks(getSelectedLinePFeature())) {
                 if ((mark != null) && mark.getPHandle().equals(markPHandle)) {
                     this.selectedPointMark = mark;
-//                    setSelectionType(SelectionType.MARK);
+                    //                    setSelectionType(SelectionType.MARK);
                     break;
                 }
             }
@@ -525,19 +525,19 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// public void setSelectedSubline(final MarkLinePHandle sublinePHandle) {
-// if (sublinePHandle == null) {
-// this.selectedLineMark = null;
-// } else {
-// for (final LineMark subline : getLineMarks(getSelectedLinePFeature())) {
-// if ((subline != null) && subline.getPHandle().equals(sublinePHandle)) {
-// this.selectedLineMark = subline;
-// setSelectionType(SelectionType.SUBLINE);
-// break;
-// }
-// }
-// }
-// }
+    // public void setSelectedSubline(final MarkLinePHandle sublinePHandle) {
+    // if (sublinePHandle == null) {
+    // this.selectedLineMark = null;
+    // } else {
+    // for (final LineMark subline : getLineMarks(getSelectedLinePFeature())) {
+    // if ((subline != null) && subline.getPHandle().equals(sublinePHandle)) {
+    // this.selectedLineMark = subline;
+    // setSelectionType(SelectionType.SUBLINE);
+    // break;
+    // }
+    // }
+    // }
+    // }
 
     /**
      * DOCUMENT ME!
@@ -576,38 +576,42 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     private void initContextMenu() {
         menu = new JPopupMenu();
 
-        cmdRemoveMark = new JMenuItem("Markierung entfernen");            // NOI18N
+        cmdRemoveMark = new JMenuItem("Markierung entfernen"); // NOI18N
         cmdRemoveAllMarks = new JMenuItem("alle Markierungen entfernen"); // NOI18N
 
-        cmdRemoveMark.setIcon(new ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png")));
-        cmdRemoveAllMarks.setIcon(new ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png")));
+        cmdRemoveMark.setIcon(
+            new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"))
+        );
+        cmdRemoveAllMarks.setIcon(
+            new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"))
+        );
 
-        cmdRemoveMark.addActionListener(new ActionListener() {
-
+        cmdRemoveMark.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent ae) {
-//                switch (selectionType) {
-//                    case MARK: {
+                    //                switch (selectionType) {
+                    //                    case MARK: {
                     removeMark(selectedPointMark);
-//                        break;
-//                    }
-//                    case SUBLINE: {
-//                        // removeLineMark(selectedLineMark);
-//                        break;
-//                    }
-//                 }
+                    //                        break;
+                    //                    }
+                    //                    case SUBLINE: {
+                    //                        // removeLineMark(selectedLineMark);
+                    //                        break;
+                    //                    }
+                    //                 }
                 }
-            });
-        cmdRemoveAllMarks.addActionListener(new ActionListener() {
-
+            }
+        );
+        cmdRemoveAllMarks.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent ae) {
                     removeAllMarks();
                     // removeAllLineMarks();
                 }
-            });
+            }
+        );
         if (menu.getComponentCount() > 0) {
             menu.addSeparator();
         }
@@ -658,25 +662,25 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-// private void removeLineMark(final LineMark subline) {
-// getLineMarks(getSelectedLinePFeature()).remove(subline);
-// getSelectedLinePFeature().removeChild(subline.getPFeature());
-// getPLayer().removeChild(subline.getPHandle());
-// }
+    // private void removeLineMark(final LineMark subline) {
+    // getLineMarks(getSelectedLinePFeature()).remove(subline);
+    // getSelectedLinePFeature().removeChild(subline.getPFeature());
+    // getPLayer().removeChild(subline.getPHandle());
+    // }
 
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-// public void removeAllLineMarks() {
-// final Collection<LineMark> lineMarks = getLineMarks(getSelectedLinePFeature());
-// for (final LineMark subline : lineMarks) {
-// getPLayer().removeChild(subline.getPHandle());
-// getSelectedLinePFeature().removeChild(subline.getPFeature());
-// }
-// lineMarks.clear();
-// }
+    // public void removeAllLineMarks() {
+    // final Collection<LineMark> lineMarks = getLineMarks(getSelectedLinePFeature());
+    // for (final LineMark subline : lineMarks) {
+    // getPLayer().removeChild(subline.getPHandle());
+    // getSelectedLinePFeature().removeChild(subline.getPFeature());
+    // }
+    // lineMarks.clear();
+    // }
 
     /**
      * DOCUMENT ME!
@@ -685,10 +689,10 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      */
     protected double getCurrentPosition() {
         if (getSelectedLinePFeature() != null) {
-            final double position = LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
-                        mc.getWtst().getSourceX(cursorX),
-                        mc.getWtst().getSourceY(cursorY)),
-                    getSelectedLinePFeature().getFeature().getGeometry());
+            final double position = LinearReferencedPointFeature.getPositionOnLine(
+                new Coordinate(mc.getWtst().getSourceX(cursorX), mc.getWtst().getSourceY(cursorY)),
+                getSelectedLinePFeature().getFeature().getGeometry()
+            );
             // prevent rounding problem and allow to set the postion 0.00
             if (position < 0.007) {
                 return 0.00;
@@ -732,14 +736,14 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @param  coordinate  pFeature DOCUMENT ME!
      */
-// private Collection<LineMark> getLineMarks(final PFeature pFeature) {
-// Collection<LineMark> lineMarks = featureLineMarks.get(getSelectedLinePFeature());
-// if (lineMarks == null) {
-// lineMarks = new ArrayList<LineMark>();
-// featureLineMarks.put(pFeature, new ArrayList<LineMark>());
-// }
-// return lineMarks;
-// }
+    // private Collection<LineMark> getLineMarks(final PFeature pFeature) {
+    // Collection<LineMark> lineMarks = featureLineMarks.get(getSelectedLinePFeature());
+    // if (lineMarks == null) {
+    // lineMarks = new ArrayList<LineMark>();
+    // featureLineMarks.put(pFeature, new ArrayList<LineMark>());
+    // }
+    // return lineMarks;
+    // }
 
     /**
      * DOCUMENT ME!
@@ -751,17 +755,16 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             log.debug("create newPointHandle and Locator"); // NOI18N
         }
         final PLocator l = new PLocator() {
+            @Override
+            public double locateX() {
+                return coordinate.x;
+            }
 
-                @Override
-                public double locateX() {
-                    return coordinate.x;
-                }
-
-                @Override
-                public double locateY() {
-                    return coordinate.y;
-                }
-            };
+            @Override
+            public double locateY() {
+                return coordinate.y;
+            }
+        };
 
         final LinearReferencedPointMarkPHandle markHandle = new LinearReferencedPointMarkPHandle(l, this, mc);
         final double currentPosition = getCurrentPosition();
@@ -792,7 +795,8 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         } else {
             if (log.isDebugEnabled()) {
                 log.debug(
-                    "Markierung mit (fast) der selben Position existiert bereits, neue Markierung wird also ignoriert.");
+                    "Markierung mit (fast) der selben Position existiert bereits, neue Markierung wird also ignoriert."
+                );
             }
         }
     }
@@ -834,60 +838,60 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @param  modus  startPosition DOCUMENT ME!
      */
-// private void addSublinePHandle(final double startPosition, final double endPosition) {
-// final double mid = startPosition + ((endPosition - startPosition) / 2);
-// final double length = Math.abs(endPosition - startPosition);
-//
-// final Coordinate midCoord = getCoordinateOfPosition(mid);
-// if (log.isDebugEnabled()) {
-// log.debug("midCoord: " + midCoord);
-// }
-//
-// final double xTest = cursorX;
-// final double yTest = cursorY;
-//
-// final PLocator l = new PLocator() {
-//
-// @Override
-// public double locateX() {
-// return xTest;
-// }
-//
-// @Override
-// public double locateY() {
-// return yTest;
-// }
-// };
-//
-// final MarkLinePHandle pHandle = new MarkLinePHandle(l, this, mc);
-// pHandle.setPositions(startPosition, endPosition);
-//
-// final LineMark lineMark = new LineMark(startPosition, endPosition, pHandle, currentLineMarkPFeature);
-//
-// getLineMarks(getSelectedLinePFeature()).add(lineMark);
-// getPLayer().addChild(pHandle);
-//
-// setSelectedSubline(pHandle);
-//
-// // measurementPHandle wieder nach oben holen
-// getPLayer().removeChild(cursorPHandle);
-// getPLayer().addChild(cursorPHandle);
-// }
+    // private void addSublinePHandle(final double startPosition, final double endPosition) {
+    // final double mid = startPosition + ((endPosition - startPosition) / 2);
+    // final double length = Math.abs(endPosition - startPosition);
+    //
+    // final Coordinate midCoord = getCoordinateOfPosition(mid);
+    // if (log.isDebugEnabled()) {
+    // log.debug("midCoord: " + midCoord);
+    // }
+    //
+    // final double xTest = cursorX;
+    // final double yTest = cursorY;
+    //
+    // final PLocator l = new PLocator() {
+    //
+    // @Override
+    // public double locateX() {
+    // return xTest;
+    // }
+    //
+    // @Override
+    // public double locateY() {
+    // return yTest;
+    // }
+    // };
+    //
+    // final MarkLinePHandle pHandle = new MarkLinePHandle(l, this, mc);
+    // pHandle.setPositions(startPosition, endPosition);
+    //
+    // final LineMark lineMark = new LineMark(startPosition, endPosition, pHandle, currentLineMarkPFeature);
+    //
+    // getLineMarks(getSelectedLinePFeature()).add(lineMark);
+    // getPLayer().addChild(pHandle);
+    //
+    // setSelectedSubline(pHandle);
+    //
+    // // measurementPHandle wieder nach oben holen
+    // getPLayer().removeChild(cursorPHandle);
+    // getPLayer().addChild(cursorPHandle);
+    // }
 
     /**
      * DOCUMENT ME!
      *
      * @param  modus  show DOCUMENT ME!
      */
-// private void showSublines(final boolean show) {
-// for (final LineMark subline : getLineMarks(getSelectedLinePFeature())) {
-// if (log.isDebugEnabled()) {
-// log.debug(subline.getPHandle() + " -- " + subline.getPFeature());
-// }
-// showOnFather(getPLayer(), subline.getPHandle(), show);
-// showOnFather(getSelectedLinePFeature(), subline.getPFeature(), show);
-// }
-// }
+    // private void showSublines(final boolean show) {
+    // for (final LineMark subline : getLineMarks(getSelectedLinePFeature())) {
+    // if (log.isDebugEnabled()) {
+    // log.debug(subline.getPHandle() + " -- " + subline.getPFeature());
+    // }
+    // showOnFather(getPLayer(), subline.getPHandle(), show);
+    // showOnFather(getSelectedLinePFeature(), subline.getPFeature(), show);
+    // }
+    // }
 
     /**
      * DOCUMENT ME!
@@ -905,24 +909,26 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     private void refreshHandles() {
         if (getSelectedLinePFeature() != null) {
             switch (modus) {
-                case MARK_SELECTION: {
-                    showCursor(false);
-                    showPointMarks(true);
-//                    showSublines(true);
-                    break;
-                }
-                case MARK_ADD: {
-                    showCursor(true);
-                    showPointMarks(true);
-//                    showSublines(true);
-                    break;
-                }
-//                case DRAWING_SUBLINE: {
-//                    showCursor(true);
-//                    showMarks(false);
-//                    showSublines(true);
-//                    break;
-//                }
+                case MARK_SELECTION:
+                    {
+                        showCursor(false);
+                        showPointMarks(true);
+                        //                    showSublines(true);
+                        break;
+                    }
+                case MARK_ADD:
+                    {
+                        showCursor(true);
+                        showPointMarks(true);
+                        //                    showSublines(true);
+                        break;
+                    }
+                //                case DRAWING_SUBLINE: {
+                //                    showCursor(true);
+                //                    showMarks(false);
+                //                    showSublines(true);
+                //                    break;
+                //                }
             }
         }
     }
@@ -971,37 +977,40 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 Coordinate snapPoint = null;
 
                 if (mc.isSnappingEnabled() && MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())) {
-                    snapPoint = PFeatureTools.getNearestCoordinateInArea(
+                    snapPoint =
+                        PFeatureTools.getNearestCoordinateInArea(
                             mc,
-                            mc.getCamera().viewToLocal((Point2D)trigger.clone()),
+                            mc.getCamera().viewToLocal((Point2D) trigger.clone()),
                             false,
-                            null);
+                            null
+                        );
                 }
 
                 Coordinate triggerCoordinate = snapPoint;
 
                 if (triggerCoordinate == null) {
-                    triggerCoordinate = new Coordinate(
-                            mc.getWtst().getSourceX(point.getX()),
-                            mc.getWtst().getSourceY(point.getY()));
+                    triggerCoordinate =
+                        new Coordinate(mc.getWtst().getSourceX(point.getX()), mc.getWtst().getSourceY(point.getY()));
                 }
                 final Geometry lineGeometry = LinearReferencedPointFeature.getReducedLineGeometry(
-                        geom,
-                        new Coordinate(cursorX, cursorY),
-                        triggerCoordinate);
+                    geom,
+                    new Coordinate(cursorX, cursorY),
+                    triggerCoordinate
+                );
                 final Coordinate erg = LinearReferencedPointFeature.getNearestCoordninateOnLine(
-                        triggerCoordinate,
-                        lineGeometry);
+                    triggerCoordinate,
+                    lineGeometry
+                );
                 final double dist = LinearReferencedPointFeature.getDistanceOfCoordToLine(
-                        triggerCoordinate,
-                        lineGeometry);
+                    triggerCoordinate,
+                    lineGeometry
+                );
                 final boolean cursorIsVisible = (dist / mc.getScaleDenominator()) < INVISIBLE_CURSOR_DISTANCE;
 
                 cursorPHandle.setVisible(cursorIsVisible);
                 cursorX = mc.getWtst().getDestX(erg.x);
                 cursorY = mc.getWtst().getDestY(erg.y);
-
-//                cursorPosition = getCurrentPosition();
+                //                cursorPosition = getCurrentPosition();
             }
         }
     }
@@ -1027,8 +1036,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 PFeature pf = mc.getPFeatureHM().get(sels[0]);
 
                 if (pf == null) {
-                    final SelectionListener sl = (SelectionListener)mc.getInputEventListener()
-                                .get(MappingComponent.SELECT);
+                    final SelectionListener sl = (SelectionListener) mc
+                        .getInputEventListener()
+                        .get(MappingComponent.SELECT);
                     final List<PFeature> fl = sl.getAllSelectedPFeatures();
                     if ((fl != null) && (fl.size() == 1)) {
                         pf = fl.get(0);
@@ -1103,77 +1113,76 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             return pHandle;
         }
     }
-
     /**
      * DOCUMENT ME!
      *
      * @version  $Revision$, $Date$
      */
-// class LineMark {
-//
-// //~ Instance fields ----------------------------------------------------
-//
-// private double positionStart;
-// private double positionEnd;
-// private MarkLinePHandle pHandle;
-// private PFeature pFeature;
-//
-// //~ Constructors -------------------------------------------------------
-//
-// /**
-// * Creates a new LineMark object.
-// *
-// * @param  positionStart  DOCUMENT ME!
-// * @param  positionEnd    DOCUMENT ME!
-// * @param  pHandle        DOCUMENT ME!
-// * @param  pFeature       DOCUMENT ME!
-// */
-// LineMark(final double positionStart,
-// final double positionEnd,
-// final MarkLinePHandle pHandle,
-// final PFeature pFeature) {
-// this.pHandle = pHandle;
-// this.pFeature = pFeature;
-// this.positionStart = positionStart;
-// this.positionEnd = positionEnd;
-// }
-//
-// //~ Methods ------------------------------------------------------------
-//
-// /**
-// * DOCUMENT ME!
-// *
-// * @return  DOCUMENT ME!
-// */
-// public double getPositionStart() {
-// return positionStart;
-// }
-//
-// /**
-// * DOCUMENT ME!
-// *
-// * @return  DOCUMENT ME!
-// */
-// public double getPositionEnd() {
-// return positionEnd;
-// }
-//
-// /**
-// * DOCUMENT ME!
-// *
-// * @return  DOCUMENT ME!
-// */
-// public MarkLinePHandle getPHandle() {
-// return pHandle;
-// }
-//
-// /**
-// * DOCUMENT ME!
-// *
-// * @return  DOCUMENT ME!
-// */
-// public PFeature getPFeature() {
-// return pFeature;
-// }
-// }
+    // class LineMark {
+    //
+    // //~ Instance fields ----------------------------------------------------
+    //
+    // private double positionStart;
+    // private double positionEnd;
+    // private MarkLinePHandle pHandle;
+    // private PFeature pFeature;
+    //
+    // //~ Constructors -------------------------------------------------------
+    //
+    // /**
+    // * Creates a new LineMark object.
+    // *
+    // * @param  positionStart  DOCUMENT ME!
+    // * @param  positionEnd    DOCUMENT ME!
+    // * @param  pHandle        DOCUMENT ME!
+    // * @param  pFeature       DOCUMENT ME!
+    // */
+    // LineMark(final double positionStart,
+    // final double positionEnd,
+    // final MarkLinePHandle pHandle,
+    // final PFeature pFeature) {
+    // this.pHandle = pHandle;
+    // this.pFeature = pFeature;
+    // this.positionStart = positionStart;
+    // this.positionEnd = positionEnd;
+    // }
+    //
+    // //~ Methods ------------------------------------------------------------
+    //
+    // /**
+    // * DOCUMENT ME!
+    // *
+    // * @return  DOCUMENT ME!
+    // */
+    // public double getPositionStart() {
+    // return positionStart;
+    // }
+    //
+    // /**
+    // * DOCUMENT ME!
+    // *
+    // * @return  DOCUMENT ME!
+    // */
+    // public double getPositionEnd() {
+    // return positionEnd;
+    // }
+    //
+    // /**
+    // * DOCUMENT ME!
+    // *
+    // * @return  DOCUMENT ME!
+    // */
+    // public MarkLinePHandle getPHandle() {
+    // return pHandle;
+    // }
+    //
+    // /**
+    // * DOCUMENT ME!
+    // *
+    // * @return  DOCUMENT ME!
+    // */
+    // public PFeature getPFeature() {
+    // return pFeature;
+    // }
+    // }
 }

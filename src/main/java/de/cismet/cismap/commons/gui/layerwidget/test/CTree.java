@@ -1,11 +1,12 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget.test;
+
 import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
@@ -13,9 +14,7 @@ import java.awt.event.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.*;
-
 import java.io.*;
-
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
@@ -30,24 +29,24 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
     //~ Static fields/initializers ---------------------------------------------
 
-// Fields...
+    // Fields...
 
-// Autoscroll Interface...
-// The following code was borrowed from the book:
-// Java Swing
-// By Robert Eckstein, Marc Loy & Dave Wood
-// Paperback - 1221 pages 1 Ed edition (September 1998)
-// O'Reilly & Associates; ISBN: 156592455X
-//
-// The relevant chapter of which can be found at:
-// http://www.oreilly.com/catalog/jswing/chapter/dnd.beta.pdf
+    // Autoscroll Interface...
+    // The following code was borrowed from the book:
+    // Java Swing
+    // By Robert Eckstein, Marc Loy & Dave Wood
+    // Paperback - 1221 pages 1 Ed edition (September 1998)
+    // O'Reilly & Associates; ISBN: 156592455X
+    //
+    // The relevant chapter of which can be found at:
+    // http://www.oreilly.com/catalog/jswing/chapter/dnd.beta.pdf
 
     private static final int AUTOSCROLL_MARGIN = 12;
 
     //~ Instance fields --------------------------------------------------------
 
-    private TreePath _pathSource;          // The path being dragged
-    private BufferedImage _imgGhost;       // The 'drag image'
+    private TreePath _pathSource; // The path being dragged
+    private BufferedImage _imgGhost; // The 'drag image'
     private Point _ptOffset = new Point(); // Where, in the drag image, the mouse was clicked
 
     //~ Constructors -----------------------------------------------------------
@@ -55,8 +54,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
     /**
      * Constructors...
      */
-    public CTree()                                      // Use the default JTree constructor so that we get a sample
-                                                        // TreeModel built for us
+    public CTree() // TreeModel built for us // Use the default JTree constructor so that we get a sample
     {
         putClientProperty("JTree.lineStyle", "Angled"); // I like this look//NOI18N
 
@@ -79,38 +77,35 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
     public static void main(final String[] argv) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         final CTree tree = new CTree();
         tree.setPreferredSize(new Dimension(300, 300));
         final JScrollPane scrollPane = new JScrollPane(tree);
 
-        final JFrame frame = new JFrame(org.openide.util.NbBundle.getMessage(
-                    CTree.class,
-                    "CTree.main(String[]).frame.title")); // NOI18N
+        final JFrame frame = new JFrame(
+            org.openide.util.NbBundle.getMessage(CTree.class, "CTree.main(String[]).frame.title")
+        ); // NOI18N
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
         frame.pack();
 
         final Dimension dimScreen = Toolkit.getDefaultToolkit().getScreenSize();
         final Dimension dimFrame = frame.getSize();
-        frame.setLocation((dimScreen.width - dimFrame.width) / 2,
-            (dimScreen.height - dimFrame.height)
-                    / 2);
+        frame.setLocation((dimScreen.width - dimFrame.width) / 2, (dimScreen.height - dimFrame.height) / 2);
 
         frame.addWindowListener(
             new WindowAdapter() {
-
                 @Override
                 public void windowClosing(final WindowEvent e) {
                     System.exit(0);
                 }
-            });
+            }
+        );
 
         frame.show();
     }
 
-// Interface: DragGestureListener
+    // Interface: DragGestureListener
     @Override
     public void dragGestureRecognized(final DragGestureEvent e) {
         final Point ptDragOrigin = e.getDragOrigin();
@@ -127,19 +122,21 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         _ptOffset.setLocation(ptDragOrigin.x - raPath.x, ptDragOrigin.y - raPath.y);
 
         // Get the cell renderer (which is a JLabel) for the path being dragged
-        final JLabel lbl = (JLabel)getCellRenderer().getTreeCellRendererComponent(
-                this,                                           // tree
-                path.getLastPathComponent(),                    // value
-                false,                                          // isSelected   (dont want a colored background)
-                isExpanded(path),                               // isExpanded
+        final JLabel lbl = (JLabel) getCellRenderer()
+            .getTreeCellRendererComponent(
+                this, // tree
+                path.getLastPathComponent(), // value
+                false, // isSelected   (dont want a colored background)
+                isExpanded(path), // isExpanded
                 getModel().isLeaf(path.getLastPathComponent()), // isLeaf
-                0,                                              // row                  (not important for rendering)
-                false                                           // hasFocus             (dont want a focus rectangle)
-                );
-        lbl.setSize((int)raPath.getWidth(), (int)raPath.getHeight()); // <-- The layout manager would normally do this
+                0, // row                  (not important for rendering)
+                false // hasFocus             (dont want a focus rectangle)
+            );
+        lbl.setSize((int) raPath.getWidth(), (int) raPath.getHeight()); // <-- The layout manager would normally do this
 
         // Get a buffered image of the selection for dragging a ghost image
-        _imgGhost = new BufferedImage((int)raPath.getWidth(), (int)raPath.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+        _imgGhost =
+            new BufferedImage((int) raPath.getWidth(), (int) raPath.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
         final Graphics2D g2 = _imgGhost.createGraphics();
 
         // Ask the cell renderer to paint itself into the BufferedImage
@@ -151,13 +148,9 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         final Icon icon = lbl.getIcon();
         final int nStartOfText = (icon == null) ? 0 : (icon.getIconWidth() + lbl.getIconTextGap());
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_OVER, 0.5f)); // Make the gradient ghostlike
-        g2.setPaint(new GradientPaint(
-                nStartOfText,
-                0,
-                SystemColor.controlShadow,
-                getWidth(),
-                0,
-                new Color(255, 255, 255, 0)));
+        g2.setPaint(
+            new GradientPaint(nStartOfText, 0, SystemColor.controlShadow, getWidth(), 0, new Color(255, 255, 255, 0))
+        );
         g2.fillRect(nStartOfText, 0, getWidth(), _imgGhost.getHeight());
 
         g2.dispose();
@@ -176,25 +169,25 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         e.startDrag(null, _imgGhost, new Point(5, 5), transferable, this);
     }
 
-// Interface: DragSourceListener
+    // Interface: DragSourceListener
     @Override
-    public void dragEnter(final DragSourceDragEvent e) {
-    }
+    public void dragEnter(final DragSourceDragEvent e) {}
+
     @Override
-    public void dragOver(final DragSourceDragEvent e) {
-    }
+    public void dragOver(final DragSourceDragEvent e) {}
+
     @Override
-    public void dragExit(final DragSourceEvent e) {
-    }
+    public void dragExit(final DragSourceEvent e) {}
+
     @Override
-    public void dropActionChanged(final DragSourceDragEvent e) {
-    }
+    public void dropActionChanged(final DragSourceDragEvent e) {}
+
     @Override
     public void dragDropEnd(final DragSourceDropEvent e) {
         if (e.getDropSuccess()) {
             final int nAction = e.getDropAction();
             if (nAction == DnDConstants.ACTION_MOVE) { // The dragged item (_pathSource) has been inserted at the
-                                                       // target selected by the user.
+                // target selected by the user.
                 // Now it is time to delete it from its original location.
                 System.out.println("REMOVING: " + _pathSource.getLastPathComponent()); // NOI18N
 
@@ -225,12 +218,14 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         // row) visible as appropriate. If we're at the absolute top or
         // bottom, just return the first or last row respectively.
 
-        nRow = ((pt.y + raOuter.y) <= AUTOSCROLL_MARGIN)          // Is row at top of screen?
-            ? ((nRow <= 0) ? 0 : (nRow - 1))                      // Yes, scroll up one row
-            : ((nRow < (getRowCount() - 1)) ? (nRow + 1) : nRow); // No, scroll down one row
+        nRow =
+            ((pt.y + raOuter.y) <= AUTOSCROLL_MARGIN) // Is row at top of screen?
+                ? ((nRow <= 0) ? 0 : (nRow - 1)) // Yes, scroll up one row
+                : ((nRow < (getRowCount() - 1)) ? (nRow + 1) : nRow); // No, scroll down one row
 
         scrollRowToVisible(nRow);
     }
+
     // Calculate the insets for the *JTREE*, not the viewport
     // the tree is in. This makes it a bit messy.
     @Override
@@ -238,24 +233,14 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         final Rectangle raOuter = getBounds();
         final Rectangle raInner = getParent().getBounds();
         return new Insets(
-                raInner.y
-                        - raOuter.y
-                        + AUTOSCROLL_MARGIN,
-                raInner.x
-                        - raOuter.x
-                        + AUTOSCROLL_MARGIN,
-                raOuter.height
-                        - raInner.height
-                        - raInner.y
-                        + raOuter.y
-                        + AUTOSCROLL_MARGIN,
-                raOuter.width
-                        - raInner.width
-                        - raInner.x
-                        + raOuter.x
-                        + AUTOSCROLL_MARGIN);
+            raInner.y - raOuter.y + AUTOSCROLL_MARGIN,
+            raInner.x - raOuter.x + AUTOSCROLL_MARGIN,
+            raOuter.height - raInner.height - raInner.y + raOuter.y + AUTOSCROLL_MARGIN,
+            raOuter.width - raInner.width - raInner.x + raOuter.x + AUTOSCROLL_MARGIN
+        );
     }
-/*
+
+    /*
         // Use this method if you want to see the boundaries of the
         // autoscroll active region. Toss it out, otherwise.
         public void paintComponent(Graphics g)
@@ -270,7 +255,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
 */
 
-// TreeModelListener interface...
+    // TreeModelListener interface...
     @Override
     public void treeNodesChanged(final TreeModelEvent e) {
         System.out.println("treeNodesChanged"); // NOI18N
@@ -300,6 +285,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
         System.out.println("treeStructureChanged "); // NOI18N
         sayWhat(e);
     }
+
     /**
      * More helpers...
      *
@@ -366,21 +352,25 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
          * Constructor...
          */
         public CDropTargetListener() {
-            _colorCueLine = new Color(
+            _colorCueLine =
+                new Color(
                     SystemColor.controlShadow.getRed(),
                     SystemColor.controlShadow.getGreen(),
                     SystemColor.controlShadow.getBlue(),
-                    64);
+                    64
+                );
 
             // Set up a hover timer, so that a node will be automatically expanded or collapsed
             // if the user lingers on it for more than a short time
-            _timerHover = new Timer(1000, new ActionListener() {
-
+            _timerHover =
+                new Timer(
+                    1000,
+                    new ActionListener() {
                         @Override
                         public void actionPerformed(final ActionEvent e) {
                             _nLeftRight = 0; // Reset left/right movement trend
                             if (isRootPath(_pathLast)) {
-                                return;      // Do nothing if we are hovering over the root node
+                                return; // Do nothing if we are hovering over the root node
                             }
                             if (isExpanded(_pathLast)) {
                                 collapsePath(_pathLast);
@@ -388,8 +378,9 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                                 expandPath(_pathLast);
                             }
                         }
-                    });
-            _timerHover.setRepeats(false);   // Set timer to one-shot mode
+                    }
+                );
+            _timerHover.setRepeats(false); // Set timer to one-shot mode
         }
 
         //~ Methods ------------------------------------------------------------
@@ -433,7 +424,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
             _ptLast = pt;
 
-            final Graphics2D g2 = (Graphics2D)getGraphics();
+            final Graphics2D g2 = (Graphics2D) getGraphics();
 
             // If a drag image is not supported by the platform, then draw my own drag image
             if (!DragSource.isDragImageSupported()) {
@@ -454,7 +445,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
             // In any case draw (over the ghost image if necessary) a cue line indicating where a drop will occur
             final Rectangle raPath = getPathBounds(path);
-            _raCueLine.setRect(0, raPath.y + (int)raPath.getHeight(), getWidth(), 2);
+            _raCueLine.setRect(0, raPath.y + (int) raPath.getHeight(), getWidth(), 2);
 
             g2.setColor(_colorCueLine);
             g2.fill(_raCueLine);
@@ -464,13 +455,15 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                 g2.drawImage(
                     _imgRight,
                     AffineTransform.getTranslateInstance(pt.x - _ptOffset.x, pt.y - _ptOffset.y),
-                    null);
+                    null
+                );
                 _nShift = +1;
             } else if (_nLeftRight < -20) {
                 g2.drawImage(
                     _imgLeft,
                     AffineTransform.getTranslateInstance(pt.x - _ptOffset.x, pt.y - _ptOffset.y),
-                    null);
+                    null
+                );
                 _nShift = -1;
             } else {
                 _nShift = 0;
@@ -478,8 +471,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
             // And include the cue line in the area to be rubbed out next time
             _raGhost = _raGhost.createUnion(_raCueLine);
-
-/*
+            /*
                         // Do this if you want to prohibit dropping onto the drag source
                         if (path.equals(_pathSource))
                                 e.rejectDrag();
@@ -517,7 +509,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                     try {
                         final Point pt = e.getLocation();
                         final TreePath pathTarget = getClosestPathForLocation(pt.x, pt.y);
-                        final TreePath pathSource = (TreePath)transferable.getTransferData(flavor);
+                        final TreePath pathSource = (TreePath) transferable.getTransferData(flavor);
 
                         System.out.println("DROPPING: " + pathSource.getLastPathComponent()); // NOI18N
                         final TreeModel model = getModel();
@@ -541,7 +533,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                         if (pathNewChild != null) {
                             setSelectionPath(pathNewChild); // Mark this as the selected path in the tree
                         }
-                        break;                              // No need to check remaining flavors
+                        break; // No need to check remaining flavors
                     } catch (UnsupportedFlavorException ufe) {
                         System.out.println(ufe);
                         e.dropComplete(false);
@@ -556,6 +548,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
             e.dropComplete(true);
         }
+
         /**
          * Helpers...
          *
@@ -574,7 +567,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                 return false;
             }
 
-/*
+            /*
                         // Do this if you want to prohibit dropping onto the drag source...
                         Point pt = e.getLocation();
                         TreePath path = getClosestPathForLocation(pt.x, pt.y);
@@ -583,7 +576,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
 
 */
 
-/*
+            /*
                         // Do this if you want to select the best flavor on offer...
                         DataFlavor[] flavors = e.getCurrentDataFlavors();
                         for (int i = 0; i < flavors.length; i++ )
@@ -614,7 +607,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                 return false;
             }
 
-/*
+            /*
                         // Do this if you want to prohibit dropping onto the drag source...
                         Point pt = e.getLocation();
                         TreePath path = getClosestPathForLocation(pt.x, pt.y);
@@ -622,7 +615,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
                                 return false;
 */
 
-/*
+            /*
                         // Do this if you want to select the best flavor on offer...
                         DataFlavor[] flavors = e.getCurrentDataFlavors();
                         for (int i = 0; i < flavors.length; i++ )

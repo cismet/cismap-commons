@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 /**
@@ -14,7 +14,6 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
  * @version  $Revision$, $Date$
  */
 public interface DeregistrationListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,31 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-
-import java.lang.reflect.Constructor;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
@@ -36,8 +21,17 @@ import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCrea
 import de.cismet.cismap.commons.gui.attributetable.creator.WithoutGeometryCreator;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
-
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
+import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
 
 /**
  * DOCUMENT ME!
@@ -63,8 +57,7 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
     /**
      * Creates a new DefaultH2AttributeTableRuleSet object.
      */
-    public DefaultH2AttributeTableRuleSet() {
-    }
+    public DefaultH2AttributeTableRuleSet() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -77,10 +70,12 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
      * @param  tableName     DOCUMENT ME!
      */
     @Override
-    public void init(final List<LinearReferencingInfo> refInfos,
-            final String geometryType,
-            final List<FeatureServiceAttribute> attributes,
-            final String tableName) {
+    public void init(
+        final List<LinearReferencingInfo> refInfos,
+        final String geometryType,
+        final List<FeatureServiceAttribute> attributes,
+        final String tableName
+    ) {
         this.refInfos = refInfos;
         this.geometryType = geometryType;
 
@@ -102,12 +97,14 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
         final LinearReferencingInfo refInfo = getInfoForColumn(columnName);
 
         if (refInfo != null) {
-            final Collection<? extends StationTableCellEditorInterface> cellEditor = Lookup.getDefault()
-                        .lookupAll(StationTableCellEditorInterface.class);
+            final Collection<? extends StationTableCellEditorInterface> cellEditor = Lookup
+                .getDefault()
+                .lookupAll(StationTableCellEditorInterface.class);
 
             if ((cellEditor != null) && (cellEditor.size() > 0)) {
-                final StationTableCellEditorInterface editor =
-                    cellEditor.toArray(new StationTableCellEditorInterface[1])[0];
+                final StationTableCellEditorInterface editor = cellEditor.toArray(
+                    new StationTableCellEditorInterface[1]
+                )[0];
 
                 final StationTableCellEditorInterface editorCopy = createNewInstance(editor);
 
@@ -204,6 +201,5 @@ public class DefaultH2AttributeTableRuleSet extends DefaultAttributeTableRuleSet
     }
 
     @Override
-    public void startEditMode(final JDBCFeature feature) {
-    }
+    public void startEditMode(final JDBCFeature feature) {}
 }

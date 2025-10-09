@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import java.awt.Color;
@@ -18,7 +18,6 @@ import java.awt.Paint;
  * @version  $Revision$, $Date$
  */
 public interface AnnotatedFeature {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

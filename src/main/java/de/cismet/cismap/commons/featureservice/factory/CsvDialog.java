@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,11 +12,9 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import org.openide.util.NbBundle;
-
 import java.nio.charset.Charset;
-
 import javax.swing.DefaultComboBoxModel;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -34,6 +32,7 @@ public class CsvDialog extends javax.swing.JDialog {
     private javax.swing.JLabel labSep1;
     private javax.swing.JTextField txtFieldDelimiter;
     private javax.swing.JTextField txtSep;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -77,7 +76,7 @@ public class CsvDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     public String getCharactersetName() {
-        return (String)cbCharset.getSelectedItem();
+        return (String) cbCharset.getSelectedItem();
     }
 
     /**
@@ -111,7 +110,8 @@ public class CsvDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             labSep,
-            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labSep.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labSep.text", new Object[] {})
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -119,10 +119,7 @@ public class CsvDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 10);
         getContentPane().add(labSep, gridBagConstraints);
 
-        txtSep.setText(org.openide.util.NbBundle.getMessage(
-                CsvDialog.class,
-                "CsvDialog.txtSep.text",
-                new Object[] {})); // NOI18N
+        txtSep.setText(org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.txtSep.text", new Object[] {})); // NOI18N
         txtSep.setMinimumSize(new java.awt.Dimension(30, 20));
         txtSep.setPreferredSize(new java.awt.Dimension(30, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -134,7 +131,8 @@ public class CsvDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             labDelimiter,
-            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labDelimiter.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labDelimiter.text", new Object[] {})
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -142,10 +140,9 @@ public class CsvDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 10);
         getContentPane().add(labDelimiter, gridBagConstraints);
 
-        txtFieldDelimiter.setText(org.openide.util.NbBundle.getMessage(
-                CsvDialog.class,
-                "CsvDialog.txtFieldDelimiter.text",
-                new Object[] {})); // NOI18N
+        txtFieldDelimiter.setText(
+            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.txtFieldDelimiter.text", new Object[] {})
+        ); // NOI18N
         txtFieldDelimiter.setMinimumSize(new java.awt.Dimension(30, 20));
         txtFieldDelimiter.setPreferredSize(new java.awt.Dimension(30, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -159,7 +156,8 @@ public class CsvDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             labSep1,
-            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labSep1.text", new Object[] {})); // NOI18N
+            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.labSep1.text", new Object[] {})
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -167,8 +165,9 @@ public class CsvDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(20, 10, 10, 10);
         getContentPane().add(labSep1, gridBagConstraints);
 
-        cbCharset.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbCharset.setModel(
+            new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" })
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -178,14 +177,16 @@ public class CsvDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton1,
-            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.jButton1.text", new Object[] {})); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+            org.openide.util.NbBundle.getMessage(CsvDialog.class, "CsvDialog.jButton1.text", new Object[] {})
+        ); // NOI18N
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -203,7 +204,7 @@ public class CsvDialog extends javax.swing.JDialog {
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         setVisible(false);
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -235,20 +236,22 @@ public class CsvDialog extends javax.swing.JDialog {
         //</editor-fold>
 
         /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final CsvDialog dialog = new CsvDialog(new javax.swing.JFrame(), true);
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
+                    dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
                             @Override
                             public void windowClosing(final java.awt.event.WindowEvent e) {
                                 System.exit(0);
                             }
-                        });
+                        }
+                    );
                     dialog.setVisible(true);
                 }
-            });
+            }
+        );
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,18 +12,13 @@
 package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-
-import java.io.File;
-
-import java.util.Collection;
-
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PersistentFeature;
-
 import de.cismet.tools.gui.downloadmanager.Download;
+import java.io.File;
+import java.util.Collection;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -39,8 +34,7 @@ public class ExportShapeDownload extends ExportDownload {
      * Creates a new ExportShapeDownload object. The init method must be invoked before the download can be started, if
      * this constructor is used.
      */
-    public ExportShapeDownload() {
-    }
+    public ExportShapeDownload() {}
 
     /**
      * Creates a new ExportShapeDownload object.
@@ -49,9 +43,7 @@ public class ExportShapeDownload extends ExportDownload {
      * @param  extension  DOCUMENT ME!
      * @param  features   DOCUMENT ME!
      */
-    public ExportShapeDownload(final String filename,
-            final String extension,
-            final FeatureServiceFeature[] features) {
+    public ExportShapeDownload(final String filename, final String extension, final FeatureServiceFeature[] features) {
         init(filename, extension, features, null, null, null);
     }
 
@@ -91,7 +83,7 @@ public class ExportShapeDownload extends ExportDownload {
                 }
 
                 if (features[0] instanceof PersistentFeature) {
-                    ((PersistentFeature)features[0]).getPersistenceManager().close();
+                    ((PersistentFeature) features[0]).getPersistenceManager().close();
                 }
             } else {
                 try {

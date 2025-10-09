@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.features;
 
+import de.cismet.cismap.commons.Refreshable;
 import java.awt.Stroke;
-
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-
-import de.cismet.cismap.commons.Refreshable;
 
 /**
  * DOCUMENT ME!
@@ -45,11 +43,13 @@ public class DefaultXStyledFeature extends DefaultStyledFeature implements XStyl
      * @param  infoComponent  DOCUMENT ME!
      * @param  lineStyle      DOCUMENT ME!
      */
-    public DefaultXStyledFeature(final ImageIcon iconImage,
-            final String name,
-            final String type,
-            final JComponent infoComponent,
-            final Stroke lineStyle) {
+    public DefaultXStyledFeature(
+        final ImageIcon iconImage,
+        final String name,
+        final String type,
+        final JComponent infoComponent,
+        final Stroke lineStyle
+    ) {
         this.iconImage = iconImage;
         this.name = name;
         this.type = type;

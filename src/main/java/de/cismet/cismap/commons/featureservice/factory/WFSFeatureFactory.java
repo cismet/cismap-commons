@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -14,47 +14,6 @@ package de.cismet.cismap.commons.featureservice.factory;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.commons.httpclient.methods.PostMethod;
-
-import org.deegree.gml.feature.GMLFeatureReader;
-import org.deegree.model.feature.DefaultFeature;
-import org.deegree.model.feature.Feature;
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.feature.GMLFeatureCollectionDocument;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import org.jdom.Element;
-
-import org.w3c.dom.Document;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-
-import java.net.URL;
-
-import java.nio.charset.Charset;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.swing.SwingWorker;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
@@ -66,10 +25,38 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.GeometryUtils;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-
 import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
-
 import de.cismet.security.WebAccessManager;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+import javax.swing.SwingWorker;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.deegree.gml.feature.GMLFeatureReader;
+import org.deegree.model.feature.DefaultFeature;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.feature.GMLFeatureCollectionDocument;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.jdom.Element;
+import org.w3c.dom.Document;
 
 /**
  * A FeatureFactory that creates WFSFeatures obtained from a Web Feature Service.<br/>
@@ -106,11 +93,13 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @param  crs              DOCUMENT ME!
      * @param  styles           DOCUMENT ME!
      */
-    public WFSFeatureFactory(final LayerProperties layerProperties,
-            final String hostname,
-            final FeatureType featureType,
-            final Crs crs,
-            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+    public WFSFeatureFactory(
+        final LayerProperties layerProperties,
+        final String hostname,
+        final FeatureType featureType,
+        final Crs crs,
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles
+    ) {
         this(layerProperties, hostname, featureType, crs, styles, false);
     }
 
@@ -125,12 +114,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @param  styles            DOCUMENT ME!
      * @param  reverseAxisOrder  DOCUMENT ME!
      */
-    public WFSFeatureFactory(final LayerProperties layerProperties,
-            final String hostname,
-            final FeatureType featureType,
-            final Crs crs,
-            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles,
-            final boolean reverseAxisOrder) {
+    public WFSFeatureFactory(
+        final LayerProperties layerProperties,
+        final String hostname,
+        final FeatureType featureType,
+        final Crs crs,
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles,
+        final boolean reverseAxisOrder
+    ) {
         logger.info("initialising WFSFeatureFactory with hostname: '" + hostname + "'");
         this.layerProperties = layerProperties;
         this.hostname = hostname;
@@ -177,9 +168,11 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @throws  Exception                 DOCUMENT ME!
      */
     @Override
-    public Vector<WFSFeature> createFeatures(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
+    public Vector<WFSFeature> createFeatures(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread
+    ) throws TooManyFeaturesException, Exception {
         return createFeatures_internal(query, boundingBox, workerThread, true);
     }
 
@@ -196,38 +189,42 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @throws  TooManyFeaturesException  DOCUMENT ME!
      * @throws  Exception                 DOCUMENT ME!
      */
-    private Vector<WFSFeature> createFeatures_internal(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread,
-            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
+    private Vector<WFSFeature> createFeatures_internal(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread,
+        final boolean saveAsLastCreated
+    ) throws TooManyFeaturesException, Exception {
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "createFeatures()")) {
             return null;
         }
         // check if canceled .......................................................
-        final XBoundingBox bbox = new XBoundingBox(boundingBox.getX1(),
-                boundingBox.getY1(),
-                boundingBox.getX2(),
-                boundingBox.getY2(),
-                getCrs().getCode(),
-                getCrs().isMetric());
+        final XBoundingBox bbox = new XBoundingBox(
+            boundingBox.getX1(),
+            boundingBox.getY1(),
+            boundingBox.getX2(),
+            boundingBox.getY2(),
+            getCrs().getCode(),
+            getCrs().isMetric()
+        );
 
         long start = System.currentTimeMillis();
         final Vector<WFSFeature> features;
 
-//        if (featuresAlreadyInMemory(bbox.getGeometry(), query)) {
-//            features = createFeaturesFromMemory(query, bbox.getGeometry());
-//        } else {
+        //        if (featuresAlreadyInMemory(bbox.getGeometry(), query)) {
+        //            features = createFeaturesFromMemory(query, bbox.getGeometry());
+        //        } else {
         final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
         final String postString = facade.setGetFeatureBoundingBox(
-                query,
-                bbox,
-                featureType,
-                getCrs().getCode(),
-                reverseAxisOrder);
-        featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
-                    featureType,
-                    getCrs().getCode()));
+            query,
+            bbox,
+            featureType,
+            getCrs().getCode(),
+            reverseAxisOrder
+        );
+        featureSrid =
+            CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(featureType, getCrs().getCode()));
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "creating post string")) {
@@ -242,10 +239,9 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         if (baseUrl.contains("?")) {
             baseUrl = baseUrl.substring(0, baseUrl.indexOf("?"));
         }
-        final InputStream respIs = WebAccessManager.getInstance()
-                    .doRequest(new URL(baseUrl),
-                        postString,
-                        ACCESS_METHODS.POST_REQUEST);
+        final InputStream respIs = WebAccessManager
+            .getInstance()
+            .doRequest(new URL(baseUrl), postString, ACCESS_METHODS.POST_REQUEST);
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "executing http request")) {
@@ -337,8 +333,13 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
 
             if (DEBUG) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("FRW[" + workerThread + "]: parsing " + featureCollectionDocument.getFeatureCount()
-                                + " features");
+                    logger.debug(
+                        "FRW[" +
+                        workerThread +
+                        "]: parsing " +
+                        featureCollectionDocument.getFeatureCount() +
+                        " features"
+                    );
                 }
             }
 
@@ -352,33 +353,50 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             }
             // check if canceled .......................................................
 
-            if ((featureCollection.size() == 1) && (featureCollection.getFeature(0).getName() != null)
-                        && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
+            if (
+                (featureCollection.size() == 1) &&
+                (featureCollection.getFeature(0).getName() != null) &&
+                featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")
+            ) {
                 logger.warn(
-                    "The wfs response contains only one feature with the name ExceptionText. "
-                            + "So an error occured. Trying to extract the error message.");
+                    "The wfs response contains only one feature with the name ExceptionText. " +
+                    "So an error occured. Trying to extract the error message."
+                );
                 try {
-                    final String errorMessage = featureCollectionDocument.getRootElement()
-                                .getFirstChild()
-                                .getFirstChild()
-                                .getTextContent();
+                    final String errorMessage = featureCollectionDocument
+                        .getRootElement()
+                        .getFirstChild()
+                        .getFirstChild()
+                        .getTextContent();
 
                     throw new Exception(errorMessage);
                 } catch (NullPointerException e) {
                     logger.error("Cannot extract the error message from the wfs response.");
-                    throw new Exception(
-                        "The wfs replies with an Exception, but the error text cannot be extracted.");
+                    throw new Exception("The wfs replies with an Exception, but the error text cannot be extracted.");
                 }
             }
 
             featureCollectionDocument = null;
             System.gc();
-            logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
-                        + (System.currentTimeMillis() - start) + " ms");
+            logger.info(
+                "FRW[" +
+                workerThread +
+                "]: parsing " +
+                featureCollection.size() +
+                " features took " +
+                (System.currentTimeMillis() - start) +
+                " ms"
+            );
 
             if (featureCollection.size() > this.getMaxFeatureCount()) {
-                throw new TooManyFeaturesException("FRW[" + workerThread + "]: feature in feature document "
-                            + featureCollection.size() + " exceeds max feature count " + this.getMaxFeatureCount());
+                throw new TooManyFeaturesException(
+                    "FRW[" +
+                    workerThread +
+                    "]: feature in feature document " +
+                    featureCollection.size() +
+                    " exceeds max feature count " +
+                    this.getMaxFeatureCount()
+                );
             } else if (featureCollection.size() == 0) {
                 logger.warn("FRW[" + workerThread + "]: no features found after parsing");
                 return null;
@@ -387,15 +405,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             final org.deegree.model.feature.Feature[] featureArray = featureCollection.toArray();
             featureCollection = null;
             System.gc();
-            features = processFeatureCollection(
-                    workerThread,
-                    featureArray,
-                    true);
+            features = processFeatureCollection(workerThread, featureArray, true);
         } catch (Exception t) {
             logger.error("FRW[" + workerThread + "]: error parsing features: " + t.getMessage(), t);
             throw t;
         }
-//        }
+        //        }
 
         // check if thread is canceled .........................................
         if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
@@ -459,34 +474,34 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @throws  Exception                      DOCUMENT ME!
      */
     @Override
-    public Vector createAttributes(final SwingWorker workerThread) throws TooManyFeaturesException,
-        UnsupportedOperationException,
-        Exception {
-        throw new UnsupportedOperationException("LIW[" + workerThread
-                    + "]: WFSFeatureFactory does not support Attributes");
+    public Vector createAttributes(final SwingWorker workerThread)
+        throws TooManyFeaturesException, UnsupportedOperationException, Exception {
+        throw new UnsupportedOperationException(
+            "LIW[" + workerThread + "]: WFSFeatureFactory does not support Attributes"
+        );
     }
 
     @Override
-    protected void initialiseFeature(final WFSFeature featureServiceFeature,
-            final Feature degreeFeature,
-            final boolean evaluateExpressions,
-            final int index) throws Exception {
+    protected void initialiseFeature(
+        final WFSFeature featureServiceFeature,
+        final Feature degreeFeature,
+        final boolean evaluateExpressions,
+        final int index
+    ) throws Exception {
         // perform standard initialisation
         featureServiceFeature.setLayerProperties(this.getLayerProperties());
 
         // creating geometry
         if (featureServiceFeature.getGeometry() == null) {
             try {
-//                final DefaultFeature f = ((DefaultFeature)degreeFeature.getProperties()[5].getValue()).getProperties()[0];
-                Geometry geom = JTSAdapter.export(
-                        degreeFeature.getGeometryPropertyValues()[geometryIndex]);
+                //                final DefaultFeature f = ((DefaultFeature)degreeFeature.getProperties()[5].getValue()).getProperties()[0];
+                Geometry geom = JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]);
                 if (reverseAxisOrder) {
                     geom = GeometryUtils.reverseGeometryCoordinates(geom);
                 }
                 featureServiceFeature.setGeometry(geom);
             } catch (Exception e) {
-                Geometry geom = JTSAdapter.export(
-                        degreeFeature.getGeometryPropertyValues()[geometryIndex]);
+                Geometry geom = JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]);
                 if (reverseAxisOrder) {
                     geom = GeometryUtils.reverseGeometryCoordinates(geom);
                 }
@@ -513,8 +528,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         if (featureServiceFeature.getId() == -1) {
             try {
                 featureServiceFeature.setId(Integer.parseInt(featureServiceFeature.toString()));
-            } catch (NumberFormatException e) {
-            }
+            } catch (NumberFormatException e) {}
         }
     }
 
@@ -528,8 +542,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         if (reader != null) {
             try {
                 reader.close();
-            } catch (Exception silent) {
-            }
+            } catch (Exception silent) {}
             reader = null;
         }
 
@@ -622,12 +635,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
 
     @Override
     public int getFeatureCount(final String query, final BoundingBox bb) {
-        final XBoundingBox bbox = new XBoundingBox(bb.getX1(),
-                bb.getY1(),
-                bb.getX2(),
-                bb.getY2(),
-                getCrs().getCode(),
-                getCrs().isMetric());
+        final XBoundingBox bbox = new XBoundingBox(
+            bb.getX1(),
+            bb.getY1(),
+            bb.getX2(),
+            bb.getY2(),
+            getCrs().getCode(),
+            getCrs().isMetric()
+        );
         final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
         final Element queryElement = facade.getGetFeatureQuery(featureType);
         String wfsQuery = query;
@@ -637,15 +652,15 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
 
         final String postString = facade.setGetFeatureBoundingBox(
-                wfsQuery,
-                bbox,
-                featureType,
-                getCrs().getCode(),
-                reverseAxisOrder,
-                true);
-        featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
-                    featureType,
-                    getCrs().getCode()));
+            wfsQuery,
+            bbox,
+            featureType,
+            getCrs().getCode(),
+            reverseAxisOrder,
+            true
+        );
+        featureSrid =
+            CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(featureType, getCrs().getCode()));
 
         if (logger.isDebugEnabled()) {
             logger.debug("Host name: " + hostname + "\nWFS Query: \n" + postString);
@@ -653,8 +668,9 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         final long start = System.currentTimeMillis();
 
         try {
-            final InputStream respIs = WebAccessManager.getInstance()
-                        .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+            final InputStream respIs = WebAccessManager
+                .getInstance()
+                .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
 
             logger.info("WFS request took " + (System.currentTimeMillis() - start) + " ms");
 
@@ -682,9 +698,9 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             final String numberOfFeatures = doc.getDocumentElement().getAttribute("numberOfFeatures");
 
             return Integer.parseInt(numberOfFeatures);
-//            featureCollectionDocument.load(re, "http://dummyID");
-//
-//            return featureCollectionDocument.getFeatureCount();
+            //            featureCollectionDocument.load(re, "http://dummyID");
+            //
+            //            return featureCollectionDocument.getFeatureCount();
         } catch (Exception t) {
             logger.error("error parsing features: " + t.getMessage(), t);
             return 0;
@@ -692,12 +708,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     }
 
     @Override
-    public List<WFSFeature> createFeatures(final String query,
-            final BoundingBox boundingBox,
-            final SwingWorker workerThread,
-            final int offset,
-            final int limit,
-            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+    public List<WFSFeature> createFeatures(
+        final String query,
+        final BoundingBox boundingBox,
+        final SwingWorker workerThread,
+        final int offset,
+        final int limit,
+        final FeatureServiceAttribute[] orderBy
+    ) throws TooManyFeaturesException, Exception {
         return createFeatures_internal(query, boundingBox, workerThread, false);
     }
 }

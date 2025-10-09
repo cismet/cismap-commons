@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,11 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget.displays;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JPanel;
-
 import de.cismet.tools.gui.FXWebViewPanel;
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
 
 /**
  * DOCUMENT ME!

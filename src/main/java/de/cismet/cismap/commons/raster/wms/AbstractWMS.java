@@ -1,15 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
-
-import org.apache.log4j.Logger;
-
-import java.awt.Image;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ServiceLayer;
@@ -17,8 +13,9 @@ import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.tools.CurrentStackTrace;
+import java.awt.Image;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -26,9 +23,9 @@ import de.cismet.tools.CurrentStackTrace;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractWMS extends AbstractRetrievalService implements MapService,
-    RetrievalListener,
-    ServiceLayer {
+public abstract class AbstractWMS
+    extends AbstractRetrievalService
+    implements MapService, RetrievalListener, ServiceLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -51,8 +48,7 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
     /**
      * Creates a new instance of AbstractWMS.
      */
-    public AbstractWMS() {
-    }
+    public AbstractWMS() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -104,8 +100,10 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
         // ansonsten ist es sehr wahrscheinlich dass es sich um ein Fehlerbild handelt
         final Object o = e.getRetrievedObject();
         if (o instanceof Image) {
-            if ((Math.abs(((Image)o).getHeight(null) - height) > 1)
-                        || (Math.abs(((Image)o).getWidth(null) - width) > 1)) {
+            if (
+                (Math.abs(((Image) o).getHeight(null) - height) > 1) ||
+                (Math.abs(((Image) o).getWidth(null) - width) > 1)
+            ) {
                 e.setHasErrors(true);
             } else {
                 e.setHasErrors(false);

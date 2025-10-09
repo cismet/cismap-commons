@@ -1,43 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
+
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.POLYGON;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.nodes.PText;
-
-import org.apache.log4j.Logger;
-
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.MouseInfo;
-import java.awt.Point;
-import java.awt.geom.Point2D;
-
-import java.lang.reflect.Constructor;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.*;
@@ -49,12 +25,27 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteA
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.NewTextDialog;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-
 import de.cismet.tools.StaticDecimalTools;
-
 import de.cismet.tools.gui.StaticSwingTools;
-
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.POLYGON;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.nodes.PText;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.geom.Point2D;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -167,9 +158,15 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      */
     @Override
     public void setMode(final String mode) throws IllegalArgumentException {
-        if (modeEquals(LINESTRING) || modeEquals(POINT) || modeEquals(POLYGON) || modeEquals(ELLIPSE)
-                    || modeEquals(RECTANGLE)
-                    || modeEquals(RECTANGLE_FROM_LINE) || modeEquals(TEXT)) {
+        if (
+            modeEquals(LINESTRING) ||
+            modeEquals(POINT) ||
+            modeEquals(POLYGON) ||
+            modeEquals(ELLIPSE) ||
+            modeEquals(RECTANGLE) ||
+            modeEquals(RECTANGLE_FROM_LINE) ||
+            modeEquals(TEXT)
+        ) {
             if (!modeEquals(mode)) {
                 reset();
                 this.mode = mode;
@@ -206,12 +203,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         super.mouseMoved(pInputEvent);
 
         if (inProgress) { // && (!isInMode(POINT))) {
-            final Point2D point = PFeatureTools.getNearestPointInArea(
-                        mappingComponent,
-                        pInputEvent.getCanvasPosition(),
-                        true,
-                        null)
-                        .getPoint();
+            final Point2D point = PFeatureTools
+                .getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition(), true, null)
+                .getPoint();
             updatePolygon(point);
 
             if (showCurrentLength && isInMode(LINESTRING)) {
@@ -223,7 +217,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     }
                 }
                 final Point2D leftInfoPoint = pInputEvent.getPosition();
-                int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                int fontSize = (int) (mappingComponent.getScaleDenominator() / 3700 * 12);
                 if (fontSize < 1) {
                     fontSize = 1;
                 }
@@ -245,8 +239,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     public void mousePressed(final PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
         if (mappingComponent.isReadOnly()) {
-            ((DefaultFeatureCollection)(mappingComponent.getFeatureCollection())).removeFeaturesByInstance(
-                PureNewFeature.class);
+            ((DefaultFeatureCollection) (mappingComponent.getFeatureCollection())).removeFeaturesByInstance(
+                    PureNewFeature.class
+                );
         }
 
         if (isInMode(TEXT)) {
@@ -264,18 +259,24 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             if (pInputEvent.isLeftMouseButton()) {
                 snappedCoordinates.clear();
                 final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
+                    mappingComponent,
+                    pInputEvent.getCanvasPosition(),
+                    true,
+                    null
+                );
+                if (
+                    (
+                        MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode()) ||
+                        MappingComponent.SnappingMode.BOTH.equals(mappingComponent.getSnappingMode())
+                    ) &&
+                    !PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(snappedPoint.getSnappedOn())
+                ) {
+                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
                         mappingComponent,
                         pInputEvent.getCanvasPosition(),
                         true,
-                        null);
-                if ((MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
-                                || MappingComponent.SnappingMode.BOTH.equals(mappingComponent.getSnappingMode()))
-                            && !PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(snappedPoint.getSnappedOn())) {
-                    final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
-                            mappingComponent,
-                            pInputEvent.getCanvasPosition(),
-                            true,
-                            null);
+                        null
+                    );
                     if (coord != null) {
                         snappedCoordinates.put(snappedPoint.getPoint(), coord);
                     }
@@ -297,10 +298,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
             // snappingpoint ermitteln falls snapping enabled
             final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
-                    mappingComponent,
-                    pInputEvent.getCanvasPosition(),
-                    true,
-                    null);
+                mappingComponent,
+                pInputEvent.getCanvasPosition(),
+                true,
+                null
+            );
             // wenn snappingpoint vorhanden, dann den nehmen, ansonsten normalen punkt unter der maus ermitteln
             final Point2D point = (snappedPoint != null) ? snappedPoint.getPoint() : pInputEvent.getPosition();
 
@@ -329,8 +331,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     final RectangleFromLineDialog dialog = new RectangleFromLineDialog(parentFrame, true, length);
 
                     // in der Karte dynamisch auf Eingaben im Dialog reagieren
-                    dialog.addWidthChangedListener(new ChangeListener() {
-
+                    dialog.addWidthChangedListener(
+                        new ChangeListener() {
                             @Override
                             public void stateChanged(final ChangeEvent ce) {
                                 final double height = dialog.getRectangleWidth();
@@ -353,7 +355,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
                                 updatePolygon(null);
                             }
-                        });
+                        }
+                    );
 
                     // Dialog mittig anzeigen
                     StaticSwingTools.showDialog(dialog);
@@ -384,20 +387,23 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         snappedCoordinates.clear();
                     }
                     if (mappingComponent.isSnappingEnabled()) {
-                        point = PFeatureTools.getNearestPointInArea(
-                                    mappingComponent,
-                                    pInputEvent.getCanvasPosition(),
-                                    true,
-                                    null).getPoint();
-                        if ((point != null)
-                                    && (MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode())
-                                        || MappingComponent.SnappingMode.BOTH.equals(
-                                            mappingComponent.getSnappingMode()))) {
+                        point =
+                            PFeatureTools
+                                .getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition(), true, null)
+                                .getPoint();
+                        if (
+                            (point != null) &&
+                            (
+                                MappingComponent.SnappingMode.POINT.equals(mappingComponent.getSnappingMode()) ||
+                                MappingComponent.SnappingMode.BOTH.equals(mappingComponent.getSnappingMode())
+                            )
+                        ) {
                             final Coordinate coord = PFeatureTools.getNearestCoordinateInArea(
-                                    mappingComponent,
-                                    pInputEvent.getCanvasPosition(),
-                                    true,
-                                    null);
+                                mappingComponent,
+                                pInputEvent.getCanvasPosition(),
+                                true,
+                                null
+                            );
                             if (coord != null) {
                                 snappedCoordinates.put(point, coord);
                             }
@@ -424,7 +430,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 } else if (pInputEvent.getClickCount() == 2) {
                     if (isInMode(POLYGON)) {
                         if (points.size() == 2) { // bei polygonen mit nur 2 punkten
-                                                  // wird eine boundingbox angelegt
+                            // wird eine boundingbox angelegt
                             //
                             // Rectangle QuickSnap
                             //
@@ -448,7 +454,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
                             // P3
                             points.add(new Point2D.Double(pointP4.getX(), pointP1.getY()));
-
                             // No need to add P1 to close the polygon, because the polygon part of the code will care
                             // about that
                         } else if (points.size() < 2) {
@@ -467,12 +472,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         inProgress = false;
                     } else {
                         points.remove(points.size() - 1);
-                        final Point2D point = PFeatureTools.getNearestPointInArea(
-                                    mappingComponent,
-                                    pInputEvent.getCanvasPosition(),
-                                    true,
-                                    null)
-                                    .getPoint();
+                        final Point2D point = PFeatureTools
+                            .getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition(), true, null)
+                            .getPoint();
                         updatePolygon(point);
                     }
                 }
@@ -505,9 +507,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      *
      * @return  DOCUMENT ME!
      */
-// protected PureNewFeature getCurrentPureNewFeature() {
-// return getCurrentPureNewFeature(null);
-// }
+    // protected PureNewFeature getCurrentPureNewFeature() {
+    // return getCurrentPureNewFeature(null);
+    // }
 
     protected AbstractNewFeature getCurrentNewFeature() {
         return currentFeature;
@@ -540,8 +542,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
 
             final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
             final Constructor<? extends AbstractNewFeature> constructor = geometryFeatureClass.getConstructor(
-                    Point2D[].class,
-                    WorldToScreenTransform.class);
+                Point2D[].class,
+                WorldToScreenTransform.class
+            );
             AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
             newFeature.setGeometryType(geomType);
             newFeature.getGeometry().setSRID(currentSrid);
@@ -566,13 +569,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 }
             }
 
-            geom = CrsTransformer.transformToGivenCrs(geom,
-                    mappingComponent.getMappingModel().getSrs().getCode());
+            geom = CrsTransformer.transformToGivenCrs(geom, mappingComponent.getMappingModel().getSrs().getCode());
 
             if (isInMode(LINESTRING) && geom.getGeometryType().equals("Polygon")) {
-                final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                        currentSrid);
-                geom = factory.createLineString(((Polygon)geom).getExteriorRing().getCoordinates());
+                final GeometryFactory factory = new GeometryFactory(
+                    new PrecisionModel(PrecisionModel.FLOATING),
+                    currentSrid
+                );
+                geom = factory.createLineString(((Polygon) geom).getExteriorRing().getCoordinates());
             }
 
             newFeature.setGeometry(geom);
@@ -580,13 +584,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             if (isInMode(TEXT)) {
                 final AbstractNewFeature f = newFeature;
 
-                EventQueue.invokeLater(new Runnable() {
-
+                EventQueue.invokeLater(
+                    new Runnable() {
                         @Override
                         public void run() {
                             createTextNode(f);
                         }
-                    });
+                    }
+                );
 
                 newFeature = null;
             }
@@ -605,15 +610,15 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      */
     private void createTextNode(final AbstractNewFeature newFeature) {
         final NewTextDialog dialog = new NewTextDialog(StaticSwingTools.getParentFrame(mappingComponent), false);
-        dialog.setRunWhenFinish(new Runnable() {
-
+        dialog.setRunWhenFinish(
+            new Runnable() {
                 @Override
                 public void run() {
                     if (dialog.isConfirmed()) {
                         newFeature.setName(dialog.getText());
 
                         if (!dialog.isAutoScaleEnabled()) {
-                            final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                            final int fontSize = (int) (mappingComponent.getScaleDenominator() / 3700 * 12);
                             Font f = dialog.getFont();
 
                             if (f == null) {
@@ -623,10 +628,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         } else {
                             Font f = dialog.getFont();
                             if (f == null) {
-                                final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                                final int fontSize = (int) (mappingComponent.getScaleDenominator() / 3700 * 12);
                                 f = new Font("sansserif", Font.PLAIN, fontSize);
                             } else {
-                                final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * f.getSize());
+                                final int fontSize = (int) (
+                                    mappingComponent.getScaleDenominator() / 3700 * f.getSize()
+                                );
                                 f = f.deriveFont(fontSize);
                             }
                             newFeature.setPrimaryAnnotationFont(f);
@@ -639,10 +646,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         finishGeometry(newFeature);
                     }
                 }
-            });
+            }
+        );
 
         final Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
-        dialog.setLocation((int)(mouseLocation.getX() + 10), (int)mouseLocation.getY());
+        dialog.setLocation((int) (mouseLocation.getX() + 10), (int) mouseLocation.getY());
         dialog.setVisible(true);
     }
 
@@ -669,10 +677,10 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     inProgress = false;
                 }
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Backspace gedr\u00FCckt: letzter eingef\u00FCgter Punkt gel\u00F6scht.");               // NOI18N
+                    LOG.debug("Backspace gedr\u00FCckt: letzter eingef\u00FCgter Punkt gel\u00F6scht."); // NOI18N
                 }
                 updatePolygon(null);
-            } else if (event.isControlDown()) {                                                                        // Strg gedr\u00FCckt
+            } else if (event.isControlDown()) { // Strg gedr\u00FCckt
                 if (!undoPoints.isEmpty()) {
                     points.add(undoPoints.pop());
                     if (LOG.isDebugEnabled()) {
@@ -683,7 +691,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             }
         } else if (!inProgress && (points != null) && points.isEmpty() && event.isControlDown()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
+                LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen"); // NOI18N
             }
 
             initTempFeature();
@@ -725,7 +733,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         if (!(currentFeature instanceof SearchFeature)) {
             final ArrayList<Feature> features = new ArrayList<>();
             features.add(currentFeature);
-            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).fireFeaturesChanged(features);
+            ((DefaultFeatureCollection) mappingComponent.getFeatureCollection()).fireFeaturesChanged(features);
         }
         if (tempFeature != null) {
             tempFeature.setPathToPolyline(getPoints(lastPoint));
@@ -864,11 +872,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             final double startY = startPoint.getY();
 
             final Coordinate[] coordArr = EllipsePHandle.createEllipseCoordinates(
-                    getNumOfEllipseEdges(),
-                    a,
-                    b,
-                    pInputEvent.isControlDown(),
-                    pInputEvent.isShiftDown());
+                getNumOfEllipseEdges(),
+                a,
+                b,
+                pInputEvent.isControlDown(),
+                pInputEvent.isShiftDown()
+            );
 
             points = new ArrayList<Point2D>(coordArr.length);
             snappedCoordinates.clear();

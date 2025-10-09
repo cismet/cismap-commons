@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
@@ -29,8 +29,7 @@ public class ActiveLayerEvent {
     /**
      * Creates a new instance of ActiveLayerEvent.
      */
-    public ActiveLayerEvent() {
-    }
+    public ActiveLayerEvent() {}
 
     //~ Methods ----------------------------------------------------------------
 

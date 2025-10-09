@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter.MatchRating;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Creates a rectangular polygon geometry (a bounding box) from the provided coordinates. At least two coordinates are
@@ -27,14 +25,15 @@ import de.cismet.commons.converter.Converter.MatchRating;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class BoundingBoxFromTextConverter extends AbstractGeometryFromTextConverter
-        implements MatchRating<String> {
+public final class BoundingBoxFromTextConverter
+    extends AbstractGeometryFromTextConverter
+    implements MatchRating<String> {
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException {
+        throws ConversionException {
         if (coordinates.length < 2) {
             throw new ConversionException("too few coordinates for bounding box: " + coordinates.length); // NOI18N
         }
@@ -64,8 +63,9 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                BoundingBoxFromTextConverter.class,
-                "BoundingBoxFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
+            BoundingBoxFromTextConverter.class,
+            "BoundingBoxFromTextConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -76,8 +76,9 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
     @Override
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "BoundingBoxFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+            PointFromTextConverter.class,
+            "BoundingBoxFromTextConverter.getFormatDescription().returnValue"
+        ); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -85,10 +86,12 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
 
     @Override
     public String getFormatHtmlDescription() {
-        final String desc = NbBundle.getMessage(
-                    PointFromTextConverter.class,
-                    "BoundingBoxFromTextConverter.getFormatHtmlDescription().returnValue")
-                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String desc = NbBundle
+            .getMessage(
+                PointFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatHtmlDescription().returnValue"
+            )
+            .replaceAll("<[/]?html>", ""); // NOI18N
         final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
 
         return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
@@ -97,9 +100,10 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "BoundingBoxFromTextConverter.getFormatExample().returnValue",
-                getDecimalSeparator()); // NOI18N
+            PointFromTextConverter.class,
+            "BoundingBoxFromTextConverter.getFormatExample().returnValue",
+            getDecimalSeparator()
+        ); // NOI18N
     }
 
     @Override

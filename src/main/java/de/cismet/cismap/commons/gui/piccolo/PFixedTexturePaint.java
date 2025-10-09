@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,7 +12,6 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
-
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
@@ -56,11 +55,13 @@ public class PFixedTexturePaint implements java.awt.Paint, PSticky, PaintWrapper
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public PaintContext createContext(final ColorModel cm,
-            final Rectangle deviceBounds,
-            final Rectangle2D userBounds,
-            final AffineTransform xform,
-            final RenderingHints hints) {
+    public PaintContext createContext(
+        final ColorModel cm,
+        final Rectangle deviceBounds,
+        final Rectangle2D userBounds,
+        final AffineTransform xform,
+        final RenderingHints hints
+    ) {
         return paint.createContext(cm, deviceBounds, userBounds, xform, hints);
     }
 
@@ -84,17 +85,16 @@ public class PFixedTexturePaint implements java.awt.Paint, PSticky, PaintWrapper
 
     @Override
     public void setScale(final double scale) {
-        paint = new TexturePaint(
+        paint =
+            new TexturePaint(
                 img,
                 new Rectangle2D.Double(
-                    anchor.getX()
-                            * scale,
-                    anchor.getY()
-                            * scale,
-                    anchor.getWidth()
-                            * scale,
-                    anchor.getHeight()
-                            * scale));
+                    anchor.getX() * scale,
+                    anchor.getY() * scale,
+                    anchor.getWidth() * scale,
+                    anchor.getHeight() * scale
+                )
+            );
     }
 
     @Override

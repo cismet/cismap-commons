@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,12 +12,11 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import java.io.File;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.JRCsvExporter;
-
-import java.io.File;
 
 /**
  * DOCUMENT ME!
@@ -38,19 +37,14 @@ public class JasperReportCsvDownload extends JasperReportDownload {
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
-    public JasperReportCsvDownload(final String reportResourceName,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
-        super(reportResourceName,
-
-
-            dataSourceGenerator,
-            directory,
-            title,
-            filename,
-            ".csv");
+    public JasperReportCsvDownload(
+        final String reportResourceName,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
+        super(reportResourceName, dataSourceGenerator, directory, title, filename, ".csv");
     }
 
     //~ Methods ----------------------------------------------------------------

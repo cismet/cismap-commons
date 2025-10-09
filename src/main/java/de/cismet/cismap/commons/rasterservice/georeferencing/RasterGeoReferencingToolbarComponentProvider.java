@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,26 +12,20 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
-import lombok.Getter;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
-
 import de.cismet.tools.StaticDebuggingTools;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.menu.CidsUiComponent;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -40,9 +34,9 @@ import de.cismet.tools.gui.menu.CidsUiComponent;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = ToolbarComponentsProvider.class)
-public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JPanel
-        implements ToolbarComponentsProvider,
-            CidsUiComponent {
+public class RasterGeoReferencingToolbarComponentProvider
+    extends javax.swing.JPanel
+    implements ToolbarComponentsProvider, CidsUiComponent {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -50,10 +44,12 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final List<ToolbarComponentDescription> toolbarComponents = new ArrayList<>();
+    @Getter
+    private final List<ToolbarComponentDescription> toolbarComponents = new ArrayList<>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JToggleButton btnRasterGeoRef;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -81,12 +77,7 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
      * @return  DOCUMENT ME!
      */
     private ToolbarComponentDescription getToolbarComponentDescription() {
-        return new ToolbarComponentDescription(
-                "tlbMain",
-                btnRasterGeoRef,
-                ToolbarPositionHint.AFTER,
-                "cmdPan",
-                true);
+        return new ToolbarComponentDescription("tlbMain", btnRasterGeoRef, ToolbarPositionHint.AFTER, "cmdPan", true);
     }
 
     /**
@@ -100,21 +91,27 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
 
         setLayout(new java.awt.GridBagLayout());
 
-        btnRasterGeoRef.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef.png"))); // NOI18N
+        btnRasterGeoRef.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef.png")
+            )
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             btnRasterGeoRef,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingToolbarComponentProvider.class,
-                "RasterGeoReferencingToolbarComponentProvider.btnRasterGeoRef.text"));                         // NOI18N
+                "RasterGeoReferencingToolbarComponentProvider.btnRasterGeoRef.text"
+            )
+        ); // NOI18N
         btnRasterGeoRef.setEnabled(false);
-        btnRasterGeoRef.addActionListener(new java.awt.event.ActionListener() {
-
+        btnRasterGeoRef.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnRasterGeoRefActionPerformed(evt);
                 }
-            });
+            }
+        );
         add(btnRasterGeoRef, new java.awt.GridBagConstraints());
     } // </editor-fold>//GEN-END:initComponents
 
@@ -125,7 +122,7 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
      */
     private void btnRasterGeoRefActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnRasterGeoRefActionPerformed
         CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
-    }                                                                                   //GEN-LAST:event_btnRasterGeoRefActionPerformed
+    } //GEN-LAST:event_btnRasterGeoRefActionPerformed
 
     @Override
     public String getPluginName() {
@@ -170,8 +167,10 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
                     RasterGeoReferencingDialog.getInstance().setVisible(false);
                 }
                 // todo: check, if this is required
-                if ((RasterGeoReferencingWizard.getInstance().getHandler() != null)
-                            && (RasterGeoReferencingWizard.getInstance().getHandler().getFeature() != null)) {
+                if (
+                    (RasterGeoReferencingWizard.getInstance().getHandler() != null) &&
+                    (RasterGeoReferencingWizard.getInstance().getHandler().getFeature() != null)
+                ) {
                     RasterGeoReferencingWizard.getInstance().getHandler().getFeature().transformationChanged();
                 }
             }
@@ -188,12 +187,10 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void pointSelected(final int position) {
-        }
+        public void pointSelected(final int position) {}
 
         @Override
-        public void coordinateSelected(final int position) {
-        }
+        public void coordinateSelected(final int position) {}
 
         @Override
         public void handlerChanged(final RasterGeoReferencingHandler handler) {
@@ -201,19 +198,15 @@ public class RasterGeoReferencingToolbarComponentProvider extends javax.swing.JP
         }
 
         @Override
-        public void positionAdded(final int position) {
-        }
+        public void positionAdded(final int position) {}
 
         @Override
-        public void positionRemoved(final int position) {
-        }
+        public void positionRemoved(final int position) {}
 
         @Override
-        public void positionChanged(final int position) {
-        }
+        public void positionChanged(final int position) {}
 
         @Override
-        public void transformationChanged() {
-        }
+        public void transformationChanged() {}
     }
 }

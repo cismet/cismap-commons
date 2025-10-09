@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -15,13 +15,10 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DropTargetDropEvent;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.util.Arrays;
 import java.util.List;
-
 import javax.swing.TransferHandler;
 
 /**
@@ -40,7 +37,7 @@ public class DnDUtils {
     static {
         try {
             URI_LIST_FLAVOR = new DataFlavor("text/uri-list;class=java.lang.String"); // NOI18N
-        } catch (ClassNotFoundException e) {                                          // can't happen
+        } catch (ClassNotFoundException e) { // can't happen
             e.printStackTrace();
         }
     }
@@ -56,10 +53,12 @@ public class DnDUtils {
      */
     public static List textURIListToFileList(final String data) {
         final java.util.List list = new java.util.ArrayList(1);
-        for (final java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n"); // NOI18N
-                    st.hasMoreTokens();) {
+        for (
+            final java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n"); // NOI18N
+            st.hasMoreTokens();
+        ) {
             final String s = st.nextToken();
-            if (s.startsWith("#")) {                                                           // NOI18N
+            if (s.startsWith("#")) { // NOI18N
                 // the line is a comment (as per the RFC 2483)
                 continue;
             }
@@ -98,8 +97,10 @@ public class DnDUtils {
         if (tsw == null) {
             return false;
         }
-        return tsw.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                    || tsw.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR);
+        return (
+            tsw.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+            tsw.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+        );
     }
 
     /**
@@ -112,8 +113,8 @@ public class DnDUtils {
      * @throws  UnsupportedFlavorException  DOCUMENT ME!
      * @throws  IOException                 DOCUMENT ME!
      */
-    public static List<File> getFilesFrom(final DropTargetDropEvent dtde) throws UnsupportedFlavorException,
-        IOException {
+    public static List<File> getFilesFrom(final DropTargetDropEvent dtde)
+        throws UnsupportedFlavorException, IOException {
         return getFilesFrom(new TransferSupportWrapper(dtde));
     }
 
@@ -127,8 +128,8 @@ public class DnDUtils {
      * @throws  UnsupportedFlavorException  DOCUMENT ME!
      * @throws  IOException                 DOCUMENT ME!
      */
-    public static List<File> getFilesFrom(final TransferSupportWrapper tsw) throws UnsupportedFlavorException,
-        IOException {
+    public static List<File> getFilesFrom(final TransferSupportWrapper tsw)
+        throws UnsupportedFlavorException, IOException {
         if (tsw == null) {
             return null;
         }
@@ -136,15 +137,15 @@ public class DnDUtils {
         final Transferable transferable = tsw.getTransferable();
         if (tsw.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
             try {
-                data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
             } catch (final Exception ex) {
                 if (data == null) {
-                    data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
-                                DnDUtils.URI_LIST_FLAVOR));
+                    data =
+                        DnDUtils.textURIListToFileList((String) transferable.getTransferData(DnDUtils.URI_LIST_FLAVOR));
                 }
             }
         } else {
-            data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+            data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
         }
         return data;
     }

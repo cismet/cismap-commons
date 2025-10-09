@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 jweintraut
  *
@@ -28,35 +28,28 @@
  */
 package de.cismet.cismap.commons.gui.shapeexport;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Exceptions;
-
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
-
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
-
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.downloadmanager.DownloadManager;
-import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import org.apache.log4j.Logger;
+import org.openide.util.Exceptions;
 
 /**
  * This dialog lets the user select which topic he wants to export. Every topic is represented by a checkbox. The
@@ -97,6 +90,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator sepControls;
     private javax.swing.JSeparator sepStep1Header;
     private javax.swing.JSeparator sepSteps;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -118,9 +112,11 @@ public class ShapeExportDialog extends javax.swing.JDialog {
      * @param  modal          A flag indicating whether this dialog has to be modal.
      * @param  wfsCollection  The topics to display.
      */
-    public ShapeExportDialog(final java.awt.Frame parent,
-            final boolean modal,
-            final Collection<ExportWFS> wfsCollection) {
+    public ShapeExportDialog(
+        final java.awt.Frame parent,
+        final boolean modal,
+        final Collection<ExportWFS> wfsCollection
+    ) {
         super(parent, modal);
         this.wfsCollection = wfsCollection;
         checkboxes = new HashMap<ExportWFS, JCheckBox>(wfsCollection.size());
@@ -145,12 +141,12 @@ public class ShapeExportDialog extends javax.swing.JDialog {
             final JCheckBox newCheckBox = new JCheckBox(wfs.getTopic());
             newCheckBox.setFocusPainted(false);
             newCheckBox.setAlignmentX(1F);
-            newCheckBox.addActionListener(new ActionListener() {
-
+            newCheckBox.addActionListener(
+                new ActionListener() {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (e.getSource() instanceof JCheckBox) {
-                            final JCheckBox checkbox = (JCheckBox)e.getSource();
+                            final JCheckBox checkbox = (JCheckBox) e.getSource();
                             if (checkbox.isSelected()) {
                                 countOfSelectedWFSs++;
                             } else {
@@ -160,7 +156,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                             btnOK.setEnabled(countOfSelectedWFSs > 0);
                         }
                     }
-                });
+                }
+            );
             checkboxes.put(wfs, newCheckBox);
 
             if (font == null) {
@@ -170,8 +167,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                 fontRenderContext = newCheckBox.getFontMetrics(font).getFontRenderContext();
             }
 
-            final int width = (int)font.getStringBounds(newCheckBox.getText(),
-                    fontRenderContext).getWidth();
+            final int width = (int) font.getStringBounds(newCheckBox.getText(), fontRenderContext).getWidth();
             if (maxWidth < width) {
                 maxWidth = width;
             }
@@ -180,9 +176,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         // Calculate the gap between checkbox and text and add the checkboxes to the panel
         for (final ExportWFS wfs : this.wfsCollection) {
             final JCheckBox newCheckBox = checkboxes.get(wfs);
-            newCheckBox.setIconTextGap((maxWidth
-                            - (int)font.getStringBounds(newCheckBox.getText(),
-                                fontRenderContext).getWidth()) + 10);
+            newCheckBox.setIconTextGap(
+                (maxWidth - (int) font.getStringBounds(newCheckBox.getText(), fontRenderContext).getWidth()) + 10
+            );
             pnlCheckboxes.add(newCheckBox);
         }
         pnlCheckboxes.add(Box.createVerticalGlue());
@@ -229,29 +225,31 @@ public class ShapeExportDialog extends javax.swing.JDialog {
 
         pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
-        btnCancel.setText(org.openide.util.NbBundle.getMessage(
-                ShapeExportDialog.class,
-                "ShapeExportDialog.btnCancel.text")); // NOI18N
+        btnCancel.setText(
+            org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.btnCancel.text")
+        ); // NOI18N
         btnCancel.setPreferredSize(new java.awt.Dimension(100, 25));
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-
+        btnCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         pnlButtons.add(btnCancel);
 
         btnOK.setText(org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.btnOK.text")); // NOI18N
         btnOK.setEnabled(false);
         btnOK.setPreferredSize(new java.awt.Dimension(100, 25));
-        btnOK.addActionListener(new java.awt.event.ActionListener() {
-
+        btnOK.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnOKActionPerformed(evt);
                 }
-            });
+            }
+        );
         pnlButtons.add(btnOK);
 
         pnlControls.add(pnlButtons, java.awt.BorderLayout.CENTER);
@@ -265,9 +263,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         panDesc.setLayout(new java.awt.GridBagLayout());
 
         lblSteps.setFont(new java.awt.Font("Tahoma", 1, 11));
-        lblSteps.setText(org.openide.util.NbBundle.getMessage(
-                ShapeExportDialog.class,
-                "ShapeExportDialog.lblSteps.text")); // NOI18N
+        lblSteps.setText(
+            org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.lblSteps.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -285,9 +283,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panDesc.add(sepSteps, gridBagConstraints);
 
-        lblStep1.setText(org.openide.util.NbBundle.getMessage(
-                ShapeExportDialog.class,
-                "ShapeExportDialog.lblStep1.text")); // NOI18N
+        lblStep1.setText(
+            org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.lblStep1.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -296,8 +294,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         panDesc.add(lblStep1, gridBagConstraints);
 
         lblIcon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/shapeexport.png"))); // NOI18N
+        lblIcon.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shapeexport.png"))
+        ); // NOI18N
         lblIcon.setPreferredSize(new java.awt.Dimension(128, 128));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -320,9 +319,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
 
         pnlExportParameters.setLayout(new java.awt.GridBagLayout());
 
-        lblDialogHint.setText(org.openide.util.NbBundle.getMessage(
-                ShapeExportDialog.class,
-                "ShapeExportDialog.lblDialogHint.text")); // NOI18N
+        lblDialogHint.setText(
+            org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.lblDialogHint.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -331,9 +330,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         pnlExportParameters.add(lblDialogHint, gridBagConstraints);
 
         lblStep1Header.setFont(new java.awt.Font("Tahoma", 1, 11));
-        lblStep1Header.setText(org.openide.util.NbBundle.getMessage(
-                ShapeExportDialog.class,
-                "ShapeExportDialog.lblStep1Header.text")); // NOI18N
+        lblStep1Header.setText(
+            org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.lblStep1Header.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -400,7 +399,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         cancelled = true;
         selectedWFSs = new LinkedList<ExportWFS>();
         setVisible(false);
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    } //GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * Returns a flag indicating whether the user closed the dialog.
@@ -437,225 +436,231 @@ public class ShapeExportDialog extends javax.swing.JDialog {
             return;
         }
         final ExportWFS wfs1 = new ExportWFS(
-                "Test-Thema 1",
-                "route",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                url,
-                null);
+            "Test-Thema 1",
+            "route",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            url,
+            null
+        );
 
         final ExportWFS wfs2 = new ExportWFS(
-                "Dann das Test-Thema 2",
-                "route",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                url,
-                null);
+            "Dann das Test-Thema 2",
+            "route",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            url,
+            null
+        );
 
         final ExportWFS wfs3 = new ExportWFS(
-                "Und dann noch das Test-Thema 3",
-                "oeg",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:gid</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:perimeter</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:ezg3_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:ezg3_id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:poly_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:subclass</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:subclass_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rings_ok</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rings_nok</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:schluessel</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:zehn</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:teilgebnr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pegelnr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pegelname</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pkz</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:seenr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:seename</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:flussgeb</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:von</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_geo</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_gebbz</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:key_pl</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:key_pl_ten</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:teilgeb</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:wrkarea</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area_km2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:mst</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:a_sum</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:id_ezg</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsaldo_amt</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:min_nsl_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:max_nsl_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsaldo_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:kg_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwn_0</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rd_p1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwn_p1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_sw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_kg_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_kg_ow</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:et0</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:kf_hoch</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:mv</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:proz_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsald_amt2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsald_lw2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk_fluss</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                url,
-                null);
+            "Und dann noch das Test-Thema 3",
+            "oeg",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:gid</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:perimeter</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:ezg3_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:ezg3_id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:poly_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:subclass</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:subclass_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rings_ok</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rings_nok</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:schluessel</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:zehn</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:teilgebnr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pegelnr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pegelname</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pkz</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:seenr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:seename</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:flussgeb</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:von</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_geo</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_gebbz</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:key_pl</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:key_pl_ten</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:teilgeb</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:wrkarea</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area_km2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:mst</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:a_sum</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:id_ezg</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsaldo_amt</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:min_nsl_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:max_nsl_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsaldo_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:kg_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwn_0</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rd_p1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwn_p1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_sw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_kg_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_kg_ow</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:et0</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:kf_hoch</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:mv</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:proz_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsald_amt2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsald_lw2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk_fluss</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            url,
+            null
+        );
         final ExportWFS wfs4 = new ExportWFS(
-                "Test-Thema 1",
-                "route",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                url,
-                null);
+            "Test-Thema 1",
+            "route",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            url,
+            null
+        );
 
         final ExportWFS wfs5 = new ExportWFS(
-                "Dann das Test-Thema 2",
-                "route",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                erraneousURL,
-                null);
+            "Dann das Test-Thema 2",
+            "route",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            erraneousURL,
+            null
+        );
 
         final ExportWFS wfs6 = new ExportWFS(
-                "Und dann noch das Test-Thema 3",
-                "oeg",
-                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
-                        + "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">"
-                        + "<ogc:Filter>"
-                        + "<ogc:BBOX>"
-                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismap:BBOX/>"
-                        + "</ogc:BBOX>"
-                        + "</ogc:Filter>"
-                        + "<wfs:PropertyName>app:gid</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:perimeter</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:ezg3_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:ezg3_id</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:poly_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:subclass</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:subclass_</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rings_ok</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rings_nok</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:schluessel</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:zehn</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:typ2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:teilgebnr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pegelnr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pegelname</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:pkz</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:seenr</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:seename</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:flussgeb</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:von</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_geo</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_gwk</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:modi_gebbz</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:key_pl</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:key_pl_ten</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:teilgeb</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:wrkarea</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area_km2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:mst</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:a_sum</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:id_ezg</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsaldo_amt</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:min_nsl_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:max_nsl_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsaldo_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:area_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:kg_lw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwn_0</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:rd_p1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwn_p1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_sw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_kg_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_kg_ow</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:et0</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw1</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:no3_gw2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:kf_hoch</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:mv</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:proz_gw</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsald_amt2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:nsald_lw2</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:gwk_fluss</wfs:PropertyName>"
-                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
-                        + "</wfs:Query>"
-                        + "</wfs:GetFeature>",
-                url,
-                null);
+            "Und dann noch das Test-Thema 3",
+            "oeg",
+            "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">" +
+            "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">" +
+            "<ogc:Filter>" +
+            "<ogc:BBOX>" +
+            "<ogc:PropertyName>app:the_geom</ogc:PropertyName>" +
+            "<cismap:BBOX/>" +
+            "</ogc:BBOX>" +
+            "</ogc:Filter>" +
+            "<wfs:PropertyName>app:gid</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:perimeter</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:ezg3_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:ezg3_id</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:poly_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:subclass</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:subclass_</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rings_ok</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rings_nok</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:schluessel</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:zehn</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:typ2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:teilgebnr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pegelnr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pegelname</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:pkz</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:seenr</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:seename</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:flussgeb</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:von</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_geo</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_gwk</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:modi_gebbz</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:key_pl</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:key_pl_ten</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:teilgeb</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:wrkarea</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area_km2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:mst</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:a_sum</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:id_ezg</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsaldo_amt</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:min_nsl_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:max_nsl_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsaldo_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:area_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:kg_lw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwn_0</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:rd_p1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwn_p1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_sw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_kg_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_kg_ow</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:et0</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw1</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:no3_gw2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:kf_hoch</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:mv</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:proz_gw</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsald_amt2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:nsald_lw2</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:gwk_fluss</wfs:PropertyName>" +
+            "<wfs:PropertyName>app:the_geom</wfs:PropertyName>" +
+            "</wfs:Query>" +
+            "</wfs:GetFeature>",
+            url,
+            null
+        );
 
         final Collection<ExportWFS> wfsList = new TreeSet<ExportWFS>();
 
@@ -673,9 +678,14 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         final Collection<ExportWFS> selectedWFS = wfsList;
 
         for (final ExportWFS wfs : selectedWFS) {
-            wfs.setQuery(wfs.getQuery().replace(
-                    ShapeExport.getBboxToken(),
-                    "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"));
+            wfs.setQuery(
+                wfs
+                    .getQuery()
+                    .replace(
+                        ShapeExport.getBboxToken(),
+                        "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"
+                    )
+            );
         }
 
         final JDialog downloadManager = DownloadManagerDialog.getInstance();
@@ -683,7 +693,6 @@ public class ShapeExportDialog extends javax.swing.JDialog {
             downloadManager.pack();
             StaticSwingTools.showDialog(CismapBroker.getInstance().getMappingComponent(), downloadManager, true);
         }
-
         /*DownloadManager.instance().add(selectedWFS);
          * try { Thread.sleep(5000); } catch (InterruptedException ex) { Exceptions.printStackTrace(ex); }
          *

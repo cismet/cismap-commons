@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 srichter
  *
@@ -28,13 +28,10 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.nodes.PImage;
-
-import java.awt.image.BufferedImage;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import edu.umd.cs.piccolo.nodes.PImage;
+import java.awt.image.BufferedImage;
 
 /**
  * DOCUMENT ME!
@@ -47,7 +44,8 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            DefaultRasterDocumentFeature.class);
+        DefaultRasterDocumentFeature.class
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -89,10 +87,12 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      * @param  y               DOCUMENT ME!
      * @param  srid            DOCUMENT ME!
      */
-    public DefaultRasterDocumentFeature(final BufferedImage rasterDocument,
-            final double x,
-            final double y,
-            final int srid) {
+    public DefaultRasterDocumentFeature(
+        final BufferedImage rasterDocument,
+        final double x,
+        final double y,
+        final int srid
+    ) {
         this(rasterDocument, getGeomFromRasterImage(rasterDocument, x, y, srid));
     }
 
@@ -105,11 +105,13 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      * @param  editable        DOCUMENT ME!
      * @param  hidden          DOCUMENT ME!
      */
-    public DefaultRasterDocumentFeature(final BufferedImage rasterDocument,
-            final Geometry geometry,
-            final boolean canBeSelected,
-            final boolean editable,
-            final boolean hidden) {
+    public DefaultRasterDocumentFeature(
+        final BufferedImage rasterDocument,
+        final Geometry geometry,
+        final boolean canBeSelected,
+        final boolean editable,
+        final boolean hidden
+    ) {
         this.rasterDocument = rasterDocument;
         this.geometry = geometry;
         this.canBeSelected = canBeSelected;
@@ -174,10 +176,11 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      */
     private static Geometry getGeomFromRasterImage(final BufferedImage bi, final double x, final double y) {
         return getGeomFromRasterImage(
-                bi,
-                x,
-                y,
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
+            bi,
+            x,
+            y,
+            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs())
+        );
     }
 
     /**
@@ -190,12 +193,13 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      *
      * @return  DOCUMENT ME!
      */
-    private static Geometry getGeomFromRasterImage(final BufferedImage bi,
-            final double x,
-            final double y,
-            final int srid) {
-        final GeometryFactory GEOM_FACTORY = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                srid);
+    private static Geometry getGeomFromRasterImage(
+        final BufferedImage bi,
+        final double x,
+        final double y,
+        final int srid
+    ) {
+        final GeometryFactory GEOM_FACTORY = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
 
         final int width = bi.getWidth();
         final int height = bi.getHeight();
@@ -208,24 +212,25 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
         final LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
         final Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
 
-//        result = CrsTransformer.transformToDefaultCrs(result);
+        //        result = CrsTransformer.transformToDefaultCrs(result);
         log.info("Created Geometry: " + result);
         return result;
     }
-//    private static Geometry getGeomFromRasterImage(BufferedImage bi) {
-//        final int width = bi.getWidth();
-//        final int height = bi.getHeight();
-//        Coordinate ursprung0 = new Coordinate(0, 0);
-//        Coordinate x1 = new Coordinate(width, 0);
-//        Coordinate xy2 = new Coordinate(width, height);
-//        Coordinate y3 = new Coordinate(0, height);
-//        Coordinate ursprung4 = new Coordinate(0, 0);
-//        Coordinate[] coords = new Coordinate[]{ursprung0, x1, xy2, y3, ursprung4};
-//        LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
-//        Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
-//        log.info("Created Geometry: " + result);
-//        return result;
-//    }
+
+    //    private static Geometry getGeomFromRasterImage(BufferedImage bi) {
+    //        final int width = bi.getWidth();
+    //        final int height = bi.getHeight();
+    //        Coordinate ursprung0 = new Coordinate(0, 0);
+    //        Coordinate x1 = new Coordinate(width, 0);
+    //        Coordinate xy2 = new Coordinate(width, height);
+    //        Coordinate y3 = new Coordinate(0, height);
+    //        Coordinate ursprung4 = new Coordinate(0, 0);
+    //        Coordinate[] coords = new Coordinate[]{ursprung0, x1, xy2, y3, ursprung4};
+    //        LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
+    //        Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
+    //        log.info("Created Geometry: " + result);
+    //        return result;
+    //    }
 
     @Override
     public String toString() {

@@ -1,24 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.raster.wms.googlemaps;
 
-import edu.umd.cs.piccolo.PNode;
-
-import java.math.BigDecimal;
-
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
+import edu.umd.cs.piccolo.PNode;
+import java.math.BigDecimal;
 
 /**
  * DOCUMENT ME!
@@ -52,12 +50,12 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
 
         final GMBoundingBox real = new GMBoundingBox();
 
-        final String url = generateURL(new GMBoundingBox(
-                    new GMGISPosition(bb.getY1(), bb.getX1()),
-                    new GMGISPosition(bb.getY2(), bb.getX2())),
-                width,
-                height,
-                real);
+        final String url = generateURL(
+            new GMBoundingBox(new GMGISPosition(bb.getY1(), bb.getX1()), new GMGISPosition(bb.getY2(), bb.getX2())),
+            width,
+            height,
+            real
+        );
 
         if ((ir != null) && ir.isAlive() && ir.getUrl().equals(url.toString()) && !forced) {
             if (log.isDebugEnabled()) {
@@ -70,17 +68,17 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
                 ir.youngerWMSCall();
                 ir.interrupt();
                 // retrievalAborted(new RetrievalEvent());
-// try {
-// ir.join();
-// }
-// catch (InterruptedException iex){
-// log.warn("ir.join() wurde unterbrochen",iex);
-// }
+                // try {
+                // ir.join();
+                // }
+                // catch (InterruptedException iex){
+                // log.warn("ir.join() wurde unterbrochen",iex);
+                // }
             }
             ir = new ImageRetrieval(this);
             ir.setUrl(url);
             if (log.isDebugEnabled()) {
-                log.debug("ir.start();");                                     // NOI18N
+                log.debug("ir.start();"); // NOI18N
             }
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
@@ -110,7 +108,6 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
     @Override
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
-        ;
     }
 
     @Override
@@ -124,8 +121,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     @Override
-    public void setLayerPosition(final int layerPosition) {
-    }
+    public void setLayerPosition(final int layerPosition) {}
 
     @Override
     public float getTranslucency() {
@@ -133,8 +129,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     @Override
-    public void setTranslucency(final float t) {
-    }
+    public void setTranslucency(final float t) {}
 
     @Override
     public String getName() {
@@ -142,8 +137,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     @Override
-    public void setName(final String name) {
-    }
+    public void setName(final String name) {}
 
     /**
      * DOCUMENT ME!
@@ -155,10 +149,12 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
      *
      * @return  DOCUMENT ME!
      */
-    public static String generateURL(final GMBoundingBox box,
-            final int image_width,
-            final int image_height,
-            final GMBoundingBox result) {
+    public static String generateURL(
+        final GMBoundingBox box,
+        final int image_width,
+        final int image_height,
+        final GMBoundingBox result
+    ) {
         final GMGISPosition position = box.middle();
         final double width = box.width();
         String URL = null;
@@ -166,7 +162,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
         double Magnification = 0.0D;
         double longtitude = (new BigDecimal(position.getLongitude())).setScale(6, 5).doubleValue();
         double latitude = (new BigDecimal(position.getLatitude())).setScale(6, 5).doubleValue();
-        final double pixelwidth = (double)image_width * LONG_DEGREES_PER_PIXEL;
+        final double pixelwidth = (double) image_width * LONG_DEGREES_PER_PIXEL;
         if (width < pixelwidth) {
             Magnification = ZOOM_LEVELS[0];
         } else if (width < (pixelwidth * ZOOM_LEVELS[1])) {
@@ -188,7 +184,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
         } else {
             Magnification = ZOOM_LEVELS[9];
         }
-        ZoomLevel = (new Double((double)image_width * (1.0D + Magnification))).intValue();
+        ZoomLevel = (new Double((double) image_width * (1.0D + Magnification))).intValue();
         longtitude *= 1000000D;
         latitude *= 1000000D;
         if (longtitude < 0.0D) {
@@ -197,19 +193,28 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
         if (latitude < 0.0D) {
             latitude += TWO_TO_THIRTYTWO;
         }
-        URL = "http://maps.google.com/mapdata?latitude_e6=" + (new BigDecimal(latitude)).setScale(0, 5)
-                    + "&longitude_e6=" + (new BigDecimal(longtitude)).setScale(0, 5) + "&zm=" + ZoomLevel
-                    + "&cc=us&min_priority=2&w=" + image_width + "&h=" + image_height; // NOI18N
+        URL =
+            "http://maps.google.com/mapdata?latitude_e6=" +
+            (new BigDecimal(latitude)).setScale(0, 5) +
+            "&longitude_e6=" +
+            (new BigDecimal(longtitude)).setScale(0, 5) +
+            "&zm=" +
+            ZoomLevel +
+            "&cc=us&min_priority=2&w=" +
+            image_width +
+            "&h=" +
+            image_height; // NOI18N
         if (Magnification == 0.0D) {
             Magnification = 1.0D;
         }
-        final double long_half = (double)(image_width / 2) * (LONG_DEGREES_PER_PIXEL * Magnification);
+        final double long_half = (double) (image_width / 2) * (LONG_DEGREES_PER_PIXEL * Magnification);
         final double dpp = 1.075E-05D * Math.cos((position.latitude * 3.1415926535897931D) / 180D);
-        final double lat_half = (double)(image_height / 2) * (dpp * Magnification);
+        final double lat_half = (double) (image_height / 2) * (dpp * Magnification);
         final GMGISPosition topLeft = new GMGISPosition(position.latitude - lat_half, position.longitude - long_half);
-        final GMGISPosition bottomRight = new GMGISPosition(position.latitude + lat_half,
-                position.longitude
-                        + long_half);
+        final GMGISPosition bottomRight = new GMGISPosition(
+            position.latitude + lat_half,
+            position.longitude + long_half
+        );
         result.setBottomRight(bottomRight);
         result.setTopLeft(topLeft);
         return URL;

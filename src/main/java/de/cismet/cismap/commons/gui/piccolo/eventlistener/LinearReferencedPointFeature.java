@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -19,21 +19,6 @@ import com.vividsolutions.jts.linearref.LengthLocationMap;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
-
-import edu.umd.cs.piccolo.util.PDimension;
-
-import java.awt.Stroke;
-import java.awt.geom.Point2D;
-
-import java.text.Format;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
@@ -44,8 +29,16 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.math.geometry.StaticGeometryFunctions;
+import edu.umd.cs.piccolo.util.PDimension;
+import java.awt.Stroke;
+import java.awt.geom.Point2D;
+import java.text.Format;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 /**
  * DOCUMENT ME!
@@ -53,27 +46,31 @@ import de.cismet.math.geometry.StaticGeometryFunctions;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class LinearReferencedPointFeature extends DefaultStyledFeature implements XStyledFeature,
-    SelfManipulatingFeature {
+public class LinearReferencedPointFeature
+    extends DefaultStyledFeature
+    implements XStyledFeature, SelfManipulatingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            LinearReferencedPointFeature.class);
+        LinearReferencedPointFeature.class
+    );
 
     public static final String PROPERTY_FEATURE_COORDINATE = "featureCoordinate";
 
     //~ Instance fields --------------------------------------------------------
 
     private Geometry baseLineGeom;
-    private Collection<LinearReferencedPointFeatureListener> listeners =
-        new ArrayList<LinearReferencedPointFeatureListener>();
-    private ImageIcon ico = new javax.swing.ImageIcon(LinearReferencedPointFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/linRefPointIcon.png"));     // NOI18N
-    private ImageIcon annotationIco = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/linRefPoint.png"));         // NOI18N
-    private ImageIcon annotationSelectedIco = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/linRefPointSelected.png")); // NOI18N
+    private Collection<LinearReferencedPointFeatureListener> listeners = new ArrayList<LinearReferencedPointFeatureListener>();
+    private ImageIcon ico = new javax.swing.ImageIcon(
+        LinearReferencedPointFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linRefPointIcon.png")
+    ); // NOI18N
+    private ImageIcon annotationIco = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/linRefPoint.png")
+    ); // NOI18N
+    private ImageIcon annotationSelectedIco = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/linRefPointSelected.png")
+    ); // NOI18N
 
     private Format infoFormat;
     private boolean isMovable = true;
@@ -100,9 +97,12 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     public LinearReferencedPointFeature(final double value, final Geometry baseLineGeom, final boolean showSubLine) {
         this.baseLineGeom = baseLineGeom;
         setGeometry(getPointOnLine(value, baseLineGeom));
-        setPointAnnotationSymbol(FeatureAnnotationSymbol.newCenteredFeatureAnnotationSymbol(
+        setPointAnnotationSymbol(
+            FeatureAnnotationSymbol.newCenteredFeatureAnnotationSymbol(
                 annotationIco.getImage(),
-                annotationSelectedIco.getImage()));
+                annotationSelectedIco.getImage()
+            )
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -206,9 +206,10 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final Coordinate[] neighbours = getNearestNeighbours(coord, lineGeom);
         if (neighbours != null) {
             final Point2D point = StaticGeometryFunctions.createPointOnLine(
-                    new Point2D.Double(neighbours[0].x, neighbours[0].y),
-                    new Point2D.Double(neighbours[1].x, neighbours[1].y),
-                    new Point2D.Double(coord.x, coord.y));
+                new Point2D.Double(neighbours[0].x, neighbours[0].y),
+                new Point2D.Double(neighbours[1].x, neighbours[1].y),
+                new Point2D.Double(coord.x, coord.y)
+            );
             return new Coordinate(point.getX(), point.getY());
         } else {
             return null;
@@ -227,9 +228,10 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final Coordinate[] neighbours = getNearestNeighbours(coord, lineGeom);
         if (neighbours != null) {
             final double distance = StaticGeometryFunctions.distanceToLine(
-                    new Point2D.Double(neighbours[0].x, neighbours[0].y),
-                    new Point2D.Double(neighbours[1].x, neighbours[1].y),
-                    new Point2D.Double(coord.x, coord.y));
+                new Point2D.Double(neighbours[0].x, neighbours[0].y),
+                new Point2D.Double(neighbours[1].x, neighbours[1].y),
+                new Point2D.Double(coord.x, coord.y)
+            );
             return distance;
         } else {
             return -1d;
@@ -245,13 +247,14 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     @Override
     public void moveTo(final Coordinate coordinate, final PDimension delta) {
         if (isMovable()) {
-//        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
-//            coordinate = transformToRouteSrid(coordinate);
+            //        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
+            //            coordinate = transformToRouteSrid(coordinate);
 
             final Geometry cuttedLineGeom = getReducedLineGeometry(
-                    baseLineGeom,
-                    getGeometry().getCoordinate(),
-                    coordinate);
+                baseLineGeom,
+                getGeometry().getCoordinate(),
+                coordinate
+            );
             final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate, cuttedLineGeom);
             if (manipulatedCoordinate != null) {
                 performMove(manipulatedCoordinate);
@@ -268,9 +271,11 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      *
      * @return  DOCUMENT ME!
      */
-    public static Geometry getReducedLineGeometry(final Geometry lineGeom,
-            final Coordinate lastCoordinate,
-            final Coordinate newCoordinate) {
+    public static Geometry getReducedLineGeometry(
+        final Geometry lineGeom,
+        final Coordinate lastCoordinate,
+        final Coordinate newCoordinate
+    ) {
         // Kreisgeometrie errechnen um die Suche nach den nächsten Nachbarpunkten
         // auf einer Teillinie einzuschränken, statt auf der gesamten Linie.
         final GeometricShapeFactory gsf = new GeometricShapeFactory();
@@ -293,8 +298,9 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      */
     private Coordinate transformToRouteSrid(final Coordinate coord) {
         try {
-            final CrsTransformer crsT = new CrsTransformer(CrsTransformer.createCrsFromSrid(
-                        getLineGeometry().getSRID()));
+            final CrsTransformer crsT = new CrsTransformer(
+                CrsTransformer.createCrsFromSrid(getLineGeometry().getSRID())
+            );
 
             final CoordinateSequence coordSeq = new CoordinateArraySequence(new Coordinate[] { coord });
             final Point point = new Point(coordSeq, getLineGeometry().getFactory());
@@ -316,7 +322,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final PFeature pFeature = mc.getPFeatureHM().get(this);
 
         if (pFeature != null) {
-            pFeature.setCoordArr(0, 0, new Coordinate[] { (Coordinate)coordinate.clone() });
+            pFeature.setCoordArr(0, 0, new Coordinate[] { (Coordinate) coordinate.clone() });
             pFeature.updatePath();
             pFeature.syncGeometry();
             pFeature.resetInfoNodePosition();
@@ -329,8 +335,9 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      * DOCUMENT ME!
      */
     private void fireFeatureMoved() {
-        final Collection<LinearReferencedPointFeatureListener> listenersCopy =
-            new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(listeners);
+        final Collection<LinearReferencedPointFeatureListener> listenersCopy = new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(
+            listeners
+        );
         for (final LinearReferencedPointFeatureListener listener : listenersCopy) {
             listener.featureMoved(this);
         }
@@ -342,10 +349,13 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      * @param  mergePoint  DOCUMENT ME!
      * @param  withPoint   DOCUMENT ME!
      */
-    private void fireFeatureMerged(final LinearReferencedPointFeature mergePoint,
-            final LinearReferencedPointFeature withPoint) {
-        final Collection<LinearReferencedPointFeatureListener> listenersCopy =
-            new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(listeners);
+    private void fireFeatureMerged(
+        final LinearReferencedPointFeature mergePoint,
+        final LinearReferencedPointFeature withPoint
+    ) {
+        final Collection<LinearReferencedPointFeatureListener> listenersCopy = new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(
+            listeners
+        );
         for (final LinearReferencedPointFeatureListener listener : listenersCopy) {
             listener.featureMerged(mergePoint, withPoint);
         }
@@ -381,6 +391,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
             return 0d;
         }
     }
+
     /**
      * Sucht die Koordinaten der 2 nächsten Punkten der Linie von der Koordinate eines bestimmten Punktes aus.
      *
@@ -400,9 +411,10 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
             final Coordinate tmpStart = coords[i];
             final Coordinate tmpEnd = coords[i + 1];
             final double tmpDist = StaticGeometryFunctions.distanceToLine(
-                    new Point2D.Double(tmpStart.x, tmpStart.y),
-                    new Point2D.Double(tmpEnd.x, tmpEnd.y),
-                    new Point2D.Double(coord.x, coord.y));
+                new Point2D.Double(tmpStart.x, tmpStart.y),
+                new Point2D.Double(tmpEnd.x, tmpEnd.y),
+                new Point2D.Double(coord.x, coord.y)
+            );
             if (tmpDist < dist) {
                 dist = tmpDist;
                 start = tmpStart;
@@ -458,7 +470,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     public static Geometry getPointOnLine(final double position, final Geometry linestringOrMultilinestring) {
         final Coordinate coordinate = getCoordinateOnLine(position, linestringOrMultilinestring);
         return new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), linestringOrMultilinestring.getSRID())
-                    .createPoint(coordinate);
+            .createPoint(coordinate);
     }
 
     /**
@@ -535,15 +547,15 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         if (snapping) {
             final FeatureCollection fc = CismapBroker.getInstance().getMappingComponent().getFeatureCollection();
             final Feature[] features = fc.getAllFeatures().toArray(new Feature[0]); // nicht die originalcollection,
-                                                                                    // weil diese sich in der
-                                                                                    // schleife verändern kann
+            // weil diese sich in der
+            // schleife verändern kann
             final LinearReferencedPointFeature mergePoint = this;
             for (final Feature feature : features) {
                 if ((feature instanceof LinearReferencedPointFeature) && (feature != mergePoint)) {
-                    final LinearReferencedPointFeature withPoint = (LinearReferencedPointFeature)feature;
-                    final boolean isInSnappingDistance = Math.abs(withPoint.getCurrentPosition()
-                                    - mergePoint.getCurrentPosition())
-                                < (0.002 * CismapBroker.getInstance().getMappingComponent().getScaleDenominator());
+                    final LinearReferencedPointFeature withPoint = (LinearReferencedPointFeature) feature;
+                    final boolean isInSnappingDistance =
+                        Math.abs(withPoint.getCurrentPosition() - mergePoint.getCurrentPosition()) <
+                        (0.002 * CismapBroker.getInstance().getMappingComponent().getScaleDenominator());
                     if (isInSnappingDistance) {
                         return withPoint;
                     }

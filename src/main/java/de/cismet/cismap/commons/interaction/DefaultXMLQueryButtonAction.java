@@ -1,24 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.interaction;
 
+import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import java.awt.event.ActionEvent;
+import java.io.StringReader;
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
-
-import java.awt.event.ActionEvent;
-
-import java.io.StringReader;
-
-import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 
 /**
  * DOCUMENT ME!
@@ -27,7 +24,6 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
  * @version  $Revision$, $Date$
  */
 public class DefaultXMLQueryButtonAction extends DefaultQueryButtonAction {
-
     //~ Instance initializers --------------------------------------------------
 
     {
@@ -102,10 +98,12 @@ public class DefaultXMLQueryButtonAction extends DefaultQueryButtonAction {
      * @param  width          DOCUMENT ME!
      * @param  posCorrection  DOCUMENT ME!
      */
-    public DefaultXMLQueryButtonAction(final String queryText,
-            final String text,
-            final int width,
-            final int posCorrection) {
+    public DefaultXMLQueryButtonAction(
+        final String queryText,
+        final String text,
+        final int width,
+        final int posCorrection
+    ) {
         super(queryText, text, width, posCorrection);
     }
 
@@ -128,20 +126,19 @@ public class DefaultXMLQueryButtonAction extends DefaultQueryButtonAction {
                 CorrectCarret(getEndTag(queryText).length() + 1);
             }
         }
-
-//        // Test
-//        String beforeCaret = queryTextArea.getText().substring(0, queryTextArea.getCaretPosition());
-//
-//        try {
-//            SAXBuilder builder = new SAXBuilder();
-//            Document d = builder.build(new StringReader("<root>" + queryTextArea.getText() + "</root>"));
-//            String xmlText = FeatureServiceUtilities.elementToString(d.getRootElement());
-//            xmlText = xmlText.substring(xmlText.indexOf("\n"), xmlText.lastIndexOf("\n"));
-//            queryTextArea.setText(xmlText);
-//        } catch (Exception ex) {
-//            //nothing to do
-//        }
-//        //Ende Test
+        //        // Test
+        //        String beforeCaret = queryTextArea.getText().substring(0, queryTextArea.getCaretPosition());
+        //
+        //        try {
+        //            SAXBuilder builder = new SAXBuilder();
+        //            Document d = builder.build(new StringReader("<root>" + queryTextArea.getText() + "</root>"));
+        //            String xmlText = FeatureServiceUtilities.elementToString(d.getRootElement());
+        //            xmlText = xmlText.substring(xmlText.indexOf("\n"), xmlText.lastIndexOf("\n"));
+        //            queryTextArea.setText(xmlText);
+        //        } catch (Exception ex) {
+        //            //nothing to do
+        //        }
+        //        //Ende Test
     }
 
     /**

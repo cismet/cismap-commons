@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,6 +12,12 @@
  */
 package de.cismet.cismap.commons.styling;
 
+import java.io.File;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import javax.xml.namespace.QName;
 import org.deegree.commons.utils.DoublePair;
 import org.deegree.commons.utils.Pair;
 import org.deegree.commons.utils.Triple;
@@ -22,16 +28,6 @@ import org.deegree.style.se.unevaluated.Continuation;
 import org.deegree.style.se.unevaluated.Style;
 import org.deegree.style.se.unevaluated.Symbolizer;
 import org.deegree.style.styling.Styling;
-
-import java.io.File;
-
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.xml.namespace.QName;
 
 /**
  * Wraps a Style object. But it can be used as the Style class extends the Style class to prevent a large refactoring
@@ -96,8 +92,10 @@ public class CustomStyle extends Style {
     }
 
     @Override
-    public LinkedList<Triple<Styling, LinkedList<Geometry>, String>> evaluate(final Feature f,
-            final XPathEvaluator<Feature> evaluator) {
+    public LinkedList<Triple<Styling, LinkedList<Geometry>, String>> evaluate(
+        final Feature f,
+        final XPathEvaluator<Feature> evaluator
+    ) {
         return style.evaluate(f, evaluator);
     }
 

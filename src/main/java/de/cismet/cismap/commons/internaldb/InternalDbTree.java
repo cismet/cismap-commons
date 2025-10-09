@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,14 +12,21 @@
 package de.cismet.cismap.commons.internaldb;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.h2gis.utilities.wrapper.ConnectionWrapper;
-
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.MappingModel;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.PointReferencingDialog;
+import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
+import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
@@ -27,15 +34,12 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-
 import java.lang.reflect.InvocationTargetException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -46,7 +50,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import javax.swing.DropMode;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -68,24 +71,10 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.H2FeatureService;
-import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
-import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
-import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.tools.PointReferencingDialog;
-
-import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
-
-import de.cismet.tools.gui.DefaultPopupMenuListener;
-import de.cismet.tools.gui.StaticSwingTools;
+import org.apache.log4j.Logger;
+import org.h2gis.utilities.wrapper.ConnectionWrapper;
+import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 /**
  * This trees are shown in the capability widget to show the content of an internal db.
@@ -103,8 +92,9 @@ public class InternalDbTree extends JTree {
 
     List<InternalDbMenuItem> menuList = new ArrayList<InternalDbMenuItem>();
 
-    private Icon shapeIcon = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"));
+    private Icon shapeIcon = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")
+    );
 
     private String databasePath;
     private JPopupMenu popupMenu = new JPopupMenu();
@@ -131,75 +121,83 @@ public class InternalDbTree extends JTree {
         menuList.add(new AddPointGeometry());
         menuList.add(new AddLinearReferencing());
 
-        addMouseListener(new DefaultPopupMenuListener(popupMenu) {
-
+        addMouseListener(
+            new DefaultPopupMenuListener(popupMenu) {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     super.mouseClicked(e); // To change body of generated methods, choose Tools | Templates.
                 }
-            });
+            }
+        );
 
         final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
+            @Override
+            public Component getTreeCellRendererComponent(
+                final JTree tree,
+                final Object value,
+                final boolean selected,
+                final boolean expanded,
+                final boolean leaf,
+                final int row,
+                final boolean hasFocus
+            ) {
+                final Component c = super.getTreeCellRendererComponent(
+                    tree,
+                    value,
+                    selected,
+                    expanded,
+                    leaf,
+                    row,
+                    hasFocus
+                );
 
-                @Override
-                public Component getTreeCellRendererComponent(final JTree tree,
-                        final Object value,
-                        final boolean selected,
-                        final boolean expanded,
-                        final boolean leaf,
-                        final int row,
-                        final boolean hasFocus) {
-                    final Component c = super.getTreeCellRendererComponent(
-                            tree,
-                            value,
-                            selected,
-                            expanded,
-                            leaf,
-                            row,
-                            hasFocus);
-
-                    if (c instanceof JLabel) {
-                        if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
-                            final Icon serviceIcon = H2FeatureService.getLayerIcon(
-                                    H2FeatureService.LAYER_ENABLED_VISIBLE,
-                                    ((DBEntry)value).getName(),
-                                    databasePath);
-                            ((JLabel)c).setIcon(serviceIcon);
-                        } else if (value instanceof DBEntry) {
-                            if (expanded) {
-                                ((JLabel)c).setIcon(getOpenIcon());
-                            } else {
-                                ((JLabel)c).setIcon(getClosedIcon());
-                            }
-                        } else if (value.equals(getModel().getRoot())) {
-                            if (expanded) {
-                                ((JLabel)c).setIcon(getOpenIcon());
-                            } else {
-                                ((JLabel)c).setIcon(getClosedIcon());
-                            }
+                if (c instanceof JLabel) {
+                    if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
+                        final Icon serviceIcon = H2FeatureService.getLayerIcon(
+                            H2FeatureService.LAYER_ENABLED_VISIBLE,
+                            ((DBEntry) value).getName(),
+                            databasePath
+                        );
+                        ((JLabel) c).setIcon(serviceIcon);
+                    } else if (value instanceof DBEntry) {
+                        if (expanded) {
+                            ((JLabel) c).setIcon(getOpenIcon());
+                        } else {
+                            ((JLabel) c).setIcon(getClosedIcon());
+                        }
+                    } else if (value.equals(getModel().getRoot())) {
+                        if (expanded) {
+                            ((JLabel) c).setIcon(getOpenIcon());
+                        } else {
+                            ((JLabel) c).setIcon(getClosedIcon());
                         }
                     }
-
-                    return c;
                 }
-            };
-        setCellRenderer(renderer);
-        setCellEditor(new DefaultTreeCellEditor(this, renderer) {
 
+                return c;
+            }
+        };
+        setCellRenderer(renderer);
+        setCellEditor(
+            new DefaultTreeCellEditor(this, renderer) {
                 @Override
-                protected void determineOffset(final JTree tree,
-                        final Object value,
-                        final boolean isSelected,
-                        final boolean expanded,
-                        final boolean leaf,
-                        final int row) {
+                protected void determineOffset(
+                    final JTree tree,
+                    final Object value,
+                    final boolean isSelected,
+                    final boolean expanded,
+                    final boolean leaf,
+                    final int row
+                ) {
                     if (renderer != null) {
                         if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
-                            editingIcon = H2FeatureService.getLayerIcon(
+                            editingIcon =
+                                H2FeatureService.getLayerIcon(
                                     H2FeatureService.LAYER_ENABLED_VISIBLE,
-                                    ((DBEntry)value).getName(),
-                                    databasePath);
-//                            editingIcon = shapeIcon;
+                                    ((DBEntry) value).getName(),
+                                    databasePath
+                                );
+                            //                            editingIcon = shapeIcon;
                         } else if (value instanceof DBEntry) {
                             if (expanded) {
                                 editingIcon = renderer.getOpenIcon();
@@ -215,8 +213,7 @@ public class InternalDbTree extends JTree {
                         }
 
                         if (editingIcon != null) {
-                            offset = renderer.getIconTextGap()
-                                        + editingIcon.getIconWidth();
+                            offset = renderer.getIconTextGap() + editingIcon.getIconWidth();
                         } else {
                             offset = renderer.getIconTextGap();
                         }
@@ -230,21 +227,23 @@ public class InternalDbTree extends JTree {
                 protected boolean canEditImmediately(final EventObject event) {
                     return true;
                 }
-            });
-//        transferHandler = new TreeTransferHandler();
-//        tree.setTransferHandler(transferHandler);
+            }
+        );
+        //        transferHandler = new TreeTransferHandler();
+        //        tree.setTransferHandler(transferHandler);
         setModel(new InternalDBTreeModel());
         createPopupMenu();
-        addTreeSelectionListener(new TreeSelectionListener() {
-
+        addTreeSelectionListener(
+            new TreeSelectionListener() {
                 @Override
                 public void valueChanged(final TreeSelectionEvent e) {
                     createPopupMenu();
                 }
-            });
+            }
+        );
 
-        popupMenu.addPopupMenuListener(new PopupMenuListener() {
-
+        popupMenu.addPopupMenuListener(
+            new PopupMenuListener() {
                 @Override
                 public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {
                     synchronized (popupMenu.getTreeLock()) {
@@ -253,7 +252,7 @@ public class InternalDbTree extends JTree {
                             final Object component = popupMenu.getComponent(i);
 
                             if (component instanceof InternalDbMenuItem) {
-                                final InternalDbMenuItem menuItem = (InternalDbMenuItem)component;
+                                final InternalDbMenuItem menuItem = (InternalDbMenuItem) component;
                                 menuItem.refreshText(paths);
                             }
                         }
@@ -261,13 +260,12 @@ public class InternalDbTree extends JTree {
                 }
 
                 @Override
-                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
-                }
+                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {}
 
                 @Override
-                public void popupMenuCanceled(final PopupMenuEvent e) {
-                }
-            });
+                public void popupMenuCanceled(final PopupMenuEvent e) {}
+            }
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -312,15 +310,27 @@ public class InternalDbTree extends JTree {
             removeEntry(entry);
         }
 
-        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        final InternalDBTreeModel model = (InternalDBTreeModel) getModel();
         Statement st = null;
 
         try {
             st = model.getConnection().createStatement();
-            st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where table = '"
-                        + folder.getName() + "'");
-            st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where left(folder, "
-                        + folder.getName().length() + ") = '" + folder.getName() + "'");
+            st.execute(
+                "delete from \"" +
+                H2FeatureServiceFactory.SORT_TABLE_NAME +
+                "\" where table = '" +
+                folder.getName() +
+                "'"
+            );
+            st.execute(
+                "delete from \"" +
+                H2FeatureServiceFactory.SORT_TABLE_NAME +
+                "\" where left(folder, " +
+                folder.getName().length() +
+                ") = '" +
+                folder.getName() +
+                "'"
+            );
         } catch (Exception e) {
             LOG.error("Error while removing folder", e);
         } finally {
@@ -345,20 +355,24 @@ public class InternalDbTree extends JTree {
     public void removeEntry(final DBEntry entry) {
         try {
             if (entry instanceof DBFolder) {
-                removeFolder(((DBFolder)entry));
-                ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
+                removeFolder(((DBFolder) entry));
+                ((InternalDBTreeModel) getModel()).fireTreeStructureChanged();
                 return;
             }
-            final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+            final InternalDBTreeModel model = (InternalDBTreeModel) getModel();
             final Connection con = model.getConnection();
             Statement st = null;
             H2FeatureService.removeTableIfExists(entry.getName());
 
             try {
                 st = con.createStatement();
-                st.execute("delete from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
-                            + "\" where table = '"
-                            + entry.getName() + "'");
+                st.execute(
+                    "delete from \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" where table = '" +
+                    entry.getName() +
+                    "'"
+                );
             } catch (Exception e) {
                 LOG.error("Error while removing folder", e);
             } finally {
@@ -373,7 +387,7 @@ public class InternalDbTree extends JTree {
             model.remove(entry.getName());
 
             removeEntryFromActiveLayerModel(entry);
-            ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
+            ((InternalDBTreeModel) getModel()).fireTreeStructureChanged();
         } catch (Exception e) {
             LOG.error("Cannot remove entry", e);
         }
@@ -391,7 +405,7 @@ public class InternalDbTree extends JTree {
         if (map != null) {
             for (final MapService service : map.values()) {
                 if (service instanceof H2FeatureService) {
-                    final H2FeatureService h2Service = (H2FeatureService)service;
+                    final H2FeatureService h2Service = (H2FeatureService) service;
                     if (h2Service.getTableName().equals(entry.getName())) {
                         model.removeLayer(h2Service);
                         AttributeTableFactory.getInstance().closeAttributeTable(h2Service);
@@ -405,7 +419,7 @@ public class InternalDbTree extends JTree {
      * DOCUMENT ME!
      */
     private void saveExpandedPaths() {
-        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        final InternalDBTreeModel model = (InternalDBTreeModel) getModel();
         expendedPaths.clear();
         final TreePath root = new TreePath(new Object[] { model.getRoot() });
         final Enumeration<TreePath> en = getExpandedDescendants(root);
@@ -419,7 +433,7 @@ public class InternalDbTree extends JTree {
      * DOCUMENT ME!
      */
     private void resetExpansion() {
-        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        final InternalDBTreeModel model = (InternalDBTreeModel) getModel();
         final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
 
         if (pathCopy.isEmpty()) {
@@ -431,26 +445,26 @@ public class InternalDbTree extends JTree {
         for (final TreePath tp : pathCopy) {
             expandPath(tp);
         }
-//        try {
-//            EventQueue.invokeAndWait(new Runnable() {
-//
-//                    @Override
-//                    public void run() {
-//                        final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
-//
-//                        if (pathCopy.isEmpty()) {
-//                            // root should always be expanded
-//                            final TreePath root = new TreePath(new Object[] { model.getRoot() });
-//                            pathCopy.add(root);
-//                        }
-//
-//                        for (final TreePath tp : pathCopy) {
-//                            expandPath(tp);
-//                        }
-//                    }
-//                });
-//        } catch (Exception ex) {
-//        }
+        //        try {
+        //            EventQueue.invokeAndWait(new Runnable() {
+        //
+        //                    @Override
+        //                    public void run() {
+        //                        final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
+        //
+        //                        if (pathCopy.isEmpty()) {
+        //                            // root should always be expanded
+        //                            final TreePath root = new TreePath(new Object[] { model.getRoot() });
+        //                            pathCopy.add(root);
+        //                        }
+        //
+        //                        for (final TreePath tp : pathCopy) {
+        //                            expandPath(tp);
+        //                        }
+        //                    }
+        //                });
+        //        } catch (Exception ex) {
+        //        }
     }
 
     /**
@@ -462,7 +476,7 @@ public class InternalDbTree extends JTree {
         final TreePath selectionPath = getSelectionPath();
 
         if ((selectionPath != null) && (selectionPath.getLastPathComponent() instanceof DBFolder)) {
-            final DBFolder folder = (DBFolder)selectionPath.getLastPathComponent();
+            final DBFolder folder = (DBFolder) selectionPath.getLastPathComponent();
             DBFolder newFolder = new DBFolder(folder.getName() + "->" + name);
             int count = 0;
 
@@ -474,12 +488,20 @@ public class InternalDbTree extends JTree {
             Statement st = null;
 
             try {
-                st = ((InternalDBTreeModel)getModel()).getConnection().createStatement();
-                st.execute("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
-                            + "\" (folder, table, position) VALUES ('"
-                            + folder.getName() + "', '" + folder.getName() + "->" + newFolder
-                            + "', (select max(position) + 1 from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
-                            + "\"))");
+                st = ((InternalDBTreeModel) getModel()).getConnection().createStatement();
+                st.execute(
+                    "insert into \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" (folder, table, position) VALUES ('" +
+                    folder.getName() +
+                    "', '" +
+                    folder.getName() +
+                    "->" +
+                    newFolder +
+                    "', (select max(position) + 1 from \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\"))"
+                );
             } catch (Exception e) {
                 LOG.error("Error while removing folder", e);
             } finally {
@@ -491,9 +513,9 @@ public class InternalDbTree extends JTree {
                     }
                 }
             }
-            ((InternalDBTreeModel)getModel()).fireTreeStructureChanged();
+            ((InternalDBTreeModel) getModel()).fireTreeStructureChanged();
         } else {
-            ((InternalDBTreeModel)getModel()).addFolder(name);
+            ((InternalDBTreeModel) getModel()).addFolder(name);
         }
     }
 
@@ -522,10 +544,10 @@ public class InternalDbTree extends JTree {
             final Object o = path.getLastPathComponent();
 
             if (o instanceof DBFolder) {
-                entries.add((DBFolder)o);
-//                addEntriesToList(entries, (DBFolder)o);
+                entries.add((DBFolder) o);
+                //                addEntriesToList(entries, (DBFolder)o);
             } else if (o instanceof DBEntry) {
-                entries.add((DBEntry)o);
+                entries.add((DBEntry) o);
             }
         }
 
@@ -535,12 +557,10 @@ public class InternalDbTree extends JTree {
             final DBEntry e = entries.get(i);
 
             if (e instanceof DBFolder) {
-                databaseTables[i] = getFolderInformation((DBFolder)e);
+                databaseTables[i] = getFolderInformation((DBFolder) e);
             } else {
-                databaseTables[i] = new DBTableInformation(e.toString(),
-                        databasePath,
-                        e.getName(),
-                        (e instanceof DBFolder));
+                databaseTables[i] =
+                    new DBTableInformation(e.toString(), databasePath, e.getName(), (e instanceof DBFolder));
             }
         }
 
@@ -555,21 +575,25 @@ public class InternalDbTree extends JTree {
      * @return  the created DBTableInformation object
      */
     private DBTableInformation getFolderInformation(final DBFolder folder) {
-        final DBTableInformation databaseTable = new DBTableInformation(folder.toString(),
-                databasePath,
-                folder.getName(),
-                true);
+        final DBTableInformation databaseTable = new DBTableInformation(
+            folder.toString(),
+            databasePath,
+            folder.getName(),
+            true
+        );
 
         for (int n = folder.getChildren().size() - 1; n >= 0; --n) {
             final DBEntry entry = folder.getChildren().get(n);
 
             if (entry instanceof DBFolder) {
-                databaseTable.addChild(getFolderInformation((DBFolder)entry));
+                databaseTable.addChild(getFolderInformation((DBFolder) entry));
             } else {
-                final DBTableInformation tmp = new DBTableInformation(entry.toString(),
-                        databasePath,
-                        entry.getName(),
-                        false);
+                final DBTableInformation tmp = new DBTableInformation(
+                    entry.toString(),
+                    databasePath,
+                    entry.getName(),
+                    false
+                );
                 databaseTable.addChild(tmp);
             }
         }
@@ -586,7 +610,7 @@ public class InternalDbTree extends JTree {
     private void addEntriesToList(final List<DBEntry> entries, final DBFolder folder) {
         for (final DBEntry entry : folder.getChildren()) {
             if (entry instanceof DBFolder) {
-                addEntriesToList(entries, (DBFolder)entry);
+                addEntriesToList(entries, (DBFolder) entry);
             } else {
                 entries.add(entry);
             }
@@ -605,22 +629,22 @@ public class InternalDbTree extends JTree {
         //~ Instance fields ----------------------------------------------------
 
         private DataFlavor TREEPATH_FLAVOR = new DataFlavor(
-                DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities"); // NOI18N
+            DataFlavor.javaJVMLocalObjectMimeType,
+            "SelectionAndCapabilities"
+        ); // NOI18N
 
         //~ Constructors -------------------------------------------------------
 
         /**
          * Creates a new DBTransferHandler object.
          */
-        public DBTransferHandler() {
-        }
+        public DBTransferHandler() {}
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         protected Transferable createTransferable(final JComponent c) {
-            final InternalDbTree tree = (InternalDbTree)c;
+            final InternalDbTree tree = (InternalDbTree) c;
             final DBTableInformation[] databaseTables = tree.getDBTableInformationOfSelectionPath();
 
             return new DBTransferable(databaseTables);
@@ -628,12 +652,12 @@ public class InternalDbTree extends JTree {
 
         @Override
         public boolean canImport(final TransferHandler.TransferSupport info) {
-            final JTree t = (JTree)info.getComponent();
-//            boolean b = info.isDrop() && info.isDataFlavorSupported(rowFlavor);
+            final JTree t = (JTree) info.getComponent();
+            //            boolean b = info.isDrop() && info.isDataFlavorSupported(rowFlavor);
 
             // Do not allow a drop on the drag source selections
-            final JTree.DropLocation dl = (JTree.DropLocation)info.getDropLocation();
-            final JTree tree = (JTree)info.getComponent();
+            final JTree.DropLocation dl = (JTree.DropLocation) info.getDropLocation();
+            final JTree tree = (JTree) info.getComponent();
             final int dropRow = tree.getRowForPath(dl.getPath());
             final int[] selRows = tree.getSelectionRows();
             for (int i = 0; i < selRows.length; i++) {
@@ -653,14 +677,15 @@ public class InternalDbTree extends JTree {
                 return false;
             }
 
-//            t.setCursor( b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop);
+            //            t.setCursor( b ? DragSource.DefaultMoveDrop : DragSource.DefaultMoveNoDrop);
             final TreePath p = t.getPathForLocation(
-                    info.getDropLocation().getDropPoint().x,
-                    info.getDropLocation().getDropPoint().y);
+                info.getDropLocation().getDropPoint().x,
+                info.getDropLocation().getDropPoint().y
+            );
             return ((p != null));
-//                            && ((p.getLastPathComponent() instanceof DBFolder)
-//                                || p.getLastPathComponent().equals(t.getModel().getRoot())));
-//            return b;
+            //                            && ((p.getLastPathComponent() instanceof DBFolder)
+            //                                || p.getLastPathComponent().equals(t.getModel().getRoot())));
+            //            return b;
         }
 
         @Override
@@ -671,12 +696,13 @@ public class InternalDbTree extends JTree {
         @Override
         public boolean importData(final TransferHandler.TransferSupport info) {
             info.setShowDropLocation(true);
-            final JTree target = (JTree)info.getComponent();
+            final JTree target = (JTree) info.getComponent();
             final TreePath p = target.getPathForLocation(
-                    info.getDropLocation().getDropPoint().x,
-                    info.getDropLocation().getDropPoint().y);
-            final JTree.DropLocation dl = (JTree.DropLocation)info.getDropLocation();
-            final InternalDBTreeModel model = (InternalDBTreeModel)target.getModel();
+                info.getDropLocation().getDropPoint().x,
+                info.getDropLocation().getDropPoint().y
+            );
+            final JTree.DropLocation dl = (JTree.DropLocation) info.getDropLocation();
+            final InternalDBTreeModel model = (InternalDBTreeModel) target.getModel();
             final Connection con = model.getConnection();
             Statement st = null;
 
@@ -687,37 +713,40 @@ public class InternalDbTree extends JTree {
 
                 if ((targetFolder instanceof DBFolder) || targetFolder.equals(model.getRoot())) {
                     DBFolder folder = null;
-                    final DBTableInformation[] o = (DBTableInformation[])info.getTransferable()
-                                .getTransferData(TREEPATH_FLAVOR);
+                    final DBTableInformation[] o = (DBTableInformation[]) info
+                        .getTransferable()
+                        .getTransferData(TREEPATH_FLAVOR);
                     for (final DBTableInformation ti : o) {
                         DBEntry entry;
                         String newName = null;
                         if (targetFolder instanceof DBFolder) {
-                            folder = (DBFolder)targetFolder;
+                            folder = (DBFolder) targetFolder;
                             newName = folder.getName() + "->" + getNameWithoutFolder(ti.getDatabaseTable());
                         } else if (targetFolder.equals(model.getRoot())) {
                             newName = getNameWithoutFolder(ti.getDatabaseTable());
                         }
                         final String targetFolderString = targetFolder.equals(model.getRoot())
-                            ? "/" : ((DBFolder)targetFolder).getName();
+                            ? "/"
+                            : ((DBFolder) targetFolder).getName();
 
                         if (ti.isFolder()) {
                             entry = getEntryFromTableInformation(ti);
                             entry.setName(newName);
 
                             if (!ti.getParentFolder().equals(targetFolderString)) {
-                                final List<DBEntry> entries = getDBEntriesFromFolder((DBFolder)entry);
+                                final List<DBEntry> entries = getDBEntriesFromFolder((DBFolder) entry);
 
                                 for (final DBEntry e : entries) {
-                                    final String newTableName = newName + "->"
-                                                + e.getName().substring(ti.getDatabaseTable().length() + 2);
+                                    final String newTableName =
+                                        newName + "->" + e.getName().substring(ti.getDatabaseTable().length() + 2);
                                     final ResultSet rs = con.getMetaData().getTables(null, null, newTableName, null);
                                     if (rs.next()) {
                                         JOptionPane.showMessageDialog(
                                             InternalDbTree.this,
                                             "Tabelle existiert bereits",
                                             "titel",
-                                            JOptionPane.WARNING_MESSAGE);
+                                            JOptionPane.WARNING_MESSAGE
+                                        );
                                         rs.close();
                                         return false;
                                     }
@@ -726,18 +755,18 @@ public class InternalDbTree extends JTree {
 
                                 for (final DBEntry e : entries) {
                                     final String oldName = e.getName();
-                                    final String newTableName = newName + "->"
-                                                + e.getName().substring(ti.getDatabaseTable().length() + 2);
-                                    st.execute("alter table \"" + oldName + "\" rename to \"" + newTableName
-                                                + "\"");
+                                    final String newTableName =
+                                        newName + "->" + e.getName().substring(ti.getDatabaseTable().length() + 2);
+                                    st.execute("alter table \"" + oldName + "\" rename to \"" + newTableName + "\"");
                                     e.setName(newTableName);
                                 }
                             }
                         } else {
                             entry = new DBEntry(newName);
                             if (!ti.getDatabaseTable().equals(newName)) {
-                                st.execute("alter table \"" + ti.getDatabaseTable() + "\" rename to \"" + newName
-                                            + "\"");
+                                st.execute(
+                                    "alter table \"" + ti.getDatabaseTable() + "\" rename to \"" + newName + "\""
+                                );
                             }
                         }
                         saveExpandedPaths();
@@ -761,14 +790,14 @@ public class InternalDbTree extends JTree {
                         if (!ti.isFolder()) {
                             final MappingModel mm = CismapBroker.getInstance().getMappingComponent().getMappingModel();
                             if (mm instanceof ActiveLayerModel) {
-                                final ActiveLayerModel activeModel = (ActiveLayerModel)mm;
+                                final ActiveLayerModel activeModel = (ActiveLayerModel) mm;
                                 final TreeMap<Integer, MapService> map = activeModel.getMapServices();
 
                                 for (final Integer key : map.keySet()) {
                                     final MapService service = map.get(key);
 
                                     if (service instanceof JDBCFeatureService) {
-                                        final JDBCFeatureService jdbcs = (JDBCFeatureService)service;
+                                        final JDBCFeatureService jdbcs = (JDBCFeatureService) service;
                                         if (jdbcs.getTableName().equals(ti.getDatabaseTable())) {
                                             jdbcs.setTableName(newName);
                                         }
@@ -811,7 +840,7 @@ public class InternalDbTree extends JTree {
 
             for (final DBEntry e : folder.getChildren()) {
                 if (e instanceof DBFolder) {
-                    list.addAll(getDBEntriesFromFolder((DBFolder)e));
+                    list.addAll(getDBEntriesFromFolder((DBFolder) e));
                 } else {
                     list.add(e);
                 }
@@ -860,7 +889,7 @@ public class InternalDbTree extends JTree {
 
         @Override
         protected void exportDone(final JComponent c, final Transferable t, final int act) {
-//            c.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            //            c.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
@@ -902,14 +931,16 @@ public class InternalDbTree extends JTree {
                 while (rs.next()) {
                     final String name = rs.getString("TABLE_NAME");
 
-                    if (name.equalsIgnoreCase("spatial_ref_sys")
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME)
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_ATTRIBUTES_NAME)
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.SORT_TABLE_NAME)
-                                || name.equalsIgnoreCase("Zeichnungen")
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.SLD_TABLE_NAME)
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.LOCK_TABLE_NAME)) {
+                    if (
+                        name.equalsIgnoreCase("spatial_ref_sys") ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME) ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME) ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_ATTRIBUTES_NAME) ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.SORT_TABLE_NAME) ||
+                        name.equalsIgnoreCase("Zeichnungen") ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.SLD_TABLE_NAME) ||
+                        name.equalsIgnoreCase(H2FeatureServiceFactory.LOCK_TABLE_NAME)
+                    ) {
                         continue;
                     }
 
@@ -935,7 +966,7 @@ public class InternalDbTree extends JTree {
                             if (folderIndex == -1) {
                                 parent.add(folder);
                             } else {
-                                folder = (DBFolder)parent.get(folderIndex);
+                                folder = (DBFolder) parent.get(folderIndex);
                             }
 
                             if (!parentFolder.equals("")) {
@@ -974,7 +1005,7 @@ public class InternalDbTree extends JTree {
 
             for (final DBEntry entry : entries) {
                 if (entry instanceof DBFolder) {
-                    addFolder((DBFolder)entry);
+                    addFolder((DBFolder) entry);
                 }
             }
         }
@@ -997,7 +1028,7 @@ public class InternalDbTree extends JTree {
 
             for (final DBEntry entry : folder.getChildren()) {
                 if (entry instanceof DBFolder) {
-                    addFolder((DBFolder)entry);
+                    addFolder((DBFolder) entry);
                 }
             }
         }
@@ -1015,8 +1046,13 @@ public class InternalDbTree extends JTree {
             try {
                 final Statement st = conn.createStatement();
 
-                final ResultSet rs = st.executeQuery("select table, position from \""
-                                + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = '" + parent + "'");
+                final ResultSet rs = st.executeQuery(
+                    "select table, position from \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" where folder = '" +
+                    parent +
+                    "'"
+                );
 
                 while (rs.next()) {
                     final String table = rs.getString(1);
@@ -1052,7 +1088,7 @@ public class InternalDbTree extends JTree {
 
                 for (final DBEntry entry : parent) {
                     if (entry instanceof DBFolder) {
-                        sortFolder((DBFolder)entry);
+                        sortFolder((DBFolder) entry);
                     }
                 }
             } catch (Exception e) {
@@ -1080,7 +1116,7 @@ public class InternalDbTree extends JTree {
 
                 for (final DBEntry entry : parent) {
                     if (entry instanceof DBFolder) {
-                        saveFolderOrder((DBFolder)entry);
+                        saveFolderOrder((DBFolder) entry);
                     }
                 }
             } catch (Exception e) {
@@ -1109,7 +1145,7 @@ public class InternalDbTree extends JTree {
 
                 for (final DBEntry entry : folder.getChildren()) {
                     if (entry instanceof DBFolder) {
-                        saveFolderOrder((DBFolder)entry);
+                        saveFolderOrder((DBFolder) entry);
                     }
                 }
             } finally {
@@ -1134,7 +1170,7 @@ public class InternalDbTree extends JTree {
 
                 for (final DBEntry entry : folder.getChildren()) {
                     if (entry instanceof DBFolder) {
-                        sortFolder((DBFolder)entry);
+                        sortFolder((DBFolder) entry);
                     }
                 }
             } finally {
@@ -1163,7 +1199,7 @@ public class InternalDbTree extends JTree {
             if (parent == root) {
                 return filterChildren(entries).get(index);
             } else if (parent instanceof DBFolder) {
-                return filterChildren(((DBFolder)parent).getChildren()).get(index);
+                return filterChildren(((DBFolder) parent).getChildren()).get(index);
             } else {
                 return null;
             }
@@ -1174,7 +1210,7 @@ public class InternalDbTree extends JTree {
             if (parent == root) {
                 return filterChildren(entries).size();
             } else if (parent instanceof DBFolder) {
-                return filterChildren(((DBFolder)parent).getChildren()).size();
+                return filterChildren(((DBFolder) parent).getChildren()).size();
             } else {
                 return 0;
             }
@@ -1208,19 +1244,25 @@ public class InternalDbTree extends JTree {
          */
         private boolean fulfilFilterRequirements(final DBEntry entry) {
             if (entry instanceof DBFolder) {
-                if ((filterString == null)
-                            || entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())) {
+                if (
+                    (filterString == null) ||
+                    entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())
+                ) {
                     return true;
                 } else {
-                    for (final DBEntry e : ((DBFolder)entry).getChildren()) {
+                    for (final DBEntry e : ((DBFolder) entry).getChildren()) {
                         if (fulfilFilterRequirements(e)) {
                             return true;
                         }
                     }
                 }
             } else {
-                return (((filterString == null)
-                                    || entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())));
+                return (
+                    (
+                        (filterString == null) ||
+                        entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())
+                    )
+                );
             }
 
             return false;
@@ -1235,7 +1277,7 @@ public class InternalDbTree extends JTree {
         public void valueForPathChanged(final TreePath path, final Object newValue) {
             try {
                 if ((newValue != null) && !newValue.equals("")) {
-                    final DBEntry entry = (DBEntry)path.getLastPathComponent();
+                    final DBEntry entry = (DBEntry) path.getLastPathComponent();
                     final Statement st = conn.createStatement();
 
                     if (entry instanceof DBFolder) {
@@ -1243,7 +1285,7 @@ public class InternalDbTree extends JTree {
                         if ((entry.getFolderName() != null) && !entry.getFolderName().equals("")) {
                             folderName = entry.getFolderName() + "->" + folderName;
                         }
-                        renameFolder((DBFolder)entry, folderName);
+                        renameFolder((DBFolder) entry, folderName);
                     } else {
                         String newName = newValue.toString() + "_" + entry.getHash();
                         if ((entry.getFolderName() != null) && !entry.getFolderName().equals("")) {
@@ -1271,7 +1313,7 @@ public class InternalDbTree extends JTree {
 
                 for (final DBEntry e : folder.getChildren()) {
                     if (e instanceof DBFolder) {
-                        renameFolder((DBFolder)e, newName + "->" + e.getNameWithoutFolder());
+                        renameFolder((DBFolder) e, newName + "->" + e.getNameWithoutFolder());
                     } else {
                         final String name = newName + "->" + e.getNameWithoutFolder();
                         st.execute("alter table \"" + e.getName() + "\" rename to \"" + name + "\"");
@@ -1293,8 +1335,10 @@ public class InternalDbTree extends JTree {
          * @param  newName  DOCUMENT ME!
          */
         private void renameExistingService(final String oldName, final String newName) {
-            final ActiveLayerModel mappingModel = (ActiveLayerModel)CismapBroker.getInstance().getMappingComponent()
-                        .getMappingModel();
+            final ActiveLayerModel mappingModel = (ActiveLayerModel) CismapBroker
+                .getInstance()
+                .getMappingComponent()
+                .getMappingModel();
 
             final TreeMap treeMap = mappingModel.getMapServices();
             final List<Integer> keyList = new ArrayList<Integer>(treeMap.keySet());
@@ -1304,7 +1348,7 @@ public class InternalDbTree extends JTree {
                 final Object service = treeMap.get(it.next());
 
                 if (service instanceof H2FeatureService) {
-                    final H2FeatureService featureService = (H2FeatureService)service;
+                    final H2FeatureService featureService = (H2FeatureService) service;
 
                     if ((featureService.getTableName() != null) && featureService.getTableName().equals(oldName)) {
                         featureService.setTableName(newName);
@@ -1339,7 +1383,7 @@ public class InternalDbTree extends JTree {
             if (parent == root) {
                 return filterChildren(entries).indexOf(child);
             } else if (parent instanceof DBFolder) {
-                return filterChildren(((DBFolder)parent).getChildren()).indexOf(child);
+                return filterChildren(((DBFolder) parent).getChildren()).indexOf(child);
             } else {
                 return 0;
             }
@@ -1383,11 +1427,16 @@ public class InternalDbTree extends JTree {
             Statement st = null;
 
             try {
-                st = ((InternalDBTreeModel)getModel()).getConnection().createStatement();
-                st.execute("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
-                            + "\" (folder, table, position) VALUES ('/', '"
-                            + folder.getName() + "', (select max(position) + 1 from \""
-                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\"))");
+                st = ((InternalDBTreeModel) getModel()).getConnection().createStatement();
+                st.execute(
+                    "insert into \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" (folder, table, position) VALUES ('/', '" +
+                    folder.getName() +
+                    "', (select max(position) + 1 from \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\"))"
+                );
             } catch (Exception e) {
                 LOG.error("Error while removing folder", e);
             } finally {
@@ -1433,7 +1482,7 @@ public class InternalDbTree extends JTree {
                     if (folderIndex == -1) {
                         break;
                     } else {
-                        folder = (DBFolder)parent.get(folderIndex);
+                        folder = (DBFolder) parent.get(folderIndex);
                     }
 
                     parent = folder.getChildren();
@@ -1453,7 +1502,7 @@ public class InternalDbTree extends JTree {
         public void removeFolder(final DBFolder folderToRemove) {
             for (final DBEntry e : folderToRemove.getChildren()) {
                 if (e instanceof DBFolder) {
-                    removeFolder((DBFolder)e);
+                    removeFolder((DBFolder) e);
                 } else {
                     remove(e.getName());
                 }
@@ -1475,7 +1524,7 @@ public class InternalDbTree extends JTree {
                     if (folderIndex == -1) {
                         break;
                     } else {
-                        folder = (DBFolder)parent.get(folderIndex);
+                        folder = (DBFolder) parent.get(folderIndex);
                     }
 
                     parent = folder.getChildren();
@@ -1521,16 +1570,17 @@ public class InternalDbTree extends JTree {
         @Override
         public void actionPerformed(final ActionEvent e) {
             InternalDbTree.this.addFolder(
-                NbBundle.getMessage(
-                    AddFolderItem.class,
-                    "InternalDbTree.AddFolderItem.addFolder"));
+                    NbBundle.getMessage(AddFolderItem.class, "InternalDbTree.AddFolderItem.addFolder")
+                );
         }
 
         @Override
         public boolean isVisible(final TreePath[] path) {
             if ((path != null) && (path.length == 1)) {
-                return (path[0].getLastPathComponent() instanceof DBFolder)
-                            || path[0].getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot());
+                return (
+                    (path[0].getLastPathComponent() instanceof DBFolder) ||
+                    path[0].getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())
+                );
             }
 
             return false;
@@ -1560,7 +1610,7 @@ public class InternalDbTree extends JTree {
             final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
 
             for (final TreePath tp : tps) {
-                final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                final DBEntry entry = (DBEntry) tp.getLastPathComponent();
                 if (tp.getLastPathComponent() instanceof DBEntry) {
                     InternalDbTree.this.removeEntry(entry);
                 }
@@ -1651,12 +1701,14 @@ public class InternalDbTree extends JTree {
 
             for (final DBTableInformation dbInfo : infoList) {
                 try {
-                    final H2FeatureService layer = new H2FeatureService(dbInfo.getName(),
-                            dbInfo.getDatabasePath(),
-                            dbInfo.getDatabaseTable(),
-                            null);
+                    final H2FeatureService layer = new H2FeatureService(
+                        dbInfo.getName(),
+                        dbInfo.getDatabasePath(),
+                        dbInfo.getDatabaseTable(),
+                        null
+                    );
                     layer.initAndWait();
-                    final Geometry envelope = ((H2FeatureServiceFactory)layer.getFeatureFactory()).getEnvelope();
+                    final Geometry envelope = ((H2FeatureServiceFactory) layer.getFeatureFactory()).getEnvelope();
 
                     if (envelope != null) {
                         if (geom == null) {
@@ -1747,26 +1799,27 @@ public class InternalDbTree extends JTree {
             final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
 
             for (final TreePath tp : tps) {
-                if ((tp.getLastPathComponent() instanceof DBEntry)
-                            && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                if (
+                    (tp.getLastPathComponent() instanceof DBEntry) && !(tp.getLastPathComponent() instanceof DBFolder)
+                ) {
                     try {
-                        final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                        final DBEntry entry = (DBEntry) tp.getLastPathComponent();
                         final H2FeatureService service = new H2FeatureService(
-                                entry.getNameWithoutFolder(),
-                                databasePath,
-                                entry.getName(),
-                                null);
+                            entry.getNameWithoutFolder(),
+                            databasePath,
+                            entry.getName(),
+                            null
+                        );
                         final LinearReferencingDialog dialog = new LinearReferencingDialog(
-                                StaticSwingTools.getParentFrame(InternalDbTree.this),
-                                true,
-                                service);
+                            StaticSwingTools.getParentFrame(InternalDbTree.this),
+                            true,
+                            service
+                        );
                         dialog.setSize(645, 260);
                         dialog.pack();
                         StaticSwingTools.showDialog(dialog);
                     } catch (Exception ex) {
-                        LOG.error(
-                            "Error while creating a H2 service instance.",
-                            ex);
+                        LOG.error("Error while creating a H2 service instance.", ex);
                     }
                 }
             }
@@ -1778,8 +1831,10 @@ public class InternalDbTree extends JTree {
                 boolean visible = true;
 
                 for (final TreePath path : paths) {
-                    if ((path.getLastPathComponent() instanceof DBFolder)
-                                || path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())) {
+                    if (
+                        (path.getLastPathComponent() instanceof DBFolder) ||
+                        path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())
+                    ) {
                         visible = false;
                         break;
                     }
@@ -1815,26 +1870,27 @@ public class InternalDbTree extends JTree {
             final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
 
             for (final TreePath tp : tps) {
-                if ((tp.getLastPathComponent() instanceof DBEntry)
-                            && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                if (
+                    (tp.getLastPathComponent() instanceof DBEntry) && !(tp.getLastPathComponent() instanceof DBFolder)
+                ) {
                     try {
-                        final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                        final DBEntry entry = (DBEntry) tp.getLastPathComponent();
                         final H2FeatureService service = new H2FeatureService(
-                                entry.getNameWithoutFolder(),
-                                databasePath,
-                                entry.getName(),
-                                null);
+                            entry.getNameWithoutFolder(),
+                            databasePath,
+                            entry.getName(),
+                            null
+                        );
                         final PointReferencingDialog dialog = new PointReferencingDialog(
-                                StaticSwingTools.getParentFrame(InternalDbTree.this),
-                                true,
-                                service);
+                            StaticSwingTools.getParentFrame(InternalDbTree.this),
+                            true,
+                            service
+                        );
                         dialog.setSize(645, 260);
                         dialog.pack();
                         StaticSwingTools.showDialog(dialog);
                     } catch (Exception ex) {
-                        LOG.error(
-                            "Error while creating a H2 service instance.",
-                            ex);
+                        LOG.error("Error while creating a H2 service instance.", ex);
                     }
                 }
             }
@@ -1846,8 +1902,10 @@ public class InternalDbTree extends JTree {
                 boolean visible = true;
 
                 for (final TreePath path : paths) {
-                    if ((path.getLastPathComponent() instanceof DBFolder)
-                                || path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())) {
+                    if (
+                        (path.getLastPathComponent() instanceof DBFolder) ||
+                        path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())
+                    ) {
                         visible = false;
                         break;
                     }
@@ -1886,12 +1944,22 @@ public class InternalDbTree extends JTree {
          */
         public DBEntryComparator(final ConnectionWrapper conn, final String folder) throws Exception {
             H2FeatureServiceFactory.createSortMetaTableIfNotExist();
-            positionStatement = conn.prepareStatement("select position from \""
-                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = ? and table = ?");
-            maxPosStatement = conn.prepareStatement("select max(position) from \""
-                            + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = ?");
-            insertStatement = conn.prepareStatement("insert into \"" + H2FeatureServiceFactory.SORT_TABLE_NAME
-                            + "\" (folder, table, position) VALUES (?, ?, ?)");
+            positionStatement =
+                conn.prepareStatement(
+                    "select position from \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" where folder = ? and table = ?"
+                );
+            maxPosStatement =
+                conn.prepareStatement(
+                    "select max(position) from \"" + H2FeatureServiceFactory.SORT_TABLE_NAME + "\" where folder = ?"
+                );
+            insertStatement =
+                conn.prepareStatement(
+                    "insert into \"" +
+                    H2FeatureServiceFactory.SORT_TABLE_NAME +
+                    "\" (folder, table, position) VALUES (?, ?, ?)"
+                );
             this.folder = folder;
         }
 
@@ -2004,7 +2072,6 @@ public class InternalDbTree extends JTree {
          *
          * @param  paths  DOCUMENT ME!
          */
-        public void refreshText(final TreePath[] paths) {
-        }
+        public void refreshText(final TreePath[] paths) {}
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * StatusBar.java
  *
@@ -14,29 +14,6 @@ package de.cismet.cismap.commons.gui.statusbar;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.openide.util.NbBundle;
-
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.RenderingHints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
-import java.util.Collection;
-import java.util.HashSet;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.ServiceLayer;
@@ -53,14 +30,29 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
-
 import de.cismet.tools.Static2DTools;
 import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
-
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.NavigatorStatusBarComponent;
 import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Collection;
+import java.util.HashSet;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -69,16 +61,16 @@ import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener
  * @version  $Revision$, $Date$
  */
 @org.openide.util.lookup.ServiceProvider(service = NavigatorStatusBarComponent.class)
-public class StatusBar extends javax.swing.JPanel implements StatusListener,
-    FeatureCollectionListener,
-    ActiveLayerListener,
-    NavigatorStatusBarComponent {
+public class StatusBar
+    extends javax.swing.JPanel
+    implements StatusListener, FeatureCollectionListener, ActiveLayerListener, NavigatorStatusBarComponent {
 
     //~ Instance fields --------------------------------------------------------
 
     String mode;
-    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/map.png"));      // NOI18N
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png")
+    ); // NOI18N
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private CrsTransformer transformer = null;
@@ -119,6 +111,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -126,8 +119,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     /**
      * Creates new form StatusBar.
      */
-    public StatusBar() {
-    }
+    public StatusBar() {}
 
     /**
      * Creates a new StatusBar object.
@@ -202,154 +194,178 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void statusValueChanged(final StatusEvent e) {
         final Runnable modifyControls = new Runnable() {
+            @Override
+            public void run() {
+                if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
+                    final Coordinate c = (Coordinate) e.getValue();
+                    final Crs crs = CismapBroker.getInstance().getSrs();
+                    final boolean showAdditionalWSG84Coords = !crs.getCode().equalsIgnoreCase("epsg:4326");
 
-                @Override
-                public void run() {
-                    if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
-                        final Coordinate c = (Coordinate)e.getValue();
-                        final Crs crs = CismapBroker.getInstance().getSrs();
-                        final boolean showAdditionalWSG84Coords = !crs.getCode().equalsIgnoreCase("epsg:4326");
+                    if (crs.isMetric()) {
+                        lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
+                    } else {
+                        lblCoordinates.setText(transformToWGS84Coords(c));
+                    }
 
-                        if (crs.isMetric()) {
-                            lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
+                    if (showAdditionalWSG84Coords) {
+                        lblWgs84Coordinates.setText(transformToWGS84Coords(c));
+                    }
+
+                    lblWgs84Coordinates.setVisible(showAdditionalWSG84Coords);
+                    sepCoordinates.setVisible(showAdditionalWSG84Coords);
+                } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
+                    lblStatus.setText(e.getValue().toString());
+                } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
+                    lblStatus.setText(""); // NOI18N
+                } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
+                    if (
+                        (e.getValue() != null) &&
+                        (e.getValue() instanceof PFeature) &&
+                        (((PFeature) e.getValue()).getFeature() != null) &&
+                        (((PFeature) e.getValue()).getFeature() instanceof XStyledFeature)
+                    ) {
+                        lblStatus.setText(((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getName());
+                        final ImageIcon ico = ((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getIconImage();
+                        if ((ico != null) && (ico.getIconWidth() > 0) && (ico.getIconHeight() > 0)) {
+                            final BufferedImage imageToScale = new BufferedImage(
+                                ico.getIconWidth(),
+                                ico.getIconHeight(),
+                                BufferedImage.TYPE_INT_ARGB
+                            );
+                            final Graphics g = imageToScale.createGraphics();
+                            g.drawImage(ico.getImage(), 0, 0, ico.getImageObserver());
+                            g.dispose();
+                            lblStatusImage.setIcon(
+                                new ImageIcon(
+                                    Static2DTools.getFasterScaledInstance(
+                                        imageToScale,
+                                        lblStatusImage.getWidth(),
+                                        lblStatusImage.getHeight(),
+                                        RenderingHints.VALUE_INTERPOLATION_BILINEAR,
+                                        true
+                                    )
+                                )
+                            );
                         } else {
-                            lblCoordinates.setText(transformToWGS84Coords(c));
-                        }
-
-                        if (showAdditionalWSG84Coords) {
-                            lblWgs84Coordinates.setText(transformToWGS84Coords(c));
-                        }
-
-                        lblWgs84Coordinates.setVisible(showAdditionalWSG84Coords);
-                        sepCoordinates.setVisible(showAdditionalWSG84Coords);
-                    } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
-                        lblStatus.setText(e.getValue().toString());
-                    } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                        lblStatus.setText("");                                                                  // NOI18N
-                    } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
-                        if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
-                                    && (((PFeature)e.getValue()).getFeature() != null)
-                                    && (((PFeature)e.getValue()).getFeature() instanceof XStyledFeature)) {
-                            lblStatus.setText(((XStyledFeature)((PFeature)e.getValue()).getFeature()).getName());
-                            final ImageIcon ico = ((XStyledFeature)((PFeature)e.getValue()).getFeature())
-                                        .getIconImage();
-                            if ((ico != null) && (ico.getIconWidth() > 0) && (ico.getIconHeight() > 0)) {
-                                final BufferedImage imageToScale = new BufferedImage(ico.getIconWidth(),
-                                        ico.getIconHeight(),
-                                        BufferedImage.TYPE_INT_ARGB);
-                                final Graphics g = imageToScale.createGraphics();
-                                g.drawImage(ico.getImage(), 0, 0, ico.getImageObserver());
-                                g.dispose();
-                                lblStatusImage.setIcon(new ImageIcon(
-                                        Static2DTools.getFasterScaledInstance(
-                                            imageToScale,
-                                            lblStatusImage.getWidth(),
-                                            lblStatusImage.getHeight(),
-                                            RenderingHints.VALUE_INTERPOLATION_BILINEAR,
-                                            true)));
-                            } else {
-                                lblStatusImage.setIcon(defaultIcon);
-                            }
-                        } else if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
-                                    && (((PFeature)e.getValue()).getFeature() != null)
-                                    && (((PFeature)e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature)) {
-                            if (
-                                ((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
-                                        .getSecondaryAnnotation()
-                                        != null) {
-                                lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
-                                            .getSecondaryAnnotation());
-                            } else {
-                                lblStatus.setText("");                                                          // NOI18N
-                            }
-                        } else {
-                            lblStatus.setText("");                                                              // NOI18N
                             lblStatusImage.setIcon(defaultIcon);
                         }
-                    } else if (e.getName().equals(StatusEvent.SCALE)) {
-                        final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
-                        if (e.getValue().equals(StatusEvent.WINDOW_REMOVED) || (mappingComponent.getWidth() == 0)) {
-                            lblScale.setText(NbBundle.getMessage(
-                                    StatusBar.class,
-                                    "StatusBar.statusValueChanged(StatusEvent).mapHidden"));                    // NOI18N
-                        } else if (mappingComponent.getWidth() < 1) {
-                            lblScale.setText(NbBundle.getMessage(
-                                    StatusBar.class,
-                                    "StatusBar.statusValueChanged(StatusEvent).mapMinimized"));                 // NOI18N
+                    } else if (
+                        (e.getValue() != null) &&
+                        (e.getValue() instanceof PFeature) &&
+                        (((PFeature) e.getValue()).getFeature() != null) &&
+                        (((PFeature) e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature)
+                    ) {
+                        if (
+                            (
+                                (DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()
+                            ).getSecondaryAnnotation() !=
+                            null
+                        ) {
+                            lblStatus.setText(
+                                (
+                                    (DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()
+                                ).getSecondaryAnnotation()
+                            );
                         } else {
-                            if (developerMode) {
-                                lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
-                            } else {
-                                lblScale.setText("1:" + sd);                                                    // NOI18N
-                            }
+                            lblStatus.setText(""); // NOI18N
                         }
-                    } else if (e.getName().equals(StatusEvent.CRS)) {
-                        lblCrs.setText(((Crs)e.getValue()).getShortname());
-                        lblCoordinates.setToolTipText(((Crs)e.getValue()).getShortname());
-                    } else if (e.getName().equals(StatusEvent.RETRIEVAL_STARTED)) {
-                        if ((pnlServicesStatus.getComponentCount() > 0)
-                                    && !pnlServicesStatus.getComponent(0).equals(servicesBusyPanel)) {
-                            pnlServicesStatus.removeAll();
-                            pnlServicesStatus.add(servicesBusyPanel, BorderLayout.CENTER);
-                            pnlServicesStatus.revalidate();
-                            pnlServicesStatus.repaint();
-                        }
-                    } else if (e.getName().equals(StatusEvent.RETRIEVAL_COMPLETED)
-                                || e.getName().equals(StatusEvent.RETRIEVAL_ABORTED)
-                                || e.getName().equals(StatusEvent.RETRIEVAL_REMOVED)) {
-                        if (servicesCounter == 0) {
-                            pnlServicesStatus.removeAll();
-                            if (servicesErroneousCounter == 0) {
-                                pnlServicesStatus.add(servicesRetrievedPanel, BorderLayout.CENTER);
-                            } else {
-                                pnlServicesStatus.add(servicesErrorPanel, BorderLayout.CENTER);
-                            }
-                            pnlServicesStatus.revalidate();
-                            pnlServicesStatus.repaint();
-                        }
-                    } else if (e.getName().equals(StatusEvent.RETRIEVAL_ERROR)) {
-                        if ((pnlServicesStatus.getComponentCount() > 0)
-                                    && !pnlServicesStatus.getComponent(0).equals(servicesErrorPanel)) {
-                            pnlServicesStatus.removeAll();
-                            pnlServicesStatus.add(servicesErrorPanel, BorderLayout.CENTER);
-                            pnlServicesStatus.revalidate();
-                            pnlServicesStatus.repaint();
-                        }
-                    } else if (e.getName().equals(StatusEvent.MAP_EXTEND_FIXED)) {
-                        if (e.getValue() instanceof Boolean) {
-                            pnlFixMapExtent.removeAll();
-                            if ((Boolean)e.getValue()) {
-                                pnlFixMapExtent.add(mapExtentFixedPanel, BorderLayout.CENTER);
-                            } else {
-                                pnlFixMapExtent.add(mapExtentUnfixedPanel, BorderLayout.CENTER);
-                            }
-                            pnlFixMapExtent.revalidate();
-                            pnlFixMapExtent.repaint();
-                        }
-                    } else if (e.getName().equals(StatusEvent.MAP_SCALE_FIXED)) {
-                        if (e.getValue() instanceof Boolean) {
-                            pnlFixMapScale.removeAll();
-                            if ((Boolean)e.getValue()) {
-                                pnlFixMapScale.add(mapScaleFixedPanel, BorderLayout.CENTER);
-                            } else {
-                                pnlFixMapScale.add(mapScaleUnfixedPanel, BorderLayout.CENTER);
-                            }
-                            pnlFixMapScale.revalidate();
-                            pnlFixMapScale.repaint();
+                    } else {
+                        lblStatus.setText(""); // NOI18N
+                        lblStatusImage.setIcon(defaultIcon);
+                    }
+                } else if (e.getName().equals(StatusEvent.SCALE)) {
+                    final int sd = (int) (mappingComponent.getScaleDenominator() + 0.5);
+                    if (e.getValue().equals(StatusEvent.WINDOW_REMOVED) || (mappingComponent.getWidth() == 0)) {
+                        lblScale.setText(
+                            NbBundle.getMessage(StatusBar.class, "StatusBar.statusValueChanged(StatusEvent).mapHidden")
+                        ); // NOI18N
+                    } else if (mappingComponent.getWidth() < 1) {
+                        lblScale.setText(
+                            NbBundle.getMessage(
+                                StatusBar.class,
+                                "StatusBar.statusValueChanged(StatusEvent).mapMinimized"
+                            )
+                        ); // NOI18N
+                    } else {
+                        if (developerMode) {
+                            lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                        } else {
+                            lblScale.setText("1:" + sd); // NOI18N
                         }
                     }
+                } else if (e.getName().equals(StatusEvent.CRS)) {
+                    lblCrs.setText(((Crs) e.getValue()).getShortname());
+                    lblCoordinates.setToolTipText(((Crs) e.getValue()).getShortname());
+                } else if (e.getName().equals(StatusEvent.RETRIEVAL_STARTED)) {
+                    if (
+                        (pnlServicesStatus.getComponentCount() > 0) &&
+                        !pnlServicesStatus.getComponent(0).equals(servicesBusyPanel)
+                    ) {
+                        pnlServicesStatus.removeAll();
+                        pnlServicesStatus.add(servicesBusyPanel, BorderLayout.CENTER);
+                        pnlServicesStatus.revalidate();
+                        pnlServicesStatus.repaint();
+                    }
+                } else if (
+                    e.getName().equals(StatusEvent.RETRIEVAL_COMPLETED) ||
+                    e.getName().equals(StatusEvent.RETRIEVAL_ABORTED) ||
+                    e.getName().equals(StatusEvent.RETRIEVAL_REMOVED)
+                ) {
+                    if (servicesCounter == 0) {
+                        pnlServicesStatus.removeAll();
+                        if (servicesErroneousCounter == 0) {
+                            pnlServicesStatus.add(servicesRetrievedPanel, BorderLayout.CENTER);
+                        } else {
+                            pnlServicesStatus.add(servicesErrorPanel, BorderLayout.CENTER);
+                        }
+                        pnlServicesStatus.revalidate();
+                        pnlServicesStatus.repaint();
+                    }
+                } else if (e.getName().equals(StatusEvent.RETRIEVAL_ERROR)) {
+                    if (
+                        (pnlServicesStatus.getComponentCount() > 0) &&
+                        !pnlServicesStatus.getComponent(0).equals(servicesErrorPanel)
+                    ) {
+                        pnlServicesStatus.removeAll();
+                        pnlServicesStatus.add(servicesErrorPanel, BorderLayout.CENTER);
+                        pnlServicesStatus.revalidate();
+                        pnlServicesStatus.repaint();
+                    }
+                } else if (e.getName().equals(StatusEvent.MAP_EXTEND_FIXED)) {
+                    if (e.getValue() instanceof Boolean) {
+                        pnlFixMapExtent.removeAll();
+                        if ((Boolean) e.getValue()) {
+                            pnlFixMapExtent.add(mapExtentFixedPanel, BorderLayout.CENTER);
+                        } else {
+                            pnlFixMapExtent.add(mapExtentUnfixedPanel, BorderLayout.CENTER);
+                        }
+                        pnlFixMapExtent.revalidate();
+                        pnlFixMapExtent.repaint();
+                    }
+                } else if (e.getName().equals(StatusEvent.MAP_SCALE_FIXED)) {
+                    if (e.getValue() instanceof Boolean) {
+                        pnlFixMapScale.removeAll();
+                        if ((Boolean) e.getValue()) {
+                            pnlFixMapScale.add(mapScaleFixedPanel, BorderLayout.CENTER);
+                        } else {
+                            pnlFixMapScale.add(mapScaleUnfixedPanel, BorderLayout.CENTER);
+                        }
+                        pnlFixMapScale.revalidate();
+                        pnlFixMapScale.repaint();
+                    }
                 }
-            };
+            }
+        };
 
         if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-            mode = ((String)e.getValue());
+            mode = ((String) e.getValue());
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_STARTED)) {
             if (log.isDebugEnabled()) {
                 log.debug("Entered RETRIEVAL_STARTED: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (erroneousServices.contains(service)) {
                     erroneousServices.remove(service);
                     servicesErroneousCounter--;
@@ -361,9 +377,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_STARTED (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_STARTED (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_COMPLETED)) {
             if (log.isDebugEnabled()) {
@@ -371,7 +394,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -379,9 +402,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_COMPLETED (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_COMPLETED (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ABORTED)) {
             if (log.isDebugEnabled()) {
@@ -389,7 +419,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -397,9 +427,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_ABORTED (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_ABORTED (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ERROR)) {
             if (log.isDebugEnabled()) {
@@ -407,7 +444,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -417,9 +454,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_ERROR (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_ERROR (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_REMOVED)) {
             if (log.isDebugEnabled()) {
@@ -427,7 +471,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -439,9 +483,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_REMOVED (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_REMOVED (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_RESET)) {
             if (log.isDebugEnabled()) {
@@ -449,7 +500,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
 
             if (e.getValue() instanceof ServiceLayer) {
-                final ServiceLayer service = (ServiceLayer)e.getValue();
+                final ServiceLayer service = (ServiceLayer) e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -466,9 +517,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             servicesErroneousCounter = 0;
 
             if (log.isDebugEnabled()) {
-                log.debug("RETRIEVAL_RESET (" + e.getValue() + ", " + System.currentTimeMillis()
-                            + ") - services started: " + servicesCounter + ", erroneous services: "
-                            + servicesErroneousCounter);
+                log.debug(
+                    "RETRIEVAL_RESET (" +
+                    e.getValue() +
+                    ", " +
+                    System.currentTimeMillis() +
+                    ") - services started: " +
+                    servicesCounter +
+                    ", erroneous services: " +
+                    servicesErroneousCounter
+                );
             }
         }
 
@@ -499,9 +557,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         sepMeasurement = new javax.swing.JSeparator();
         lblStatusImage = new javax.swing.JLabel();
         lblStatus = new javax.swing.JLabel();
-        gluFiller = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        gluFiller =
+            new javax.swing.Box.Filler(
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(0, 0));
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(0, 0)
+            );
         lblScale = new javax.swing.JLabel();
         sepScale = new javax.swing.JSeparator();
         lblCrs = new javax.swing.JLabel();
@@ -587,13 +648,14 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         add(gluFiller, gridBagConstraints);
 
         lblScale.setComponentPopupMenu(pomScale);
-        lblScale.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblScale.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     lblScaleMousePressed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 9;
         gridBagConstraints.gridy = 0;
@@ -608,13 +670,14 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         add(sepScale, gridBagConstraints);
 
         lblCrs.setComponentPopupMenu(pomCrs);
-        lblCrs.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblCrs.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     lblCrsMousePressed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 11;
         gridBagConstraints.gridy = 0;
@@ -644,9 +707,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         add(sepCoordinates, gridBagConstraints);
 
         lblWgs84Coordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblWgs84Coordinates.setToolTipText(org.openide.util.NbBundle.getMessage(
-                StatusBar.class,
-                "StatusBar.lblWgs84Coordinates.toolTipText")); // NOI18N
+        lblWgs84Coordinates.setToolTipText(
+            org.openide.util.NbBundle.getMessage(StatusBar.class, "StatusBar.lblWgs84Coordinates.toolTipText")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 15;
         gridBagConstraints.gridy = 0;
@@ -675,7 +738,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }                                                                        //GEN-LAST:event_lblScaleMousePressed
+    } //GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
@@ -686,7 +749,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }                                                                      //GEN-LAST:event_lblCrsMousePressed
+    } //GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
@@ -702,13 +765,14 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
 
         jmi.setToolTipText(crs.getName());
-        jmi.addActionListener(new ActionListener() {
-
+        jmi.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     CismapBroker.getInstance().setSrs(crs);
                 }
-            });
+            }
+        );
         pomCrs.add(jmi);
     }
 
@@ -720,14 +784,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     private void addScalePopupMenu(final String text, final double scaleDenominator) {
         final JMenuItem jmi = new JMenuItem(text);
-        jmi.addActionListener(new ActionListener() {
-
+        jmi.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     mappingComponent.gotoBoundingBoxWithHistory(
-                        mappingComponent.getBoundingBoxFromScale(scaleDenominator));
+                        mappingComponent.getBoundingBoxFromScale(scaleDenominator)
+                    );
                 }
-            });
+            }
+        );
         pomScale.add(jmi);
     }
 
@@ -760,13 +826,15 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
             }
         }
         if (((area == 0.0) && (umfang == 0.0)) || (cf.size() == 0)) {
-            lblMeasurement.setText("");                                                                  // NOI18N
+            lblMeasurement.setText(""); // NOI18N
         } else {
             lblMeasurement.setText(
                 org.openide.util.NbBundle.getMessage(
                     StatusBar.class,
                     "StatusBar.lblMeasurement.text",
-                    new Object[] { StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) })); // NOI18N
+                    new Object[] { StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) }
+                )
+            ); // NOI18N
         }
     }
 
@@ -776,8 +844,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      * @param  fce  DOCUMENT ME!
      */
     @Override
-    public void featuresRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void featuresRemoved(final FeatureCollectionEvent fce) {}
 
     /**
      * DOCUMENT ME!
@@ -802,8 +869,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      * @param  fce  DOCUMENT ME!
      */
     @Override
-    public void featuresAdded(final FeatureCollectionEvent fce) {
-    }
+    public void featuresAdded(final FeatureCollectionEvent fce) {}
 
     /**
      * DOCUMENT ME!
@@ -821,8 +887,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      * @param  fce  DOCUMENT ME!
      */
     @Override
-    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-    }
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {}
 
     /**
      * DOCUMENT ME!
@@ -830,8 +895,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      * @param  fce  DOCUMENT ME!
      */
     @Override
-    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {}
 
     /**
      * DOCUMENT ME!
@@ -846,8 +910,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      * DOCUMENT ME!
      */
     @Override
-    public void featureCollectionChanged() {
-    }
+    public void featureCollectionChanged() {}
 
     /**
      * DOCUMENT ME!
@@ -861,9 +924,10 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
         try {
             if (transformer != null) {
-                final Coordinate[] wgs84Coord = transformer.transformGeometry(CismapBroker.getInstance().getSrs()
-                                .getCode(),
-                        p);
+                final Coordinate[] wgs84Coord = transformer.transformGeometry(
+                    CismapBroker.getInstance().getSrs().getCode(),
+                    p
+                );
                 result = "(" + df.format(wgs84Coord[0].x) + "," + df.format(wgs84Coord[0].y) + ")"; // NOI18N
             } else {
                 log.error("Cannot transform the current coordinates: " + p);
@@ -893,7 +957,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
-            statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, (ServiceLayer)e.getLayer()));
+            statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, (ServiceLayer) e.getLayer()));
         }
     }
 
@@ -925,7 +989,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void layerAvailabilityChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
-            final ServiceLayer layer = (ServiceLayer)e.getLayer();
+            final ServiceLayer layer = (ServiceLayer) e.getLayer();
             if (!layer.isEnabled()) {
                 statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, layer));
             }

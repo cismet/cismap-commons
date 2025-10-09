@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms.featuresupportlayer;
 
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
@@ -70,8 +70,10 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
     // TODO: these two method should probably be available in the super implementation
     @Override
     public boolean equals(final Object o) {
-        return (o instanceof SimpleFeatureSupporterRasterServiceUrl)
-                    && ((SimpleFeatureSupporterRasterServiceUrl)o).urlTemplate.equals(this.urlTemplate);
+        return (
+            (o instanceof SimpleFeatureSupporterRasterServiceUrl) &&
+            ((SimpleFeatureSupporterRasterServiceUrl) o).urlTemplate.equals(this.urlTemplate)
+        );
     }
 
     @Override

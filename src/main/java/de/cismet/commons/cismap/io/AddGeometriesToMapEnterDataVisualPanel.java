@@ -1,17 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-import org.openide.util.WeakListeners;
-
+import de.cismet.cismap.commons.util.DnDUtils;
+import de.cismet.commons.converter.Converter;
+import de.cismet.commons.converter.FormatHint;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -21,24 +19,18 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.io.File;
-
 import java.net.URI;
-
 import java.util.List;
-
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import de.cismet.cismap.commons.util.DnDUtils;
-
-import de.cismet.commons.converter.Converter;
-import de.cismet.commons.converter.FormatHint;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
@@ -72,6 +64,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
     private final transient javax.swing.JSeparator sepSelectedConverter = new javax.swing.JSeparator();
     private final transient javax.swing.JTextField txtFile = new DnDTextField();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -91,9 +84,12 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         initComponents();
 
-        this.setName(NbBundle.getMessage(
-                AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.<init>(AddGeomtriesToMapEnterDataWizardPanel).panelName")); // NOI18N
+        this.setName(
+                NbBundle.getMessage(
+                    AddGeometriesToMapEnterDataVisualPanel.class,
+                    "AddGeometriesToMapEnterDataVisualPanel.<init>(AddGeomtriesToMapEnterDataWizardPanel).panelName"
+                )
+            ); // NOI18N
 
         this.model.addChangeListener(WeakListeners.change(modelChangeL, model));
         this.btnOpenFile.addActionListener(WeakListeners.create(ActionListener.class, openFileL, btnOpenFile));
@@ -142,12 +138,18 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblCoordinates.setText(NbBundle.getMessage(
+        lblCoordinates.setText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text"));        // NOI18N
-        lblCoordinates.setToolTipText(NbBundle.getMessage(
+                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text"
+            )
+        ); // NOI18N
+        lblCoordinates.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.toolTipText"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -156,16 +158,20 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCoordinates, gridBagConstraints);
 
-        edpCoordinates.setToolTipText(NbBundle.getMessage(
+        edpCoordinates.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.edpCoordinates.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.edpCoordinates.toolTipText"
+            )
+        ); // NOI18N
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.coordinateData}"),
-                edpCoordinates,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+            org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+            this,
+            org.jdesktop.beansbinding.ELProperty.create("${model.coordinateData}"),
+            edpCoordinates,
+            org.jdesktop.beansbinding.BeanProperty.create("text")
+        );
         bindingGroup.addBinding(binding);
 
         jScrollPane1.setViewportView(edpCoordinates);
@@ -180,12 +186,18 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
-        lblFile.setText(NbBundle.getMessage(
+        lblFile.setText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblFile.text"));        // NOI18N
-        lblFile.setToolTipText(NbBundle.getMessage(
+                "AddGeometriesToMapEnterDataVisualPanel.lblFile.text"
+            )
+        ); // NOI18N
+        lblFile.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblFile.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblFile.toolTipText"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -194,16 +206,21 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblFile, gridBagConstraints);
 
-        txtFile.setToolTipText(NbBundle.getMessage(
+        txtFile.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.txtFile.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.txtFile.toolTipText"
+            )
+        ); // NOI18N
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${model.inputFile}"),
                 txtFile,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+                org.jdesktop.beansbinding.BeanProperty.create("text")
+            );
         binding.setConverter(new InputFileConverter());
         bindingGroup.addBinding(binding);
 
@@ -216,12 +233,18 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtFile, gridBagConstraints);
 
-        btnOpenFile.setText(NbBundle.getMessage(
+        btnOpenFile.setText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text"));        // NOI18N
-        btnOpenFile.setToolTipText(NbBundle.getMessage(
+                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text"
+            )
+        ); // NOI18N
+        btnOpenFile.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.toolTipText"
+            )
+        ); // NOI18N
         btnOpenFile.setMaximumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setMinimumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setPreferredSize(new java.awt.Dimension(50, 29));
@@ -242,12 +265,18 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         pnlSelectedConverter.setOpaque(false);
         pnlSelectedConverter.setLayout(new java.awt.GridBagLayout());
 
-        lblSelectedConverterValue.setText(NbBundle.getMessage(
+        lblSelectedConverterValue.setText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text"));        // NOI18N
-        lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text"
+            )
+        ); // NOI18N
+        lblSelectedConverterValue.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -257,12 +286,18 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlSelectedConverter.add(lblSelectedConverterValue, gridBagConstraints);
 
-        lblSelectedConverter.setText(NbBundle.getMessage(
+        lblSelectedConverter.setText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"));        // NOI18N
-        lblSelectedConverter.setToolTipText(NbBundle.getMessage(
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"
+            )
+        ); // NOI18N
+        lblSelectedConverter.setToolTipText(
+            NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.toolTipText")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.toolTipText"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -312,10 +347,13 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         @Override
         public void stateChanged(final ChangeEvent e) {
             if (e.getSource() instanceof AddGeometriesToMapEnterDataWizardPanel) {
-                lblCoordinates.setText(NbBundle.getMessage(
+                lblCoordinates.setText(
+                    NbBundle.getMessage(
                         AddGeometriesToMapEnterDataVisualPanel.class,
                         "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", // NOI18N
-                        model.getCrsName()));
+                        model.getCrsName()
+                    )
+                );
                 final String text = model.getCoordinateData();
                 if ((text == null) || !text.equals(edpCoordinates.getText())) {
                     edpCoordinates.setText(text);
@@ -323,19 +361,25 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
                 final Converter conv = model.getSelectedConverter();
                 if (conv instanceof FormatHint) {
-                    lblSelectedConverterValue.setText(((FormatHint)conv).getFormatDisplayName());
+                    lblSelectedConverterValue.setText(((FormatHint) conv).getFormatDisplayName());
                 } else if (conv == null) {
-                    lblSelectedConverterValue.setText(NbBundle.getMessage(
+                    lblSelectedConverterValue.setText(
+                        NbBundle.getMessage(
                             AddGeometriesToMapEnterDataVisualPanel.class,
-                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text")); // NOI18N
+                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text"
+                        )
+                    ); // NOI18N
                 } else {
                     lblSelectedConverterValue.setText(conv.toString());
                 }
 
-                lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                lblSelectedConverterValue.setToolTipText(
+                    NbBundle.getMessage(
                         AddGeometriesToMapEnterDataVisualPanel.class,
                         "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText", // NOI18N
-                        model.getConverterPreselectionMode()));
+                        model.getConverterPreselectionMode()
+                    )
+                );
             }
         }
     }
@@ -383,8 +427,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragEnter(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -393,8 +439,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragOver(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -403,8 +451,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dropActionChanged(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -424,10 +474,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 final File file;
                 if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
                     // unix drop
-                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String uriList = (String) dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
                     final String[] uris = uriList.split(System.getProperty("line.separator")); // NOI18N
                     if (uris.length == 1) {
-                        file = new File(new URI(uris[0].replaceFirst("localhost", "")));       // NOI18N
+                        file = new File(new URI(uris[0].replaceFirst("localhost", ""))); // NOI18N
                         dtde.dropComplete(true);
                     } else {
                         file = null;
@@ -436,7 +486,9 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 } else {
                     // win drop
                     @SuppressWarnings("unchecked")
-                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    final List<File> data = (List) dtde
+                        .getTransferable()
+                        .getTransferData(DataFlavor.javaFileListFlavor);
                     if (data.size() == 1) {
                         file = data.get(0);
                         dtde.dropComplete(true);
@@ -474,9 +526,11 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragEnter(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
-                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR) ||
+                dtde.isDataFlavorSupported(DataFlavor.stringFlavor)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -485,9 +539,11 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragOver(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
-                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR) ||
+                dtde.isDataFlavorSupported(DataFlavor.stringFlavor)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -496,9 +552,11 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dropActionChanged(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
-                        || dtde.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR) ||
+                dtde.isDataFlavorSupported(DataFlavor.stringFlavor)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -517,8 +575,8 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
                 if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
                     // unix drop
-                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
-                    final String[] uris = uriList.split(System.getProperty("line.separator"));      // NOI18N
+                    final String uriList = (String) dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String[] uris = uriList.split(System.getProperty("line.separator")); // NOI18N
                     if (uris.length == 1) {
                         final File file = new File(new URI(uris[0].replaceFirst("localhost", ""))); // NOI18N
                         dtde.dropComplete(true);
@@ -529,7 +587,9 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 } else if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                     // win drop
                     @SuppressWarnings("unchecked")
-                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    final List<File> data = (List) dtde
+                        .getTransferable()
+                        .getTransferData(DataFlavor.javaFileListFlavor);
                     if (data.size() == 1) {
                         final File file = data.get(0);
                         dtde.dropComplete(true);
@@ -538,7 +598,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                         dtde.dropComplete(false);
                     }
                 } else {
-                    final String data = (String)dtde.getTransferable().getTransferData(DataFlavor.stringFlavor);
+                    final String data = (String) dtde.getTransferable().getTransferData(DataFlavor.stringFlavor);
                     dtde.dropComplete(true);
 
                     // String drop, empty file
@@ -570,8 +630,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragEnter(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -580,8 +642,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dragOver(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -590,8 +654,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         @Override
         public void dropActionChanged(final DropTargetDragEvent dtde) {
-            if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                        || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            if (
+                dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) ||
+                dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)
+            ) {
                 dtde.acceptDrag(DnDConstants.ACTION_COPY_OR_MOVE);
             } else {
                 dtde.rejectDrag();
@@ -610,8 +676,8 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
                 if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
                     // unix drop
-                    final String uriList = (String)dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
-                    final String[] uris = uriList.split(System.getProperty("line.separator"));      // NOI18N
+                    final String uriList = (String) dtde.getTransferable().getTransferData(DnDUtils.URI_LIST_FLAVOR);
+                    final String[] uris = uriList.split(System.getProperty("line.separator")); // NOI18N
                     if (uris.length == 1) {
                         final File file = new File(new URI(uris[0].replaceFirst("localhost", ""))); // NOI18N
                         dtde.dropComplete(true);
@@ -622,7 +688,9 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 } else {
                     // win drop
                     @SuppressWarnings("unchecked")
-                    final List<File> data = (List)dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                    final List<File> data = (List) dtde
+                        .getTransferable()
+                        .getTransferData(DataFlavor.javaFileListFlavor);
                     if (data.size() == 1) {
                         final File file = data.get(0);
                         dtde.dropComplete(true);

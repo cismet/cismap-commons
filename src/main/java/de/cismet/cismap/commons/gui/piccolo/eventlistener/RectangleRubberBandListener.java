@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * RectangleRubberBandListener.java
  *
@@ -12,17 +12,15 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.tools.PFeatureTools;
 import edu.umd.cs.piccolo.*;
 import edu.umd.cs.piccolo.event.*;
 import edu.umd.cs.piccolo.nodes.*;
 import edu.umd.cs.piccolo.util.PBounds;
-
 import java.awt.*;
 import java.awt.geom.Point2D;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
  * DOCUMENT ME!
@@ -50,8 +48,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
     /**
      * Creates a new instance of RectangleRubberBandListener.
      */
-    public RectangleRubberBandListener() {
-    }
+    public RectangleRubberBandListener() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -60,7 +57,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
         super.mousePressed(e);
         try {
             if (e.isLeftMouseButton() && !isMouseOverStickyNode(e)) {
-                final PLayer layer = ((MappingComponent)(e.getComponent())).getRubberBandLayer();
+                final PLayer layer = ((MappingComponent) (e.getComponent())).getRubberBandLayer();
                 // Initialize the locations.
                 pressPoint = e.getPosition();
                 dragPoint = pressPoint;
@@ -69,7 +66,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
                 // that we can see it.
                 rectangle = new PPath();
                 rectangle.setPaint(new java.awt.Color(20, 20, 20, 20));
-                rectangle.setStroke(new BasicStroke((float)(1 / e.getCamera().getViewScale())));
+                rectangle.setStroke(new BasicStroke((float) (1 / e.getCamera().getViewScale())));
                 layer.addChild(rectangle);
                 rectangle.moveToFront();
                 updateRectangle();
@@ -133,12 +130,13 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
      */
     private boolean isMouseOverStickyNode(final PInputEvent pInputEvent) {
         final Object firstPFeatureUnderMouse = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
 
         if ((firstPFeatureUnderMouse != null) && (firstPFeatureUnderMouse instanceof PFeature)) {
-            final PFeature pFeature = (PFeature)firstPFeatureUnderMouse;
+            final PFeature pFeature = (PFeature) firstPFeatureUnderMouse;
             final PNode stickyChild = pFeature.getStickyChild();
             if ((stickyChild != null) && stickyChild.getVisible()) {
                 if (stickyChild.getFullBounds().contains(pInputEvent.getPosition())) {

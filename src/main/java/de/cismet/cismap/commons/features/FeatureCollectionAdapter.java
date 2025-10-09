@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 /**
@@ -18,30 +18,23 @@ public abstract class FeatureCollectionAdapter implements FeatureCollectionListe
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void featuresAdded(final FeatureCollectionEvent fce) {
-    }
+    public void featuresAdded(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featuresRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void featuresRemoved(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featuresChanged(final FeatureCollectionEvent fce) {
-    }
+    public void featuresChanged(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-    }
+    public void featureSelectionChanged(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-    }
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featureCollectionChanged() {
-    }
+    public void featureCollectionChanged() {}
 }

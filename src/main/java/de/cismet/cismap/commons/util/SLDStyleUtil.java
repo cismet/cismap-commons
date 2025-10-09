@@ -1,28 +1,26 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.util;
 
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
+import java.util.LinkedList;
+import java.util.List;
 import org.deegree.style.styling.LineStyling;
 import org.deegree.style.styling.PointStyling;
 import org.deegree.style.styling.PolygonStyling;
 import org.deegree.style.styling.Styling;
 import org.deegree.style.styling.components.Fill;
 import org.deegree.style.styling.components.Stroke;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
-import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 
 /**
  * This class contains some static methods, which are usable to handle the SLD style.
@@ -51,14 +49,14 @@ public class SLDStyleUtil {
             for (final LinkedList<Styling> st : style.get(0).getBases()) {
                 for (final Styling styling : st) {
                     if (styling instanceof PolygonStyling) {
-                        final PolygonStyling s = (PolygonStyling)styling;
+                        final PolygonStyling s = (PolygonStyling) styling;
                         fill = s.fill;
                         stroke = s.stroke;
                     } else if (styling instanceof LineStyling) {
-                        final LineStyling s = (LineStyling)styling;
+                        final LineStyling s = (LineStyling) styling;
                         stroke = s.stroke;
                     } else if (styling instanceof PointStyling) {
-                        final PointStyling s = (PointStyling)styling;
+                        final PointStyling s = (PointStyling) styling;
                     }
                 }
             }
@@ -74,7 +72,7 @@ public class SLDStyleUtil {
 
                 if (stroke != null) {
                     basicStyle.setLineColor(stroke.color);
-                    basicStyle.setLineWidth((int)stroke.width);
+                    basicStyle.setLineWidth((int) stroke.width);
                 }
             }
         }

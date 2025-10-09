@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,21 +12,17 @@
  */
 package de.cismet.cismap.commons.drophandler.builtin;
 
-import lombok.Getter;
-import lombok.Setter;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.io.File;
-
-import java.util.Collection;
-
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
 import de.cismet.cismap.commons.gui.layerwidget.LayerDropUtils;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidgetProvider;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
+import java.io.File;
+import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -39,9 +35,12 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final MappingComponentDropHandlerFileMatcher fileMatcher = new WorldFileMatcher();
+    @Getter
+    private final MappingComponentDropHandlerFileMatcher fileMatcher = new WorldFileMatcher();
 
-    @Getter @Setter private LayerWidget layerWidget;
+    @Getter
+    @Setter
+    private LayerWidget layerWidget;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -58,7 +57,8 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
                 layerWidget.getMappingModel(),
                 -1,
                 layerWidget,
-                ImageFileUtils.Mode.WORLDFILE);
+                ImageFileUtils.Mode.WORLDFILE
+            );
         }
     }
 
@@ -76,8 +76,11 @@ public class MappingComponentWorldFileDropHandler implements MappingComponentDro
         @Override
         public boolean isMatching(final File file) {
             final File worldFile = ImageFileUtils.getWorldFile(file);
-            return ImageFileUtils.isImageFileEnding(file.getName()) && (worldFile != null)
-                        && !ImageFileUtils.checkIfRasterGeoRef(worldFile);
+            return (
+                ImageFileUtils.isImageFileEnding(file.getName()) &&
+                (worldFile != null) &&
+                !ImageFileUtils.checkIfRasterGeoRef(worldFile)
+            );
         }
     }
 }

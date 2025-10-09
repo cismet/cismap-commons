@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,20 +12,14 @@
  */
 package de.cismet.cismap.commons.drophandler.builtin;
 
-import lombok.Getter;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.io.File;
-
-import java.util.Collection;
-
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import java.io.File;
+import java.util.Collection;
+import javax.swing.SwingUtilities;
+import lombok.Getter;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -38,12 +32,12 @@ public class MappingComponentUnknownFileDropHandler implements MappingComponentD
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final MappingComponentUnknownFileDropHandlerDialog DIALOG =
-        MappingComponentUnknownFileDropHandlerDialog.getInstance();
+    private static final MappingComponentUnknownFileDropHandlerDialog DIALOG = MappingComponentUnknownFileDropHandlerDialog.getInstance();
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final MappingComponentDropHandlerFileMatcher fileMatcher = new AllFileMatcher();
+    @Getter
+    private final MappingComponentDropHandlerFileMatcher fileMatcher = new AllFileMatcher();
 
     //~ Methods ----------------------------------------------------------------
 
@@ -54,14 +48,15 @@ public class MappingComponentUnknownFileDropHandler implements MappingComponentD
 
     @Override
     public void dropFiles(final Collection<File> files) {
-        SwingUtilities.invokeLater(new Runnable() {
-
+        SwingUtilities.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     DIALOG.setUnknownFiles(files);
                     StaticSwingTools.showDialog(DIALOG);
                 }
-            });
+            }
+        );
     }
 
     //~ Inner Classes ----------------------------------------------------------

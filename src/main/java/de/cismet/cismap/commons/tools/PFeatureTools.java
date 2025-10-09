@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.tools;
 
 import Sirius.util.collections.MultiMap;
-
 import com.vividsolutions.jts.algorithm.CentroidPoint;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -20,23 +19,6 @@ import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.PLayer;
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.util.PBounds;
-import edu.umd.cs.piccolo.util.PPickPath;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-import java.awt.Rectangle;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-
-import java.util.*;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -45,6 +27,18 @@ import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedLineFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PBounds;
+import edu.umd.cs.piccolo.util.PPickPath;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * DOCUMENT ME!
@@ -68,8 +62,7 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static PNode getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
-            final Class[] validClasses) {
+    public static PNode getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent, final Class[] validClasses) {
         return getFirstValidObjectUnderPointer2(pInputEvent, validClasses, 0);
     }
 
@@ -82,10 +75,12 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static PNode getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo) {
-        final List<PNode> allValids = (List<PNode>)getFirstObjectsUnderPointer(pInputEvent, validClasses, halo);
+    public static PNode getFirstValidObjectUnderPointer2(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo
+    ) {
+        final List<PNode> allValids = (List<PNode>) getFirstObjectsUnderPointer(pInputEvent, validClasses, halo);
         if (allValids.isEmpty()) {
             return null;
         }
@@ -101,9 +96,11 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PNode> getFirstObjectsUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo) {
+    public static List<PNode> getFirstObjectsUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo
+    ) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, true);
     }
 
@@ -116,9 +113,11 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo) {
+    public static List<PNode> getValidObjectsUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo
+    ) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, false);
     }
 
@@ -132,11 +131,13 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo,
-            final boolean stopAfterFirstValid) {
-        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+    public static List<PNode> getValidObjectsUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo,
+        final boolean stopAfterFirstValid
+    ) {
+        final MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
         final WorldToScreenTransform wtst = mc.getWtst();
         final double x1 = wtst.getWorldX(pInputEvent.getPosition().getX());
         final double y1 = wtst.getWorldY(pInputEvent.getPosition().getY());
@@ -156,13 +157,15 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
-            final double xCoor,
-            final double yCoord,
-            final Class[] validClasses,
-            final double halo,
-            final boolean stopAfterFirstValid) {
-        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+    public static List<PNode> getValidObjectsUnderPointer(
+        final PInputEvent pInputEvent,
+        final double xCoor,
+        final double yCoord,
+        final Class[] validClasses,
+        final double halo,
+        final boolean stopAfterFirstValid
+    ) {
+        final MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
 
         final int srs = CrsTransformer.extractSridFromCrs(mc.getMappingModel().getSrs().getCode());
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srs);
@@ -185,9 +188,13 @@ public class PFeatureTools {
         final LinkedList<PNode> allValidPNodes = new LinkedList<>();
         for (final PNode pNode : pNodes) {
             for (int i = 0; i < validClasses.length; ++i) {
-                if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
-                            && (pNode.getParent() != null)
-                            && pNode.getParent().getVisible() && pNode.getVisible()) {
+                if (
+                    (pNode != null) &&
+                    validClasses[i].isAssignableFrom(pNode.getClass()) &&
+                    (pNode.getParent() != null) &&
+                    pNode.getParent().getVisible() &&
+                    pNode.getVisible()
+                ) {
                     allValidPNodes.add(pNode);
                     if (stopAfterFirstValid) {
                         break;
@@ -248,9 +255,11 @@ public class PFeatureTools {
      *
      * @return  a Geometry object that represents the given PBounds object.
      */
-    public static Geometry getGeometryFromPBounds(final PBounds bounds,
-            final WorldToScreenTransform wtst,
-            final String crs) {
+    public static Geometry getGeometryFromPBounds(
+        final PBounds bounds,
+        final WorldToScreenTransform wtst,
+        final String crs
+    ) {
         final int srs = CrsTransformer.extractSridFromCrs(crs);
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srs);
         final double x1 = wtst.getWorldX(bounds.x);
@@ -285,7 +294,7 @@ public class PFeatureTools {
         for (int index = 0; index < node.getChildrenCount(); index++) {
             final PNode pNode = node.getChild(index);
             if (pNode instanceof PFeature) {
-                final PFeature pFeature = (PFeature)pNode;
+                final PFeature pFeature = (PFeature) pNode;
                 Geometry featureGeometry = pFeature.getFeature().getGeometry();
 
                 if (featureGeometry.getSRID() != geometry.getSRID()) {
@@ -319,8 +328,8 @@ public class PFeatureTools {
         }
 
         if ((g1 instanceof GeometryCollection) && (g2 instanceof GeometryCollection)) {
-            final GeometryCollection gc1 = (GeometryCollection)g1;
-            final GeometryCollection gc2 = (GeometryCollection)g2;
+            final GeometryCollection gc1 = (GeometryCollection) g1;
+            final GeometryCollection gc2 = (GeometryCollection) g2;
 
             for (int i = 0; i < gc1.getNumGeometries(); ++i) {
                 for (int n = 0; n < gc2.getNumGeometries(); ++n) {
@@ -335,7 +344,7 @@ public class PFeatureTools {
 
             return false;
         } else if (g1 instanceof GeometryCollection) {
-            final GeometryCollection gc = (GeometryCollection)g1;
+            final GeometryCollection gc = (GeometryCollection) g1;
 
             for (int i = 0; i < gc.getNumGeometries(); ++i) {
                 final Geometry geomEntry = gc.getGeometryN(i);
@@ -361,10 +370,12 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D[] getPointsInArea(final MappingComponent mc,
-            final PBounds bounds,
-            final PFeature vetoPFeature,
-            final MultiMap glueFeatureCoordinates) {
+    public static Point2D[] getPointsInArea(
+        final MappingComponent mc,
+        final PBounds bounds,
+        final PFeature vetoPFeature,
+        final MultiMap glueFeatureCoordinates
+    ) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
 
         final Collection<Point2D> points = new ArrayList<>();
@@ -376,7 +387,8 @@ public class PFeatureTools {
                 continue;
             }
             final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
-                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
+                ? (Collection) glueFeatureCoordinates.get(pfeature)
+                : null;
             for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                 for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                     final float[] xp = pfeature.getXp(entityIndex, ringIndex);
@@ -406,11 +418,13 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    private static Point2D getNearestPointInArea(final MappingComponent mc,
-            final PBounds bounds,
-            final Point2D myPosition,
-            final PFeature vetoPFeature,
-            final MultiMap glueCoordinates) {
+    private static Point2D getNearestPointInArea(
+        final MappingComponent mc,
+        final PBounds bounds,
+        final Point2D myPosition,
+        final PFeature vetoPFeature,
+        final MultiMap glueCoordinates
+    ) {
         final Point2D[] points = getPointsInArea(mc, bounds, vetoPFeature, glueCoordinates);
         double distance = -1;
         Point2D nearestPoint = null;
@@ -447,49 +461,56 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static SnappedPoint getNearestPointInArea(final MappingComponent mc,
-            final Point2D canvasPosition,
-            final boolean considerVetoObjects,
-            final MultiMap glueCoordinates) {
+    public static SnappedPoint getNearestPointInArea(
+        final MappingComponent mc,
+        final Point2D canvasPosition,
+        final boolean considerVetoObjects,
+        final MultiMap glueCoordinates
+    ) {
         if (mc.isSnappingEnabled()) {
-            final PFeature vetoFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
-                                                              : null);
-            final Point2D nearestPointOnPoint =
-                (MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode())
-                            || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode()))
-                ? getNearestPointInArea(mc, canvasPosition, vetoFeature, glueCoordinates) : null;
-            final Point2D nearestPointOnLine =
-                ((nearestPointOnPoint == null)
-                            && (MappingComponent.SnappingMode.LINE.equals(mc.getSnappingMode())
-                                || MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())))
-                ? getNearestPointInAreaNoVertexRequired(
-                    mc,
-                    canvasPosition,
-                    vetoFeature,
-                    glueCoordinates) : null;
+            final PFeature vetoFeature =
+                (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature() : null);
+            final Point2D nearestPointOnPoint = (
+                    MappingComponent.SnappingMode.POINT.equals(mc.getSnappingMode()) ||
+                    MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())
+                )
+                ? getNearestPointInArea(mc, canvasPosition, vetoFeature, glueCoordinates)
+                : null;
+            final Point2D nearestPointOnLine = (
+                    (nearestPointOnPoint == null) &&
+                    (
+                        MappingComponent.SnappingMode.LINE.equals(mc.getSnappingMode()) ||
+                        MappingComponent.SnappingMode.BOTH.equals(mc.getSnappingMode())
+                    )
+                )
+                ? getNearestPointInAreaNoVertexRequired(mc, canvasPosition, vetoFeature, glueCoordinates)
+                : null;
 
             if (mc.getSnappingMode() != null) {
                 switch (mc.getSnappingMode()) {
-                    case POINT: {
-                        if (nearestPointOnPoint != null) {
-                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                    case POINT:
+                        {
+                            if (nearestPointOnPoint != null) {
+                                return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                            }
                         }
-                    }
-                    break;
-                    case LINE: {
-                        if (nearestPointOnLine != null) {
-                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        break;
+                    case LINE:
+                        {
+                            if (nearestPointOnLine != null) {
+                                return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                            }
                         }
-                    }
-                    break;
-                    case BOTH: {
-                        if (nearestPointOnPoint != null) {
-                            return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
-                        } else if (nearestPointOnLine != null) {
-                            return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                        break;
+                    case BOTH:
+                        {
+                            if (nearestPointOnPoint != null) {
+                                return new SnappedPoint(nearestPointOnPoint, SnappedPoint.SnappedOn.POINT);
+                            } else if (nearestPointOnLine != null) {
+                                return new SnappedPoint(nearestPointOnLine, SnappedPoint.SnappedOn.LINE);
+                            }
                         }
-                    }
-                    break;
+                        break;
                 }
             }
         }
@@ -506,13 +527,15 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D getNearestPointInAreaNoVertexRequired(final MappingComponent mc,
-            final Point2D canvasPosition,
-            final PFeature vetoFeature,
-            final MultiMap glueCoordinates) {
+    public static Point2D getNearestPointInAreaNoVertexRequired(
+        final MappingComponent mc,
+        final Point2D canvasPosition,
+        final PFeature vetoFeature,
+        final MultiMap glueCoordinates
+    ) {
         final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        final Point2D myPosition = mc.getCamera().localToView((Point2D) canvasPosition.clone());
         final PBounds bounds = new PBounds(d2d);
 
         final Point2D[] points = getPointsInAreaNoVertexRequired(mc, bounds, myPosition, vetoFeature, glueCoordinates);
@@ -539,11 +562,13 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D[] getPointsInAreaNoVertexRequired(final MappingComponent mc,
-            final PBounds bounds,
-            final Point2D currentPosition,
-            final PFeature vetoFeature,
-            final MultiMap glueFeatureCoordinates) {
+    public static Point2D[] getPointsInAreaNoVertexRequired(
+        final MappingComponent mc,
+        final PBounds bounds,
+        final Point2D currentPosition,
+        final PFeature vetoFeature,
+        final MultiMap glueFeatureCoordinates
+    ) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
         final Collection<Point2D> points = new ArrayList<>();
         if (features == null) {
@@ -552,29 +577,38 @@ public class PFeatureTools {
         final Coordinate c = new Coordinate(currentPosition.getX(), currentPosition.getY());
         for (final PFeature pfeature : features) {
             final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
-                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
+                ? (Collection) glueFeatureCoordinates.get(pfeature)
+                : null;
             if (!pfeature.equals(vetoFeature)) {
                 LineSegment segment = null;
                 double dist = Double.POSITIVE_INFINITY;
                 if (pfeature != null) {
                     final Geometry geometry = pfeature.getFeature().getGeometry();
-                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                                || (geometry instanceof MultiPolygon)) {
+                    if (
+                        (geometry instanceof Polygon) ||
+                        (geometry instanceof LineString) ||
+                        (geometry instanceof MultiPolygon)
+                    ) {
                         for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                             for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                                 final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                                 final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                                 for (int coordIndex = xp.length - 1; coordIndex > 0; coordIndex--) {
-                                    if ((glueCoordinates != null)
-                                                && (glueCoordinates.contains(coordIndex)
-                                                    || glueCoordinates.contains(coordIndex - 1))) {
+                                    if (
+                                        (glueCoordinates != null) &&
+                                        (
+                                            glueCoordinates.contains(coordIndex) ||
+                                            glueCoordinates.contains(coordIndex - 1)
+                                        )
+                                    ) {
                                         continue;
                                     }
                                     final LineSegment tmpSegment = new LineSegment(
-                                            xp[coordIndex - 1],
-                                            yp[coordIndex - 1],
-                                            xp[coordIndex],
-                                            yp[coordIndex]);
+                                        xp[coordIndex - 1],
+                                        yp[coordIndex - 1],
+                                        xp[coordIndex],
+                                        yp[coordIndex]
+                                    );
                                     final double tmpDist = tmpSegment.distance(c);
                                     if (tmpDist < dist) {
                                         dist = tmpDist;
@@ -588,7 +622,7 @@ public class PFeatureTools {
                 if (segment != null) {
                     final Coordinate point = segment.closestPoint(c);
                     if (bounds.contains(point.x, point.y)) {
-                        points.add(new Point2D.Float((float)point.x, (float)point.y));
+                        points.add(new Point2D.Float((float) point.x, (float) point.y));
                     }
                 }
             }
@@ -609,18 +643,20 @@ public class PFeatureTools {
         double dist = Double.POSITIVE_INFINITY;
         if (pfeature != null) {
             final Geometry geometry = pfeature.getFeature().getGeometry();
-            if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                        || (geometry instanceof MultiPolygon)) {
+            if (
+                (geometry instanceof Polygon) || (geometry instanceof LineString) || (geometry instanceof MultiPolygon)
+            ) {
                 for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                     for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                         final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                         final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                         for (int coordIndex = xp.length - 1; coordIndex > 0; coordIndex--) {
                             final LineSegment tmpSegment = new LineSegment(
-                                    xp[coordIndex - 1],
-                                    yp[coordIndex - 1],
-                                    xp[coordIndex],
-                                    yp[coordIndex]);
+                                xp[coordIndex - 1],
+                                yp[coordIndex - 1],
+                                xp[coordIndex],
+                                yp[coordIndex]
+                            );
                             final double tmpDist = tmpSegment.distance(trigger);
                             if (tmpDist < dist) {
                                 dist = tmpDist;
@@ -644,13 +680,15 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Point2D getNearestPointInArea(final MappingComponent mc,
-            final Point2D canvasPosition,
-            final PFeature vetoPFeature,
-            final MultiMap glueCoordinates) {
+    public static Point2D getNearestPointInArea(
+        final MappingComponent mc,
+        final Point2D canvasPosition,
+        final PFeature vetoPFeature,
+        final MultiMap glueCoordinates
+    ) {
         final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        final Point2D myPosition = mc.getCamera().localToView((Point2D) canvasPosition.clone());
         return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
     }
 
@@ -663,11 +701,12 @@ public class PFeatureTools {
      * @return  the snapping area
      */
     private static Rectangle2D getSnappingRectangle(final MappingComponent mc, final Point2D canvasPosition) {
-        return new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
-                (int)canvasPosition.getY()
-                        - (mc.getSnappingRectSize() / 2),
-                mc.getSnappingRectSize(),
-                mc.getSnappingRectSize());
+        return new Rectangle(
+            (int) canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
+            (int) canvasPosition.getY() - (mc.getSnappingRectSize() / 2),
+            mc.getSnappingRectSize(),
+            mc.getSnappingRectSize()
+        );
     }
 
     /**
@@ -692,9 +731,11 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final boolean deepPick) {
+    public static PNode getFirstValidObjectUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final boolean deepPick
+    ) {
         final double halo = ((CismapBroker.getInstance().getSrs().isMetric()) ? 1d : 0.0001);
         return getFirstValidObjectUnderPointer(pInputEvent, validClasses, halo, deepPick);
     }
@@ -712,12 +753,14 @@ public class PFeatureTools {
      *
      * @see     getNearestPointInArea(final MappingComponent mc, final Point2D canvasPosition, final Point2D vetoPoint)
      */
-    public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
-            final Point2D canvasPosition,
-            final boolean considerVetoObjects,
-            final MultiMap glueCoordinates) {
-        final PFeature vetoPFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
-                                                           : null);
+    public static Coordinate getNearestCoordinateInArea(
+        final MappingComponent mc,
+        final Point2D canvasPosition,
+        final boolean considerVetoObjects,
+        final MultiMap glueCoordinates
+    ) {
+        final PFeature vetoPFeature =
+            (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature() : null);
         return getNearestCoordinateInArea(mc, canvasPosition, vetoPFeature, glueCoordinates);
     }
 
@@ -731,13 +774,15 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
-            final Point2D canvasPosition,
-            final PFeature vetoPFeature,
-            final MultiMap glueCoordinates) {
+    public static Coordinate getNearestCoordinateInArea(
+        final MappingComponent mc,
+        final Point2D canvasPosition,
+        final PFeature vetoPFeature,
+        final MultiMap glueCoordinates
+    ) {
         final Rectangle2D area = getSnappingRectangle(mc, canvasPosition);
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().localToView((Point2D)canvasPosition.clone());
+        final Point2D myPosition = mc.getCamera().localToView((Point2D) canvasPosition.clone());
         return getNearestCoordinateInArea(mc, new PBounds(d2d), myPosition, vetoPFeature, glueCoordinates);
     }
 
@@ -752,11 +797,13 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    private static Coordinate getNearestCoordinateInArea(final MappingComponent mc,
-            final PBounds bounds,
-            final Point2D myPosition,
-            final PFeature vetoPFeature,
-            final MultiMap glueFeatureCoordinates) {
+    private static Coordinate getNearestCoordinateInArea(
+        final MappingComponent mc,
+        final PBounds bounds,
+        final Point2D myPosition,
+        final PFeature vetoPFeature,
+        final MultiMap glueFeatureCoordinates
+    ) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
         final List<Coordinate> coordinates = new ArrayList<>();
         final Collection<Point2D> p = new ArrayList<>();
@@ -764,16 +811,21 @@ public class PFeatureTools {
             return null;
         }
         for (final PFeature pfeature : features) {
-            if ((pfeature != null)
-                        && ((pfeature.getFeature() instanceof LinearReferencedPointFeature)
-                            || (pfeature.getFeature() instanceof LinearReferencedLineFeature))) {
+            if (
+                (pfeature != null) &&
+                (
+                    (pfeature.getFeature() instanceof LinearReferencedPointFeature) ||
+                    (pfeature.getFeature() instanceof LinearReferencedLineFeature)
+                )
+            ) {
                 continue;
             }
             if (pfeature.equals(vetoPFeature)) {
                 continue;
             }
             final Collection<Integer> glueCoordinates = (glueFeatureCoordinates != null)
-                ? (Collection)glueFeatureCoordinates.get(pfeature) : null;
+                ? (Collection) glueFeatureCoordinates.get(pfeature)
+                : null;
             for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                 for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                     final float[] xp = pfeature.getXp(entityIndex, ringIndex);
@@ -814,9 +866,11 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo) {
+    public static PNode getFirstValidObjectUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo
+    ) {
         return getFirstValidObjectUnderPointer(pInputEvent, validClasses, halo, false);
     }
 
@@ -830,10 +884,12 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses,
-            final double halo,
-            final boolean deepSeek) {
+    public static PNode getFirstValidObjectUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses,
+        final double halo,
+        final boolean deepSeek
+    ) {
         // Dieses Konstrukt sorgt daf\u00FCr das uninteressante Objekte die oberhalb dem Mauszeiger liegen
         // einfach ignoriert werden
         PNode pNode = null;
@@ -841,8 +897,9 @@ public class PFeatureTools {
         final double xPos = pInputEvent.getPosition().getX();
         final double yPos = pInputEvent.getPosition().getY();
 
-        final PPickPath pp = ((MappingComponent)pInputEvent.getComponent()).getCamera()
-                    .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), halo);
+        final PPickPath pp =
+            ((MappingComponent) pInputEvent.getComponent()).getCamera()
+                .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), halo);
         pp.pushNode(pInputEvent.getPickedNode());
 
         if (deepSeek) {
@@ -878,7 +935,7 @@ public class PFeatureTools {
             int getIndex = pp.getNodeStackReference().size() - 1;
             if (pp.getNodeStackReference().size() > 0) {
                 do {
-                    pNode = (PNode)pp.getNodeStackReference().get(getIndex);
+                    pNode = (PNode) pp.getNodeStackReference().get(getIndex);
                     pNode = getRightPNodeOrNull(pNode, validClasses, xPos, yPos);
                     getIndex--;
                     // pNode is either null now if it not of the right type
@@ -901,24 +958,35 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    private static PNode getRightPNodeOrNull(final PNode pNode,
-            final Class[] validClasses,
-            final double xPos,
-            final double yPos) {
+    private static PNode getRightPNodeOrNull(
+        final PNode pNode,
+        final Class[] validClasses,
+        final double xPos,
+        final double yPos
+    ) {
         for (int i = 0; i < validClasses.length; ++i) {
-            if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
-                        && (pNode.getParent() != null) && pNode.getParent().getVisible()
-                        && pNode.getVisible()) {
-                if ((pNode instanceof PPath)
-                            && (!isPolygon((PPath)pNode)
-                                || ((PPath)pNode).getPathReference().contains(xPos, yPos))) {
+            if (
+                (pNode != null) &&
+                validClasses[i].isAssignableFrom(pNode.getClass()) &&
+                (pNode.getParent() != null) &&
+                pNode.getParent().getVisible() &&
+                pNode.getVisible()
+            ) {
+                if (
+                    (pNode instanceof PPath) &&
+                    (!isPolygon((PPath) pNode) || ((PPath) pNode).getPathReference().contains(xPos, yPos))
+                ) {
                     return pNode;
                 }
-            } else if ((validClasses[i] == PFeature.class) && (pNode != null)
-                        && ParentNodeIsAPFeature.class.isAssignableFrom(pNode.getClass())
-                        && (pNode.getParent() != null) && pNode.getParent().getVisible()
-                        && pNode.getVisible()) {
-                final PNode parentPNode = getPFeatureByChild((ParentNodeIsAPFeature)pNode);
+            } else if (
+                (validClasses[i] == PFeature.class) &&
+                (pNode != null) &&
+                ParentNodeIsAPFeature.class.isAssignableFrom(pNode.getClass()) &&
+                (pNode.getParent() != null) &&
+                pNode.getParent().getVisible() &&
+                pNode.getVisible()
+            ) {
+                final PNode parentPNode = getPFeatureByChild((ParentNodeIsAPFeature) pNode);
                 if (parentPNode != null) {
                     return parentPNode;
                 }
@@ -935,11 +1003,13 @@ public class PFeatureTools {
      * @return  true, iff the given PPath is an instanec of PPfeature and contains a Polygon or Multipolygon
      */
     private static boolean isPolygon(final PPath o) {
-        if ((o instanceof PFeature) && (((PFeature)o).getFeature() != null)) {
-            final PFeature feature = (PFeature)o;
+        if ((o instanceof PFeature) && (((PFeature) o).getFeature() != null)) {
+            final PFeature feature = (PFeature) o;
 
-            return (feature.getFeature().getGeometry() instanceof Polygon)
-                        || (feature.getFeature().getGeometry() instanceof MultiPolygon);
+            return (
+                (feature.getFeature().getGeometry() instanceof Polygon) ||
+                (feature.getFeature().getGeometry() instanceof MultiPolygon)
+            );
         }
 
         return false;
@@ -953,8 +1023,10 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PNode> getAllValidObjectsUnderPointer(final PInputEvent pInputEvent,
-            final Class[] validClasses) {
+    public static List<PNode> getAllValidObjectsUnderPointer(
+        final PInputEvent pInputEvent,
+        final Class[] validClasses
+    ) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, 0.003d, false);
     }
 
@@ -968,14 +1040,15 @@ public class PFeatureTools {
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     public static PFeature getPFeatureByChild(final ParentNodeIsAPFeature child) {
-        final PNode parent = ((PNode)child).getParent();
+        final PNode parent = ((PNode) child).getParent();
         if (parent instanceof PFeature) {
-            return (PFeature)parent;
+            return (PFeature) parent;
         } else if (parent instanceof ParentNodeIsAPFeature) {
-            return getPFeatureByChild((ParentNodeIsAPFeature)parent);
+            return getPFeatureByChild((ParentNodeIsAPFeature) parent);
         } else {
-            throw new IllegalArgumentException("ParentNodeIsAPFeature " + child
-                        + " has no ParentNode that is a PFeature"); // NOI18N
+            throw new IllegalArgumentException(
+                "ParentNodeIsAPFeature " + child + " has no ParentNode that is a PFeature"
+            ); // NOI18N
         }
     }
 
@@ -1038,7 +1111,7 @@ public class PFeatureTools {
 
                 if (ringIndex == 0) { // polygon außenhülle
                     areaTotal += area;
-                } else {              // loch
+                } else { // loch
                     areaTotal -= area;
                 }
             }
@@ -1054,8 +1127,10 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PFeatureCoordinateInformation> identifyMergeableCoordinates(final Collection<PFeature> pFeatures,
-            final double thresholdInMeters) {
+    public static List<PFeatureCoordinateInformation> identifyMergeableCoordinates(
+        final Collection<PFeature> pFeatures,
+        final double thresholdInMeters
+    ) {
         final List<PFeatureCoordinateInformation> groupedInfos = new ArrayList<>();
 
         // collect all coordinate infos of all pfeatures
@@ -1074,10 +1149,11 @@ public class PFeatureTools {
 
                     for (int coordPosition = 0; coordPosition < numOfCoordinates; coordPosition++) {
                         final PFeatureCoordinateInformation info = new PFeatureCoordinateInformation(
-                                pFeature,
-                                entityPosition,
-                                ringPosition,
-                                coordPosition);
+                            pFeature,
+                            entityPosition,
+                            ringPosition,
+                            coordPosition
+                        );
                         if (info.getCoordinate() != null) {
                             infos.add(info);
                         }
@@ -1150,8 +1226,10 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static List<PFeatureCoordinateInformation> automergeCoordinates(final Collection<PFeature> pFeatures,
-            final double thresholdInMeters) {
+    public static List<PFeatureCoordinateInformation> automergeCoordinates(
+        final Collection<PFeature> pFeatures,
+        final double thresholdInMeters
+    ) {
         return automergeCoordinates(identifyMergeableCoordinates(pFeatures, thresholdInMeters));
     }
 
@@ -1163,7 +1241,8 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static List<PFeatureCoordinateInformation> automergeCoordinates(
-            final List<PFeatureCoordinateInformation> groupedInfos) {
+        final List<PFeatureCoordinateInformation> groupedInfos
+    ) {
         final List<PFeatureCoordinateInformation> unmergedInfos = new ArrayList<>();
 
         // calculating the centroid of all grouped infos, and setting the coordinates to the centroid
@@ -1190,8 +1269,7 @@ public class PFeatureTools {
                 final Coordinate centroid = centroidPoint.getCentroid();
 
                 // setting centroid to group "parent"
-                LOG.info("setting centroid to group parent. before: "
-                            + coordinate + " after:" + centroid);
+                LOG.info("setting centroid to group parent. before: " + coordinate + " after:" + centroid);
                 if (pFeature.moveCoordinate(entityPosition, ringPosition, coordinatePosition, centroid, false)) {
                     // setting centroid to group neighbours
 
@@ -1202,34 +1280,51 @@ public class PFeatureTools {
                         final int neighbourCoordinatePosition = neighbourInfo.getCoordinatePosition();
                         final Coordinate neighbourCoordinate = neighbourInfo.getCoordinate();
 
-                        if (neighbourPFeature.equals(pFeature)
-                                    && (neighbourEntityPosition == entityPosition)
-                                    && (neighbourRingPosition == ringPosition)) {
+                        if (
+                            neighbourPFeature.equals(pFeature) &&
+                            (neighbourEntityPosition == entityPosition) &&
+                            (neighbourRingPosition == ringPosition)
+                        ) {
                             // it's on the same ring of the same pfeature, the coordinate can be removed
                             LOG.info("it's on the same ring of the same pfeature, the coordinate can be removed");
 
                             coordinateRemoveMap.put(neighbourPFeature, neighbourInfo);
                         } else {
-                            LOG.info("setting centroid to group neighbour. before: " + neighbourCoordinate + " after:"
-                                        + centroid);
-                            if (neighbourPFeature.moveCoordinate(
-                                            neighbourEntityPosition,
-                                            neighbourRingPosition,
-                                            neighbourCoordinatePosition,
-                                            centroid,
-                                            true)) {
+                            LOG.info(
+                                "setting centroid to group neighbour. before: " +
+                                neighbourCoordinate +
+                                " after:" +
+                                centroid
+                            );
+                            if (
+                                neighbourPFeature.moveCoordinate(
+                                    neighbourEntityPosition,
+                                    neighbourRingPosition,
+                                    neighbourCoordinatePosition,
+                                    centroid,
+                                    true
+                                )
+                            ) {
                                 pFeatureToSync.add(neighbourPFeature);
                             } else {
-                                LOG.warn("cant move coordinate of  " + neighbourPFeature
-                                            + ". It would result in an invalid geometry. coordinate: " + centroid);
+                                LOG.warn(
+                                    "cant move coordinate of  " +
+                                    neighbourPFeature +
+                                    ". It would result in an invalid geometry. coordinate: " +
+                                    centroid
+                                );
                                 unmergedInfos.add(neighbourInfo);
                             }
                         }
                     }
                     pFeatureToSync.add(pFeature);
                 } else {
-                    LOG.warn("cant move coordinate of  " + pFeature
-                                + ". It would result in an invalid geometry. coordinate: " + centroid);
+                    LOG.warn(
+                        "cant move coordinate of  " +
+                        pFeature +
+                        ". It would result in an invalid geometry. coordinate: " +
+                        centroid
+                    );
                     unmergedInfos.add(info);
                 }
             } catch (final Exception ex) {
@@ -1240,12 +1335,14 @@ public class PFeatureTools {
         // removing now duplicate coordinates from pfeatures
         // ( in reverse coordinatePosition order, to avoid position-shifting-problems
         // when removing multiple coordinates from the same pfeature )
-        for (final PFeature pFeature : (Set<PFeature>)coordinateRemoveMap.keySet()) {
-            final Set<PFeatureCoordinateInformation> coordinateRemoveSet = new HashSet<>((Collection)
-                    coordinateRemoveMap.get(pFeature));
+        for (final PFeature pFeature : (Set<PFeature>) coordinateRemoveMap.keySet()) {
+            final Set<PFeatureCoordinateInformation> coordinateRemoveSet = new HashSet<>(
+                (Collection) coordinateRemoveMap.get(pFeature)
+            );
             final List<PFeatureCoordinateInformation> coordinateRemoveInfos = new ArrayList<>(coordinateRemoveSet);
-            Collections.sort(coordinateRemoveInfos, new Comparator<PFeatureCoordinateInformation>() {
-
+            Collections.sort(
+                coordinateRemoveInfos,
+                new Comparator<PFeatureCoordinateInformation>() {
                     @Override
                     public int compare(final PFeatureCoordinateInformation o1, final PFeatureCoordinateInformation o2) {
                         if (o1.getEntityPosition() != o2.getEntityPosition()) {
@@ -1258,7 +1355,8 @@ public class PFeatureTools {
                             return 0;
                         }
                     }
-                });
+                }
+            );
 
             for (final PFeatureCoordinateInformation info : coordinateRemoveInfos) {
                 final int entityPosition = info.getEntityPosition();
@@ -1278,16 +1376,13 @@ public class PFeatureTools {
                 }
 
                 final int numOfCoords = pFeature.getNumOfCoordinates(entityPosition, ringPosition);
-                if ((numOfCoords > minCoordinates)
-                            && pFeature.removeCoordinate(
-                                entityPosition,
-                                ringPosition,
-                                coordinatePosition,
-                                false)) {
+                if (
+                    (numOfCoords > minCoordinates) &&
+                    pFeature.removeCoordinate(entityPosition, ringPosition, coordinatePosition, false)
+                ) {
                     pFeatureToSync.add(pFeature);
                 } else {
-                    LOG.warn("cant remove coordinate from  " + pFeature
-                                + ". It would result in an invalid geometry.");
+                    LOG.warn("cant remove coordinate from  " + pFeature + ". It would result in an invalid geometry.");
                     unmergedInfos.add(info);
                 }
             }
@@ -1358,7 +1453,7 @@ public class PFeatureTools {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            final PFeatureCoordinateInformation other = (PFeatureCoordinateInformation)obj;
+            final PFeatureCoordinateInformation other = (PFeatureCoordinateInformation) obj;
             if (this.entityPosition != other.entityPosition) {
                 return false;
             }
@@ -1391,10 +1486,11 @@ public class PFeatureTools {
          * @version  $Revision$, $Date$
          */
         public enum SnappedOn {
-
             //~ Enum constants -------------------------------------------------
 
-            NOTHING, POINT, LINE
+            NOTHING,
+            POINT,
+            LINE,
         }
 
         //~ Instance fields ----------------------------------------------------

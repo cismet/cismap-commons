@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /**
  * Copyright (C) 1998-2000 by University of Maryland, College Park, MD 20742, USA
  * All rights reserved.
@@ -14,19 +14,15 @@ package pswing;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
-
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-
 import javax.swing.*;
 
 /*
@@ -157,7 +153,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
     //~ Static fields/initializers ---------------------------------------------
 
     /** Used as a hashtable key for this object in the Swing component's client properties. */
-    public static final String VISUAL_COMPONENT_KEY = "ZSwing";                            // NOI18N
+    public static final String VISUAL_COMPONENT_KEY = "ZSwing"; // NOI18N
     private static final AffineTransform IDENTITY = new AffineTransform();
     private static PBounds TEMP_REPAINT_BOUNDS2 = new PBounds();
 
@@ -237,8 +233,10 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
             component.revalidate();
         }
 
-        if (((getCompositeMagnification(renderContext) < renderCutoff) && PSwingCanvas.getInteracting())
-                    || ((minFontSize * getCompositeMagnification(renderContext)) < 0.5)) {
+        if (
+            ((getCompositeMagnification(renderContext) < renderCutoff) && PSwingCanvas.getInteracting()) ||
+            ((minFontSize * getCompositeMagnification(renderContext)) < 0.5)
+        ) {
             paintAsGreek(g2);
         } else {
             paint(g2);
@@ -287,13 +285,16 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
         boolean wrongRepaintManager = false;
         PSwingCanvas.ZBasicRepaintManager manager = null;
         try {
-            manager = (PSwingCanvas.ZBasicRepaintManager)RepaintManager.currentManager(component);
+            manager = (PSwingCanvas.ZBasicRepaintManager) RepaintManager.currentManager(component);
         } catch (Exception e) {
             log.warn("Repaint Problem", e);
             wrongRepaintManager = true;
         }
-        if ((buffer == null) || (buffer.getWidth() != component.getWidth())
-                    || (buffer.getHeight() != component.getHeight())) {
+        if (
+            (buffer == null) ||
+            (buffer.getWidth() != component.getWidth()) ||
+            (buffer.getHeight() != component.getHeight())
+        ) {
             buffer = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_ARGB);
         } else {
             final Graphics2D bufferedGraphics = buffer.createGraphics();
@@ -301,9 +302,9 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
             bufferedGraphics.clipRect(0, 0, component.getWidth(), component.getHeight());
         }
         final Graphics2D bufferedGraphics = buffer.createGraphics();
-//        bufferedGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        //        bufferedGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         component.paint(bufferedGraphics);
-//        g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+        //        g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
         final Object origHint = g2.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
         g2.drawRenderedImage(buffer, IDENTITY);
@@ -325,35 +326,35 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
      * @param  repaintBounds  DOCUMENT ME!
      */
     public void repaint(final PBounds repaintBounds) {
-//        AffineTransform viewTransform = zCanvas.getCamera().getViewTransform();
-//        AffineTransform totalTransform=getTransform();
-//        System.out.println( "viewTransform = " + viewTransform );
+        //        AffineTransform viewTransform = zCanvas.getCamera().getViewTransform();
+        //        AffineTransform totalTransform=getTransform();
+        //        System.out.println( "viewTransform = " + viewTransform );
         final Shape sh = getTransform().createTransformedShape(repaintBounds);
         TEMP_REPAINT_BOUNDS2.setRect(sh.getBounds2D());
         repaintFrom(TEMP_REPAINT_BOUNDS2, this);
         // repaint();
-// PNode parent = getParent();
-// if( parent != null ) {
-////            parent.repaintFrom( repaintBounds, this );
-////            parent.repaintFrom( repaintBounds, parent );
-//            repaint();
-//        }
-//        else {
-//            repaint();
-//        }
+        // PNode parent = getParent();
+        // if( parent != null ) {
+        ////            parent.repaintFrom( repaintBounds, this );
+        ////            parent.repaintFrom( repaintBounds, parent );
+        //            repaint();
+        //        }
+        //        else {
+        //            repaint();
+        //        }
 
         // original code
-// PNode[] parentsRef = getParentsReference();
-// int numParents = getNumParents();
-//
-// for( int i = 0; i < numParents; i++ ) {
-// if( i == numParents - 1 ) {
-// parentsRef[i].repaint( repaintBounds );
-// }
-// else {
-// parentsRef[i].repaint( (ZBounds)repaintBounds.clone() );
-// }
-// }
+        // PNode[] parentsRef = getParentsReference();
+        // int numParents = getNumParents();
+        //
+        // for( int i = 0; i < numParents; i++ ) {
+        // if( i == numParents - 1 ) {
+        // parentsRef[i].repaint( repaintBounds );
+        // }
+        // else {
+        // parentsRef[i].repaint( (ZBounds)repaintBounds.clone() );
+        // }
+        // }
     }
 
     /**
@@ -364,7 +365,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
         final Dimension d = component.getPreferredSize();
         getBoundsReference().setRect(0, 0, d.getWidth(), d.getHeight());
         if (!component.getSize().equals(d)) {
-            component.setBounds(0, 0, (int)d.getWidth(), (int)d.getHeight());
+            component.setBounds(0, 0, (int) d.getWidth(), (int) d.getHeight());
         }
     }
 
@@ -389,7 +390,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
     void init(final Component c) {
         Component[] children = null;
         if (c instanceof Container) {
-            children = ((Container)c).getComponents();
+            children = ((Container) c).getComponents();
         }
 
         if (c.getFont() != null) {
@@ -403,7 +404,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
         }
 
         if (c instanceof JComponent) {
-            ((JComponent)c).setDoubleBuffered(false);
+            ((JComponent) c).setDoubleBuffered(false);
             c.addPropertyChangeListener("font", this); // NOI18N
         }
     }
@@ -415,9 +416,8 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
      */
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
-        if (component.isAncestorOf((Component)evt.getSource())
-                    && (((Component)evt.getSource()).getFont() != null)) {
-            minFontSize = Math.min(minFontSize, ((Component)evt.getSource()).getFont().getSize());
+        if (component.isAncestorOf((Component) evt.getSource()) && (((Component) evt.getSource()).getFont() != null)) {
+            minFontSize = Math.min(minFontSize, ((Component) evt.getSource()).getFont().getSize());
         }
     }
 

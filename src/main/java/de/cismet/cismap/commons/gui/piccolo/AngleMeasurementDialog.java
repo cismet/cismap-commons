@@ -1,37 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineSegment;
 import com.vividsolutions.jts.geom.LineString;
-
-import edu.umd.cs.piccolo.nodes.PPath;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.geom.Point2D;
-
-import java.text.DecimalFormat;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
@@ -40,10 +19,23 @@ import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.collections.HashArrayList;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.nodes.PPath;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  * DOCUMENT ME!
@@ -56,7 +48,8 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            AngleMeasurementDialog.class);
+        AngleMeasurementDialog.class
+    );
     private static AngleMeasurementDialog INSTANCE = null;
     private static DecimalFormat FORMAT = new DecimalFormat("#0.00");
 
@@ -73,15 +66,14 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
     private final FeatureCollectionListModel featureCollectionListModel = new FeatureCollectionListModel();
     private final ListSelectionListener listSelectionListener = new ListSelectionListener() {
-
-            @Override
-            public void valueChanged(final ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting() && isListSelectionListenerEnabled()) {
-                    applyListSelectionToMap();
-                    doCalculateAngle();
-                }
+        @Override
+        public void valueChanged(final ListSelectionEvent e) {
+            if (!e.getValueIsAdjusting() && isListSelectionListenerEnabled()) {
+                applyListSelectionToMap();
+                doCalculateAngle();
             }
-        };
+        }
+    };
 
     private PPath tempFeature = null;
 
@@ -108,6 +100,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panParams;
     private javax.swing.JPanel panSide;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -326,9 +319,9 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
         jLabel4.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel4.setText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jLabel4.text"));     // NOI18N
+        jLabel4.setText(
+            org.openide.util.NbBundle.getMessage(AngleMeasurementDialog.class, "AngleMeasurementDialog.jLabel4.text")
+        ); // NOI18N
         jLabel4.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -372,20 +365,27 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
-        jToggleButton2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/Angle-Thingy-icon.png"))); // NOI18N
+        jToggleButton2.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/Angle-Thingy-icon.png")
+            )
+        ); // NOI18N
         jToggleButton2.setSelected(true);
-        jToggleButton2.setText(org.openide.util.NbBundle.getMessage(
+        jToggleButton2.setText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jToggleButton2.text"));                                          // NOI18N
+                "AngleMeasurementDialog.jToggleButton2.text"
+            )
+        ); // NOI18N
         jToggleButton2.setFocusPainted(false);
-        jToggleButton2.addActionListener(new java.awt.event.ActionListener() {
-
+        jToggleButton2.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jToggleButton2ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -396,23 +396,31 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanel2.add(jToggleButton2, gridBagConstraints);
 
-        jToggleButton1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-flip.png"))); // NOI18N
-        jToggleButton1.setText(org.openide.util.NbBundle.getMessage(
+        jToggleButton1.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-flip.png"))
+        ); // NOI18N
+        jToggleButton1.setText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jToggleButton1.text"));                                   // NOI18N
-        jToggleButton1.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "AngleMeasurementDialog.jToggleButton1.text"
+            )
+        ); // NOI18N
+        jToggleButton1.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jToggleButton1.toolTipText"));                            // NOI18N
+                "AngleMeasurementDialog.jToggleButton1.toolTipText"
+            )
+        ); // NOI18N
         jToggleButton1.setDisabledIcon(null);
         jToggleButton1.setFocusPainted(false);
-        jToggleButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jToggleButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jToggleButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -421,23 +429,33 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(1, 1, 1, 1);
         jPanel2.add(jToggleButton1, gridBagConstraints);
 
-        jToggleButton3.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-flip-vertical.png"))); // NOI18N
-        jToggleButton3.setText(org.openide.util.NbBundle.getMessage(
+        jToggleButton3.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-flip-vertical.png")
+            )
+        ); // NOI18N
+        jToggleButton3.setText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jToggleButton3.text"));                                            // NOI18N
-        jToggleButton3.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "AngleMeasurementDialog.jToggleButton3.text"
+            )
+        ); // NOI18N
+        jToggleButton3.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jToggleButton3.toolTipText"));                                     // NOI18N
+                "AngleMeasurementDialog.jToggleButton3.toolTipText"
+            )
+        ); // NOI18N
         jToggleButton3.setDisabledIcon(null);
         jToggleButton3.setFocusPainted(false);
-        jToggleButton3.addActionListener(new java.awt.event.ActionListener() {
-
+        jToggleButton3.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jToggleButton3ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -457,9 +475,9 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jPanel3.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jLabel1.text")); // NOI18N
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(AngleMeasurementDialog.class, "AngleMeasurementDialog.jLabel1.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -467,30 +485,40 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
         jPanel3.add(jLabel1, gridBagConstraints);
 
-        jButton2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png"))); // NOI18N
-        jButton2.setText(org.openide.util.NbBundle.getMessage(
+        jButton2.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png")
+            )
+        ); // NOI18N
+        jButton2.setText(
+            org.openide.util.NbBundle.getMessage(AngleMeasurementDialog.class, "AngleMeasurementDialog.jButton2.text")
+        ); // NOI18N
+        jButton2.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jButton2.text"));                                                       // NOI18N
-        jButton2.setToolTipText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jButton2.toolTipText"));                                                // NOI18N
+                "AngleMeasurementDialog.jButton2.toolTipText"
+            )
+        ); // NOI18N
         jButton2.setBorderPainted(false);
         jButton2.setContentAreaFilled(false);
-        jButton2.setDisabledIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")));         // NOI18N
+        jButton2.setDisabledIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")
+            )
+        ); // NOI18N
         jButton2.setEnabled(false);
         jButton2.setFocusPainted(false);
         jButton2.setFocusable(false);
         jButton2.setRequestFocusEnabled(false);
         jButton2.setRolloverEnabled(false);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton2.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton2ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -506,9 +534,9 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jPanel4.setLayout(new java.awt.GridBagLayout());
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(
+            org.openide.util.NbBundle.getMessage(AngleMeasurementDialog.class, "AngleMeasurementDialog.jLabel2.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -516,30 +544,40 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
         jPanel4.add(jLabel2, gridBagConstraints);
 
-        jButton1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png"))); // NOI18N
-        jButton1.setText(org.openide.util.NbBundle.getMessage(
+        jButton1.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png")
+            )
+        ); // NOI18N
+        jButton1.setText(
+            org.openide.util.NbBundle.getMessage(AngleMeasurementDialog.class, "AngleMeasurementDialog.jButton1.text")
+        ); // NOI18N
+        jButton1.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jButton1.text"));                                                       // NOI18N
-        jButton1.setToolTipText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jButton1.toolTipText"));                                                // NOI18N
+                "AngleMeasurementDialog.jButton1.toolTipText"
+            )
+        ); // NOI18N
         jButton1.setBorderPainted(false);
         jButton1.setContentAreaFilled(false);
-        jButton1.setDisabledIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")));         // NOI18N
+        jButton1.setDisabledIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")
+            )
+        ); // NOI18N
         jButton1.setEnabled(false);
         jButton1.setFocusPainted(false);
         jButton1.setFocusable(false);
         jButton1.setRequestFocusEnabled(false);
         jButton1.setRolloverEnabled(false);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -562,16 +600,20 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 0, 5, 0));
 
-        btnCancel.setText(org.openide.util.NbBundle.getMessage(
+        btnCancel.setText(
+            org.openide.util.NbBundle.getMessage(
                 AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.btnCancel.text_2")); // NOI18N
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-
+                "AngleMeasurementDialog.btnCancel.text_2"
+            )
+        ); // NOI18N
+        btnCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(btnCancel);
 
         panButtons.add(jPanel1);
@@ -592,7 +634,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      */
     private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    } //GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -607,12 +649,11 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
             } else {
                 try {
                     getMappingComponent().getTmpFeatureLayer().removeChild(tempFeature);
-                } catch (final Exception ex) {
-                }
+                } catch (final Exception ex) {}
             }
         }
         refreshButtons();
-    }                                                                                  //GEN-LAST:event_jToggleButton2ActionPerformed
+    } //GEN-LAST:event_jToggleButton2ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -622,7 +663,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     private void jToggleButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton1ActionPerformed
         setMirrorA(jToggleButton1.isSelected());
         doCalculateAngle();
-    }                                                                                  //GEN-LAST:event_jToggleButton1ActionPerformed
+    } //GEN-LAST:event_jToggleButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -632,7 +673,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     private void jToggleButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jToggleButton3ActionPerformed
         setMirrorB(jToggleButton3.isSelected());
         doCalculateAngle();
-    }                                                                                  //GEN-LAST:event_jToggleButton3ActionPerformed
+    } //GEN-LAST:event_jToggleButton3ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -640,11 +681,11 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      * @param  evt  DOCUMENT ME!
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
-        final Feature feature = (Feature)jList1.getSelectedValue();
+        final Feature feature = (Feature) jList1.getSelectedValue();
         if (feature != null) {
             getMappingComponent().getFeatureCollection().removeFeature(feature);
         }
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -652,11 +693,11 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      * @param  evt  DOCUMENT ME!
      */
     private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton2ActionPerformed
-        final Feature feature = (Feature)jList2.getSelectedValue();
+        final Feature feature = (Feature) jList2.getSelectedValue();
         if (feature != null) {
             getMappingComponent().getFeatureCollection().removeFeature(feature);
         }
-    }                                                                            //GEN-LAST:event_jButton2ActionPerformed
+    } //GEN-LAST:event_jButton2ActionPerformed
 
     @Override
     public void dispose() {
@@ -665,8 +706,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
             if (tempFeature != null) {
                 getMappingComponent().getTmpFeatureLayer().removeChild(tempFeature);
             }
-        } catch (final Exception ex) {
-        }
+        } catch (final Exception ex) {}
         featureCollectionListModel.clear();
         getMappingComponent().setReadOnly(initialMcReadonly);
         tempFeature = null;
@@ -706,22 +746,25 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      * DOCUMENT ME!
      */
     private void doCalculateAngle() {
-        final Feature featureA = (Feature)jList1.getSelectedValue();
-        final Feature featureB = (Feature)jList2.getSelectedValue();
+        final Feature featureA = (Feature) jList1.getSelectedValue();
+        final Feature featureB = (Feature) jList2.getSelectedValue();
 
         try {
             getMappingComponent().getTmpFeatureLayer().removeChild(tempFeature);
-        } catch (final Exception ex) {
-        }
-        if ((featureA == null) || !checkForSegment(featureA.getGeometry()) || (featureB == null)
-                    || !checkForSegment(featureB.getGeometry())) {
+        } catch (final Exception ex) {}
+        if (
+            (featureA == null) ||
+            !checkForSegment(featureA.getGeometry()) ||
+            (featureB == null) ||
+            !checkForSegment(featureB.getGeometry())
+        ) {
             setMirrorAAllowed(false);
             setMirrorBAllowed(false);
             jLabel4.setText("");
             return;
         }
-        final LineString geomA = (LineString)featureA.getGeometry();
-        final LineString geomB = (LineString)featureB.getGeometry();
+        final LineString geomA = (LineString) featureA.getGeometry();
+        final LineString geomB = (LineString) featureB.getGeometry();
 
         final Coordinate coordA1 = geomA.getCoordinateN(0);
         final Coordinate coordA2 = geomA.getCoordinateN(1);
@@ -732,22 +775,30 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         final Coordinate intersection = segA.lineIntersection(segB);
 
         if (intersection != null) {
-            final boolean intersectsA = (coordA1.distance(intersection) > 0.01)
-                        && (coordA2.distance(intersection) > 0.01) && (segA.distance(intersection) < 0.01);
-            final boolean intersectsB = (coordB1.distance(intersection) > 0.01)
-                        && (coordB2.distance(intersection) > 0.01) && (segB.distance(intersection) < 0.01);
+            final boolean intersectsA =
+                (coordA1.distance(intersection) > 0.01) &&
+                (coordA2.distance(intersection) > 0.01) &&
+                (segA.distance(intersection) < 0.01);
+            final boolean intersectsB =
+                (coordB1.distance(intersection) > 0.01) &&
+                (coordB2.distance(intersection) > 0.01) &&
+                (segB.distance(intersection) < 0.01);
 
             setMirrorAAllowed(intersectsA);
             setMirrorBAllowed(intersectsB);
 
-            final Coordinate cA0 = (intersection.distance(coordA1) > intersection.distance(coordA2)) ? coordA1
-                                                                                                     : coordA2;
-            final Coordinate cA1 = (intersection.distance(coordA1) > intersection.distance(coordA2)) ? coordA2
-                                                                                                     : coordA1;
-            final Coordinate cB0 = (intersection.distance(coordB1) > intersection.distance(coordB2)) ? coordB1
-                                                                                                     : coordB2;
-            final Coordinate cB1 = (intersection.distance(coordB1) > intersection.distance(coordB2)) ? coordB2
-                                                                                                     : coordB1;
+            final Coordinate cA0 = (intersection.distance(coordA1) > intersection.distance(coordA2))
+                ? coordA1
+                : coordA2;
+            final Coordinate cA1 = (intersection.distance(coordA1) > intersection.distance(coordA2))
+                ? coordA2
+                : coordA1;
+            final Coordinate cB0 = (intersection.distance(coordB1) > intersection.distance(coordB2))
+                ? coordB1
+                : coordB2;
+            final Coordinate cB1 = (intersection.distance(coordB1) > intersection.distance(coordB2))
+                ? coordB2
+                : coordB1;
 
             final Coordinate cA;
             final Coordinate cB;
@@ -765,8 +816,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
             final LineSegment interSegB = new LineSegment(intersection, cB);
             double angle;
             if (interSegA.angle() > interSegB.angle()) {
-                angle = Math.toDegrees(interSegA.angle())
-                            - Math.toDegrees(interSegB.angle());
+                angle = Math.toDegrees(interSegA.angle()) - Math.toDegrees(interSegB.angle());
             } else {
                 angle = Math.toDegrees(interSegB.angle()) - Math.toDegrees(interSegA.angle());
             }
@@ -778,14 +828,18 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
                 new Point2D[] {
                     new Point2D.Double(
                         getMappingComponent().getWtst().getScreenX(cA.x),
-                        getMappingComponent().getWtst().getScreenY(cA.y)),
+                        getMappingComponent().getWtst().getScreenY(cA.y)
+                    ),
                     new Point2D.Double(
                         getMappingComponent().getWtst().getScreenX(intersection.x),
-                        getMappingComponent().getWtst().getScreenY(intersection.y)),
+                        getMappingComponent().getWtst().getScreenY(intersection.y)
+                    ),
                     new Point2D.Double(
                         getMappingComponent().getWtst().getScreenX(cB.x),
-                        getMappingComponent().getWtst().getScreenY(cB.y))
-                });
+                        getMappingComponent().getWtst().getScreenY(cB.y)
+                    ),
+                }
+            );
             if (isShowFeature()) {
                 getMappingComponent().getTmpFeatureLayer().addChild(tempFeature);
             }
@@ -806,21 +860,23 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final AngleMeasurementDialog dialog = new AngleMeasurementDialog();
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
+                    dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
                             @Override
                             public void windowClosing(final java.awt.event.WindowEvent e) {
                                 System.exit(0);
                             }
-                        });
+                        }
+                    );
                     dialog.setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -853,8 +909,8 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      * DOCUMENT ME!
      */
     private void applyListSelectionToMap() {
-        final Feature feature1 = (Feature)jList1.getSelectedValue();
-        final Feature feature2 = (Feature)jList2.getSelectedValue();
+        final Feature feature1 = (Feature) jList1.getSelectedValue();
+        final Feature feature2 = (Feature) jList2.getSelectedValue();
         final Collection<Feature> featuresToSelect = new ArrayList<Feature>();
         if ((feature1 != null) && getMappingComponent().getFeatureCollection().contains(feature1)) {
             featuresToSelect.add(feature1);
@@ -883,142 +939,144 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
         private final List<Feature> segmentFeatures = new HashArrayList<Feature>();
         private final FeatureCollectionListener featureCollectionListener = new FeatureCollectionListener() {
+            @Override
+            public void featuresAdded(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {
+                        boolean changed = false;
+                        for (final Feature feature : filterSegments(fce.getEventFeatures())) {
+                            if (!segmentFeatures.contains(feature)) {
+                                segmentFeatures.add(feature);
+                                changed = true;
+                            }
+                        }
+                        if (changed) {
+                            fireContentChanged();
+                        }
+                    }
+                } catch (final Exception ex) {
+                    LOG.warn("error while featuresAdded", ex);
+                }
+            }
 
-                @Override
-                public void featuresAdded(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                            boolean changed = false;
-                            for (final Feature feature : filterSegments(fce.getEventFeatures())) {
-                                if (!segmentFeatures.contains(feature)) {
-                                    segmentFeatures.add(feature);
-                                    changed = true;
+            @Override
+            public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {
+                        if (!segmentFeatures.isEmpty()) {
+                            jList1.clearSelection();
+                            jList2.clearSelection();
+                            segmentFeatures.clear();
+                            fireContentChanged();
+                        }
+                    }
+                } catch (final Exception ex) {
+                    LOG.warn("error while allFeaturesRemoved", ex);
+                }
+            }
+
+            @Override
+            public void featuresRemoved(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {
+                        boolean changed = false;
+                        for (final Feature segment : filterSegments(fce.getEventFeatures())) {
+                            if (segmentFeatures.contains(segment)) {
+                                if (segment.equals(jList1.getSelectedValue())) {
+                                    jList1.clearSelection();
                                 }
-                            }
-                            if (changed) {
-                                fireContentChanged();
-                            }
-                        }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featuresAdded", ex);
-                    }
-                }
-
-                @Override
-                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                            if (!segmentFeatures.isEmpty()) {
-                                jList1.clearSelection();
-                                jList2.clearSelection();
-                                segmentFeatures.clear();
-                                fireContentChanged();
+                                if (segment.equals(jList2.getSelectedValue())) {
+                                    jList2.clearSelection();
+                                }
+                                segmentFeatures.remove(segment);
+                                changed = true;
                             }
                         }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while allFeaturesRemoved", ex);
+                        if (changed) {
+                            fireContentChanged();
+                        }
                     }
+                } catch (final Exception ex) {
+                    LOG.warn("error while featuresRemoved", ex);
                 }
+            }
 
-                @Override
-                public void featuresRemoved(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                            boolean changed = false;
-                            for (final Feature segment : filterSegments(fce.getEventFeatures())) {
-                                if (segmentFeatures.contains(segment)) {
-                                    if (segment.equals(jList1.getSelectedValue())) {
+            @Override
+            public void featuresChanged(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {
+                        boolean changed = false;
+                        for (final Feature feature : fce.getEventFeatures()) {
+                            if (
+                                fce.getFeatureCollection().contains(feature) && fce.getEventFeatures().contains(feature)
+                            ) {
+                                if (segmentFeatures.contains(feature) && !checkForSegment(feature.getGeometry())) {
+                                    if (feature.equals(jList1.getSelectedValue())) {
                                         jList1.clearSelection();
                                     }
-                                    if (segment.equals(jList2.getSelectedValue())) {
+                                    if (feature.equals(jList2.getSelectedValue())) {
                                         jList2.clearSelection();
                                     }
-                                    segmentFeatures.remove(segment);
+                                    segmentFeatures.remove(feature);
                                     changed = true;
+                                } else if (
+                                    !segmentFeatures.contains(feature) && checkForSegment(feature.getGeometry())
+                                ) {
+                                    segmentFeatures.add(feature);
+                                    changed = true;
+                                } else if (
+                                    feature.equals(jList1.getSelectedValue()) ||
+                                    feature.equals(jList2.getSelectedValue())
+                                ) {
+                                    doCalculateAngle();
                                 }
                             }
-                            if (changed) {
-                                fireContentChanged();
-                            }
                         }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featuresRemoved", ex);
-                    }
-                }
-
-                @Override
-                public void featuresChanged(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                            boolean changed = false;
-                            for (final Feature feature : fce.getEventFeatures()) {
-                                if (fce.getFeatureCollection().contains(feature)
-                                            && fce.getEventFeatures().contains(feature)) {
-                                    if (segmentFeatures.contains(feature) && !checkForSegment(feature.getGeometry())) {
-                                        if (feature.equals(jList1.getSelectedValue())) {
-                                            jList1.clearSelection();
-                                        }
-                                        if (feature.equals(jList2.getSelectedValue())) {
-                                            jList2.clearSelection();
-                                        }
-                                        segmentFeatures.remove(feature);
-                                        changed = true;
-                                    } else if (!segmentFeatures.contains(feature)
-                                                && checkForSegment(feature.getGeometry())) {
-                                        segmentFeatures.add(feature);
-                                        changed = true;
-                                    } else if (feature.equals(jList1.getSelectedValue())
-                                                || feature.equals(jList2.getSelectedValue())) {
-                                        doCalculateAngle();
+                        if (changed) {
+                            SwingUtilities.invokeLater(
+                                new Thread("AngleMeasurementDialog featuresChanged()") {
+                                    @Override
+                                    public void run() {
+                                        fireContentChanged();
                                     }
                                 }
-                            }
-                            if (changed) {
-                                SwingUtilities.invokeLater(new Thread("AngleMeasurementDialog featuresChanged()") {
-
-                                        @Override
-                                        public void run() {
-                                            fireContentChanged();
-                                        }
-                                    });
-                            }
+                            );
                         }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featuresChanged", ex);
                     }
+                } catch (final Exception ex) {
+                    LOG.warn("error while featuresChanged", ex);
                 }
+            }
 
-                @Override
-                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                            selectListFromFeatureCollection(getMappingComponent().getFeatureCollection());
-                        }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featureSelectionChanged", ex);
+            @Override
+            public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {
+                        selectListFromFeatureCollection(getMappingComponent().getFeatureCollection());
                     }
+                } catch (final Exception ex) {
+                    LOG.warn("error while featureSelectionChanged", ex);
                 }
+            }
 
-                @Override
-                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                        }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featureReconsiderationRequested", ex);
-                    }
+            @Override
+            public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {}
+                } catch (final Exception ex) {
+                    LOG.warn("error while featureReconsiderationRequested", ex);
                 }
+            }
 
-                @Override
-                public void featureCollectionChanged() {
-                    try {
-                        if (isFeatureCollectionListenerEnabled() && isVisible()) {
-                        }
-                    } catch (final Exception ex) {
-                        LOG.warn("error while featureCollectionChanged", ex);
-                    }
+            @Override
+            public void featureCollectionChanged() {
+                try {
+                    if (isFeatureCollectionListenerEnabled() && isVisible()) {}
+                } catch (final Exception ex) {
+                    LOG.warn("error while featureCollectionChanged", ex);
                 }
-            };
+            }
+        };
 
         //~ Constructors -------------------------------------------------------
 
@@ -1144,19 +1202,22 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public Component getListCellRendererComponent(final JList<?> list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
+        public Component getListCellRendererComponent(
+            final JList<?> list,
+            final Object value,
+            final int index,
+            final boolean isSelected,
+            final boolean cellHasFocus
+        ) {
             final Component superComp = super.getListCellRendererComponent(
-                    list,
-                    value,
-                    index,
-                    isSelected,
-                    cellHasFocus);
+                list,
+                value,
+                index,
+                isSelected,
+                cellHasFocus
+            );
             if ((value instanceof XStyledFeature) && (superComp instanceof JLabel)) {
-                ((JLabel)superComp).setText(((XStyledFeature)value).getName());
+                ((JLabel) superComp).setText(((XStyledFeature) value).getName());
             }
             return superComp;
         }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -12,50 +12,6 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKTReader;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.io.gpx.GPXReader;
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.spatialschema.JTSAdapter;
-import org.deegree.model.spatialschema.WKTAdapter;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import org.jdom.Element;
-
-import org.openide.DialogDisplayer;
-import org.openide.WizardDescriptor;
-import org.openide.util.ImageUtilities;
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-
-import java.awt.Component;
-import java.awt.Dialog;
-import java.awt.EventQueue;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import java.text.MessageFormat;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.AbstractNewFeature.geomTypes;
 import de.cismet.cismap.commons.features.Feature;
@@ -64,24 +20,52 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.tools.FeatureTools;
-
 import de.cismet.commons.cismap.io.converters.AbstractGeometryFromTextConverter;
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
 import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
-
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
-
 import de.cismet.commons.gui.wizard.WizardUtils;
 import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
 import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
-
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
+import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.EventQueue;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import org.apache.log4j.Logger;
+import org.deegree.io.gpx.GPXReader;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.model.spatialschema.WKTAdapter;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+import org.jdom.Element;
+import org.openide.DialogDisplayer;
+import org.openide.WizardDescriptor;
+import org.openide.util.ImageUtilities;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -93,15 +77,15 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__";         // NOI18N
-    public static final String PROP_INPUT_FILE = "__prop_input_file__";                             // NOI18N
-    public static final String PROP_CURRENT_CRS = "__prop_current_epsg_code__";                     // NOI18N
-    public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__";             // NOI18N
+    public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
+    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
+    public static final String PROP_CURRENT_CRS = "__prop_current_epsg_code__"; // NOI18N
+    public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__"; // NOI18N
     public static final String PROP_CONVERTER_PRESELECT_MODE = "__prop_converter_preselect_mode__"; // NOI18N
 
-    public static final String CONF_SECTION = "addGeometriesToMapWizardAction";                                    // NOI18N
-    public static final String CONF_CONV_PRESELECT = "converterPreselectionMode";                                  // NOI18N
-    public static final String CONF_PREVIEW_GETMAP_URL = "previewGetMapUrl";                                       // NOI18N
+    public static final String CONF_SECTION = "addGeometriesToMapWizardAction"; // NOI18N
+    public static final String CONF_CONV_PRESELECT = "converterPreselectionMode"; // NOI18N
+    public static final String CONF_PREVIEW_GETMAP_URL = "previewGetMapUrl"; // NOI18N
     public static final String CONF_GEOM_FROM_TEXT_CONV_DECIMAL_SEP = "geometryFromTextConverterDecimalSeparator"; // NOI18N
 
     /** LOGGER. */
@@ -125,17 +109,19 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public AddGeometriesToMapWizardAction() {
         super(
-            "",                                   // NOI18N
+            "", // NOI18N
             ImageUtilities.loadImageIcon(
-                AddGeometriesToMapWizardAction.class.getPackage().getName().replace('.', '/')
-                        + "/new_geom_wiz_22.png", // NOI18N
-                false));
-
+                AddGeometriesToMapWizardAction.class.getPackage().getName().replace('.', '/') + "/new_geom_wiz_22.png", // NOI18N
+                false
+            )
+        );
         putValue(
             Action.SHORT_DESCRIPTION,
             NbBundle.getMessage(
                 AddGeometriesToMapWizardAction.class,
-                "AddGeometriesToMapWizardAction.<init>.action.shortDescription")); // NOI18N
+                "AddGeometriesToMapWizardAction.<init>.action.shortDescription"
+            )
+        ); // NOI18N
 
         setConverterPreselectionMode(getDefaultConverterPreselectionMode());
     }
@@ -152,20 +138,21 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
-            final AddGeometriesToMapChooseConverterWizardPanel chooseConvPanel =
-                new AddGeometriesToMapChooseConverterWizardPanel();
+            final AddGeometriesToMapChooseConverterWizardPanel chooseConvPanel = new AddGeometriesToMapChooseConverterWizardPanel();
             try {
-                final ResourceBundle customBundle = ResourceBundle.getBundle(this.getClass().getPackage().getName()
-                                + ".ConverterPanelL10N");          // NOI18N
+                final ResourceBundle customBundle = ResourceBundle.getBundle(
+                    this.getClass().getPackage().getName() + ".ConverterPanelL10N"
+                ); // NOI18N
                 chooseConvPanel.setResourceBundle(customBundle);
             } catch (final Exception e) {
                 LOG.warn("cannot set custom converter bundle", e); // NOI18N
             }
 
-            panels = new WizardDescriptor.Panel[] {
+            panels =
+                new WizardDescriptor.Panel[] {
                     new AddGeometriesToMapEnterDataWizardPanel(),
                     chooseConvPanel,
-                    new AddGeometriesToMapPreviewWizardPanel()
+                    new AddGeometriesToMapPreviewWizardPanel(),
                 };
 
             final String[] steps = new String[panels.length];
@@ -177,7 +164,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                 steps[i] = c.getName();
                 if (c instanceof JComponent) {
                     // assume Swing components
-                    final JComponent jc = (JComponent)c;
+                    final JComponent jc = (JComponent) c;
                     // Sets step number of a component
                     jc.putClientProperty(WizardDescriptor.PROP_CONTENT_SELECTED_INDEX, Integer.valueOf(i));
                     // Sets steps names for a panel
@@ -199,19 +186,25 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                                  // NOI18N
-        wizard.setTitle(NbBundle.getMessage(
+        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
+        wizard.setTitle(
+            NbBundle.getMessage(
                 AddGeometriesToMapWizardAction.class,
-                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.title"));             // NOI18N
+                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.title"
+            )
+        ); // NOI18N
         WizardUtils.setCustomButtonText(
             wizard,
             WizardDescriptor.FINISH_OPTION,
             NbBundle.getMessage(
                 AddGeometriesToMapWizardAction.class,
-                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.finishButton.text")); // NOI18N
+                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.finishButton.text"
+            )
+        ); // NOI18N
 
-        final Collection<? extends TextToGeometryConverter> availableConverters = Lookup.getDefault()
-                    .lookupAll(TextToGeometryConverter.class);
+        final Collection<? extends TextToGeometryConverter> availableConverters = Lookup
+            .getDefault()
+            .lookupAll(TextToGeometryConverter.class);
 
         final ConverterPreselectionMode preselectionMode;
         if (ConverterPreselectionMode.DEFAULT == getConverterPreselectionMode()) {
@@ -242,121 +235,134 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
             // remember the selected converter
-            if ((ConverterPreselectionMode.SESSION_MEMORY == converterPreselectionMode)
-                        || (ConverterPreselectionMode.PERMANENT_MEMORY == converterPreselectionMode)
-                        || (ConverterPreselectionMode.CONFIGURE_AND_MEMORY == converterPreselectionMode)) {
-                setSelectedConverter((Converter)wizard.getProperty(
-                        AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
+            if (
+                (ConverterPreselectionMode.SESSION_MEMORY == converterPreselectionMode) ||
+                (ConverterPreselectionMode.PERMANENT_MEMORY == converterPreselectionMode) ||
+                (ConverterPreselectionMode.CONFIGURE_AND_MEMORY == converterPreselectionMode)
+            ) {
+                setSelectedConverter(
+                    (Converter) wizard.getProperty(AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER)
+                );
             } else {
                 setSelectedConverter(null);
             }
 
             final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
-                    parent,
-                    true,
-                    NbBundle.getMessage(
-                        AddGeometriesToMapWizardAction.class,
-                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.message"), // NOI18N
-                    null,
-                    50) {
+                parent,
+                true,
+                NbBundle.getMessage(
+                    AddGeometriesToMapWizardAction.class,
+                    "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.message"
+                ), // NOI18N
+                null,
+                50
+            ) {
+                @Override
+                @SuppressWarnings("unchecked")
+                protected Geometry doInBackground() throws Exception {
+                    Geometry geometry = (Geometry) wizard.getProperty(
+                        AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY
+                    );
 
-                    @Override
-                    @SuppressWarnings("unchecked")
-                    protected Geometry doInBackground() throws Exception {
-                        Geometry geometry = (Geometry)wizard.getProperty(
-                                AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
+                    if (geometry == null) {
+                        final Converter converter = (Converter) wizard.getProperty(
+                            AbstractConverterChooseWizardPanel.PROP_CONVERTER
+                        );
+                        final Object data = wizard.getProperty(
+                            AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA
+                        );
+                        final Crs crs = (Crs) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
-                        if (geometry == null) {
-                            final Converter converter = (Converter)wizard.getProperty(
-                                    AbstractConverterChooseWizardPanel.PROP_CONVERTER);
-                            final Object data = wizard.getProperty(
-                                    AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
-                            final Crs crs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
+                        assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
 
-                            assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
+                        final GeometryConverter geomConverter = (GeometryConverter) converter;
 
-                            final GeometryConverter geomConverter = (GeometryConverter)converter;
-
-                            geometry = geomConverter.convertForward(data, crs.getCode());
-                        }
-
-                        return geometry;
+                        geometry = geomConverter.convertForward(data, crs.getCode());
                     }
 
-                    @Override
-                    protected void done() {
-                        try {
-                            final Geometry geom = get();
-                            final Converter converter = (Converter)wizard.getProperty(
-                                    AbstractConverterChooseWizardPanel.PROP_CONVERTER);
-                            final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
+                    return geometry;
+                }
 
-                            if ((converter instanceof MultiGeometriesProvider)
-                                        && (geom instanceof GeometryCollection)) {
-                                final GeometryCollection gc = (GeometryCollection)geom;
+                @Override
+                protected void done() {
+                    try {
+                        final Geometry geom = get();
+                        final Converter converter = (Converter) wizard.getProperty(
+                            AbstractConverterChooseWizardPanel.PROP_CONVERTER
+                        );
+                        final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
 
-                                for (int i = 0; i < gc.getNumGeometries(); ++i) {
-                                    final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
-                                    feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
-                                    feature.setEditable(true);
-                                    featureList.add(feature);
-                                }
-                            } else {
-                                final PureNewFeature feature = new PureNewFeature(geom);
-                                feature.setGeometryType(FeatureTools.getGeomType(geom));
+                        if ((converter instanceof MultiGeometriesProvider) && (geom instanceof GeometryCollection)) {
+                            final GeometryCollection gc = (GeometryCollection) geom;
+
+                            for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                                final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
+                                feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
                                 feature.setEditable(true);
                                 featureList.add(feature);
                             }
-
-                            final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-                            map.getFeatureCollection().addFeatures(featureList);
-
-                            for (final PureNewFeature feature : featureList) {
-                                map.getFeatureCollection().holdFeature(feature);
-                            }
-
-                            // fixed extent means, don't move map at all
-                            if (!map.isFixedMapExtent()) {
-                                map.zoomToAFeatureCollection(featureList,
-                                    true,
-                                    map.isFixedMapScale());
-                            }
-                        } catch (final Exception ex) {
-                            final ErrorInfo errorInfo;
-                            final StringWriter stacktraceWriter = new StringWriter();
-                            ex.printStackTrace(new PrintWriter(stacktraceWriter));
-                            if (ex instanceof ConversionException) {
-                                errorInfo = new ErrorInfo(
-                                        NbBundle.getMessage(
-                                            AddGeometriesToMapWizardAction.class,
-                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.title"),   // NOI18N
-                                        NbBundle.getMessage(
-                                            AddGeometriesToMapWizardAction.class,
-                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.message"), // NOI18N
-                                        stacktraceWriter.toString(),
-                                        "WARNING",                                                                                                      // NOI18N
-                                        ex,
-                                        Level.WARNING,
-                                        null);
-                            } else {
-                                errorInfo = new ErrorInfo(
-                                        NbBundle.getMessage(
-                                            AddGeometriesToMapWizardAction.class,
-                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.title"),      // NOI18N
-                                        NbBundle.getMessage(
-                                            AddGeometriesToMapWizardAction.class,
-                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.message"),    // NOI18N
-                                        stacktraceWriter.toString(),
-                                        "WARNING",                                                                                                      // NOI18N
-                                        ex,
-                                        Level.WARNING,
-                                        null);
-                            }
-
-                            JXErrorPane.showDialog(parent, errorInfo);
+                        } else {
+                            final PureNewFeature feature = new PureNewFeature(geom);
+                            feature.setGeometryType(FeatureTools.getGeomType(geom));
+                            feature.setEditable(true);
+                            featureList.add(feature);
                         }
+
+                        final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+                        map.getFeatureCollection().addFeatures(featureList);
+
+                        for (final PureNewFeature feature : featureList) {
+                            map.getFeatureCollection().holdFeature(feature);
+                        }
+
+                        // fixed extent means, don't move map at all
+                        if (!map.isFixedMapExtent()) {
+                            map.zoomToAFeatureCollection(featureList, true, map.isFixedMapScale());
+                        }
+                    } catch (final Exception ex) {
+                        final ErrorInfo errorInfo;
+                        final StringWriter stacktraceWriter = new StringWriter();
+                        ex.printStackTrace(new PrintWriter(stacktraceWriter));
+                        if (ex instanceof ConversionException) {
+                            errorInfo =
+                                new ErrorInfo(
+                                    NbBundle.getMessage(
+                                        AddGeometriesToMapWizardAction.class,
+                                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.title"
+                                    ), // NOI18N
+                                    NbBundle.getMessage(
+                                        AddGeometriesToMapWizardAction.class,
+                                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.message"
+                                    ), // NOI18N
+                                    stacktraceWriter.toString(),
+                                    "WARNING", // NOI18N
+                                    ex,
+                                    Level.WARNING,
+                                    null
+                                );
+                        } else {
+                            errorInfo =
+                                new ErrorInfo(
+                                    NbBundle.getMessage(
+                                        AddGeometriesToMapWizardAction.class,
+                                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.title"
+                                    ), // NOI18N
+                                    NbBundle.getMessage(
+                                        AddGeometriesToMapWizardAction.class,
+                                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.message"
+                                    ), // NOI18N
+                                    stacktraceWriter.toString(),
+                                    "WARNING", // NOI18N
+                                    ex,
+                                    Level.WARNING,
+                                    null
+                                );
+                        }
+
+                        JXErrorPane.showDialog(parent, errorInfo);
                     }
-                };
+                }
+            };
 
             // FIXME: the WaitingDialogThread only works properly when using start, thus cannot be put in an executor
             wdt.start();
@@ -388,7 +394,8 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             final String convPreselectModeString = convPreselectModeElement.getText();
             try {
                 final ConverterPreselectionMode convPreselectMode = ConverterPreselectionMode.valueOf(
-                        convPreselectModeString);
+                    convPreselectModeString
+                );
                 setConverterPreselectionMode(convPreselectMode);
             } catch (final IllegalArgumentException e) {
                 LOG.warn("illegal value for " + CONF_CONV_PRESELECT + ", configuring DEFAULT", e); // NOI18N
@@ -448,15 +455,16 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public void setConverterPreselectionMode(final ConverterPreselectionMode converterPreselectionMode) {
         switch (converterPreselectionMode) {
-            case CONFIGURE:                                                                                 // fall-through
-            case CONFIGURE_AND_MEMORY:                                                                      // fall-through
-            case PERMANENT_MEMORY: {
-                throw new IllegalArgumentException("mode not supported yet: " + converterPreselectionMode); // NOI18N
-            }
-
-            default: {
-                this.converterPreselectionMode = converterPreselectionMode;
-            }
+            case CONFIGURE: // fall-through
+            case CONFIGURE_AND_MEMORY: // fall-through
+            case PERMANENT_MEMORY:
+                {
+                    throw new IllegalArgumentException("mode not supported yet: " + converterPreselectionMode); // NOI18N
+                }
+            default:
+                {
+                    this.converterPreselectionMode = converterPreselectionMode;
+                }
         }
     }
 

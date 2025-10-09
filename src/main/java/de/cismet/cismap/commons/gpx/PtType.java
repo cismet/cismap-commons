@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -15,7 +15,6 @@
 package de.cismet.cismap.commons.gpx;
 
 import java.math.BigDecimal;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -48,29 +47,20 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @version  $Revision$, $Date$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    name = "ptType",
-    propOrder = {
-            "ele",
-            "time"
-        }
-)
+@XmlType(name = "ptType", propOrder = { "ele", "time" })
 public class PtType {
 
     //~ Instance fields --------------------------------------------------------
 
     protected BigDecimal ele;
+
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar time;
-    @XmlAttribute(
-        name = "lat",
-        required = true
-    )
+
+    @XmlAttribute(name = "lat", required = true)
     protected BigDecimal lat;
-    @XmlAttribute(
-        name = "lon",
-        required = true
-    )
+
+    @XmlAttribute(name = "lon", required = true)
     protected BigDecimal lon;
 
     //~ Methods ----------------------------------------------------------------

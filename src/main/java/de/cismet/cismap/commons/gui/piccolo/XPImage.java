@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.nodes.PImage;
-
 import java.awt.Image;
 
 /**
@@ -29,8 +28,7 @@ public class XPImage extends PImage {
     /**
      * Creates a new XPImage object.
      */
-    public XPImage() {
-    }
+    public XPImage() {}
 
     //~ Methods ----------------------------------------------------------------
 

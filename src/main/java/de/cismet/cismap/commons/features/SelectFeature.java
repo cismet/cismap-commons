@@ -1,24 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-
-import java.awt.*;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 
 /**
  * DOCUMENT ME!
@@ -46,7 +44,6 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
      */
     public SelectFeature(final Geometry g, final String inputListenerName) {
         super(g);
-
         this.inputListenerName = inputListenerName;
     }
 
@@ -66,8 +63,7 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
      * @param  canvasPoints  DOCUMENT ME!
      * @param  wtst          DOCUMENT ME!
      */
-    public SelectFeature(final Point2D[] canvasPoints,
-            final WorldToScreenTransform wtst) {
+    public SelectFeature(final Point2D[] canvasPoints, final WorldToScreenTransform wtst) {
         super(canvasPoints, wtst);
     }
 
@@ -103,15 +99,19 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
 
     @Override
     public Paint getFillingPaint() {
-        final SelectionListener selectListener = ((SelectionListener)CismapBroker.getInstance().getMappingComponent()
-                        .getInputListener(
-                            MappingComponent.SELECT));
+        final SelectionListener selectListener =
+            (
+                (SelectionListener) CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.SELECT)
+            );
         return selectListener.getSelectColor();
     }
 
     @Override
     public Paint getLinePaint() {
-        final Color color = (Color)getFillingPaint();
+        final Color color = (Color) getFillingPaint();
         return color.darker();
     }
 
@@ -119,43 +119,56 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
     public String getName() {
         if (getGeometryType() != null) {
             switch (getGeometryType()) {
-                case RECTANGLE: {
-                    return org.openide.util.NbBundle.getMessage(
+                case RECTANGLE:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
                             SelectFeature.class,
-                            "SelectFeature.etName().selectRectangle");     // NOI18N
-                }
-                case LINESTRING: {
-                    return org.openide.util.NbBundle.getMessage(
-                            SelectFeature.class,
-                            "SelectFeature.getName().selectPolyline");     // NOI18N
-                }
-                case ELLIPSE: {
-                    return org.openide.util.NbBundle.getMessage(
-                            SelectFeature.class,
-                            "SelectFeature.getName().selectEllipse");      // NOI18N
-                }
-                case POINT: {
-                    return org.openide.util.NbBundle.getMessage(
-                            SelectFeature.class,
-                            "SelectFeature.getName().selectPoint");        // NOI18N
-                }
-                case POLYGON: {
-                    return org.openide.util.NbBundle.getMessage(
-                            SelectFeature.class,
-                            "SelectFeature.getName().selectPOLYGON");      // NOI18N
-                }
-                case MULTIPOLYGON: {
-                    return org.openide.util.NbBundle.getMessage(
-                            SelectFeature.class,
-                            "SelectFeature.getName().selectMULTIPOLYGON"); // NOI18N
-                }
-                default: {
-                    if (super.getName() != null) {
-                        return super.getName();
-                    } else {
-                        return "---";
+                            "SelectFeature.etName().selectRectangle"
+                        ); // NOI18N
                     }
-                }
+                case LINESTRING:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPolyline"
+                        ); // NOI18N
+                    }
+                case ELLIPSE:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectEllipse"
+                        ); // NOI18N
+                    }
+                case POINT:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPoint"
+                        ); // NOI18N
+                    }
+                case POLYGON:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectPOLYGON"
+                        ); // NOI18N
+                    }
+                case MULTIPOLYGON:
+                    {
+                        return org.openide.util.NbBundle.getMessage(
+                            SelectFeature.class,
+                            "SelectFeature.getName().selectMULTIPOLYGON"
+                        ); // NOI18N
+                    }
+                default:
+                    {
+                        if (super.getName() != null) {
+                            return super.getName();
+                        } else {
+                            return "---";
+                        }
+                    }
             }
         } else {
             return "--";
@@ -174,17 +187,21 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
         final int circleSize = imageSize - (strokeWidth * 2);
         // 0 | strokeWidth | circleSize | strokeWidth | imageSize
 
-        final Color color = (Color)getFillingPaint();
+        final Color color = (Color) getFillingPaint();
         final BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
-        final Graphics2D graphics = (Graphics2D)bufferedImage.getGraphics();
+        final Graphics2D graphics = (Graphics2D) bufferedImage.getGraphics();
 
         graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         graphics.setColor(color);
         graphics.setStroke(new BasicStroke(strokeWidth));
         graphics.drawOval(strokeWidth, strokeWidth, circleSize, circleSize);
 
-        final FeatureAnnotationSymbol pointAnnotationSymbol = FeatureAnnotationSymbol
-                    .newCustomSweetSpotFeatureAnnotationSymbol(bufferedImage, null, 0.5, 0.5);
+        final FeatureAnnotationSymbol pointAnnotationSymbol = FeatureAnnotationSymbol.newCustomSweetSpotFeatureAnnotationSymbol(
+            bufferedImage,
+            null,
+            0.5,
+            0.5
+        );
 
         return pointAnnotationSymbol;
     }
@@ -201,7 +218,7 @@ public class SelectFeature extends AbstractNewFeature implements DoubleClickable
     @Override
     public void doubleClickPerformed(final SelectionListener selectionListener) {
         final MappingComponent mappingComponent = selectionListener.getMappingComponent();
-        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+        ((DefaultFeatureCollection) mappingComponent.getFeatureCollection()).unselectAll();
         mappingComponent.getHandleLayer().removeAllChildren();
         selectionListener.select(this);
     }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -17,7 +17,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
-
 import com.ysystems.ycad.lib.ydxf.YdxfGet;
 import com.ysystems.ycad.lib.ydxf.YdxfGetBuffer;
 import com.ysystems.ycad.lib.yxxf.Yxxf;
@@ -37,21 +36,6 @@ import com.ysystems.ycad.lib.yxxf.YxxfEntVertex;
 import com.ysystems.ycad.lib.yxxf.YxxfGfxPointW;
 import com.ysystems.ycad.lib.yxxf.YxxfObject;
 import com.ysystems.ycad.lib.yxxf.YxxfXRecord;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.datatypes.Types;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -61,6 +45,16 @@ import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.util.CrsDeterminer;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.log4j.Logger;
+import org.deegree.datatypes.Types;
 
 /**
  * DOCUMENT ME!
@@ -116,37 +110,37 @@ public class DxfReader {
             int nextToDraw;
 
             for (nextToDraw = 0;;) {
-                final YxxfEnt ent = (YxxfEnt)drawing.secEntities.insMSpace.block.nextEntity(nextToDraw);
+                final YxxfEnt ent = (YxxfEnt) drawing.secEntities.insMSpace.block.nextEntity(nextToDraw);
                 if (!(ent instanceof YxxfEntHeader)) {
                     break;
                 }
                 if (ent instanceof YxxfEntText) {
-                    final YxxfEntText text = (YxxfEntText)ent;
+                    final YxxfEntText text = (YxxfEntText) ent;
                     final YxxfGfxPointW point = text.inspnt;
                     final Geometry geom = factory.createPoint(new Coordinate(point.x, point.y, point.z));
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, text, true);
                     featureAttr.put("annotation", text.text);
                     annotationFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntMtext) {
-                    final YxxfEntMtext text = (YxxfEntMtext)ent;
+                    final YxxfEntMtext text = (YxxfEntMtext) ent;
                     final YxxfGfxPointW point = text.inspnt;
                     final Geometry geom = factory.createPoint(new Coordinate(point.x, point.y, point.z));
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, text, true);
                     featureAttr.put("annotation", text.text);
                     annotationFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntInsert) {
-                    final YxxfEntInsert ins = (YxxfEntInsert)ent;
+                    final YxxfEntInsert ins = (YxxfEntInsert) ent;
                     final YxxfGfxPointW point = ins.inspnt;
                     final Geometry geom = factory.createPoint(new Coordinate(point.x, point.y, point.z));
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, ins, true);
                     pointFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntPoint) {
-                    final YxxfEntPoint point = (YxxfEntPoint)ent;
+                    final YxxfEntPoint point = (YxxfEntPoint) ent;
                     final Geometry geom = factory.createPoint(new Coordinate(point.pnt.x, point.pnt.y, point.pnt.z));
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, point, true);
                     pointFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntPolyline) {
-                    final YxxfEntPolyline line = (YxxfEntPolyline)ent;
+                    final YxxfEntPolyline line = (YxxfEntPolyline) ent;
                     final Geometry geom = readPolyLine(line, factory, originFeatureType);
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, line, true);
 
@@ -156,7 +150,7 @@ public class DxfReader {
                         linestringFeatures.add(toFeature(geom, featureAttr));
                     }
                 } else if (ent instanceof YxxfEntLine) {
-                    final YxxfEntLine line = (YxxfEntLine)ent;
+                    final YxxfEntLine line = (YxxfEntLine) ent;
                     final Coordinate[] coordArray = new Coordinate[2];
 
                     Coordinate coord = new Coordinate(line.begpnt.x, line.begpnt.y, line.begpnt.z);
@@ -168,7 +162,7 @@ public class DxfReader {
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, line, true);
                     linestringFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntLwpolyline) {
-                    final YxxfEntLwpolyline line = (YxxfEntLwpolyline)ent;
+                    final YxxfEntLwpolyline line = (YxxfEntLwpolyline) ent;
                     final Geometry geom = readPolyLine(line.pline, factory, originFeatureType);
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, line, true);
                     if ((originFeatureType != null) && originFeatureType.toLowerCase().equals("polygon")) {
@@ -177,14 +171,14 @@ public class DxfReader {
                         linestringFeatures.add(toFeature(geom, featureAttr));
                     }
                 } else if (ent instanceof YxxfEntCircle) {
-                    final YxxfEntCircle circle = (YxxfEntCircle)ent;
+                    final YxxfEntCircle circle = (YxxfEntCircle) ent;
                     final YxxfGfxPointW point = circle.center;
                     final Geometry center = factory.createPoint(new Coordinate(point.x, point.y, point.z));
                     final Geometry geom = center.buffer(circle.radius);
                     final Map<String, Object> featureAttr = getFeatureAttributes(buffer, circle, true);
                     polygonFeatures.add(toFeature(geom, featureAttr));
                 } else if (ent instanceof YxxfEntArc) {
-                    final YxxfEntArc arc = (YxxfEntArc)ent;
+                    final YxxfEntArc arc = (YxxfEntArc) ent;
                     final YxxfGfxPointW point = arc.center;
 
                     final GeometricShapeFactory gsf = new GeometricShapeFactory();
@@ -211,11 +205,9 @@ public class DxfReader {
             }
             if (properties != null) {
                 try {
-                    properties.setFeatureService(new H2FeatureService(
-                            "dummy",
-                            "dummy",
-                            null,
-                            featureServiceAttributes));
+                    properties.setFeatureService(
+                        new H2FeatureService("dummy", "dummy", null, featureServiceAttributes)
+                    );
                 } catch (Exception e) {
                     LOG.error("Cannot create dummy H2FeatureService.", e);
                 }
@@ -231,9 +223,9 @@ public class DxfReader {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-//        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-polyff-ohne-proj-wsg-daten3.dxf";
-//        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-poly-mit-proj-ezg-mv-3.dxf";
-//        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-poly-ohne-proj-wsg-daten1.dxf";
+        //        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-polyff-ohne-proj-wsg-daten3.dxf";
+        //        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-poly-mit-proj-ezg-mv-3.dxf";
+        //        String filename = "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-poly-ohne-proj-wsg-daten1.dxf";
         final String filename =
             "/home/therter/Downloads/beispieldaten-dxf-dwg/dxf-2010-poly-mit-proj-wsg-daten2/2013-08-01-wsg-eurawasser-hro.dxf";
 
@@ -296,9 +288,11 @@ public class DxfReader {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private Map<String, Object> getFeatureAttributes(final YdxfGetBuffer buffer,
-            final YxxfEntHeader header,
-            final boolean annotation) throws Exception {
+    private Map<String, Object> getFeatureAttributes(
+        final YdxfGetBuffer buffer,
+        final YxxfEntHeader header,
+        final boolean annotation
+    ) throws Exception {
         final Map<String, Object> attributeMap = new HashMap<String, Object>();
         final String esriAttributesHandle = getDictionaryHandle(buffer, header, "ESRI_Attributes");
         final boolean createFeatureAttirbutes = featureServiceAttributes == null;
@@ -307,14 +301,14 @@ public class DxfReader {
             final YxxfObject attributeHeader = buffer.currObjectsBlock.getObjectByHandle(esriAttributesHandle);
 
             if (attributeHeader instanceof YxxfDictionary) {
-                final YxxfDictionary dict = (YxxfDictionary)attributeHeader;
+                final YxxfDictionary dict = (YxxfDictionary) attributeHeader;
 
                 for (final String attrName : dict.nameSoftOwnerIdMap.keySet()) {
                     final String valueHandle = dict.nameSoftOwnerIdMap.get(attrName);
                     final YxxfObject value = buffer.currObjectsBlock.getObjectByHandle(valueHandle);
 
                     if (value instanceof YxxfXRecord) {
-                        final YxxfXRecord val = (YxxfXRecord)value;
+                        final YxxfXRecord val = (YxxfXRecord) value;
                         if (!val.values.isEmpty()) {
                             // take the first element
                             final Integer key = val.values.keySet().iterator().next();
@@ -324,21 +318,24 @@ public class DxfReader {
                                 if (featureServiceAttributes == null) {
                                     featureServiceAttributes = new ArrayList<FeatureServiceAttribute>();
                                     properties = new DefaultLayerProperties();
-                                    featureServiceAttributes.add(new FeatureServiceAttribute(
-                                            "geom",
-                                            String.valueOf(Types.GEOMETRY),
-                                            true));
+                                    featureServiceAttributes.add(
+                                        new FeatureServiceAttribute("geom", String.valueOf(Types.GEOMETRY), true)
+                                    );
                                     if (annotation) {
-                                        featureServiceAttributes.add(new FeatureServiceAttribute(
+                                        featureServiceAttributes.add(
+                                            new FeatureServiceAttribute(
                                                 "annotation",
                                                 String.valueOf(Types.VARCHAR),
-                                                true));
+                                                true
+                                            )
+                                        );
                                     }
                                 }
                                 final FeatureServiceAttribute attr = new FeatureServiceAttribute(
-                                        attrName,
-                                        getTypeByEsriCode(key),
-                                        true);
+                                    attrName,
+                                    getTypeByEsriCode(key),
+                                    true
+                                );
                                 featureServiceAttributes.add(attr);
                             }
                         }
@@ -351,10 +348,9 @@ public class DxfReader {
                 properties = new DefaultLayerProperties();
                 featureServiceAttributes.add(new FeatureServiceAttribute("geom", String.valueOf(Types.GEOMETRY), true));
                 if (annotation) {
-                    featureServiceAttributes.add(new FeatureServiceAttribute(
-                            "annotation",
-                            String.valueOf(Types.VARCHAR),
-                            true));
+                    featureServiceAttributes.add(
+                        new FeatureServiceAttribute("annotation", String.valueOf(Types.VARCHAR), true)
+                    );
                 }
             }
         }
@@ -374,14 +370,14 @@ public class DxfReader {
 
         for (final YxxfObject obj : objects) {
             if (obj instanceof YxxfDictionary) {
-                final YxxfDictionary dic = (YxxfDictionary)obj;
+                final YxxfDictionary dic = (YxxfDictionary) obj;
                 final String featureTypeHandle = dic.nameSoftOwnerIdMap.get("FeatureType");
 
                 if (featureTypeHandle != null) {
                     final YxxfObject geomType = buffer.currObjectsBlock.getObjectByHandle(featureTypeHandle);
 
                     if (geomType instanceof YxxfXRecord) {
-                        final YxxfXRecord rec = (YxxfXRecord)geomType;
+                        final YxxfXRecord rec = (YxxfXRecord) geomType;
 
                         return rec.values.get(1);
                     }
@@ -442,7 +438,7 @@ public class DxfReader {
             final byte[] asByte = new byte[value.length()];
 
             for (int i = 0; i < value.length(); ++i) {
-                asByte[i] = (byte)value.charAt(i);
+                asByte[i] = (byte) value.charAt(i);
             }
 
             return new String(asByte);
@@ -463,7 +459,7 @@ public class DxfReader {
 
         for (final YxxfObject obj : objects) {
             if (obj instanceof YxxfDictionary) {
-                final YxxfDictionary dic = (YxxfDictionary)obj;
+                final YxxfDictionary dic = (YxxfDictionary) obj;
                 final String handle = dic.nameSoftOwnerIdMap.get(name);
 
                 if (handle != null) {
@@ -488,14 +484,14 @@ public class DxfReader {
 
         for (final YxxfObject obj : objects) {
             if (obj instanceof YxxfDictionary) {
-                final YxxfDictionary dic = (YxxfDictionary)obj;
+                final YxxfDictionary dic = (YxxfDictionary) obj;
                 final String prjPnt = dic.nameSoftOwnerIdMap.get("ESRI_PRJ");
 
                 if (prjPnt != null) {
                     final YxxfObject prjObj = buffer.currObjectsBlock.getObjectByHandle(prjPnt);
 
                     if (prjObj instanceof YxxfXRecord) {
-                        final YxxfXRecord rec = (YxxfXRecord)prjObj;
+                        final YxxfXRecord rec = (YxxfXRecord) prjObj;
 
                         crsDefinition = rec.values.get(1);
                     }
@@ -516,24 +512,24 @@ public class DxfReader {
 
         for (final YxxfObject obj : objects) {
             if (obj instanceof YxxfDictionary) {
-                final YxxfDictionary dic = (YxxfDictionary)obj;
+                final YxxfDictionary dic = (YxxfDictionary) obj;
 
                 printDictionary(buffer, dic);
-//                for (final String key : dic.nameSoftOwnerIdMap.keySet()) {
-//                    final String handle = dic.nameSoftOwnerIdMap.get(key);
-//                    final YxxfObject prjObj = buffer.currObjectsBlock.getObjectByHandle(handle);
-//                    System.out.println("key: " + key);
-//
-//                    if (prjObj instanceof YxxfXRecord) {
-//                        final YxxfXRecord rec = (YxxfXRecord)prjObj;
-//
-//                        for (final Integer intKey : rec.values.keySet()) {
-//                            System.out.println(intKey + ": " + rec.values.get(intKey));
-//                        }
-//                    } else {
-//                        System.out.println("class: " + ((prjObj == null) ? "null" : prjObj.getClass().getName()));
-//                    }
-//                }
+                //                for (final String key : dic.nameSoftOwnerIdMap.keySet()) {
+                //                    final String handle = dic.nameSoftOwnerIdMap.get(key);
+                //                    final YxxfObject prjObj = buffer.currObjectsBlock.getObjectByHandle(handle);
+                //                    System.out.println("key: " + key);
+                //
+                //                    if (prjObj instanceof YxxfXRecord) {
+                //                        final YxxfXRecord rec = (YxxfXRecord)prjObj;
+                //
+                //                        for (final Integer intKey : rec.values.keySet()) {
+                //                            System.out.println(intKey + ": " + rec.values.get(intKey));
+                //                        }
+                //                    } else {
+                //                        System.out.println("class: " + ((prjObj == null) ? "null" : prjObj.getClass().getName()));
+                //                    }
+                //                }
             } else {
                 System.out.println("class: " + obj.getClass().getName());
             }
@@ -553,13 +549,13 @@ public class DxfReader {
             System.out.println("key: " + key);
 
             if (prjObj instanceof YxxfXRecord) {
-                final YxxfXRecord rec = (YxxfXRecord)prjObj;
+                final YxxfXRecord rec = (YxxfXRecord) prjObj;
 
                 for (final Integer intKey : rec.values.keySet()) {
                     System.out.println(intKey + ": " + rec.values.get(intKey));
                 }
             } else if (prjObj instanceof YxxfDictionary) {
-                printDictionary(buffer, (YxxfDictionary)prjObj);
+                printDictionary(buffer, (YxxfDictionary) prjObj);
             } else {
                 System.out.println("class: " + ((prjObj == null) ? "null" : prjObj.getClass().getName()));
             }
@@ -608,10 +604,12 @@ public class DxfReader {
      *
      * @return  DOCUMENT ME!
      */
-    private Geometry readPolyLine(final YxxfEntPolyline line,
-            final GeometryFactory factory,
-            final String originFeatureType) {
-        final List<YxxfEntVertex> vertexList = (List<YxxfEntVertex>)line.vtxEntities;
+    private Geometry readPolyLine(
+        final YxxfEntPolyline line,
+        final GeometryFactory factory,
+        final String originFeatureType
+    ) {
+        final List<YxxfEntVertex> vertexList = (List<YxxfEntVertex>) line.vtxEntities;
         final Coordinate[] coordArray = new Coordinate[vertexList.size()];
         int index = -1;
 
@@ -646,7 +644,7 @@ public class DxfReader {
             }
         }
 
-        final DefaultFeatureServiceFeature feature = new DefaultFeatureServiceFeature((Integer)id, geom, properties);
+        final DefaultFeatureServiceFeature feature = new DefaultFeatureServiceFeature((Integer) id, geom, properties);
         feature.addProperties(attributes);
         feature.addProperty("geom", geom);
 

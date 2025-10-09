@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * CustomAction.java
  *
@@ -15,15 +15,13 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
-import java.awt.geom.Point2D;
-
-import java.util.Collection;
-import java.util.Vector;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import java.awt.geom.Point2D;
+import java.util.Collection;
+import java.util.Vector;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um das Drehen von Features wieder
@@ -51,10 +49,12 @@ public class FeatureRotateAction implements CustomAction {
      * @param  pivot  Kopie des Angelpunkts der Drehung
      * @param  rot    Drehwinkel im Bogenma\u00DF
      */
-    public FeatureRotateAction(final MappingComponent mc,
-            final Collection<Feature> arr,
-            final Point2D pivot,
-            final double rot) {
+    public FeatureRotateAction(
+        final MappingComponent mc,
+        final Collection<Feature> arr,
+        final Point2D pivot,
+        final double rot
+    ) {
         this.mc = mc;
         this.arr = arr;
         this.pivot = pivot;
@@ -70,12 +70,12 @@ public class FeatureRotateAction implements CustomAction {
     public void doAction() {
         final Vector v = new Vector();
         for (final Feature o : arr) {
-            final PFeature pf = ((PFeature)mc.getPFeatureHM().get(o));
+            final PFeature pf = ((PFeature) mc.getPFeatureHM().get(o));
             v.add(pf.getFeature());
             pf.rotateAllPoints(rot, pivot);
             pf.syncGeometry();
         }
-        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
+        ((DefaultFeatureCollection) mc.getFeatureCollection()).fireFeaturesChanged(v);
         mc.showHandles(false);
     }
 
@@ -88,13 +88,14 @@ public class FeatureRotateAction implements CustomAction {
     public String info() {
         final StringBuffer sb = new StringBuffer();
         for (final Object o : arr) {
-            sb.append(o.hashCode() + ", ");                           // NOI18N
+            sb.append(o.hashCode() + ", "); // NOI18N
         }
         sb.delete(sb.length() - 2, sb.length());
         return org.openide.util.NbBundle.getMessage(
-                FeatureRotateAction.class,
-                "FeatureRotateAction.info().return",
-                new Object[] { sb.toString(), Math.toDegrees(rot) }); // NOI18N
+            FeatureRotateAction.class,
+            "FeatureRotateAction.info().return",
+            new Object[] { sb.toString(), Math.toDegrees(rot) }
+        ); // NOI18N
     }
 
     /**

@@ -1,25 +1,23 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.SimpleGetFeatureInfoUrl;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
-
 import de.cismet.tools.BrowserLauncher;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
 
 /**
  * DOCUMENT ME!
@@ -57,13 +55,13 @@ public class CustomFeatureInfoListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(final PInputEvent pInputEvent) {
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+            final MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
             if (log.isDebugEnabled()) {
                 log.debug("featurInfoRetrievalUrl " + featureInforetrievalUrl); // NOI18N
             }
             final SimpleGetFeatureInfoUrl url = new SimpleGetFeatureInfoUrl(featureInforetrievalUrl);
-            url.setX((int)pInputEvent.getCanvasPosition().getX());
-            url.setY((int)pInputEvent.getCanvasPosition().getY());
+            url.setX((int) pInputEvent.getCanvasPosition().getX());
+            url.setY((int) pInputEvent.getCanvasPosition().getY());
             url.setHeight(mc.getHeight());
             url.setWidth(mc.getWidth());
             final BoundingBox bb = mc.getCurrentBoundingBoxFromCamera();
@@ -76,10 +74,10 @@ public class CustomFeatureInfoListener extends PBasicInputEventHandler {
                 if (u != null) {
                     u = u.trim();
                 }
-                log.info("Open:" + u);                                          // NOI18N
+                log.info("Open:" + u); // NOI18N
                 BrowserLauncher.openURL(u);
             } catch (Exception e) {
-                log.error("Error", e);                                          // NOI18N
+                log.error("Error", e); // NOI18N
             }
         }
     }

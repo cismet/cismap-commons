@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MapLockedPanel.java
  *
@@ -24,6 +24,7 @@ public class MapExtentFixedPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblMapLockedIcon;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,14 +49,20 @@ public class MapExtentFixedPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-        lblMapLockedIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/fixMapExtent.png"))); // NOI18N
-        lblMapLockedIcon.setText(org.openide.util.NbBundle.getMessage(
+        lblMapLockedIcon.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/fixMapExtent.png")
+            )
+        ); // NOI18N
+        lblMapLockedIcon.setText(
+            org.openide.util.NbBundle.getMessage(MapExtentFixedPanel.class, "MapExtentFixedPanel.lblMapLockedIcon.text")
+        ); // NOI18N
+        lblMapLockedIcon.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 MapExtentFixedPanel.class,
-                "MapExtentFixedPanel.lblMapLockedIcon.text"));                                        // NOI18N
-        lblMapLockedIcon.setToolTipText(org.openide.util.NbBundle.getMessage(
-                MapExtentFixedPanel.class,
-                "MapExtentFixedPanel.lblMapLockedIcon.toolTipText"));                                 // NOI18N
+                "MapExtentFixedPanel.lblMapLockedIcon.toolTipText"
+            )
+        ); // NOI18N
         add(lblMapLockedIcon, java.awt.BorderLayout.CENTER);
-    }                                                                                                 // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 }

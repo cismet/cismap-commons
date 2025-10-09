@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * GuiCredentialProvider.java
  *
@@ -15,6 +15,15 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.DialogOpenedEvent;
+import de.cismet.tools.gui.DialogSupport;
+import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.Component;
+import java.io.IOException;
+import java.net.URL;
+import java.util.prefs.Preferences;
+import javax.swing.JFrame;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -26,27 +35,10 @@ import org.apache.commons.httpclient.auth.CredentialsProvider;
 import org.apache.commons.httpclient.auth.NTLMScheme;
 import org.apache.commons.httpclient.auth.RFC2617Scheme;
 import org.apache.commons.httpclient.methods.GetMethod;
-
 import org.jdesktop.swingx.JXLoginPane;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.auth.DefaultUserNameStore;
 import org.jdesktop.swingx.auth.LoginService;
-
-import java.awt.Component;
-
-import java.io.IOException;
-
-import java.net.URL;
-
-import java.util.prefs.Preferences;
-
-import javax.swing.JFrame;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.gui.DialogOpenedEvent;
-import de.cismet.tools.gui.DialogSupport;
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -59,7 +51,8 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            "de.cismet.cismap.commons.rasterservice.GUICredentialsProvider"); // NOI18N
+        "de.cismet.cismap.commons.rasterservice.GUICredentialsProvider"
+    ); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -139,12 +132,13 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
 
     @Override
     public Credentials getCredentials(
-            final AuthScheme authscheme,
-            final String host,
-            final int port,
-            final boolean proxy) throws CredentialsNotAvailableException {
+        final AuthScheme authscheme,
+        final String host,
+        final int port,
+        final boolean proxy
+    ) throws CredentialsNotAvailableException {
         if (log.isDebugEnabled()) {
-            log.debug("Credentials requested for :" + url.toString() + " alias: " + title);                    // NOI18N
+            log.debug("Credentials requested for :" + url.toString() + " alias: " + title); // NOI18N
         }
         usernames = new DefaultUserNameStore();
         appPrefs = Preferences.userNodeForPackage(this.getClass());
@@ -171,8 +165,10 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
 
                 return creds;
             } else {
-                throw new CredentialsNotAvailableException("Unsupported authentication scheme: " // NOI18N
-                            + authscheme.getSchemeName());
+                throw new CredentialsNotAvailableException(
+                    "Unsupported authentication scheme: " + // NOI18N
+                    authscheme.getSchemeName()
+                );
             }
         }
     }
@@ -194,32 +190,37 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
         title = broker.getProperty(url.toString());
         if (title != null) {
             //
-            login.setMessage(org.openide.util.NbBundle.getMessage(
+            login.setMessage(
+                org.openide.util.NbBundle.getMessage(
                     GUICredentialsProvider.class,
                     "GUICredentialsProvider.requestUsernamePassword().login.message",
-                    new Object[] { title }));                           // NOI18N
+                    new Object[] { title }
+                )
+            ); // NOI18N
         } else {
             title = url.toString();
             if (title.startsWith("http://") && (title.length() > 21)) { // NOI18N
-                title = title.substring(7, 21) + "...";                 // NOI18N
+                title = title.substring(7, 21) + "..."; // NOI18N
             } else if (title.length() > 14) {
-                title = title.substring(0, 14) + "...";                 // NOI18N
+                title = title.substring(0, 14) + "..."; // NOI18N
             }
 
-            login.setMessage(org.openide.util.NbBundle.getMessage(
+            login.setMessage(
+                org.openide.util.NbBundle.getMessage(
                     GUICredentialsProvider.class,
                     "GUICredentialsProvider.requestUsernamePassword().login.message",
-                    new Object[] { title }));                            // NOI18N
+                    new Object[] { title }
+                )
+            ); // NOI18N
         }
         if (log.isDebugEnabled()) {
             log.debug("parentFrame in GUICredentialprovider:" + parent); // NOI18N
         }
-        final JXLoginPane.JXLoginDialog dialog = new JXLoginPane.JXLoginDialog((JFrame)parent, login);
+        final JXLoginPane.JXLoginDialog dialog = new JXLoginPane.JXLoginDialog((JFrame) parent, login);
 
         try {
-            ((JXPanel)((JXPanel)login.getComponent(1)).getComponent(1)).getComponent(3).requestFocus();
-        } catch (Exception skip) {
-        }
+            ((JXPanel) ((JXPanel) login.getComponent(1)).getComponent(1)).getComponent(3).requestFocus();
+        } catch (Exception skip) {}
         dialog.setAlwaysOnTop(true);
         dialog.toFront();
         dialog.setAlwaysOnTop(false);
@@ -235,11 +236,11 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
     @Override
     public boolean authenticate(final String name, final char[] password, final String server) throws Exception {
         if (log.isDebugEnabled()) {
-            log.debug("Authentication with username: " + name);                    // NOI18N
+            log.debug("Authentication with username: " + name); // NOI18N
         }
         if (testConnection(new UsernamePasswordCredentials(name, new String(password)))) {
             if (log.isDebugEnabled()) {
-                log.debug("Credentials are valid for URL: " + url.toString());     // NOI18N
+                log.debug("Credentials are valid for URL: " + url.toString()); // NOI18N
             }
             usernames.removeUserName(name);
             usernames.saveUserNames();
@@ -274,21 +275,24 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
      */
     public boolean testConnection(final UsernamePasswordCredentials creds) {
         final HttpClient client = new HttpClient();
-        final String proxySet = System.getProperty("proxySet");                      // NOI18N
-        if ((proxySet != null) && proxySet.equals("true")) {                         // NOI18N
+        final String proxySet = System.getProperty("proxySet"); // NOI18N
+        if ((proxySet != null) && proxySet.equals("true")) { // NOI18N
             if (log.isDebugEnabled()) {
-                log.debug("proxyIs Set");                                            // NOI18N
-                log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));      // NOI18N
+                log.debug("proxyIs Set"); // NOI18N
+                log.debug("ProxyHost:" + System.getProperty("http.proxyHost")); // NOI18N
             }
             if (log.isDebugEnabled()) {
-                log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));      // NOI18N
+                log.debug("ProxyPort:" + System.getProperty("http.proxyPort")); // NOI18N
             }
             try {
-                client.getHostConfiguration()
-                        .setProxy(System.getProperty("http.proxyHost"),
-                            Integer.parseInt(System.getProperty("http.proxyPort"))); // NOI18N
+                client
+                    .getHostConfiguration()
+                    .setProxy(
+                        System.getProperty("http.proxyHost"),
+                        Integer.parseInt(System.getProperty("http.proxyPort"))
+                    ); // NOI18N
             } catch (Exception e) {
-                log.error("Problem while setting proxy", e);                         // NOI18N
+                log.error("Problem while setting proxy", e); // NOI18N
             }
         }
         final GetMethod method = new GetMethod(url.toString());
@@ -297,8 +301,7 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
         int statuscode = 0;
         try {
             statuscode = client.executeMethod(method);
-        } catch (IOException ex) {
-        }
+        } catch (IOException ex) {}
         if (statuscode == HttpStatus.SC_OK) {
             method.releaseConnection();
             return true;

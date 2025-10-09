@@ -1,31 +1,26 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
-
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.swing.JComponent;
-
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
-import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * DOCUMENT ME!
@@ -61,7 +56,7 @@ public class HTTPImageRetrieval extends Thread {
         client = new HttpClient();
         // client.getHostConfiguration().setProxy("www-proxy.htw-saarland.de", 3128);
         if (log.isDebugEnabled()) {
-            log.debug("proxySet:" + System.getProperty("http.proxyHost"));  // NOI18N
+            log.debug("proxySet:" + System.getProperty("http.proxyHost")); // NOI18N
         }
         if (log.isDebugEnabled()) {
             log.debug("ProxyHost:" + System.getProperty("http.proxyHost")); // NOI18N
@@ -70,25 +65,28 @@ public class HTTPImageRetrieval extends Thread {
             log.debug("ProxyPort:" + System.getProperty("http.proxyPort")); // NOI18N
         }
 
-        final String proxySet = System.getProperty("proxySet");                      // NOI18N
-        if ((proxySet != null) && proxySet.equals("true")) {                         // NOI18N
+        final String proxySet = System.getProperty("proxySet"); // NOI18N
+        if ((proxySet != null) && proxySet.equals("true")) { // NOI18N
             if (log.isDebugEnabled()) {
-                log.debug("proxyIs Set");                                            // NOI18N
-                log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));      // NOI18N
+                log.debug("proxyIs Set"); // NOI18N
+                log.debug("ProxyHost:" + System.getProperty("http.proxyHost")); // NOI18N
             }
             if (log.isDebugEnabled()) {
-                log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));      // NOI18N
+                log.debug("ProxyPort:" + System.getProperty("http.proxyPort")); // NOI18N
             }
             try {
-                client.getHostConfiguration()
-                        .setProxy(System.getProperty("http.proxyHost"),
-                            Integer.parseInt(System.getProperty("http.proxyPort"))); // NOI18N
+                client
+                    .getHostConfiguration()
+                    .setProxy(
+                        System.getProperty("http.proxyHost"),
+                        Integer.parseInt(System.getProperty("http.proxyPort"))
+                    ); // NOI18N
             } catch (Exception e) {
-                log.error("Problem while setting proxy", e);                         // NOI18N
+                log.error("Problem while setting proxy", e); // NOI18N
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("no proxyIs Set");                                         // NOI18N
+                log.debug("no proxyIs Set"); // NOI18N
             }
         }
     }
@@ -125,7 +123,7 @@ public class HTTPImageRetrieval extends Thread {
                         }
                     }
                     if (log.isDebugEnabled()) {
-                        log.debug("creating image");                     // NOI18N
+                        log.debug("creating image"); // NOI18N
                     }
                     // Image image =observer.createImage( (ImageProducer) o);
                     observer = new ImageObserverInterceptor();
@@ -216,23 +214,24 @@ public class HTTPImageRetrieval extends Thread {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public boolean imageUpdate(final Image img,
-                final int infoflags,
-                final int x,
-                final int y,
-                final int width,
-                final int height) {
+        public boolean imageUpdate(
+            final Image img,
+            final int infoflags,
+            final int x,
+            final int y,
+            final int width,
+            final int height
+        ) {
             final boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
-//            log.debug("ImageUpdate");
-//            log.debug("y "+height);
-//            log.debug("img.getHeight"+img.getHeight(this));
+            //            log.debug("ImageUpdate");
+            //            log.debug("y "+height);
+            //            log.debug("img.getHeight"+img.getHeight(this));
 
             if ((infoflags & ImageObserver.SOMEBITS) != 0) {
                 final RetrievalEvent e = new RetrievalEvent();
-                e.setPercentageDone((int)(y / (img.getHeight(this) - 1.0) * 100));
+                e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
-            } else if ((infoflags & ImageObserver.ABORT) != 0) {
-            } else if ((infoflags & ImageObserver.ERROR) != 0) {
+            } else if ((infoflags & ImageObserver.ABORT) != 0) {} else if ((infoflags & ImageObserver.ERROR) != 0) {
                 final RetrievalEvent e = new RetrievalEvent();
                 e.setHasErrors(true);
                 final String error = new String(byteArrayOut.toByteArray());

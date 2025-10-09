@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
-
-import edu.umd.cs.piccolo.util.PBounds;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
-
 import de.cismet.tools.StaticDecimalTools;
+import edu.umd.cs.piccolo.util.PBounds;
 
 /**
  * DOCUMENT ME!
@@ -51,9 +49,18 @@ public class PBoundsWithCleverToString extends PBounds {
         final double y2 = wtst.getWorldY(y);
         final double x2 = x1 + width;
         final double y1 = y2 - height;
-        return StaticDecimalTools.round("0.00", x1) + "," + StaticDecimalTools.round("0.00", y1) + ","
-                    + StaticDecimalTools.round("0.00", x2) + "," + StaticDecimalTools.round("0.00", y2) + " (" + crsCode
-                    + ")"; // NOI18N
+        return (
+            StaticDecimalTools.round("0.00", x1) +
+            "," +
+            StaticDecimalTools.round("0.00", y1) +
+            "," +
+            StaticDecimalTools.round("0.00", x2) +
+            "," +
+            StaticDecimalTools.round("0.00", y2) +
+            " (" +
+            crsCode +
+            ")"
+        ); // NOI18N
     }
 
     /**

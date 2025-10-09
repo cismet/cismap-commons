@@ -1,21 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms.simple;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.commons.httpclient.HttpClient;
-
-import org.jdom.Attribute;
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import java.util.Vector;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.LayerInfoProvider;
@@ -25,8 +15,13 @@ import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-
 import de.cismet.commons.wms.capabilities.Layer;
+import edu.umd.cs.piccolo.PNode;
+import java.util.Vector;
+import org.apache.commons.httpclient.HttpClient;
+import org.jdom.Attribute;
+import org.jdom.CDATA;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -34,10 +29,9 @@ import de.cismet.commons.wms.capabilities.Layer;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SimpleWMS extends AbstractWMS implements MapService,
-    RasterMapService,
-    RetrievalServiceLayer,
-    LayerInfoProvider {    // implements RasterService,RetrievalListener,ServiceLayer {
+public class SimpleWMS
+    extends AbstractWMS
+    implements MapService, RasterMapService, RetrievalServiceLayer, LayerInfoProvider { // implements RasterService,RetrievalListener,ServiceLayer {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -57,8 +51,8 @@ public class SimpleWMS extends AbstractWMS implements MapService,
      */
     public SimpleWMS(final SimpleWMS s) {
         this(s.gmUrl);
-        if ((BoundingBox)s.bb != null) {
-            bb = (BoundingBox)s.bb.clone();
+        if ((BoundingBox) s.bb != null) {
+            bb = (BoundingBox) s.bb.clone();
         }
         enabled = s.enabled;
         height = s.height;
@@ -67,7 +61,7 @@ public class SimpleWMS extends AbstractWMS implements MapService,
         // The cloned wms and the origin wms should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
         // used in 2 different MappingComponents
-// pNode = s.pNode;
+        // pNode = s.pNode;
         translucency = s.translucency;
         width = s.width;
         ir = new ImageRetrieval(s);
@@ -101,37 +95,32 @@ public class SimpleWMS extends AbstractWMS implements MapService,
         if (layerPositionAttr != null) {
             try {
                 layerPosition = layerPositionAttr.getIntValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute enabledAttr = object.getAttribute("enabled");             // NOI18N
+        final Attribute enabledAttr = object.getAttribute("enabled"); // NOI18N
         if (enabledAttr != null) {
             try {
                 enabled = enabledAttr.getBooleanValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute nameAttr = object.getAttribute("name");                   // NOI18N
+        final Attribute nameAttr = object.getAttribute("name"); // NOI18N
         if (nameAttr != null) {
             try {
                 name = nameAttr.getValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute visAttr = object.getAttribute("visible");                 // NOI18N
+        final Attribute visAttr = object.getAttribute("visible"); // NOI18N
         if (visAttr != null) {
             try {
                 visible = visAttr.getBooleanValue();
                 pNode.setVisible(visible);
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute translucencyAttr = object.getAttribute("translucency");   // NOI18N
+        final Attribute translucencyAttr = object.getAttribute("translucency"); // NOI18N
         if (translucencyAttr != null) {
             try {
                 setTranslucency(translucencyAttr.getFloatValue());
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
     }
 
@@ -144,11 +133,13 @@ public class SimpleWMS extends AbstractWMS implements MapService,
      * @param  canbeDisabled  DOCUMENT ME!
      * @param  name           DOCUMENT ME!
      */
-    public SimpleWMS(final SimpleWmsGetMapUrl gmUrl,
-            final int layerPosition,
-            final boolean enabled,
-            final boolean canbeDisabled,
-            final String name) {
+    public SimpleWMS(
+        final SimpleWmsGetMapUrl gmUrl,
+        final int layerPosition,
+        final boolean enabled,
+        final boolean canbeDisabled,
+        final String name
+    ) {
         this.gmUrl = gmUrl;
         this.layerPosition = layerPosition;
         this.enabled = enabled;
@@ -163,13 +154,13 @@ public class SimpleWMS extends AbstractWMS implements MapService,
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element element = new Element("simpleWms");                             // NOI18N
+        final Element element = new Element("simpleWms"); // NOI18N
         element.setAttribute("layerPosition", new Integer(layerPosition).toString()); // NOI18N
-        element.setAttribute("skip", "false");                                        // NOI18N
+        element.setAttribute("skip", "false"); // NOI18N
         element.setAttribute("enabled", Boolean.toString(enabled));
-        element.setAttribute("visible", Boolean.toString(pNode.getVisible()));        // NOI18N
-        element.setAttribute("name", name);                                           // NOI18N
-        element.setAttribute("translucency", new Float(translucency).toString());     // NOI18N
+        element.setAttribute("visible", Boolean.toString(pNode.getVisible())); // NOI18N
+        element.setAttribute("name", name); // NOI18N
+        element.setAttribute("translucency", new Float(translucency).toString()); // NOI18N
         final CDATA data = new CDATA(gmUrl.getUrlTemplate());
         element.addContent(data);
         return element;
@@ -295,8 +286,7 @@ public class SimpleWMS extends AbstractWMS implements MapService,
     }
 
     @Override
-    public void setLayerQuerySelected(final boolean selected) {
-    }
+    public void setLayerQuerySelected(final boolean selected) {}
 
     @Override
     public boolean isQueryable() {

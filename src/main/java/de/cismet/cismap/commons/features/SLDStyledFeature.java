@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.features;
 
-import org.deegree.style.se.unevaluated.Style;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import java.util.List;
+import org.deegree.style.se.unevaluated.Style;
 
 /**
  * DOCUMENT ME!
@@ -25,7 +23,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
  * @version  $Revision$, $Date$
  */
 public interface SLDStyledFeature extends Feature {
-
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -34,10 +31,12 @@ public interface SLDStyledFeature extends Feature {
      * @version  $Revision$, $Date$
      */
     public enum UOM {
-
         //~ Enum constants -----------------------------------------------------
 
-        metre, foot, pixel, mm
+        metre,
+        foot,
+        pixel,
+        mm,
     }
 
     //~ Methods ----------------------------------------------------------------

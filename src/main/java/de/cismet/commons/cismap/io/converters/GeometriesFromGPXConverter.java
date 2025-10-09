@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -12,19 +12,14 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.gpx.helper.GpxReader;
-
 import de.cismet.commons.converter.ConversionException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Creates one or more point geometries from the provided coordinates. At least one coordinate is expected.
@@ -33,8 +28,9 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextConverter
-        implements MultiGeometriesProvider {
+public final class GeometriesFromGPXConverter
+    extends AbstractGeometryFromTextConverter
+    implements MultiGeometriesProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -44,7 +40,7 @@ public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextCo
 
     @Override
     protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException {
+        throws ConversionException {
         // this will never be used in this converter
         if (coordinates.length < 1) {
             throw new ConversionException("cannot create point from empty coordinate array"); // NOI18N
@@ -65,8 +61,10 @@ public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextCo
         try {
             final GpxReader reader = new GpxReader();
             final Geometry[] geometries = reader.read(from);
-            final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                    4326);
+            final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                4326
+            );
             Geometry geometry;
 
             if (geometries.length == 1) {
@@ -92,8 +90,9 @@ public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextCo
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "GeometriesFromGPXConverter.getFormatDisplayName().returnValue"); // NOI18N
+            PointFromTextConverter.class,
+            "GeometriesFromGPXConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -104,8 +103,9 @@ public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextCo
     @Override
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
-                GeometriesFromGPXConverter.class,
-                "GeometriesFromGPXConverter.getFormatDescription().returnValue"); // NOI18N
+            GeometriesFromGPXConverter.class,
+            "GeometriesFromGPXConverter.getFormatDescription().returnValue"
+        ); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -114,16 +114,18 @@ public final class GeometriesFromGPXConverter extends AbstractGeometryFromTextCo
     @Override
     public String getFormatHtmlDescription() {
         return NbBundle.getMessage(
-                GeometriesFromGPXConverter.class,
-                "GeometriesFromGPXConverter.getFormatHtmlDescription().returnValue");
+            GeometriesFromGPXConverter.class,
+            "GeometriesFromGPXConverter.getFormatHtmlDescription().returnValue"
+        );
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                GeometriesFromGPXConverter.class,
-                "GeometriesFromGPXConverter.getFormatExample().returnValue",
-                getDecimalSeparator()); // NOI18N
+            GeometriesFromGPXConverter.class,
+            "GeometriesFromGPXConverter.getFormatExample().returnValue",
+            getDecimalSeparator()
+        ); // NOI18N
     }
 
     /**

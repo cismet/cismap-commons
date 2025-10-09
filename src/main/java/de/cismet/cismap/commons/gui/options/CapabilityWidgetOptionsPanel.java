@@ -1,25 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.options;
-
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.lookupoptions.*;
-
 import de.cismet.tools.configuration.NoWriteError;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -33,8 +29,9 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String OPTION_NAME = NbBundle.getMessage(
-            CapabilityWidgetOptionsPanel.class,
-            "CapabilityWidgetOptionsPanel.OPTION_NAME");
+        CapabilityWidgetOptionsPanel.class,
+        "CapabilityWidgetOptionsPanel.OPTION_NAME"
+    );
     private static CapabilityWidget capabilityWidget;
 
     //~ Instance fields --------------------------------------------------------
@@ -46,6 +43,7 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JCheckBox jcSearch;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -95,13 +93,13 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
     @Override
     public String getTooltip() {
         return org.openide.util.NbBundle.getMessage(
-                CapabilityWidgetOptionsPanel.class,
-                "CapabilityWidgetOptionsPanel.tooltip"); // NOI18N
+            CapabilityWidgetOptionsPanel.class,
+            "CapabilityWidgetOptionsPanel.tooltip"
+        ); // NOI18N
     }
 
     @Override
-    public void configure(final Element parent) {
-    }
+    public void configure(final Element parent) {}
 
     @Override
     public Element getConfiguration() throws NoWriteError {
@@ -138,26 +136,50 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
         jLabel1 = new javax.swing.JLabel();
         jcSearch = new javax.swing.JCheckBox();
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(
                 CapabilityWidgetOptionsPanel.class,
-                "CapabilityWidgetOptionsPanel.jLabel1.text")); // NOI18N
+                "CapabilityWidgetOptionsPanel.jLabel1.text"
+            )
+        ); // NOI18N
 
-        jcSearch.setText(org.openide.util.NbBundle.getMessage(
+        jcSearch.setText(
+            org.openide.util.NbBundle.getMessage(
                 CapabilityWidgetOptionsPanel.class,
-                "CapabilityWidgetOptionsPanel.jcSearch.text")); // NOI18N
+                "CapabilityWidgetOptionsPanel.jcSearch.text"
+            )
+        ); // NOI18N
 
         final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jLabel1)
-                                .addComponent(jcSearch)).addContainerGap(152, Short.MAX_VALUE)));
+            layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                            layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel1)
+                                .addComponent(jcSearch)
+                        )
+                        .addContainerGap(152, Short.MAX_VALUE)
+                )
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(jLabel1).addPreferredGap(
-                    javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(jcSearch).addContainerGap(
-                    39,
-                    Short.MAX_VALUE)));
+            layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jcSearch)
+                        .addContainerGap(39, Short.MAX_VALUE)
+                )
+        );
     } // </editor-fold>//GEN-END:initComponents
 }

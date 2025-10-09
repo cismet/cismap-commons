@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,21 +13,6 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.event.PPanEventHandler;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
-
-import java.awt.Point;
-import java.awt.geom.Point2D;
-
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -35,6 +20,15 @@ import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencin
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.event.PPanEventHandler;
+import java.awt.Point;
+import java.awt.geom.Point2D;
+import javax.swing.SwingUtilities;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -75,8 +69,10 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
         if (RasterGeoReferencingDialog.getInstance().isVisible() && (getHandler() != null)) {
             final Point2D mouseScreenPoint = pie.getPosition();
             final WorldToScreenTransform wtst = getMainMap().getWtst();
-            final Coordinate mouseCoordinate = new Coordinate(wtst.getWorldX(mouseScreenPoint.getX()),
-                    wtst.getWorldY(mouseScreenPoint.getY()));
+            final Coordinate mouseCoordinate = new Coordinate(
+                wtst.getWorldX(mouseScreenPoint.getX()),
+                wtst.getWorldY(mouseScreenPoint.getY())
+            );
 
             final int position = getWizard().getPosition();
             final Coordinate pointCoordinate = getHandler().getPointCoordinate(position);
@@ -86,8 +82,9 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
                 getWizard().setPointZoom(coordinate);
             }
 
-            final Coordinate coordinate = getWizard().isCoordinateSelected() ? mouseCoordinate
-                                                                             : getWizard().getSelectedCoordinate();
+            final Coordinate coordinate = getWizard().isCoordinateSelected()
+                ? mouseCoordinate
+                : getWizard().getSelectedCoordinate();
             if (getWizard().isCoordinateSelected() || (coordinate != null)) {
                 getWizard().setCoordinateZoom(coordinate);
             }
@@ -118,7 +115,7 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
      * @return  DOCUMENT ME!
      */
     private PanAndMousewheelZoomListener getPanAndMousewheelZoomListener() {
-        return (PanAndMousewheelZoomListener)getMainMap().getInputListener(MappingComponent.PAN);
+        return (PanAndMousewheelZoomListener) getMainMap().getInputListener(MappingComponent.PAN);
     }
 
     @Override
@@ -134,17 +131,20 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
             if (pie.getClickCount() < 2) {
                 final Point2D mapPoint = pie.getPosition();
                 final WorldToScreenTransform wtst = getMainMap().getWtst();
-                final Coordinate coordinate = new Coordinate(wtst.getWorldX(mapPoint.getX()),
-                        wtst.getWorldY(mapPoint.getY()));
+                final Coordinate coordinate = new Coordinate(
+                    wtst.getWorldX(mapPoint.getX()),
+                    wtst.getWorldY(mapPoint.getY())
+                );
 
                 final int position = getWizard().getPosition();
 
                 try {
-                    final Coordinate imageCoordinate = getHandler().getMetaData()
-                                .getTransform()
-                                .getInverse()
-                                .transform(coordinate, new Coordinate());
-                    final Point point = new Point((int)imageCoordinate.x, (int)imageCoordinate.y);
+                    final Coordinate imageCoordinate = getHandler()
+                        .getMetaData()
+                        .getTransform()
+                        .getInverse()
+                        .transform(coordinate, new Coordinate());
+                    final Point point = new Point((int) imageCoordinate.x, (int) imageCoordinate.y);
 
                     if (getWizard().isPointSelected()) {
                         getHandler().setPoint(position, point);
@@ -153,8 +153,7 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
                     } else {
                         return;
                     }
-                } catch (final Exception ex) {
-                }
+                } catch (final Exception ex) {}
 
                 if (getWizard().isCoordinateSelectionMode()) {
                     getHandler().setPositionEnabled(position, true);
@@ -205,37 +204,36 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
 
     @Override
     public void handlerChanged(final RasterGeoReferencingHandler handler) {
-        SwingUtilities.invokeLater(new Runnable() {
-
+        SwingUtilities.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     getWizard().refreshPointZoomMap();
                 }
-            });
+            }
+        );
     }
 
     @Override
-    public void positionAdded(final int position) {
-    }
+    public void positionAdded(final int position) {}
 
     @Override
-    public void positionRemoved(final int position) {
-    }
+    public void positionRemoved(final int position) {}
 
     @Override
-    public void positionChanged(final int position) {
-    }
+    public void positionChanged(final int position) {}
 
     @Override
     public void transformationChanged() {
-        SwingUtilities.invokeLater(new Runnable() {
-
+        SwingUtilities.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     getWizard().refreshPointZoomMap();
                     getWizard().updateZoom(getWizard().getPosition());
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -265,7 +263,6 @@ public class RasterGeoReferencingInputListener extends PPanEventHandler implemen
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 }

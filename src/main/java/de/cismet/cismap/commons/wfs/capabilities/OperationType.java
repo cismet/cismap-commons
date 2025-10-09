@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -30,7 +30,6 @@ package de.cismet.cismap.commons.wfs.capabilities;
  * @version  $Revision$, $Date$
  */
 public interface OperationType {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,31 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import java.awt.HeadlessException;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.MissingResourceException;
-
-import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.HeadlessException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.MissingResourceException;
+import javax.swing.JOptionPane;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -33,8 +26,9 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearchGeometryListener
-        implements PropertyChangeListener {
+public class MetaSearchCreateSearchGeometryListener
+    extends AbstractCreateSearchGeometryListener
+    implements PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -63,7 +57,6 @@ public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearch
      */
     public MetaSearchCreateSearchGeometryListener(final MappingComponent mc, final MetaSearchFacade metaSearch) {
         this(mc);
-
         setMetaSearch(metaSearch);
     }
 
@@ -106,21 +99,27 @@ public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearch
                     StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()),
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"),       // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"
+                    ), // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen.title"
+                    ), // NOI18N
+                    JOptionPane.ERROR_MESSAGE
+                );
             } else {
                 JOptionPane.showMessageDialog(
                     StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()),
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"),             // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"
+                    ), // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized.title"),       // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized.title"
+                    ), // NOI18N
+                    JOptionPane.ERROR_MESSAGE
+                );
             }
         }
     }
@@ -137,10 +136,10 @@ public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearch
         if (!isSearchTopicsSelected()) {
             // finishGeometry is called before mousePressed. finishGeometry is not called if the user displayed the
             // last search feature. These conditions ensure that there is only one notification in any case.
-// if (searchFeature.equals(getLastSearchFeature())) {
+            // if (searchFeature.equals(getLastSearchFeature())) {
             notifyUserAboutMissingSearchTopics();
             return false;
-//            }
+            //            }
         }
 
         final MapSearchEvent mse = new MapSearchEvent();

@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.capabilities;
 
-import javax.swing.tree.TreeModel;
-
 import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
+import javax.swing.tree.TreeModel;
 
 /**
  * DOCUMENT ME!
@@ -49,22 +48,22 @@ public abstract class AbstractCapabilitiesTreeModel implements TreeModel, String
         this.serviceName = serviceName;
     }
 
-// TODO MUST BE REFACTORED ONE DERIVATION IS USING DEEGREE 1 THE OTHER DEEGREE 2
-//     /**
-//     * Liefert das diesem Model zugeordnete WFSCapabilities-Objekt.
-//     * @return WFSCapabilities-Objekt
-//     */
-//    public WFSCapabilities getCapabilities() {
-//        return capabilities;
-//    }
-//
-//    /**
-//     * Setzt das diesem Model zugeordnete WFSCapabilities-Objekt neu.
-//     * @param capabilities das neue WFSCapabilities-Objekt
-//     */
-//    public void setCapabilities(WFSCapabilities capabilities) {
-//        this.capabilities = capabilities;
-//    }
+    // TODO MUST BE REFACTORED ONE DERIVATION IS USING DEEGREE 1 THE OTHER DEEGREE 2
+    //     /**
+    //     * Liefert das diesem Model zugeordnete WFSCapabilities-Objekt.
+    //     * @return WFSCapabilities-Objekt
+    //     */
+    //    public WFSCapabilities getCapabilities() {
+    //        return capabilities;
+    //    }
+    //
+    //    /**
+    //     * Setzt das diesem Model zugeordnete WFSCapabilities-Objekt neu.
+    //     * @param capabilities das neue WFSCapabilities-Objekt
+    //     */
+    //    public void setCapabilities(WFSCapabilities capabilities) {
+    //        this.capabilities = capabilities;
+    //    }
 
     /**
      * DOCUMENT ME!

@@ -1,27 +1,27 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
 import com.vividsolutions.jts.geom.Point;
-
-import org.jdom.Element;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.CrsChangeListener;
+import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
-
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.Vector;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -29,13 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.interaction.CrsChangeListener;
-import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -53,8 +47,7 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
 
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
-    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource(
-                "/images/markPoint.png")); // NOI18N
+    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/images/markPoint.png")); // NOI18N
     protected FixedPImage pMark = new FixedPImage(mark.getImage());
 
     protected MappingComponent mappingComponent;
@@ -64,11 +57,13 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
     private final String loadingMessage = org.openide.util.NbBundle.getMessage(
-            AbstractWFSForm.class,
-            "AbstractWFSForm.loadingMessage");            // NOI18N
+        AbstractWFSForm.class,
+        "AbstractWFSForm.loadingMessage"
+    ); // NOI18N
     private final String errorMessage = org.openide.util.NbBundle.getMessage(
-            WFSFormsListAndComboBoxModel.class,
-            "WFSFormsListAndComboBoxModel.errorMessage"); // NOI18N
+        WFSFormsListAndComboBoxModel.class,
+        "WFSFormsListAndComboBoxModel.errorMessage"
+    ); // NOI18N
     private WFSFormFeature lastFeature = null;
     private String title;
     private String id;
@@ -93,15 +88,16 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
         } catch (IOException iox) {
             log.warn("Problem when loading the markPointSweetSpot.properties", iox);
         }
-        addHierarchyListener(new HierarchyListener() {
-
+        addHierarchyListener(
+            new HierarchyListener() {
                 @Override
                 public void hierarchyChanged(final HierarchyEvent e) {
                     if (!isInited() && isDisplayable()) {
                         initWFSForm();
                     }
                 }
-            });
+            }
+        );
         pMark.setVisible(false);
     }
 
@@ -133,37 +129,41 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
                     if (log.isDebugEnabled()) {
-                        log.debug("Comp: " + q.getComponentName());    // NOI18N
+                        log.debug("Comp: " + q.getComponentName()); // NOI18N
                     }
                     if (c instanceof JComboBox) {
                         try {
-                            final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName()
-                                            + "Progress");             // NOI18N
+                            final JProgressBar bar = (JProgressBar) listComponents.get(
+                                q.getComponentName() + "Progress"
+                            ); // NOI18N
                             final WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
-                            w.addActionListener(new ActionListener() {
-
+                            w.addActionListener(
+                                new ActionListener() {
                                     @Override
                                     public void actionPerformed(final ActionEvent e) {
                                         fireActionPerformed(e);
                                     }
-                                });
-                            ((JComboBox)c).setModel(w);
+                                }
+                            );
+                            ((JComboBox) c).setModel(w);
                         } catch (Exception ex) {
                             log.error("Error in initWFSForm", ex); // NOI18N
                         }
                     } else if (c instanceof JList) {
                         try {
-                            final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName()
-                                            + "Progress");         // NOI18N
+                            final JProgressBar bar = (JProgressBar) listComponents.get(
+                                q.getComponentName() + "Progress"
+                            ); // NOI18N
                             final WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
-                            w.addActionListener(new ActionListener() {
-
+                            w.addActionListener(
+                                new ActionListener() {
                                     @Override
                                     public void actionPerformed(final ActionEvent e) {
                                         fireActionPerformed(e);
                                     }
-                                });
-                            ((JList)c).setModel(w);
+                                }
+                            );
+                            ((JList) c).setModel(w);
                         } catch (Exception ex) {
                             log.error("Error in initWFSForm", ex); // NOI18N
                         }
@@ -171,7 +171,7 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
                 }
             }
         } catch (Exception e) {
-            log.error("Error during initWFSForm", e);              // NOI18N
+            log.error("Error during initWFSForm", e); // NOI18N
         }
     }
 
@@ -182,9 +182,13 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
      */
     protected void checkCboCorrectness(final JComboBox combo) {
         final String itemString = String.valueOf(combo.getSelectedItem()).trim();
-        if ((combo.getSelectedItem() != null) && !itemString.equals("") && !itemString.equals(loadingMessage)
-                    && !itemString.equals(errorMessage)
-                    && (combo.getSelectedIndex() == -1)) { // NOI18N
+        if (
+            (combo.getSelectedItem() != null) &&
+            !itemString.equals("") &&
+            !itemString.equals(loadingMessage) &&
+            !itemString.equals(errorMessage) &&
+            (combo.getSelectedIndex() == -1)
+        ) { // NOI18N
             combo.getEditor().getEditorComponent().setBackground(Color.red);
             garbageDuringAutoCompletion(combo);
         } else {
@@ -207,49 +211,53 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
      */
     public void requestRefresh(final String component, final HashMap<String, String> replacingValues) {
         if (log.isDebugEnabled()) {
-            log.debug("requestRefresh: Queries=" + queries);                                                          // NOI18N
+            log.debug("requestRefresh: Queries=" + queries); // NOI18N
         }
         for (final WFSFormQuery q : queries) {
             if (component.equals(q.getComponentName()) && listComponents.containsKey(q.getComponentName())) {
                 final JComponent c = listComponents.get(q.getComponentName());
                 if (log.isDebugEnabled()) {
-                    log.debug("requestRefresh JComponent=" + c);                                                      // NOI18N
+                    log.debug("requestRefresh JComponent=" + c); // NOI18N
                 }
                 if (c instanceof JComboBox) {
                     try {
-                        final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName() + "Progress"); // NOI18N
+                        final JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress"); // NOI18N
                         final WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(
-                                q,
-                                replacingValues,
-                                c,
-                                bar);
-                        model.addActionListener(new ActionListener() {
-
+                            q,
+                            replacingValues,
+                            c,
+                            bar
+                        );
+                        model.addActionListener(
+                            new ActionListener() {
                                 @Override
                                 public void actionPerformed(final ActionEvent e) {
                                     fireActionPerformed(e);
                                 }
-                            });
-                        ((JComboBox)c).setModel(model);
+                            }
+                        );
+                        ((JComboBox) c).setModel(model);
                     } catch (Exception ex) {
                         log.error("Error in requestRefresh", ex); // NOI18N
                     }
                 } else if (c instanceof JList) {
                     try {
-                        final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName() + "Progress"); // NOI18N
+                        final JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress"); // NOI18N
                         final WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(
-                                q,
-                                replacingValues,
-                                c,
-                                bar);
-                        model.addActionListener(new ActionListener() {
-
+                            q,
+                            replacingValues,
+                            c,
+                            bar
+                        );
+                        model.addActionListener(
+                            new ActionListener() {
                                 @Override
                                 public void actionPerformed(final ActionEvent e) {
                                     fireActionPerformed(e);
                                 }
-                            });
-                        ((JList)c).setModel(model);
+                            }
+                        );
+                        ((JList) c).setModel(model);
                     } catch (Exception ex) {
                         log.error("Error in requestRefresh", ex); // NOI18N
                     }
@@ -264,12 +272,12 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element ret = new Element("wfsForm");    // NOI18N
-        ret.setAttribute("id", getId());               // NOI18N
-        ret.setAttribute("title", getTitle());         // NOI18N
-        ret.setAttribute("icon", getIconPath());       // NOI18N
+        final Element ret = new Element("wfsForm"); // NOI18N
+        ret.setAttribute("id", getId()); // NOI18N
+        ret.setAttribute("title", getTitle()); // NOI18N
+        ret.setAttribute("icon", getIconPath()); // NOI18N
         ret.setAttribute("className", getClassName()); // NOI18N
-        ret.setAttribute("menu", getMenuString());     // NOI18N
+        ret.setAttribute("menu", getMenuString()); // NOI18N
         for (final WFSFormQuery query : queries) {
             ret.addContent(query.getElement());
         }
@@ -308,8 +316,10 @@ public abstract class AbstractWFSForm extends JPanel implements CrsChangeListene
         mappingComponent.getHighlightingLayer().removeAllChildren();
         mappingComponent.getHighlightingLayer().addChild(pMark);
         mappingComponent.addStickyNode(pMark);
-        final Point p = CrsTransformer.transformToGivenCrs(feature.getPosition(),
-                mappingComponent.getMappingModel().getSrs().getCode());
+        final Point p = CrsTransformer.transformToGivenCrs(
+            feature.getPosition(),
+            mappingComponent.getMappingModel().getSrs().getCode()
+        );
         final double x = mappingComponent.getWtst().getScreenX(p.getCoordinate().x);
         final double y = mappingComponent.getWtst().getScreenY(p.getCoordinate().y);
         pMark.setOffset(x, y);

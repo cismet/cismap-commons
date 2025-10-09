@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * OverviewComponent.java
  *
@@ -13,26 +13,6 @@
 package de.cismet.cismap.commons.gui.overviewwidget;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.umd.cs.piccolo.PCamera;
-
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.HashMap;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CidsLayerFactory;
 import de.cismet.cismap.commons.Crs;
@@ -46,16 +26,24 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
-
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+import edu.umd.cs.piccolo.PCamera;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -71,7 +59,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     MappingComponent overviewMap = null;
     MappingComponent masterMap = null;
     ActiveLayerModel model = new ActiveLayerModel();
-    Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true);                                                                                                                                                                                                                              // NOI18N
+    Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true); // NOI18N
     XBoundingBox home = new XBoundingBox(2567799, 5670041, 2594650, 5688258, srs.getCode(), srs.isMetric());
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String url =
@@ -118,25 +106,25 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         for (final String layerKey : layerMap.keySet()) {
             final ServiceLayer layer = layerMap.get(layerKey);
 
-            model.addLayer((RetrievalServiceLayer)layer);
-            ((RetrievalServiceLayer)layer).addRetrievalListener(new RetrievalListener() {
+            model.addLayer((RetrievalServiceLayer) layer);
+            ((RetrievalServiceLayer) layer).addRetrievalListener(
+                    new RetrievalListener() {
+                        @Override
+                        public void retrievalStarted(final RetrievalEvent e) {}
 
-                    @Override
-                    public void retrievalStarted(final RetrievalEvent e) {
+                        @Override
+                        public void retrievalProgress(final RetrievalEvent e) {}
+
+                        @Override
+                        public void retrievalComplete(final RetrievalEvent e) {}
+
+                        @Override
+                        public void retrievalAborted(final RetrievalEvent e) {}
+
+                        @Override
+                        public void retrievalError(final RetrievalEvent e) {}
                     }
-                    @Override
-                    public void retrievalProgress(final RetrievalEvent e) {
-                    }
-                    @Override
-                    public void retrievalComplete(final RetrievalEvent e) {
-                    }
-                    @Override
-                    public void retrievalAborted(final RetrievalEvent e) {
-                    }
-                    @Override
-                    public void retrievalError(final RetrievalEvent e) {
-                    }
-                });
+                );
         }
     }
 
@@ -148,6 +136,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     private void initComponents() {
         setLayout(new java.awt.BorderLayout());
     } // </editor-fold>//GEN-END:initComponents
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
 
@@ -202,42 +191,44 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     public void setMasterMap(final MappingComponent masterMap) {
         this.masterMap = masterMap;
         final Color fill = new Color(255, 0, 0, 100);
-        masterMap.getCamera()
-                .addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
+        masterMap
+            .getCamera()
+            .addPropertyChangeListener(
+                PCamera.PROPERTY_VIEW_TRANSFORM,
+                new PropertyChangeListener() {
+                    @Override
+                    public void propertyChange(final PropertyChangeEvent evt) {
+                        try {
+                            BoundingBox bb = masterMap.getCurrentBoundingBoxFromCamera();
 
-                        @Override
-                        public void propertyChange(final PropertyChangeEvent evt) {
-                            try {
-                                BoundingBox bb = masterMap.getCurrentBoundingBoxFromCamera();
-
-                                if (!CismapBroker.getInstance().getSrs().getCode().equals(srs.getCode())) {
-                                    final CrsTransformer transformer = new CrsTransformer(srs.getCode());
-                                    bb = transformer.transformBoundingBox(
-                                            bb,
-                                            CismapBroker.getInstance().getSrs().getCode());
-                                }
-
-                                final double x = bb.getX1() + (bb.getWidth() / 2.0);
-                                final double y = bb.getY2() - (bb.getHeight() / 2.0);
-                                overviewMap.getWtst();
-                                overviewMap.outlineArea(bb, fill);
-                                // overviewMap.crossHairPoint(new Coordinate(2583781, 5682540));
-                                overviewMap.crossHairPoint(new Coordinate(x, y));
-                            } catch (Exception e) {
-                                log.error(
-                                    "Cannot transform the current boundingbox from "
-                                    + CismapBroker.getInstance().getSrs().getCode()
-                                    + " to "
-                                    + srs.getCode(),
-                                    e);
+                            if (!CismapBroker.getInstance().getSrs().getCode().equals(srs.getCode())) {
+                                final CrsTransformer transformer = new CrsTransformer(srs.getCode());
+                                bb =
+                                    transformer.transformBoundingBox(bb, CismapBroker.getInstance().getSrs().getCode());
                             }
+
+                            final double x = bb.getX1() + (bb.getWidth() / 2.0);
+                            final double y = bb.getY2() - (bb.getHeight() / 2.0);
+                            overviewMap.getWtst();
+                            overviewMap.outlineArea(bb, fill);
+                            // overviewMap.crossHairPoint(new Coordinate(2583781, 5682540));
+                            overviewMap.crossHairPoint(new Coordinate(x, y));
+                        } catch (Exception e) {
+                            log.error(
+                                "Cannot transform the current boundingbox from " +
+                                CismapBroker.getInstance().getSrs().getCode() +
+                                " to " +
+                                srs.getCode(),
+                                e
+                            );
                         }
-                    });
+                    }
+                }
+            );
     }
 
     @Override
-    public void configure(final Element parent) {
-    }
+    public void configure(final Element parent) {}
 
     @Override
     public Element getConfiguration() throws NoWriteError {
@@ -253,14 +244,12 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
                 final Crs tmp = new Crs();
                 tmp.setCode(prefs.getAttributeValue("srs"));
                 srs = tmp;
-            } catch (Exception skip) {
-            }
+            } catch (Exception skip) {}
 
             try {
                 // TODO determine, whether the home CRS is metric or not
                 home = new XBoundingBox(prefs.getChild("overviewExtent"), srs.getCode(), true); // NOI18N
-            } catch (Exception skip) {
-            }
+            } catch (Exception skip) {}
 
             try {
                 final Element e = prefs.getChild("background").getChild("simpleWms");
@@ -269,9 +258,9 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
                     final SimpleWMS simpleWMS = new SimpleWMS(prefs.getChild("background").getChild("simpleWms")); // NOI18N
                     layerMap.put("SimpleWms", simpleWMS);
                 } else {
-                    final Element layersElement = prefs.getChild("background");                                    // NOI18N
+                    final Element layersElement = prefs.getChild("background"); // NOI18N
                     if (layersElement == null) {
-                        log.error("Kein valides Layerelement gefunden.");                                          // NOI18N
+                        log.error("Kein valides Layerelement gefunden."); // NOI18N
                         return;
                     }
                     final Element[] orderedLayers = CidsLayerFactory.orderLayers(layersElement);
@@ -283,18 +272,21 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
                                 log.debug("Adding element: " + curLayerElement + " with key: " + curKeyString);
                             }
                             final ServiceLayer layer = CidsLayerFactory.createLayer(
-                                    curLayerElement,
-                                    new HashMap<String, WMSCapabilities>(),
-                                    null);
+                                curLayerElement,
+                                new HashMap<String, WMSCapabilities>(),
+                                null
+                            );
                             layerMap.put(curKeyString, layer);
                         } else {
-                            log.warn("Es war nicht möglich einen Keystring für das Element: " + curLayerElement
-                                        + " zu erzeugen");
+                            log.warn(
+                                "Es war nicht möglich einen Keystring für das Element: " +
+                                curLayerElement +
+                                " zu erzeugen"
+                            );
                         }
                     }
                 }
-            } catch (Exception skip) {
-            }
+            } catch (Exception skip) {}
             initBackgroundService();
         } catch (Exception e) {
             log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e); // NOI18N

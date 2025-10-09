@@ -1,40 +1,32 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.tools;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Cancellable;
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.ErroneousRetrievalServiceProvider;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.retrieval.RetrievalService;
+import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.IOException;
-
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
 import javax.imageio.ImageIO;
-
 import javax.swing.JOptionPane;
-
-import de.cismet.cismap.commons.ErroneousRetrievalServiceProvider;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.retrieval.RetrievalService;
-
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import org.apache.log4j.Logger;
+import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
 /**
  * A Download which can be added to the DownloadManager and saves an image from a Future&lt;Image&gt; to a file. If the
@@ -67,11 +59,12 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
      * @param  futureImage   DOCUMENT ME!
      */
     public FutureImageDownload(
-            final String filename,
-            final String extension,
-            final String title,
-            final File fileToSaveTo,
-            final Future<Image> futureImage) {
+        final String filename,
+        final String extension,
+        final String title,
+        final File fileToSaveTo,
+        final Future<Image> futureImage
+    ) {
         this.extension = extension;
         this.futureImage = futureImage;
         this.futureImageHash = futureImage.hashCode();
@@ -98,10 +91,10 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
         if (futureImage != null) {
             try {
                 if (!Thread.interrupted()) {
-                    image = (Image)futureImage.get();
+                    image = (Image) futureImage.get();
 
                     if (futureImage instanceof ErroneousRetrievalServiceProvider) {
-                        final ErroneousRetrievalServiceProvider p = (ErroneousRetrievalServiceProvider)futureImage;
+                        final ErroneousRetrievalServiceProvider p = (ErroneousRetrievalServiceProvider) futureImage;
                         final HashSet<RetrievalService> layers = p.getErroneousLayer();
 
                         if ((layers != null) && !layers.isEmpty()) {
@@ -122,11 +115,14 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
                                 NbBundle.getMessage(
                                     FutureImageDownload.class,
                                     "FutureImageDownload.run().cannotLoadLayer.message",
-                                    layersWithErrors),
+                                    layersWithErrors
+                                ),
                                 NbBundle.getMessage(
                                     FutureImageDownload.class,
-                                    "FutureImageDownload.run().cannotLoadLayer.title"),
-                                JOptionPane.WARNING_MESSAGE);
+                                    "FutureImageDownload.run().cannotLoadLayer.title"
+                                ),
+                                JOptionPane.WARNING_MESSAGE
+                            );
                         }
                     }
                 } else {
@@ -191,13 +187,15 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
         if (extension.endsWith("jpg") || extension.endsWith("jpeg")) {
             return removeTransparency(image);
         } else if (image instanceof BufferedImage) {
-            return (BufferedImage)image;
+            return (BufferedImage) image;
         } else {
             // Convert the image to a buffered image
             // Create a buffered image with transparency
-            final BufferedImage bimage = new BufferedImage(image.getWidth(null),
-                    image.getHeight(null),
-                    BufferedImage.TYPE_INT_ARGB);
+            final BufferedImage bimage = new BufferedImage(
+                image.getWidth(null),
+                image.getHeight(null),
+                BufferedImage.TYPE_INT_ARGB
+            );
 
             // Draw the image on to the buffered image
             final Graphics2D bGr = bimage.createGraphics();
@@ -219,15 +217,16 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
      * @return  DOCUMENT ME!
      */
     private BufferedImage removeTransparency(final Image transparentImage) {
-        final BufferedImage whiteBackgroundImage = new BufferedImage(transparentImage.getWidth(null),
-                transparentImage.getHeight(null),
-                BufferedImage.TYPE_INT_RGB);
+        final BufferedImage whiteBackgroundImage = new BufferedImage(
+            transparentImage.getWidth(null),
+            transparentImage.getHeight(null),
+            BufferedImage.TYPE_INT_RGB
+        );
 
         Graphics2D g2 = null;
         try {
             g2 = whiteBackgroundImage.createGraphics();
-            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
             g2.setColor(Color.WHITE);
             g2.fillRect(0, 0, whiteBackgroundImage.getWidth(), whiteBackgroundImage.getHeight());
@@ -238,7 +237,8 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
                 0,
                 whiteBackgroundImage.getWidth(),
                 whiteBackgroundImage.getHeight(),
-                null);
+                null
+            );
         } finally {
             if (g2 != null) {
                 g2.dispose();
@@ -288,15 +288,17 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FutureImageDownload other = (FutureImageDownload)obj;
+        final FutureImageDownload other = (FutureImageDownload) obj;
         if (this.futureImageHash != other.futureImageHash) {
             return false;
         }
         if ((this.title == null) ? (other.title != null) : (!this.title.equals(other.title))) {
             return false;
         }
-        if ((this.fileToSaveTo != other.fileToSaveTo)
-                    && ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))) {
+        if (
+            (this.fileToSaveTo != other.fileToSaveTo) &&
+            ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))
+        ) {
             return false;
         }
         return true;

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,11 +13,8 @@
 package de.cismet.cismap.commons.drophandler.builtin;
 
 import java.awt.Component;
-
 import java.io.File;
-
 import java.util.Collection;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
@@ -41,6 +38,7 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
     private javax.swing.JList<File> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -49,7 +47,7 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
      * Creates new form MappingComponentUnknownFileDropHandlerDialog.
      */
     private MappingComponentUnknownFileDropHandlerDialog() {
-        super((JFrame)null, true);
+        super((JFrame) null, true);
         initComponents();
     }
 
@@ -62,9 +60,9 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
      */
     public void setUnknownFiles(final Collection<File> unknownFiles) {
         this.unknownFiles = unknownFiles;
-        ((DefaultListModel<File>)jList1.getModel()).clear();
+        ((DefaultListModel<File>) jList1.getModel()).clear();
         for (final File unknownFile : this.unknownFiles) {
-            ((DefaultListModel<File>)jList1.getModel()).addElement(unknownFile);
+            ((DefaultListModel<File>) jList1.getModel()).addElement(unknownFile);
         }
     }
 
@@ -82,9 +80,12 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<File>();
 
-        setTitle(org.openide.util.NbBundle.getMessage(
+        setTitle(
+            org.openide.util.NbBundle.getMessage(
                 MappingComponentUnknownFileDropHandlerDialog.class,
-                "MappingComponentUnknownFileDropHandlerDialog.title")); // NOI18N
+                "MappingComponentUnknownFileDropHandlerDialog.title"
+            )
+        ); // NOI18N
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -93,7 +94,9 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
             jLabel1,
             org.openide.util.NbBundle.getMessage(
                 MappingComponentUnknownFileDropHandlerDialog.class,
-                "MappingComponentUnknownFileDropHandlerDialog.jLabel1.text")); // NOI18N
+                "MappingComponentUnknownFileDropHandlerDialog.jLabel1.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
@@ -142,16 +145,14 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
 
         //~ Static fields/initializers -----------------------------------------
 
-        private static final MappingComponentUnknownFileDropHandlerDialog INSTANCE =
-            new MappingComponentUnknownFileDropHandlerDialog();
+        private static final MappingComponentUnknownFileDropHandlerDialog INSTANCE = new MappingComponentUnknownFileDropHandlerDialog();
 
         //~ Constructors -------------------------------------------------------
 
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 
     /**
@@ -164,19 +165,22 @@ public class MappingComponentUnknownFileDropHandlerDialog extends javax.swing.JD
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public Component getListCellRendererComponent(final JList<?> list,
-                final Object value,
-                final int index,
-                final boolean isSelected,
-                final boolean cellHasFocus) {
-            final JLabel component = (JLabel)super.getListCellRendererComponent(
-                    list,
-                    value,
-                    index,
-                    isSelected,
-                    cellHasFocus);
-            component.setToolTipText(((File)value).getAbsolutePath());
-            component.setText(((File)value).getName());
+        public Component getListCellRendererComponent(
+            final JList<?> list,
+            final Object value,
+            final int index,
+            final boolean isSelected,
+            final boolean cellHasFocus
+        ) {
+            final JLabel component = (JLabel) super.getListCellRendererComponent(
+                list,
+                value,
+                index,
+                isSelected,
+                cellHasFocus
+            );
+            component.setToolTipText(((File) value).getAbsolutePath());
+            component.setText(((File) value).getName());
             return component;
         }
     }

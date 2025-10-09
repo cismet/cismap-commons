@@ -1,12 +1,34 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.ImageObserver;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -17,33 +39,6 @@ import org.apache.commons.httpclient.auth.CredentialsProvider;
 import org.apache.commons.httpclient.auth.NTLMScheme;
 import org.apache.commons.httpclient.auth.RFC2617Scheme;
 import org.apache.commons.httpclient.methods.GetMethod;
-
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.ImageObserver;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * This class should not be used anymore. This class still uses the proxy configuration from the system properties and
@@ -80,27 +75,28 @@ public class HTTPImageRetrievalWithAuth extends Thread {
         client = new HttpClient();
         // client.getHostConfiguration().setProxy(System.getProperty("proxyHost"),
         // Integer.getInteger(System.getProperty("proxyPort")));
-        final String proxySet = System.getProperty("proxySet");                      // NOI18N
-        if ((proxySet != null) && proxySet.equals("true")) {                         // NOI18N
+        final String proxySet = System.getProperty("proxySet"); // NOI18N
+        if ((proxySet != null) && proxySet.equals("true")) { // NOI18N
             if (log.isDebugEnabled()) {
-                log.debug("proxyIs Set");                                            // NOI18N
-                log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));      // NOI18N
+                log.debug("proxyIs Set"); // NOI18N
+                log.debug("ProxyHost:" + System.getProperty("http.proxyHost")); // NOI18N
             }
             if (log.isDebugEnabled()) {
-                log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));      // NOI18N
+                log.debug("ProxyPort:" + System.getProperty("http.proxyPort")); // NOI18N
             }
             try {
-                client.getHostConfiguration()
-                        .setProxy(System.getProperty("http.proxyHost"),
-                            Integer.parseInt(System.getProperty("http.proxyPort"))); // NOI18N
+                client
+                    .getHostConfiguration()
+                    .setProxy(
+                        System.getProperty("http.proxyHost"),
+                        Integer.parseInt(System.getProperty("http.proxyPort"))
+                    ); // NOI18N
             } catch (Exception e) {
-                log.error("Problem while setting proxy", e);                         // NOI18N
+                log.error("Problem while setting proxy", e); // NOI18N
             }
         }
         // new
-        client.getParams().setParameter(
-            CredentialsProvider.PROVIDER,
-            new ConsoleAuthPrompter());
+        client.getParams().setParameter(CredentialsProvider.PROVIDER, new ConsoleAuthPrompter());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -128,7 +124,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
                 } else {
                     if (statusCode != -1) {
                         if (log.isDebugEnabled()) {
-                            log.debug("reading: " + url);                          // NOI18N
+                            log.debug("reading: " + url); // NOI18N
                         }
                         final InputStream is = method.getResponseBodyAsStream();
                         final BufferedInputStream in = new BufferedInputStream(is);
@@ -146,15 +142,16 @@ public class HTTPImageRetrievalWithAuth extends Thread {
                             }
                         }
                         if (log.isDebugEnabled()) {
-                            log.debug("creating image");                     // NOI18N
+                            log.debug("creating image"); // NOI18N
                         }
                         // Image image =observer.createImage( (ImageProducer) o);
                         observer = new ImageObserverInterceptor();
                         // Image image =Toolkit.getDefaultToolkit().getImage(is);
                         image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
                         observer.prepareImage(image, observer);
-                        while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS)
-                                    != ImageObserver.ALLBITS) {
+                        while (
+                            (observer.checkImage(image, observer) & ImageObserver.ALLBITS) != ImageObserver.ALLBITS
+                        ) {
                             Thread.sleep(10);
                             if (youngerCall) {
                                 fireLoadingAborted();
@@ -184,6 +181,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
             }
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -201,6 +199,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
     public void setUrl(final String url) {
         this.url = url;
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -224,6 +223,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
 
         System.gc();
     }
+
     /**
      * new.
      */
@@ -249,23 +249,24 @@ public class HTTPImageRetrievalWithAuth extends Thread {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public boolean imageUpdate(final Image img,
-                final int infoflags,
-                final int x,
-                final int y,
-                final int width,
-                final int height) {
+        public boolean imageUpdate(
+            final Image img,
+            final int infoflags,
+            final int x,
+            final int y,
+            final int width,
+            final int height
+        ) {
             final boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
-//            log.debug("ImageUpdate");
-//            log.debug("y "+height);
-//            log.debug("img.getHeight"+img.getHeight(this));
+            //            log.debug("ImageUpdate");
+            //            log.debug("y "+height);
+            //            log.debug("img.getHeight"+img.getHeight(this));
 
             if ((infoflags & ImageObserver.SOMEBITS) != 0) {
                 final RetrievalEvent e = new RetrievalEvent();
-                e.setPercentageDone((int)(y / (img.getHeight(this) - 1.0) * 100));
+                e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
-            } else if ((infoflags & ImageObserver.ABORT) != 0) {
-            } else if ((infoflags & ImageObserver.ERROR) != 0) {
+            } else if ((infoflags & ImageObserver.ABORT) != 0) {} else if ((infoflags & ImageObserver.ERROR) != 0) {
                 final RetrievalEvent e = new RetrievalEvent();
                 e.setHasErrors(true);
                 final String error = new String(byteArrayOut.toByteArray());
@@ -275,6 +276,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
             return ret;
         }
     }
+
     /**
      * /new.
      *
@@ -308,10 +310,11 @@ public class HTTPImageRetrievalWithAuth extends Thread {
 
         @Override
         public Credentials getCredentials(
-                final AuthScheme authscheme,
-                final String host,
-                final int port,
-                final boolean proxy) throws CredentialsNotAvailableException {
+            final AuthScheme authscheme,
+            final String host,
+            final int port,
+            final boolean proxy
+        ) throws CredentialsNotAvailableException {
             if (authscheme == null) {
                 return null;
             }
@@ -323,8 +326,10 @@ public class HTTPImageRetrievalWithAuth extends Thread {
                     requestUsernamePassword();
                     return creds;
                 } else {
-                    throw new CredentialsNotAvailableException("Unna gsupported authentication scheme: " // NOI18N
-                                + authscheme.getSchemeName());
+                    throw new CredentialsNotAvailableException(
+                        "Unna gsupported authentication scheme: " + // NOI18N
+                        authscheme.getSchemeName()
+                    );
                 }
             } catch (IOException e) {
                 throw new CredentialsNotAvailableException(e.getMessage(), e);
@@ -335,62 +340,76 @@ public class HTTPImageRetrievalWithAuth extends Thread {
          * DOCUMENT ME!
          */
         private void requestUsernamePassword() {
-//            try {
-//                javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
-//            } catch (UnsupportedLookAndFeelException ex) {
-//                ex.printStackTrace();
-//            }
+            //            try {
+            //                javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
+            //            } catch (UnsupportedLookAndFeelException ex) {
+            //                ex.printStackTrace();
+            //            }
 
             // TODO determine main frame and insert
             // TODO Cancel KEY
             final JFrame dummy = null;
             final JDialog requestDialog = new JDialog(
-                    dummy,
-                    org.openide.util.NbBundle.getMessage(
-                        HTTPImageRetrievalWithAuth.class,
-                        "HTTPImageRetrievalWithAuth.requestUsernamePassword().title"),
-                    true);                                                                           // NOI18N
+                dummy,
+                org.openide.util.NbBundle.getMessage(
+                    HTTPImageRetrievalWithAuth.class,
+                    "HTTPImageRetrievalWithAuth.requestUsernamePassword().title"
+                ),
+                true
+            ); // NOI18N
             requestDialog.setLayout(new GridLayout(0, 1));
             requestDialog.setPreferredSize(new Dimension(400, 200));
-            final JLabel usernameLabel = new JLabel(org.openide.util.NbBundle.getMessage(
-                        HTTPImageRetrievalWithAuth.class,
-                        "HTTPImageRetrievalWithAuth.requestUsernamePassword().usernameLabel.text")); // NOI18N
+            final JLabel usernameLabel = new JLabel(
+                org.openide.util.NbBundle.getMessage(
+                    HTTPImageRetrievalWithAuth.class,
+                    "HTTPImageRetrievalWithAuth.requestUsernamePassword().usernameLabel.text"
+                )
+            ); // NOI18N
             requestDialog.add(usernameLabel);
 
             final JTextField usernameField = new JTextField();
             usernameField.setBackground(Color.lightGray);
             requestDialog.add(usernameField);
 
-            final JLabel passwordLabel = new JLabel(org.openide.util.NbBundle.getMessage(
-                        HTTPImageRetrievalWithAuth.class,
-                        "HTTPImageRetrievalWithAuth.requestUsernamePassword().passwordLabel.text")); // NOI18N
+            final JLabel passwordLabel = new JLabel(
+                org.openide.util.NbBundle.getMessage(
+                    HTTPImageRetrievalWithAuth.class,
+                    "HTTPImageRetrievalWithAuth.requestUsernamePassword().passwordLabel.text"
+                )
+            ); // NOI18N
             requestDialog.add(passwordLabel);
 
             final JPasswordField passwordField = new JPasswordField();
             passwordField.setBackground(Color.lightGray);
             requestDialog.add(passwordField);
 
-            final JButton okButton = new JButton(org.openide.util.NbBundle.getMessage(
-                        HTTPImageRetrievalWithAuth.class,
-                        "HTTPImageRetrievalWithAuth.requestUsernamePassword().okButton.text")); // NOI18N
+            final JButton okButton = new JButton(
+                org.openide.util.NbBundle.getMessage(
+                    HTTPImageRetrievalWithAuth.class,
+                    "HTTPImageRetrievalWithAuth.requestUsernamePassword().okButton.text"
+                )
+            ); // NOI18N
             requestDialog.add(okButton);
-            okButton.addActionListener(new ActionListener() {
-
+            okButton.addActionListener(
+                new ActionListener() {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         setUsernamePassword(
                             new UsernamePasswordCredentials(
                                 usernameField.getText(),
-                                new String(passwordField.getPassword())));
+                                new String(passwordField.getPassword())
+                            )
+                        );
                         requestDialog.dispose();
                         // TODO security issue --> cleaning charArray
                     }
-                });
+                }
+            );
 
             final JButton cancelButton = new JButton("Abbrechen");
             requestDialog.add(cancelButton);
-            cancelButton.addActionListener(new ActionListener() {
-
+            cancelButton.addActionListener(
+                new ActionListener() {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         // setUsernamePassword(new UsernamePasswordCredentials(usernameField.getText(),new
@@ -398,7 +417,8 @@ public class HTTPImageRetrievalWithAuth extends Thread {
                         requestDialog.dispose();
                         // TODO security issue --> cleaning charArray
                     }
-                });
+                }
+            );
 
             requestDialog.pack();
             StaticSwingTools.showDialog(requestDialog);

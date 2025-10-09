@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
 /**
@@ -20,8 +20,7 @@ public final class InitialisationException extends Exception {
     /**
      * Creates a new instance of <code>InitialisationException</code> without detail message.
      */
-    public InitialisationException() {
-    }
+    public InitialisationException() {}
 
     /**
      * Constructs an instance of <code>InitialisationException</code> with the specified detail message.

@@ -1,19 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Point;
-
 import edu.umd.cs.piccolo.nodes.PImage;
-
 import java.awt.Image;
 import java.awt.geom.Point2D;
-
 import java.net.URL;
 
 /**
@@ -161,8 +158,9 @@ public class FixedPImage extends PImage implements PSticky {
      * @param  y  DOCUMENT ME!
      */
     private void setOffsetWithoutTouchingOriginalOffset(final double x, final double y) {
-        super.setOffset(x - (getGlobalBounds().getWidth() * sweetSpotX),
-            y
-                    - (getGlobalBounds().getHeight() * sweetSpotY));
+        super.setOffset(
+            x - (getGlobalBounds().getWidth() * sweetSpotX),
+            y - (getGlobalBounds().getHeight() * sweetSpotY)
+        );
     }
 }

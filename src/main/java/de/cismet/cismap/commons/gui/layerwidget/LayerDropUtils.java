@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -13,33 +13,6 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.ogcwebservices.wms.capabilities.Layer;
-
-import org.openide.util.NbBundle;
-
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.dnd.DnDConstants;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.TransferHandler;
-import javax.swing.tree.TreePath;
-
 import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -64,12 +37,29 @@ import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-
 import de.cismet.commons.cismap.io.converters.GeometriesFromGPXConverter;
 import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+import javax.swing.TransferHandler;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
+import org.deegree.ogcwebservices.wms.capabilities.Layer;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -94,9 +84,11 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean drop(final Collection<File> data,
-            final ActiveLayerModel activeLayerModel,
-            final JComponent parent) {
+    public static boolean drop(
+        final Collection<File> data,
+        final ActiveLayerModel activeLayerModel,
+        final JComponent parent
+    ) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Drag&Drop File List: " + data); // NOI18N
         }
@@ -105,10 +97,11 @@ public class LayerDropUtils {
                 return true;
             }
         } else {
-            LOG.warn("No files available");            // NOI18N
+            LOG.warn("No files available"); // NOI18N
         }
         return false;
     }
+
     /**
      * Handles a layer drop event.
      *
@@ -116,9 +109,11 @@ public class LayerDropUtils {
      * @param  activeLayerModel  the model to add
      * @param  parent            a component that is used to message dialogs, if required
      */
-    public static void drop(final java.awt.dnd.DropTargetDropEvent dtde,
-            final ActiveLayerModel activeLayerModel,
-            final JComponent parent) {
+    public static void drop(
+        final java.awt.dnd.DropTargetDropEvent dtde,
+        final ActiveLayerModel activeLayerModel,
+        final JComponent parent
+    ) {
         drop(new DnDUtils.TransferSupportWrapper(dtde), activeLayerModel, parent, -1);
     }
 
@@ -132,10 +127,12 @@ public class LayerDropUtils {
      *
      * @return  true, if the given element was added
      */
-    public static boolean drop(final TransferHandler.TransferSupport support,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final JComponent parent) {
+    public static boolean drop(
+        final TransferHandler.TransferSupport support,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final JComponent parent
+    ) {
         return drop(new DnDUtils.TransferSupportWrapper(support), activeLayerModel, parent, index);
     }
 
@@ -149,15 +146,18 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    private static boolean drop(final DnDUtils.TransferSupportWrapper dtde,
-            final ActiveLayerModel activeLayerModel,
-            final JComponent parent,
-            final int index) {
+    private static boolean drop(
+        final DnDUtils.TransferSupportWrapper dtde,
+        final ActiveLayerModel activeLayerModel,
+        final JComponent parent,
+        final int index
+    ) {
         final DataFlavor TREEPATH_FLAVOR = new DataFlavor(
-                DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities");                                                                            // NOI18N
+            DataFlavor.javaJVMLocalObjectMimeType,
+            "SelectionAndCapabilities"
+        ); // NOI18N
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList());                                  // NOI18N
+            LOG.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList()); // NOI18N
         }
         if (DnDUtils.isFilesOrUriList(dtde)) {
             dtde.acceptDrop(DnDConstants.ACTION_COPY);
@@ -165,7 +165,7 @@ public class LayerDropUtils {
                 final List<File> data = DnDUtils.getFilesFrom(dtde);
                 drop(data, activeLayerModel, parent);
             } catch (final Exception ex) {
-                LOG.error("Failure during drag & drop opertation", ex);                                                 // NOI18N
+                LOG.error("Failure during drag & drop opertation", ex); // NOI18N
             }
         } else if (dtde.isDataFlavorSupported(TREEPATH_FLAVOR)) {
             try {
@@ -174,22 +174,22 @@ public class LayerDropUtils {
                 }
                 for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]);       // NOI18N
+                        LOG.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]); // NOI18N
                     }
                 }
                 final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
                 final List<TreePath> v = new ArrayList<TreePath>();
                 dtde.dropComplete(true);
                 if (o instanceof SelectionAndCapabilities) {
-                    final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
+                    final TreePath[] tpa = ((SelectionAndCapabilities) o).getSelection();
                     for (int i = 0; i < tpa.length; ++i) {
                         v.add(tpa[i]);
                     }
 
                     if (isSlidableWMSServiceLayerGroup(v.get(0).getLastPathComponent())) {
                         final SlidableWMSServiceLayerGroup l = new SlidableWMSServiceLayerGroup(v);
-                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                        l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
+                        l.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
+                        l.setCapabilitiesUrl(((SelectionAndCapabilities) o).getUrl());
                         if (index != -1) {
                             activeLayerModel.addLayer(l, activeLayerModel.layers.size() - index);
                         } else {
@@ -200,33 +200,40 @@ public class LayerDropUtils {
                     } else {
                         WMSServiceLayer l;
 
-                        if (((SelectionAndCapabilities)o).getUrl().contains("cismap.dont.touch.ordering=true")) {
+                        if (((SelectionAndCapabilities) o).getUrl().contains("cismap.dont.touch.ordering=true")) {
                             l = new WMSServiceLayer(v, false, false);
                         } else {
                             l = new WMSServiceLayer(v, true, true);
                         }
 
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("((SelectionAndCapabilities)o).getUrl()"
-                                        + ((SelectionAndCapabilities)o).getUrl()); // NOI18N
+                            LOG.debug(
+                                "((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) o).getUrl()
+                            ); // NOI18N
                         }
 
-                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                        l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
+                        l.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
+                        l.setCapabilitiesUrl(((SelectionAndCapabilities) o).getUrl());
 
                         if (CismapBroker.getInstance().isWMSLayerNamesWithPath() && (v.size() == 1)) {
                             final List<de.cismet.commons.wms.capabilities.Layer> parents = new ArrayList<>();
                             TreePath tp = v.get(0);
 
                             if ((tp.getLastPathComponent() instanceof de.cismet.commons.wms.capabilities.Layer)) {
-                                parents.add((de.cismet.commons.wms.capabilities.Layer)tp.getLastPathComponent());
+                                parents.add((de.cismet.commons.wms.capabilities.Layer) tp.getLastPathComponent());
                             }
 
-                            while ((tp.getParentPath() != null)
-                                        && (tp.getParentPath().getLastPathComponent()
-                                            instanceof de.cismet.commons.wms.capabilities.Layer)) {
-                                parents.add((de.cismet.commons.wms.capabilities.Layer)tp.getParentPath()
-                                            .getLastPathComponent());
+                            while (
+                                (tp.getParentPath() != null) &&
+                                (
+                                    tp
+                                        .getParentPath()
+                                        .getLastPathComponent() instanceof de.cismet.commons.wms.capabilities.Layer
+                                )
+                            ) {
+                                parents.add(
+                                    (de.cismet.commons.wms.capabilities.Layer) tp.getParentPath().getLastPathComponent()
+                                );
                                 tp = tp.getParentPath();
                             }
 
@@ -253,36 +260,48 @@ public class LayerDropUtils {
                         return true;
                     }
                 } else if (o instanceof WFSSelectionAndCapabilities) { // Drop-Objekt war ein WFS-Element
-                    final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)o;
+                    final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) o;
 
                     for (final FeatureType feature : sac.getFeatures()) {
                         try {
-//                            final WebFeatureService wfs = new WebFeatureService(feature.getName().getLocalPart(),
-//                                    feature.getWFSCapabilities().getURL().toString(),
-//                                    feature.getWFSQuery(),
-//                                    feature.getFeatureAttributes(),
-//                                    feature,
-//                                    sac.isReverseAxisOrder());
-                            final String hostname = ((feature.getWFSCapabilities().getOriginalLink() != null)
-                                    ? feature.getWFSCapabilities().getOriginalLink()
-                                    : feature.getWFSCapabilities().getURL().toString());
+                            //                            final WebFeatureService wfs = new WebFeatureService(feature.getName().getLocalPart(),
+                            //                                    feature.getWFSCapabilities().getURL().toString(),
+                            //                                    feature.getWFSQuery(),
+                            //                                    feature.getFeatureAttributes(),
+                            //                                    feature,
+                            //                                    sac.isReverseAxisOrder());
+                            final String hostname =
+                                (
+                                    (feature.getWFSCapabilities().getOriginalLink() != null)
+                                        ? feature.getWFSCapabilities().getOriginalLink()
+                                        : feature.getWFSCapabilities().getURL().toString()
+                                );
                             final WebFeatureService wfs = new WebFeatureService(
-                                    ((WFSCapabilitiesTreeCellRenderer.showTitle && (feature.getTitle() != null))
-                                        ? feature.getTitle() : feature.getPrefixedNameString()),
-                                    hostname,
-                                    feature.getWFSQuery(),
-                                    feature.getFeatureAttributes(),
-                                    feature,
-                                    sac.isReverseAxisOrder());
+                                (
+                                    (WFSCapabilitiesTreeCellRenderer.showTitle && (feature.getTitle() != null))
+                                        ? feature.getTitle()
+                                        : feature.getPrefixedNameString()
+                                ),
+                                hostname,
+                                feature.getWFSQuery(),
+                                feature.getFeatureAttributes(),
+                                feature,
+                                sac.isReverseAxisOrder()
+                            );
                             if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("setting PrimaryAnnotationExpression of WFS Layer to '"
-                                                + sac.getIdentifier()
-                                                + "' (EXPRESSIONTYPE_PROPERTYNAME)");        // NOI18N
+                                    LOG.debug(
+                                        "setting PrimaryAnnotationExpression of WFS Layer to '" +
+                                        sac.getIdentifier() +
+                                        "' (EXPRESSIONTYPE_PROPERTYNAME)"
+                                    ); // NOI18N
                                 }
-                                wfs.getLayerProperties()
-                                        .setPrimaryAnnotationExpression(sac.getIdentifier(),
-                                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                                wfs
+                                    .getLayerProperties()
+                                    .setPrimaryAnnotationExpression(
+                                        sac.getIdentifier(),
+                                        LayerProperties.EXPRESSIONTYPE_PROPERTYNAME
+                                    );
                             } else {
                                 LOG.warn("could not determine PrimaryAnnotationExpression"); // NOI18N
                             }
@@ -297,11 +316,14 @@ public class LayerDropUtils {
                                 parent,
                                 org.openide.util.NbBundle.getMessage(
                                     LayerWidget.class,
-                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"
+                                ), // NOI18N
                                 org.openide.util.NbBundle.getMessage(
                                     LayerWidget.class,
-                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                                JOptionPane.ERROR_MESSAGE);
+                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"
+                                ), // NOI18N
+                                JOptionPane.ERROR_MESSAGE
+                            );
 
                             return false;
                         }
@@ -309,8 +331,8 @@ public class LayerDropUtils {
 
                     return true;
                 } else if (o instanceof CidsLayerTransferable[]) {
-                    for (int i = ((CidsLayerTransferable[])o).length - 1; i >= 0; --i) {
-                        final CidsLayerTransferable transferable = ((CidsLayerTransferable[])o)[i];
+                    for (int i = ((CidsLayerTransferable[]) o).length - 1; i >= 0; --i) {
+                        final CidsLayerTransferable transferable = ((CidsLayerTransferable[]) o)[i];
 
                         if (transferable.isFolder()) {
                             final TreeFolder folder = transferable.getFolder();
@@ -326,9 +348,10 @@ public class LayerDropUtils {
                         } else {
                             final LayerConfig config = transferable.getLayerConfig();
                             if (index != -1) {
-                                activeLayerModel.addLayer((config).createConfiguredLayer(),
-                                    activeLayerModel.layers.size()
-                                            - index);
+                                activeLayerModel.addLayer(
+                                    (config).createConfiguredLayer(),
+                                    activeLayerModel.layers.size() - index
+                                );
                             } else {
                                 activeLayerModel.addLayer((config).createConfiguredLayer());
                             }
@@ -338,13 +361,13 @@ public class LayerDropUtils {
                     return true;
                 } else if (o instanceof File) {
                     final List<File> list = new ArrayList<File>(1);
-                    list.add((File)o);
+                    list.add((File) o);
 
                     if (handleFiles(list, activeLayerModel, index, parent)) {
                         return true;
                     }
                 } else if (o instanceof DBTableInformation[]) {
-                    final DBTableInformation[] infos = (DBTableInformation[])o;
+                    final DBTableInformation[] infos = (DBTableInformation[]) o;
 
                     for (int n = infos.length - 1; n >= 0; --n) {
                         final DBTableInformation i = infos[n];
@@ -358,10 +381,12 @@ public class LayerDropUtils {
                                 activeLayerModel.addLayer(lc, 0);
                             }
                         } else {
-                            final H2FeatureService layer = new H2FeatureService(i.getName(),
-                                    i.getDatabasePath(),
-                                    i.getDatabaseTable(),
-                                    null);
+                            final H2FeatureService layer = new H2FeatureService(
+                                i.getName(),
+                                i.getDatabasePath(),
+                                i.getDatabaseTable(),
+                                null
+                            );
 
                             if (index != -1) {
                                 activeLayerModel.addLayer(layer, activeLayerModel.layers.size() - index);
@@ -376,11 +401,14 @@ public class LayerDropUtils {
                     parent,
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"
+                    ), // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"
+                    ), // NOI18N
+                    JOptionPane.ERROR_MESSAGE
+                );
             } catch (final Exception e) {
                 LOG.error(e, e);
             }
@@ -408,10 +436,12 @@ public class LayerDropUtils {
             if (tmp.isFolder()) {
                 lc.add(createH2Folder(tmp));
             } else {
-                final H2FeatureService layer = new H2FeatureService(tmp.getName(),
-                        tmp.getDatabasePath(),
-                        tmp.getDatabaseTable(),
-                        null);
+                final H2FeatureService layer = new H2FeatureService(
+                    tmp.getName(),
+                    tmp.getDatabasePath(),
+                    tmp.getDatabaseTable(),
+                    null
+                );
 
                 lc.add(layer);
             }
@@ -435,9 +465,9 @@ public class LayerDropUtils {
 
         for (final Object tmp : folder) {
             if (tmp instanceof TreeFolder) {
-                lc.add(createTreeFolder((TreeFolder)tmp));
+                lc.add(createTreeFolder((TreeFolder) tmp));
             } else {
-                lc.add(((LayerConfig)tmp).createConfiguredLayer());
+                lc.add(((LayerConfig) tmp).createConfiguredLayer());
             }
         }
 
@@ -454,10 +484,12 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean handleFiles(final Collection<File> data,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final Component parent) {
+    public static boolean handleFiles(
+        final Collection<File> data,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final Component parent
+    ) {
         boolean success = false;
         for (final File currentFile : data) {
             if (handleFile(currentFile, activeLayerModel, index, parent)) {
@@ -477,19 +509,22 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean handleFile(final File currentFile,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final Component parent) {
+    public static boolean handleFile(
+        final File currentFile,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final Component parent
+    ) {
         LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
 
         if (ImageFileUtils.isImageFileEnding(currentFile.getName())) {
             return handleImageFile(
-                    currentFile,
-                    activeLayerModel,
-                    index,
-                    parent,
-                    ImageFileUtils.determineMode(currentFile));
+                currentFile,
+                activeLayerModel,
+                index,
+                parent,
+                ImageFileUtils.determineMode(currentFile)
+            );
         } else {
             return handleFeatureServiceFile(currentFile, activeLayerModel, index, parent);
         }
@@ -506,11 +541,13 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean handleImageFile(final File currentFile,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final Component parent,
-            final ImageFileUtils.Mode imageFileMode) {
+    public static boolean handleImageFile(
+        final File currentFile,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final Component parent,
+        final ImageFileUtils.Mode imageFileMode
+    ) {
         final ImageRasterService irs = new ImageRasterService(currentFile, imageFileMode);
 
         if (index != -1) {
@@ -531,97 +568,97 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean handleGPXFile(final File currentFile,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final Component parent) {
+    public static boolean handleGPXFile(
+        final File currentFile,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final Component parent
+    ) {
         final GeometriesFromGPXConverter converter = new GeometriesFromGPXConverter();
 
         final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
-                StaticSwingTools.getFirstParentFrame(parent),
-                true,
-                NbBundle.getMessage(
-                    LayerDropUtils.class,
-                    "LayerDropUtils.handleGPXFile().waitingDialogThread.message"), // NOI18N
-                null,
-                50) {
+            StaticSwingTools.getFirstParentFrame(parent),
+            true,
+            NbBundle.getMessage(LayerDropUtils.class, "LayerDropUtils.handleGPXFile().waitingDialogThread.message"), // NOI18N
+            null,
+            50
+        ) {
+            @Override
+            protected Geometry doInBackground() throws Exception {
+                final BufferedReader fileReader = new BufferedReader(new FileReader(currentFile));
+                final StringBuilder sb = new StringBuilder();
+                String line;
 
-                @Override
-                protected Geometry doInBackground() throws Exception {
-                    final BufferedReader fileReader = new BufferedReader(new FileReader(currentFile));
-                    final StringBuilder sb = new StringBuilder();
-                    String line;
-
-                    while ((line = fileReader.readLine()) != null) {
-                        sb.append(line).append('\n');
-                    }
-
-                    final Geometry geom = converter.convertForward(sb.toString(),
-                            CismapBroker.getInstance().getSrs().getCode());
-
-                    return geom;
+                while ((line = fileReader.readLine()) != null) {
+                    sb.append(line).append('\n');
                 }
 
-                @Override
-                protected void done() {
-                    try {
-                        final Geometry geom = get();
-                        final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+                final Geometry geom = converter.convertForward(
+                    sb.toString(),
+                    CismapBroker.getInstance().getSrs().getCode()
+                );
 
-                        final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
-                        String featureName = currentFile.getName();
+                return geom;
+            }
 
-                        if (featureName.contains(".")) {
-                            featureName = featureName.substring(0, currentFile.getName().indexOf("."));
-                        }
+            @Override
+            protected void done() {
+                try {
+                    final Geometry geom = get();
+                    final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
 
-                        if ((converter instanceof MultiGeometriesProvider)
-                                    && (geom instanceof GeometryCollection)) {
-                            final GeometryCollection gc = (GeometryCollection)geom;
+                    final List<PureNewFeature> featureList = new ArrayList<PureNewFeature>();
+                    String featureName = currentFile.getName();
 
-                            for (int i = 0; i < gc.getNumGeometries(); ++i) {
-                                final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
-                                feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
-                                feature.setEditable(true);
-                                feature.setName(featureName + "-" + i);
-                                featureList.add(feature);
-                            }
-                        } else {
-                            final PureNewFeature feature = new PureNewFeature(geom);
-                            feature.setGeometryType(FeatureTools.getGeomType(geom));
+                    if (featureName.contains(".")) {
+                        featureName = featureName.substring(0, currentFile.getName().indexOf("."));
+                    }
+
+                    if ((converter instanceof MultiGeometriesProvider) && (geom instanceof GeometryCollection)) {
+                        final GeometryCollection gc = (GeometryCollection) geom;
+
+                        for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                            final PureNewFeature feature = new PureNewFeature(gc.getGeometryN(i));
+                            feature.setGeometryType(FeatureTools.getGeomType(gc.getGeometryN(i)));
                             feature.setEditable(true);
-                            feature.setName(featureName);
+                            feature.setName(featureName + "-" + i);
                             featureList.add(feature);
                         }
-
-                        map.getFeatureCollection().addFeatures(featureList);
-
-                        for (final PureNewFeature feature : featureList) {
-                            map.getFeatureCollection().holdFeature(feature);
-                        }
-
-                        // fixed extent means, don't move map at all
-                        if (!map.isFixedMapExtent()) {
-                            map.zoomToAFeatureCollection(featureList,
-                                true,
-                                map.isFixedMapScale());
-                        }
-                    } catch (Exception e) {
-                        LOG.error("Error whiel parsing gpx file");
+                    } else {
+                        final PureNewFeature feature = new PureNewFeature(geom);
+                        feature.setGeometryType(FeatureTools.getGeomType(geom));
+                        feature.setEditable(true);
+                        feature.setName(featureName);
+                        featureList.add(feature);
                     }
+
+                    map.getFeatureCollection().addFeatures(featureList);
+
+                    for (final PureNewFeature feature : featureList) {
+                        map.getFeatureCollection().holdFeature(feature);
+                    }
+
+                    // fixed extent means, don't move map at all
+                    if (!map.isFixedMapExtent()) {
+                        map.zoomToAFeatureCollection(featureList, true, map.isFixedMapScale());
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error whiel parsing gpx file");
                 }
-            };
+            }
+        };
 
         if (EventQueue.isDispatchThread()) {
             wdt.start();
         } else {
-            EventQueue.invokeLater(new Thread("GPXParser-Thread") {
-
+            EventQueue.invokeLater(
+                new Thread("GPXParser-Thread") {
                     @Override
                     public void run() {
                         wdt.start();
                     }
-                });
+                }
+            );
         }
 
         return true;
@@ -637,13 +674,14 @@ public class LayerDropUtils {
      *
      * @return  DOCUMENT ME!
      */
-    public static boolean handleFeatureServiceFile(final File currentFile,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final Component parent) {
+    public static boolean handleFeatureServiceFile(
+        final File currentFile,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final Component parent
+    ) {
         try {
-            final AbstractFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(
-                    currentFile);
+            final AbstractFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(currentFile);
 
             try {
                 if (index != -1) {
@@ -656,17 +694,20 @@ public class LayerDropUtils {
                     parent,
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"
+                    ), // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"
+                    ), // NOI18N
+                    JOptionPane.ERROR_MESSAGE
+                );
                 throw ex;
             }
 
             if (dfs instanceof ShapeFileFeatureService) {
-                new Thread(new Runnable() {
-
+                new Thread(
+                    new Runnable() {
                         @Override
                         public void run() {
                             do {
@@ -677,29 +718,37 @@ public class LayerDropUtils {
                                 }
                             } while (!dfs.isInitialized());
 
-                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                            if (((ShapeFileFeatureService) dfs).isErrorInGeometryFound()) {
                                 JOptionPane.showMessageDialog(
                                     StaticSwingTools.getParentFrame(parent),
                                     NbBundle.getMessage(
                                         LayerWidget.class,
-                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
+                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"
+                                    ),
                                     NbBundle.getMessage(
                                         LayerWidget.class,
-                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
-                                    JOptionPane.ERROR_MESSAGE);
-                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"
+                                    ),
+                                    JOptionPane.ERROR_MESSAGE
+                                );
+                            } else if (((ShapeFileFeatureService) dfs).isNoGeometryRecognised()) {
                                 JOptionPane.showMessageDialog(
                                     StaticSwingTools.getParentFrame(parent),
                                     NbBundle.getMessage(
                                         LayerWidget.class,
-                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"),
+                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"
+                                    ),
                                     NbBundle.getMessage(
                                         LayerWidget.class,
-                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"),
-                                    JOptionPane.WARNING_MESSAGE);
+                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"
+                                    ),
+                                    JOptionPane.WARNING_MESSAGE
+                                );
                             }
                         }
-                    }).start();
+                    }
+                )
+                    .start();
             }
         } catch (LayerAlreadyAddedException e) {
             // nothing to do. This exception means that the layer should not be added to the layer model, because it is
@@ -722,7 +771,7 @@ public class LayerDropUtils {
         de.cismet.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
 
         if (lastPathComponent instanceof de.cismet.commons.wms.capabilities.deegree.DeegreeLayer) {
-            layer = (de.cismet.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
+            layer = (de.cismet.commons.wms.capabilities.deegree.DeegreeLayer) lastPathComponent;
         } else {
             return false;
         }

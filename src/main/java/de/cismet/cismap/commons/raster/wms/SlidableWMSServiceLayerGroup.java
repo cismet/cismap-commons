@@ -1,43 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.DataConversionException;
-import org.jdom.Element;
-
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.geom.Point2D;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
@@ -55,12 +23,37 @@ import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.commons.wms.capabilities.Envelope;
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.commons.wms.capabilities.Position;
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
+import org.jdom.DataConversionException;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -68,12 +61,10 @@ import de.cismet.commons.wms.capabilities.WMSCapabilities;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService implements RetrievalServiceLayer,
-    RasterMapService,
-    ChangeListener,
-    MapService,
-    LayerInfoProvider,
-    ActiveLayerListener {
+public final class SlidableWMSServiceLayerGroup
+    extends AbstractRetrievalService
+    implements
+        RetrievalServiceLayer, RasterMapService, ChangeListener, MapService, LayerInfoProvider, ActiveLayerListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -95,14 +86,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     static {
         final Properties prop = new Properties();
         try {
-            prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
-                    "SlidableWMSServiceLayerGroup.properties"));
+            prop.load(
+                SlidableWMSServiceLayerGroup.class.getResourceAsStream("SlidableWMSServiceLayerGroup.properties")
+            );
             BOTTOM_UP = prop.getProperty("bottomUp", "true").trim().equalsIgnoreCase("true");
             RESOURCE_CONSERVING = prop.getProperty("resourceConserving", "false").trim().equalsIgnoreCase("true");
             TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked", "60")));
             INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked", "10")));
-            VERTICAL_LABEL_WIDTH_THRESHOLD = Math.abs(Double.parseDouble(
-                        prop.getProperty("verticalLabelWidthThreshold", "0.5")));
+            VERTICAL_LABEL_WIDTH_THRESHOLD =
+                Math.abs(Double.parseDouble(prop.getProperty("verticalLabelWidthThreshold", "0.5")));
         } catch (Exception ex) {
             LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
             BOTTOM_UP = true;
@@ -121,10 +113,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @version  $Revision$, $Date$
      */
     public enum LabelDirection {
-
         //~ Enum constants -----------------------------------------------------
 
-        HORIZONTAL, VERTICAL;
+        HORIZONTAL,
+        VERTICAL,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -162,24 +154,21 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private int inactiveTimeTillLocked;
     private double verticalLabelWidthThreshold;
     private ActionListener btnLockListener = new java.awt.event.ActionListener() {
-
-            @Override
-            public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                btnLockResultsActionPerformed(evt);
-            }
-        };
+        @Override
+        public void actionPerformed(final java.awt.event.ActionEvent evt) {
+            btnLockResultsActionPerformed(evt);
+        }
+    };
 
     private ActionListener lockTimerListener = new ActionListener() {
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            doNotDisableSlider = !lockTimer.isRunning();
+            SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
+        }
+    };
 
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                doNotDisableSlider = !lockTimer.isRunning();
-                SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
-            }
-        };
-
-    private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners =
-        new HashMap<WMSServiceLayer, RetrievalListener>();
+    private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners = new HashMap<WMSServiceLayer, RetrievalListener>();
 
     private boolean enabled = true;
     private List originalTreePaths;
@@ -199,8 +188,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public SlidableWMSServiceLayerGroup(final List treePaths) {
         originalTreePaths = treePaths;
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
-        final TreePath tp = ((TreePath)treePaths.get(0));
-        final Layer selectedLayer = (de.cismet.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        final TreePath tp = ((TreePath) treePaths.get(0));
+        final Layer selectedLayer = (de.cismet.commons.wms.capabilities.Layer) tp.getLastPathComponent();
         evaluateLayerKeywords(selectedLayer);
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 
@@ -212,9 +201,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         for (final Object path : tp.getPath()) {
             if (path instanceof Layer) {
                 if (completePath == null) {
-                    completePath = ((Layer)path).getName();
+                    completePath = ((Layer) path).getName();
                 } else {
-                    completePath += "/" + ((Layer)path).getName();
+                    completePath += "/" + ((Layer) path).getName();
                 }
             }
         }
@@ -284,8 +273,13 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         }
 
-        if (!usesMultipleSrs && (maxx != Double.NaN) && (minx != Double.NaN) && (maxy != Double.NaN)
-                    && (miny != Double.NaN)) {
+        if (
+            !usesMultipleSrs &&
+            (maxx != Double.NaN) &&
+            (minx != Double.NaN) &&
+            (maxy != Double.NaN) &&
+            (miny != Double.NaN)
+        ) {
             final Crs srs = CismapBroker.getInstance().crsFromCode(srsCode);
 
             if (srs != null) {
@@ -297,8 +291,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("The children of '" + getName()
-                            + "' whether use multiple srs or don't have valid bounding boxes.");
+                LOG.debug(
+                    "The children of '" + getName() + "' whether use multiple srs or don't have valid bounding boxes."
+                );
             }
         }
 
@@ -382,7 +377,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         for (final Object o : layersList) {
-            final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
+            final WMSServiceLayer l = new WMSServiceLayer((Element) o, capabilities);
             layers.add(l);
         }
 
@@ -419,12 +414,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      *
      * @deprecated  DOCUMENT ME!
      */
-    public SlidableWMSServiceLayerGroup(final String name,
-            final String completePath,
-            final Collection<Layer> layers,
-            final WMSCapabilities wmsCapabilities,
-            final String capabilitiesUrl,
-            final Crs srs) {
+    public SlidableWMSServiceLayerGroup(
+        final String name,
+        final String completePath,
+        final Collection<Layer> layers,
+        final WMSCapabilities wmsCapabilities,
+        final String capabilitiesUrl,
+        final Crs srs
+    ) {
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(name);
         this.completePath = completePath;
@@ -531,84 +528,85 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             pnode.addChild(wsl.getPNode());
 
             final RetrievalListener retrievalListener = new RetrievalListener() {
+                @Override
+                public void retrievalStarted(final RetrievalEvent e) {
+                    fireRetrievalStarted(e);
+                }
 
-                    @Override
-                    public void retrievalStarted(final RetrievalEvent e) {
-                        fireRetrievalStarted(e);
+                @Override
+                public void retrievalProgress(final RetrievalEvent e) {
+                    final RetrievalEvent event = new RetrievalEvent();
+                    progressTable.put(wsl, e.getPercentageDone());
+                    int progress = 0;
+
+                    for (final int i : progressTable.values()) {
+                        progress += i;
                     }
 
-                    @Override
-                    public void retrievalProgress(final RetrievalEvent e) {
-                        final RetrievalEvent event = new RetrievalEvent();
-                        progressTable.put(wsl, e.getPercentageDone());
-                        int progress = 0;
+                    if (!isLocked()) {
+                        progress /= layers.size();
+                    }
 
-                        for (final int i : progressTable.values()) {
-                            progress += i;
+                    SlidableWMSServiceLayerGroup.this.progress = progress;
+                    event.setPercentageDone(progress);
+                    fireRetrievalProgress(event);
+                }
+
+                @Override
+                public void retrievalComplete(final RetrievalEvent e) {
+                    final Image i = (Image) e.getRetrievedObject();
+                    ((XPImage) wsl.getPNode()).setImage(i);
+                    new Thread("SlidableWMSServiceLayerGroup retrievalComplete()") {
+                        @Override
+                        public void run() {
+                            final Point2D localOrigin = CismapBroker
+                                .getInstance()
+                                .getMappingComponent()
+                                .getCamera()
+                                .getViewBounds()
+                                .getOrigin();
+                            final double localScale = CismapBroker
+                                .getInstance()
+                                .getMappingComponent()
+                                .getCamera()
+                                .getViewScale();
+                            wsl.getPNode().setScale(1 / localScale);
+                            wsl.getPNode().setOffset(localOrigin);
+                            layerComplete.incrementAndGet();
+
+                            if (layerComplete.get() == layers.size()) {
+                                CismapBroker.getInstance().getMappingComponent().repaint();
+                                final RetrievalEvent re = new RetrievalEvent();
+                                re.setIsComplete(true);
+                                re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
+                                re.setHasErrors(false);
+
+                                re.setRetrievedObject(null);
+                                fireRetrievalComplete(re);
+                                stateChanged(new ChangeEvent(this));
+                                enableSliderAndRestartTimer();
+                                progressTable.clear();
+                            } else if (wsl == getSelectedLayer()) {
+                                CismapBroker.getInstance().getMappingComponent().repaint();
+                            }
+                            if (isPrintMode()) {
+                                fireRetrievalComplete(e);
+                            }
                         }
-
-                        if (!isLocked()) {
-                            progress /= layers.size();
-                        }
-
-                        SlidableWMSServiceLayerGroup.this.progress = progress;
-                        event.setPercentageDone(progress);
-                        fireRetrievalProgress(event);
                     }
+                        .start();
+                }
 
-                    @Override
-                    public void retrievalComplete(final RetrievalEvent e) {
-                        final Image i = (Image)e.getRetrievedObject();
-                        ((XPImage)wsl.getPNode()).setImage(i);
-                        new Thread("SlidableWMSServiceLayerGroup retrievalComplete()") {
+                @Override
+                public void retrievalAborted(final RetrievalEvent e) {
+                    fireRetrievalAborted(e);
+                }
 
-                                @Override
-                                public void run() {
-                                    final Point2D localOrigin = CismapBroker.getInstance()
-                                                .getMappingComponent()
-                                                .getCamera()
-                                                .getViewBounds()
-                                                .getOrigin();
-                                    final double localScale = CismapBroker.getInstance()
-                                                .getMappingComponent()
-                                                .getCamera()
-                                                .getViewScale();
-                                    wsl.getPNode().setScale(1 / localScale);
-                                    wsl.getPNode().setOffset(localOrigin);
-                                    layerComplete.incrementAndGet();
-
-                                    if (layerComplete.get() == layers.size()) {
-                                        CismapBroker.getInstance().getMappingComponent().repaint();
-                                        final RetrievalEvent re = new RetrievalEvent();
-                                        re.setIsComplete(true);
-                                        re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
-                                        re.setHasErrors(false);
-
-                                        re.setRetrievedObject(null);
-                                        fireRetrievalComplete(re);
-                                        stateChanged(new ChangeEvent(this));
-                                        enableSliderAndRestartTimer();
-                                        progressTable.clear();
-                                    } else if (wsl == getSelectedLayer()) {
-                                        CismapBroker.getInstance().getMappingComponent().repaint();
-                                    }
-                                    if (isPrintMode()) {
-                                        fireRetrievalComplete(e);
-                                    }
-                                }
-                            }.start();
-                    }
-
-                    @Override
-                    public void retrievalAborted(final RetrievalEvent e) {
-                        fireRetrievalAborted(e);
-                    }
-
-                    @Override
-                    public void retrievalError(final RetrievalEvent e) {
-                        fireRetrievalError(e);
-                    }
-                };
+                @Override
+                public void retrievalError(final RetrievalEvent e) {
+                    fireRetrievalError(e);
+                }
+            };
 
             layerRetrievalListeners.put(wsl, retrievalListener);
             wsl.addRetrievalListener(retrievalListener);
@@ -628,13 +626,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         if (SwingUtilities.isEventDispatchThread()) {
             CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
         } else {
-            SwingUtilities.invokeLater(new Runnable() {
-
+            SwingUtilities.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         CismapBroker.getInstance().addActiveLayerListener(SlidableWMSServiceLayerGroup.this);
                     }
-                });
+                }
+            );
         }
     }
 
@@ -649,8 +648,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             timeTillLocked = slidableLayerElement.getAttribute("timeTillLocked").getIntValue();
             inactiveTimeTillLocked = slidableLayerElement.getAttribute("inactiveTimeTillLocked").getIntValue();
             bottomUp = slidableLayerElement.getAttribute("bottomUp").getBooleanValue();
-            verticalLabelWidthThreshold = slidableLayerElement.getAttribute("verticalLabelWidthThreshold")
-                        .getDoubleValue();
+            verticalLabelWidthThreshold =
+                slidableLayerElement.getAttribute("verticalLabelWidthThreshold").getDoubleValue();
             crossfadeEnabled = slidableLayerElement.getAttribute("crossfadeEnabled").getBooleanValue();
         } catch (final NullPointerException e) {
             LOG.warn("Attribute not found.", e);
@@ -766,8 +765,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * DOCUMENT ME!
      */
     private void setDefaults() {
-        preferredRasterFormat = "image/png";                      // NOI18N
-        preferredBGColor = "0xF0F0F0";                            // NOI18N
+        preferredRasterFormat = "image/png"; // NOI18N
+        preferredBGColor = "0xF0F0F0"; // NOI18N
         preferredExceptionsFormat = "application/vnd.ogc.se_xml"; // NOI18N
     }
 
@@ -842,7 +841,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         }
         if (internalFrame.isAllowCrossfade() && ((i + 1) < getPNode().getChildrenCount())) {
-            getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
+            getPNode().getChild(i + 1).setTransparency(((float) rest) / 100f);
         }
 
         if (lockTimer.isRunning()) {
@@ -1128,7 +1127,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof SlidableWMSServiceLayerGroup) {
-            final SlidableWMSServiceLayerGroup other = (SlidableWMSServiceLayerGroup)obj;
+            final SlidableWMSServiceLayerGroup other = (SlidableWMSServiceLayerGroup) obj;
             final Iterator<WMSServiceLayer> otherLayerIt = other.layers.iterator();
 
             for (final WMSServiceLayer l : layers) {
@@ -1205,13 +1204,12 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void enableSliderAndRestartTimer() {
         final Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    internalFrame.enableSlider(true);
-                    lockTimer.restart();
-                }
-            };
+            @Override
+            public void run() {
+                internalFrame.enableSlider(true);
+                lockTimer.restart();
+            }
+        };
         if (!isLocked()) {
             if (SwingUtilities.isEventDispatchThread()) {
                 r.run();
@@ -1276,8 +1274,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     @Override
-    public void layerAdded(final ActiveLayerEvent e) {
-    }
+    public void layerAdded(final ActiveLayerEvent e) {}
 
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
@@ -1285,7 +1282,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if ((addedInternalWidget != null) && addedInternalWidget.equals(sliderName)) {
                 CismapBroker.getInstance().getMappingComponent().removeInternalWidget(sliderName);
                 internalFrame.removeModel();
-//                internalFrame.dispose();
+                //                internalFrame.dispose();
                 internalFrame = null;
                 addedInternalWidget = null;
             }
@@ -1293,13 +1290,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if (SwingUtilities.isEventDispatchThread()) {
                 CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
             } else {
-                SwingUtilities.invokeLater(new Runnable() {
-
+                SwingUtilities.invokeLater(
+                    new Runnable() {
                         @Override
                         public void run() {
                             CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
                         }
-                    });
+                    }
+                );
             }
             try {
                 uniqueNumbers.remove(Integer.valueOf(sliderName.substring(SLIDER_PREFIX.length())));
@@ -1316,8 +1314,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     @Override
-    public void layerPositionChanged(final ActiveLayerEvent e) {
-    }
+    public void layerPositionChanged(final ActiveLayerEvent e) {}
 
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
@@ -1338,9 +1335,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
             if (fadeInThisWidget) {
                 internalFrame.updateHorizontalOrVertical();
-                CismapBroker.getInstance()
-                        .getMappingComponent()
-                        .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
+                CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
                 addedInternalWidget = sliderName;
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
             }
@@ -1348,12 +1346,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     @Override
-    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-    }
+    public void layerInformationStatusChanged(final ActiveLayerEvent e) {}
 
     @Override
     public synchronized void layerSelectionChanged(final ActiveLayerEvent e) {
@@ -1367,9 +1363,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
             if ((getPNode() != null) && getPNode().getVisible()) {
                 internalFrame.updateHorizontalOrVertical();
-                CismapBroker.getInstance()
-                        .getMappingComponent()
-                        .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
+                CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
                 addedInternalWidget = sliderName;
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
             }

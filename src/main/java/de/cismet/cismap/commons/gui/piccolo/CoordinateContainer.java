@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -18,7 +18,6 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
 import java.util.ArrayList;
 
 /**
@@ -31,10 +30,10 @@ public class CoordinateContainer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String POINT = "POINT";               // NOI18N
-    public static final String LINESTRING = "LINESTRING";     // NOI18N
-    public static final String LINEARRING = "LINEARRING";     // NOI18N
-    public static final String POLYGON = "POLYGON";           // NOI18N
+    public static final String POINT = "POINT"; // NOI18N
+    public static final String LINESTRING = "LINESTRING"; // NOI18N
+    public static final String LINEARRING = "LINEARRING"; // NOI18N
+    public static final String POLYGON = "POLYGON"; // NOI18N
     public static final String MULTIPOLYGON = "MULTIPOLYGON"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -81,20 +80,17 @@ public class CoordinateContainer {
     /**
      * DOCUMENT ME!
      */
-    public void removeCoordinate() {
-    }
+    public void removeCoordinate() {}
 
     /**
      * DOCUMENT ME!
      */
-    public void duplicateCoordinate() {
-    }
+    public void duplicateCoordinate() {}
 
     /**
      * DOCUMENT ME!
      */
-    public void insertCoordinate() {
-    }
+    public void insertCoordinate() {}
 
     /**
      * DOCUMENT ME!

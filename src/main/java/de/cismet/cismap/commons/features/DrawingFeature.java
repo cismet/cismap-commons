@@ -1,23 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-
+import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
-
 import javax.swing.ImageIcon;
-
-import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * This feature will be used for the drawing mode.
@@ -29,8 +26,9 @@ public class DrawingFeature extends PureNewFeature implements FeatureWithId, Dra
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final ImageIcon textAnnotationSymbol = new javax.swing.ImageIcon(DrawingFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/transparentPoint.png"));
+    private static final ImageIcon textAnnotationSymbol = new javax.swing.ImageIcon(
+        DrawingFeature.class.getResource("/de/cismet/cismap/commons/gui/res/transparentPoint.png")
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -99,7 +97,7 @@ public class DrawingFeature extends PureNewFeature implements FeatureWithId, Dra
 
         if (AbstractNewFeature.geomTypes.TEXT.equals(geomType)) {
             setPrimaryAnnotationVisible(true);
-//            setAutoScale(true);
+            //            setAutoScale(true);
             final FeatureAnnotationSymbol symbol = new FeatureAnnotationSymbol(textAnnotationSymbol.getImage());
             symbol.setSweetSpotX(0);
             symbol.setSweetSpotY(0);
@@ -168,8 +166,7 @@ public class DrawingFeature extends PureNewFeature implements FeatureWithId, Dra
     }
 
     @Override
-    public void setIdExpression(final String idExpression) {
-    }
+    public void setIdExpression(final String idExpression) {}
 
     /**
      * DOCUMENT ME!

@@ -1,30 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.awt.Color;
-import java.awt.Font;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-
 import de.cismet.tools.gui.PointSymbolCreator;
+import java.awt.Color;
+import java.awt.Font;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * BasicStyle implements the Style-interface. It represents a collection of different variables (like colors, sizes,
@@ -37,7 +32,7 @@ public class BasicStyle implements Style {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    protected static final Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 12);                                // NOI18N
+    protected static final Font DEFAULT_FONT = new Font("SansSerif", Font.PLAIN, 12); // NOI18N
     protected static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -107,25 +102,27 @@ public class BasicStyle implements Style {
      * @param  autoscale         true to resize the label according to the zoomlevel, else false
      * @param  halo              DOCUMENT ME!
      */
-    public BasicStyle(final boolean drawFill,
-            final Color colorFill,
-            final boolean drawLine,
-            final Color colorLine,
-            final int lineWidth,
-            final boolean highlightFeature,
-            final float alpha,
-            final String pointSymbolName,
-            final int pointSymbolSize,
-            final boolean drawLabel,
-            final Font font,
-            final Color fontColor,
-            final String attribute,
-            final float alignment,
-            final int minScale,
-            final int maxScale,
-            final double multiplier,
-            final boolean autoscale,
-            final Color halo) {
+    public BasicStyle(
+        final boolean drawFill,
+        final Color colorFill,
+        final boolean drawLine,
+        final Color colorLine,
+        final int lineWidth,
+        final boolean highlightFeature,
+        final float alpha,
+        final String pointSymbolName,
+        final int pointSymbolSize,
+        final boolean drawLabel,
+        final Font font,
+        final Color fontColor,
+        final String attribute,
+        final float alignment,
+        final int minScale,
+        final int maxScale,
+        final double multiplier,
+        final boolean autoscale,
+        final Color halo
+    ) {
         this.drawFill = drawFill;
         this.drawLine = drawLine;
         this.highlightFeature = highlightFeature;
@@ -153,9 +150,11 @@ public class BasicStyle implements Style {
      * Resets this BasicStyle back to default.
      */
     public void setDefaultValues() {
-        final Color defaultColor = new Color((int)(Math.random() * 255),
-                (int)(Math.random() * 255),
-                (int)(Math.random() * 255));
+        final Color defaultColor = new Color(
+            (int) (Math.random() * 255),
+            (int) (Math.random() * 255),
+            (int) (Math.random() * 255)
+        );
         this.drawFill = true;
         this.drawLine = true;
         this.highlightFeature = true;
@@ -252,24 +251,28 @@ public class BasicStyle implements Style {
     @Override
     public int compareTo(final Object o) {
         if (o instanceof BasicStyle) {
-            final BasicStyle bs = (BasicStyle)o;
-            if ((highlightFeature == bs.isHighlightFeature()) && (drawFill == bs.isDrawFill())
-                        && (colorFill == bs.getFillColor())
-                        && (drawLine == bs.isDrawLine())
-                        && (colorLine == bs.getLineColor())
-                        && (lineWidth == bs.getLineWidth())
-                        && (alpha == bs.getAlpha()) && pointSymbolFilename.equals(bs.getPointSymbolFilename())
-                        && (drawLabel == bs.isDrawLabel() /*&& attribute.equals(bs.getAnnotationAttribute())*/)
-                        && font.getFamily().equals(bs.getFont().getFamily())
-                        && (font.getStyle() == bs.getFont().getStyle())
-                        && (font.getSize() == bs.getFont().getSize())
-                        && (fontColor == bs.getFontColor())
-                        && (maxScale == bs.getMaxScale())
-                        && (minScale == bs.getMinScale())
-                        && (alignment == bs.getAlignment())
-                        && (autoscale == bs.isAutoscale())
-                        && (multiplier == bs.getMultiplier())
-                        && (halo == bs.getHalo())) {
+            final BasicStyle bs = (BasicStyle) o;
+            if (
+                (highlightFeature == bs.isHighlightFeature()) &&
+                (drawFill == bs.isDrawFill()) &&
+                (colorFill == bs.getFillColor()) &&
+                (drawLine == bs.isDrawLine()) &&
+                (colorLine == bs.getLineColor()) &&
+                (lineWidth == bs.getLineWidth()) &&
+                (alpha == bs.getAlpha()) &&
+                pointSymbolFilename.equals(bs.getPointSymbolFilename()) &&
+                (drawLabel == bs.isDrawLabel()/*&& attribute.equals(bs.getAnnotationAttribute())*/) &&
+                font.getFamily().equals(bs.getFont().getFamily()) &&
+                (font.getStyle() == bs.getFont().getStyle()) &&
+                (font.getSize() == bs.getFont().getSize()) &&
+                (fontColor == bs.getFontColor()) &&
+                (maxScale == bs.getMaxScale()) &&
+                (minScale == bs.getMinScale()) &&
+                (alignment == bs.getAlignment()) &&
+                (autoscale == bs.isAutoscale()) &&
+                (multiplier == bs.getMultiplier()) &&
+                (halo == bs.getHalo())
+            ) {
                 if (pointSymbolFilename.equals(NO_POINTSYMBOL)) {
                     if (pointSymbolSize == bs.getPointSymbolSize()) {
                         return 0;
@@ -297,25 +300,26 @@ public class BasicStyle implements Style {
     @Override
     public Object clone() throws CloneNotSupportedException {
         return new BasicStyle(
-                drawFill,
-                colorFill,
-                drawLine,
-                colorLine,
-                lineWidth,
-                highlightFeature,
-                alpha,
-                pointSymbolFilename,
-                pointSymbolSize,
-                drawLabel,
-                font,
-                fontColor,
-                attribute,
-                alignment,
-                minScale,
-                maxScale,
-                multiplier,
-                autoscale,
-                halo);
+            drawFill,
+            colorFill,
+            drawLine,
+            colorLine,
+            lineWidth,
+            highlightFeature,
+            alpha,
+            pointSymbolFilename,
+            pointSymbolSize,
+            drawLabel,
+            font,
+            fontColor,
+            attribute,
+            alignment,
+            minScale,
+            maxScale,
+            multiplier,
+            autoscale,
+            halo
+        );
     }
 
     @Override
@@ -437,27 +441,25 @@ public class BasicStyle implements Style {
 
         if (pointSymbolFilename.equalsIgnoreCase(Style.AUTO_POINTSYMBOL)) {
             if (logger.isDebugEnabled()) {
-                logger.debug("auto creating new pointsymbol");                                              // NOI18N
+                logger.debug("auto creating new pointsymbol"); // NOI18N
             }
-            this.pointSymbol = new FeatureAnnotationSymbol(PointSymbolCreator.createPointSymbol(
-                        true,
-                        true,
-                        10,
-                        1,
-                        this.colorFill,
-                        this.colorLine));
+            this.pointSymbol =
+                new FeatureAnnotationSymbol(
+                    PointSymbolCreator.createPointSymbol(true, true, 10, 1, this.colorFill, this.colorLine)
+                );
             this.pointSymbol.setSweetSpotX(0.5d);
             this.pointSymbol.setSweetSpotY(0.5d);
         } else if (!pointSymbolFilename.equalsIgnoreCase(Style.NO_POINTSYMBOL)) {
             try {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("loading new pointsymbol '" + pointSymbolFilename + "'");                  // NOI18N
+                    logger.debug("loading new pointsymbol '" + pointSymbolFilename + "'"); // NOI18N
                 }
                 final FeatureAnnotationSymbol featureAnnotationSymbol = new FeatureAnnotationSymbol(
-                        new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + pointSymbolFilename)).getImage());
+                    new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + pointSymbolFilename)).getImage()
+                );
                 featureAnnotationSymbol.setSweetSpotX(0.14d);
                 featureAnnotationSymbol.setSweetSpotY(1.0d);
-                featureAnnotationSymbol.addAttribute("name", pointSymbolFilename);                          // NOI18N
+                featureAnnotationSymbol.addAttribute("name", pointSymbolFilename); // NOI18N
                 this.pointSymbol = featureAnnotationSymbol;
             } catch (Throwable t) {
                 logger.warn("point symbol '" + pointSymbol + "' could not be found, setting to undefined"); // NOI18N
@@ -478,12 +480,22 @@ public class BasicStyle implements Style {
     public void setPointSymbolSize(final int pointSymbolSize) {
         final int oldPointSymbolSize = this.pointSymbolSize;
         if (pointSymbolSize < Style.MIN_POINTSYMBOLSIZE) {
-            logger.warn("pointSymbolSize " + pointSymbolSize + " smaller than MIN_POINTSYMBOLSIZE "
-                        + MIN_POINTSYMBOLSIZE + ", settign to MIN_POINTSYMBOLSIZE"); // NOI18N
+            logger.warn(
+                "pointSymbolSize " +
+                pointSymbolSize +
+                " smaller than MIN_POINTSYMBOLSIZE " +
+                MIN_POINTSYMBOLSIZE +
+                ", settign to MIN_POINTSYMBOLSIZE"
+            ); // NOI18N
             this.pointSymbolSize = MIN_POINTSYMBOLSIZE;
         } else if (pointSymbolSize > Style.MAX_POINTSYMBOLSIZE) {
-            logger.warn("pointSymbolSize " + pointSymbolSize + " lager than MAX_POINTSYMBOLSIZE " + MAX_POINTSYMBOLSIZE
-                        + ", settign to MAX_POINTSYMBOLSIZE");                       // NOI18N
+            logger.warn(
+                "pointSymbolSize " +
+                pointSymbolSize +
+                " lager than MAX_POINTSYMBOLSIZE " +
+                MAX_POINTSYMBOLSIZE +
+                ", settign to MAX_POINTSYMBOLSIZE"
+            ); // NOI18N
             this.pointSymbolSize = MAX_POINTSYMBOLSIZE;
         } else {
             this.pointSymbolSize = pointSymbolSize;
@@ -636,9 +648,11 @@ public class BasicStyle implements Style {
                 // Parse Label
                 final Element label = element.getChild(Style.LABEL);
                 this.setDrawLabel(label.getAttribute(Style.PAINT).getBooleanValue());
-                final Font tmpFont = new Font(label.getAttributeValue(Style.FAMILY),
-                        new Integer(label.getAttributeValue(Style.STYLE)),
-                        new Integer(label.getAttributeValue(Style.SIZE)));
+                final Font tmpFont = new Font(
+                    label.getAttributeValue(Style.FAMILY),
+                    new Integer(label.getAttributeValue(Style.STYLE)),
+                    new Integer(label.getAttributeValue(Style.SIZE))
+                );
                 this.setFont(tmpFont);
 
                 final Color tmpA = new Color(label.getAttribute(Style.COLOR).getIntValue());
@@ -665,8 +679,13 @@ public class BasicStyle implements Style {
                 throw ex;
             }
         } else {
-            logger.warn("the element '" + element.getName() + "' is no valid style element, '" + Style.STYLE_ELEMENT
-                        + "' expected");                                            // NOI18N
+            logger.warn(
+                "the element '" +
+                element.getName() +
+                "' is no valid style element, '" +
+                Style.STYLE_ELEMENT +
+                "' expected"
+            ); // NOI18N
         }
     }
 
@@ -675,10 +694,10 @@ public class BasicStyle implements Style {
     public void setPointSymbol(final FeatureAnnotationSymbol pointSymbol) {
         logger.warn("deprecated operation setPointSymbol called!"); // NOI18N
         this.pointSymbol = pointSymbol;
-//    if (pointSymbol.getAttribute("name") != null)
-//    {
-//      this.setPointSymbolFilename(pointSymbol.getAttribute("name").toString());
-//    }
+        //    if (pointSymbol.getAttribute("name") != null)
+        //    {
+        //      this.setPointSymbolFilename(pointSymbol.getAttribute("name").toString());
+        //    }
     }
 
     @Override
@@ -729,14 +748,16 @@ public class BasicStyle implements Style {
      * @return  DOCUMENT ME!
      */
     public FeatureAnnotationSymbol createAutoPointSymbol() {
-        final FeatureAnnotationSymbol autoPointSymbol = new FeatureAnnotationSymbol(PointSymbolCreator
-                        .createPointSymbol(
-                            this.drawLine,
-                            this.drawFill,
-                            this.pointSymbolSize,
-                            this.lineWidth,
-                            this.colorFill,
-                            this.colorLine));
+        final FeatureAnnotationSymbol autoPointSymbol = new FeatureAnnotationSymbol(
+            PointSymbolCreator.createPointSymbol(
+                this.drawLine,
+                this.drawFill,
+                this.pointSymbolSize,
+                this.lineWidth,
+                this.colorFill,
+                this.colorLine
+            )
+        );
         autoPointSymbol.setSweetSpotX(0.5d);
         autoPointSymbol.setSweetSpotY(0.5d);
         return autoPointSymbol;

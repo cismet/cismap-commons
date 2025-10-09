@@ -1,30 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.commons.httpclient.HttpClient;
-
-import org.jdom.Attribute;
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
@@ -32,10 +18,16 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.commons.wms.capabilities.Layer;
-
 import de.cismet.tools.CurrentStackTrace;
+import edu.umd.cs.piccolo.PNode;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import org.apache.commons.httpclient.HttpClient;
+import org.jdom.Attribute;
+import org.jdom.CDATA;
+import org.jdom.Element;
 
 /**
  * This service can be used like a wms, but its data sources are image files.
@@ -43,12 +35,9 @@ import de.cismet.tools.CurrentStackTrace;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ImageRasterService extends AbstractRetrievalService implements MapService,
-    RasterMapService,
-    RetrievalServiceLayer,
-    LayerInfoProvider,
-    RetrievalListener,
-    ServiceLayer { // implements RasterService,RetrievalListener,ServiceLayer {
+public class ImageRasterService
+    extends AbstractRetrievalService
+    implements MapService, RasterMapService, RetrievalServiceLayer, LayerInfoProvider, RetrievalListener, ServiceLayer { // implements RasterService,RetrievalListener,ServiceLayer {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -83,8 +72,8 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
      */
     public ImageRasterService(final ImageRasterService s) {
         this(s.imageFile, s.mode);
-        if ((BoundingBox)s.bb != null) {
-            bb = (BoundingBox)s.bb.clone();
+        if ((BoundingBox) s.bb != null) {
+            bb = (BoundingBox) s.bb.clone();
         }
         enabled = s.enabled;
         height = s.height;
@@ -93,7 +82,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
         // The cloned service and the origin service should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
         // used in 2 different MappingComponents
-// pNode = s.pNode;
+        // pNode = s.pNode;
         translucency = s.translucency;
         width = s.width;
         ir = new ImageFileRetrieval(s.imageFile, this, s.mode);
@@ -116,42 +105,39 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
         if (layerPositionAttr != null) {
             try {
                 layerPosition = layerPositionAttr.getIntValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute enabledAttr = object.getAttribute("enabled");             // NOI18N
+        final Attribute enabledAttr = object.getAttribute("enabled"); // NOI18N
         if (enabledAttr != null) {
             try {
                 enabled = enabledAttr.getBooleanValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute nameAttr = object.getAttribute("name");                   // NOI18N
+        final Attribute nameAttr = object.getAttribute("name"); // NOI18N
         if (nameAttr != null) {
             try {
                 name = nameAttr.getValue();
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute visAttr = object.getAttribute("visible");                 // NOI18N
+        final Attribute visAttr = object.getAttribute("visible"); // NOI18N
         if (visAttr != null) {
             try {
                 visible = visAttr.getBooleanValue();
                 pNode.setVisible(visible);
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
-        final Attribute translucencyAttr = object.getAttribute("translucency");   // NOI18N
+        final Attribute translucencyAttr = object.getAttribute("translucency"); // NOI18N
         if (translucencyAttr != null) {
             try {
                 setTranslucency(translucencyAttr.getFloatValue());
-            } catch (Exception e) {
-            }
+            } catch (Exception e) {}
         }
         final File worldFile = ImageFileUtils.getWorldFile(imageFile);
         if (worldFile != null) {
-            mode = ImageFileUtils.checkIfRasterGeoRef(worldFile) ? ImageFileUtils.Mode.GEO_REFERENCED
-                                                                 : ImageFileUtils.Mode.WORLDFILE;
+            mode =
+                ImageFileUtils.checkIfRasterGeoRef(worldFile)
+                    ? ImageFileUtils.Mode.GEO_REFERENCED
+                    : ImageFileUtils.Mode.WORLDFILE;
         } else {
             mode = ImageFileUtils.Mode.TIFF;
         }
@@ -186,13 +172,13 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element element = new Element("ImageRasterService");              // NOI18N
+        final Element element = new Element("ImageRasterService"); // NOI18N
         element.setAttribute("layerPosition", Integer.toString(layerPosition)); // NOI18N
         element.setAttribute("type", getClass().getName());
         element.setAttribute("enabled", Boolean.toString(enabled));
-        element.setAttribute("visible", Boolean.toString(pNode.getVisible()));  // NOI18N
-        element.setAttribute("name", name);                                     // NOI18N
-        element.setAttribute("translucency", Float.toString(translucency));     // NOI18N
+        element.setAttribute("visible", Boolean.toString(pNode.getVisible())); // NOI18N
+        element.setAttribute("name", name); // NOI18N
+        element.setAttribute("translucency", Float.toString(translucency)); // NOI18N
         final CDATA data = new CDATA(imageFile.getAbsolutePath());
         element.addContent(data);
         return element;
@@ -321,8 +307,7 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
     }
 
     @Override
-    public void setLayerQuerySelected(final boolean selected) {
-    }
+    public void setLayerQuerySelected(final boolean selected) {}
 
     @Override
     public boolean isQueryable() {

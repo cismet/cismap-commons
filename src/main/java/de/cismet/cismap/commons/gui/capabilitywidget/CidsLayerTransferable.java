@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -67,7 +67,7 @@ public class CidsLayerTransferable {
      */
     public LayerConfig getLayerConfig() {
         if (!folder) {
-            return (LayerConfig)data;
+            return (LayerConfig) data;
         } else {
             return null;
         }
@@ -80,7 +80,7 @@ public class CidsLayerTransferable {
      */
     public TreeFolder getFolder() {
         if (folder) {
-            return (TreeFolder)data;
+            return (TreeFolder) data;
         } else {
             return null;
         }

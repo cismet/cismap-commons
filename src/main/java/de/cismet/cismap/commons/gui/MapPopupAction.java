@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
 import com.vividsolutions.jts.geom.Point;
-
 import javax.swing.Action;
 import javax.swing.JMenu;
 
@@ -19,7 +18,6 @@ import javax.swing.JMenu;
  * @version  $Revision$, $Date$
  */
 public interface MapPopupAction extends Action, Comparable<MapPopupAction> {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

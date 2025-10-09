@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
@@ -17,7 +17,6 @@ import de.cismet.cismap.commons.rasterservice.MapService;
  * @version  $Revision$, $Date$
  */
 public interface RasterLayerSupportedFeature {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

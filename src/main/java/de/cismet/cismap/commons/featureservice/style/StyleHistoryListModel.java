@@ -1,30 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
+import de.cismet.cismap.commons.ConvertableToXML;
+import java.io.File;
+import java.util.Vector;
+import javax.swing.ListModel;
+import javax.swing.event.ListDataListener;
 import org.apache.log4j.Logger;
-
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
-
-import java.io.File;
-
-import java.util.Vector;
-
-import javax.swing.ListModel;
-import javax.swing.event.ListDataListener;
-
-import de.cismet.cismap.commons.ConvertableToXML;
 
 /**
  * The StyleHistoryListModel is a ListModel that contains a list of Style-objects.
@@ -68,7 +63,6 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML {
      */
     public StyleHistoryListModel(final File f) throws Exception {
         this();
-
         try {
             final Document doc = builder.build(f);
             final Element root = doc.getRootElement();
@@ -78,7 +72,7 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML {
                 logger.error("file '" + f.getName() + "' contains wrong xml content:\n" + doc); // NOI18N
             }
         } catch (Exception ex) {
-            logger.error("Could not load style history from '" + f.getName() + "'", ex);        // NOI18N
+            logger.error("Could not load style history from '" + f.getName() + "'", ex); // NOI18N
         }
     }
 
@@ -165,12 +159,10 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML {
     }
 
     @Override
-    public void addListDataListener(final ListDataListener l) {
-    }
+    public void addListDataListener(final ListDataListener l) {}
 
     @Override
-    public void removeListDataListener(final ListDataListener l) {
-    }
+    public void removeListDataListener(final ListDataListener l) {}
 
     @Override
     public void initFromElement(final Element element) throws Exception {
@@ -178,7 +170,7 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML {
         this.styleList.ensureCapacity(element.getChildren(Style.STYLE_ELEMENT).size());
         for (final Object o : element.getChildren(Style.STYLE_ELEMENT)) {
             if (o instanceof Element) {
-                final Style newStyle = new BasicStyle((Element)o);
+                final Style newStyle = new BasicStyle((Element) o);
                 if (newStyle != null) {
                     this.styleList.add(newStyle);
                 }

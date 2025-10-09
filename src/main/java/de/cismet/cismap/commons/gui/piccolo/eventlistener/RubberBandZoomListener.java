@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * RubberBandZoomListener.java
  *
@@ -12,18 +12,15 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
-
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-
 import javax.swing.Timer;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -59,14 +56,14 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
         if ((e.getButton() == MouseEvent.BUTTON1) && (rectangle != null)) { // rectangle can be null, if the drag
-                                                                            // request started on a sticky node. See
-                                                                            // Issue 21
+            // request started on a sticky node. See
+            // Issue 21
             final PBounds b = new PBounds(rectangle.getBounds());
-            final PBounds bb = (PBounds)b.clone();
+            final PBounds bb = (PBounds) b.clone();
             e.getCamera().viewToLocal(bb);
             if ((bb.width > 20) && (bb.height > 20)) {
                 if (e.getComponent() instanceof MappingComponent) {
-                    final MappingComponent map = (MappingComponent)e.getComponent();
+                    final MappingComponent map = (MappingComponent) e.getComponent();
                     e.getCamera().animateViewToCenterBounds(b, true, map.getAnimationDuration());
                     map.setNewViewBounds(b);
                     map.queryServices();
@@ -80,7 +77,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
         super.mouseClicked(e);
         if (e.getButton() == 3) { // Rechte Maustaste: TODO: konnte die piccolo Konstanten nicht inden
             if (e.getComponent() instanceof MappingComponent) {
-                zoom(0.5f, e, ((MappingComponent)e.getComponent()).getAnimationDuration(), 200);
+                zoom(0.5f, e, ((MappingComponent) e.getComponent()).getAnimationDuration(), 200);
             }
         }
     }
@@ -153,7 +150,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
         if (zoomListener != null) {
             timer.removeActionListener(zoomListener);
         }
-        zoomListener = new ZoomAction(b, (MappingComponent)pc.getComponent());
+        zoomListener = new ZoomAction(b, (MappingComponent) pc.getComponent());
         timer.addActionListener(zoomListener);
 
         timer.setInitialDelay(delayTime);

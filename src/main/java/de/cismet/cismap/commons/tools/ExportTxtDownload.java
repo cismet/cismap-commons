@@ -1,35 +1,30 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.tools;
 
-import org.deegree.model.spatialschema.Geometry;
-import org.deegree.model.spatialschema.GeometryException;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import org.openide.util.NbBundle;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PersistentFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-
 import de.cismet.tools.gui.downloadmanager.Download;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.deegree.model.spatialschema.Geometry;
+import org.deegree.model.spatialschema.GeometryException;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -52,8 +47,7 @@ public class ExportTxtDownload extends ExportDownload {
      * Creates a new ExportShapeDownload object. The init method must be invoked before the download can be started, if
      * this constructor is used.
      */
-    public ExportTxtDownload() {
-    }
+    public ExportTxtDownload() {}
 
     /**
      * Creates a new ExportShapeDownload object.
@@ -66,11 +60,13 @@ public class ExportTxtDownload extends ExportDownload {
      *                         alias of the column and the second element is the name of the attribute, that should be
      *                         shown in the column
      */
-    public ExportTxtDownload(final String filename,
-            final String extension,
-            final FeatureServiceFeature[] features,
-            final AbstractFeatureService service,
-            final List<String[]> attributeNames) {
+    public ExportTxtDownload(
+        final String filename,
+        final String extension,
+        final FeatureServiceFeature[] features,
+        final AbstractFeatureService service,
+        final List<String[]> attributeNames
+    ) {
         init(filename, extension, features, service, attributeNames, null);
     }
 
@@ -132,7 +128,7 @@ public class ExportTxtDownload extends ExportDownload {
             }
 
             if ((features.length > 0) && (features[0] instanceof PersistentFeature)) {
-                ((PersistentFeature)features[0]).getPersistenceManager().close();
+                ((PersistentFeature) features[0]).getPersistenceManager().close();
             }
 
             if (status == Download.State.RUNNING) {
@@ -156,7 +152,7 @@ public class ExportTxtDownload extends ExportDownload {
      * @return  DOCUMENT ME!
      */
     private String toString(final List<String> attributeNames, final FeatureServiceFeature f) {
-        final Map<String, Object> hm = (Map<String, Object>)f.getProperties();
+        final Map<String, Object> hm = (Map<String, Object>) f.getProperties();
         final List<Object> vals = new ArrayList<Object>();
 
         for (final String attrName : attributeNames) {
@@ -185,7 +181,7 @@ public class ExportTxtDownload extends ExportDownload {
             }
 
             if (tmp instanceof Geometry) {
-                final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)tmp);
+                final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry) tmp);
                 tmp = "Geometry";
                 try {
                     tmp = JTSAdapter.export(geom);
@@ -200,8 +196,11 @@ public class ExportTxtDownload extends ExportDownload {
                 result.append(separator);
             }
 
-            if (!withoutQuotes && (quotes != null)
-                        && ((tmp instanceof String) || (tmp instanceof com.vividsolutions.jts.geom.Geometry))) {
+            if (
+                !withoutQuotes &&
+                (quotes != null) &&
+                ((tmp instanceof String) || (tmp instanceof com.vividsolutions.jts.geom.Geometry))
+            ) {
                 result.append(quotes).append(String.valueOf(tmp)).append(quotes);
             } else {
                 if ((tmp instanceof Float) || (tmp instanceof Double)) {

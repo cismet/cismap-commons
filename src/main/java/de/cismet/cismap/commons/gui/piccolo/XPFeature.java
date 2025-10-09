@@ -1,16 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
-
-import edu.umd.cs.piccolo.PNode;
 
 import de.cismet.cismap.commons.features.Highlightable;
 import de.cismet.cismap.commons.features.Selectable;
+import edu.umd.cs.piccolo.PNode;
 
 /**
  * DOCUMENT ME!
@@ -25,6 +24,5 @@ public class XPFeature extends PNode {
     /**
      * Creates a new instance of XPFeature.
      */
-    public XPFeature() {
-    }
+    public XPFeature() {}
 }

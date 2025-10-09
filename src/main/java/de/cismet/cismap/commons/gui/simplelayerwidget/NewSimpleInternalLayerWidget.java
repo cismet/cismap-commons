@@ -1,14 +1,33 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.simplelayerwidget;
 
-import org.jdom.Element;
-
+import de.cismet.cismap.commons.MappingModel;
+import de.cismet.cismap.commons.MappingModelEvent;
+import de.cismet.cismap.commons.MappingModelListener;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
+import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
+import de.cismet.cismap.commons.gui.layerwidget.*;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.tools.configuration.Configurable;
+import de.cismet.tools.configuration.NoWriteError;
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.imagetooltip.ImageToolTip;
+import de.cismet.tools.gui.treetable.JTreeTable;
+import de.cismet.tools.gui.treetable.TreeTableCellEditor;
+import de.cismet.tools.gui.treetable.TreeTableModel;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -25,9 +44,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-
 import java.util.Vector;
-
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
@@ -41,30 +58,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.MappingModelEvent;
-import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.featureservice.LayerProperties;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
-import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
-import de.cismet.cismap.commons.gui.layerwidget.*;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
-import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-
-import de.cismet.tools.configuration.Configurable;
-import de.cismet.tools.configuration.NoWriteError;
-
-import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.imagetooltip.ImageToolTip;
-import de.cismet.tools.gui.treetable.JTreeTable;
-import de.cismet.tools.gui.treetable.TreeTableCellEditor;
-import de.cismet.tools.gui.treetable.TreeTableModel;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -72,10 +66,9 @@ import de.cismet.tools.gui.treetable.TreeTableModel;
  * @author   nh
  * @version  $Revision$, $Date$
  */
-public class NewSimpleInternalLayerWidget extends JInternalFrame implements MappingModelListener,
-    TableModelListener,
-    DropTargetListener,
-    Configurable {
+public class NewSimpleInternalLayerWidget
+    extends JInternalFrame
+    implements MappingModelListener, TableModelListener, DropTargetListener, Configurable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -85,16 +78,21 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private final ImageIcon UP = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/up.png"));               // NOI18N
-    private final ImageIcon DOWN = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/down.png"));             // NOI18N
-    private final ImageIcon DELETE = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"));      // NOI18N
-    private final ImageIcon DISABLE = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"));          // NOI18N
-    private final ImageIcon INVISIBLE = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png")); // NOI18N
+    private final ImageIcon UP = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png")
+    ); // NOI18N
+    private final ImageIcon DOWN = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png")
+    ); // NOI18N
+    private final ImageIcon DELETE = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png")
+    ); // NOI18N
+    private final ImageIcon DISABLE = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png")
+    ); // NOI18N
+    private final ImageIcon INVISIBLE = new ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png")
+    ); // NOI18N
     private int layerCount = 0;
     private boolean deactivatePopupMenuButtons = true;
     private ActiveLayerModel activeLayerModel;
@@ -109,6 +107,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
     private JMenuItem dis;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane scpMain;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -134,9 +133,11 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
 
         // JInternalFrame fixieren, indem alle MouseMotionListener der Statusbar entfernt werden
         try {
-            final BasicInternalFrameUI fui = (BasicInternalFrameUI)getUI();
+            final BasicInternalFrameUI fui = (BasicInternalFrameUI) getUI();
             final Component north = fui.getNorthPane();
-            final MouseMotionListener[] listener = (MouseMotionListener[])north.getListeners(MouseMotionListener.class);
+            final MouseMotionListener[] listener = (MouseMotionListener[]) north.getListeners(
+                MouseMotionListener.class
+            );
             for (int i = 0; i < listener.length; i++) {
                 north.removeMouseMotionListener(listener[i]);
             }
@@ -145,83 +146,101 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
         }
         initComponents();
         this.mc = mc;
-        activeLayerModel = (ActiveLayerModel)mc.getMappingModel();
+        activeLayerModel = (ActiveLayerModel) mc.getMappingModel();
         popupMenu = new JPopupMenu();
         up = new JMenuItem();
-        up.setText(org.openide.util.NbBundle.getMessage(
+        up.setText(
+            org.openide.util.NbBundle.getMessage(
                 NewSimpleInternalLayerWidget.class,
-                "NewSimpleInternalLayerWidget.up.text"));                         // NOI18N
+                "NewSimpleInternalLayerWidget.up.text"
+            )
+        ); // NOI18N
         up.setIcon(UP);
-        up.addActionListener(new ActionListener() {
-
+        up.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     final TreePath tp = treeTable.getTree().getSelectionPath();
                     if (tp != null) {
                         activeLayerModel.moveLayerUp(tp);
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 treeTable.getTree().setSelectionPath(tp);
                                 StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
         down = new JMenuItem();
-        down.setText(org.openide.util.NbBundle.getMessage(
+        down.setText(
+            org.openide.util.NbBundle.getMessage(
                 NewSimpleInternalLayerWidget.class,
-                "NewSimpleInternalLayerWidget.down.text")); // NOI18N
+                "NewSimpleInternalLayerWidget.down.text"
+            )
+        ); // NOI18N
         down.setIcon(DOWN);
-        down.addActionListener(new ActionListener() {
-
+        down.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     final TreePath tp = treeTable.getTree().getSelectionPath();
                     if (tp != null) {
                         activeLayerModel.moveLayerDown(tp);
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 treeTable.getTree().setSelectionPath(tp);
                                 StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
         dis = new JMenuItem();
-        dis.setText(org.openide.util.NbBundle.getMessage(
+        dis.setText(
+            org.openide.util.NbBundle.getMessage(
                 NewSimpleInternalLayerWidget.class,
-                "NewSimpleInternalLayerWidget.dis.text")); // NOI18N
+                "NewSimpleInternalLayerWidget.dis.text"
+            )
+        ); // NOI18N
         dis.setIcon(DISABLE);
-        dis.addActionListener(new ActionListener() {
-
+        dis.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     final TreePath tp = treeTable.getTree().getSelectionPath();
                     if (tp != null) {
                         activeLayerModel.disableLayer(tp);
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 treeTable.getTree().setSelectionPath(tp);
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
         del = new JMenuItem();
-        del.setText(org.openide.util.NbBundle.getMessage(
+        del.setText(
+            org.openide.util.NbBundle.getMessage(
                 NewSimpleInternalLayerWidget.class,
-                "NewSimpleInternalLayerWidget.del.text")); // NOI18N
+                "NewSimpleInternalLayerWidget.del.text"
+            )
+        ); // NOI18N
         del.setIcon(DELETE);
-        del.addActionListener(new ActionListener() {
-
+        del.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     final TreePath tp = treeTable.getTree().getSelectionPath();
@@ -229,37 +248,44 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                     if (tp != null) {
                         activeLayerModel.removeLayer(tp);
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 treeTable.getSelectionModel().setSelectionInterval(row, row);
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
         vis = new JMenuItem();
-        vis.setText(org.openide.util.NbBundle.getMessage(
+        vis.setText(
+            org.openide.util.NbBundle.getMessage(
                 NewSimpleInternalLayerWidget.class,
-                "NewSimpleInternalLayerWidget.vis.text")); // NOI18N
+                "NewSimpleInternalLayerWidget.vis.text"
+            )
+        ); // NOI18N
         vis.setIcon(INVISIBLE);
-        vis.addActionListener(new ActionListener() {
-
+        vis.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     final TreePath tp = treeTable.getTree().getSelectionPath();
                     if (tp != null) {
                         activeLayerModel.handleVisibility(tp);
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 treeTable.getTree().setSelectionPath(tp);
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
         popupMenu.add(up);
         popupMenu.add(down);
         popupMenu.addSeparator();
@@ -270,11 +296,11 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
         popupMenu.add(vis);
 
         try {
-            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);                         // NOI18N DropTarget dt
-                                                                                                 // = new
-                                                                                                 // DropTarget(this,
-                                                                                                 // acceptableActions,
-                                                                                                 // this);
+            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N DropTarget dt
+            // = new
+            // DropTarget(this,
+            // acceptableActions,
+            // this);
         } catch (Throwable t) {
             log.error("Fehler beim setzen der Client Property isPalette: " + t.getMessage(), t); // NOI18N
         }
@@ -283,13 +309,14 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             createTree();
         }
 
-        mc.addComponentListener(new ComponentAdapter() {
-
+        mc.addComponentListener(
+            new ComponentAdapter() {
                 @Override
                 public void componentResized(final ComponentEvent e) {
                     reshapeWidget(false);
                 }
-            });
+            }
+        );
 
         pack();
     }
@@ -303,7 +330,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
      */
     public void setMappingModel(final MappingModel mm) {
         if (mm instanceof ActiveLayerModel) {
-            this.activeLayerModel = (ActiveLayerModel)mm;
+            this.activeLayerModel = (ActiveLayerModel) mm;
             createTree();
         } else {
             log.info("MappingModel ist kein ActiveLayerModel, kann InternalWidget nicht erstellen"); // NOI18N
@@ -345,8 +372,8 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
      */
     private void createTree() {
         try {
-            treeTable = new JTreeTable(activeLayerModel) {
-
+            treeTable =
+                new JTreeTable(activeLayerModel) {
                     @Override
                     public JToolTip createToolTip() {
                         if (log.isDebugEnabled()) {
@@ -383,31 +410,35 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             treeTable.getColumnModel().getColumn(0).setCellRenderer(tableCellRenderer);
             treeTable.getColumnModel().getColumn(2).setCellRenderer(tableCellRenderer);
             treeTable.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
-            treeTable.getTree().getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
-
-                    @Override
-                    public void valueChanged(final TreeSelectionEvent e) {
-                        if (treeTable.getTree().getSelectionPath() != null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("ActiveLayerWidget: selectionChanged()\n" + e);      // NOI18N
-                            }
-                            try {
-                                final ActiveLayerEvent ale = new ActiveLayerEvent();
-                                ale.setLayer(treeTable.getTree().getSelectionPath().getLastPathComponent());
-                                if (ale.getLayer() instanceof WMSServiceLayer) {
-                                    ale.setCapabilities(((WMSServiceLayer)ale.getLayer()).getWmsCapabilities());
+            treeTable
+                .getTree()
+                .getSelectionModel()
+                .addTreeSelectionListener(
+                    new TreeSelectionListener() {
+                        @Override
+                        public void valueChanged(final TreeSelectionEvent e) {
+                            if (treeTable.getTree().getSelectionPath() != null) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("ActiveLayerWidget: selectionChanged()\n" + e); // NOI18N
                                 }
-                                CismapBroker.getInstance().fireLayerSelectionChanged(ale);
-                            } catch (Exception ex) {
-                                log.warn("Error at fireLayerSelectionChanged ... no problem"); // NOI18N
+                                try {
+                                    final ActiveLayerEvent ale = new ActiveLayerEvent();
+                                    ale.setLayer(treeTable.getTree().getSelectionPath().getLastPathComponent());
+                                    if (ale.getLayer() instanceof WMSServiceLayer) {
+                                        ale.setCapabilities(((WMSServiceLayer) ale.getLayer()).getWmsCapabilities());
+                                    }
+                                    CismapBroker.getInstance().fireLayerSelectionChanged(ale);
+                                } catch (Exception ex) {
+                                    log.warn("Error at fireLayerSelectionChanged ... no problem"); // NOI18N
+                                }
                             }
                         }
                     }
-                });
+                );
             treeTable.setGridColor(this.getBackground());
 
-            treeTable.addMouseListener(new MouseAdapter() {
-
+            treeTable.addMouseListener(
+                new MouseAdapter() {
                     @Override
                     public void mouseReleased(final MouseEvent e) {
                         if (e.isPopupTrigger()) {
@@ -421,18 +452,20 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                             popupMenu.show(e.getComponent(), e.getX(), e.getY());
                         }
                     }
-                });
+                }
+            );
 
             reshapeWidget(true);
             scpMain.setViewportView(treeTable);
 
-            addComponentListener(new ComponentAdapter() {
-
+            addComponentListener(
+                new ComponentAdapter() {
                     @Override
                     public void componentResized(final ComponentEvent e) {
                         treeTable.repaint();
                     }
-                });
+                }
+            );
         } catch (Exception ex) {
             log.error("Error during the creation of a TreeTable!", ex); // NOI18N
         }
@@ -448,121 +481,137 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
 
         setMinimumSize(new java.awt.Dimension(350, 50));
         setPreferredSize(new java.awt.Dimension(350, 100));
-        addKeyListener(new java.awt.event.KeyAdapter() {
-
+        addKeyListener(
+            new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyPressed(final java.awt.event.KeyEvent evt) {
                     formKeyPressed(evt);
                 }
-            });
+            }
+        );
 
         scpMain.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
         getContentPane().add(scpMain, java.awt.BorderLayout.CENTER);
 
         pack();
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formKeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_formKeyPressed
-    }                                                                //GEN-LAST:event_formKeyPressed
+    private void formKeyPressed(final java.awt.event.KeyEvent evt) {} //GEN-FIRST:event_formKeyPressed //GEN-LAST:event_formKeyPressed
 
     @Override
-    public void dragEnter(final DropTargetDragEvent dtde) {
-    }
+    public void dragEnter(final DropTargetDragEvent dtde) {}
 
     @Override
-    public void dragOver(final DropTargetDragEvent dtde) {
-    }
+    public void dragOver(final DropTargetDragEvent dtde) {}
 
     @Override
-    public void dropActionChanged(final DropTargetDragEvent dtde) {
-    }
+    public void dropActionChanged(final DropTargetDragEvent dtde) {}
 
     @Override
-    public void dragExit(final DropTargetEvent dte) {
-    }
+    public void dragExit(final DropTargetEvent dte) {}
 
     @Override
     public void drop(final DropTargetDropEvent dtde) {
         final DataFlavor TREEPATH_FLAVOR = new DataFlavor(
-                DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities");                                                                       // NOI18N
+            DataFlavor.javaJVMLocalObjectMimeType,
+            "SelectionAndCapabilities"
+        ); // NOI18N
         try {
             if (log.isDebugEnabled()) {
                 log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + "DataFlavours"); // NOI18N
             }
             for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
                 if (log.isDebugEnabled()) {
-                    log.debug("DataFlavour" + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);       // NOI18N
+                    log.debug("DataFlavour" + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]); // NOI18N
                 }
             }
             final Object trasferData = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
             final Vector treePaths = new Vector();
             dtde.dropComplete(true);
             if (trasferData instanceof SelectionAndCapabilities) {
-                final TreePath[] tpa = ((SelectionAndCapabilities)trasferData).getSelection();
+                final TreePath[] tpa = ((SelectionAndCapabilities) trasferData).getSelection();
                 for (int i = 0; i < tpa.length; ++i) {
                     treePaths.add(tpa[i]);
                 }
                 final WMSServiceLayer l = new WMSServiceLayer(treePaths);
                 if (l.getWMSLayers().size() > 0) {
                     if ((treeTable.getEditingRow() != -1) && (treeTable.getEditingColumn() != -1)) {
-                        treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
-                                .stopCellEditing();
+                        treeTable
+                            .getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
+                            .stopCellEditing();
                     }
-                    l.setWmsCapabilities(((SelectionAndCapabilities)trasferData).getCapabilities());
+                    l.setWmsCapabilities(((SelectionAndCapabilities) trasferData).getCapabilities());
                     activeLayerModel.addLayer(l);
                 }
-                l.setWmsCapabilities(((SelectionAndCapabilities)trasferData).getCapabilities());
-                l.setCapabilitiesUrl(((SelectionAndCapabilities)trasferData).getUrl());
+                l.setWmsCapabilities(((SelectionAndCapabilities) trasferData).getCapabilities());
+                l.setCapabilitiesUrl(((SelectionAndCapabilities) trasferData).getUrl());
                 if (log.isDebugEnabled()) {
-                    log.debug("((SelectionAndCapabilities)o).getUrl()"
-                                + ((SelectionAndCapabilities)trasferData).getUrl());                               // NOI18N
+                    log.debug(
+                        "((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) trasferData).getUrl()
+                    ); // NOI18N
                 }
-            }                                                                                                      // Drop-Objekt war ein WFS-Element
+            } // Drop-Objekt war ein WFS-Element
             else if (trasferData instanceof WFSSelectionAndCapabilities) {
-                final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)trasferData;
+                final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) trasferData;
                 for (final FeatureType feature : sac.getFeatures()) {
                     try {
-                        final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
-                                feature.getWFSCapabilities().getURL().toString(),
-                                feature.getWFSQuery(),
-                                feature.getFeatureAttributes(),
-                                feature);
+                        final WebFeatureService wfs = new WebFeatureService(
+                            feature.getPrefixedNameString(),
+                            feature.getWFSCapabilities().getURL().toString(),
+                            feature.getWFSQuery(),
+                            feature.getFeatureAttributes(),
+                            feature
+                        );
 
                         if (log.isDebugEnabled()) {
-                            log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()
-                                        + "' (EXPRESSIONTYPE_PROPERTYNAME)");                 // NOI18N
+                            log.debug(
+                                "setting PrimaryAnnotationExpression of WFS Layer to '" +
+                                sac.getIdentifier() +
+                                "' (EXPRESSIONTYPE_PROPERTYNAME)"
+                            ); // NOI18N
                         }
-                        wfs.getLayerProperties()
-                                .setPrimaryAnnotationExpression(sac.getIdentifier(),
-                                    LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                        wfs
+                            .getLayerProperties()
+                            .setPrimaryAnnotationExpression(
+                                sac.getIdentifier(),
+                                LayerProperties.EXPRESSIONTYPE_PROPERTYNAME
+                            );
                         activeLayerModel.addLayer(wfs);
                     } catch (IllegalArgumentException schonVorhanden) {
-                        JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
+                        JOptionPane.showMessageDialog(
+                            StaticSwingTools.getParentFrame(this),
                             org.openide.util.NbBundle.getMessage(
                                 LayerWidget.class,
-                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"
+                            ), // NOI18N
                             org.openide.util.NbBundle.getMessage(
                                 LayerWidget.class,
-                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),   // NOI18N
-                            JOptionPane.ERROR_MESSAGE);
+                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"
+                            ), // NOI18N
+                            JOptionPane.ERROR_MESSAGE
+                        );
                     }
                 }
                 scpMain.setViewportView(treeTable);
             }
         } catch (IllegalArgumentException schonVorhanden) {
-            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
+            JOptionPane.showMessageDialog(
+                StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
                     NewSimpleInternalLayerWidget.class,
-                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"
+                ), // NOI18N
                 org.openide.util.NbBundle.getMessage(
                     NewSimpleInternalLayerWidget.class,
-                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
+                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"
+                ), // NOI18N
+                JOptionPane.ERROR_MESSAGE
+            );
         } catch (Exception e) {
             log.error(e, e);
         }
@@ -617,8 +666,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
     }
 
     @Override
-    public void mapServiceLayerStructureChanged(final MappingModelEvent mme) {
-    }
+    public void mapServiceLayerStructureChanged(final MappingModelEvent mme) {}
 
     @Override
     public void mapServiceAdded(final MapService mapService) {

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * DeleteFeatureListener.java
  *
@@ -13,22 +13,6 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.*;
-
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.nodes.PText;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.geom.RoundRectangle2D;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -37,6 +21,18 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureAddEnti
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureAddHoleAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.nodes.PText;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.geom.RoundRectangle2D;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 
 /**
  * DOCUMENT ME!
@@ -76,10 +72,9 @@ public class DeleteFeatureListener extends PBasicInputEventHandler implements De
     @Override
     public void mouseMoved(final PInputEvent pInputEvent) {
         multiPolygonPointerAnnotation.setOffset(
-            pInputEvent.getCanvasPosition().getX()
-                    + 20.0d,
-            pInputEvent.getCanvasPosition().getY()
-                    + 20.0d);
+            pInputEvent.getCanvasPosition().getX() + 20.0d,
+            pInputEvent.getCanvasPosition().getY() + 20.0d
+        );
         final Collection selectedFeatures = mc.getFeatureCollection().getSelectedFeatures();
         if (selectedFeatures.size() != 1) {
             if (pInputEvent.isAltDown()) {
@@ -97,89 +92,114 @@ public class DeleteFeatureListener extends PBasicInputEventHandler implements De
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            final MappingComponent mappingComponent = (MappingComponent)pInputEvent.getComponent();
-            final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                    pInputEvent,
-                    new Class[] { PFeature.class },
-                    true);
+            final MappingComponent mappingComponent = (MappingComponent) pInputEvent.getComponent();
+            final PFeature clickedPFeature = (PFeature) PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class },
+                true
+            );
 
-            if ((clickedPFeature != null) && (clickedPFeature.getFeature() != null)
-                        && (allowedFeatureClassesToDelete != null)
-                        && (Arrays.binarySearch(
-                                allowedFeatureClassesToDelete,
-                                clickedPFeature.getFeature().getClass(),
-                                comparator) < 0)) {
+            if (
+                (clickedPFeature != null) &&
+                (clickedPFeature.getFeature() != null) &&
+                (allowedFeatureClassesToDelete != null) &&
+                (
+                    Arrays.binarySearch(
+                        allowedFeatureClassesToDelete,
+                        clickedPFeature.getFeature().getClass(),
+                        comparator
+                    ) <
+                    0
+                )
+            ) {
                 return;
             }
 
-            if (pInputEvent.isAltDown()) {                                                                              // alt-modifier => speziall-handling für
-                                                                                                                        // multipolygone
+            if (pInputEvent.isAltDown()) { // alt-modifier => speziall-handling für
+                // multipolygone
                 final Collection selectedFeatures = mappingComponent.getFeatureCollection().getSelectedFeatures();
-                if (selectedFeatures.size() == 1) {                                                                     // es ist genau ein feature selektiert
-                    final PFeature selectedPFeature = mappingComponent.getPFeatureHM()
-                                .get((Feature)selectedFeatures.toArray()[0]);
-                    if ((selectedPFeature != null) && selectedPFeature.getFeature().canBeSelected()
-                                && selectedPFeature.getFeature().isEditable()
-                                && ((selectedPFeature.getFeature().getGeometry() instanceof MultiPolygon)
-                                    || (selectedPFeature.getFeature().getGeometry() instanceof Polygon))) {
+                if (selectedFeatures.size() == 1) { // es ist genau ein feature selektiert
+                    final PFeature selectedPFeature = mappingComponent
+                        .getPFeatureHM()
+                        .get((Feature) selectedFeatures.toArray()[0]);
+                    if (
+                        (selectedPFeature != null) &&
+                        selectedPFeature.getFeature().canBeSelected() &&
+                        selectedPFeature.getFeature().isEditable() &&
+                        (
+                            (selectedPFeature.getFeature().getGeometry() instanceof MultiPolygon) ||
+                            (selectedPFeature.getFeature().getGeometry() instanceof Polygon)
+                        )
+                    ) {
                         if ((selectedPFeature.getNumOfEntities() == 1) && (selectedPFeature.equals(clickedPFeature))) { // hat nur ein teil-polygon
                             // "normales" löschen des geklickten features
                             deletePFeature(selectedPFeature, mappingComponent);
                         } else { // hat mehrere teil-polygone
                             // koordinate der maus berechnen
                             final Coordinate mouseCoord = new Coordinate(
-                                    mappingComponent.getWtst().getSourceX(
-                                        pInputEvent.getPosition().getX()
-                                                - mappingComponent.getClip_offset_x()),
-                                    mappingComponent.getWtst().getSourceY(
-                                        pInputEvent.getPosition().getY()
-                                                - mappingComponent.getClip_offset_y()));
+                                mappingComponent
+                                    .getWtst()
+                                    .getSourceX(pInputEvent.getPosition().getX() - mappingComponent.getClip_offset_x()),
+                                mappingComponent
+                                    .getWtst()
+                                    .getSourceY(pInputEvent.getPosition().getY() - mappingComponent.getClip_offset_y())
+                            );
                             // teil-polygon unter der maus suchen
                             final GeometryFactory geometryFactory = new GeometryFactory(
-                                    new PrecisionModel(PrecisionModel.FLOATING),
-                                    CrsTransformer.extractSridFromCrs(
-                                        mappingComponent.getMappingModel().getSrs().getCode()));
-                            final Point mousePoint = CrsTransformer.transformToGivenCrs(geometryFactory.createPoint(
-                                        mouseCoord),
-                                    CrsTransformer.createCrsFromSrid(
-                                        selectedPFeature.getFeature().getGeometry().getSRID()));
+                                new PrecisionModel(PrecisionModel.FLOATING),
+                                CrsTransformer.extractSridFromCrs(mappingComponent.getMappingModel().getSrs().getCode())
+                            );
+                            final Point mousePoint = CrsTransformer.transformToGivenCrs(
+                                geometryFactory.createPoint(mouseCoord),
+                                CrsTransformer.createCrsFromSrid(selectedPFeature.getFeature().getGeometry().getSRID())
+                            );
 
                             final int selectedEntityPosition = selectedPFeature.getEntityPositionUnderPoint(mousePoint);
                             if (selectedEntityPosition >= 0) { // gefunden => teil-polygon entfernen
                                 final Polygon entity = selectedPFeature.getEntityByPosition(selectedEntityPosition);
                                 selectedPFeature.removeEntity(selectedEntityPosition);
-                                mappingComponent.getMemUndo()
-                                        .addAction(new FeatureAddEntityAction(
-                                                mappingComponent,
-                                                selectedPFeature.getFeature(),
-                                                entity));
+                                mappingComponent
+                                    .getMemUndo()
+                                    .addAction(
+                                        new FeatureAddEntityAction(
+                                            mappingComponent,
+                                            selectedPFeature.getFeature(),
+                                            entity
+                                        )
+                                    );
                                 mappingComponent.getMemRedo().clear();
-                            } else {                           // nicht gefunden => es muss also ein loch sein => suchen
-                                                               // und entfernen (komplex)
+                            } else { // nicht gefunden => es muss also ein loch sein => suchen
+                                // und entfernen (komplex)
                                 final int entityPosition = selectedPFeature.getMostInnerEntityUnderPoint(mousePoint);
                                 final int holePosition = selectedPFeature.getHolePositionUnderPoint(
-                                        mousePoint,
-                                        entityPosition);
+                                    mousePoint,
+                                    entityPosition
+                                );
                                 final LineString hole = selectedPFeature.getHoleByPosition(
-                                        entityPosition,
-                                        holePosition);
+                                    entityPosition,
+                                    holePosition
+                                );
                                 selectedPFeature.removeHoleUnderPoint(mousePoint);
-                                mappingComponent.getMemUndo()
-                                        .addAction(new FeatureAddHoleAction(
-                                                mappingComponent,
-                                                selectedPFeature.getFeature(),
-                                                entityPosition,
-                                                hole));
+                                mappingComponent
+                                    .getMemUndo()
+                                    .addAction(
+                                        new FeatureAddHoleAction(
+                                            mappingComponent,
+                                            selectedPFeature.getFeature(),
+                                            entityPosition,
+                                            hole
+                                        )
+                                    );
                                 mappingComponent.getMemRedo().clear();
                             }
                         }
                     }
-                } else {                                       // mehrere features selektiert => alt-selektionsmodus
+                } else { // mehrere features selektiert => alt-selektionsmodus
                     if (clickedPFeature != null) {
                         mappingComponent.getFeatureCollection().select(clickedPFeature.getFeature());
                     }
                 }
-            } else {                                           // alt-modifier nicht gedrückt
+            } else { // alt-modifier nicht gedrückt
                 if (clickedPFeature != null) {
                     // geklicktes feature entfernen
                     deletePFeature(clickedPFeature, mappingComponent);
@@ -196,7 +216,7 @@ public class DeleteFeatureListener extends PBasicInputEventHandler implements De
      */
     private void deletePFeature(final PFeature pFeature, final MappingComponent mappingComponent) {
         if (pFeature.getFeature().isEditable() && pFeature.getFeature().canBeSelected()) {
-            featureRequestedForDeletion = (PFeature)pFeature.clone();
+            featureRequestedForDeletion = (PFeature) pFeature.clone();
             mappingComponent.getFeatureCollection().removeFeature(pFeature.getFeature());
             mappingComponent.getMemUndo().addAction(new FeatureCreateAction(mappingComponent, pFeature.getFeature()));
             mappingComponent.getMemRedo().clear();
@@ -275,22 +295,17 @@ public class DeleteFeatureListener extends PBasicInputEventHandler implements De
             final PText pText = new PText(text);
 
             final Font defaultFont = pText.getFont();
-            final Font boldDefaultFont = new Font(defaultFont.getName(),
-                    defaultFont.getStyle()
-                            + Font.BOLD,
-                    defaultFont.getSize());
+            final Font boldDefaultFont = new Font(
+                defaultFont.getName(),
+                defaultFont.getStyle() + Font.BOLD,
+                defaultFont.getSize()
+            );
             pText.setFont(boldDefaultFont);
             pText.setOffset(5, 5);
 
-            final PPath background = new PPath(new RoundRectangle2D.Double(
-                        0,
-                        0,
-                        pText.getWidth()
-                                + 15,
-                        pText.getHeight()
-                                + 15,
-                        10,
-                        10));
+            final PPath background = new PPath(
+                new RoundRectangle2D.Double(0, 0, pText.getWidth() + 15, pText.getHeight() + 15, 10, 10)
+            );
             background.setPaint(COLOR_BACKGROUND);
 
             background.addChild(pText);

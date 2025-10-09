@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
+import de.cismet.cismap.commons.Refreshable;
 import java.awt.Stroke;
-
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-
-import de.cismet.cismap.commons.Refreshable;
 
 /**
  * DOCUMENT ME!
@@ -21,7 +19,6 @@ import de.cismet.cismap.commons.Refreshable;
  * @version  $Revision$, $Date$
  */
 public interface XStyledFeature extends StyledFeature, FeatureNameProvider {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

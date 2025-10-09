@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction;
 
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -16,7 +16,6 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
  * @version  $Revision$, $Date$
  */
 public interface ActiveLayerListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 /*
@@ -20,7 +20,6 @@ package de.cismet.cismap.commons.rasterservice.georeferencing;
  * @version  $Revision$, $Date$
  */
 public interface RasterGeoReferencingHandlerListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,30 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice.java_iio;
 
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import java.awt.Image;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-
 import java.net.URL;
 import java.net.URLConnection;
-
 import java.util.Iterator;
-
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.event.IIOReadProgressListener;
 import javax.imageio.stream.ImageInputStream;
-
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 /**
  * DOCUMENT ME!
@@ -107,7 +102,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener {
             final Iterator it = ImageIO.getImageReadersByMIMEType(mimeType);
             // TODO: Hier kucken ob es \u00FCberhaupt einen Reader gibt
             if (it.hasNext()) {
-                ir = (ImageReader)it.next();
+                ir = (ImageReader) it.next();
                 ir.setInput(iis, true);
                 ir.addIIOReadProgressListener(this);
 
@@ -145,43 +140,35 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener {
     }
 
     @Override
-    public void imageComplete(final ImageReader source) {
-    }
+    public void imageComplete(final ImageReader source) {}
 
     @Override
     public void imageProgress(final ImageReader source, final float percentageDone) {
         if (!youngerCall) {
             final RetrievalEvent e = new RetrievalEvent();
-            e.setPercentageDone((int)percentageDone);
+            e.setPercentageDone((int) percentageDone);
             listener.retrievalProgress(e);
         }
     }
 
     @Override
-    public void imageStarted(final ImageReader source, final int imageIndex) {
-    }
+    public void imageStarted(final ImageReader source, final int imageIndex) {}
 
     @Override
-    public void readAborted(final ImageReader source) {
-    }
+    public void readAborted(final ImageReader source) {}
 
     @Override
-    public void sequenceComplete(final ImageReader source) {
-    }
+    public void sequenceComplete(final ImageReader source) {}
 
     @Override
-    public void sequenceStarted(final ImageReader source, final int minIndex) {
-    }
+    public void sequenceStarted(final ImageReader source, final int minIndex) {}
 
     @Override
-    public void thumbnailComplete(final ImageReader source) {
-    }
+    public void thumbnailComplete(final ImageReader source) {}
 
     @Override
-    public void thumbnailProgress(final ImageReader source, final float percentageDone) {
-    }
+    public void thumbnailProgress(final ImageReader source, final float percentageDone) {}
 
     @Override
-    public void thumbnailStarted(final ImageReader source, final int imageIndex, final int thumbnailIndex) {
-    }
+    public void thumbnailStarted(final ImageReader source, final int imageIndex, final int thumbnailIndex) {}
 }

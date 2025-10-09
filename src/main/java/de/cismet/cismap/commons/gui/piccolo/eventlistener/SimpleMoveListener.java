@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleMoveListener.java
  *
@@ -14,22 +14,6 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-
-import java.util.Collection;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
@@ -43,10 +27,20 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-
 import de.cismet.math.geometry.StaticGeometryFunctions;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.EventQueue;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.Collection;
 
 /**
  * DOCUMENT ME!
@@ -107,168 +101,185 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseMoved(final PInputEvent event) {
         final Runnable t = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        underlyingObject = null;
-                        final Object o;
-                        if (underlyingObjectHalo > 0.0d) {
-                            o = PFeatureTools.getFirstValidObjectUnderPointer2(
-                                    event,
-                                    new Class[] { PFeature.class },
-                                    underlyingObjectHalo);
-                        } else {
-                            o = PFeatureTools.getFirstValidObjectUnderPointer(
-                                    event,
-                                    new Class[] { PFeature.class },
-                                    deepSeekEnabled);
-                        }
-                        if (o instanceof PFeature) {
-                            underlyingObject = (PFeature)o;
-                        }
-                        if (underlyingObject != null) {
-                            if (mappingComponent.getInteractionMode().equals(MappingComponent.SELECT)
-                                        && ((!(underlyingObject.getFeature() instanceof RequestForUnaddableHandles)
-                                                && mappingComponent.getHandleInteractionMode().equals(
-                                                    MappingComponent.ADD_HANDLE))
-                                            || (!(underlyingObject.getFeature()
-                                                    instanceof RequestForNonreflectingFeature)
-                                                && mappingComponent.getHandleInteractionMode().equals(
-                                                    MappingComponent.REFLECT_POLYGON)))) {
-                                if ((mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
-//                                  no one knows, why the following condition was there
-//                                            && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-//                                                .getSelectedFeatures().size() == 1)
+            @Override
+            public void run() {
+                try {
+                    underlyingObject = null;
+                    final Object o;
+                    if (underlyingObjectHalo > 0.0d) {
+                        o =
+                            PFeatureTools.getFirstValidObjectUnderPointer2(
+                                event,
+                                new Class[] { PFeature.class },
+                                underlyingObjectHalo
+                            );
+                    } else {
+                        o =
+                            PFeatureTools.getFirstValidObjectUnderPointer(
+                                event,
+                                new Class[] { PFeature.class },
+                                deepSeekEnabled
+                            );
+                    }
+                    if (o instanceof PFeature) {
+                        underlyingObject = (PFeature) o;
+                    }
+                    if (underlyingObject != null) {
+                        if (
+                            mappingComponent.getInteractionMode().equals(MappingComponent.SELECT) &&
+                            (
+                                (
+                                    !(underlyingObject.getFeature() instanceof RequestForUnaddableHandles) &&
+                                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
+                                ) ||
+                                (
+                                    !(underlyingObject.getFeature() instanceof RequestForNonreflectingFeature) &&
+                                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)
+                                )
+                            )
+                        ) {
+                            if (
+                                (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
+                                //                                  no one knows, why the following condition was there
+                                //                                            && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                //                                                .getSelectedFeatures().size() == 1)
+                            ) {
+                                if (!newPointHandleExists()) {
+                                    createNewPointHandle();
+                                }
+                                if (
+                                    !(underlyingObject.getFeature() instanceof RequestForUnaddableHandles) &&
+                                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
                                 ) {
-                                    if (!newPointHandleExists()) {
-                                        createNewPointHandle();
-                                    }
-                                    if (!(underlyingObject.getFeature() instanceof RequestForUnaddableHandles)
-                                                && mappingComponent.getHandleInteractionMode().equals(
-                                                    MappingComponent.ADD_HANDLE)) {
-                                        newPointHandle.setPaint(COLOR_ADD_HANDLE);
-                                    } else if (!(underlyingObject.getFeature()
-                                                    instanceof RequestForNonreflectingFeature)
-                                                && mappingComponent.getHandleInteractionMode().equals(
-                                                    MappingComponent.REFLECT_POLYGON)) {
-                                        newPointHandle.setPaint(COLOR_REFLECT_HANDLE);
-                                    }
+                                    newPointHandle.setPaint(COLOR_ADD_HANDLE);
+                                } else if (
+                                    !(underlyingObject.getFeature() instanceof RequestForNonreflectingFeature) &&
+                                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)
+                                ) {
+                                    newPointHandle.setPaint(COLOR_REFLECT_HANDLE);
+                                }
 
-                                    if (event.isAltDown()) {
-                                        handleX = (float)event.getPosition().getX();
-                                        handleY = (float)event.getPosition().getY();
-                                    } else {
-                                        final Collection sel =
-                                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                    .getSelectedFeatures();
-                                        final Point2D trigger = event.getPosition();
-                                        final Point2D[] neighbours = getNearestNeighbours(trigger, sel);
+                                if (event.isAltDown()) {
+                                    handleX = (float) event.getPosition().getX();
+                                    handleY = (float) event.getPosition().getY();
+                                } else {
+                                    final Collection sel =
+                                        (
+                                            (DefaultFeatureCollection) mappingComponent.getFeatureCollection()
+                                        ).getSelectedFeatures();
+                                    final Point2D trigger = event.getPosition();
+                                    final Point2D[] neighbours = getNearestNeighbours(trigger, sel);
 
-                                        final Point2D p0 = neighbours[0];
-                                        final Point2D p1 = neighbours[1];
-                                        if ((p0 != null) && (p1 != null)) {
-                                            if (event.isShiftDown()) {
-                                                final Point2D p0i1 = new Point2D.Double(p0.getX(), p1.getY());
-                                                final Point2D p1i0 = new Point2D.Double(p1.getX(), p0.getY());
-                                                final Line2D lOrig = new Line2D.Double(p0, p1);
-                                                final Line2D lInversed = new Line2D.Double(p0i1, p1i0);
-                                                final Point2D erg = StaticGeometryFunctions.createIntersectionPoint(
-                                                        lOrig,
-                                                        lInversed);
-                                                handleX = (float)erg.getX();
-                                                handleY = (float)erg.getY();
-                                            } else {
-                                                final Point2D erg = StaticGeometryFunctions.createPointOnLine(
-                                                        p0,
-                                                        p1,
-                                                        trigger);
-                                                handleX = (float)erg.getX();
-                                                handleY = (float)erg.getY();
-                                            }
+                                    final Point2D p0 = neighbours[0];
+                                    final Point2D p1 = neighbours[1];
+                                    if ((p0 != null) && (p1 != null)) {
+                                        if (event.isShiftDown()) {
+                                            final Point2D p0i1 = new Point2D.Double(p0.getX(), p1.getY());
+                                            final Point2D p1i0 = new Point2D.Double(p1.getX(), p0.getY());
+                                            final Line2D lOrig = new Line2D.Double(p0, p1);
+                                            final Line2D lInversed = new Line2D.Double(p0i1, p1i0);
+                                            final Point2D erg = StaticGeometryFunctions.createIntersectionPoint(
+                                                lOrig,
+                                                lInversed
+                                            );
+                                            handleX = (float) erg.getX();
+                                            handleY = (float) erg.getY();
+                                        } else {
+                                            final Point2D erg = StaticGeometryFunctions.createPointOnLine(
+                                                p0,
+                                                p1,
+                                                trigger
+                                            );
+                                            handleX = (float) erg.getX();
+                                            handleY = (float) erg.getY();
                                         }
-                                        boolean found = false;
-                                        for (final Object po : mappingComponent.getHandleLayer().getChildrenReference()) {
-                                            if ((po instanceof PHandle) && ((PHandle)po == newPointHandle)) {
-                                                found = true;
-                                            }
-                                        }
-                                        if (!found) {
-                                            // EventQueue.invokeLater(new Runnable() {
-                                            // public void run() {
-                                            mappingComponent.getHandleLayer().addChild(newPointHandle);
-                                            LOG.info("tempor\u00E4res Handle eingef\u00FCgt"); // NOI18N
-                                            // }
-                                            // });
-                                        }
-                                        newPointHandle.relocateHandle();
                                     }
+                                    boolean found = false;
+                                    for (final Object po : mappingComponent.getHandleLayer().getChildrenReference()) {
+                                        if ((po instanceof PHandle) && ((PHandle) po == newPointHandle)) {
+                                            found = true;
+                                        }
+                                    }
+                                    if (!found) {
+                                        // EventQueue.invokeLater(new Runnable() {
+                                        // public void run() {
+                                        mappingComponent.getHandleLayer().addChild(newPointHandle);
+                                        LOG.info("tempor\u00E4res Handle eingef\u00FCgt"); // NOI18N
+                                        // }
+                                        // });
+                                    }
+                                    newPointHandle.relocateHandle();
                                 }
                             }
                         }
-                        final WorldToScreenTransform wtst = mappingComponent.getWtst();
+                    }
+                    final WorldToScreenTransform wtst = mappingComponent.getWtst();
 
-                        if (wtst == null) {
-                            return;
+                    if (wtst == null) {
+                        return;
+                    }
+                    xCoord = wtst.getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
+                    yCoord = wtst.getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
+
+                    refreshPointerAnnotation(event);
+
+                    postCoordinateChanged();
+                    try {
+                        mappingComponent.getSnapHandleLayer().removeAllChildren();
+                    } catch (Exception e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Fehler beim entfernen der SnappingVisualisierung", e); // NOI18N
                         }
-                        xCoord = wtst.getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
-                        yCoord = wtst.getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
+                    }
 
-                        refreshPointerAnnotation(event);
-
-                        postCoordinateChanged();
-                        try {
-                            mappingComponent.getSnapHandleLayer().removeAllChildren();
-                        } catch (Exception e) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Fehler beim entfernen der SnappingVisualisierung", e); // NOI18N
-                            }
-                        }
-
-                        if (mappingComponent.isVisualizeSnappingEnabled()) {
-                            final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
-                                    mappingComponent,
-                                    event.getCanvasPosition(),
-                                    true,
-                                    null);
-                            if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(
-                                            snappedPoint.getSnappedOn())) {
-                                final Point2D nearestPoint = snappedPoint.getPoint();
-                                mappingComponent.getCamera().viewToLocal(nearestPoint);
-                                final PPath show = PPath.createEllipse((float)(nearestPoint.getX() - 3),
-                                        (float)(nearestPoint.getY() - 3),
-                                        (float)(6),
-                                        (float)(6));
-                                switch (snappedPoint.getSnappedOn()) {
-                                    case POINT: {
+                    if (mappingComponent.isVisualizeSnappingEnabled()) {
+                        final PFeatureTools.SnappedPoint snappedPoint = PFeatureTools.getNearestPointInArea(
+                            mappingComponent,
+                            event.getCanvasPosition(),
+                            true,
+                            null
+                        );
+                        if (!PFeatureTools.SnappedPoint.SnappedOn.NOTHING.equals(snappedPoint.getSnappedOn())) {
+                            final Point2D nearestPoint = snappedPoint.getPoint();
+                            mappingComponent.getCamera().viewToLocal(nearestPoint);
+                            final PPath show = PPath.createEllipse(
+                                (float) (nearestPoint.getX() - 3),
+                                (float) (nearestPoint.getY() - 3),
+                                (float) (6),
+                                (float) (6)
+                            );
+                            switch (snappedPoint.getSnappedOn()) {
+                                case POINT:
+                                    {
                                         show.setPaint(Color.BLACK);
                                     }
                                     break;
-                                    case LINE: {
+                                case LINE:
+                                    {
                                         show.setPaint(Color.GRAY);
                                     }
                                     break;
-                                }
-                                mappingComponent.getSnapHandleLayer().addChild(show);
                             }
-                            if (mappingComponent.isVisualizeSnappingRectEnabled()) {
-                                snapRect.setVisible(true);
-                                snapRect.setPathToRectangle((int)event.getCanvasPosition().getX()
-                                            - (mappingComponent.getSnappingRectSize() / 2),
-                                    (int)event.getCanvasPosition().getY()
-                                            - (mappingComponent.getSnappingRectSize() / 2),
-                                    mappingComponent.getSnappingRectSize(),
-                                    mappingComponent.getSnappingRectSize());
-                            } else {
-                                snapRect.setVisible(false);
-                            }
+                            mappingComponent.getSnapHandleLayer().addChild(show);
                         }
-                    } catch (Exception e) {
-                        LOG.info("Fehler beim Moven \u00FCber die Karte ", e); // NOI18N
+                        if (mappingComponent.isVisualizeSnappingRectEnabled()) {
+                            snapRect.setVisible(true);
+                            snapRect.setPathToRectangle(
+                                (int) event.getCanvasPosition().getX() - (mappingComponent.getSnappingRectSize() / 2),
+                                (int) event.getCanvasPosition().getY() - (mappingComponent.getSnappingRectSize() / 2),
+                                mappingComponent.getSnappingRectSize(),
+                                mappingComponent.getSnappingRectSize()
+                            );
+                        } else {
+                            snapRect.setVisible(false);
+                        }
                     }
-                    handleHighlightingStuff(event);
+                } catch (Exception e) {
+                    LOG.info("Fehler beim Moven \u00FCber die Karte ", e); // NOI18N
                 }
-            };
+                handleHighlightingStuff(event);
+            }
+        };
         EventQueue.invokeLater(t);
     }
 
@@ -297,8 +308,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         if (LOG.isDebugEnabled()) {
             LOG.debug("create newPointHandle and Locator"); // NOI18N
         }
-        locator = new PLocator() {
-
+        locator =
+            new PLocator() {
                 @Override
                 public double locateX() {
                     return handleX;
@@ -309,8 +320,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     return handleY;
                 }
             };
-        newPointHandle = new PHandle(locator, mappingComponent) {
-
+        newPointHandle =
+            new PHandle(locator, mappingComponent) {
                 @Override
                 public void handleClicked(final PInputEvent e) {
                     SimpleMoveListener.this.mouseClicked(e);
@@ -334,12 +345,15 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         double dist = Double.POSITIVE_INFINITY;
         for (final Object o : sel) {
             if (o instanceof Feature) {
-                final Feature feature = (Feature)o;
-                final PFeature pfeature = (PFeature)mappingComponent.getPFeatureHM().get(feature);
+                final Feature feature = (Feature) o;
+                final PFeature pfeature = (PFeature) mappingComponent.getPFeatureHM().get(feature);
                 if (pfeature != null) {
                     final Geometry geometry = pfeature.getFeature().getGeometry();
-                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                                || (geometry instanceof MultiPolygon)) {
+                    if (
+                        (geometry instanceof Polygon) ||
+                        (geometry instanceof LineString) ||
+                        (geometry instanceof MultiPolygon)
+                    ) {
                         for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                             for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                                 final float[] xp = pfeature.getXp(entityIndex, ringIndex);
@@ -348,9 +362,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
                                     final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
                                     final double tmpDist = StaticGeometryFunctions.distanceToLine(
-                                            tmpStart,
-                                            tmpEnd,
-                                            trigger);
+                                        tmpStart,
+                                        tmpEnd,
+                                        trigger
+                                    );
                                     if (tmpDist < dist) {
                                         dist = tmpDist;
                                         start = tmpStart;
@@ -379,11 +394,12 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     private void handleHighlightingStuff(final PInputEvent event) {
         synchronized (handleHighlightingStuff) {
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                    event,
-                    new Class[] { PFeature.class, PHandle.class },
-                    deepSeekEnabled);
+                event,
+                new Class[] { PFeature.class, PHandle.class },
+                deepSeekEnabled
+            );
             try {
-                final PNode n = (PNode)o;
+                final PNode n = (PNode) o;
                 setMouseCursorAccordingToMode(n);
 
                 if (CismapBroker.getInstance().isHighlightFeatureOnMouseOver()) {
@@ -391,8 +407,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         if (highlighted != null) {
                             highlighted.setHighlighting(false);
                         }
-                        ((Highlightable)n).setHighlighting(true);
-                        highlighted = (Highlightable)n;
+                        ((Highlightable) n).setHighlighting(true);
+                        highlighted = (Highlightable) n;
                     } else if (highlighted != null) {
                         highlighted.setHighlighting(false);
                     }
@@ -432,14 +448,19 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(final PInputEvent event) {
         try {
-            if ((event.getClickCount() == 2) && mappingComponent.getInteractionMode().equals(MappingComponent.SELECT)
-                        && ((pFeature != null) && pFeature.isSelected())) {
+            if (
+                (event.getClickCount() == 2) &&
+                mappingComponent.getInteractionMode().equals(MappingComponent.SELECT) &&
+                ((pFeature != null) && pFeature.isSelected())
+            ) {
                 // Selektiertes Feature holen
-                final Collection sel = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                            .getSelectedFeatures();
+                final Collection sel =
+                    ((DefaultFeatureCollection) mappingComponent.getFeatureCollection()).getSelectedFeatures();
 
-                if (!(pFeature.getFeature() instanceof RequestForUnaddableHandles)
-                            && mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
+                if (
+                    !(pFeature.getFeature() instanceof RequestForUnaddableHandles) &&
+                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
+                ) {
                     // markiertes Handel auf der Linie holen
                     final Point2D newPoint = new Point2D.Float(handleX, handleY);
                     final Point2D[] neighbours = getNearestNeighbours(newPoint, sel);
@@ -460,8 +481,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 // Nachbar "1" ist weiter Links
                                 leftNeighbour = p1;
                                 rightNeighbour = p0;
-                            } else // Nachbar "0" und "1" liegen genau übereinander
-                            {
+                            } else { // Nachbar "0" und "1" liegen genau übereinander
                                 if (p0.getY() <= p1.getY()) {
                                     // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
                                     leftNeighbour = p0;
@@ -508,16 +528,26 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
                                 if (distanceTotal != 0) {
                                     // Handle-Koordinaten anhand des Abstands berechnen
-                                    handleX = (float)(leftNeighbour.getX()
-                                                    + ((rightNeighbour.getX() - leftNeighbour.getX())
-                                                        * (distanceLeft / distanceTotal)));
-                                    handleY = (float)(leftNeighbour.getY()
-                                                    + ((rightNeighbour.getY() - leftNeighbour.getY())
-                                                        * (distanceLeft / distanceTotal)));
+                                    handleX =
+                                        (float) (
+                                            leftNeighbour.getX() +
+                                            (
+                                                (rightNeighbour.getX() - leftNeighbour.getX()) *
+                                                (distanceLeft / distanceTotal)
+                                            )
+                                        );
+                                    handleY =
+                                        (float) (
+                                            leftNeighbour.getY() +
+                                            (
+                                                (rightNeighbour.getY() - leftNeighbour.getY()) *
+                                                (distanceLeft / distanceTotal)
+                                            )
+                                        );
                                 } else { // ist die Gesamtlänge 0
                                     // Handle-Koordinaten sind gleich die des linken Nachbarn
-                                    handleX = (float)leftNeighbour.getX();
-                                    handleY = (float)leftNeighbour.getY();
+                                    handleX = (float) leftNeighbour.getX();
+                                    handleY = (float) leftNeighbour.getY();
                                 }
                             } else { // wenn der Dialog nicht mit OK geschlossen wurde
                                 // nichts tun
@@ -528,8 +558,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     }
 
                     pFeature.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
-                } else if (!(pFeature.getFeature() instanceof RequestForNonreflectingFeature)
-                            && mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)) {
+                } else if (
+                    !(pFeature.getFeature() instanceof RequestForNonreflectingFeature) &&
+                    mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)
+                ) {
                     reflectFeature(pFeature, entityPosition, ringPosition, coordPosition - 1, coordPosition);
                 }
 
@@ -551,25 +583,29 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      * @param  leftCoordPosition   DOCUMENT ME!
      * @param  rightCoordPosition  DOCUMENT ME!
      */
-    private void reflectFeature(final PFeature pf,
-            final int entityPosition,
-            final int ringPosition,
-            final int leftCoordPosition,
-            final int rightCoordPosition) {
+    private void reflectFeature(
+        final PFeature pf,
+        final int entityPosition,
+        final int ringPosition,
+        final int leftCoordPosition,
+        final int rightCoordPosition
+    ) {
         final Geometry origGeom = pf.getFeature().getGeometry();
         final Coordinate[] coordArr = pf.getCoordArr(entityPosition, ringPosition);
-        final Geometry reflectGeom = AffineTransformation.reflectionInstance(
-                    coordArr[leftCoordPosition].x,
-                    coordArr[leftCoordPosition].y,
-                    coordArr[rightCoordPosition].x,
-                    coordArr[rightCoordPosition].y)
-                    .transform(origGeom);
+        final Geometry reflectGeom = AffineTransformation
+            .reflectionInstance(
+                coordArr[leftCoordPosition].x,
+                coordArr[leftCoordPosition].y,
+                coordArr[rightCoordPosition].x,
+                coordArr[rightCoordPosition].y
+            )
+            .transform(origGeom);
 
         final PureNewFeature reflectFeature = new PureNewFeature(reflectGeom);
 
         final PureNewFeature.geomTypes geomType;
         if (pf.getFeature() instanceof PureNewFeature) {
-            final PureNewFeature origPureNewFeature = (PureNewFeature)pf.getFeature();
+            final PureNewFeature origPureNewFeature = (PureNewFeature) pf.getFeature();
             geomType = origPureNewFeature.getGeometryType();
         } else if (reflectGeom instanceof MultiPolygon) {
             geomType = PureNewFeature.geomTypes.MULTIPOLYGON;
@@ -632,9 +668,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      */
     private void refreshPointerAnnotation(final PInputEvent event) {
         if (pointerAnnotation != null) {
-            pointerAnnotation.setOffset(event.getCanvasPosition().getX() + 20.0d,
-                event.getCanvasPosition().getY()
-                        + 20.0d);
+            pointerAnnotation.setOffset(
+                event.getCanvasPosition().getX() + 20.0d,
+                event.getCanvasPosition().getY() + 20.0d
+            );
         }
     }
 

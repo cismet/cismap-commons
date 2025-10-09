@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.features.AbstractNewFeature;
@@ -16,16 +16,15 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
  * @version  $Revision$, $Date$
  */
 public interface CreateGeometryListenerInterface {
-
     //~ Instance fields --------------------------------------------------------
 
-    String LINESTRING = "LINESTRING";                   // NOI18N
-    String POINT = "POINT";                             // NOI18N
-    String POLYGON = "POLYGON";                         // NOI18N
-    String RECTANGLE = "BOUNDING_BOX";                  // NOI18N
+    String LINESTRING = "LINESTRING"; // NOI18N
+    String POINT = "POINT"; // NOI18N
+    String POLYGON = "POLYGON"; // NOI18N
+    String RECTANGLE = "BOUNDING_BOX"; // NOI18N
     String RECTANGLE_FROM_LINE = "RECTANGLE_FROM_LINE"; // NOI18N
-    String ELLIPSE = "ELLIPSE";                         // NOI18N
-    String TEXT = "TEXT";                               // NOI18N
+    String ELLIPSE = "ELLIPSE"; // NOI18N
+    String TEXT = "TEXT"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 

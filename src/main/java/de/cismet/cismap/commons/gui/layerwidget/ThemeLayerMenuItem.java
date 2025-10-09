@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,14 +12,11 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import de.cismet.cismap.commons.ServiceLayer;
 import java.awt.event.ActionListener;
-
 import java.util.List;
-
 import javax.swing.JMenuItem;
 import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.ServiceLayer;
 
 /**
  * DOCUMENT ME!
@@ -136,6 +133,5 @@ public abstract class ThemeLayerMenuItem extends JMenuItem implements ActionList
      *
      * @param  paths  DOCUMENT ME!
      */
-    public void refreshText(final TreePath[] paths) {
-    }
+    public void refreshText(final TreePath[] paths) {}
 }

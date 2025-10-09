@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -24,8 +24,7 @@ public class UnknownDocumentException extends Exception {
     /**
      * Creates a new UnknownDocumentException object.
      */
-    public UnknownDocumentException() {
-    }
+    public UnknownDocumentException() {}
 
     /**
      * Creates a new UnknownDocumentException object.

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -19,35 +19,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import edu.umd.cs.piccolo.PNode;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
-
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.Stroke;
-import java.awt.image.BufferedImage;
-
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.imageio.ImageIO;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.features.ChildNodesProvider;
@@ -69,6 +40,26 @@ import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencin
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandlerListener;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizard;
 import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingWizardListener;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Stroke;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -76,16 +67,19 @@ import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencin
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyledFeature,
-    ChildNodesProvider,
-    RequestForUnaddableHandles,
-    RequestForUnmoveableHandles,
-    RequestForUnremovableHandles,
-    RequestForRotatingPivotLock,
-    RequestForNonreflectingFeature,
-    RequestForHidingHandles,
-    RasterGeoReferencingHandlerListener,
-    RasterGeoReferencingWizardListener {
+public class RasterGeoRefFeature
+    extends DefaultStyledFeature
+    implements
+        XStyledFeature,
+        ChildNodesProvider,
+        RequestForUnaddableHandles,
+        RequestForUnmoveableHandles,
+        RequestForUnremovableHandles,
+        RequestForRotatingPivotLock,
+        RequestForNonreflectingFeature,
+        RequestForHidingHandles,
+        RasterGeoReferencingHandlerListener,
+        RasterGeoReferencingWizardListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -98,24 +92,36 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     static {
         BufferedImage geoRefDotImage = null;
         try {
-            geoRefDotImage = ImageIO.read(RasterGeoRefFeature.class.getResource(
-                        "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_dot.png"));
+            geoRefDotImage =
+                ImageIO.read(
+                    RasterGeoRefFeature.class.getResource(
+                            "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_dot.png"
+                        )
+                );
         } catch (final IOException ex) {
             LOG.error("could not load the georref_dot image from resources");
         }
         GEOREF_DOT_IMAGE = geoRefDotImage;
         BufferedImage geoRefCrossImage = null;
         try {
-            geoRefCrossImage = ImageIO.read(RasterGeoRefFeature.class.getResource(
-                        "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png"));
+            geoRefCrossImage =
+                ImageIO.read(
+                    RasterGeoRefFeature.class.getResource(
+                            "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png"
+                        )
+                );
         } catch (final IOException ex) {
             LOG.error("could not load the georref_cross image from resources");
         }
         GEOREF_CROSS_IMAGE = geoRefCrossImage;
         BufferedImage geoRefIconImage = null;
         try {
-            geoRefIconImage = ImageIO.read(RasterGeoRefFeature.class.getResource(
-                        "/de/cismet/cismap/commons/rasterservice/georeferencing/georef.png"));
+            geoRefIconImage =
+                ImageIO.read(
+                    RasterGeoRefFeature.class.getResource(
+                            "/de/cismet/cismap/commons/rasterservice/georeferencing/georef.png"
+                        )
+                );
         } catch (final IOException ex) {
             LOG.error("could not load the georref_cross image from resources");
         }
@@ -147,68 +153,69 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
         RasterGeoReferencingWizard.getInstance().addListener(this);
         updateGeometry();
 
-        CismapBroker.getInstance()
-                .getMappingComponent()
-                .getFeatureCollection()
-                .addFeatureCollectionListener(new FeatureCollectionListener() {
+        CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .getFeatureCollection()
+            .addFeatureCollectionListener(
+                new FeatureCollectionListener() {
+                    boolean ignoreSelection = false;
 
-                        boolean ignoreSelection = false;
+                    @Override
+                    public void featuresAdded(final FeatureCollectionEvent fce) {
+                        // if (!isRefreshing() && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                        // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
+                        // }
+                    }
 
-                        @Override
-                        public void featuresAdded(final FeatureCollectionEvent fce) {
-                            // if (!isRefreshing() && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                            // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.GEO_REF);
-                            // }
-                        }
+                    @Override
+                    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {}
 
-                        @Override
-                        public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-                        }
+                    @Override
+                    public void featuresRemoved(final FeatureCollectionEvent fce) {
+                        // if (!isRefreshing()) { if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
+                        // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.SELECT);
+                        // } }
+                    }
 
-                        @Override
-                        public void featuresRemoved(final FeatureCollectionEvent fce) {
-                            // if (!isRefreshing()) { if (fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                            // CismapBroker.getInstance().getMappingComponent().setInteractionMode(MappingComponent.SELECT);
-                            // } }
-                        }
+                    @Override
+                    public void featuresChanged(final FeatureCollectionEvent fce) {}
 
-                        @Override
-                        public void featuresChanged(final FeatureCollectionEvent fce) {
-                        }
-
-                        @Override
-                        public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                            if ((fce != null) && (fce.getEventFeatures() != null)
-                                && fce.getEventFeatures().contains(RasterGeoRefFeature.this)) {
-                                if (fce.getFeatureCollection().getSelectedFeatures().contains(
-                                        RasterGeoRefFeature.this)) {
-                                    if (!ignoreSelection) {
-                                        ignoreSelection = true;
-                                        try {
-                                            RasterGeoReferencingWizard.getInstance().setHandler(handler);
-                                            CismapBroker.getInstance()
+                    @Override
+                    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                        if (
+                            (fce != null) &&
+                            (fce.getEventFeatures() != null) &&
+                            fce.getEventFeatures().contains(RasterGeoRefFeature.this)
+                        ) {
+                            if (fce.getFeatureCollection().getSelectedFeatures().contains(RasterGeoRefFeature.this)) {
+                                if (!ignoreSelection) {
+                                    ignoreSelection = true;
+                                    try {
+                                        RasterGeoReferencingWizard.getInstance().setHandler(handler);
+                                        CismapBroker
+                                            .getInstance()
                                             .getMappingComponent()
                                             .getFeatureCollection()
                                             .select(handler.getFeature());
-                                            // CismapBroker.getInstance()
-                                            // .getMappingComponent()
-                                            // .setInteractionMode(MappingComponent.GEO_REF);
-                                        } finally {
-                                            ignoreSelection = false;
-                                        }
+                                        // CismapBroker.getInstance()
+                                        // .getMappingComponent()
+                                        // .setInteractionMode(MappingComponent.GEO_REF);
+                                    } finally {
+                                        ignoreSelection = false;
                                     }
                                 }
                             }
                         }
+                    }
 
-                        @Override
-                        public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-                        }
+                    @Override
+                    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {}
 
-                        @Override
-                        public void featureCollectionChanged() {
-                        }
-                    });
+                    @Override
+                    public void featureCollectionChanged() {}
+                }
+            );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -220,33 +227,34 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
         final Rectangle envelope = getHandler().getMetaData().getImageBounds();
         final AffineTransformation transform = getHandler().getMetaData().getTransform();
         if ((envelope != null) && (transform != null)) {
-            final Coordinate upperLeftCoordinate = transform.transform(new Coordinate(
-                        envelope.getMinX(),
-                        envelope.getMinY()),
-                    new Coordinate());
-            final Coordinate upperRightCoordinate = transform.transform(new Coordinate(
-                        envelope.getMaxX(),
-                        envelope.getMinY()),
-                    new Coordinate());
-            final Coordinate lowerRightCoordinate = transform.transform(new Coordinate(
-                        envelope.getMaxX(),
-                        envelope.getMaxY()),
-                    new Coordinate());
-            final Coordinate lowerLeftCoordinate = transform.transform(new Coordinate(
-                        envelope.getMinX(),
-                        envelope.getMaxY()),
-                    new Coordinate());
+            final Coordinate upperLeftCoordinate = transform.transform(
+                new Coordinate(envelope.getMinX(), envelope.getMinY()),
+                new Coordinate()
+            );
+            final Coordinate upperRightCoordinate = transform.transform(
+                new Coordinate(envelope.getMaxX(), envelope.getMinY()),
+                new Coordinate()
+            );
+            final Coordinate lowerRightCoordinate = transform.transform(
+                new Coordinate(envelope.getMaxX(), envelope.getMaxY()),
+                new Coordinate()
+            );
+            final Coordinate lowerLeftCoordinate = transform.transform(
+                new Coordinate(envelope.getMinX(), envelope.getMaxY()),
+                new Coordinate()
+            );
 
             final Coordinate[] coordinates = new Coordinate[] {
-                    upperLeftCoordinate,
-                    upperRightCoordinate,
-                    lowerRightCoordinate,
-                    lowerLeftCoordinate,
-                    upperLeftCoordinate
-                };
+                upperLeftCoordinate,
+                upperRightCoordinate,
+                lowerRightCoordinate,
+                lowerLeftCoordinate,
+                upperLeftCoordinate,
+            };
             final GeometryFactory factory = new GeometryFactory(
-                    new PrecisionModel(),
-                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                new PrecisionModel(),
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+            );
             final LinearRing linear = factory.createLinearRing(coordinates);
             setGeometry(factory.createPolygon(linear, null));
         }
@@ -302,41 +310,41 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
         final PointCoordinatePair pair = getHandler().getPair(position);
         if ((pair != null) && (pair.getCoordinate() != null)) {
             final DerivedFixedPImage coordinateDFP = new DerivedFixedPImage(
-                    GEOREF_CROSS_IMAGE,
-                    parent,
-                    new DeriveRule() {
+                GEOREF_CROSS_IMAGE,
+                parent,
+                new DeriveRule() {
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        final GeometryFactory factory = new GeometryFactory(
+                            new PrecisionModel(),
+                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+                        );
 
-                        @Override
-                        public Geometry derive(final Geometry in) {
-                            final GeometryFactory factory = new GeometryFactory(
-                                    new PrecisionModel(),
-                                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-
-                            return factory.createPoint(pair.getCoordinate());
-                        }
-                    });
+                        return factory.createPoint(pair.getCoordinate());
+                    }
+                }
+            );
             coordinateDFP.setMultiplier(0.25);
             coordinateDFP.setSweetSpotX(0.5);
             coordinateDFP.setSweetSpotY(0.5);
             getChildren().add(coordinateDFP);
 
-            final DerivedFixedPImage textDFP = new DerivedFixedPImage(createImageFromText(
-                        Integer.toString(position + 1),
-                        30,
-                        30),
-                    parent,
-                    new DeriveRule() {
+            final DerivedFixedPImage textDFP = new DerivedFixedPImage(
+                createImageFromText(Integer.toString(position + 1), 30, 30),
+                parent,
+                new DeriveRule() {
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        final GeometryFactory factory = new GeometryFactory(
+                            new PrecisionModel(),
+                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+                        );
 
-                        @Override
-                        public Geometry derive(final Geometry in) {
-                            final GeometryFactory factory = new GeometryFactory(
-                                    new PrecisionModel(),
-                                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
-
-                            final Point center = factory.createPoint(pair.getCoordinate());
-                            return center;
-                        }
-                    });
+                        final Point center = factory.createPoint(pair.getCoordinate());
+                        return center;
+                    }
+                }
+            );
 
             textDFP.setSweetSpotX(1);
             textDFP.setSweetSpotY(1);
@@ -356,48 +364,42 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
             final AffineTransformation transform = getHandler().getMetaData().getTransform();
             if (transform != null) {
                 final DerivedFixedPImage pointDFP = new DerivedFixedPImage(
-                        GEOREF_DOT_IMAGE,
-                        parent,
-                        new DeriveRule() {
-
-                            @Override
-                            public Geometry derive(final Geometry in) {
-                                final GeometryFactory factory = new GeometryFactory(
-                                        new PrecisionModel(),
-                                        CrsTransformer.extractSridFromCrs(
-                                            CismapBroker.getInstance().getSrs().getCode()));
-                                return transform.transform(
-                                        factory.createPoint(
-                                            new Coordinate(
-                                                pair.getPoint().getX(),
-                                                pair.getPoint().getY())));
-                            }
-                        });
+                    GEOREF_DOT_IMAGE,
+                    parent,
+                    new DeriveRule() {
+                        @Override
+                        public Geometry derive(final Geometry in) {
+                            final GeometryFactory factory = new GeometryFactory(
+                                new PrecisionModel(),
+                                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+                            );
+                            return transform.transform(
+                                factory.createPoint(new Coordinate(pair.getPoint().getX(), pair.getPoint().getY()))
+                            );
+                        }
+                    }
+                );
                 pointDFP.setMultiplier(0.25);
                 pointDFP.setSweetSpotX(0.5);
                 pointDFP.setSweetSpotY(0.5);
                 getChildren().add(pointDFP);
 
-                final DerivedFixedPImage textDFP = new DerivedFixedPImage(createImageFromText(
-                            Integer.toString(position + 1),
-                            30,
-                            30),
-                        parent,
-                        new DeriveRule() {
-
-                            @Override
-                            public Geometry derive(final Geometry in) {
-                                final GeometryFactory factory = new GeometryFactory(
-                                        new PrecisionModel(),
-                                        CrsTransformer.extractSridFromCrs(
-                                            CismapBroker.getInstance().getSrs().getCode()));
-                                return transform.transform(
-                                        factory.createPoint(
-                                            new Coordinate(
-                                                pair.getPoint().getX(),
-                                                pair.getPoint().getY())));
-                            }
-                        });
+                final DerivedFixedPImage textDFP = new DerivedFixedPImage(
+                    createImageFromText(Integer.toString(position + 1), 30, 30),
+                    parent,
+                    new DeriveRule() {
+                        @Override
+                        public Geometry derive(final Geometry in) {
+                            final GeometryFactory factory = new GeometryFactory(
+                                new PrecisionModel(),
+                                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+                            );
+                            return transform.transform(
+                                factory.createPoint(new Coordinate(pair.getPoint().getX(), pair.getPoint().getY()))
+                            );
+                        }
+                    }
+                );
                 textDFP.setSweetSpotX(0);
                 textDFP.setSweetSpotY(0);
                 getChildren().add(textDFP);
@@ -417,9 +419,7 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     private BufferedImage createImageFromText(final String text, final int width, final int height) {
         final Font font = new Font("Arial", Font.BOLD, 12);
 
-        final BufferedImage image = new BufferedImage(width,
-                height,
-                BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         final Graphics2D g2d = image.createGraphics();
         g2d.setComposite(AlphaComposite.Clear);
         g2d.fillRect(0, 0, width, height);
@@ -430,8 +430,9 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
         final FontMetrics metrics = g2d.getFontMetrics(font);
         g2d.drawString(
             text,
-            (float)((width / 2f) - (metrics.stringWidth(text) / 2f)),
-            (float)((height / 2f) - (metrics.getHeight() / 2f) + metrics.getAscent()));
+            (float) ((width / 2f) - (metrics.stringWidth(text) / 2f)),
+            (float) ((height / 2f) - (metrics.getHeight() / 2f) + metrics.getAscent())
+        );
         g2d.dispose();
 
         return image;
@@ -451,27 +452,30 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     private void refresh() {
         getChildren().clear();
         updateGeometry();
-        SwingUtilities.invokeLater(new Runnable() {
-
+        SwingUtilities.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     try {
                         setRefreshing(true);
-                        CismapBroker.getInstance()
+                        CismapBroker
+                            .getInstance()
+                            .getMappingComponent()
+                            .getFeatureCollection()
+                            .removeFeature(RasterGeoRefFeature.this);
+                        if (getGeometry() != null) {
+                            CismapBroker
+                                .getInstance()
                                 .getMappingComponent()
                                 .getFeatureCollection()
-                                .removeFeature(RasterGeoRefFeature.this);
-                        if (getGeometry() != null) {
-                            CismapBroker.getInstance()
-                                    .getMappingComponent()
-                                    .getFeatureCollection()
-                                    .addFeature(RasterGeoRefFeature.this);
+                                .addFeature(RasterGeoRefFeature.this);
                         }
                     } finally {
                         setRefreshing(false);
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override
@@ -495,12 +499,10 @@ public class RasterGeoRefFeature extends DefaultStyledFeature implements XStyled
     }
 
     @Override
-    public void pointSelected(final int position) {
-    }
+    public void pointSelected(final int position) {}
 
     @Override
-    public void coordinateSelected(final int position) {
-    }
+    public void coordinateSelected(final int position) {}
 
     @Override
     public void handlerChanged(final RasterGeoReferencingHandler handler) {

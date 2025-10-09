@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,18 +12,10 @@
 package de.cismet.cismap.commons.rasterservice;
 
 import com.vividsolutions.jts.geom.Envelope;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.io.geotiff.GeoTiffException;
-import org.deegree.io.geotiff.GeoTiffReader;
-
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -31,19 +23,18 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import javax.imageio.ImageIO;
-
 import javax.swing.JOptionPane;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingBackend;
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.log4j.Logger;
+import org.deegree.io.geotiff.GeoTiffException;
+import org.deegree.io.geotiff.GeoTiffReader;
+import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 /**
  * Loads map sections from image files.
@@ -65,13 +56,34 @@ public class ImageFileRetrieval extends Thread {
      * @version  $Revision$, $Date$
      */
 
-    @Getter @Setter private int width;
-    @Getter @Setter private int height;
-    @Getter @Setter private double x1;
-    @Getter @Setter private double x2;
-    @Getter @Setter private double y1;
-    @Getter @Setter private double y2;
-    @Getter @Setter private File imageFile;
+    @Getter
+    @Setter
+    private int width;
+
+    @Getter
+    @Setter
+    private int height;
+
+    @Getter
+    @Setter
+    private double x1;
+
+    @Getter
+    @Setter
+    private double x2;
+
+    @Getter
+    @Setter
+    private double y1;
+
+    @Getter
+    @Setter
+    private double y2;
+
+    @Getter
+    @Setter
+    private File imageFile;
+
     private RetrievalListener listener = null;
     private volatile boolean youngerCall = false;
     private ImageFileMetaData metaData;
@@ -86,9 +98,7 @@ public class ImageFileRetrieval extends Thread {
      * @param  listener   DOCUMENT ME!
      * @param  mode       DOCUMENT ME!
      */
-    public ImageFileRetrieval(final File imageFile,
-            final RetrievalListener listener,
-            final ImageFileUtils.Mode mode) {
+    public ImageFileRetrieval(final File imageFile, final RetrievalListener listener, final ImageFileUtils.Mode mode) {
         super("ImageFileRetrieval");
         this.imageFile = imageFile;
         this.listener = listener;
@@ -117,15 +127,17 @@ public class ImageFileRetrieval extends Thread {
             if (metaData == null) {
                 final RetrievalEvent re = new RetrievalEvent();
 
-                JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                JOptionPane.showMessageDialog(
+                    CismapBroker.getInstance().getMappingComponent(),
                     NbBundle.getMessage(ImageFileRetrieval.class, "ImageFileRetrieval.run().message"),
                     NbBundle.getMessage(ImageFileRetrieval.class, "ImageFileRetrieval.run().title"),
-                    JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE
+                );
 
                 re.setIsComplete(false);
-                re.setRetrievedObject(NbBundle.getMessage(
-                        ImageFileRetrieval.class,
-                        "ImageFileRetrieval.run().message"));
+                re.setRetrievedObject(
+                    NbBundle.getMessage(ImageFileRetrieval.class, "ImageFileRetrieval.run().message")
+                );
                 re.setErrorType(RetrievalEvent.CLIENTERROR);
                 listener.retrievalError(re);
 
@@ -160,8 +172,7 @@ public class ImageFileRetrieval extends Thread {
                 try {
                     final String cause = ex.getCause().getMessage();
                     re.setRetrievedObject(cause);
-                } catch (Exception ee) {
-                }
+                } catch (Exception ee) {}
             } else {
                 re.setRetrievedObject(ex.getMessage());
                 re.setErrorType(RetrievalEvent.CLIENTERROR);
@@ -181,14 +192,16 @@ public class ImageFileRetrieval extends Thread {
      *
      * @return  DOCUMENT ME!
      */
-    private Rectangle getClippingRect(final Rectangle.Double mapWorldBounds,
-            final Point.Double imageMapWorldOffset,
-            final Rectangle imageBounds,
-            final AffineTransform worldFileTransform) {
-        int mapPartStartX = (int)Math.floor(-imageMapWorldOffset.getX() / worldFileTransform.getScaleX());
-        int mapPartStartY = (int)Math.floor(-imageMapWorldOffset.getY() / -worldFileTransform.getScaleY());
-        int mapPartWidth = (int)Math.ceil(mapWorldBounds.getWidth() / worldFileTransform.getScaleX()) + 1;
-        int mapPartHeight = (int)Math.ceil(mapWorldBounds.getHeight() / -worldFileTransform.getScaleY()) + 1;
+    private Rectangle getClippingRect(
+        final Rectangle.Double mapWorldBounds,
+        final Point.Double imageMapWorldOffset,
+        final Rectangle imageBounds,
+        final AffineTransform worldFileTransform
+    ) {
+        int mapPartStartX = (int) Math.floor(-imageMapWorldOffset.getX() / worldFileTransform.getScaleX());
+        int mapPartStartY = (int) Math.floor(-imageMapWorldOffset.getY() / -worldFileTransform.getScaleY());
+        int mapPartWidth = (int) Math.ceil(mapWorldBounds.getWidth() / worldFileTransform.getScaleX()) + 1;
+        int mapPartHeight = (int) Math.ceil(mapWorldBounds.getHeight() / -worldFileTransform.getScaleY()) + 1;
 
         if (mapPartStartX < 0) {
             mapPartStartX = 0;
@@ -199,10 +212,10 @@ public class ImageFileRetrieval extends Thread {
             mapPartHeight += mapPartStartY;
         }
         if ((mapPartStartX + mapPartWidth) > imageBounds.getWidth()) {
-            mapPartWidth = (int)imageBounds.getWidth() - mapPartStartX;
+            mapPartWidth = (int) imageBounds.getWidth() - mapPartStartX;
         }
         if ((mapPartStartY + mapPartHeight) > imageBounds.getHeight()) {
-            mapPartHeight = (int)imageBounds.getHeight() - mapPartStartY;
+            mapPartHeight = (int) imageBounds.getHeight() - mapPartStartY;
         }
 
         return new Rectangle(mapPartStartX, mapPartStartY, mapPartWidth, mapPartHeight);
@@ -219,9 +232,8 @@ public class ImageFileRetrieval extends Thread {
      * @throws  InterruptedException             DOCUMENT ME!
      * @throws  NoninvertibleTransformException  DOCUMENT ME!
      */
-    private BufferedImage createImage(final ImageFileMetaData metaData) throws IOException,
-        InterruptedException,
-        NoninvertibleTransformException {
+    private BufferedImage createImage(final ImageFileMetaData metaData)
+        throws IOException, InterruptedException, NoninvertibleTransformException {
         if (metaData.getTransform() == null) {
             final Envelope en = metaData.getImageEnvelope();
             final Rectangle rec = metaData.getImageBounds();
@@ -229,12 +241,13 @@ public class ImageFileRetrieval extends Thread {
         } else {
             final double[] matrix = metaData.getTransform().getMatrixEntries();
             final AffineTransform worldFileTransform = new AffineTransform(
-                    matrix[0],
-                    matrix[3],
-                    matrix[1],
-                    matrix[4],
-                    matrix[2],
-                    matrix[5]);
+                matrix[0],
+                matrix[3],
+                matrix[1],
+                matrix[4],
+                matrix[2],
+                matrix[5]
+            );
 
             // bounds in pixel dimensions
             final Rectangle mapBounds = new Rectangle(width, height);
@@ -246,20 +259,18 @@ public class ImageFileRetrieval extends Thread {
 
             // the offset of the image in relation to the map in world dimensions
             final Point.Double imageMapWorldOffset = new Point.Double(
-                    imageWorldBounds.getMinX()
-                            - mapWorldBounds.getMinX(),
-                    mapWorldBounds.getMaxY()
-                            - imageWorldBounds.getMaxY());
+                imageWorldBounds.getMinX() - mapWorldBounds.getMinX(),
+                mapWorldBounds.getMaxY() - imageWorldBounds.getMaxY()
+            );
 
             // meter per pixel ration (the better appropriate "Dimension" class only supports Integers
             // so we are using Rectangle.Double instead)
             final Rectangle.Double meterPerPixel = new Rectangle.Double(
-                    0,
-                    0,
-                    mapWorldBounds.getWidth()
-                            / mapBounds.getWidth(),
-                    mapWorldBounds.getHeight()
-                            / mapBounds.getHeight());
+                0,
+                0,
+                mapWorldBounds.getWidth() / mapBounds.getWidth(),
+                mapWorldBounds.getHeight() / mapBounds.getHeight()
+            );
 
             // LOAD RAW IMAGE
             BufferedImage rawImage = ImageIO.read(imageFile);
@@ -272,23 +283,27 @@ public class ImageFileRetrieval extends Thread {
             if ((worldFileTransform.getShearX() == 0) && (worldFileTransform.getShearY() == 0)) {
                 // calculating clipping rectangle
                 final Rectangle clippingRect = getClippingRect(
-                        mapWorldBounds,
-                        imageMapWorldOffset,
-                        imageBounds,
-                        worldFileTransform);
+                    mapWorldBounds,
+                    imageMapWorldOffset,
+                    imageBounds,
+                    worldFileTransform
+                );
 
                 // the clipped image does not start at the same positon. an offset is needed to compensate for this
-                clippingWorldOffset = new Point.Double(
-                        clippingRect.getX()
-                                * worldFileTransform.getScaleX(),
-                        -clippingRect.getY()
-                                * worldFileTransform.getScaleY());
+                clippingWorldOffset =
+                    new Point.Double(
+                        clippingRect.getX() * worldFileTransform.getScaleX(),
+                        -clippingRect.getY() * worldFileTransform.getScaleY()
+                    );
                 if ((clippingRect.getWidth() >= 0) && (clippingRect.getHeight() >= 0)) {
                     // clipping the image
-                    clippedImage = rawImage.getSubimage((int)clippingRect.getX(),
-                            (int)clippingRect.getY(),
-                            (int)clippingRect.getWidth(),
-                            (int)clippingRect.getHeight());
+                    clippedImage =
+                        rawImage.getSubimage(
+                            (int) clippingRect.getX(),
+                            (int) clippingRect.getY(),
+                            (int) clippingRect.getWidth(),
+                            (int) clippingRect.getHeight()
+                        );
                 } else {
                     clippedImage = null;
                 }
@@ -308,16 +323,13 @@ public class ImageFileRetrieval extends Thread {
             // (Not very elegant to do this, but it works)
             // scaling and shearing = worldfile scaling/shearing divided by meterPerPixel
             final AffineTransform transformation = new AffineTransform(
-                    worldFileTransform.getScaleX()
-                            / meterPerPixel.getWidth(),
-                    -worldFileTransform.getShearY()
-                            / meterPerPixel.getHeight(),
-                    worldFileTransform.getShearX()
-                            / meterPerPixel.getWidth(),
-                    -worldFileTransform.getScaleY()
-                            / meterPerPixel.getHeight(),
-                    0,
-                    0);
+                worldFileTransform.getScaleX() / meterPerPixel.getWidth(),
+                -worldFileTransform.getShearY() / meterPerPixel.getHeight(),
+                worldFileTransform.getShearX() / meterPerPixel.getWidth(),
+                -worldFileTransform.getScaleY() / meterPerPixel.getHeight(),
+                0,
+                0
+            );
 
             // The x/y coordinate of the transformed (but not yet translated) is either 0
             // or negative. This is important, because negative values hav to be added to the offset
@@ -326,16 +338,15 @@ public class ImageFileRetrieval extends Thread {
             // We apply now the full transormation to the image
             // position = combined world offsets divided by meterPerPixel
             final AffineTransform transformation2 = new AffineTransform(
-                    transformation.getScaleX(),
-                    transformation.getShearY(),
-                    transformation.getShearX(),
-                    transformation.getScaleY(),
-                    ((imageMapWorldOffset.getX() + clippingWorldOffset.getX())
-                                / meterPerPixel.getWidth())
-                            - shapeBounds.getX(),
-                    ((imageMapWorldOffset.getY() + clippingWorldOffset.getY())
-                                / meterPerPixel.getHeight())
-                            - shapeBounds.getY());
+                transformation.getScaleX(),
+                transformation.getShearY(),
+                transformation.getShearX(),
+                transformation.getScaleY(),
+                ((imageMapWorldOffset.getX() + clippingWorldOffset.getX()) / meterPerPixel.getWidth()) -
+                shapeBounds.getX(),
+                ((imageMapWorldOffset.getY() + clippingWorldOffset.getY()) / meterPerPixel.getHeight()) -
+                shapeBounds.getY()
+            );
             final BufferedImage transformedImage = transform(transformation2, clippedImage);
 
             // cleaning memory
@@ -358,13 +369,13 @@ public class ImageFileRetrieval extends Thread {
      * @throws  InterruptedException  DOCUMENT ME!
      */
     private BufferedImage createImage(final Rectangle origImageBounds, final Envelope origImageCoords)
-            throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
         final double meterPerPixelWidth = origImageCoords.getWidth() / origImageBounds.getWidth();
         final double meterPerPixelHeight = origImageCoords.getHeight() / origImageBounds.getHeight();
-        int mapPartStartX = (int)((x1 - origImageCoords.getMinX()) / meterPerPixelWidth);
-        int mapPartStartY = (int)((origImageCoords.getMaxY() - y2) / meterPerPixelHeight);
-        int mapPartWidth = (int)((x2 - x1) / meterPerPixelWidth);
-        int mapPartHeight = (int)((y2 - y1) / meterPerPixelHeight);
+        int mapPartStartX = (int) ((x1 - origImageCoords.getMinX()) / meterPerPixelWidth);
+        int mapPartStartY = (int) ((origImageCoords.getMaxY() - y2) / meterPerPixelHeight);
+        int mapPartWidth = (int) ((x2 - x1) / meterPerPixelWidth);
+        int mapPartHeight = (int) ((y2 - y1) / meterPerPixelHeight);
         int imageWidth = width;
         int imageHeight = height;
         int borderLeft = 0;
@@ -375,7 +386,7 @@ public class ImageFileRetrieval extends Thread {
         if (mapPartStartX < 0) {
             // add left border
             mapPartWidth -= Math.abs(mapPartStartX);
-            borderLeft = (int)(Math.abs(mapPartStartX) * meterPerPixelWidth / ((x2 - x1) / width));
+            borderLeft = (int) (Math.abs(mapPartStartX) * meterPerPixelWidth / ((x2 - x1) / width));
             imageWidth -= borderLeft;
             mapPartStartX = 0;
         }
@@ -383,24 +394,32 @@ public class ImageFileRetrieval extends Thread {
         if (mapPartStartY < 0) {
             // add top border
             mapPartHeight -= Math.abs(mapPartStartY);
-            borderTop = (int)(Math.abs(mapPartStartY) * meterPerPixelHeight / ((y2 - y1) / height));
+            borderTop = (int) (Math.abs(mapPartStartY) * meterPerPixelHeight / ((y2 - y1) / height));
             imageHeight -= borderTop;
             mapPartStartY = 0;
         }
 
         if ((mapPartStartX + mapPartWidth) > origImageBounds.getWidth()) {
             // add right border
-            borderRight = (int)(((mapPartStartX + mapPartWidth) - origImageBounds.getWidth()) * meterPerPixelWidth
-                            / ((x2 - x1) / width));
-            mapPartWidth = ((int)origImageBounds.getWidth() - mapPartStartX);
+            borderRight =
+                (int) (
+                    ((mapPartStartX + mapPartWidth) - origImageBounds.getWidth()) *
+                    meterPerPixelWidth /
+                    ((x2 - x1) / width)
+                );
+            mapPartWidth = ((int) origImageBounds.getWidth() - mapPartStartX);
             imageWidth = imageWidth - borderRight;
         }
 
         if ((mapPartStartY + mapPartHeight) > origImageBounds.getHeight()) {
             // add bottom border
-            borderBottom = (int)(((mapPartStartY + mapPartHeight) - origImageBounds.getHeight()) * meterPerPixelHeight
-                            / ((y2 - y1) / height));
-            mapPartHeight = ((int)origImageBounds.getHeight() - mapPartStartY);
+            borderBottom =
+                (int) (
+                    ((mapPartStartY + mapPartHeight) - origImageBounds.getHeight()) *
+                    meterPerPixelHeight /
+                    ((y2 - y1) / height)
+                );
+            mapPartHeight = ((int) origImageBounds.getHeight() - mapPartStartY);
             imageHeight = imageHeight - borderBottom;
         }
 
@@ -418,14 +437,15 @@ public class ImageFileRetrieval extends Thread {
         }
 
         final BufferedImage rescaledImage = rescale(
-                imageWidth,
-                imageHeight,
-                borderLeft,
-                borderRight,
-                borderTop,
-                borderBottom,
-                BufferedImage.TYPE_INT_ARGB,
-                imagePart);
+            imageWidth,
+            imageHeight,
+            borderLeft,
+            borderRight,
+            borderTop,
+            borderBottom,
+            BufferedImage.TYPE_INT_ARGB,
+            imagePart
+        );
 
         imagePart = null;
         System.gc();
@@ -447,14 +467,16 @@ public class ImageFileRetrieval extends Thread {
      *
      * @return  DOCUMENT ME!
      */
-    private BufferedImage rescale(final int width,
-            final int height,
-            final int borderLeft,
-            final int borderRight,
-            final int borderTop,
-            final int borderBottom,
-            final int type,
-            final BufferedImage image) {
+    private BufferedImage rescale(
+        final int width,
+        final int height,
+        final int borderLeft,
+        final int borderRight,
+        final int borderTop,
+        final int borderBottom,
+        final int type,
+        final BufferedImage image
+    ) {
         final int totalWdth = width + borderLeft + borderRight;
         final int totalHeight = height + borderTop + borderBottom;
         final BufferedImage resized = new BufferedImage(totalWdth, totalHeight, type);
@@ -466,15 +488,14 @@ public class ImageFileRetrieval extends Thread {
                 image,
                 borderLeft,
                 borderTop,
-                width
-                        + borderLeft,
-                height
-                        + borderTop,
+                width + borderLeft,
+                height + borderTop,
                 0,
                 0,
                 image.getWidth(),
                 image.getHeight(),
-                null);
+                null
+            );
             g.dispose();
         }
 
@@ -520,15 +541,18 @@ public class ImageFileRetrieval extends Thread {
     private ImageFileMetaData getImageMetaData() throws Exception {
         if (mode != null) {
             switch (mode) {
-                case WORLDFILE: {
-                    return ImageFileUtils.getWorldFileMetaData(getImageFile(), getWorldFile());
-                }
-                case TIFF: {
-                    return getTiffMetaData();
-                }
-                case GEO_REFERENCED: {
-                    return getGeoReferencedMetaData();
-                }
+                case WORLDFILE:
+                    {
+                        return ImageFileUtils.getWorldFileMetaData(getImageFile(), getWorldFile());
+                    }
+                case TIFF:
+                    {
+                        return getTiffMetaData();
+                    }
+                case GEO_REFERENCED:
+                    {
+                        return getGeoReferencedMetaData();
+                    }
             }
         }
         return null;
@@ -615,10 +639,10 @@ public class ImageFileRetrieval extends Thread {
         int hash = 5;
         hash = (59 * hash) + this.width;
         hash = (59 * hash) + this.height;
-        hash = (59 * hash) + (int)(Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
-        hash = (59 * hash) + (int)(Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
-        hash = (59 * hash) + (int)(Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
-        hash = (59 * hash) + (int)(Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
+        hash = (59 * hash) + (int) (Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
+        hash = (59 * hash) + (int) (Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
+        hash = (59 * hash) + (int) (Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
+        hash = (59 * hash) + (int) (Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
         hash = (59 * hash) + ((this.imageFile != null) ? this.imageFile.hashCode() : 0);
         return hash;
     }
@@ -631,7 +655,7 @@ public class ImageFileRetrieval extends Thread {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ImageFileRetrieval other = (ImageFileRetrieval)obj;
+        final ImageFileRetrieval other = (ImageFileRetrieval) obj;
         if (this.width != other.width) {
             return false;
         }
@@ -650,8 +674,9 @@ public class ImageFileRetrieval extends Thread {
         if (Double.doubleToLongBits(this.y2) != Double.doubleToLongBits(other.y2)) {
             return false;
         }
-        if ((this.imageFile != other.imageFile)
-                    && ((this.imageFile == null) || !this.imageFile.equals(other.imageFile))) {
+        if (
+            (this.imageFile != other.imageFile) && ((this.imageFile == null) || !this.imageFile.equals(other.imageFile))
+        ) {
             return false;
         }
         return true;

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
@@ -18,7 +18,6 @@ import de.cismet.cismap.commons.features.FeatureCollection;
  * @version  $Revision$, $Date$
  */
 public interface FeatureAwareRasterService extends RetrievalServiceLayer, MapService {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MapScaleFixedPanel.java
  *
@@ -24,6 +24,7 @@ public class MapScaleFixedPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblMapScaleFixedIcon;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,14 +49,21 @@ public class MapScaleFixedPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-        lblMapScaleFixedIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/fixMapScale.png"))); // NOI18N
-        lblMapScaleFixedIcon.setText(org.openide.util.NbBundle.getMessage(
+        lblMapScaleFixedIcon.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/fixMapScale.png"))
+        ); // NOI18N
+        lblMapScaleFixedIcon.setText(
+            org.openide.util.NbBundle.getMessage(
                 MapScaleFixedPanel.class,
-                "MapScaleFixedPanel.lblMapScaleFixedIcon.text"));                                    // NOI18N
-        lblMapScaleFixedIcon.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "MapScaleFixedPanel.lblMapScaleFixedIcon.text"
+            )
+        ); // NOI18N
+        lblMapScaleFixedIcon.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 MapScaleFixedPanel.class,
-                "MapScaleFixedPanel.lblMapScaleFixedIcon.toolTipText"));                             // NOI18N
+                "MapScaleFixedPanel.lblMapScaleFixedIcon.toolTipText"
+            )
+        ); // NOI18N
         add(lblMapScaleFixedIcon, java.awt.BorderLayout.CENTER);
-    }                                                                                                // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 }
