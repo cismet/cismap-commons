@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -14,15 +14,13 @@
 //
 package de.cismet.cismap.commons.gpx;
 
-import org.w3c.dom.Element;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlType;
+import org.w3c.dom.Element;
 
 /**
  * You can add extend GPX by adding your own elements from another schema here.
@@ -46,10 +44,7 @@ import javax.xml.bind.annotation.XmlType;
  * @version  $Revision$, $Date$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    name = "extensionsType",
-    propOrder = { "any" }
-)
+@XmlType(name = "extensionsType", propOrder = { "any" })
 public class ExtensionsType {
 
     //~ Instance fields --------------------------------------------------------

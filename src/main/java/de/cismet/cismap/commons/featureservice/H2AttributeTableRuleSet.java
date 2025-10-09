@@ -1,36 +1,30 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-
-import java.lang.reflect.Constructor;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-
 import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCreator;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
-
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
+import java.lang.reflect.Constructor;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
 
 /**
  * This is the default AttributeTableRouleSet for h2 services. This is required to support linear referencing
@@ -82,12 +76,14 @@ public class H2AttributeTableRuleSet extends DefaultAttributeTableRuleSet {
         final LinearReferencingInfo refInfo = getInfoForColumn(columnName);
 
         if (refInfo != null) {
-            final Collection<? extends StationTableCellEditorInterface> cellEditor = Lookup.getDefault()
-                        .lookupAll(StationTableCellEditorInterface.class);
+            final Collection<? extends StationTableCellEditorInterface> cellEditor = Lookup
+                .getDefault()
+                .lookupAll(StationTableCellEditorInterface.class);
 
             if ((cellEditor != null) && (cellEditor.size() > 0)) {
-                final StationTableCellEditorInterface editor =
-                    cellEditor.toArray(new StationTableCellEditorInterface[1])[0];
+                final StationTableCellEditorInterface editor = cellEditor.toArray(
+                    new StationTableCellEditorInterface[1]
+                )[0];
 
                 final StationTableCellEditorInterface editorCopy = createNewInstance(editor);
 

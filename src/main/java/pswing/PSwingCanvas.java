@@ -1,24 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /* Copyright 2004, Sam Reid */
 package pswing;
 
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.util.PBounds;
-
+import java.awt.*;
+import java.util.Vector;
+import javax.swing.*;
 import org.jdesktop.swingx.RepaintManagerX;
 import org.jdesktop.swingx.TranslucentRepaintManager;
-
-import java.awt.*;
-
-import java.util.Vector;
-
-import javax.swing.*;
 
 /**
  * User: Sam Reid Date: Jul 12, 2005 Time: 8:47:08 AM Copyright (c) Jul 12, 2005 by Sam Reid
@@ -177,11 +173,13 @@ public class PSwingCanvas extends PCanvas {
          * @param  h  Height of the dirty region in the component
          */
         @Override
-        public synchronized void addDirtyRegion(final JComponent c,
-                final int x,
-                final int y,
-                final int w,
-                final int h) {
+        public synchronized void addDirtyRegion(
+            final JComponent c,
+            final int x,
+            final int y,
+            final int w,
+            final int h
+        ) {
             boolean captureRepaint = false;
             JComponent capturedComponent = null;
             int captureX = x;
@@ -192,12 +190,15 @@ public class PSwingCanvas extends PCanvas {
             // we will want to capture that repaint.  However, we also will
             // need to translate the repaint request since the component may
             // be offset inside another component.
-            for (Component comp = c; (comp != null) && isLightweight(comp) && !captureRepaint;
-                        comp = comp.getParent()) {
+            for (
+                Component comp = c;
+                (comp != null) && isLightweight(comp) && !captureRepaint;
+                comp = comp.getParent()
+            ) {
                 if (comp.getParent() == swingWrapper) {
                     if (comp instanceof JComponent) {
                         captureRepaint = true;
-                        capturedComponent = (JComponent)comp;
+                        capturedComponent = (JComponent) comp;
                     }
                 } else {
                     // Adds to the offset since the component is nested
@@ -210,18 +211,17 @@ public class PSwingCanvas extends PCanvas {
             // accordingly
             if (captureRepaint) {
                 if (!isPainting(capturedComponent)) {
-                    final PSwing vis = (PSwing)capturedComponent.getClientProperty(PSwing.VISUAL_COMPONENT_KEY);
+                    final PSwing vis = (PSwing) capturedComponent.getClientProperty(PSwing.VISUAL_COMPONENT_KEY);
 
                     if (vis != null) {
                         final int repaintX = captureX;
                         final int repaintY = captureY;
                         final Runnable repainter = new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    vis.repaint(new PBounds((double)repaintX, (double)repaintY, (double)w, (double)h));
-                                }
-                            };
+                            @Override
+                            public void run() {
+                                vis.repaint(new PBounds((double) repaintX, (double) repaintY, (double) w, (double) h));
+                            }
+                        };
                         SwingUtilities.invokeLater(repainter);
                     }
                 }
@@ -252,19 +252,19 @@ public class PSwingCanvas extends PCanvas {
         public synchronized void addInvalidComponent(final JComponent invalidComponent) {
             final JComponent capturedComponent = invalidComponent;
 
-            if ((capturedComponent.getParent() != null)
-                        && (capturedComponent.getParent() instanceof JComponent)
-                        && (((JComponent)capturedComponent.getParent()).getClientProperty(SWING_WRAPPER_KEY) != null)) {
+            if (
+                (capturedComponent.getParent() != null) &&
+                (capturedComponent.getParent() instanceof JComponent) &&
+                (((JComponent) capturedComponent.getParent()).getClientProperty(SWING_WRAPPER_KEY) != null)
+            ) {
                 final Runnable validater = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            capturedComponent.validate();
-                            final PSwing swing = (PSwing)capturedComponent.getClientProperty(
-                                    PSwing.VISUAL_COMPONENT_KEY);
-                            swing.reshape();
-                        }
-                    };
+                    @Override
+                    public void run() {
+                        capturedComponent.validate();
+                        final PSwing swing = (PSwing) capturedComponent.getClientProperty(PSwing.VISUAL_COMPONENT_KEY);
+                        swing.reshape();
+                    }
+                };
                 SwingUtilities.invokeLater(validater);
             } else {
                 super.addInvalidComponent(invalidComponent);

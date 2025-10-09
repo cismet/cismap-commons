@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -47,7 +47,7 @@ public class TreeFolder extends ArrayList<Object> {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof TreeFolder) {
-            return ((TreeFolder)obj).name.equals(name);
+            return ((TreeFolder) obj).name.equals(name);
         }
 
         return false;

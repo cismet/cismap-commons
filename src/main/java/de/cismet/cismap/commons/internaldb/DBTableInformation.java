@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -40,10 +40,12 @@ public class DBTableInformation {
      * @param  databaseTable  DOCUMENT ME!
      * @param  folder         DOCUMENT ME!
      */
-    public DBTableInformation(final String name,
-            final String databasePath,
-            final String databaseTable,
-            final boolean folder) {
+    public DBTableInformation(
+        final String name,
+        final String databasePath,
+        final String databaseTable,
+        final boolean folder
+    ) {
         this.databasePath = databasePath;
         this.databaseTable = databaseTable;
         this.name = name;

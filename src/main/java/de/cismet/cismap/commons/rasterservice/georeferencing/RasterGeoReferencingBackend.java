@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,25 +12,12 @@
  */
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
+import static de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler.createAverageTransformation;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 import com.vividsolutions.jts.geom.util.AffineTransformationBuilder;
-
-import lombok.Getter;
-
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-
-import java.io.File;
-import java.io.PrintWriter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
@@ -42,8 +29,16 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
 import de.cismet.cismap.commons.rasterservice.ImageFileUtils;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
-
-import static de.cismet.cismap.commons.rasterservice.georeferencing.RasterGeoReferencingHandler.createAverageTransformation;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import lombok.Getter;
 
 /**
  * DOCUMENT ME!
@@ -56,21 +51,23 @@ public class RasterGeoReferencingBackend {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            RasterGeoReferencingBackend.class);
+        RasterGeoReferencingBackend.class
+    );
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<>();
+    @Getter
+    private final Map<File, RasterGeoReferencingHandler> metaDataMap = new HashMap<>();
 
-    @Getter private final ActiveLayerListenerHandler activeLayerListenerHandler = new ActiveLayerListenerHandler();
+    @Getter
+    private final ActiveLayerListenerHandler activeLayerListenerHandler = new ActiveLayerListenerHandler();
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RasterGeoReferencingBackend object.
      */
-    private RasterGeoReferencingBackend() {
-    }
+    private RasterGeoReferencingBackend() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -113,64 +110,54 @@ public class RasterGeoReferencingBackend {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private static RasterGeoReferencingHandler createInitHandler(final ImageRasterService service, final File imageFile)
-            throws Exception {
+    private static RasterGeoReferencingHandler createInitHandler(
+        final ImageRasterService service,
+        final File imageFile
+    ) throws Exception {
         final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
         final Rectangle imageBounds = new Rectangle(
-                0,
-                0,
-                (int)imageDimension.getWidth(),
-                (int)imageDimension.getHeight());
+            0,
+            0,
+            (int) imageDimension.getWidth(),
+            (int) imageDimension.getHeight()
+        );
 
         final BoundingBox bb = getMainMap().getCurrentBoundingBoxFromCamera();
 
         final double scale;
         if ((bb.getWidth() / bb.getHeight()) > (imageBounds.getWidth() / imageBounds.getHeight())) {
-            scale = bb.getHeight()
-                        / imageBounds.getHeight();
+            scale = bb.getHeight() / imageBounds.getHeight();
         } else {
-            scale = bb.getWidth()
-                        / imageBounds.getWidth();
+            scale = bb.getWidth() / imageBounds.getWidth();
         }
         final Coordinate mapCenterCoordinate = new Coordinate(
-                bb.getX1()
-                        + ((bb.getX2() - bb.getX1()) / 2d),
-                bb.getY2()
-                        + ((bb.getY1() - bb.getY2()) / 2d));
+            bb.getX1() + ((bb.getX2() - bb.getX1()) / 2d),
+            bb.getY2() + ((bb.getY1() - bb.getY2()) / 2d)
+        );
         final Envelope imageEnvelope = new Envelope(
-                mapCenterCoordinate.x
-                        - ((imageBounds.getWidth() * scale) / 2d),
-                mapCenterCoordinate.x
-                        + ((imageBounds.getWidth() * scale) / 2d),
-                mapCenterCoordinate.y
-                        + ((imageBounds.getHeight() * scale) / 2d),
-                mapCenterCoordinate.y
-                        - ((imageBounds.getHeight() * scale) / 2d));
+            mapCenterCoordinate.x - ((imageBounds.getWidth() * scale) / 2d),
+            mapCenterCoordinate.x + ((imageBounds.getWidth() * scale) / 2d),
+            mapCenterCoordinate.y + ((imageBounds.getHeight() * scale) / 2d),
+            mapCenterCoordinate.y - ((imageBounds.getHeight() * scale) / 2d)
+        );
 
         final PointCoordinatePair[] pairs = new PointCoordinatePair[] {
-                // upper left
-                new PointCoordinatePair(
-                    new Point(0, 0),
-                    new Coordinate(imageEnvelope.getMinX(), imageEnvelope.getMaxY())),
-                // upper right
-                new PointCoordinatePair(
-                    new Point((int)imageBounds.getWidth(), 0),
-                    new Coordinate(imageEnvelope.getMaxX(), imageEnvelope.getMaxY())),
-                // bottom middle
-                new PointCoordinatePair(
-                    new Point((int)imageBounds.getWidth() / 2, (int)imageBounds.getHeight()),
-                    new Coordinate(
-                        imageEnvelope.getMaxX()
-                                - (imageEnvelope.getWidth() / 2d),
-                        imageEnvelope.getMinY()))
-            };
+            // upper left
+            new PointCoordinatePair(new Point(0, 0), new Coordinate(imageEnvelope.getMinX(), imageEnvelope.getMaxY())),
+            // upper right
+            new PointCoordinatePair(
+                new Point((int) imageBounds.getWidth(), 0),
+                new Coordinate(imageEnvelope.getMaxX(), imageEnvelope.getMaxY())
+            ),
+            // bottom middle
+            new PointCoordinatePair(
+                new Point((int) imageBounds.getWidth() / 2, (int) imageBounds.getHeight()),
+                new Coordinate(imageEnvelope.getMaxX() - (imageEnvelope.getWidth() / 2d), imageEnvelope.getMinY())
+            ),
+        };
         final AffineTransformation transform = calculateAvgTransformation(pairs);
 
-        final ImageFileMetaData metaData = new ImageFileMetaData(
-                imageBounds,
-                imageEnvelope,
-                transform,
-                pairs);
+        final ImageFileMetaData metaData = new ImageFileMetaData(imageBounds, imageEnvelope, transform, pairs);
 
         return new RasterGeoReferencingHandler(service, metaData);
     }
@@ -196,23 +183,25 @@ public class RasterGeoReferencingBackend {
         pw.append(Double.toString(matrix[2])).append("\n");
         pw.append(Double.toString(matrix[5])).append("\n");
 
-        pw.append("#cidsgeoref;")
-                .append(Integer.toString(handler.getCompletePairs().length))
-                .append(";")
-                .append(getMainMap().getMappingModel().getSrs().getShortname())
-                .append("\n");
+        pw
+            .append("#cidsgeoref;")
+            .append(Integer.toString(handler.getCompletePairs().length))
+            .append(";")
+            .append(getMainMap().getMappingModel().getSrs().getShortname())
+            .append("\n");
         for (final PointCoordinatePair pair : handler.getCompletePairs()) {
             final Point point = pair.getPoint();
             final Coordinate coordinate = pair.getCoordinate();
-            pw.append("#")
-                    .append(Integer.toString((int)point.getX()))
-                    .append(",")
-                    .append(Integer.toString((int)point.getY()))
-                    .append(";")
-                    .append(Double.toString(coordinate.x))
-                    .append(",")
-                    .append(Double.toString(coordinate.y))
-                    .append("\n");
+            pw
+                .append("#")
+                .append(Integer.toString((int) point.getX()))
+                .append(",")
+                .append(Integer.toString((int) point.getY()))
+                .append(";")
+                .append(Double.toString(coordinate.x))
+                .append(",")
+                .append(Double.toString(coordinate.y))
+                .append("\n");
         }
         pw.close();
     }
@@ -237,17 +226,18 @@ public class RasterGeoReferencingBackend {
         final List<AffineTransformation> transforms = new ArrayList<>();
         if (completePairs.length >= 3) {
             for (final Object[] arr : RasterGeoReferencingHandler.getCombinations(completePairs, 3)) {
-                final PointCoordinatePair pair0 = (PointCoordinatePair)arr[0];
-                final PointCoordinatePair pair1 = (PointCoordinatePair)arr[1];
-                final PointCoordinatePair pair2 = (PointCoordinatePair)arr[2];
+                final PointCoordinatePair pair0 = (PointCoordinatePair) arr[0];
+                final PointCoordinatePair pair1 = (PointCoordinatePair) arr[1];
+                final PointCoordinatePair pair2 = (PointCoordinatePair) arr[2];
 
                 final AffineTransformationBuilder builder = new AffineTransformationBuilder(
-                        new Coordinate(pair0.getPoint().getX(), pair0.getPoint().getY()),
-                        new Coordinate(pair1.getPoint().getX(), pair1.getPoint().getY()),
-                        new Coordinate(pair2.getPoint().getX(), pair2.getPoint().getY()),
-                        pair0.getCoordinate(),
-                        pair1.getCoordinate(),
-                        pair2.getCoordinate());
+                    new Coordinate(pair0.getPoint().getX(), pair0.getPoint().getY()),
+                    new Coordinate(pair1.getPoint().getX(), pair1.getPoint().getY()),
+                    new Coordinate(pair2.getPoint().getX(), pair2.getPoint().getY()),
+                    pair0.getCoordinate(),
+                    pair1.getCoordinate(),
+                    pair2.getCoordinate()
+                );
 
                 final AffineTransformation transform = builder.getTransformation();
                 if (transform != null) {
@@ -278,7 +268,7 @@ public class RasterGeoReferencingBackend {
             if (!RasterGeoReferencingWizard.getInstance().getIgnoreLayerList().contains(layer)) {
                 try {
                     if (layer instanceof ImageRasterService) {
-                        final ImageRasterService irs = (ImageRasterService)layer;
+                        final ImageRasterService irs = (ImageRasterService) layer;
                         if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                             final File imagefile = irs.getImageFile();
                             if (!getMetaDataMap().containsKey(imagefile)) {
@@ -289,16 +279,17 @@ public class RasterGeoReferencingBackend {
                                         handler = createInitHandler(irs, imagefile);
                                     } else {
                                         final ImageFileMetaData metaData = ImageFileUtils.getWorldFileMetaData(
-                                                imagefile,
-                                                worldFile);
+                                            imagefile,
+                                            worldFile
+                                        );
                                         handler = new RasterGeoReferencingHandler(irs, metaData);
                                         for (final PointCoordinatePair pair : metaData.getPairs()) {
                                             handler.addPair(pair);
                                         }
                                     }
                                     getMetaDataMap().put(imagefile, handler);
-                                    handler.addListener(new RasterGeoReferencingHandlerListener() {
-
+                                    handler.addListener(
+                                        new RasterGeoReferencingHandlerListener() {
                                             @Override
                                             public void transformationChanged() {
                                                 if (handler.isComplete()) {
@@ -309,22 +300,23 @@ public class RasterGeoReferencingBackend {
                                             }
 
                                             @Override
-                                            public void positionAdded(final int position) {
-                                            }
+                                            public void positionAdded(final int position) {}
 
                                             @Override
-                                            public void positionRemoved(final int position) {
-                                            }
+                                            public void positionRemoved(final int position) {}
 
                                             @Override
-                                            public void positionChanged(final int position) {
-                                            }
-                                        });
+                                            public void positionChanged(final int position) {}
+                                        }
+                                    );
 
                                     final Feature feature = handler.getFeature();
                                     final FeatureCollection featureCollection = getMainMap().getFeatureCollection();
-                                    if ((feature != null) && (featureCollection != null)
-                                                && !featureCollection.contains(feature)) {
+                                    if (
+                                        (feature != null) &&
+                                        (featureCollection != null) &&
+                                        !featureCollection.contains(feature)
+                                    ) {
                                         featureCollection.addFeature(feature);
                                     }
                                 } catch (final Exception ex) {
@@ -349,15 +341,16 @@ public class RasterGeoReferencingBackend {
             final Object layer = e.getLayer();
             if (!RasterGeoReferencingWizard.getInstance().getIgnoreLayerList().contains(layer)) {
                 if (layer instanceof ImageRasterService) {
-                    final ImageRasterService irs = (ImageRasterService)layer;
+                    final ImageRasterService irs = (ImageRasterService) layer;
                     if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                         final File imageFile = irs.getImageFile();
                         if (getMetaDataMap().containsKey(imageFile)) {
                             final RasterGeoRefFeature feature = getHandler(imageFile).getFeature();
                             getWizard().setHandler(null);
                             final FeatureCollection featureCollection = getMainMap().getFeatureCollection();
-                            if ((feature != null) && (featureCollection != null)
-                                        && featureCollection.contains(feature)) {
+                            if (
+                                (feature != null) && (featureCollection != null) && featureCollection.contains(feature)
+                            ) {
                                 featureCollection.removeFeature(feature);
                                 getWizard().removeListener(feature);
                             }
@@ -369,20 +362,16 @@ public class RasterGeoReferencingBackend {
         }
 
         @Override
-        public void layerPositionChanged(final ActiveLayerEvent e) {
-        }
+        public void layerPositionChanged(final ActiveLayerEvent e) {}
 
         @Override
-        public void layerVisibilityChanged(final ActiveLayerEvent e) {
-        }
+        public void layerVisibilityChanged(final ActiveLayerEvent e) {}
 
         @Override
-        public void layerAvailabilityChanged(final ActiveLayerEvent e) {
-        }
+        public void layerAvailabilityChanged(final ActiveLayerEvent e) {}
 
         @Override
-        public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-        }
+        public void layerInformationStatusChanged(final ActiveLayerEvent e) {}
 
         @Override
         public void layerSelectionChanged(final ActiveLayerEvent e) {
@@ -390,7 +379,7 @@ public class RasterGeoReferencingBackend {
             final Object layer = e.getLayer();
             if (!RasterGeoReferencingWizard.getInstance().getIgnoreLayerList().contains(layer)) {
                 if (layer instanceof ImageRasterService) {
-                    final ImageRasterService irs = (ImageRasterService)layer;
+                    final ImageRasterService irs = (ImageRasterService) layer;
                     if (ImageFileUtils.Mode.GEO_REFERENCED == irs.getMode()) {
                         final File imagefile = irs.getImageFile();
                         if (getMetaDataMap().containsKey(imagefile)) {
@@ -419,7 +408,6 @@ public class RasterGeoReferencingBackend {
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 }

@@ -1,24 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.tools.collections.TypeSafeCollections;
 import java.awt.Paint;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
-
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -36,7 +32,8 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     private final Set<Feature> groupFeatures;
     private final Collection<Feature> readOnlyGroupFeatures;
     private Geometry enclosingGeometry;
-//    private boolean canBeSelected;
+
+    //    private boolean canBeSelected;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -66,7 +63,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
         if ((features == null) || (features.size() <= 0)) {
             this.groupFeatures = TypeSafeCollections.newHashSet();
         } else {
-            this.groupFeatures = (Set<Feature>)TypeSafeCollections.newHashSet(features);
+            this.groupFeatures = (Set<Feature>) TypeSafeCollections.newHashSet(features);
         }
         this.readOnlyGroupFeatures = Collections.unmodifiableCollection(groupFeatures);
     }
@@ -130,8 +127,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setCanBeSelected(final boolean canBeSelected) {
-    }
+    public void setCanBeSelected(final boolean canBeSelected) {}
 
     @Override
     public boolean isEditable() {
@@ -149,8 +145,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void hide(final boolean hiding) {
-    }
+    public void hide(final boolean hiding) {}
 
     @Override
     public Iterator<Feature> iterator() {
@@ -196,7 +191,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         if (parentFeature instanceof XStyledFeature) {
-            sb.append(((XStyledFeature)parentFeature).getName());
+            sb.append(((XStyledFeature) parentFeature).getName());
         } else {
             sb.append(parentFeature);
         }
@@ -211,8 +206,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setLinePaint(final Paint linePaint) {
-    }
+    public void setLinePaint(final Paint linePaint) {}
 
     @Override
     public int getLineWidth() {
@@ -220,8 +214,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setLineWidth(final int width) {
-    }
+    public void setLineWidth(final int width) {}
 
     @Override
     public Paint getFillingPaint() {
@@ -229,8 +222,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setFillingPaint(final Paint fillingStyle) {
-    }
+    public void setFillingPaint(final Paint fillingStyle) {}
 
     @Override
     public float getTransparency() {
@@ -238,8 +230,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setTransparency(final float transparrency) {
-    }
+    public void setTransparency(final float transparrency) {}
 
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
@@ -247,8 +238,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
-    }
+    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {}
 
     @Override
     public boolean isHighlightingEnabled() {
@@ -256,8 +246,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setHighlightingEnabled(final boolean enabled) {
-    }
+    public void setHighlightingEnabled(final boolean enabled) {}
 
     /**
      * DOCUMENT ME!
@@ -268,9 +257,9 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
         return enclosingGeometry;
     }
 
-//    public void setEnclosingGeometry(Geometry enclosingGeometry) {
-//        this.enclosingGeometry = enclosingGeometry;
-//    }
+    //    public void setEnclosingGeometry(Geometry enclosingGeometry) {
+    //        this.enclosingGeometry = enclosingGeometry;
+    //    }
     @Override
     public String getMyAttributeStringInParentFeature() {
         return myAttributeStringInParentFeature;

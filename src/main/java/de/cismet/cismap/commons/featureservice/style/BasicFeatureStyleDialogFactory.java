@@ -1,26 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
-
-import org.jdom.Element;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.Frame;
-
-import java.util.ArrayList;
-
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -29,6 +18,12 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellEditor;
 import de.cismet.cismap.commons.wfs.WFSFacade;
+import java.awt.Frame;
+import java.util.ArrayList;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import org.jdom.Element;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -36,10 +31,7 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
  * @author   mroncoroni
  * @version  $Revision$, $Date$
  */
-@ServiceProvider(
-    service = StyleDialogInterface.class,
-    position = 1
-)
+@ServiceProvider(service = StyleDialogInterface.class, position = 1)
 public class BasicFeatureStyleDialogFactory implements StyleDialogInterface {
 
     //~ Static fields/initializers ---------------------------------------------
@@ -57,94 +49,95 @@ public class BasicFeatureStyleDialogFactory implements StyleDialogInterface {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public JDialog configureDialog(final AbstractFeatureService FeatureService,
-            final Frame parentFrame,
-            final MappingComponent mappingComponent,
-            final ArrayList<String> configTabs) {
+    public JDialog configureDialog(
+        final AbstractFeatureService FeatureService,
+        final Frame parentFrame,
+        final MappingComponent mappingComponent,
+        final ArrayList<String> configTabs
+    ) {
         selectedService = FeatureService;
         parent = parentFrame;
         dialog = new StyleDialog(parentFrame, true);
-        dialog.configureDialog(FeatureService.getSLDDefiniton(),
+        dialog.configureDialog(
+            FeatureService.getSLDDefiniton(),
             FeatureService.getName(),
             FeatureService.getLayerProperties(),
             FeatureService.getFeatureServiceAttributes(),
-            FeatureService.getQuery());
+            FeatureService.getQuery()
+        );
         return dialog;
     }
 
     @Override
     public Runnable createResultTask() {
         return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    boolean forceUpdate = false;
+                    if (selectedService instanceof WebFeatureService) {
+                        if (dialog.isGeoAttributeChanged() || dialog.isAttributeSelectionChanged()) {
+                            if (DEBUG) {
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Attributes changed, updating the QUERY Element"); // NOI18N
+                                }
+                            }
+                            final Element query = ((WebFeatureService) selectedService).getQueryElement();
+                            final WebFeatureService service = ((WebFeatureService) selectedService);
+                            WFSFacade.setGeometry(query, dialog.getSelectedGeoAttribute(), service.getVersion());
+                            WFSFacade.changePropertyNames(query, dialog.getSelectedAttributes(), service.getVersion());
 
-                @Override
-                public void run() {
-                    try {
-                        boolean forceUpdate = false;
-                        if (selectedService instanceof WebFeatureService) {
-                            if (dialog.isGeoAttributeChanged()
-                                        || dialog.isAttributeSelectionChanged()) {
+                            service.setQueryElement(query);
+                            forceUpdate = true;
+                        }
+
+                        if (dialog.isQueryStringChanged()) {
+                            final int i = JOptionPane.showConfirmDialog(
+                                parent,
+                                org.openide.util.NbBundle.getMessage(
+                                    ActiveLayerTableCellEditor.class,
+                                    "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"
+                                ), // NOI18N
+                                org.openide.util.NbBundle.getMessage(
+                                    ActiveLayerTableCellEditor.class,
+                                    "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"
+                                ), // NOI18N
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE
+                            );
+                            if (i == JOptionPane.YES_OPTION) {
                                 if (DEBUG) {
                                     if (logger.isDebugEnabled()) {
-                                        logger.debug("Attributes changed, updating the QUERY Element"); // NOI18N
+                                        logger.debug("Query String changed, updating the QUERY String "); // NOI18N
                                     }
                                 }
-                                final Element query = ((WebFeatureService)selectedService).getQueryElement();
-                                final WebFeatureService service = ((WebFeatureService)selectedService);
-                                WFSFacade.setGeometry(query,
-                                    dialog.getSelectedGeoAttribute(), service.getVersion());
-                                WFSFacade.changePropertyNames(
-                                    query,
-                                    dialog.getSelectedAttributes(),
-                                    service.getVersion());
-
-                                service.setQueryElement(query);
+                                selectedService.setQuery(dialog.getQueryString());
                                 forceUpdate = true;
                             }
-
-                            if (dialog.isQueryStringChanged()) {
-                                final int i = JOptionPane.showConfirmDialog(
-                                        parent,
-                                        org.openide.util.NbBundle.getMessage(
-                                            ActiveLayerTableCellEditor.class,
-                                            "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"), // NOI18N
-                                        org.openide.util.NbBundle.getMessage(
-                                            ActiveLayerTableCellEditor.class,
-                                            "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"), // NOI18N
-                                        JOptionPane.YES_NO_OPTION,
-                                        JOptionPane.WARNING_MESSAGE);
-                                if (i == JOptionPane.YES_OPTION) {
-                                    if (DEBUG) {
-                                        if (logger.isDebugEnabled()) {
-                                            logger.debug("Query String changed, updating the QUERY String ");           // NOI18N
-                                        }
-                                    }
-                                    selectedService.setQuery(dialog.getQueryString());
-                                    forceUpdate = true;
-                                }
-                            }
                         }
-
-                        // this causes a refresh of the last created features and fires a
-                        // retrieval event
-                        selectedService.setFeatureServiceAttributes(dialog.getFeatureServiceAttributes());
-
-                        if (forceUpdate) {
-                            ((WebFeatureService)selectedService).setLayerPropertiesWithoutUpdate(
-                                dialog.getLayerProperties());
-                            selectedService.retrieve(forceUpdate);
-                        } else {
-                            selectedService.setLayerProperties(dialog.getLayerProperties(), false);
-                            if (selectedService instanceof SLDStyledLayer) {
-                                ((SLDStyledLayer)selectedService).setSLDInputStream(
-                                    dialog.getSLDStyle());
-                            }
-                            selectedService.refreshFeatures();
-                        }
-                    } catch (Throwable t) {
-                        logger.error(t.getMessage(), t);
                     }
+
+                    // this causes a refresh of the last created features and fires a
+                    // retrieval event
+                    selectedService.setFeatureServiceAttributes(dialog.getFeatureServiceAttributes());
+
+                    if (forceUpdate) {
+                        ((WebFeatureService) selectedService).setLayerPropertiesWithoutUpdate(
+                                dialog.getLayerProperties()
+                            );
+                        selectedService.retrieve(forceUpdate);
+                    } else {
+                        selectedService.setLayerProperties(dialog.getLayerProperties(), false);
+                        if (selectedService instanceof SLDStyledLayer) {
+                            ((SLDStyledLayer) selectedService).setSLDInputStream(dialog.getSLDStyle());
+                        }
+                        selectedService.refreshFeatures();
+                    }
+                } catch (Throwable t) {
+                    logger.error(t.getMessage(), t);
                 }
-            };
+            }
+        };
     }
 
     @Override

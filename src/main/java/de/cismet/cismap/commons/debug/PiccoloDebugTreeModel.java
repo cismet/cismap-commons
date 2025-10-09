@@ -1,17 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.debug;
 
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PNode;
-
 import java.util.Vector;
-
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -40,12 +38,18 @@ public class PiccoloDebugTreeModel implements TreeModel {
      */
     public PiccoloDebugTreeModel(final PCanvas pc) {
         this.pc = pc;
-        secondLevel.add(org.openide.util.NbBundle.getMessage(
+        secondLevel.add(
+            org.openide.util.NbBundle.getMessage(
                 PiccoloDebugTreeModel.class,
-                "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.cameras")); // NOI18N
-        secondLevel.add(org.openide.util.NbBundle.getMessage(
+                "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.cameras"
+            )
+        ); // NOI18N
+        secondLevel.add(
+            org.openide.util.NbBundle.getMessage(
                 PiccoloDebugTreeModel.class,
-                "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.layer"));   // NOI18N
+                "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.layer"
+            )
+        ); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -77,7 +81,7 @@ public class PiccoloDebugTreeModel implements TreeModel {
         if (parent == root) {
             return pc.getCamera().getChildrenCount();
         } else if (parent instanceof PNode) {
-            return ((PNode)parent).getChildrenCount();
+            return ((PNode) parent).getChildrenCount();
         } else {
             return 0;
         }
@@ -92,8 +96,7 @@ public class PiccoloDebugTreeModel implements TreeModel {
      * @param  newValue  the new value from the TreeCellEditor
      */
     @Override
-    public void valueForPathChanged(final TreePath path, final Object newValue) {
-    }
+    public void valueForPathChanged(final TreePath path, final Object newValue) {}
 
     /**
      * Removes a listener previously added with <code>addTreeModelListener</code>.
@@ -135,7 +138,7 @@ public class PiccoloDebugTreeModel implements TreeModel {
         if (parent == root) {
             return pc.getCamera().getChild(index);
         } else if (parent instanceof PNode) {
-            return ((PNode)parent).getChild(index);
+            return ((PNode) parent).getChild(index);
         } else {
             return "UUPS"; // NOI18N
         }
@@ -166,7 +169,7 @@ public class PiccoloDebugTreeModel implements TreeModel {
         if (parent == root) {
             return 0;
         } else if (parent instanceof PNode) {
-            return ((PNode)parent).getChildrenReference().indexOf(child);
+            return ((PNode) parent).getChildrenReference().indexOf(child);
         } else {
             return -1;
         }

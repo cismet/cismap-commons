@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -14,25 +14,21 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoRefFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import java.awt.Point;
 import java.awt.Rectangle;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.RasterGeoRefFeature;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.ImageFileMetaData;
-import de.cismet.cismap.commons.rasterservice.ImageRasterService;
+import lombok.AccessLevel;
+import lombok.Getter;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -51,13 +47,22 @@ public class RasterGeoReferencingHandler {
     //~ Instance fields --------------------------------------------------------
 
     private final List<PointCoordinatePair> pairs = new ArrayList<>();
+
     @Getter(AccessLevel.PRIVATE)
     private final ListenerHandler listenerHandler = new ListenerHandler();
+
     @Getter(AccessLevel.PRIVATE)
     private final Map<Integer, Boolean> positionStates = new HashMap<>();
-    @Getter private final ImageFileMetaData metaData;
-    @Getter private final RasterGeoRefFeature feature;
-    @Getter private final ImageRasterService service;
+
+    @Getter
+    private final ImageFileMetaData metaData;
+
+    @Getter
+    private final RasterGeoRefFeature feature;
+
+    @Getter
+    private final ImageRasterService service;
+
     @Getter(AccessLevel.PRIVATE)
     private final AffineTransformation initialTransform;
 
@@ -202,7 +207,7 @@ public class RasterGeoReferencingHandler {
 
         synchronized (pairs) {
             position = pairs.size();
-            pairs.add(position, (PointCoordinatePair)pair.clone());
+            pairs.add(position, (PointCoordinatePair) pair.clone());
             getPositionStates().put(position, (pair.getPoint() != null) && (pair.getCoordinate() != null));
         }
         getListenerHandler().positionAdded(position);
@@ -219,14 +224,14 @@ public class RasterGeoReferencingHandler {
      * @throws  IndexOutOfBoundsException  DOCUMENT ME!
      * @throws  IllegalArgumentException   DOCUMENT ME!
      */
-    public void setPair(final PointCoordinatePair pair, final int position) throws IndexOutOfBoundsException,
-        IllegalArgumentException {
+    public void setPair(final PointCoordinatePair pair, final int position)
+        throws IndexOutOfBoundsException, IllegalArgumentException {
         if (pair == null) {
             throw new IllegalArgumentException("the given pair is null");
         }
         synchronized (pairs) {
             checḱPosition(position);
-            pairs.set(position, (PointCoordinatePair)pair.clone());
+            pairs.set(position, (PointCoordinatePair) pair.clone());
             getListenerHandler().positionChanged(position);
             updateTransformation();
         }
@@ -457,7 +462,8 @@ public class RasterGeoReferencingHandler {
         final Polygon imageBoundsGeometry = createPolygon(getMetaData().getImageBounds());
 
         final AffineTransformation avgTransform = RasterGeoReferencingBackend.calculateAvgTransformation(
-                getCompletePairs());
+            getCompletePairs()
+        );
         final AffineTransformation transform = (avgTransform != null) ? avgTransform : getInitialTransform();
         if (!transform.equals(oldTransformation)) {
             final Envelope imageEnvelope = transform.transform(imageBoundsGeometry).getEnvelopeInternal();
@@ -477,17 +483,19 @@ public class RasterGeoReferencingHandler {
      */
     private Polygon createPolygon(final Rectangle bounds) {
         final GeometryFactory factory = new GeometryFactory(
-                new PrecisionModel(),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+            new PrecisionModel(),
+            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+        );
 
         final LinearRing linear = factory.createLinearRing(
-                new Coordinate[] {
-                    new Coordinate(bounds.getMinX(), bounds.getMinY()),
-                    new Coordinate(bounds.getMaxX(), bounds.getMinY()),
-                    new Coordinate(bounds.getMaxX(), bounds.getMaxY()),
-                    new Coordinate(bounds.getMinX(), bounds.getMaxY()),
-                    new Coordinate(bounds.getMinX(), bounds.getMinY())
-                });
+            new Coordinate[] {
+                new Coordinate(bounds.getMinX(), bounds.getMinY()),
+                new Coordinate(bounds.getMaxX(), bounds.getMinY()),
+                new Coordinate(bounds.getMaxX(), bounds.getMaxY()),
+                new Coordinate(bounds.getMinX(), bounds.getMaxY()),
+                new Coordinate(bounds.getMinX(), bounds.getMinY()),
+            }
+        );
         return factory.createPolygon(linear);
     }
 
@@ -518,8 +526,12 @@ public class RasterGeoReferencingHandler {
      */
     public double getError(final int position) {
         final PointCoordinatePair pair = pairs.get(position);
-        if ((getMetaData().getTransform() != null) && (pair != null) && (pair.getPoint() != null)
-                    && (pair.getCoordinate() != null)) {
+        if (
+            (getMetaData().getTransform() != null) &&
+            (pair != null) &&
+            (pair.getPoint() != null) &&
+            (pair.getCoordinate() != null)
+        ) {
             final Coordinate point = new Coordinate(pair.getPoint().getX(), pair.getPoint().getY());
             final Coordinate transformedPoint = getMetaData().getTransform().transform(point, new Coordinate());
             return transformedPoint.distance(pair.getCoordinate());
@@ -558,7 +570,7 @@ public class RasterGeoReferencingHandler {
                     index--;
                 }
                 if (index >= 0) {
-                    indices[index]++;                         // increment this item
+                    indices[index]++; // increment this item
                     for (++index; index < setSize; index++) { // fill up remaining items
                         indices[index] = indices[index - 1] + 1;
                     }
@@ -596,8 +608,7 @@ public class RasterGeoReferencingHandler {
 
         //~ Instance fields ----------------------------------------------------
 
-        private final Collection<RasterGeoReferencingHandlerListener> listeners =
-            new ArrayList<RasterGeoReferencingHandlerListener>();
+        private final Collection<RasterGeoReferencingHandlerListener> listeners = new ArrayList<RasterGeoReferencingHandlerListener>();
 
         //~ Methods ------------------------------------------------------------
 

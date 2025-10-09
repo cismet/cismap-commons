@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import de.cismet.cismap.commons.MappingModelEvent;
@@ -16,7 +16,6 @@ import de.cismet.cismap.commons.MappingModelEvent;
  * @version  $Revision$, $Date$
  */
 public interface FeatureCollectionListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

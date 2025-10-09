@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * PDFCreatingWaitDialog.java
  *
@@ -30,6 +30,7 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JProgressBar jProgressBar1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -42,13 +43,14 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
      */
     public PDFCreatingWaitDialog(final java.awt.Frame parent, final boolean modal) {
         super(parent, modal);
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     initComponents();
                 }
-            });
+            }
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -69,9 +71,9 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pdf.png"))); // NOI18N
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                PDFCreatingWaitDialog.class,
-                "PDFCreatingWaitDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(
+            org.openide.util.NbBundle.getMessage(PDFCreatingWaitDialog.class, "PDFCreatingWaitDialog.jLabel2.text")
+        ); // NOI18N
 
         jProgressBar1.setForeground(new java.awt.Color(255, 0, 0));
         jProgressBar1.setBorderPainted(false);
@@ -80,32 +82,58 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
         final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().add(jLabel1).addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                            .add(
-                                layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                                    jProgressBar1,
-                                    0,
-                                    0,
-                                    Short.MAX_VALUE).add(
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    layout
+                        .createSequentialGroup()
+                        .add(jLabel1)
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(
+                            layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                .add(jProgressBar1, 0, 0, Short.MAX_VALUE)
+                                .add(
                                     jLabel2,
                                     org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                                     org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                                    Short.MAX_VALUE)).addContainerGap(175, Short.MAX_VALUE)));
+                                    Short.MAX_VALUE
+                                )
+                        )
+                        .addContainerGap(175, Short.MAX_VALUE)
+                )
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                layout.createSequentialGroup().addContainerGap().add(
-                    layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false).add(
-                        layout.createSequentialGroup().add(jLabel2).addPreferredGap(
-                            org.jdesktop.layout.LayoutStyle.RELATED,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            Short.MAX_VALUE).add(
-                            jProgressBar1,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(jLabel1)).addContainerGap(
-                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    Short.MAX_VALUE)));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .add(
+                            layout
+                                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                                .add(
+                                    layout
+                                        .createSequentialGroup()
+                                        .add(jLabel2)
+                                        .addPreferredGap(
+                                            org.jdesktop.layout.LayoutStyle.RELATED,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            Short.MAX_VALUE
+                                        )
+                                        .add(
+                                            jProgressBar1,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                        )
+                                )
+                                .add(jLabel1)
+                        )
+                        .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                )
+        );
 
         pack();
     } // </editor-fold>//GEN-END:initComponents
@@ -116,12 +144,13 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
-//                new PDFCreatingWaitDialog(new javax.swing.JFrame(), true).setVisible(true);
+                    //                new PDFCreatingWaitDialog(new javax.swing.JFrame(), true).setVisible(true);
                 }
-            });
+            }
+        );
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureInfoWidget.java
  *
@@ -13,26 +13,6 @@
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
 import com.jgoodies.looks.Options;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
-import java.awt.Color;
-import java.awt.Component;
-
-import java.util.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -45,10 +25,22 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.GUIWindow;
+import java.awt.Color;
+import java.awt.Component;
+import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -71,6 +63,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JTabbedPane tbpFeatureInfos;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -108,8 +101,8 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
         final Object o = e.getLayer();
         if ((o instanceof WMSLayer) && (displays.get(o) != null)) {
             tbpFeatureInfos.setSelectedComponent(displays.get(o).getDisplayComponent());
-        } else if ((o instanceof WMSServiceLayer) && (((WMSServiceLayer)o).getWMSLayers().size() == 1)) {
-            final FeatureInfoDisplay displ = displays.get(((WMSServiceLayer)o).getWMSLayers().get(0));
+        } else if ((o instanceof WMSServiceLayer) && (((WMSServiceLayer) o).getWMSLayers().size() == 1)) {
+            final FeatureInfoDisplay displ = displays.get(((WMSServiceLayer) o).getWMSLayers().get(0));
 
             if (displ != null) {
                 tbpFeatureInfos.setSelectedComponent(displ.getDisplayComponent());
@@ -148,19 +141,19 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     private void handleInformationStatusChanged(final ActiveLayerEvent e, final boolean remove) {
         final Object o = e.getLayer();
         if (o instanceof ChildrenProvider) {
-            final Collection c = ((ChildrenProvider)o).getChildren();
+            final Collection c = ((ChildrenProvider) o).getChildren();
             for (final Object childlayer : c) {
                 final ActiveLayerEvent ale = new ActiveLayerEvent();
                 ale.setLayer(childlayer);
                 handleInformationStatusChanged(ale, remove);
             }
-        } else if ((o instanceof LayerInfoProvider) && ((LayerInfoProvider)o).isQueryable()) {
-            final LayerInfoProvider layer = (LayerInfoProvider)o;
+        } else if ((o instanceof LayerInfoProvider) && ((LayerInfoProvider) o).isQueryable()) {
+            final LayerInfoProvider layer = (LayerInfoProvider) o;
             FeatureInfoDisplay display = displays.get(layer);
             if ((display != null) && ((layer.isLayerQuerySelected() == false) || remove)) {
                 final FeatureInfoDisplay d = displays.get(layer);
                 if (d instanceof AggregateableFeatureInfoDisplay) {
-                    final AggregateableFeatureInfoDisplay aggrDisplay = ((AggregateableFeatureInfoDisplay)d);
+                    final AggregateableFeatureInfoDisplay aggrDisplay = ((AggregateableFeatureInfoDisplay) d);
                     final String aggregateType = aggrDisplay.getAggregateTypeID();
                     aggregatableDisplayMap.get(aggregateType).remove(aggrDisplay);
 
@@ -184,24 +177,24 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                     display.init(layer, tbpFeatureInfos);
 
                     if (display instanceof AggregateableFeatureInfoDisplay) {
-                        final String aggregateType = ((AggregateableFeatureInfoDisplay)display).getAggregateTypeID();
+                        final String aggregateType = ((AggregateableFeatureInfoDisplay) display).getAggregateTypeID();
                         if (!aggregatableDisplayMap.containsKey(aggregateType)) {
-                            final ArrayList<AggregateableFeatureInfoDisplay> displayList =
-                                new ArrayList<AggregateableFeatureInfoDisplay>();
+                            final ArrayList<AggregateableFeatureInfoDisplay> displayList = new ArrayList<AggregateableFeatureInfoDisplay>();
                             aggregatableDisplayMap.put(aggregateType, displayList);
                         }
 
-                        aggregatableDisplayMap.get(aggregateType).add((AggregateableFeatureInfoDisplay)display);
+                        aggregatableDisplayMap.get(aggregateType).add((AggregateableFeatureInfoDisplay) display);
 
                         for (final AggregateableFeatureInfoDisplay d : aggregatableDisplayMap.get(aggregateType)) {
                             d.setAggregatableDisplayList(aggregatableDisplayMap.get(aggregateType));
                         }
                     }
                     final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-                    final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
-                        mc.getInputListener(MappingComponent.FEATURE_INFO);
+                    final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener) mc.getInputListener(
+                        MappingComponent.FEATURE_INFO
+                    );
                     if ((listener != null) && (display instanceof MultipleFeatureInfoRequestsDisplay)) {
-                        ((MultipleFeatureInfoRequestsDisplay)display).addHoldListener(listener);
+                        ((MultipleFeatureInfoRequestsDisplay) display).addHoldListener(listener);
                     }
                     tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
                     displays.put(layer, display);
@@ -224,29 +217,33 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
 
         jButton1.setText(null);
 
-        tbpFeatureInfos.addChangeListener(new javax.swing.event.ChangeListener() {
-
+        tbpFeatureInfos.addChangeListener(
+            new javax.swing.event.ChangeListener() {
                 @Override
                 public void stateChanged(final javax.swing.event.ChangeEvent evt) {
                     tbpFeatureInfosStateChanged(evt);
                 }
-            });
+            }
+        );
 
         final org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                tbpFeatureInfos,
-                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                400,
-                Short.MAX_VALUE));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(tbpFeatureInfos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                org.jdesktop.layout.GroupLayout.TRAILING,
-                tbpFeatureInfos,
-                org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                300,
-                Short.MAX_VALUE));
+            layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(
+                    org.jdesktop.layout.GroupLayout.TRAILING,
+                    tbpFeatureInfos,
+                    org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                    300,
+                    Short.MAX_VALUE
+                )
+        );
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -257,17 +254,18 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (final FeatureInfoDisplay d : displays.values()) {
             if ((d != null) && (d instanceof MultipleFeatureInfoRequestsDisplay)) {
-                final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)d;
+                final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay) d;
                 multiRequestDisplay.setDisplayVisble(false);
             }
         }
 
         final Component c = tbpFeatureInfos.getSelectedComponent();
         if ((c != null) && (c instanceof MultipleFeatureInfoRequestsDisplay)) {
-            final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)c;
+            final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay) c;
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
-                mc.getInputListener(MappingComponent.FEATURE_INFO);
+            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener) mc.getInputListener(
+                MappingComponent.FEATURE_INFO
+            );
             if (listener != null) {
                 multiRequestDisplay.removeHoldListener(listener);
                 multiRequestDisplay.addHoldListener(listener);
@@ -275,8 +273,9 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
             multiRequestDisplay.setDisplayVisble(true);
         } else {
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
-                mc.getInputListener(MappingComponent.FEATURE_INFO);
+            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener) mc.getInputListener(
+                MappingComponent.FEATURE_INFO
+            );
             listener.addFeatureInfoIconForLastClick();
         }
 
@@ -294,7 +293,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
+    } //GEN-LAST:event_tbpFeatureInfosStateChanged
 
     /**
      * DOCUMENT ME!
@@ -332,8 +331,9 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
 
     @Override
     public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/featureinfowidget/res/featureInfo16.png"));
+        final Icon icoMap = new ImageIcon(
+            getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/featureInfo16.png")
+        );
         return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 }

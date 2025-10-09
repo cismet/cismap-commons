@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 /**
@@ -14,5 +14,4 @@ package de.cismet.commons.cismap.io.converters;
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-public interface TextToGeometryConverter extends GeometryConverter<String> {
-}
+public interface TextToGeometryConverter extends GeometryConverter<String> {}

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -13,13 +13,10 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.commons.converter.ConversionException;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
-
-import de.cismet.cismap.commons.CrsTransformer;
-
-import de.cismet.commons.converter.ConversionException;
 
 /**
  * Creates a geometry from (E)WKT. However, the conversion back from a geometry produces WKT only. If the input is EWKT
@@ -29,8 +26,9 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeomFromWktConverter extends AbstractRatingConverter<String, Geometry>
-        implements TextToGeometryConverter {
+public final class GeomFromWktConverter
+    extends AbstractRatingConverter<String, Geometry>
+    implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -122,8 +120,9 @@ public final class GeomFromWktConverter extends AbstractRatingConverter<String, 
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                GeomFromWktConverter.class,
-                "GeomFromWktConverter.getFormatDisplayName().returnValue"); // NOI18N
+            GeomFromWktConverter.class,
+            "GeomFromWktConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -134,15 +133,17 @@ public final class GeomFromWktConverter extends AbstractRatingConverter<String, 
     @Override
     public String getFormatDescription() {
         return NbBundle.getMessage(
-                GeomFromWktConverter.class,
-                "GeomFromWktConverter.getFormatDescription().returnValue"); // NOI18N
+            GeomFromWktConverter.class,
+            "GeomFromWktConverter.getFormatDescription().returnValue"
+        ); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
         return NbBundle.getMessage(
-                GeomFromWktConverter.class,
-                "GeomFromWktConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+            GeomFromWktConverter.class,
+            "GeomFromWktConverter.getFormatHtmlDescription().returnValue"
+        ); // NOI18N
     }
 
     @Override

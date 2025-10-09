@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MementoInterface.java
  *
@@ -15,13 +15,11 @@
  */
 package de.cismet.cismap.commons.interaction.memento;
 
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-
-import java.util.Collection;
-import java.util.Observable;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import java.util.Collection;
+import java.util.Observable;
 
 /**
  * MementoInterface schreibt bestimmte Methoden vor, die von einer Klasse implementiert werden, um eine korrekte
@@ -31,10 +29,9 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
  * @version  $Revision$, $Date$
  */
 public interface MementoInterface {
-
     //~ Instance fields --------------------------------------------------------
 
-    String ACTIVATE = "ACTIVATE";     // NOI18N
+    String ACTIVATE = "ACTIVATE"; // NOI18N
     String DEACTIVATE = "DEACTIVATE"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------

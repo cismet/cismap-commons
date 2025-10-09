@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -23,15 +23,11 @@
  */
 package de.cismet.cismap.commons.wfs.capabilities;
 
-import org.jdom.Element;
-
-import java.util.Vector;
-
-import javax.xml.namespace.QName;
-
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-
 import de.cismet.commons.wms.capabilities.Envelope;
+import java.util.Vector;
+import javax.xml.namespace.QName;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -40,7 +36,6 @@ import de.cismet.commons.wms.capabilities.Envelope;
  * @version  $Revision$, $Date$
  */
 public interface FeatureType {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,30 +1,28 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io;
 
-import org.apache.log4j.Logger;
-
-import org.openide.WizardDescriptor;
-import org.openide.WizardDescriptor.FinishablePanel;
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.Crs;
+import de.cismet.commons.concurrency.CismetConcurrency;
+import de.cismet.commons.concurrency.CismetExecutors;
+import de.cismet.commons.converter.Converter;
+import de.cismet.commons.converter.Converter.MatchRating;
+import de.cismet.commons.gui.wizard.AbstractWizardPanel;
+import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
 import java.awt.Component;
 import java.awt.EventQueue;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,19 +30,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
 import javax.swing.SwingWorker;
-
-import de.cismet.cismap.commons.Crs;
-
-import de.cismet.commons.concurrency.CismetConcurrency;
-import de.cismet.commons.concurrency.CismetExecutors;
-
-import de.cismet.commons.converter.Converter;
-import de.cismet.commons.converter.Converter.MatchRating;
-
-import de.cismet.commons.gui.wizard.AbstractWizardPanel;
-import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
+import org.apache.log4j.Logger;
+import org.openide.WizardDescriptor;
+import org.openide.WizardDescriptor.FinishablePanel;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -86,8 +76,9 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
      */
     public AddGeometriesToMapEnterDataWizardPanel() {
         threadFactory =
-            CismetConcurrency.getInstance("cismap-commons")                               // NOI18N
-            .createThreadFactory("AddGeometriesToMapEnterDataWizardPanel-threadfactory"); // NOI18N
+            CismetConcurrency
+                .getInstance("cismap-commons") // NOI18N
+                .createThreadFactory("AddGeometriesToMapEnterDataWizardPanel-threadfactory"); // NOI18N
         dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);
         propCSupport = new PropertyChangeSupport(this);
     }
@@ -127,8 +118,8 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
      * @throws  IllegalStateException  DOCUMENT ME!
      */
     private void processInputFile(final File inputFile) {
-        dispatcher.execute(new SwingWorker<String, Void>() {
-
+        dispatcher.execute(
+            new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() throws Exception {
                     Thread.currentThread().setName("AddGeometriesToMapEnterDataWizardPanel processInputFile()");
@@ -151,11 +142,11 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                                 return sb.toString();
                             } catch (final FileNotFoundException ex) {
                                 throw new IllegalStateException(
-                                    "file was present and readable, but now is not anymore: "
-                                            + inputFile,
-                                    ex);                                                       // NOI18N
+                                    "file was present and readable, but now is not anymore: " + inputFile,
+                                    ex
+                                ); // NOI18N
                             } catch (final IOException ex) {
-                                LOG.warn("cannot read input file", ex);                        // NOI18N
+                                LOG.warn("cannot read input file", ex); // NOI18N
                             } finally {
                                 if (fileReader != null) {
                                     try {
@@ -183,7 +174,8 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                         LOG.warn("cannot fetch result data from worker", ex); // NOI18N
                     }
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -327,7 +319,9 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AddGeometriesToMapEnterDataWizardPanel.class,
-                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.enterCoordinateData")); // NOI18N
+                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.enterCoordinateData"
+                )
+            ); // NOI18N
 
             return false;
         } else {
@@ -335,7 +329,9 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                 WizardDescriptor.PROP_INFO_MESSAGE,
                 NbBundle.getMessage(
                     AddGeometriesToMapEnterDataWizardPanel.class,
-                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.proceed")); // NOI18N
+                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.proceed"
+                )
+            ); // NOI18N
 
             return true;
         }
@@ -363,19 +359,21 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     @SuppressWarnings("unchecked")
     protected void read(final WizardDescriptor wizard) {
         // initialise first so that setters work correctly when using auto detect mode
-        setConverterPreselectionMode((ConverterPreselectionMode)wizard.getProperty(
-                AddGeometriesToMapWizardAction.PROP_CONVERTER_PRESELECT_MODE));
+        setConverterPreselectionMode(
+            (ConverterPreselectionMode) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CONVERTER_PRESELECT_MODE)
+        );
         if (ConverterPreselectionMode.AUTO_DETECT == converterPreselectionMode) {
-            availableConverters = (List<Converter>)wizard.getProperty(
-                    AddGeometriesToMapWizardAction.PROP_AVAILABLE_CONVERTERS);
+            availableConverters =
+                (List<Converter>) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_AVAILABLE_CONVERTERS);
             detectorExecutor = Executors.newSingleThreadScheduledExecutor(threadFactory);
         }
 
-        setCoordinateData((String)wizard.getProperty(PROP_COORDINATE_DATA));
-        setInputFile((File)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_INPUT_FILE));
-        setCrsName(((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
-        setSelectedConverter((Converter)wizard.getProperty(
-                AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
+        setCoordinateData((String) wizard.getProperty(PROP_COORDINATE_DATA));
+        setInputFile((File) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_INPUT_FILE));
+        setCrsName(((Crs) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
+        setSelectedConverter(
+            (Converter) wizard.getProperty(AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER)
+        );
     }
 
     @Override
@@ -420,12 +418,13 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                 }
 
                 if (converter instanceof Converter.MatchRating) {
-                    final MatchRating matchRating = (MatchRating)converter;
+                    final MatchRating matchRating = (MatchRating) converter;
 
                     @SuppressWarnings("unchecked")
                     final int converterRating = matchRating.rate(
-                            getCoordinateData(),
-                            ((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getCode());
+                        getCoordinateData(),
+                        ((Crs) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getCode()
+                    );
                     if (converterRating > highScoreConverterRating) {
                         highScoreConverterRating = converterRating;
                         highScoreConverter = converter;
@@ -439,13 +438,14 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                 return;
             }
 
-            EventQueue.invokeLater(new Runnable() {
-
+            EventQueue.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         setSelectedConverter(detectedConverter);
                     }
-                });
+                }
+            );
         }
     }
 }

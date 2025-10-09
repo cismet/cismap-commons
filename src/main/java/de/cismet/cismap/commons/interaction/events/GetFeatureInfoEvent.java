@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,10 +12,8 @@
 package de.cismet.cismap.commons.interaction.events;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.features.Feature;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -36,8 +34,7 @@ public class GetFeatureInfoEvent {
     /**
      * Creates a new GetFeatureInfoEvent object.
      */
-    public GetFeatureInfoEvent() {
-    }
+    public GetFeatureInfoEvent() {}
 
     /**
      * Creates a new GetFeatureInfoEvent object.

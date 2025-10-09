@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * HandleAddAction.java
  *
@@ -52,13 +52,14 @@ public class HandleAddAction implements CustomAction {
      * @param  y               DOCUMENT ME!
      */
     public HandleAddAction(
-            final MappingComponent mc,
-            final Feature f,
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float x,
-            final float y) {
+        final MappingComponent mc,
+        final Feature f,
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float x,
+        final float y
+    ) {
         this.mc = mc;
         this.feature = f;
         this.entityPosition = entityPosition;
@@ -75,7 +76,7 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public void doAction() {
-        final PFeature pf = (PFeature)mc.getPFeatureHM().get(feature);
+        final PFeature pf = (PFeature) mc.getPFeatureHM().get(feature);
         pf.insertCoordinate(entityPosition, ringPosition, coordPosition, x, y, false);
     }
 
@@ -87,9 +88,10 @@ public class HandleAddAction implements CustomAction {
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
-                HandleAddAction.class,
-                "HandleAddAction.info().return",
-                new Object[] { coordPosition, x, y }); // NOI18N
+            HandleAddAction.class,
+            "HandleAddAction.info().return",
+            new Object[] { coordPosition, x, y }
+        ); // NOI18N
     }
 
     /**

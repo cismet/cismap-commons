@@ -1,25 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.options;
-
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.lookupoptions.*;
-
 import de.cismet.tools.configuration.NoWriteError;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -33,8 +29,9 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String OPTION_NAME = NbBundle.getMessage(
-            GeometryOptionsPanel.class,
-            "GeometryOptionsPanel.OPTION_NAME");
+        GeometryOptionsPanel.class,
+        "GeometryOptionsPanel.OPTION_NAME"
+    );
     private static final String CONFIGURATION = "GeometryOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "EllipseEgdes";
 
@@ -50,6 +47,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField jTextField1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -103,8 +101,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public String getTooltip() {
-        return org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class,
-                "GeometryOptionsPanel.tooltip"); // NOI18N
+        return org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.tooltip"); // NOI18N
     }
 
     /**
@@ -114,12 +111,22 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
      */
     private CreateGeometryListenerInterface getListener() {
         CreateGeometryListenerInterface result = null;
-        if ((CismapBroker.getInstance() != null)
-                    && (CismapBroker.getInstance().getMappingComponent() != null)
-                    && (CismapBroker.getInstance().getMappingComponent().getInputListener(
-                            MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
-            result = (CreateGeometryListenerInterface)CismapBroker.getInstance().getMappingComponent()
-                        .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
+        if (
+            (CismapBroker.getInstance() != null) &&
+            (CismapBroker.getInstance().getMappingComponent() != null) &&
+            (
+                CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON) !=
+                null
+            )
+        ) {
+            result =
+                (CreateGeometryListenerInterface) CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
         }
 
         return result;
@@ -182,41 +189,70 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                GeometryOptionsPanel.class,
-                "GeometryOptionsPanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jLabel1.text")
+        ); // NOI18N
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                GeometryOptionsPanel.class,
-                "GeometryOptionsPanel.jLabel2.text")); // NOI18N
+        jLabel2.setText(
+            org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jLabel2.text")
+        ); // NOI18N
 
-        jTextField1.setText(org.openide.util.NbBundle.getMessage(
-                GeometryOptionsPanel.class,
-                "GeometryOptionsPanel.jTextField1.text")); // NOI18N
+        jTextField1.setText(
+            org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jTextField1.text")
+        ); // NOI18N
 
         final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                        layout.createSequentialGroup().addGap(12, 12, 12).addComponent(jLabel2).addPreferredGap(
-                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
-                            jTextField1,
-                            javax.swing.GroupLayout.PREFERRED_SIZE,
-                            49,
-                            javax.swing.GroupLayout.PREFERRED_SIZE)).addComponent(jLabel1)).addContainerGap(
-                    40,
-                    Short.MAX_VALUE)));
+            layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                            layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(
+                                    layout
+                                        .createSequentialGroup()
+                                        .addGap(12, 12, 12)
+                                        .addComponent(jLabel2)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(
+                                            jTextField1,
+                                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                                            49,
+                                            javax.swing.GroupLayout.PREFERRED_SIZE
+                                        )
+                                )
+                                .addComponent(jLabel1)
+                        )
+                        .addContainerGap(40, Short.MAX_VALUE)
+                )
+        );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                layout.createSequentialGroup().addContainerGap().addComponent(jLabel1).addPreferredGap(
-                    javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
-                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(jLabel2)
+            layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    layout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(
+                            layout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel2)
                                 .addComponent(
                                     jTextField1,
                                     javax.swing.GroupLayout.PREFERRED_SIZE,
                                     javax.swing.GroupLayout.DEFAULT_SIZE,
-                                    javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap(36, Short.MAX_VALUE)));
+                                    javax.swing.GroupLayout.PREFERRED_SIZE
+                                )
+                        )
+                        .addContainerGap(36, Short.MAX_VALUE)
+                )
+        );
     } // </editor-fold>//GEN-END:initComponents
 }

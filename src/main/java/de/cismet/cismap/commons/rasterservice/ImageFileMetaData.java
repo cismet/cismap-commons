@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -14,14 +14,11 @@ package de.cismet.cismap.commons.rasterservice;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
+import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
+import java.awt.Rectangle;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.awt.Rectangle;
-
-import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
 
 /**
  * DOCUMENT ME!

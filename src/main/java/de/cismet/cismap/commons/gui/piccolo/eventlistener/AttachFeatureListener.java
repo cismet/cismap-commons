@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * DragFeatureListener.java
  *
@@ -16,15 +16,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.Attachable;
@@ -33,8 +24,12 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  * DOCUMENT ME!
@@ -49,7 +44,8 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
     public static final String ATTACH_FEATURE_NOTIFICATION = "ATTACH_FEATURE_NOTIFICATION"; // NOI18N
 
     private static final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            AttachFeatureListener.class);
+        AttachFeatureListener.class
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -65,13 +61,14 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                30.5d,
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            30.5d,
+            true
+        );
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
-            featureToAttach = (PFeature)(o);
+            featureToAttach = (PFeature) (o);
             postFeatureAttachRequest();
         } else {
             featureToAttach = null;
@@ -86,8 +83,10 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
     private Geometry createGeometryFromRectangle() {
         final WorldToScreenTransform wtst = CismapBroker.getInstance().getMappingComponent().getWtst();
 
-        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+        final GeometryFactory geomFactory = new GeometryFactory(
+            new PrecisionModel(PrecisionModel.FLOATING),
+            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+        );
 
         // ab einer bestimmten Zoomstufe ist aus ungeklärten Gründen getBounds = EMPTY
         // damit intersects funktioniert, wird hier im Falle von isEmpty ein Punkt statt
@@ -106,12 +105,12 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
             final double y2 = wtst.getWorldY(rectangle.getBounds().getMaxY());
 
             final Coordinate[] polyCords = new Coordinate[] {
-                    new Coordinate(x1, y1),
-                    new Coordinate(x2, y1),
-                    new Coordinate(x2, y2),
-                    new Coordinate(x1, y2),
-                    new Coordinate(x1, y1)
-                };
+                new Coordinate(x1, y1),
+                new Coordinate(x2, y1),
+                new Coordinate(x2, y2),
+                new Coordinate(x1, y2),
+                new Coordinate(x1, y1),
+            };
 
             return geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
         }
@@ -128,7 +127,7 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
         if (event.getButton() == 1) { // linke Maustaste
             // Mouseevent muss von einer MappingComponent gefeuert werden
             if (event.getComponent() instanceof MappingComponent) {
-                final MappingComponent mc = (MappingComponent)event.getComponent();
+                final MappingComponent mc = (MappingComponent) event.getComponent();
                 mc.getHandleLayer().removeAllChildren();
 
                 if (log.isDebugEnabled()) {
@@ -154,12 +153,13 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
                 } else if (markedFeatures.size() == 1) { // genau 1 Feature markiert
                     featureToAttach = mc.getPFeatureHM().get(markedFeatures.get(0));
                     postFeatureAttachRequest();
-                } else {                                 // mehr als ein Feature markiert
+                } else { // mehr als ein Feature markiert
                     JOptionPane.showMessageDialog(
                         StaticSwingTools.getParentFrame(mc),
                         "Bitte nur ein Objekt zum Zuordnen auswählen.",
                         "Mehr als ein Objekt markiert.",
-                        JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
                 }
             }
         }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,11 +12,10 @@
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
-import java.util.Map;
-
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
+import java.util.Map;
 
 /**
  * The base class of feature creators, which are used to create new features.
@@ -56,14 +55,16 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
      * @param  feature     DOCUMENT ME!
      * @param  properties  DOCUMENT ME!
      */
-    protected static void fillFeatureWithDefaultValues(final DefaultFeatureServiceFeature feature,
-            final Map<String, Object> properties) {
+    protected static void fillFeatureWithDefaultValues(
+        final DefaultFeatureServiceFeature feature,
+        final Map<String, Object> properties
+    ) {
         if (properties != null) {
             for (final String propName : properties.keySet()) {
                 final Object o = properties.get(propName);
 
-                if ((o instanceof String) && ((String)o).startsWith("@")) {
-                    final String referencedProperty = ((String)o).substring(1);
+                if ((o instanceof String) && ((String) o).startsWith("@")) {
+                    final String referencedProperty = ((String) o).substring(1);
                     final Object value = feature.getProperty(referencedProperty);
                     feature.setProperty(propName, value);
                 } else {
@@ -79,14 +80,16 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
      * @param  feature     DOCUMENT ME!
      * @param  properties  DOCUMENT ME!
      */
-    protected static void fillFeatureWithDefaultValuesAfterSave(final DefaultFeatureServiceFeature feature,
-            final Map<String, Object> properties) {
+    protected static void fillFeatureWithDefaultValuesAfterSave(
+        final DefaultFeatureServiceFeature feature,
+        final Map<String, Object> properties
+    ) {
         if (properties != null) {
             for (final String propName : properties.keySet()) {
                 final Object o = properties.get(propName);
 
-                if ((o instanceof String) && ((String)o).startsWith("@")) {
-                    final String referencedProperty = ((String)o).substring(1);
+                if ((o instanceof String) && ((String) o).startsWith("@")) {
+                    final String referencedProperty = ((String) o).substring(1);
                     final Object value = feature.getProperty(referencedProperty);
                     feature.setProperty(propName, value);
                 }
@@ -95,12 +98,10 @@ public abstract class AbstractFeatureCreator implements FeatureCreator {
     }
 
     @Override
-    public void cancel() {
-    }
+    public void cancel() {}
 
     @Override
-    public void resume() {
-    }
+    public void resume() {}
 
     @Override
     public boolean isCreationAllowed(final MappingComponent mc) {

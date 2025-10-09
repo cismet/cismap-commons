@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * HandleDeleteAction.java
  *
@@ -51,13 +51,15 @@ public class HandleDeleteAction implements CustomAction {
      * @param  x               DOCUMENT ME!
      * @param  y               DOCUMENT ME!
      */
-    public HandleDeleteAction(final MappingComponent mc,
-            final Feature feature,
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float x,
-            final float y) {
+    public HandleDeleteAction(
+        final MappingComponent mc,
+        final Feature feature,
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float x,
+        final float y
+    ) {
         this.mc = mc;
         this.feature = feature;
         this.entityPosition = entityPosition;
@@ -74,7 +76,7 @@ public class HandleDeleteAction implements CustomAction {
      */
     @Override
     public void doAction() {
-        final PFeature pf = (PFeature)mc.getPFeatureHM().get(feature);
+        final PFeature pf = (PFeature) mc.getPFeatureHM().get(feature);
         pf.removeCoordinate(entityPosition, ringPosition, coordPosition, false);
     }
 
@@ -86,9 +88,10 @@ public class HandleDeleteAction implements CustomAction {
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
-                HandleDeleteAction.class,
-                "HandleDeleteAction.info().return",
-                new Object[] { coordPosition, x, y }); // NOI18N
+            HandleDeleteAction.class,
+            "HandleDeleteAction.info().return",
+            new Object[] { coordPosition, x, y }
+        ); // NOI18N
     }
 
     /**

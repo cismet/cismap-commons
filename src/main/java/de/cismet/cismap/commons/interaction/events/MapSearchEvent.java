@@ -1,17 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.util.PBounds;
-
 import de.cismet.cismap.commons.BoundingBox;
+import edu.umd.cs.piccolo.util.PBounds;
 
 /**
  * DOCUMENT ME!
@@ -32,8 +30,7 @@ public class MapSearchEvent {
     /**
      * Creates a new instance of MapSearchEvent.
      */
-    public MapSearchEvent() {
-    }
+    public MapSearchEvent() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -64,6 +61,7 @@ public class MapSearchEvent {
     public PBounds getBounds() {
         return bounds;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -73,6 +71,7 @@ public class MapSearchEvent {
     public void setBounds(final PBounds bounds) {
         this.bounds = bounds;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -82,6 +81,7 @@ public class MapSearchEvent {
     public BoundingBox getBb() {
         return bb;
     }
+
     /**
      * DOCUMENT ME!
      *

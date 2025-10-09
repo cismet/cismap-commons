@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleClickDetectionListener.java
  *
@@ -12,11 +12,10 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 /**
  * DOCUMENT ME!
@@ -39,12 +38,13 @@ public class SimpleClickDetectionListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
-            p = (PFeature)(o);
+            p = (PFeature) (o);
             postClickDetected();
         } else {
             p = null;

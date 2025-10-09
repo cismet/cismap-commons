@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * BadHttpStatusCodeException.java
  *
@@ -16,7 +16,6 @@
 package de.cismet.cismap.commons.exceptions;
 
 import java.awt.EventQueue;
-
 import javax.swing.SwingUtilities;
 
 /**

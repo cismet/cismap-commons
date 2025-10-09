@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,28 +12,22 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.util.PDimension;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import java.awt.geom.Point2D;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.JOptionPane;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.util.PDimension;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.geom.Point2D;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Vector;
+import javax.swing.JOptionPane;
 
 /**
  * DOCUMENT ME!
@@ -71,14 +65,16 @@ public class RotationPHandle extends PHandle {
      * @param  mid             DOCUMENT ME!
      * @param  pivotHandle     DOCUMENT ME!
      */
-    public RotationPHandle(final PFeature pfeature,
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final Point2D mid,
-            final PHandle pivotHandle) {
-        super(new PLocator() {
-
+    public RotationPHandle(
+        final PFeature pfeature,
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final Point2D mid,
+        final PHandle pivotHandle
+    ) {
+        super(
+            new PLocator() {
                 @Override
                 public double locateX() {
                     return pfeature.getXp(entityPosition, ringPosition)[coordPosition];
@@ -88,8 +84,9 @@ public class RotationPHandle extends PHandle {
                 public double locateY() {
                     return pfeature.getYp(entityPosition, ringPosition)[coordPosition];
                 }
-            }, pfeature.getViewer());
-
+            },
+            pfeature.getViewer()
+        );
         this.mid = mid;
         this.pfeature = pfeature;
         this.entityPosition = entityPosition;
@@ -110,18 +107,20 @@ public class RotationPHandle extends PHandle {
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
         pfeature.getViewer().getCamera().localToView(aLocalDimension);
         final double dragRot = pfeature.calculateDrag(
-                aEvent,
-                pfeature.getXp(entityPosition, ringPosition)[coordPosition],
-                pfeature.getYp(entityPosition, ringPosition)[coordPosition]);
+            aEvent,
+            pfeature.getXp(entityPosition, ringPosition)[coordPosition],
+            pfeature.getYp(entityPosition, ringPosition)[coordPosition]
+        );
 
         // No sense for stepping with discrete steps through the roatating process
         // because of the restarting with 0 when a new rotation drag operation ist started
 
-        if ((pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection)
-                    && (((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).getSelectedFeatures()
-                        .size() > 1)) {
+        if (
+            (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) &&
+            (((DefaultFeatureCollection) pfeature.getViewer().getFeatureCollection()).getSelectedFeatures().size() > 1)
+        ) {
             for (final Object o : pfeature.getViewer().getFeatureCollection().getSelectedFeatures()) {
-                final PFeature pf = (PFeature)pfeature.getViewer().getPFeatureHM().get((Feature)o);
+                final PFeature pf = (PFeature) pfeature.getViewer().getPFeatureHM().get((Feature) o);
                 if (pf.getFeature().isEditable()) {
                     pf.rotateAllPoints(dragRot, null);
                     relocateHandle();
@@ -152,7 +151,7 @@ public class RotationPHandle extends PHandle {
         // InfoNode entfernen, da sie sonst mitdreht
         final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
         for (final Object o : selArr) {
-            final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(o));
+            final PFeature pf = (PFeature) (pfeature.getViewer().getPFeatureHM().get(o));
             if ((pf != null) && (pf.getInfoNode() != null)) {
                 pf.getInfoNode().setVisible(false);
             }
@@ -181,8 +180,10 @@ public class RotationPHandle extends PHandle {
                 }
             }
 
-            final LinkedHashSet<Feature> temp = (LinkedHashSet<Feature>)pfeature.getViewer().getFeatureCollection()
-                        .getSelectedFeatures();
+            final LinkedHashSet<Feature> temp = (LinkedHashSet<Feature>) pfeature
+                .getViewer()
+                .getFeatureCollection()
+                .getSelectedFeatures();
             final LinkedHashSet<Feature> selArr = new LinkedHashSet<Feature>();
             for (final Feature sel : temp) {
                 if (sel.isEditable()) {
@@ -195,10 +196,10 @@ public class RotationPHandle extends PHandle {
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                 final Vector v = new Vector();
                 for (final Object f : selArr) {
-                    ((PFeature)pfeature.getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
-                    v.add(((PFeature)pfeature.getViewer().getPFeatureHM().get(f)).getFeature());
+                    ((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
+                    v.add(((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).getFeature());
                 }
-                ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+                ((DefaultFeatureCollection) pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
             } else {
                 pfeature.getViewer().getFeatureCollection().reconsiderFeature(pfeature.getFeature());
             }
@@ -211,8 +212,8 @@ public class RotationPHandle extends PHandle {
                 if (!(pfeature.getFeature() instanceof SearchFeature)) {
                     // Ewig aufwändiger Check nach Überschneidungen
                     for (final Object o : selArr) {
-                        final Geometry g = ((PFeature)pfeature.getViewer().getPFeatureHM().get(o)).getFeature()
-                                    .getGeometry();
+                        final Geometry g =
+                            ((PFeature) pfeature.getViewer().getPFeatureHM().get(o)).getFeature().getGeometry();
                         if (!overlap) {
                             for (final Feature f : all) {
                                 if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
@@ -240,30 +241,32 @@ public class RotationPHandle extends PHandle {
                     }
                 }
                 final int answer = JOptionPane.showConfirmDialog(
-                        StaticSwingTools.getParentFrame(pfeature.getViewer()),
-                        DIALOG_TEXT,
-                        DIALOG_TITLE,
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
+                    StaticSwingTools.getParentFrame(pfeature.getViewer()),
+                    DIALOG_TEXT,
+                    DIALOG_TITLE,
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+                );
                 if (pfeature.getViewer().isFeatureDebugging()) {
                     if (log.isDebugEnabled()) {
                         log.debug("Drehung durchf\u00FChren: " + ((answer == JOptionPane.YES_OPTION) ? "JA" : "NEIN"));
                     }
                 }
                 if (answer == JOptionPane.YES_OPTION) {
-                    final CustomAction a = new FeatureRotateAction(pfeature.getViewer(),
-                            selArr,
-                            (Point2D)mid.clone(),
-                            rotation);
+                    final CustomAction a = new FeatureRotateAction(
+                        pfeature.getViewer(),
+                        selArr,
+                        (Point2D) mid.clone(),
+                        rotation
+                    );
                     a.doAction();
                 } else if (rotation != 0.0d) {
-                    pfeature.getViewer()
-                            .getMemUndo()
-                            .addAction(new FeatureRotateAction(
-                                    pfeature.getViewer(),
-                                    selArr,
-                                    (Point2D)mid.clone(),
-                                    rotation));
+                    pfeature
+                        .getViewer()
+                        .getMemUndo()
+                        .addAction(
+                            new FeatureRotateAction(pfeature.getViewer(), selArr, (Point2D) mid.clone(), rotation)
+                        );
                     pfeature.getViewer().getMemRedo().clear();
                 }
             } else {
@@ -276,9 +279,10 @@ public class RotationPHandle extends PHandle {
                         log.debug("mid=" + mid);
                     }
                     final Point2D actionMid = new Point2D.Double(mid.getX(), mid.getY());
-                    pfeature.getViewer()
-                            .getMemUndo()
-                            .addAction(new FeatureRotateAction(pfeature.getViewer(), selArr, actionMid, rotation));
+                    pfeature
+                        .getViewer()
+                        .getMemUndo()
+                        .addAction(new FeatureRotateAction(pfeature.getViewer(), selArr, actionMid, rotation));
                     pfeature.getViewer().getMemRedo().clear();
                 }
             }

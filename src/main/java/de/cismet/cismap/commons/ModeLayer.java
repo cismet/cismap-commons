@@ -1,25 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.jdom.Element;
-
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
 
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModelStore;
@@ -27,6 +17,12 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import edu.umd.cs.piccolo.PNode;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -54,8 +50,7 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     /**
      * Creates a new ModeLayer object.
      */
-    public ModeLayer() {
-    }
+    public ModeLayer() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -165,9 +160,9 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
                 }
                 if (mappingModel != null) {
                     if (oldLayer != null) {
-                        mappingModel.fireMapServiceRemoved((MapService)oldLayer);
+                        mappingModel.fireMapServiceRemoved((MapService) oldLayer);
                     }
-                    mappingModel.fireMapServiceAdded((MapService)currentModeLayer);
+                    mappingModel.fireMapServiceAdded((MapService) currentModeLayer);
                 }
                 ale.setLayer(currentModeLayer);
                 CismapBroker.getInstance().fireLayerAdded(ale);
@@ -185,7 +180,8 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     private void checkCurrentModeLayer() {
         if (currentModeLayer == null) {
             throw new IllegalStateException(
-                "A modeLayer without a mode is not a good idea. It should be configured with at least two different modes/layers and initialized with a start mode");
+                "A modeLayer without a mode is not a good idea. It should be configured with at least two different modes/layers and initialized with a start mode"
+            );
         }
     }
 
@@ -333,7 +329,7 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     public void setSize(final int height, final int width) {
         for (final RetrievalServiceLayer rsl : modeLayers.values()) {
             if (rsl instanceof MapService) {
-                ((MapService)rsl).setSize(height, width);
+                ((MapService) rsl).setSize(height, width);
             }
         }
     }
@@ -360,14 +356,14 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     public void setBoundingBox(final BoundingBox bb) {
         for (final RetrievalServiceLayer rsl : modeLayers.values()) {
             if (rsl instanceof MapService) {
-                ((MapService)rsl).setBoundingBox(bb);
+                ((MapService) rsl).setBoundingBox(bb);
             }
         }
     }
 
     @Override
     public boolean isVisible() {
-        return ((MapService)currentModeLayer).isVisible();
+        return ((MapService) currentModeLayer).isVisible();
     }
 
     /**
@@ -376,19 +372,19 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
      * @return  DOCUMENT ME!
      */
     public Element toElement() {
-        final Element element = new Element("ModeLayer");                                             // NOI18N
-        element.setAttribute("mode", getCurrentMode());                                               // NOI18N
-        element.setAttribute("key", layerKey);                                                        // NOI18N
+        final Element element = new Element("ModeLayer"); // NOI18N
+        element.setAttribute("mode", getCurrentMode()); // NOI18N
+        element.setAttribute("key", layerKey); // NOI18N
         if (layerPosition != -1) {
-            element.setAttribute("layerPosition", String.valueOf(layerPosition));                     // NOI18N
+            element.setAttribute("layerPosition", String.valueOf(layerPosition)); // NOI18N
         }
-        element.setAttribute("translucency", Float.toString(getCurrentLayer().getTranslucency()));    // NOI18N
-        element.setAttribute("enabled", Boolean.toString(getCurrentLayer().isEnabled()));             // NOI18N
+        element.setAttribute("translucency", Float.toString(getCurrentLayer().getTranslucency())); // NOI18N
+        element.setAttribute("enabled", Boolean.toString(getCurrentLayer().isEnabled())); // NOI18N
         element.setAttribute("visible", Boolean.toString(getCurrentLayer().getPNode().getVisible())); // NOI18N
         for (final String m : getModes()) {
             final Element modeElement = new Element("Mode");
             modeElement.setAttribute("key", m);
-            modeElement.addContent(CidsLayerFactory.getElement((MapService)getModeLayer(m)));
+            modeElement.addContent(CidsLayerFactory.getElement((MapService) getModeLayer(m)));
             element.addContent(modeElement);
         }
         return element;

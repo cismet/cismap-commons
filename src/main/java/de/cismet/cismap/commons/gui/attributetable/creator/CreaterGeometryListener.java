@@ -1,28 +1,26 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
-import edu.umd.cs.piccolo.nodes.PPath;
-
-import java.awt.BasicStroke;
-import java.awt.Color;
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.LINESTRING;
 
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
-
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.LINESTRING;
+import edu.umd.cs.piccolo.nodes.PPath;
+import java.awt.BasicStroke;
+import java.awt.Color;
 
 /**
  * can be used tio create new Geometries on the map.

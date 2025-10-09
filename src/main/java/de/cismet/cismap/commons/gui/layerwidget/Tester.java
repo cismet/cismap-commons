@@ -1,26 +1,23 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
+
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.configuration.ConfigurationManager;
+import java.awt.dnd.DnDConstants;
+import java.io.InputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.xml.XmlConfiguration;
-
-import java.awt.dnd.DnDConstants;
-
-import java.io.InputStream;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.configuration.ConfigurationManager;
 
 /**
  * DOCUMENT ME!
@@ -47,6 +44,7 @@ public class Tester extends javax.swing.JFrame {
     private javax.swing.JPanel panCaps;
     private javax.swing.JPanel panLayerWidget;
     private javax.swing.JPanel panMap;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -56,10 +54,13 @@ public class Tester extends javax.swing.JFrame {
      */
     public Tester() {
         try {
-            try(final InputStream configStream = ClassLoader.getSystemResourceAsStream(
-                                "de/cismet/cismap/commons/demo/log4j.xml")) {
+            try (
+                final InputStream configStream = ClassLoader.getSystemResourceAsStream(
+                    "de/cismet/cismap/commons/demo/log4j.xml"
+                )
+            ) {
                 final ConfigurationSource source = new ConfigurationSource(configStream);
-                final LoggerContext context = (LoggerContext)LogManager.getContext(false);
+                final LoggerContext context = (LoggerContext) LogManager.getContext(false);
                 context.start(new XmlConfiguration(context, source)); // Apply new configuration
             }
         } catch (Exception e) {
@@ -91,8 +92,8 @@ public class Tester extends javax.swing.JFrame {
         cm.addConfigurable(capWidget);
         cm.addConfigurable(layerWidget);
         cm.addConfigurable(mapC);
-        cm.setFileName("configuration.xml");                       // NOI18N
-        cm.setFolder(".cismap");                                   // NOI18N
+        cm.setFileName("configuration.xml"); // NOI18N
+        cm.setFolder(".cismap"); // NOI18N
         cm.configure();
     }
 
@@ -149,33 +150,36 @@ public class Tester extends javax.swing.JFrame {
         getContentPane().add(jButton2, new java.awt.GridBagConstraints());
 
         jButton1.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton1.text")); // NOI18N
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton1);
 
         jButton3.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton3.text")); // NOI18N
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton3.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton3ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton3);
 
         jButton4.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton4.text")); // NOI18N
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton4.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton4ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton4);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -195,8 +199,8 @@ public class Tester extends javax.swing.JFrame {
      * @param  evt  DOCUMENT ME!
      */
     private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
-        mapC.getRasterServiceLayer().removeAllChildren();                        // TODO add your handling code here:
-    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
+        mapC.getRasterServiceLayer().removeAllChildren(); // TODO add your handling code here:
+    } //GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -208,7 +212,7 @@ public class Tester extends javax.swing.JFrame {
             validateTree();
         }
         mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(), 500);
-    }                                                                            //GEN-LAST:event_jButton3ActionPerformed
+    } //GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -217,7 +221,7 @@ public class Tester extends javax.swing.JFrame {
      */
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         mapC.setMappingModel(layerWidget.getMappingModel());
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -225,12 +229,13 @@ public class Tester extends javax.swing.JFrame {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     new Tester().setVisible(true);
                 }
-            });
+            }
+        );
     }
 }

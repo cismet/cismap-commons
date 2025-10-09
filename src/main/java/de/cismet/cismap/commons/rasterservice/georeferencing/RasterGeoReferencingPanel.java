@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,13 +13,8 @@
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel;
 import java.awt.Point;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -27,10 +22,8 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-
 import javax.swing.JLabel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
@@ -39,9 +32,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -56,30 +50,35 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private static final transient Logger LOG = Logger.getLogger(RasterGeoReferencingPanel.class);
 
     private static final String[] COLUMN_NAMES = {
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.colName.position"),
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.colName.point"),
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.colName.coord"),
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.colName.error"),
-            org.openide.util.NbBundle.getMessage(
-                RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.colName.enabled")
-        };
+        org.openide.util.NbBundle.getMessage(
+            RasterGeoReferencingPanel.class,
+            "RasterGeoReferencingPanel.colName.position"
+        ),
+        org.openide.util.NbBundle.getMessage(
+            RasterGeoReferencingPanel.class,
+            "RasterGeoReferencingPanel.colName.point"
+        ),
+        org.openide.util.NbBundle.getMessage(
+            RasterGeoReferencingPanel.class,
+            "RasterGeoReferencingPanel.colName.coord"
+        ),
+        org.openide.util.NbBundle.getMessage(
+            RasterGeoReferencingPanel.class,
+            "RasterGeoReferencingPanel.colName.error"
+        ),
+        org.openide.util.NbBundle.getMessage(
+            RasterGeoReferencingPanel.class,
+            "RasterGeoReferencingPanel.colName.enabled"
+        ),
+    };
 
     private static final Class[] COLUMN_CLASSES = {
-            Integer.class,
-            String.class,
-            String.class,
-            String.class,
-            Boolean.class
-        };
+        Integer.class,
+        String.class,
+        String.class,
+        String.class,
+        Boolean.class,
+    };
 
     //~ Instance fields --------------------------------------------------------
 
@@ -126,6 +125,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel simpleBackgroundedJPanel1;
     private de.cismet.cismap.commons.gui.SimpleBackgroundedJPanel simpleBackgroundedJPanel2;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -197,13 +197,19 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jXTable1 = new org.jdesktop.swingx.JXTable();
         jPanel4 = new javax.swing.JPanel();
         jButton8 = new javax.swing.JButton();
-        filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        filler2 =
+            new javax.swing.Box.Filler(
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(32767, 0));
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0)
+            );
         jButton1 = new javax.swing.JButton();
-        filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        filler3 =
+            new javax.swing.Box.Filler(
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(32767, 0));
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0)
+            );
         panMapOverview = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -214,28 +220,36 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         simpleBackgroundedJPanel2 = new DnDTargetSimpleBackgroundedJPanel();
         jLabel11 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
+        filler1 =
+            new javax.swing.Box.Filler(
                 new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(32767, 0));
+                new java.awt.Dimension(0, 0),
+                new java.awt.Dimension(32767, 0)
+            );
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel12,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel12.text")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel12.text"
+            )
+        ); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jMenuItem2,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jMenuItem2.text")); // NOI18N
-        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-
+                "RasterGeoReferencingPanel.jMenuItem2.text"
+            )
+        ); // NOI18N
+        jMenuItem2.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jMenuItem2ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPopupMenu1.add(jMenuItem2);
 
         setMinimumSize(new java.awt.Dimension(420, 500));
@@ -250,7 +264,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             jLabel7,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel7.text_1")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel7.text_1"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -261,15 +277,18 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             jLabel5,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel5.text")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel5.text"
+            )
+        ); // NOI18N
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${wizard.pointSelected}"),
-                jLabel5,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"),
-                "wizPointEnable");
+            org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+            this,
+            org.jdesktop.beansbinding.ELProperty.create("${wizard.pointSelected}"),
+            jLabel5,
+            org.jdesktop.beansbinding.BeanProperty.create("enabled"),
+            "wizPointEnable"
+        );
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -285,15 +304,19 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             jLabel6,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel6.text")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel6.text"
+            )
+        ); // NOI18N
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${wizard.coordinateSelected}"),
                 jLabel6,
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"),
-                "wizCoordinateEnable");
+                "wizCoordinateEnable"
+            );
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -307,13 +330,16 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 2, 5, 0));
 
-        jButton6.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/control-180.png"))); // NOI18N
+        jButton6.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/control-180.png"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton6,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jButton6.text"));                                   // NOI18N
+                "RasterGeoReferencingPanel.jButton6.text"
+            )
+        ); // NOI18N
         jButton6.setBorderPainted(false);
         jButton6.setContentAreaFilled(false);
         jButton6.setFocusPainted(false);
@@ -321,51 +347,60 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jButton6.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton6.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${backwardPossible}"),
                 jButton6,
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"),
-                "wizBackwardEnable");
+                "wizBackwardEnable"
+            );
         bindingGroup.addBinding(binding);
 
-        jButton6.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton6.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton6ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton6);
 
-        jButton7.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/control.png"))); // NOI18N
+        jButton7.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/control.png"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton7,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jButton7.text"));                               // NOI18N
+                "RasterGeoReferencingPanel.jButton7.text"
+            )
+        ); // NOI18N
         jButton7.setBorderPainted(false);
         jButton7.setContentAreaFilled(false);
         jButton7.setFocusPainted(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 this,
                 org.jdesktop.beansbinding.ELProperty.create("${forwardPossible}"),
                 jButton7,
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"),
-                "wizForwardEnable");
+                "wizForwardEnable"
+            );
         bindingGroup.addBinding(binding);
 
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton7.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton7ActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(jButton7);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -374,14 +409,18 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         panInstructions.add(jPanel1, gridBagConstraints);
 
-        jLabel8.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource(
-                    "/de/cismet/cismap/commons/rasterservice/georeferencing/georef_wizard_icon.png"))); // NOI18N
+        jLabel8.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_wizard_icon.png")
+            )
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel8,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel8.text"));                                             // NOI18N
+                "RasterGeoReferencingPanel.jLabel8.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -390,13 +429,15 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 20);
         panInstructions.add(jLabel8, gridBagConstraints);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 jXTable1,
                 org.jdesktop.beansbinding.ELProperty.create("<html><b>${selectedRow + 1}"),
                 jLabel9,
                 org.jdesktop.beansbinding.BeanProperty.create("text"),
-                "wizPosition");
+                "wizPosition"
+            );
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -464,26 +505,33 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
 
         jPanel4.setLayout(new java.awt.GridBagLayout());
 
-        jButton8.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/plus.png"))); // NOI18N
+        jButton8.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/plus.png"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton8,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jButton8.text"));                            // NOI18N
-        jButton8.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "RasterGeoReferencingPanel.jButton8.text"
+            )
+        ); // NOI18N
+        jButton8.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jButton8.toolTipText"));                     // NOI18N
+                "RasterGeoReferencingPanel.jButton8.toolTipText"
+            )
+        ); // NOI18N
         jButton8.setBorderPainted(false);
         jButton8.setContentAreaFilled(false);
         jButton8.setFocusPainted(false);
-        jButton8.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton8.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton8ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -497,32 +545,38 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         jPanel4.add(filler2, gridBagConstraints);
 
-        jButton1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/minus.png"))); // NOI18N
+        jButton1.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/minus.png"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jButton1,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jButton1.text"));                             // NOI18N
+                "RasterGeoReferencingPanel.jButton1.text"
+            )
+        ); // NOI18N
         jButton1.setBorderPainted(false);
         jButton1.setContentAreaFilled(false);
         jButton1.setFocusPainted(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+        binding =
+            org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
                 jXTable1,
                 org.jdesktop.beansbinding.ELProperty.create("${selectedElement != null}"),
                 jButton1,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+                org.jdesktop.beansbinding.BeanProperty.create("enabled")
+            );
         bindingGroup.addBinding(binding);
 
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
+        jButton1.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     jButton1ActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -556,7 +610,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             jLabel3,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel3.text")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel3.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 2);
@@ -567,7 +623,9 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             jLabel4,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel4.text")); // NOI18N
+                "RasterGeoReferencingPanel.jLabel4.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -582,20 +640,26 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jScrollPane2.setPreferredSize(new java.awt.Dimension(200, 200));
 
         simpleBackgroundedJPanel1.setBackground(new java.awt.Color(255, 255, 255));
-        simpleBackgroundedJPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(
-                javax.swing.border.BevelBorder.LOWERED));
+        simpleBackgroundedJPanel1.setBorder(
+            javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED)
+        );
         simpleBackgroundedJPanel1.setMaximumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setMinimumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setPreferredSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel1.setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_dot.png"))); // NOI18N
+        jLabel1.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_dot.png")
+            )
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel1,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel1.text"));                                                        // NOI18N
+                "RasterGeoReferencingPanel.jLabel1.text"
+            )
+        ); // NOI18N
         simpleBackgroundedJPanel1.add(jLabel1, new java.awt.GridBagConstraints());
 
         jScrollPane2.setViewportView(simpleBackgroundedJPanel1);
@@ -614,34 +678,42 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jScrollPane3.setPreferredSize(new java.awt.Dimension(200, 200));
 
         simpleBackgroundedJPanel2.setBackground(new java.awt.Color(255, 255, 255));
-        simpleBackgroundedJPanel2.setBorder(javax.swing.BorderFactory.createBevelBorder(
-                javax.swing.border.BevelBorder.LOWERED));
+        simpleBackgroundedJPanel2.setBorder(
+            javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED)
+        );
         simpleBackgroundedJPanel2.setMaximumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel2.setMinimumSize(new java.awt.Dimension(200, 200));
         simpleBackgroundedJPanel2.setPreferredSize(new java.awt.Dimension(200, 200));
-        simpleBackgroundedJPanel2.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        simpleBackgroundedJPanel2.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     simpleBackgroundedJPanel2MousePressed(evt);
                 }
-            });
+            }
+        );
         simpleBackgroundedJPanel2.setLayout(new java.awt.GridBagLayout());
 
-        jLabel11.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/info.png"))); // NOI18N
+        jLabel11.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/info.png")
+            )
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel11,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel11.text"));                                                    // NOI18N
-        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
-
+                "RasterGeoReferencingPanel.jLabel11.text"
+            )
+        ); // NOI18N
+        jLabel11.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     jLabel11MousePressed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -651,20 +723,26 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         jLabel11.setVisible(false);
 
         jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel10.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png"))); // NOI18N
+        jLabel10.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/rasterservice/georeferencing/georef_cross.png")
+            )
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             jLabel10,
             org.openide.util.NbBundle.getMessage(
                 RasterGeoReferencingPanel.class,
-                "RasterGeoReferencingPanel.jLabel10.text"));                                                         // NOI18N
-        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
-
+                "RasterGeoReferencingPanel.jLabel10.text"
+            )
+        ); // NOI18N
+        jLabel10.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mousePressed(final java.awt.event.MouseEvent evt) {
                     jLabel10MousePressed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -713,29 +791,28 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
         final int position = jXTable1.getSelectedRow();
         new SwingWorker<Boolean, Object>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                final boolean success = getHandler().removePair(position);
+                return success;
+            }
 
-                @Override
-                protected Boolean doInBackground() throws Exception {
-                    final boolean success = getHandler().removePair(position);
-                    return success;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        final Boolean success = get();
-                        if (Boolean.TRUE.equals(success)) {
-                            refreshModel();
-                            if (success && (getHandler().getNumOfPairs() != 0)) {
-                                getWizard().selectCoordinate(position - 1);
-                            }
+            @Override
+            protected void done() {
+                try {
+                    final Boolean success = get();
+                    if (Boolean.TRUE.equals(success)) {
+                        refreshModel();
+                        if (success && (getHandler().getNumOfPairs() != 0)) {
+                            getWizard().selectCoordinate(position - 1);
                         }
-                    } catch (final Exception ex) {
-                        LOG.info(ex, ex);
                     }
+                } catch (final Exception ex) {
+                    LOG.info(ex, ex);
                 }
-            }.execute();
-        ;
+            }
+        }
+            .execute();
     } //GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -745,24 +822,24 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jButton8ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton8ActionPerformed
         new SwingWorker<Integer, Object>() {
+            @Override
+            protected Integer doInBackground() throws Exception {
+                final int position = getHandler().addPair();
+                return position;
+            }
 
-                @Override
-                protected Integer doInBackground() throws Exception {
-                    final int position = getHandler().addPair();
-                    return position;
+            @Override
+            protected void done() {
+                try {
+                    final int position = (Integer) get();
+                    refreshModel();
+                    getWizard().selectPoint(position);
+                } catch (final Exception ex) {
+                    LOG.info(ex, ex);
                 }
-
-                @Override
-                protected void done() {
-                    try {
-                        final int position = (Integer)get();
-                        refreshModel();
-                        getWizard().selectPoint(position);
-                    } catch (final Exception ex) {
-                        LOG.info(ex, ex);
-                    }
-                }
-            }.execute();
+            }
+        }
+            .execute();
     } //GEN-LAST:event_jButton8ActionPerformed
 
     /**
@@ -772,13 +849,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jButton7ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton7ActionPerformed
         new SwingWorker<Void, Object>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    getWizard().forward();
-                    return null;
-                }
-            }.execute();
+            @Override
+            protected Void doInBackground() throws Exception {
+                getWizard().forward();
+                return null;
+            }
+        }
+            .execute();
     } //GEN-LAST:event_jButton7ActionPerformed
 
     /**
@@ -788,13 +865,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jButton6ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton6ActionPerformed
         new SwingWorker<Void, Object>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    getWizard().backward();
-                    return null;
-                }
-            }.execute();
+            @Override
+            protected Void doInBackground() throws Exception {
+                getWizard().backward();
+                return null;
+            }
+        }
+            .execute();
     } //GEN-LAST:event_jButton6ActionPerformed
 
     /**
@@ -804,7 +881,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jMenuItem2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jMenuItem2ActionPerformed
         resetLayer();
-    }                                                                              //GEN-LAST:event_jMenuItem2ActionPerformed
+    } //GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -813,7 +890,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jLabel11MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel11MousePressed
         showResetLayerPopup(evt);
-    }                                                                        //GEN-LAST:event_jLabel11MousePressed
+    } //GEN-LAST:event_jLabel11MousePressed
 
     /**
      * DOCUMENT ME!
@@ -822,7 +899,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void jLabel10MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_jLabel10MousePressed
         showResetLayerPopup(evt);
-    }                                                                        //GEN-LAST:event_jLabel10MousePressed
+    } //GEN-LAST:event_jLabel10MousePressed
 
     /**
      * DOCUMENT ME!
@@ -831,7 +908,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      */
     private void simpleBackgroundedJPanel2MousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_simpleBackgroundedJPanel2MousePressed
         showResetLayerPopup(evt);
-    }                                                                                         //GEN-LAST:event_simpleBackgroundedJPanel2MousePressed
+    } //GEN-LAST:event_simpleBackgroundedJPanel2MousePressed
 
     /**
      * DOCUMENT ME!
@@ -859,8 +936,11 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     public boolean isBackwardPossible() {
-        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
-                    && ((jXTable1.getSelectedRow() > 0) || getWizard().isCoordinateSelected());
+        return (
+            (getHandler() != null) &&
+            (getHandler().getNumOfPairs() > 0) &&
+            ((jXTable1.getSelectedRow() > 0) || getWizard().isCoordinateSelected())
+        );
     }
 
     /**
@@ -869,9 +949,11 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     public boolean isForwardPossible() {
-        return (getHandler() != null) && (getHandler().getNumOfPairs() > 0)
-                    && ((jXTable1.getSelectedRow() < (getHandler().getNumOfPairs() - 1))
-                        || getWizard().isPointSelected());
+        return (
+            (getHandler() != null) &&
+            (getHandler().getNumOfPairs() > 0) &&
+            ((jXTable1.getSelectedRow() < (getHandler().getNumOfPairs() - 1)) || getWizard().isPointSelected())
+        );
     }
 
     /**
@@ -880,8 +962,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
     private void refreshWizardBinding() {
         if (!isWizardRefreshing()) {
             setWizardRefreshing(true);
-            SwingUtilities.invokeLater(new Runnable() {
-
+            SwingUtilities.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -900,7 +982,8 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                             setWizardRefreshing(false);
                         }
                     }
-                });
+                }
+            );
         }
     }
 
@@ -908,7 +991,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void refreshModel() {
-        ((PairTableModel)jXTable1.getModel()).fireTableDataChanged();
+        ((PairTableModel) jXTable1.getModel()).fireTableDataChanged();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -962,29 +1045,36 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
             final DecimalFormat format = new DecimalFormat("#0.00", otherSymbols);
 
             switch (columnIndex) {
-                case 0: {
-                    return rowIndex + 1;
-                }
-                case 1: {
-                    return (point != null) ? ("[" + (int)point.getX() + ";" + (int)point.getY() + "]") : null;
-                }
-                case 2: {
-                    return (coordinate != null)
-                        ? ("[" + format.format(coordinate.x) + ";" + format.format(coordinate.y) + "]") : null;
-                }
-                case 3: {
-                    if (getHandler().isComplete()) {
-                        return format.format(getHandler().getError(rowIndex));
-                    } else {
-                        return "-";
+                case 0:
+                    {
+                        return rowIndex + 1;
                     }
-                }
-                case 4: {
-                    return getHandler().isPositionEnabled(rowIndex);
-                }
-                default: {
-                    return null;
-                }
+                case 1:
+                    {
+                        return (point != null) ? ("[" + (int) point.getX() + ";" + (int) point.getY() + "]") : null;
+                    }
+                case 2:
+                    {
+                        return (coordinate != null)
+                            ? ("[" + format.format(coordinate.x) + ";" + format.format(coordinate.y) + "]")
+                            : null;
+                    }
+                case 3:
+                    {
+                        if (getHandler().isComplete()) {
+                            return format.format(getHandler().getError(rowIndex));
+                        } else {
+                            return "-";
+                        }
+                    }
+                case 4:
+                    {
+                        return getHandler().isPositionEnabled(rowIndex);
+                    }
+                default:
+                    {
+                        return null;
+                    }
             }
         }
 
@@ -996,13 +1086,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
          */
         public void setPoint(final int position, final Point point) {
             new SwingWorker<Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        getHandler().setPoint(position, point);
-                        return null;
-                    }
-                }.execute();
+                @Override
+                protected Void doInBackground() throws Exception {
+                    getHandler().setPoint(position, point);
+                    return null;
+                }
+            }
+                .execute();
         }
 
         /**
@@ -1013,13 +1103,13 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
          */
         public void setCoordinate(final int position, final Coordinate coordinate) {
             new SwingWorker<Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        getHandler().setCoordinate(position, coordinate);
-                        return null;
-                    }
-                }.execute();
+                @Override
+                protected Void doInBackground() throws Exception {
+                    getHandler().setCoordinate(position, coordinate);
+                    return null;
+                }
+            }
+                .execute();
         }
 
         /**
@@ -1030,25 +1120,26 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
          */
         public void setPostitionEnabled(final int position, final boolean enabled) {
             new SwingWorker<Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        getHandler().setPositionEnabled(position, enabled);
-                        return null;
-                    }
-                }.execute();
+                @Override
+                protected Void doInBackground() throws Exception {
+                    getHandler().setPositionEnabled(position, enabled);
+                    return null;
+                }
+            }
+                .execute();
         }
 
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
             if ((columnIndex == 1) || (columnIndex == 2)) {
-                final String value = (aValue != null) ? ((String)aValue).trim() : null;
+                final String value = (aValue != null) ? ((String) aValue).trim() : null;
                 if (value != null) {
-                    final String[] split = value.replaceAll("\\(|\\)|\\[|\\]| ", "")
-                                .replaceAll("\\.", "")
-                                .replaceAll("\\||/", ";")
-                                .replaceAll(",", ".")
-                                .split(";");
+                    final String[] split = value
+                        .replaceAll("\\(|\\)|\\[|\\]| ", "")
+                        .replaceAll("\\.", "")
+                        .replaceAll("\\||/", ";")
+                        .replaceAll(",", ".")
+                        .split(";");
                     if (split.length == 2) {
                         try {
                             if (columnIndex == 1) {
@@ -1075,7 +1166,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
                 }
             } else {
                 if (columnIndex == 4) {
-                    final Boolean value = (Boolean)aValue;
+                    final Boolean value = (Boolean) aValue;
                     setPostitionEnabled(rowIndex, Boolean.TRUE.equals(value));
                 }
             }
@@ -1149,8 +1240,7 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         }
 
         @Override
-        public void transformationChanged() {
-        }
+        public void transformationChanged() {}
 
         @Override
         public void pointSelected(final int position) {
@@ -1221,28 +1311,25 @@ public class RasterGeoReferencingPanel extends javax.swing.JPanel {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void dragEnter(final DropTargetDragEvent dtde) {
-        }
+        public void dragEnter(final DropTargetDragEvent dtde) {}
 
         @Override
-        public void dragOver(final DropTargetDragEvent dtde) {
-        }
+        public void dragOver(final DropTargetDragEvent dtde) {}
 
         @Override
-        public void dropActionChanged(final DropTargetDragEvent dtde) {
-        }
+        public void dropActionChanged(final DropTargetDragEvent dtde) {}
 
         @Override
-        public void dragExit(final DropTargetEvent dte) {
-        }
+        public void dragExit(final DropTargetEvent dte) {}
 
         @Override
         public void drop(final DropTargetDropEvent dtde) {
             try {
                 getWizard().drop(dtde);
                 final RetrievalServiceLayer layer = getWizard().getSingleLayer();
-                final String tooltip = (layer != null) ? ("<html>" + jLabel12.getText() + ": " + layer.getName())
-                                                       : null;
+                final String tooltip = (layer != null)
+                    ? ("<html>" + jLabel12.getText() + ": " + layer.getName())
+                    : null;
                 jLabel10.setToolTipText(tooltip);
                 jLabel11.setToolTipText(tooltip);
                 jLabel11.setVisible(layer != null);

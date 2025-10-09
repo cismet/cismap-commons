@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,17 +12,13 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.util.SimpleCache;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import de.cismet.cismap.commons.util.SimpleCache;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -63,11 +59,13 @@ public class JDBCFeatureInfo {
      * @param  tableName   DOCUMENT ME!
      * @param  idField     DOCUMENT ME!
      */
-    public JDBCFeatureInfo(final Connection connection,
-            final int srid,
-            final String geoField,
-            final String tableName,
-            final String idField) {
+    public JDBCFeatureInfo(
+        final Connection connection,
+        final int srid,
+        final String geoField,
+        final String tableName,
+        final String idField
+    ) {
         this.connection = connection;
         this.srid = srid;
         this.tableName = tableName;
@@ -85,15 +83,17 @@ public class JDBCFeatureInfo {
     private void createStatements() {
         try {
             if (getGeoField() != null) {
-                geometryStatement = connection.prepareStatement("select \"" + getGeoField() + "\" from \"" + tableName
-                                + "\" where \"" + idField + "\" = ?");
+                geometryStatement =
+                    connection.prepareStatement(
+                        "select \"" + getGeoField() + "\" from \"" + tableName + "\" where \"" + idField + "\" = ?"
+                    );
             }
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for geometries", e);
         }
         try {
-            propertiesStatement = connection.prepareStatement("select * from \"" + tableName + "\" where \"" + idField
-                            + "\" = ?");
+            propertiesStatement =
+                connection.prepareStatement("select * from \"" + tableName + "\" where \"" + idField + "\" = ?");
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for properties", e);
         }
@@ -111,8 +111,8 @@ public class JDBCFeatureInfo {
 
         if (ps == null) {
             try {
-                final String query = "select \"" + property + "\" from \"" + tableName + "\" WHERE \"" + idField
-                            + "\" = ?";
+                final String query =
+                    "select \"" + property + "\" from \"" + tableName + "\" WHERE \"" + idField + "\" = ?";
                 ps = connection.prepareStatement(query);
                 propStats.put(property, ps);
             } catch (Exception e) {

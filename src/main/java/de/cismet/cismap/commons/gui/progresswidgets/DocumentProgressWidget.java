@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -16,12 +16,10 @@
  */
 package de.cismet.cismap.commons.gui.progresswidgets;
 
-import org.apache.log4j.Logger;
-
 import java.awt.Component;
 import java.awt.event.MouseMotionListener;
-
 import javax.swing.plaf.basic.BasicInternalFrameUI;
+import org.apache.log4j.Logger;
 
 /**
  * Displays the loading progress of Documents, e.g. SHP Files.
@@ -38,6 +36,7 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JLabel serviceLabel;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,9 +47,11 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
     public DocumentProgressWidget() {
         // JInternalFrame fixieren, indem alle MouseMotionListener der Statusbar entfernt werden
         try {
-            final BasicInternalFrameUI fui = (BasicInternalFrameUI)getUI();
+            final BasicInternalFrameUI fui = (BasicInternalFrameUI) getUI();
             final Component north = fui.getNorthPane();
-            final MouseMotionListener[] listener = (MouseMotionListener[])north.getListeners(MouseMotionListener.class);
+            final MouseMotionListener[] listener = (MouseMotionListener[]) north.getListeners(
+                MouseMotionListener.class
+            );
             for (int i = 0; i < listener.length; i++) {
                 north.removeMouseMotionListener(listener[i]);
             }
@@ -104,49 +105,90 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
 
         progressBar.setPreferredSize(new java.awt.Dimension(360, 20));
 
-        iconLabel.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/blockdevice.png"))); // NOI18N
+        iconLabel.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/blockdevice.png"))
+        ); // NOI18N
 
         serviceLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         serviceLabel.setText("Service Name");
 
-        messageLabel.setText(org.openide.util.NbBundle.getMessage(
-                DocumentProgressWidget.class,
-                "DocumentProgressWidget.messageLabel")); // NOI18N
+        messageLabel.setText(
+            org.openide.util.NbBundle.getMessage(DocumentProgressWidget.class, "DocumentProgressWidget.messageLabel")
+        ); // NOI18N
 
         final javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(
-                    mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                        progressBar,
-                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                        360,
-                        javax.swing.GroupLayout.PREFERRED_SIZE).addGroup(
-                        mainPanelLayout.createSequentialGroup().addComponent(iconLabel).addPreferredGap(
-                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
-                            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                                mainPanelLayout.createSequentialGroup().addComponent(messageLabel).addGap(
-                                    51,
-                                    51,
-                                    51)).addComponent(
-                                serviceLabel,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                Short.MAX_VALUE)))).addContainerGap()));
+            mainPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    mainPanelLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                            mainPanelLayout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(
+                                    progressBar,
+                                    javax.swing.GroupLayout.PREFERRED_SIZE,
+                                    360,
+                                    javax.swing.GroupLayout.PREFERRED_SIZE
+                                )
+                                .addGroup(
+                                    mainPanelLayout
+                                        .createSequentialGroup()
+                                        .addComponent(iconLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(
+                                            mainPanelLayout
+                                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(
+                                                    mainPanelLayout
+                                                        .createSequentialGroup()
+                                                        .addComponent(messageLabel)
+                                                        .addGap(51, 51, 51)
+                                                )
+                                                .addComponent(
+                                                    serviceLabel,
+                                                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                    Short.MAX_VALUE
+                                                )
+                                        )
+                                )
+                        )
+                        .addContainerGap()
+                )
+        );
         mainPanelLayout.setVerticalGroup(
-            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
-                mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(
-                    mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false).addGroup(
-                        mainPanelLayout.createSequentialGroup().addComponent(serviceLabel).addPreferredGap(
-                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(messageLabel))
-                                .addComponent(iconLabel, javax.swing.GroupLayout.Alignment.TRAILING)).addPreferredGap(
-                    javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
-                    progressBar,
-                    javax.swing.GroupLayout.PREFERRED_SIZE,
-                    20,
-                    javax.swing.GroupLayout.PREFERRED_SIZE).addContainerGap(20, Short.MAX_VALUE)));
+            mainPanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                    mainPanelLayout
+                        .createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(
+                            mainPanelLayout
+                                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGroup(
+                                    mainPanelLayout
+                                        .createSequentialGroup()
+                                        .addComponent(serviceLabel)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(messageLabel)
+                                )
+                                .addComponent(iconLabel, javax.swing.GroupLayout.Alignment.TRAILING)
+                        )
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(
+                            progressBar,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            20,
+                            javax.swing.GroupLayout.PREFERRED_SIZE
+                        )
+                        .addContainerGap(20, Short.MAX_VALUE)
+                )
+        );
 
         getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
 

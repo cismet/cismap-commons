@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
 /**
  * DOCUMENT ME!
@@ -47,18 +45,24 @@ public class RaisePolygonListener extends PBasicInputEventHandler {
         if (log.isDebugEnabled()) {
             log.debug("RaiseTry1"); // NOI18N
         }
-        final PFeature o = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+        final PFeature o = (PFeature) PFeatureTools.getFirstValidObjectUnderPointer(
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
         // if (o!=null&&o.getFeature() instanceof DefaultFeatureServiceFeature&& o.getVisible()==true &&
         // o.getParent()!=null && o.getParent().getVisible()==true) {
-        if ((o != null) && (o.getFeature() != null) && (o.getVisible() == true) && (o.getParent() != null)
-                    && (o.getParent().getVisible() == true)) {
+        if (
+            (o != null) &&
+            (o.getFeature() != null) &&
+            (o.getVisible() == true) &&
+            (o.getParent() != null) &&
+            (o.getParent().getVisible() == true)
+        ) {
             if (log.isDebugEnabled()) {
                 log.debug("RaiseTry2"); // NOI18N
             }
-            final PureNewFeature pnf = new PureNewFeature((Geometry)(o.getFeature().getGeometry().clone()));
+            final PureNewFeature pnf = new PureNewFeature((Geometry) (o.getFeature().getGeometry().clone()));
             pnf.setEditable(true);
             mc.getFeatureCollection().addFeature(pnf);
         }

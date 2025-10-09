@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,9 +12,17 @@
 package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Geometry;
-
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import org.apache.log4j.Logger;
-
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.datatypes.Types;
 import org.deegree.io.datastore.PropertyPathResolvingException;
@@ -35,20 +43,6 @@ import org.deegree.model.spatialschema.Point;
 import org.deegree.model.spatialschema.Polygon;
 import org.deegree.model.spatialschema.Surface;
 import org.deegree.ogcbase.PropertyPath;
-
-import java.math.BigDecimal;
-
-import java.sql.Timestamp;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 
 /**
  * DOCUMENT ME!
@@ -78,9 +72,11 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      * @param  features            The feature list. This list should not be null or empty
      * @param  aliasAttributeList  DOCUMENT ME!
      */
-    public SimpleFeatureCollection(final String id,
-            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
-            final List<String[]> aliasAttributeList) {
+    public SimpleFeatureCollection(
+        final String id,
+        final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
+        final List<String[]> aliasAttributeList
+    ) {
         this(id, features, aliasAttributeList, null);
     }
 
@@ -92,10 +88,12 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      * @param  aliasAttributeList  DOCUMENT ME!
      * @param  attributeMap        contains all attribute descriptors
      */
-    public SimpleFeatureCollection(final String id,
-            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
-            final List<String[]> aliasAttributeList,
-            final Map<String, FeatureServiceAttribute> attributeMap) {
+    public SimpleFeatureCollection(
+        final String id,
+        final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
+        final List<String[]> aliasAttributeList,
+        final Map<String, FeatureServiceAttribute> attributeMap
+    ) {
         super(id);
         this.features = new Feature[features.length];
         this.aliasAttributeList = aliasAttributeList;
@@ -125,15 +123,18 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      * @return  DOCUMENT ME!
      */
     private List<String[]> generateAliasAttributeList(
-            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features) {
+        final de.cismet.cismap.commons.features.FeatureServiceFeature[] features
+    ) {
         final List<String[]> aliasAttrList = new ArrayList<String[]>();
         Map props = null;
 
         if (attributeMap != null) {
             props = attributeMap;
-        } else if ((features[0].getLayerProperties() != null)
-                    && (features[0].getLayerProperties().getFeatureService() != null)
-                    && (features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
+        } else if (
+            (features[0].getLayerProperties() != null) &&
+            (features[0].getLayerProperties().getFeatureService() != null) &&
+            (features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)
+        ) {
             props = features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes();
         } else {
             // the feature properties contains always a geometry property. Even, if the feature should not have any
@@ -257,7 +258,7 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
             if (value instanceof Geometry) {
                 try {
-                    value = JTSAdapter.wrap((Geometry)value);
+                    value = JTSAdapter.wrap((Geometry) value);
                 } catch (GeometryException ex) {
                     LOG.error("Cannot convert JTS geometry to deegree geometry.", ex);
                 }
@@ -294,7 +295,7 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
             if (value instanceof Geometry) {
                 try {
-                    value = JTSAdapter.wrap((Geometry)value);
+                    value = JTSAdapter.wrap((Geometry) value);
                 } catch (GeometryException ex) {
                     LOG.error("Cannot convert JTS geometry to deegree geometry.", ex);
                 }
@@ -318,9 +319,11 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      *
      * @return  DOCUMENT ME!
      */
-    private PropertyType getPropertyType(final QualifiedName name,
-            final FeatureServiceAttribute attr,
-            final Object value) {
+    private PropertyType getPropertyType(
+        final QualifiedName name,
+        final FeatureServiceAttribute attr,
+        final Object value
+    ) {
         if ((attr != null) && !attr.isGeometry()) {
             final Class cl = FeatureTools.getClass(attr);
             if (cl.equals(String.class)) {

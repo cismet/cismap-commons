@@ -1,25 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import java.awt.Color;
-import java.awt.Cursor;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import de.cismet.cismap.commons.features.SearchFeature;
-import de.cismet.cismap.commons.gui.MappingComponent;
 
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener.PROPERTY_HOLD_GEOMETRIES;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener.PROPERTY_LAST_FEATURE;
@@ -28,14 +18,23 @@ import static de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateS
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener.PROPERTY_SEARCH_COLOR;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener.PROPERTY_SEARCH_TRANSPARENCY;
 
+import de.cismet.cismap.commons.features.SearchFeature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 /**
  * DOCUMENT ME!
  *
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public abstract class MetaSearchFollowingCreateSearchGeometryListener extends AbstractCreateSearchGeometryListener
-        implements PropertyChangeListener {
+public abstract class MetaSearchFollowingCreateSearchGeometryListener
+    extends AbstractCreateSearchGeometryListener
+    implements PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -53,12 +52,15 @@ public abstract class MetaSearchFollowingCreateSearchGeometryListener extends Ab
      * @param  mappingComponent  DOCUMENT ME!
      * @param  listenerName      DOCUMENT ME!
      */
-    public MetaSearchFollowingCreateSearchGeometryListener(final MappingComponent mappingComponent,
-            final String listenerName) {
+    public MetaSearchFollowingCreateSearchGeometryListener(
+        final MappingComponent mappingComponent,
+        final String listenerName
+    ) {
         super(mappingComponent, listenerName);
-
-        metaSearchListener = (MetaSearchCreateSearchGeometryListener)mappingComponent.getInputListener(
-                MappingComponent.CREATE_SEARCH_POLYGON);
+        metaSearchListener =
+            (MetaSearchCreateSearchGeometryListener) mappingComponent.getInputListener(
+                MappingComponent.CREATE_SEARCH_POLYGON
+            );
         metaSearchListener.addPropertyChangeListener(this);
 
         mappingComponent.addCustomInputListener(listenerName, this);
@@ -84,17 +86,17 @@ public abstract class MetaSearchFollowingCreateSearchGeometryListener extends Ab
                 generateAndShowPointerAnnotation();
             }
         } else if (PROPERTY_LAST_FEATURE.equals(propertyName)) {
-            super.setLastFeature((SearchFeature)newValue);
+            super.setLastFeature((SearchFeature) newValue);
         } else if (PROPERTY_MODE.equals(propertyName)) {
             super.setMode(newValue.toString());
         } else if (PROPERTY_HOLD_GEOMETRIES.equals(propertyName) && (newValue instanceof Boolean)) {
-            super.setHoldGeometries((Boolean)newValue);
+            super.setHoldGeometries((Boolean) newValue);
         } else if (PROPERTY_NUM_OF_ELLIPSE_EDGES.equals(propertyName) && (newValue instanceof Integer)) {
-            super.setNumOfEllipseEdges((Integer)newValue);
+            super.setNumOfEllipseEdges((Integer) newValue);
         } else if (PROPERTY_SEARCH_COLOR.equals(propertyName) && (newValue instanceof Color)) {
-            super.setSearchColor((Color)newValue);
+            super.setSearchColor((Color) newValue);
         } else if (PROPERTY_SEARCH_TRANSPARENCY.equals(propertyName) && (newValue instanceof Float)) {
-            super.setSearchTransparency((Float)newValue);
+            super.setSearchTransparency((Float) newValue);
         }
     }
 

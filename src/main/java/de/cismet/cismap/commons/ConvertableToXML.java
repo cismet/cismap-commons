@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -22,11 +22,10 @@ import org.jdom.Element;
  * @version  $Revision$, $Date$
  */
 public interface ConvertableToXML<T> {
-
     //~ Instance fields --------------------------------------------------------
 
     /** Name of the mandatory type attribute, value shall be the canonical class name. */
-    String TYPE_ATTRIBUTE = "type";                                                   // NOI18N
+    String TYPE_ATTRIBUTE = "type"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 

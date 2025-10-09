@@ -1,26 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
-
 import java.awt.geom.Point2D;
-
 import java.util.Collection;
 
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 /**
  * DOCUMENT ME!
  *
@@ -44,8 +42,8 @@ public class PivotPHandle extends PHandle {
      * @param  mid       DOCUMENT ME!
      */
     public PivotPHandle(final PFeature pfeature, final Point2D mid) {
-        super(new PLocator() {
-
+        super(
+            new PLocator() {
                 @Override
                 public double locateX() {
                     if (mid == null) {
@@ -63,8 +61,9 @@ public class PivotPHandle extends PHandle {
                         return mid.getY();
                     }
                 }
-            }, pfeature.getViewer());
-
+            },
+            pfeature.getViewer()
+        );
         this.pfeature = pfeature;
         this.mid = mid;
     }
@@ -75,9 +74,10 @@ public class PivotPHandle extends PHandle {
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
         if (!((pfeature != null) && (pfeature.getFeature() instanceof RequestForRotatingPivotLock))) {
             final double scale = pfeature.getViewer().getCamera().getViewScale();
-            mid.setLocation(mid.getX() + (aLocalDimension.width / scale),
-                mid.getY()
-                        + (aLocalDimension.height / scale));
+            mid.setLocation(
+                mid.getX() + (aLocalDimension.width / scale),
+                mid.getY() + (aLocalDimension.height / scale)
+            );
             relocateHandle();
         }
     }
@@ -88,7 +88,7 @@ public class PivotPHandle extends PHandle {
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                 final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
                 for (final Object o : selArr) {
-                    final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(o));
+                    final PFeature pf = (PFeature) (pfeature.getViewer().getPFeatureHM().get(o));
                     pf.setPivotPoint(mid);
                 }
             }

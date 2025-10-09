@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 srichter
  *
@@ -32,7 +32,6 @@ import java.util.Collection;
  * @version  $Revision$, $Date$
  */
 public interface ToolbarComponentsProvider {
-
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -41,10 +40,10 @@ public interface ToolbarComponentsProvider {
      * @version  $Revision$, $Date$
      */
     public static enum ToolbarPositionHint {
-
         //~ Enum constants -----------------------------------------------------
 
-        BEFORE, AFTER;
+        BEFORE,
+        AFTER,
     }
 
     //~ Methods ----------------------------------------------------------------

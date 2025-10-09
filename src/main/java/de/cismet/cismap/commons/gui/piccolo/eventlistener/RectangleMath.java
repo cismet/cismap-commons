@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -36,6 +36,7 @@ public class RectangleMath {
     public static Coordinate getMidPoint(final Coordinate a, final Coordinate b) {
         return new Coordinate((a.x + b.x) / 2.0, (a.y + b.y) / 2.0);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -55,8 +56,7 @@ public class RectangleMath {
      *
      * @return  DOCUMENT ME!
      */
-    public static Coordinate getPointFromStartByFraction(final Coordinate[] line,
-            final double fraction) {
+    public static Coordinate getPointFromStartByFraction(final Coordinate[] line, final double fraction) {
         return LinearLocation.pointAlongSegmentByFraction(line[0], line[1], fraction);
     }
 
@@ -69,9 +69,11 @@ public class RectangleMath {
      *
      * @return  DOCUMENT ME!
      */
-    public static Coordinate getPointPerpendicular(final Coordinate[] line,
-            final Coordinate start,
-            final double length) {
+    public static Coordinate getPointPerpendicular(
+        final Coordinate[] line,
+        final Coordinate start,
+        final double length
+    ) {
         final double dx = line[1].x - line[0].x;
         final double dy = line[1].y - line[0].y;
         final double scale = length / Math.sqrt((dx * dx) + (dy * dy));

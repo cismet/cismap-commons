@@ -1,32 +1,29 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.overviewwidget;
 
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PBounds;
-
 import java.awt.Color;
 import java.awt.Dimension;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 
 /**
  * DOCUMENT ME!
@@ -51,7 +48,7 @@ public class OverviewWidget extends PCanvas {
     public OverviewWidget(final MappingComponent mapC) {
         super();
         if (log.isDebugEnabled()) {
-            log.debug("Start");                      // NOI18N
+            log.debug("Start"); // NOI18N
         }
         setBackground(Color.YELLOW);
         setPreferredSize(new Dimension(100, 100));
@@ -59,19 +56,23 @@ public class OverviewWidget extends PCanvas {
             getLayer().addChild(highlightingLayer);
             getLayer().addChild(new PText("Start")); // NOI18N
 
-//        PBounds pb = new BoundingBox(2568580.612400579, 2568580.612400579, 2568580.612400579, 5687929.518337978).getPBounds(mapC.getWtst());
-//        getCamera().animateViewToCenterBounds(pb,true,0);
+            //        PBounds pb = new BoundingBox(2568580.612400579, 2568580.612400579, 2568580.612400579, 5687929.518337978).getPBounds(mapC.getWtst());
+            //        getCamera().animateViewToCenterBounds(pb,true,0);
 
-            mapC.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
+            mapC
+                .getCamera()
+                .addPropertyChangeListener(
+                    PCamera.PROPERTY_VIEW_TRANSFORM,
+                    new PropertyChangeListener() {
+                        @Override
+                        public void propertyChange(final PropertyChangeEvent evt) {
+                            //                PBounds pb = new BoundingBox(2568580.612400579, 2568580.612400579, 2568580.612400579, 5687929.518337978).getPBounds(mapC.getWtst());
+                            //                getCamera().animateViewToCenterBounds(pb,true,0);
 
-                    @Override
-                    public void propertyChange(final PropertyChangeEvent evt) {
-//                PBounds pb = new BoundingBox(2568580.612400579, 2568580.612400579, 2568580.612400579, 5687929.518337978).getPBounds(mapC.getWtst());
-//                getCamera().animateViewToCenterBounds(pb,true,0);
-
-                        outlineArea(mapC.getCamera().getViewBounds());
+                            outlineArea(mapC.getCamera().getViewBounds());
+                        }
                     }
-                });
+                );
         } catch (Throwable t) {
             t.printStackTrace();
         }

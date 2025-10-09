@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 /**
@@ -15,5 +15,4 @@ package de.cismet.cismap.commons.features;
  * @version  $Revision$, $Date$
  * @see      de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener
  */
-public interface Attachable {
-}
+public interface Attachable {}

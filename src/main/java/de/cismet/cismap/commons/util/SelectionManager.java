@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,30 +12,7 @@
  */
 package de.cismet.cismap.commons.util;
 
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import org.apache.log4j.Logger;
-
-import java.awt.EventQueue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.swing.Icon;
-import javax.swing.SwingWorker;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import static de.cismet.cismap.commons.featureservice.AbstractFeatureService.UNKNOWN;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
@@ -58,8 +35,26 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
-
-import static de.cismet.cismap.commons.featureservice.AbstractFeatureService.UNKNOWN;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.swing.Icon;
+import javax.swing.SwingWorker;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import org.apache.log4j.Logger;
 
 /**
  * Determines the selected features and sort them by their corresponding service.
@@ -106,24 +101,24 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         if (mc != null) {
             mc.getFeatureCollection().addFeatureCollectionListener(this);
-            mc.addRepaintListener(new RepaintListener() {
-
+            mc.addRepaintListener(
+                new RepaintListener() {
                     @Override
-                    public void repaintStart(final RepaintEvent e) {
-                    }
+                    public void repaintStart(final RepaintEvent e) {}
 
                     @Override
                     public void repaintComplete(final RepaintEvent e) {
                         if (e.getRetrievalEvent().getRetrievalService() instanceof AbstractFeatureService) {
                             synchronizeSelectionWithMap(
-                                (AbstractFeatureService)e.getRetrievalEvent().getRetrievalService());
+                                (AbstractFeatureService) e.getRetrievalEvent().getRetrievalService()
+                            );
                         }
                     }
 
                     @Override
-                    public void repaintError(final RepaintEvent e) {
-                    }
-                });
+                    public void repaintError(final RepaintEvent e) {}
+                }
+            );
         }
     }
 
@@ -152,22 +147,23 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     mapFeature.setSelected(true);
                 }
                 if (f instanceof FeatureWithId) {
-                    selectedFeatureIds[++index] = ((FeatureWithId)f).getId();
+                    selectedFeatureIds[++index] = ((FeatureWithId) f).getId();
                 }
             }
-//            CismapBroker.getInstance().getMappingComponent().showHandles(false);
+            //            CismapBroker.getInstance().getMappingComponent().showHandles(false);
             Arrays.sort(selectedFeatureIds);
-            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance().getMappingComponent()
-                        .getInputEventListener()
-                        .get(MappingComponent.SELECT);
+            final SelectionListener sl = (SelectionListener) CismapBroker
+                .getInstance()
+                .getMappingComponent()
+                .getInputEventListener()
+                .get(MappingComponent.SELECT);
 
             for (final PFeature pfeature : features) {
                 Feature feature = pfeature.getFeature();
 
                 if (feature instanceof FeatureWithId) {
-                    final boolean selected = Arrays.binarySearch(
-                            selectedFeatureIds,
-                            ((FeatureWithId)feature).getId()) >= 0;
+                    final boolean selected =
+                        Arrays.binarySearch(selectedFeatureIds, ((FeatureWithId) feature).getId()) >= 0;
 
                     if (selected != pfeature.isSelected()) {
                         pfeature.setSelected(selected);
@@ -223,8 +219,10 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  service      DOCUMENT ME!
      * @param  featureList  DOCUMENT ME!
      */
-    public void setSelectedFeaturesForService(final AbstractFeatureService service,
-            final List<? extends Feature> featureList) {
+    public void setSelectedFeaturesForService(
+        final AbstractFeatureService service,
+        final List<? extends Feature> featureList
+    ) {
         AbstractFeatureService s = service;
         if (LOG.isDebugEnabled()) {
             LOG.debug("setSelectedFeaturesForService invoked");
@@ -238,7 +236,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         for (final Feature f : featureList) {
             if (f instanceof DefaultFeatureServiceFeature) {
-                final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
+                final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature) f;
 
                 Set<Feature> list = selectedFeatures.get(s);
 
@@ -271,8 +269,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  featureList  the features to remove
      */
     public void removeSelectedFeatures(final List<? extends Feature> featureList) {
-        final Map<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>> selectedFeaturesToRemove =
-            new HashMap<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>>();
+        final Map<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>> selectedFeaturesToRemove = new HashMap<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>>();
         if (LOG.isDebugEnabled()) {
             LOG.debug("removeSelectedFeatures invoked");
         }
@@ -284,7 +281,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         // save the features ordered by the corresponding service
         for (final Feature f : featureList) {
             if (f instanceof DefaultFeatureServiceFeature) {
-                final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature)f;
+                final DefaultFeatureServiceFeature fsf = (DefaultFeatureServiceFeature) f;
                 AbstractFeatureService service = DUMMY;
 
                 if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
@@ -315,13 +312,13 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
             // remove selected features from the map
             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-            final SelectionListener sl = (SelectionListener)map.getInputEventListener().get(MappingComponent.SELECT);
+            final SelectionListener sl = (SelectionListener) map.getInputEventListener().get(MappingComponent.SELECT);
             final List<PFeature> sel = sl.getAllSelectedPFeatures();
             final List<Feature> toBeUnselected = new ArrayList<Feature>();
 
             for (final PFeature feature : sel) {
                 if (feature.getFeature() instanceof FeatureServiceFeature) {
-                    final FeatureServiceFeature fsf = (FeatureServiceFeature)feature.getFeature();
+                    final FeatureServiceFeature fsf = (FeatureServiceFeature) feature.getFeature();
 
                     if (featureList.contains(fsf) && feature.isSelected()) {
                         feature.setSelected(false);
@@ -331,9 +328,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 }
             }
             selectionChangeInProgress = true;
-            ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
-                    .unselect(
-                        toBeUnselected);
+            (
+                (DefaultFeatureCollection) CismapBroker.getInstance().getMappingComponent().getFeatureCollection()
+            ).unselect(toBeUnselected);
             selectionChangeInProgress = false;
             fireSelectionChangedEvent();
         }
@@ -348,9 +345,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      *
      * @return  DOCUMENT ME!
      */
-    private boolean setSelectedFeatures(final List<? extends Feature> featureList,
-            final boolean removeOldSelection,
-            final boolean syncMap) {
+    private boolean setSelectedFeatures(
+        final List<? extends Feature> featureList,
+        final boolean removeOldSelection,
+        final boolean syncMap
+    ) {
         boolean added = false;
         if (LOG.isDebugEnabled()) {
             LOG.debug("setSelectedFeatures invoked");
@@ -366,7 +365,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         for (final Feature f : featureList) {
             if (f instanceof FeatureServiceFeature) {
-                FeatureServiceFeature fsf = (FeatureServiceFeature)f;
+                FeatureServiceFeature fsf = (FeatureServiceFeature) f;
                 AbstractFeatureService service = DUMMY;
 
                 if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)) {
@@ -383,8 +382,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 final AttributeTable table = consideredAttributeTables.get(service);
 
                 if (table != null) {
-                    final FeatureServiceFeature modifiableFeature = consideredAttributeTables.get(service)
-                                .getFeatureById((fsf).getId());
+                    final FeatureServiceFeature modifiableFeature = consideredAttributeTables
+                        .get(service)
+                        .getFeatureById((fsf).getId());
 
                     if (modifiableFeature != null) {
                         fsf = modifiableFeature;
@@ -408,7 +408,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     private void removeSelectionFromMap() {
         final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-        final SelectionListener sl = (SelectionListener)map.getInputEventListener().get(MappingComponent.SELECT);
+        final SelectionListener sl = (SelectionListener) map.getInputEventListener().get(MappingComponent.SELECT);
         final List<PFeature> sel = sl.getAllSelectedPFeatures();
         final List<Feature> toBeUnselected = new ArrayList<Feature>();
 
@@ -421,8 +421,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         }
 
         selectionChangeInProgress = true;
-        ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection()).unselect(
-            toBeUnselected);
+        ((DefaultFeatureCollection) CismapBroker.getInstance().getMappingComponent().getFeatureCollection()).unselect(
+                toBeUnselected
+            );
         selectionChangeInProgress = false;
     }
 
@@ -433,22 +434,28 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     private void removeSelectionFromMap(final AbstractFeatureService service) {
         final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-        final SelectionListener sl = (SelectionListener)map.getInputEventListener().get(MappingComponent.SELECT);
+        final SelectionListener sl = (SelectionListener) map.getInputEventListener().get(MappingComponent.SELECT);
         final List<PFeature> sel = sl.getAllSelectedPFeatures();
         final List<Feature> toBeUnselected = new ArrayList<Feature>();
 
         for (final PFeature feature : sel) {
             if (feature.getFeature() instanceof FeatureServiceFeature) {
-                final FeatureServiceFeature fsf = (FeatureServiceFeature)feature.getFeature();
+                final FeatureServiceFeature fsf = (FeatureServiceFeature) feature.getFeature();
 
-                if ((fsf.getLayerProperties() != null) && (fsf.getLayerProperties().getFeatureService() != null)
-                            && fsf.getLayerProperties().getFeatureService().equals(service) && feature.isSelected()) {
+                if (
+                    (fsf.getLayerProperties() != null) &&
+                    (fsf.getLayerProperties().getFeatureService() != null) &&
+                    fsf.getLayerProperties().getFeatureService().equals(service) &&
+                    feature.isSelected()
+                ) {
                     feature.setSelected(false);
                     sl.removeSelectedFeature(feature);
                     toBeUnselected.add(feature.getFeature());
-                } else if (((fsf.getLayerProperties() == null)
-                                || (fsf.getLayerProperties().getFeatureService() == null)) && service.equals(DUMMY)
-                            && feature.isSelected()) {
+                } else if (
+                    ((fsf.getLayerProperties() == null) || (fsf.getLayerProperties().getFeatureService() == null)) &&
+                    service.equals(DUMMY) &&
+                    feature.isSelected()
+                ) {
                     feature.setSelected(false);
                     sl.removeSelectedFeature(feature);
                     toBeUnselected.add(feature.getFeature());
@@ -456,8 +463,9 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             }
         }
         selectionChangeInProgress = true;
-        ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection()).unselect(
-            toBeUnselected);
+        ((DefaultFeatureCollection) CismapBroker.getInstance().getMappingComponent().getFeatureCollection()).unselect(
+                toBeUnselected
+            );
         selectionChangeInProgress = false;
     }
 
@@ -591,10 +599,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                         ++modifiable;
 
                         if (featureFromTable != f) {
-                            final PFeature pf = CismapBroker.getInstance()
-                                        .getMappingComponent()
-                                        .getPFeatureHM()
-                                        .get(featureFromTable);
+                            final PFeature pf = CismapBroker
+                                .getInstance()
+                                .getMappingComponent()
+                                .getPFeatureHM()
+                                .get(featureFromTable);
 
                             if (pf != null) {
                                 if (!pf.isSelected()) {
@@ -609,7 +618,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                     }
                 }
             }
-//            return getSelectedFeaturesCount(service);
+            //            return getSelectedFeaturesCount(service);
             return modifiable;
         } else {
             return null;
@@ -695,20 +704,16 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     }
 
     @Override
-    public void featuresAdded(final FeatureCollectionEvent fce) {
-    }
+    public void featuresAdded(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featuresRemoved(final FeatureCollectionEvent fce) {
-    }
+    public void featuresRemoved(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featuresChanged(final FeatureCollectionEvent fce) {
-    }
+    public void featuresChanged(final FeatureCollectionEvent fce) {}
 
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
@@ -716,13 +721,17 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             return;
         }
         final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-        final SelectionListener sl = (SelectionListener)map.getInputEventListener().get(MappingComponent.SELECT);
+        final SelectionListener sl = (SelectionListener) map.getInputEventListener().get(MappingComponent.SELECT);
         final boolean featuresAdded = sl.isFeatureAdded();
 
-        if ((fce != null) && (fce.getFeatureCollection() != null)
-                    && (fce.getFeatureCollection().getSelectedFeatures() != null)) {
-            final List<Feature> selectedMapFeatures = new ArrayList<Feature>((Collection<Feature>)
-                    fce.getFeatureCollection().getSelectedFeatures());
+        if (
+            (fce != null) &&
+            (fce.getFeatureCollection() != null) &&
+            (fce.getFeatureCollection().getSelectedFeatures() != null)
+        ) {
+            final List<Feature> selectedMapFeatures = new ArrayList<Feature>(
+                (Collection<Feature>) fce.getFeatureCollection().getSelectedFeatures()
+            );
 
             setSelectedFeatures(selectedMapFeatures, !featuresAdded, false);
 
@@ -742,18 +751,16 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     }
 
     @Override
-    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-    }
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {}
 
     @Override
-    public void featureCollectionChanged() {
-    }
+    public void featureCollectionChanged() {}
 
     @Override
     public void valueChanged(final ListSelectionEvent e) {
-//        if (!e.getValueIsAdjusting()) {
-//            fireSelectionChangedEvent();
-//        }
+        //        if (!e.getValueIsAdjusting()) {
+        //            fireSelectionChangedEvent();
+        //        }
     }
 
     /**
@@ -811,46 +818,48 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         @Override
         protected FeatureFactory createFeatureFactory() throws Exception {
             return new AbstractFeatureFactory() {
+                @Override
+                protected boolean isGenerateIds() {
+                    return false;
+                }
 
-                    @Override
-                    protected boolean isGenerateIds() {
-                        return false;
-                    }
+                @Override
+                public AbstractFeatureFactory clone() {
+                    return this;
+                }
 
-                    @Override
-                    public AbstractFeatureFactory clone() {
-                        return this;
-                    }
+                @Override
+                public List createFeatures(
+                    final Object query,
+                    final BoundingBox boundingBox,
+                    final SwingWorker workerThread
+                ) throws FeatureFactory.TooManyFeaturesException, Exception {
+                    return null;
+                }
 
-                    @Override
-                    public List createFeatures(final Object query,
-                            final BoundingBox boundingBox,
-                            final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException, Exception {
-                        return null;
-                    }
+                @Override
+                public List createFeatures(
+                    final Object query,
+                    final BoundingBox boundingBox,
+                    final SwingWorker workerThread,
+                    final int offset,
+                    final int limit,
+                    final FeatureServiceAttribute[] orderBy
+                ) throws FeatureFactory.TooManyFeaturesException, Exception {
+                    return null;
+                }
 
-                    @Override
-                    public List createFeatures(final Object query,
-                            final BoundingBox boundingBox,
-                            final SwingWorker workerThread,
-                            final int offset,
-                            final int limit,
-                            final FeatureServiceAttribute[] orderBy) throws FeatureFactory.TooManyFeaturesException,
-                        Exception {
-                        return null;
-                    }
+                @Override
+                public List createAttributes(final SwingWorker workerThread)
+                    throws FeatureFactory.TooManyFeaturesException, UnsupportedOperationException, Exception {
+                    return new ArrayList();
+                }
 
-                    @Override
-                    public List createAttributes(final SwingWorker workerThread)
-                            throws FeatureFactory.TooManyFeaturesException, UnsupportedOperationException, Exception {
-                        return new ArrayList();
-                    }
-
-                    @Override
-                    public int getFeatureCount(final Object query, final BoundingBox bb) {
-                        return 0;
-                    }
-                };
+                @Override
+                public int getFeatureCount(final Object query, final BoundingBox bb) {
+                    return 0;
+                }
+            };
         }
 
         @Override
@@ -859,12 +868,10 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         }
 
         @Override
-        public void setQuery(final Object query) {
-        }
+        public void setQuery(final Object query) {}
 
         @Override
-        protected void initConcreteInstance() throws Exception {
-        }
+        protected void initConcreteInstance() throws Exception {}
 
         @Override
         protected String getFeatureLayerType() {
@@ -917,12 +924,12 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
                 refreshTimer.cancel();
                 refreshTimer = new Timer();
-                refreshTimer.schedule(new TimerTask() {
-
+                refreshTimer.schedule(
+                    new TimerTask() {
                         @Override
                         public void run() {
-                            EventQueue.invokeLater(new Thread() {
-
+                            EventQueue.invokeLater(
+                                new Thread() {
                                     @Override
                                     public void run() {
                                         // in edt to avoid a ConcurrentModificationException in
@@ -930,28 +937,34 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                                         synchronized (featuresToSelectInt) {
                                             if (!featuresToSelectInt.isEmpty() || !featuresToUnselectInt.isEmpty()) {
                                                 selectionChangeInProgress = true;
-                                                CismapBroker.getInstance()
-                                                        .getMappingComponent()
-                                                        .getFeatureCollection()
-                                                        .addToSelection(featuresToSelectInt);
-                                                CismapBroker.getInstance()
-                                                        .getMappingComponent()
-                                                        .getFeatureCollection()
-                                                        .unselect(featuresToUnselectInt);
+                                                CismapBroker
+                                                    .getInstance()
+                                                    .getMappingComponent()
+                                                    .getFeatureCollection()
+                                                    .addToSelection(featuresToSelectInt);
+                                                CismapBroker
+                                                    .getInstance()
+                                                    .getMappingComponent()
+                                                    .getFeatureCollection()
+                                                    .unselect(featuresToUnselectInt);
                                                 featuresToSelectInt.clear();
                                                 featuresToUnselectInt.clear();
                                                 final PNotificationCenter pn = PNotificationCenter.defaultCenter();
                                                 pn.postNotification(
                                                     SelectionListener.SELECTION_CHANGED_NOTIFICATION,
-                                                    this);
+                                                    this
+                                                );
                                                 CismapBroker.getInstance().getMappingComponent().showHandles(false);
                                                 selectionChangeInProgress = false;
                                             }
                                         }
                                     }
-                                });
+                                }
+                            );
                         }
-                    }, 100);
+                    },
+                    100
+                );
             }
         }
     }

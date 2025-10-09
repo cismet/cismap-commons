@@ -1,17 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 /**
  * DOCUMENT ME!
@@ -36,13 +35,14 @@ public class JoinPolygonsListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
         modifier = pInputEvent.getModifiers();
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
-            featureRequestedForJoin = (PFeature)(o);
+            featureRequestedForJoin = (PFeature) (o);
             postFeatureJoinRequest();
         } else {
             featureRequestedForJoin = null;

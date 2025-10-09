@@ -1,19 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.attributetable;
 
-import org.openide.util.Lookup;
-
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import org.openide.util.Lookup;
 
 /**
  * Uses the lookup netbeans mechanism to identify all available FeatureLockingInterface implementaions.
@@ -33,8 +31,9 @@ public class FeatureLockerFactory {
      * Creates a new FeatureLockerFactory object.
      */
     private FeatureLockerFactory() {
-        final Collection<? extends FeatureLockingInterface> lockerList = Lookup.getDefault()
-                    .lookupAll(FeatureLockingInterface.class);
+        final Collection<? extends FeatureLockingInterface> lockerList = Lookup
+            .getDefault()
+            .lookupAll(FeatureLockingInterface.class);
 
         for (final FeatureLockingInterface tmp : lockerList) {
             final Class[] c = tmp.getSupportedFeatureServiceClasses();

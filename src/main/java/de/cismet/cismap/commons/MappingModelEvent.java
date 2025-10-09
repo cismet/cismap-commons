@@ -1,16 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MappingModelEvent.java
  *
  * Created on 10. M\u00E4rz 2005, 11:28
  */
 package de.cismet.cismap.commons;
+
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 
@@ -48,6 +49,7 @@ public class MappingModelEvent extends java.util.EventObject {
         super(layer);
         this.layer = layer;
     }
+
     /**
      * Creates a new MappingModelEvent object.
      *
@@ -58,6 +60,7 @@ public class MappingModelEvent extends java.util.EventObject {
         super(fc);
         setSingleFeatureChangedIndex(featureIndex);
     }
+
     /**
      * Creates a new MappingModelEvent object.
      *

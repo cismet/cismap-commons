@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,14 +12,12 @@
  */
 package de.cismet.cismap.commons.util;
 
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.cismet.cismap.commons.Crs;
-import de.cismet.cismap.commons.interaction.CismapBroker;
+import org.apache.log4j.Logger;
 
 /**
  * Provides some helper methods to parse crs wkt.
@@ -44,16 +42,19 @@ public class CrsDeterminer {
      *
      * @return  true, if the given crs are equal
      */
-    public static boolean isCrsEqual(final String authority,
-            final WKTCrs crs,
-            final WKTCrs otherCrs) {
+    public static boolean isCrsEqual(final String authority, final WKTCrs crs, final WKTCrs otherCrs) {
         if ((crs == null) || (otherCrs == null)) {
             return false;
         }
 
-        if (((otherCrs.getIdentifier() != null) && (authority != null)
-                        && otherCrs.getIdentifier().equalsIgnoreCase(authority))
-                    || otherCrs.equals(crs)) {
+        if (
+            (
+                (otherCrs.getIdentifier() != null) &&
+                (authority != null) &&
+                otherCrs.getIdentifier().equalsIgnoreCase(authority)
+            ) ||
+            otherCrs.equals(crs)
+        ) {
             return true;
         } else {
             return false;
@@ -75,13 +76,12 @@ public class CrsDeterminer {
             for (final Crs crs : crsList) {
                 if (crs.hasEsriDefinition()) {
                     try {
-                        prjMap.put(
-                            crs,
-                            new WKTCrs(crs.getEsriDefinition()));
+                        prjMap.put(crs, new WKTCrs(crs.getEsriDefinition()));
                     } catch (Exception e) {
-                        LOG.error("Cannot parse the crs definition for " + crs.getCode() + ":\n"
-                                    + crs.getEsriDefinition(),
-                            e);
+                        LOG.error(
+                            "Cannot parse the crs definition for " + crs.getCode() + ":\n" + crs.getEsriDefinition(),
+                            e
+                        );
                     }
                 }
             }
@@ -142,9 +142,10 @@ public class CrsDeterminer {
             // replace mercator_auxiliary_sphere with mercator_2sp, because
             // geotools does not know the mercator_auxiliary_sphere projection
             final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidProjection));
-            final String secondPart = tmp.substring(tmp.toLowerCase().indexOf(invalidProjection)
-                            + invalidProjection.length(),
-                    tmp.length());
+            final String secondPart = tmp.substring(
+                tmp.toLowerCase().indexOf(invalidProjection) + invalidProjection.length(),
+                tmp.length()
+            );
             tmp = firstPart + "PROJECTION[\"Mercator_2SP\"]" + secondPart;
         }
 
@@ -152,13 +153,16 @@ public class CrsDeterminer {
             // replace the Auxiliary_Sphere_Type parameter, because
             // geotools does not know the Auxiliary_Sphere_Type parameter
             final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidParameter));
-            String withoutParameterStart = tmp.substring(tmp.toLowerCase().indexOf(invalidParameter)
-                            + invalidParameter.length(),
-                    tmp.length());
-            withoutParameterStart = withoutParameterStart.substring(withoutParameterStart.indexOf("]") + 1,
-                    withoutParameterStart.length());
-            final String secondPart = withoutParameterStart.substring(withoutParameterStart.indexOf(",") + 1,
-                    withoutParameterStart.length());
+            String withoutParameterStart = tmp.substring(
+                tmp.toLowerCase().indexOf(invalidParameter) + invalidParameter.length(),
+                tmp.length()
+            );
+            withoutParameterStart =
+                withoutParameterStart.substring(withoutParameterStart.indexOf("]") + 1, withoutParameterStart.length());
+            final String secondPart = withoutParameterStart.substring(
+                withoutParameterStart.indexOf(",") + 1,
+                withoutParameterStart.length()
+            );
             tmp = firstPart + secondPart;
         }
 

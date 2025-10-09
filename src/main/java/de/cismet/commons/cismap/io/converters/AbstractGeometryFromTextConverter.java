@@ -1,31 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.commons.converter.ConversionException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
-
 import java.util.Locale;
-
-import de.cismet.cismap.commons.CrsTransformer;
-
-import de.cismet.commons.converter.ConversionException;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * Basic <code>TextToGeometryConverter</code> implementation that expects the given text to be separated by white space
@@ -41,8 +35,9 @@ import de.cismet.commons.converter.ConversionException;
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-public abstract class AbstractGeometryFromTextConverter extends AbstractRatingConverter<String, Geometry>
-        implements TextToGeometryConverter {
+public abstract class AbstractGeometryFromTextConverter
+    extends AbstractRatingConverter<String, Geometry>
+    implements TextToGeometryConverter {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -59,20 +54,21 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
             "de.cismet.commons.cismap.io.convertes.AbstractGeometryFromTextConverter.decimalSeparator"; // NOI18N
 
         // in line with Character.isWithespace()
-        WHITE_SPACE_CHARS = new char[] {
+        WHITE_SPACE_CHARS =
+            new char[] {
                 // white space characters
-                0x20,   // space
+                0x20, // space
                 0x2028, // line sep
                 0x2029, // paragraph sep
-                0x09,   // tab
-                0x0A,   // LF
-                0x0B,   // vertical tab
-                0x0C,   // form feed
-                0x0D,   // CR
-                0x1C,   // file sep
-                0x1D,   // group sep
-                0x1E,   // record sep
-                0x1F    // unit sep
+                0x09, // tab
+                0x0A, // LF
+                0x0B, // vertical tab
+                0x0C, // form feed
+                0x0D, // CR
+                0x1C, // file sep
+                0x1D, // group sep
+                0x1E, // record sep
+                0x1F, // unit sep
             };
 
         DEFAULT_TOKEN_SEPARATORS = new char[WHITE_SPACE_CHARS.length + 3];
@@ -97,7 +93,7 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
      * @throws  ConversionException  if any error occurs during creation of the geometry
      */
     protected abstract Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException;
+        throws ConversionException;
 
     // this is because of jalopy as for some reason it generates a javadoc template for this method although overridden
     /**
@@ -106,7 +102,7 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
     @Override
     public Geometry convertForward(final String from, final String... params) throws ConversionException {
         if ((from == null) || from.isEmpty()) {
-            throw new IllegalArgumentException("from must not be null or empty");                         // NOI18N
+            throw new IllegalArgumentException("from must not be null or empty"); // NOI18N
         }
         if ((params == null) || (params.length < 1)) {
             throw new IllegalArgumentException("no parameters provided, epsgcode is required parameter"); // NOI18N
@@ -184,22 +180,26 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
 
         char c;
         if ((systemSep == null) || (systemSep.length() == 0)) {
-            c = ((DecimalFormat)NumberFormat.getNumberInstance(Locale.getDefault())).getDecimalFormatSymbols()
-                        .getDecimalSeparator();
+            c =
+                ((DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault())).getDecimalFormatSymbols()
+                    .getDecimalSeparator();
         } else {
             try {
-                c = (char)Integer.decode(systemSep).intValue();
+                c = (char) Integer.decode(systemSep).intValue();
             } catch (final NumberFormatException e) {
                 // not encoded according to §3.10.1 Java language sepc
                 if (systemSep.startsWith("\\u") || systemSep.startsWith("\\U")) { // NOI18N
                     try {
                         // only hex is accepted when using this notation
-                        c = (char)Integer.parseInt(systemSep.substring(2), 16);
+                        c = (char) Integer.parseInt(systemSep.substring(2), 16);
                     } catch (final NumberFormatException ex) {
                         LOG.warn("unrecognized separator format '" + systemSep + "', using locale default", ex); // NOI18N
 
-                        c = ((DecimalFormat)NumberFormat.getNumberInstance(Locale.getDefault()))
-                                    .getDecimalFormatSymbols().getDecimalSeparator();
+                        c =
+                            (
+                                (DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault())
+                            ).getDecimalFormatSymbols()
+                                .getDecimalSeparator();
                     }
                 } else {
                     c = systemSep.charAt(0);
@@ -208,8 +208,9 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
 
             if (Character.isWhitespace(c)) {
                 LOG.warn("white space chars not accepted as decimal separator, using locale default"); // NOI18N
-                c = ((DecimalFormat)NumberFormat.getNumberInstance(Locale.getDefault())).getDecimalFormatSymbols()
-                            .getDecimalSeparator();
+                c =
+                    ((DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault())).getDecimalFormatSymbols()
+                        .getDecimalSeparator();
             }
         }
 
@@ -223,12 +224,12 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
      * @return  the decimal format used by this converter
      */
     protected DecimalFormat getDecimalFormat() {
-        final DecimalFormat format = (DecimalFormat)NumberFormat.getNumberInstance(Locale.getDefault());
+        final DecimalFormat format = (DecimalFormat) NumberFormat.getNumberInstance(Locale.getDefault());
         final DecimalFormatSymbols symbols = format.getDecimalFormatSymbols();
         final char decimalSep = getDecimalSeparator();
 
         symbols.setDecimalSeparator(decimalSep);
-        symbols.setGroupingSeparator((char)0);
+        symbols.setGroupingSeparator((char) 0);
 
         format.setDecimalFormatSymbols(symbols);
         format.setGroupingUsed(false);
@@ -247,7 +248,7 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
         for (final char sep : getTokenSeparators()) {
             sb.append(sep);
         }
-        sb.append("]+");                                 // NOI18N
+        sb.append("]+"); // NOI18N
 
         return sb.toString();
     }
@@ -314,11 +315,12 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
             if (indexOfComma > 0) {
                 sb.replace(
                     indexOfComma,
-                    indexOfComma
-                            + 1,
+                    indexOfComma + 1,
                     NbBundle.getMessage(
                         AbstractGeometryFromTextConverter.class,
-                        "AbstractGeometryFromTextConverter.getFormatSeparators().or")); // NOI18N
+                        "AbstractGeometryFromTextConverter.getFormatSeparators().or"
+                    )
+                ); // NOI18N
             }
         }
 
@@ -328,18 +330,20 @@ public abstract class AbstractGeometryFromTextConverter extends AbstractRatingCo
     @Override
     public String getFormatDescription() {
         return NbBundle.getMessage(
-                AbstractGeometryFromTextConverter.class,
-                "AbstractGeometryFromTextConverter.getFormatDescription().returnValue", // NOI18N
-                getFormatSeparators(),
-                getDecimalSeparator());
+            AbstractGeometryFromTextConverter.class,
+            "AbstractGeometryFromTextConverter.getFormatDescription().returnValue", // NOI18N
+            getFormatSeparators(),
+            getDecimalSeparator()
+        );
     }
 
     @Override
     public String getFormatHtmlDescription() {
         return NbBundle.getMessage(
-                AbstractGeometryFromTextConverter.class,
-                "AbstractGeometryFromTextConverter.getFormatHtmlDescription().returnValue", // NOI18N
-                getFormatSeparators(),
-                getDecimalSeparator());
+            AbstractGeometryFromTextConverter.class,
+            "AbstractGeometryFromTextConverter.getFormatHtmlDescription().returnValue", // NOI18N
+            getFormatSeparators(),
+            getDecimalSeparator()
+        );
     }
 }

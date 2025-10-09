@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 thorsten
  *
@@ -24,7 +24,6 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import java.util.Collection;
 
 /**
@@ -34,7 +33,6 @@ import java.util.Collection;
  * @version  $Revision$, $Date$
  */
 public interface CommonFeaturePreciseAction extends CommonFeatureAction {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

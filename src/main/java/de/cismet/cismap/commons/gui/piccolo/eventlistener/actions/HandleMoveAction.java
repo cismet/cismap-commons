@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * HandleMoveAction.java
  *
@@ -16,16 +16,13 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import Sirius.util.collections.MultiMap;
-
-import edu.umd.cs.piccolo.PLayer;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.Vector;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import edu.umd.cs.piccolo.PLayer;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein Handle, das vom Benutzer
@@ -64,15 +61,17 @@ public class HandleMoveAction implements CustomAction {
      * @param  endY            Y-Koordinate des Endpunkts
      * @param  isGlued         Waren beim Verschieben mehrere Handles gekoppelt?
      */
-    public HandleMoveAction(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final PFeature pf,
-            final float startX,
-            final float startY,
-            final float endX,
-            final float endY,
-            final boolean isGlued) {
+    public HandleMoveAction(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final PFeature pf,
+        final float startX,
+        final float startY,
+        final float endX,
+        final float endY,
+        final boolean isGlued
+    ) {
         this.gluedCoordinates = null;
         this.entityPosition = entityPosition;
         this.ringPosition = ringPosition;
@@ -103,17 +102,18 @@ public class HandleMoveAction implements CustomAction {
             final Set<PFeature> pFeatureSet = gluedCoordinates.keySet();
             for (final PFeature gluePFeature : pFeatureSet) {
                 if (gluePFeature.getFeature().isEditable()) {
-                    final Collection coordinates = (Collection)gluedCoordinates.get(gluePFeature);
+                    final Collection coordinates = (Collection) gluedCoordinates.get(gluePFeature);
                     if (coordinates != null) {
                         for (final Object o : coordinates) {
-                            final int oIndex = (Integer)o;
+                            final int oIndex = (Integer) o;
                             gluePFeature.moveCoordinateToNewPiccoloPosition(
                                 entityPosition,
                                 ringPosition,
                                 oIndex,
                                 startX,
                                 startY,
-                                false);
+                                false
+                            );
                         }
                         gluePFeature.updatePath();
                     }
@@ -130,7 +130,7 @@ public class HandleMoveAction implements CustomAction {
         pf.syncGeometry();
         final Vector v = new Vector();
         v.add(pf.getFeature());
-        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+        ((DefaultFeatureCollection) pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
     }
 
     /**
@@ -141,9 +141,10 @@ public class HandleMoveAction implements CustomAction {
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
-                HandleMoveAction.class,
-                "HandleMoveAction.info().return",
-                new Object[] { new Float(startX).intValue(), new Float(startY).intValue() }); // NOI18N
+            HandleMoveAction.class,
+            "HandleMoveAction.info().return",
+            new Object[] { new Float(startX).intValue(), new Float(startY).intValue() }
+        ); // NOI18N
     }
 
     /**
@@ -154,15 +155,16 @@ public class HandleMoveAction implements CustomAction {
     @Override
     public CustomAction getInverse() {
         return new HandleMoveAction(
-                entityPosition,
-                ringPosition,
-                coordPosition,
-                pf,
-                endX,
-                endY,
-                startX,
-                startY,
-                isGluedAction);
+            entityPosition,
+            ringPosition,
+            coordPosition,
+            pf,
+            endX,
+            endY,
+            startX,
+            startY,
+            isGluedAction
+        );
     }
 
     @Override

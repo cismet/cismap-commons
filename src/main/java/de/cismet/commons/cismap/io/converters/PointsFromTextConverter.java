@@ -1,24 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
+import de.cismet.commons.converter.ConversionException;
 import java.util.ArrayList;
 import java.util.List;
-
-import de.cismet.commons.converter.ConversionException;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Creates one or more point geometries from the provided coordinates. At least one coordinate is expected.
@@ -27,14 +24,15 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class PointsFromTextConverter extends AbstractGeometryFromTextConverter
-        implements MultiGeometriesProvider {
+public final class PointsFromTextConverter
+    extends AbstractGeometryFromTextConverter
+    implements MultiGeometriesProvider {
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException {
+        throws ConversionException {
         if (coordinates.length < 1) {
             throw new ConversionException("cannot create point from empty coordinate array"); // NOI18N
         }
@@ -57,8 +55,9 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PointsFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
+            PointFromTextConverter.class,
+            "PointsFromTextConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -69,8 +68,9 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     @Override
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
-                PointsFromTextConverter.class,
-                "PointsFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+            PointsFromTextConverter.class,
+            "PointsFromTextConverter.getFormatDescription().returnValue"
+        ); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -78,10 +78,9 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
 
     @Override
     public String getFormatHtmlDescription() {
-        final String desc = NbBundle.getMessage(
-                    PointsFromTextConverter.class,
-                    "PointsFromTextConverter.getFormatHtmlDescription().returnValue")
-                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String desc = NbBundle
+            .getMessage(PointsFromTextConverter.class, "PointsFromTextConverter.getFormatHtmlDescription().returnValue")
+            .replaceAll("<[/]?html>", ""); // NOI18N
         final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
 
         return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
@@ -90,9 +89,10 @@ public final class PointsFromTextConverter extends AbstractGeometryFromTextConve
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PointsFromTextConverter.class,
-                "PointsFromTextConverter.getFormatExample().returnValue",
-                getDecimalSeparator()); // NOI18N
+            PointsFromTextConverter.class,
+            "PointsFromTextConverter.getFormatExample().returnValue",
+            getDecimalSeparator()
+        ); // NOI18N
     }
 
     /**

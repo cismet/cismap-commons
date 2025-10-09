@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 thorsten
  *
@@ -23,17 +23,14 @@
  */
 package de.cismet.cismap.actions;
 
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.UpdateablePostgisFeature;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -56,9 +53,12 @@ public class UpdateablePostgisFeatureAction extends AbstractAction implements Co
      * Creates a new DuplicateGeometryFeatureAction object.
      */
     public UpdateablePostgisFeatureAction() {
-        super(NbBundle.getMessage(
+        super(
+            NbBundle.getMessage(
                 UpdateablePostgisFeatureAction.class,
-                "UpdateablePostgisFeatureAction.UpdateablePostgisFeatureAction()"));
+                "UpdateablePostgisFeatureAction.UpdateablePostgisFeatureAction()"
+            )
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -83,15 +83,15 @@ public class UpdateablePostgisFeatureAction extends AbstractAction implements Co
         f = source;
         // now change the icon and title according to the selected feature
         if (f instanceof UpdateablePostgisFeature) {
-            putValue(Action.NAME, ((UpdateablePostgisFeature)f).getAction().getActionText());
-            putValue(Action.SMALL_ICON, ((UpdateablePostgisFeature)f).getAction().getIcon());
+            putValue(Action.NAME, ((UpdateablePostgisFeature) f).getAction().getActionText());
+            putValue(Action.SMALL_ICON, ((UpdateablePostgisFeature) f).getAction().getIcon());
         }
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
         if (f instanceof UpdateablePostgisFeature) {
-            ((UpdateablePostgisFeature)f).doUpdate();
+            ((UpdateablePostgisFeature) f).doUpdate();
         }
     }
 

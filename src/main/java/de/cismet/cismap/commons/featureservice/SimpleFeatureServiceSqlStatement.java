@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.featureservice;
 
 /**
@@ -18,10 +18,10 @@ public class SimpleFeatureServiceSqlStatement {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String ALL_FIELDS_TOKEN = "<cismap::AllFields>"; // NOI18N
-    public static final String X1_TOKEN = "<cismap::x1>";                // NOI18N
-    public static final String Y1_TOKEN = "<cismap::y1>";                // NOI18N
-    public static final String X2_TOKEN = "<cismap::x2>";                // NOI18N
-    public static final String Y2_TOKEN = "<cismap::y2>";                // NOI18N
+    public static final String X1_TOKEN = "<cismap::x1>"; // NOI18N
+    public static final String Y1_TOKEN = "<cismap::y1>"; // NOI18N
+    public static final String X2_TOKEN = "<cismap::x2>"; // NOI18N
+    public static final String Y2_TOKEN = "<cismap::y2>"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -39,7 +39,7 @@ public class SimpleFeatureServiceSqlStatement {
     private double y1 = 0;
     private double x2 = 0;
     private double y2 = 0;
-    private String orderBy = "";   // NOI18N
+    private String orderBy = ""; // NOI18N
 
     //~ Constructors -----------------------------------------------------------
 
@@ -67,12 +67,14 @@ public class SimpleFeatureServiceSqlStatement {
      * @param  x2Token         DOCUMENT ME!
      * @param  y2Token         DOCUMENT ME!
      */
-    public SimpleFeatureServiceSqlStatement(final String sqlTemplate,
-            final String allFieldsToken,
-            final String x1Token,
-            final String y1Token,
-            final String x2Token,
-            final String y2Token) {
+    public SimpleFeatureServiceSqlStatement(
+        final String sqlTemplate,
+        final String allFieldsToken,
+        final String x1Token,
+        final String y1Token,
+        final String x2Token,
+        final String y2Token
+    ) {
         this.sqlTemplate = sqlTemplate;
         this.allFieldsToken = allFieldsToken;
         this.x1Token = x1Token;
@@ -167,7 +169,7 @@ public class SimpleFeatureServiceSqlStatement {
         ret = ret.replaceAll(y1Token, y1 + ""); // NOI18N
         ret = ret.replaceAll(x2Token, x2 + ""); // NOI18N
         ret = ret.replaceAll(y2Token, y2 + ""); // NOI18N
-        return ret + " " + orderBy;             // NOI18N
+        return ret + " " + orderBy; // NOI18N
     }
 
     /**
@@ -178,10 +180,10 @@ public class SimpleFeatureServiceSqlStatement {
     public String getCountFeaturesStatement() {
         String ret = sqlTemplate;
         ret = ret.replaceAll(allFieldsToken, "count(*)"); // NOI18N
-        ret = ret.replaceAll(x1Token, x1 + "");           // NOI18N
-        ret = ret.replaceAll(y1Token, y1 + "");           // NOI18N
-        ret = ret.replaceAll(x2Token, x2 + "");           // NOI18N
-        ret = ret.replaceAll(y2Token, y2 + "");           // NOI18N
+        ret = ret.replaceAll(x1Token, x1 + ""); // NOI18N
+        ret = ret.replaceAll(y1Token, y1 + ""); // NOI18N
+        ret = ret.replaceAll(x2Token, x2 + ""); // NOI18N
+        ret = ret.replaceAll(y2Token, y2 + ""); // NOI18N
         return ret;
     }
 

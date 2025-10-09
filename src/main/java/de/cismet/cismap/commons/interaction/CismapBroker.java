@@ -1,44 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.interaction;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-import edu.umd.cs.piccolox.event.PSelectionEventHandler;
-
-import org.openide.util.Exceptions;
-
-import java.awt.Color;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
@@ -58,11 +27,32 @@ import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.security.AbstractCredentialsProvider;
-
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
-
 import de.cismet.tools.gui.historybutton.HistoryModelListener;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import edu.umd.cs.piccolox.event.PSelectionEventHandler;
+import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+import javax.swing.SwingWorker;
+import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -74,10 +64,10 @@ public class CismapBroker {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final String FS = System.getProperty("file.separator");                       // NOI18N
-    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");           // NOI18N
-    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";              // NOI18N
-    private static final String DEFAULT_CISMAP_FOLDER = ".cismap";                               // NOI18N
+    private static final String FS = System.getProperty("file.separator"); // NOI18N
+    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home"); // NOI18N
+    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties"; // NOI18N
+    private static final String DEFAULT_CISMAP_FOLDER = ".cismap"; // NOI18N
     private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -804,24 +794,30 @@ public class CismapBroker {
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
-        PNotificationCenter.defaultCenter()
-                .addListener(
-                    this,
-                    "coordinatesChanged", // NOI18N
-                    SimpleMoveListener.COORDINATES_CHANGED,
-                    mappingComponent.getInputListener(MappingComponent.MOTION));
-        PNotificationCenter.defaultCenter()
-                .addListener(
-                    this,
-                    "lengthChanged", // NOI18N
-                    MeasurementListener.LENGTH_CHANGED,
-                    mappingComponent.getInputListener(MappingComponent.MEASUREMENT));
-        PNotificationCenter.defaultCenter()
-                .addListener(
-                    this,
-                    "selectionChanged", // NOI18N
-                    PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
-                    mappingComponent.getInputListener(MappingComponent.SELECT));
+        PNotificationCenter
+            .defaultCenter()
+            .addListener(
+                this,
+                "coordinatesChanged", // NOI18N
+                SimpleMoveListener.COORDINATES_CHANGED,
+                mappingComponent.getInputListener(MappingComponent.MOTION)
+            );
+        PNotificationCenter
+            .defaultCenter()
+            .addListener(
+                this,
+                "lengthChanged", // NOI18N
+                MeasurementListener.LENGTH_CHANGED,
+                mappingComponent.getInputListener(MappingComponent.MEASUREMENT)
+            );
+        PNotificationCenter
+            .defaultCenter()
+            .addListener(
+                this,
+                "selectionChanged", // NOI18N
+                PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
+                mappingComponent.getInputListener(MappingComponent.SELECT)
+            );
     }
 
     /**
@@ -850,13 +846,11 @@ public class CismapBroker {
     public void coordinatesChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
         final Object o = notification.getObject();
         if (o instanceof SimpleMoveListener) {
-            final double x = ((SimpleMoveListener)o).getXCoord();
-            final double y = ((SimpleMoveListener)o).getYCoord();
+            final double x = ((SimpleMoveListener) o).getXCoord();
+            final double y = ((SimpleMoveListener) o).getYCoord();
 
-            fireStatusValueChanged(new StatusEvent(
-                    StatusEvent.COORDINATE_STRING,
-                    new Coordinate(x, y)));
-            final PFeature pf = ((SimpleMoveListener)o).getUnderlyingPFeature();
+            fireStatusValueChanged(new StatusEvent(StatusEvent.COORDINATE_STRING, new Coordinate(x, y)));
+            final PFeature pf = ((SimpleMoveListener) o).getUnderlyingPFeature();
             if (pf != oldPfeature) {
                 fireStatusValueChanged(new StatusEvent(StatusEvent.OBJECT_INFOS, pf));
                 oldPfeature = pf;
@@ -872,11 +866,10 @@ public class CismapBroker {
     public void lengthChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
         final Object o = notification.getObject();
         if (o instanceof MeasurementListener) {
-            final double length = ((MeasurementListener)o).getMeasuredLength();
-            fireStatusValueChanged(new StatusEvent(
-                    StatusEvent.MEASUREMENT_INFOS,
-                    StaticDecimalTools.round("0.00", length)
-                            + " m")); // NOI18N
+            final double length = ((MeasurementListener) o).getMeasuredLength();
+            fireStatusValueChanged(
+                new StatusEvent(StatusEvent.MEASUREMENT_INFOS, StaticDecimalTools.round("0.00", length) + " m")
+            ); // NOI18N
         }
     }
 
@@ -885,8 +878,7 @@ public class CismapBroker {
      *
      * @param  notification  DOCUMENT ME!
      */
-    public void selectionChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
-    }
+    public void selectionChanged(final edu.umd.cs.piccolox.event.PNotification notification) {}
 
     /**
      * public LayerWidget getLayerWidget() { return layerWidget; } public void setLayerWidget(LayerWidget layerWidget) {
@@ -966,8 +958,11 @@ public class CismapBroker {
                 final String aliasUrl = replaceVariableInAlias(urlPart);
 
                 if (url.contains("?") && (aliasUrl != null) && aliasUrl.contains("?")) {
-                    if (url.substring(0, url.indexOf("?")).equalsIgnoreCase(
-                                    aliasUrl.substring(0, aliasUrl.indexOf("?")))) {
+                    if (
+                        url
+                            .substring(0, url.indexOf("?"))
+                            .equalsIgnoreCase(aliasUrl.substring(0, aliasUrl.indexOf("?")))
+                    ) {
                         final Map<String, String> urlMap = getParameterMap(url);
                         final Map<String, String> urlAliasMap = getParameterMap(aliasUrl);
 
@@ -1108,11 +1103,11 @@ public class CismapBroker {
             }
             appPrefs.removeNode();
             if (log.isDebugEnabled()) {
-                log.debug("deletion of the preferences successfully");         // NOI18N
+                log.debug("deletion of the preferences successfully"); // NOI18N
             }
         } catch (BackingStoreException ex) {
             if (log.isDebugEnabled()) {
-                log.debug("Error during the deletion of the preferences");     // NOI18N
+                log.debug("Error during the deletion of the preferences"); // NOI18N
             }
             ex.printStackTrace();
         }
@@ -1123,7 +1118,7 @@ public class CismapBroker {
      */
     public void writePropertyFile() {
         if (log.isDebugEnabled()) {
-            log.debug("writing server Aliases to File");                      // NOI18N
+            log.debug("writing server Aliases to File"); // NOI18N
         }
         if (!serverAliasesInited) {
             initAliases();
@@ -1131,13 +1126,13 @@ public class CismapBroker {
         try {
             if (userAliasFile.exists()) {
                 final FileOutputStream out = new FileOutputStream(userAliasFile);
-                userProperties.store(out, "Server Aliases URL <---> Alias");  // NOI18N
+                userProperties.store(out, "Server Aliases URL <---> Alias"); // NOI18N
             }
         } catch (IOException ex) {
             log.error("Error during writing the server aliases to file", ex); // NOI18N
         }
         if (log.isDebugEnabled()) {
-            log.debug("Server Aliases wrote to File");                        // NOI18N
+            log.debug("Server Aliases wrote to File"); // NOI18N
         }
     }
 
@@ -1183,7 +1178,7 @@ public class CismapBroker {
                 log.debug("SwingWorker submitted to Threadpool"); // NOI18N
             }
         } catch (Exception ex) {
-            log.fatal("SwingWorker Error", ex);                   // NOI18N
+            log.fatal("SwingWorker Error", ex); // NOI18N
         }
     }
 
@@ -1270,7 +1265,8 @@ public class CismapBroker {
         if (mappingComponent == null) {
             if (log.isDebugEnabled()) {
                 log.debug(
-                    "CismapBroker didn't provide a mapping component. So it's impossible to retrieve the crs list.");
+                    "CismapBroker didn't provide a mapping component. So it's impossible to retrieve the crs list."
+                );
             }
 
             return result;
@@ -1280,7 +1276,8 @@ public class CismapBroker {
         if ((crsList == null) || crsList.isEmpty()) {
             if (log.isDebugEnabled()) {
                 log.debug(
-                    "The crs list of the mapping component is empty. So it's impossible to find a matching Crs object.");
+                    "The crs list of the mapping component is empty. So it's impossible to find a matching Crs object."
+                );
             }
 
             return result;
@@ -1341,7 +1338,8 @@ public class CismapBroker {
      * @param  checkForOverlappingGeometriesAfterFeatureRotation  DOCUMENT ME!
      */
     public void setCheckForOverlappingGeometriesAfterFeatureRotation(
-            final boolean checkForOverlappingGeometriesAfterFeatureRotation) {
+        final boolean checkForOverlappingGeometriesAfterFeatureRotation
+    ) {
         this.checkForOverlappingGeometriesAfterFeatureRotation = checkForOverlappingGeometriesAfterFeatureRotation;
     }
 
@@ -1507,7 +1505,6 @@ public class CismapBroker {
         /**
          * Creates a new LazyInitialiser object.
          */
-        private LazyInitialiser() {
-        }
+        private LazyInitialiser() {}
     }
 }

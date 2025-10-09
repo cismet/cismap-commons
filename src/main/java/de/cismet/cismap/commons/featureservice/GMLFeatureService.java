@@ -1,35 +1,29 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.net.URI;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
-
 import de.cismet.commons.wms.capabilities.Layer;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * Document FeatureService that supports GML Documents.
@@ -38,8 +32,9 @@ import de.cismet.commons.wms.capabilities.Layer;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeature, String>
-        implements LayerInfoProvider {
+public class GMLFeatureService
+    extends DocumentFeatureService<FeatureServiceFeature, String>
+    implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -52,23 +47,33 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
         layerIcons.put(
             LAYER_ENABLED_VISIBLE,
             new ImageIcon(
-                AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")));                   // NOI18N
+                AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_ENABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_VISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png"))); // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png"
+                    )
+            )
+        ); // NOI18N
     }
 
     //~ Constructors -----------------------------------------------------------
@@ -94,10 +99,12 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public GMLFeatureService(final String name,
-            final URI documentURI,
-            final long documentSize,
-            final List<FeatureServiceAttribute> attributes) throws Exception {
+    public GMLFeatureService(
+        final String name,
+        final URI documentURI,
+        final long documentSize,
+        final List<FeatureServiceAttribute> attributes
+    ) throws Exception {
         super(name, documentURI, documentSize, attributes);
     }
 
@@ -148,10 +155,12 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
      */
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new GMLFeatureFactory(this.getLayerProperties(),
-                this.getDocumentURI(),
-                this.maxSupportedFeatureCount,
-                this.layerInitWorker);
+        return new GMLFeatureFactory(
+            this.getLayerProperties(),
+            this.getDocumentURI(),
+            this.maxSupportedFeatureCount,
+            this.layerInitWorker
+        );
     }
 
     /**
@@ -194,7 +203,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
     public void setDocumentURI(final URI documentURI) {
         super.setDocumentURI(documentURI);
         if (this.getFeatureFactory() != null) {
-            ((GMLFeatureFactory)this.getFeatureFactory()).setDocumentURI(documentURI);
+            ((GMLFeatureFactory) this.getFeatureFactory()).setDocumentURI(documentURI);
         }
     }
 
@@ -255,8 +264,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
      * @param  selected  DOCUMENT ME!
      */
     @Override
-    public void setLayerQuerySelected(final boolean selected) {
-    }
+    public void setLayerQuerySelected(final boolean selected) {}
 
     /**
      * DOCUMENT ME!

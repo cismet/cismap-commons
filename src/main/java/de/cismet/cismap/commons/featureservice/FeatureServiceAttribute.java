@@ -1,21 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.jdom.Element;
-
-import java.util.Arrays;
-
 import de.cismet.cismap.commons.ConvertableToXML;
+import java.util.Arrays;
+import org.jdom.Element;
 
 /**
  * Describes the attributes of all Features available in a certain layer.
@@ -81,9 +79,11 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
      * @param  featureServiceAttribute  DOCUMENT ME!
      */
     protected FeatureServiceAttribute(final FeatureServiceAttribute featureServiceAttribute) {
-        this(new String(featureServiceAttribute.getName()),
+        this(
+            new String(featureServiceAttribute.getName()),
             String.valueOf(featureServiceAttribute.getType()),
-            featureServiceAttribute.isSelected());
+            featureServiceAttribute.isSelected()
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -226,7 +226,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final FeatureServiceAttribute other = (FeatureServiceAttribute)obj;
+        final FeatureServiceAttribute other = (FeatureServiceAttribute) obj;
         if ((this.type != other.type) && ((this.type == null) || !this.type.equals(other.type))) {
             return false;
         }
@@ -287,15 +287,18 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
         this.setType(element.getAttributeValue(FeatureServiceUtilities.XML_TYPE_STRING));
 
         final boolean newSelected = (element.getAttributeValue(IS_SELECTED) != null)
-            ? Boolean.valueOf(element.getAttributeValue(IS_SELECTED)) : true;
+            ? Boolean.valueOf(element.getAttributeValue(IS_SELECTED))
+            : true;
         this.setSelected(newSelected);
 
         final boolean newVisible = (element.getAttributeValue(FeatureServiceUtilities.IS_VISIBLE) != null)
-            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_VISIBLE)) : true;
+            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_VISIBLE))
+            : true;
         this.setVisible(newVisible);
 
         final boolean newNameElement = (element.getAttributeValue(FeatureServiceUtilities.IS_NAME_ELEMENT) != null)
-            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_NAME_ELEMENT)) : false;
+            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_NAME_ELEMENT))
+            : false;
         this.setNameElement(newNameElement);
 
         final boolean newGeometry = (this.getType() != null) && (FeatureServiceUtilities.isElementOfGeometryType(type));

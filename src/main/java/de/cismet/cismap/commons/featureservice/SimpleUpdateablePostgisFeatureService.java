@@ -1,21 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.featureservice;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import javax.swing.ImageIcon;
 
 import de.cismet.cismap.commons.featureservice.factory.PostgisAction;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
+import javax.swing.ImageIcon;
+import org.apache.log4j.Logger;
+import org.jdom.CDATA;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -61,10 +58,10 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
     @Override
     public Element toElement() {
         final Element element = super.toElement();
-        element.setAttribute("updateable", "true");                             // NOI18N
-        final Element actionElement = new Element("action");                    // NOI18N
+        element.setAttribute("updateable", "true"); // NOI18N
+        final Element actionElement = new Element("action"); // NOI18N
         actionElement.setAttribute("text", this.postgisAction.getActionText()); // NOI18N
-        actionElement.setAttribute("icon", this.postgisAction.getIconPath());   // NOI18N
+        actionElement.setAttribute("icon", this.postgisAction.getIconPath()); // NOI18N
         actionElement.addContent(new CDATA(this.postgisAction.getAction()));
         element.addContent(actionElement);
         return element;
@@ -76,20 +73,23 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
         Element actionElement = null;
         this.postgisAction = new PostgisAction();
         try {
-            actionElement = element.getChild("action");                                                          // NOI18N
+            actionElement = element.getChild("action"); // NOI18N
             this.postgisAction.setAction(actionElement.getText());
         } catch (Exception e) {
-            LOG.warn("No action in updateable Service: " + e.getMessage());                                      // NOI18N
+            LOG.warn("No action in updateable Service: " + e.getMessage()); // NOI18N
         }
         try {
-            this.postgisAction.setActionText(actionElement.getAttribute("text").getValue());                     // NOI18N
-            this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue());                       // NOI18N
+            this.postgisAction.setActionText(actionElement.getAttribute("text").getValue()); // NOI18N
+            this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue()); // NOI18N
             this.postgisAction.setIcon(new ImageIcon(getClass().getResource(this.postgisAction.getIconPath())));
         } catch (Exception e) {
-            LOG.warn("No actiontext in updateable Service: " + e.getMessage());                                  // NOI18N
-            this.postgisAction.setActionText(org.openide.util.NbBundle.getMessage(
-                    SimpleUpdateablePostgisFeatureService.class,
-                    "SimpleUpdateablePostgisFeatureService.initFromElement(Element).postgisAction.actionText")); // NOI18N
+            LOG.warn("No actiontext in updateable Service: " + e.getMessage()); // NOI18N
+            this.postgisAction.setActionText(
+                    org.openide.util.NbBundle.getMessage(
+                        SimpleUpdateablePostgisFeatureService.class,
+                        "SimpleUpdateablePostgisFeatureService.initFromElement(Element).postgisAction.actionText"
+                    )
+                ); // NOI18N
         }
     }
 

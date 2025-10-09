@@ -1,25 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.commons.wms.capabilities.Layer;
+import de.cismet.tools.gui.VerticalTextIcon;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-
 import java.util.Hashtable;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -27,12 +24,8 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.border.EmptyBorder;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.commons.wms.capabilities.Layer;
-
-import de.cismet.tools.gui.VerticalTextIcon;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -45,11 +38,13 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final ImageIcon LOCK_ICON = new javax.swing.ImageIcon(
-            SlidableWMSServiceLayerGroupInternalFrame.class.getResource(
-                "/de/cismet/cismap/commons/raster/wms/res/lock.png"));        // NOI18N
+        SlidableWMSServiceLayerGroupInternalFrame.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock.png")
+    ); // NOI18N
     private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
-            SlidableWMSServiceLayerGroupInternalFrame.class.getResource(
-                "/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
+        SlidableWMSServiceLayerGroupInternalFrame.class.getResource(
+                "/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png"
+            )
+    ); // NOI18N
 
     private static final transient Logger LOG = Logger.getLogger(SlidableWMSServiceLayerGroupInternalFrame.class);
 
@@ -91,11 +86,14 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         btnLock.setIcon(LOCK_ICON);
         btnLock.setBorder(null);
         btnLock.setContentAreaFilled(false);
-        btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
+        btnLock.setPreferredSize(new Dimension(32, (int) slider.getPreferredSize().getHeight()));
         btnLock.setFocusPainted(false);
-        btnLock.setToolTipText(NbBundle.getMessage(
+        btnLock.setToolTipText(
+            NbBundle.getMessage(
                 SlidableWMSServiceLayerGroup.class,
-                "SlidableWMSServiceLayerGroup.initDialog().btnLock.tooltip"));
+                "SlidableWMSServiceLayerGroup.initDialog().btnLock.tooltip"
+            )
+        );
         btnLock.setVisible(model.isResourceConserving());
         this.getContentPane().add(btnLock, BorderLayout.WEST);
 
@@ -119,7 +117,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
             slider.drawLabels(SlidableWMSServiceLayerGroup.LabelDirection.VERTICAL);
             sliderWidth = slider.estimateSliderWidthVerticalLabels();
         }
-        this.setPreferredSize(new Dimension((int)sliderWidth + 24, (int)slider.getPreferredSize().getHeight() + 15));
+        this.setPreferredSize(new Dimension((int) sliderWidth + 24, (int) slider.getPreferredSize().getHeight() + 15));
         this.pack();
     }
 
@@ -147,6 +145,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     public void setLockIcon() {
         btnLock.setIcon(LOCK_ICON);
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -198,6 +197,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     public boolean isAllowCrossfade() {
         return allowCrossfade;
     }
+
     /**
      * Returns a string which can be used as the title of a tick in the slider. If the model was created from an JDom
      * element, then the layer name has a certain suffix. In this case the suffix is removed and the name is returned.
@@ -228,7 +228,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     private String createShortLayerTitle(final WMSServiceLayer layer) {
         String layerTitle = "";
         try {
-            final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
+            final String[] keywords = ((Layer) layer.ogcLayers.get(0)).getKeywords();
             for (final String keyword : keywords) {
                 if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
                     layerTitle = keyword.split(":")[1];
@@ -290,14 +290,16 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         public void drawLabels(final SlidableWMSServiceLayerGroup.LabelDirection direction) {
             labelDirection = direction;
             switch (direction) {
-                case HORIZONTAL: {
-                    drawLabelsHorizontally();
-                    break;
-                }
-                case VERTICAL: {
-                    drawLabelsVertically();
-                    break;
-                }
+                case HORIZONTAL:
+                    {
+                        drawLabelsHorizontally();
+                        break;
+                    }
+                case VERTICAL:
+                    {
+                        drawLabelsVertically();
+                        break;
+                    }
             }
         }
 
@@ -393,8 +395,9 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         @Override
         public void setEnabled(final boolean enabled) {
             super.setEnabled(enabled);
-            if ((labelDirection != null)
-                        && labelDirection.equals(SlidableWMSServiceLayerGroup.LabelDirection.VERTICAL)) {
+            if (
+                (labelDirection != null) && labelDirection.equals(SlidableWMSServiceLayerGroup.LabelDirection.VERTICAL)
+            ) {
                 if (enabled) {
                     drawLabelsVertically();
                 } else {
@@ -409,8 +412,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         }
 
         @Override
-        public void componentMoved(final ComponentEvent e) {
-        }
+        public void componentMoved(final ComponentEvent e) {}
 
         @Override
         public void componentShown(final ComponentEvent e) {
@@ -418,7 +420,6 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         }
 
         @Override
-        public void componentHidden(final ComponentEvent e) {
-        }
+        public void componentHidden(final ComponentEvent e) {}
     }
 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -51,13 +51,26 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
-
 import de.cismet.commons.security.AccessHandler;
-
 import de.cismet.connectioncontext.ConnectionContext;
 import de.cismet.connectioncontext.ConnectionContextProvider;
-
 import de.cismet.security.WebAccessManager;
+import java.awt.Cursor;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.StringReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Collection;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JList;
+import javax.swing.JToggleButton;
+import javax.swing.ListModel;
+import javax.swing.SwingWorker;
+import org.apache.commons.httpclient.Header;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -69,32 +82,34 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final String MAP_TEMPLATE = "<rasterfari:url>"
-                + "?REQUEST=GetMap"
-                + "&SERVICE=WMS"
-                + "&SRS=EPSG:25832"
-                + "&BBOX=<cismap:boundingBox>"
-                + "&WIDTH=<cismap:width>"
-                + "&HEIGHT=<cismap:height>"
-                + "&LAYERS=<rasterfari:document>"
-                + "&CUSTOMSCALE=<rasterfari:scale>"
-                + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
-                + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
-                + "&TRANSPARENT=false"
-                + "&REBUILDCACHE=no";
+    private static final String MAP_TEMPLATE =
+        "<rasterfari:url>" +
+        "?REQUEST=GetMap" +
+        "&SERVICE=WMS" +
+        "&SRS=EPSG:25832" +
+        "&BBOX=<cismap:boundingBox>" +
+        "&WIDTH=<cismap:width>" +
+        "&HEIGHT=<cismap:height>" +
+        "&LAYERS=<rasterfari:document>" +
+        "&CUSTOMSCALE=<rasterfari:scale>" +
+        "&CUSTOMOFFSETX=<rasterfari:offsetX>" +
+        "&CUSTOMOFFSETY=<rasterfari:offsetY>" +
+        "&TRANSPARENT=false" +
+        "&REBUILDCACHE=no";
 
-    private static final String MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED = "<rasterfari:url>"
-                + "?REQUEST=GetMap"
-                + "&SERVICE=WMS"
-                + "&SRS=EPSG:25832"
-                + "&BBOX=<cismap:boundingBox>"
-                + "&WIDTH=<cismap:width>"
-                + "&HEIGHT=<cismap:height>"
-                + "&LAYERS=<rasterfari:document>"
-                + "&CUSTOMSCALE=<rasterfari:scale>"
-                + "&CUSTOMOFFSETX=<rasterfari:offsetX>"
-                + "&CUSTOMOFFSETY=<rasterfari:offsetY>"
-                + "&TRANSPARENT=false";
+    private static final String MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED =
+        "<rasterfari:url>" +
+        "?REQUEST=GetMap" +
+        "&SERVICE=WMS" +
+        "&SRS=EPSG:25832" +
+        "&BBOX=<cismap:boundingBox>" +
+        "&WIDTH=<cismap:width>" +
+        "&HEIGHT=<cismap:height>" +
+        "&LAYERS=<rasterfari:document>" +
+        "&CUSTOMSCALE=<rasterfari:scale>" +
+        "&CUSTOMOFFSETX=<rasterfari:offsetX>" +
+        "&CUSTOMOFFSETY=<rasterfari:offsetY>" +
+        "&TRANSPARENT=false";
 
     private static final String DOWNLOAD_TEMPLATE =
         "<rasterfari:url>?REQUEST=GetMap&SERVICE=WMS&customDocumentInfo=download&LAYERS=<rasterfari:document>";
@@ -106,26 +121,28 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
     private static final XBoundingBox INITIAL_BOUNDINGBOX = new XBoundingBox(-0.5d, -0.5d, 0.5d, 0.5d, SRS, true);
     private static final int NO_SELECTION = -1;
     private static final ListModel MODEL_LOAD = new DefaultListModel() {
-
-            {
-                add(
-                    0,
-                    org.openide.util.NbBundle.getMessage(
-                        RasterfariDocumentLoaderPanel.class,
-                        "RasterfariDocumentLoaderPanel.lstPages.loading"));
-            }
-        };
+        {
+            add(
+                0,
+                org.openide.util.NbBundle.getMessage(
+                    RasterfariDocumentLoaderPanel.class,
+                    "RasterfariDocumentLoaderPanel.lstPages.loading"
+                )
+            );
+        }
+    };
 
     private static final ListModel FEHLER_MODEL = new DefaultListModel() {
-
-            {
-                add(
-                    0,
-                    org.openide.util.NbBundle.getMessage(
-                        RasterfariDocumentLoaderPanel.class,
-                        "RasterfariDocumentLoaderPanel.lstPages.loadingError"));
-            }
-        };
+        {
+            add(
+                0,
+                org.openide.util.NbBundle.getMessage(
+                    RasterfariDocumentLoaderPanel.class,
+                    "RasterfariDocumentLoaderPanel.lstPages.loadingError"
+                )
+            );
+        }
+    };
 
     //~ Instance fields --------------------------------------------------------
 
@@ -149,6 +166,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
     private javax.swing.JScrollPane scpPages;
     private javax.swing.JToggleButton togPan;
     private javax.swing.JToggleButton togZoom;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -167,9 +185,11 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      * @param  listener           DOCUMENT ME!
      * @param  connectionContext  DOCUMENT ME!
      */
-    public RasterfariDocumentLoaderPanel(final String rasterfariUrl,
-            final Listener listener,
-            final ConnectionContext connectionContext) {
+    public RasterfariDocumentLoaderPanel(
+        final String rasterfariUrl,
+        final Listener listener,
+        final ConnectionContext connectionContext
+    ) {
         this(rasterfariUrl, listener, INITIAL_BOUNDINGBOX, CRS, connectionContext);
     }
 
@@ -182,11 +202,13 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      * @param  crs                 DOCUMENT ME!
      * @param  connectionContext   DOCUMENT ME!
      */
-    public RasterfariDocumentLoaderPanel(final String rasterfariUrl,
-            final Listener listener,
-            final XBoundingBox initialBoundingBox,
-            final Crs crs,
-            final ConnectionContext connectionContext) {
+    public RasterfariDocumentLoaderPanel(
+        final String rasterfariUrl,
+        final Listener listener,
+        final XBoundingBox initialBoundingBox,
+        final Crs crs,
+        final ConnectionContext connectionContext
+    ) {
         this.rasterfariUrl = rasterfariUrl;
         this.listener = listener;
         this.crs = crs;
@@ -228,14 +250,14 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
     public void dispose() {
         // TODO:
         // this is a quick fix for the memory leak that some mapping components can not be garbage collected
-// panCenter.remove(map);
+        // panCenter.remove(map);
         if (map != null) {
             map.removeInputEventListener(mapListener);
             map.dispose();
         }
-//        map = null;
-        ((DefaultListModel)FEHLER_MODEL).removeAllElements();
-        ((DefaultListModel)MODEL_LOAD).removeAllElements();
+        //        map = null;
+        ((DefaultListModel) FEHLER_MODEL).removeAllElements();
+        ((DefaultListModel) MODEL_LOAD).removeAllElements();
     }
 
     /**
@@ -358,7 +380,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         if (map != null) {
             final FeatureCollection fc = map.getFeatureCollection();
             if (fc instanceof DefaultFeatureCollection) {
-                ((DefaultFeatureCollection)fc).clear();
+                ((DefaultFeatureCollection) fc).clear();
             } else {
                 fc.removeAllFeatures();
             }
@@ -373,8 +395,10 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         if (mainDocumentGeometry != null) {
             geometry = mainDocumentGeometry;
         } else {
-            geometry = getMap().getInitialBoundingBox()
-                        .getGeometry(CrsTransformer.extractSridFromCrs(getMap().getMappingModel().getSrs().getCode()));
+            geometry =
+                getMap()
+                    .getInitialBoundingBox()
+                    .getGeometry(CrsTransformer.extractSridFromCrs(getMap().getMappingModel().getSrs().getCode()));
         }
         getMap().gotoBoundingBoxWithHistory(new XBoundingBox(geometry.buffer(scale / 10)));
     }
@@ -428,75 +452,97 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
 
         lstPages.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         lstPages.setFixedCellWidth(75);
-        lstPages.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-
+        lstPages.addListSelectionListener(
+            new javax.swing.event.ListSelectionListener() {
                 @Override
                 public void valueChanged(final javax.swing.event.ListSelectionEvent evt) {
                     lstPagesValueChanged(evt);
                 }
-            });
+            }
+        );
         scpPages.setViewportView(lstPages);
 
-        togPan.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/pan.gif"))); // NOI18N
+        togPan.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/pan.gif"))
+        ); // NOI18N
         togPan.setSelected(true);
         org.openide.awt.Mnemonics.setLocalizedText(
             togPan,
             org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.togPan.text"));                             // NOI18N
-        togPan.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "RasterfariDocumentLoaderPanel.togPan.text"
+            )
+        ); // NOI18N
+        togPan.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.togPan.toolTipText"));                      // NOI18N
+                "RasterfariDocumentLoaderPanel.togPan.toolTipText"
+            )
+        ); // NOI18N
         togPan.setFocusPainted(false);
         togPan.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        togPan.addActionListener(new java.awt.event.ActionListener() {
-
+        togPan.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     togPanActionPerformed(evt);
                 }
-            });
+            }
+        );
 
-        togZoom.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/zoom.gif"))); // NOI18N
+        togZoom.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/zoom.gif"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             togZoom,
             org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.togZoom.text"));                             // NOI18N
-        togZoom.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "RasterfariDocumentLoaderPanel.togZoom.text"
+            )
+        ); // NOI18N
+        togZoom.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.togZoom.toolTipText"));                      // NOI18N
+                "RasterfariDocumentLoaderPanel.togZoom.toolTipText"
+            )
+        ); // NOI18N
         togZoom.setFocusPainted(false);
         togZoom.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        togZoom.addActionListener(new java.awt.event.ActionListener() {
-
+        togZoom.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     togZoomActionPerformed(evt);
                 }
-            });
+            }
+        );
 
-        btnHome.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/home.gif"))); // NOI18N
+        btnHome.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cids/custom/wunda_blau/res/home.gif"))
+        ); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(
             btnHome,
             org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.btnHome.text"));                             // NOI18N
-        btnHome.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "RasterfariDocumentLoaderPanel.btnHome.text"
+            )
+        ); // NOI18N
+        btnHome.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 RasterfariDocumentLoaderPanel.class,
-                "RasterfariDocumentLoaderPanel.btnHome.toolTipText"));                      // NOI18N
+                "RasterfariDocumentLoaderPanel.btnHome.toolTipText"
+            )
+        ); // NOI18N
         btnHome.setFocusPainted(false);
         btnHome.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        btnHome.addActionListener(new java.awt.event.ActionListener() {
-
+        btnHome.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnHomeActionPerformed(evt);
                 }
-            });
+            }
+        );
 
         setLayout(new java.awt.BorderLayout());
 
@@ -519,7 +565,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
             final Object page = lstPages.getSelectedValue();
 
             if (page instanceof Integer) {
-                loadPage(((Integer)page) - 1);
+                loadPage(((Integer) page) - 1);
             }
         }
     } //GEN-LAST:event_lstPagesValueChanged
@@ -535,18 +581,16 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         listener.showMeasureIsLoading();
         try {
             final MappingModel mm = map.getMappingModel();
-            final String template = MAP_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl)
-                        .replace("<rasterfari:scale>", Double.toString(scale))
-                        .replace("<rasterfari:offsetX>", Double.toString(offsetX))
-                        .replace("<rasterfari:offsetY>", Double.toString(offsetY))
-                        .replace(
-                            "<rasterfari:document>",
-                            currentDocument
-                            + ((lstPages.getModel().getSize() > 1) ? URLEncoder.encode(
-                                    "["
-                                    + currentPage
-                                    + "]",
-                                    "UTF-8") : ""));
+            final String template = MAP_TEMPLATE
+                .replace("<rasterfari:url>", rasterfariUrl)
+                .replace("<rasterfari:scale>", Double.toString(scale))
+                .replace("<rasterfari:offsetX>", Double.toString(offsetX))
+                .replace("<rasterfari:offsetY>", Double.toString(offsetY))
+                .replace(
+                    "<rasterfari:document>",
+                    currentDocument +
+                    ((lstPages.getModel().getSize() > 1) ? URLEncoder.encode("[" + currentPage + "]", "UTF-8") : "")
+                );
             mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 0, true, false, "prefetching_Lageplan"));
             mm.addLayer(new SimpleWMS(new SimpleWmsGetMapUrl(template), 1, true, false, "Lageplan"));
 
@@ -577,15 +621,16 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      */
     private void doScale(final double scalefactor) {
         setScale(scale * scalefactor);
-        final Geometry documentGeom = (Geometry)getMainDocumentGeometry().clone();
+        final Geometry documentGeom = (Geometry) getMainDocumentGeometry().clone();
         final Point oldCentroid = documentGeom.getCentroid();
         documentGeom.apply(AffineTransformation.scaleInstance(scalefactor, scalefactor));
         final Point newCentroid = documentGeom.getCentroid();
-        documentGeom.apply(AffineTransformation.translationInstance(
-                oldCentroid.getX()
-                        - newCentroid.getX(),
-                oldCentroid.getY()
-                        - newCentroid.getY()));
+        documentGeom.apply(
+            AffineTransformation.translationInstance(
+                oldCentroid.getX() - newCentroid.getX(),
+                oldCentroid.getY() - newCentroid.getY()
+            )
+        );
         setMainDocumentGeometry(documentGeom);
     }
 
@@ -654,9 +699,9 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      */
     public URL getDocumentUrl(final String document) {
         try {
-            return new URL(DOWNLOAD_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl).replace(
-                        "<rasterfari:document>",
-                        document));
+            return new URL(
+                DOWNLOAD_TEMPLATE.replace("<rasterfari:url>", rasterfariUrl).replace("<rasterfari:document>", document)
+            );
         } catch (final MalformedURLException ex) {
             LOG.error(ex, ex);
             return null;
@@ -670,7 +715,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      */
     private void togPanActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togPanActionPerformed
         actionPan();
-    }                                                                          //GEN-LAST:event_togPanActionPerformed
+    } //GEN-LAST:event_togPanActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -679,7 +724,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      */
     private void togZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togZoomActionPerformed
         actionZoom();
-    }                                                                           //GEN-LAST:event_togZoomActionPerformed
+    } //GEN-LAST:event_togZoomActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -688,7 +733,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      */
     private void btnHomeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnHomeActionPerformed
         showFullDocument();
-    }                                                                           //GEN-LAST:event_btnHomeActionPerformed
+    } //GEN-LAST:event_btnHomeActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -719,56 +764,53 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         listener.showMeasureIsLoading();
 
         new SwingWorker<Integer, Void>() {
-
-                @Override
-                protected Integer doInBackground() throws Exception {
-                    // We just want the header.
-                    final String template = MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED.replace(
-                                "<rasterfari:url>",
-                                rasterfariUrl)
-                                .replace("<cismap:boundingBox>", "-0.5,-0.5,0.5,0.5")
-                                .replace("<cismap:width>", "10")
-                                .replace("<cismap:height>", "10")
-                                .replace("<rasterfari:document>", currentDocument)
-                                .replace("<rasterfari:scale>", Double.toString(1d))
-                                .replace("<rasterfari:offsetX>", Double.toString(0d))
-                                .replace("<rasterfari:offsetY>", Double.toString(0d));
-                    final URL url = new URL(template);
-                    final InputStream is = WebAccessManager.getInstance()
-                                .doRequest(
-                                    url,
-                                    new StringReader(""),
-                                    AccessHandler.ACCESS_METHODS.HEAD_REQUEST);
-                    try(final ObjectInputStream ois = new ObjectInputStream(is)) {
-                        final Object object = ois.readObject();
-                        final Header[] headers = (Header[])object;
-                        for (final Header header : headers) {
-                            if ("X-Rasterfari-numOfPages".equals(header.getName())) {
-                                return Integer.parseInt(header.getValue());
-                            }
+            @Override
+            protected Integer doInBackground() throws Exception {
+                // We just want the header.
+                final String template = MAP_TEMPLATE_REBUILD_CACHE_IF_NEEDED
+                    .replace("<rasterfari:url>", rasterfariUrl)
+                    .replace("<cismap:boundingBox>", "-0.5,-0.5,0.5,0.5")
+                    .replace("<cismap:width>", "10")
+                    .replace("<cismap:height>", "10")
+                    .replace("<rasterfari:document>", currentDocument)
+                    .replace("<rasterfari:scale>", Double.toString(1d))
+                    .replace("<rasterfari:offsetX>", Double.toString(0d))
+                    .replace("<rasterfari:offsetY>", Double.toString(0d));
+                final URL url = new URL(template);
+                final InputStream is = WebAccessManager
+                    .getInstance()
+                    .doRequest(url, new StringReader(""), AccessHandler.ACCESS_METHODS.HEAD_REQUEST);
+                try (final ObjectInputStream ois = new ObjectInputStream(is)) {
+                    final Object object = ois.readObject();
+                    final Header[] headers = (Header[]) object;
+                    for (final Header header : headers) {
+                        if ("X-Rasterfari-numOfPages".equals(header.getName())) {
+                            return Integer.parseInt(header.getValue());
                         }
                     }
-                    return -1;
                 }
+                return -1;
+            }
 
-                @Override
-                protected void done() {
-                    try {
-                        final Integer pages = get();
-                        final DefaultListModel dlm = new DefaultListModel();
-                        for (int i = 0; i < pages; i++) {
-                            dlm.addElement(i + 1);
-                        }
-                        lstPages.setModel(dlm);
-                        lstPages.setEnabled(true);
-                        lstPages.setSelectedIndex(0);
-                    } catch (final Exception ex) {
-                        lstPages.setModel(FEHLER_MODEL);
-                        LOG.error(ex, ex);
-                        setCurrentPageNull();
+            @Override
+            protected void done() {
+                try {
+                    final Integer pages = get();
+                    final DefaultListModel dlm = new DefaultListModel();
+                    for (int i = 0; i < pages; i++) {
+                        dlm.addElement(i + 1);
                     }
+                    lstPages.setModel(dlm);
+                    lstPages.setEnabled(true);
+                    lstPages.setSelectedIndex(0);
+                } catch (final Exception ex) {
+                    lstPages.setModel(FEHLER_MODEL);
+                    LOG.error(ex, ex);
+                    setCurrentPageNull();
                 }
-            }.execute();
+            }
+        }
+            .execute();
     }
 
     /**
@@ -787,7 +829,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
         removeAllFeatures();
         getMap().setInteractionMode(MappingComponent.PAN);
         final MappingModel mm = getMap().getMappingModel();
-        for (final RetrievalServiceLayer rsl : (Collection<RetrievalServiceLayer>)mm.getRasterServices().values()) {
+        for (final RetrievalServiceLayer rsl : (Collection<RetrievalServiceLayer>) mm.getRasterServices().values()) {
             mm.removeLayer(rsl);
         }
     }
@@ -805,7 +847,6 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
      * @version  $Revision$, $Date$
      */
     public interface Listener {
-
         //~ Methods ------------------------------------------------------------
 
         /**

@@ -1,21 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import java.util.List;
-
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -24,7 +23,6 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
  * @version  $Revision$, $Date$
  */
 public interface AttributeTableFieldCalculation {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -37,10 +35,12 @@ public interface AttributeTableFieldCalculation {
      *
      * @return  true, if the calculation was started
      */
-    boolean openPanel(AttributeTable table,
-            AbstractFeatureService service,
-            FeatureServiceAttribute attribute,
-            final List<FeatureServiceFeature> featureList);
+    boolean openPanel(
+        AttributeTable table,
+        AbstractFeatureService service,
+        FeatureServiceAttribute attribute,
+        final List<FeatureServiceFeature> featureList
+    );
 
     /**
      * DOCUMENT ME!
@@ -53,9 +53,11 @@ public interface AttributeTableFieldCalculation {
      *
      * @return  DOCUMENT ME!
      */
-    boolean openPanel(final AttributeTable table,
-            final AbstractFeatureService service,
-            final FeatureServiceAttribute attribute,
-            final List<FeatureServiceFeature> featureList,
-            final List<FeatureServiceFeature> allFeaturesFromService);
+    boolean openPanel(
+        final AttributeTable table,
+        final AbstractFeatureService service,
+        final FeatureServiceAttribute attribute,
+        final List<FeatureServiceFeature> featureList,
+        final List<FeatureServiceFeature> allFeaturesFromService
+    );
 }

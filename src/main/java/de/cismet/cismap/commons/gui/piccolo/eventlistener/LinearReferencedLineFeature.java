@@ -1,33 +1,28 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.TopologyException;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
-
-import edu.umd.cs.piccolo.util.PDimension;
-
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.Stroke;
-
-import java.util.Collection;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import edu.umd.cs.piccolo.util.PDimension;
+import java.awt.Color;
+import java.awt.Paint;
+import java.awt.Stroke;
+import java.util.Collection;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 /**
  * DOCUMENT ME!
@@ -35,9 +30,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class LinearReferencedLineFeature extends DefaultStyledFeature implements DrawSelectionFeature,
-    XStyledFeature,
-    SelfManipulatingFeature {
+public class LinearReferencedLineFeature
+    extends DefaultStyledFeature
+    implements DrawSelectionFeature, XStyledFeature, SelfManipulatingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -46,9 +41,11 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     public static final boolean TO = false;
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            LinearReferencedLineFeature.class);
-    private static final ImageIcon ico = new javax.swing.ImageIcon(LinearReferencedLineFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/linRefPointIcon.png")); // NOI18N
+        LinearReferencedLineFeature.class
+    );
+    private static final ImageIcon ico = new javax.swing.ImageIcon(
+        LinearReferencedLineFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linRefPointIcon.png")
+    ); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -68,8 +65,10 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      * @param  fromFeature  DOCUMENT ME!
      * @param  toFeature    DOCUMENT ME!
      */
-    public LinearReferencedLineFeature(final LinearReferencedPointFeature fromFeature,
-            final LinearReferencedPointFeature toFeature) {
+    public LinearReferencedLineFeature(
+        final LinearReferencedPointFeature fromFeature,
+        final LinearReferencedPointFeature toFeature
+    ) {
         this.baseLineGeom = fromFeature.getLineGeometry();
 
         setLineWidth(4);
@@ -136,25 +135,27 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      * DOCUMENT ME!
      */
     private void initFeatureCollectionListener() {
-        featureCollectionListener = new FeatureCollectionAdapter() {
-
+        featureCollectionListener =
+            new FeatureCollectionAdapter() {
                 @Override
                 public void featureSelectionChanged(final FeatureCollectionEvent fce) {
                     final Collection<Feature> features = fce.getEventFeatures();
 
-                    final FeatureCollection collection = CismapBroker.getInstance()
-                                .getMappingComponent()
-                                .getFeatureCollection();
+                    final FeatureCollection collection = CismapBroker
+                        .getInstance()
+                        .getMappingComponent()
+                        .getFeatureCollection();
                     if (!featCollLock) {
                         featCollLock = true;
                         try {
                             boolean addFeaturesToCollection = false;
                             if (features != null) {
                                 for (final Feature feature : features) {
-                                    if (collection.isSelected(feature)
-                                                && (feature instanceof LinearReferencedLineFeature)
-                                                && (((LinearReferencedLineFeature)feature)
-                                                    == LinearReferencedLineFeature.this)) {
+                                    if (
+                                        collection.isSelected(feature) &&
+                                        (feature instanceof LinearReferencedLineFeature) &&
+                                        (((LinearReferencedLineFeature) feature) == LinearReferencedLineFeature.this)
+                                    ) {
                                         addFeaturesToCollection = true;
                                     }
                                 }
@@ -170,10 +171,11 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
                 }
             };
 
-        CismapBroker.getInstance()
-                .getMappingComponent()
-                .getFeatureCollection()
-                .addFeatureCollectionListener(featureCollectionListener);
+        CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .getFeatureCollection()
+            .addFeatureCollectionListener(featureCollectionListener);
     }
 
     /**
@@ -212,9 +214,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
                     }
                 }
 
-                sublineGeom = createSubline(from,
-                        to,
-                        baseLineGeom);
+                sublineGeom = createSubline(from, to, baseLineGeom);
             } else {
                 sublineGeom = fromFeature.getGeometry();
             }
@@ -320,8 +320,10 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void featureMerged(final LinearReferencedPointFeature mergePoint,
-                final LinearReferencedPointFeature withPoint) {
+        public void featureMerged(
+            final LinearReferencedPointFeature mergePoint,
+            final LinearReferencedPointFeature withPoint
+        ) {
             setPointFeature(withPoint, isFrom);
             updateGeometry();
         }

@@ -1,37 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
-
-import org.deegree.io.shpapi.FileHeader;
-
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
-
-import java.awt.Component;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
-import java.security.MessageDigest;
-
-import java.util.List;
-import java.util.StringTokenizer;
-
-import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
@@ -42,6 +20,21 @@ import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.LayerCollection;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.awt.Component;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.security.MessageDigest;
+import java.util.List;
+import java.util.StringTokenizer;
+import javax.swing.JOptionPane;
+import org.deegree.io.shpapi.FileHeader;
+import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -54,7 +47,8 @@ public class DocumentFeatureServiceFactory {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            DocumentFeatureServiceFactory.class);
+        DocumentFeatureServiceFactory.class
+    );
     public static final String XML_FILE_EXTENSION = ".xml";
     public static final String GML_FILE_EXTENSION = ".gml";
     public static final String SHP_FILE_EXTENSION = ".shp";
@@ -67,60 +61,60 @@ public class DocumentFeatureServiceFactory {
 
     //~ Methods ----------------------------------------------------------------
 
-// public static DocumentFeatureService createDocumentFeatureService(File documentFile) throws Exception {
-// if (documentFile != null) {
-// return createDocumentFeatureService(documentFile);
-// } else {
-// log.error("URI ist null es kann kein FeatureService angelegt werden");
-// throw new Exception("Pfad ist ungültig es kann kein FeatureService angelegt werden");
-// }
-// }
-//
-// public static DocumentFeatureService createDocumentFeatureService(Element element) throws Exception {
-//
-//
-// //File test = new File(new URI(layerConf.getChildText("documentURI").trim()));
-//
-// if (layerConf != null) {
-// return createDocumentFeatureService(element);
-// } else {
-// log.error("URI ist null es kann kein FeatureService angelegt werden");
-// throw new Exception("Pfad ist ungültig es kann kein FeatureService angelegt werden");
-// }
-// }
-// try {
-// if (test.getName().endsWith(XML_FILE_EXTENSION) || test.getName().endsWith(GML_FILE_EXTENSION)) {
-// log.debug("File extension ist xml/gml");
-// if (isGMLDocument(test)) {
-// return new GMLFeatureService(layerConf);
-// } else {
-// throw new FileExtensionContentMissmatchException("File extension ist xml/gml aber kein gültiges xml/gml Dokument");
-//                    }
-//                } else if (test.getPath().endsWith(SHP_FILE_EXTENSION)) {
-//                    log.debug("File extension ist shp");
-//                    if (isShapeFile(test)) {
-//                        return new ShapeFileFeatureService(layerConf);
-//                    } else {
-//                        throw new FileExtensionContentMissmatchException("File extension ist shp aber kein gültiges shp Dokument");
-//                    }
-//                } else {
-//                    throw new UnknownDocumentException("Endung des Dokumentes ist nicht bekannt");
-//                }
-//            } catch (Exception ex) {
-//                if (ex instanceof UnknownDocumentException || ex instanceof FileExtensionContentMissmatchException) {
-//                    log.error("Fehler beim erstellen eines DocumentFeaturelayers anhand eines Dokumentes --> versuche Inhalt automatisch zu bestimmen", ex);
-//                    if (isGMLDocument(test)) {
-//                        return new GMLFeatureService(layerConf);
-//                    } else if (isShapeFile(test)) {
-//                        return new ShapeFileFeatureService(layerConf);
-//                    } else {
-//                        throw new Exception("Inhalt des Dokumentes ist nicht bekannt und kann nicht verarbeitet werden");
-//                    }
-//                } else {
-//                    log.error("Fehler beim anlegen eines DocumentFeatureServices", ex);
-//                    throw ex;
-//                }
-//            }
+    // public static DocumentFeatureService createDocumentFeatureService(File documentFile) throws Exception {
+    // if (documentFile != null) {
+    // return createDocumentFeatureService(documentFile);
+    // } else {
+    // log.error("URI ist null es kann kein FeatureService angelegt werden");
+    // throw new Exception("Pfad ist ungültig es kann kein FeatureService angelegt werden");
+    // }
+    // }
+    //
+    // public static DocumentFeatureService createDocumentFeatureService(Element element) throws Exception {
+    //
+    //
+    // //File test = new File(new URI(layerConf.getChildText("documentURI").trim()));
+    //
+    // if (layerConf != null) {
+    // return createDocumentFeatureService(element);
+    // } else {
+    // log.error("URI ist null es kann kein FeatureService angelegt werden");
+    // throw new Exception("Pfad ist ungültig es kann kein FeatureService angelegt werden");
+    // }
+    // }
+    // try {
+    // if (test.getName().endsWith(XML_FILE_EXTENSION) || test.getName().endsWith(GML_FILE_EXTENSION)) {
+    // log.debug("File extension ist xml/gml");
+    // if (isGMLDocument(test)) {
+    // return new GMLFeatureService(layerConf);
+    // } else {
+    // throw new FileExtensionContentMissmatchException("File extension ist xml/gml aber kein gültiges xml/gml Dokument");
+    //                    }
+    //                } else if (test.getPath().endsWith(SHP_FILE_EXTENSION)) {
+    //                    log.debug("File extension ist shp");
+    //                    if (isShapeFile(test)) {
+    //                        return new ShapeFileFeatureService(layerConf);
+    //                    } else {
+    //                        throw new FileExtensionContentMissmatchException("File extension ist shp aber kein gültiges shp Dokument");
+    //                    }
+    //                } else {
+    //                    throw new UnknownDocumentException("Endung des Dokumentes ist nicht bekannt");
+    //                }
+    //            } catch (Exception ex) {
+    //                if (ex instanceof UnknownDocumentException || ex instanceof FileExtensionContentMissmatchException) {
+    //                    log.error("Fehler beim erstellen eines DocumentFeaturelayers anhand eines Dokumentes --> versuche Inhalt automatisch zu bestimmen", ex);
+    //                    if (isGMLDocument(test)) {
+    //                        return new GMLFeatureService(layerConf);
+    //                    } else if (isShapeFile(test)) {
+    //                        return new ShapeFileFeatureService(layerConf);
+    //                    } else {
+    //                        throw new Exception("Inhalt des Dokumentes ist nicht bekannt und kann nicht verarbeitet werden");
+    //                    }
+    //                } else {
+    //                    log.error("Fehler beim anlegen eines DocumentFeatureServices", ex);
+    //                    throw ex;
+    //                }
+    //            }
     /**
      * Creates a new DocumentFeatureService depending on the type of the delivered object.
      *
@@ -139,33 +133,45 @@ public class DocumentFeatureServiceFactory {
         final long documentSize = documentFile.length();
 
         try {
-            if (documentFile.getName().endsWith(XML_FILE_EXTENSION)
-                        || documentFile.getName().endsWith(GML_FILE_EXTENSION)) {
+            if (
+                documentFile.getName().endsWith(XML_FILE_EXTENSION) ||
+                documentFile.getName().endsWith(GML_FILE_EXTENSION)
+            ) {
                 if (log.isDebugEnabled()) {
                     log.debug("File extension ist xml/gml");
                 }
                 if (isGMLDocument(documentFile)) {
                     return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), documentSize, null);
-//          if (xmlConfig != null)
-//          {
-//            return new GMLFeatureService(xmlConfig);
-//          } else
-//          {
-//            return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), null);
-//          }
+                    //          if (xmlConfig != null)
+                    //          {
+                    //            return new GMLFeatureService(xmlConfig);
+                    //          } else
+                    //          {
+                    //            return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), null);
+                    //          }
                 } else {
                     throw new FileExtensionContentMissmatchException(
-                        "File extension ist xml/gml aber kein gültiges xml/gml Dokument");
+                        "File extension ist xml/gml aber kein gültiges xml/gml Dokument"
+                    );
                 }
-            } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)
-                        || documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
-                        || documentFile.getPath().endsWith(CSV_FILE_EXTENSION)) {
+            } else if (
+                documentFile.getPath().endsWith(SHP_FILE_EXTENSION) ||
+                documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION) ||
+                documentFile.getPath().endsWith(CSV_FILE_EXTENSION)
+            ) {
                 if (log.isDebugEnabled()) {
                     log.debug("File extension ist shp/dbf/csv");
                 }
-                if (((documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
-                                    || documentFile.getPath().endsWith(CSV_FILE_EXTENSION))
-                                && CismapBroker.getInstance().isUseInternalDb()) || isShapeFile(documentFile)) {
+                if (
+                    (
+                        (
+                            documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION) ||
+                            documentFile.getPath().endsWith(CSV_FILE_EXTENSION)
+                        ) &&
+                        CismapBroker.getInstance().isUseInternalDb()
+                    ) ||
+                    isShapeFile(documentFile)
+                ) {
                     // dbf and csv will only be supported, if the internal db is used
                     if (CismapBroker.getInstance().isUseInternalDb()) {
                         final String hexString = calcMd5FromFile(documentFile);
@@ -174,38 +180,45 @@ public class DocumentFeatureServiceFactory {
                         fileName = fileName.substring(0, fileName.lastIndexOf("."));
                         final String tableName = fileName + "_" + hexString;
                         if (H2FeatureService.tableAlreadyExists(tableName)) {
-                            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                            JOptionPane.showMessageDialog(
+                                CismapBroker.getInstance().getMappingComponent(),
                                 NbBundle.getMessage(
                                     DocumentFeatureServiceFactory.class,
-                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.message"),
+                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.message"
+                                ),
                                 NbBundle.getMessage(
                                     DocumentFeatureServiceFactory.class,
-                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.title"),
-                                JOptionPane.WARNING_MESSAGE);
+                                    "DocumentFeatureServiceFactory.createDocumentFeatureService.title"
+                                ),
+                                JOptionPane.WARNING_MESSAGE
+                            );
                         }
                         return new H2FeatureService(
-                                fileName,
-                                H2FeatureServiceFactory.DB_NAME,
-                                tableName,
-                                null,
-                                documentFile);
+                            fileName,
+                            H2FeatureServiceFactory.DB_NAME,
+                            tableName,
+                            null,
+                            documentFile
+                        );
                     } else {
-                        return new ShapeFileFeatureService(documentFile.getName(),
-                                documentFile.toURI(),
-                                documentSize,
-                                null);
+                        return new ShapeFileFeatureService(
+                            documentFile.getName(),
+                            documentFile.toURI(),
+                            documentSize,
+                            null
+                        );
                     }
-
-//          if (xmlConfig != null)
-//          {
-//            return new ShapeFileFeatureService(xmlConfig);
-//          } else
-//          {
-//            return new ShapeFileFeatureService(documentFile.getName(), documentFile.toURI(), null);
-//          }
+                    //          if (xmlConfig != null)
+                    //          {
+                    //            return new ShapeFileFeatureService(xmlConfig);
+                    //          } else
+                    //          {
+                    //            return new ShapeFileFeatureService(documentFile.getName(), documentFile.toURI(), null);
+                    //          }
                 } else {
                     throw new FileExtensionContentMissmatchException(
-                        "File extension ist shp aber kein gültiges shp Dokument");
+                        "File extension ist shp aber kein gültiges shp Dokument"
+                    );
                 }
             } else if (documentFile.getPath().toLowerCase().endsWith(DXF_FILE_EXTENSION)) {
                 final DxfReader reader = new DxfReader(documentFile.getPath());
@@ -224,14 +237,15 @@ public class DocumentFeatureServiceFactory {
                     final String serviceName = fileName + "_point";
                     final String tableName = folderName + "->" + fileName + "_point" + "_" + hexString;
                     final H2FeatureService service = new H2FeatureService(
-                            serviceName,
-                            H2FeatureServiceFactory.DB_NAME,
-                            tableName,
-                            attributes,
-                            null,
-                            pointFeatures,
-                            null,
-                            "dxf");
+                        serviceName,
+                        H2FeatureServiceFactory.DB_NAME,
+                        tableName,
+                        attributes,
+                        null,
+                        pointFeatures,
+                        null,
+                        "dxf"
+                    );
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -239,14 +253,15 @@ public class DocumentFeatureServiceFactory {
                     final String serviceName = fileName + "_linestring";
                     final String tableName = folderName + "->" + fileName + "_linestring" + "_" + hexString;
                     final H2FeatureService service = new H2FeatureService(
-                            serviceName,
-                            H2FeatureServiceFactory.DB_NAME,
-                            tableName,
-                            attributes,
-                            null,
-                            linestringFeatures,
-                            null,
-                            "dxf");
+                        serviceName,
+                        H2FeatureServiceFactory.DB_NAME,
+                        tableName,
+                        attributes,
+                        null,
+                        linestringFeatures,
+                        null,
+                        "dxf"
+                    );
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -254,14 +269,15 @@ public class DocumentFeatureServiceFactory {
                     final String serviceName = fileName + "_polygon";
                     final String tableName = folderName + "->" + fileName + "_polygon" + "_" + hexString;
                     final H2FeatureService service = new H2FeatureService(
-                            serviceName,
-                            H2FeatureServiceFactory.DB_NAME,
-                            tableName,
-                            attributes,
-                            null,
-                            polygonFeatures,
-                            null,
-                            "dxf");
+                        serviceName,
+                        H2FeatureServiceFactory.DB_NAME,
+                        tableName,
+                        attributes,
+                        null,
+                        polygonFeatures,
+                        null,
+                        "dxf"
+                    );
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -270,14 +286,15 @@ public class DocumentFeatureServiceFactory {
                     final String serviceName = fileName + "_annotation";
                     final String tableName = folderName + "->" + fileName + "_annotation" + "_" + hexString;
                     final H2FeatureService service = new H2FeatureService(
-                            serviceName,
-                            H2FeatureServiceFactory.DB_NAME,
-                            tableName,
-                            attributes,
-                            null,
-                            annotationFeatures,
-                            null,
-                            "dxf");
+                        serviceName,
+                        H2FeatureServiceFactory.DB_NAME,
+                        tableName,
+                        attributes,
+                        null,
+                        annotationFeatures,
+                        null,
+                        "dxf"
+                    );
                     service.initAndWait();
                     showService(service, folderName);
                 }
@@ -292,28 +309,31 @@ public class DocumentFeatureServiceFactory {
             if ((ex instanceof UnknownDocumentException) || (ex instanceof FileExtensionContentMissmatchException)) {
                 log.error(
                     "Fehler beim erstellen eines DocumentFeaturelayers anhand eines Dokumentes --> versuche Inhalt automatisch zu bestimmen",
-                    ex);
+                    ex
+                );
                 if (isGMLDocument(documentFile)) {
                     return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), documentSize, null);
-//          if (xmlConfig != null)
-//          {
-//            return new GMLFeatureService(xmlConfig);
-//          } else
-//          {
-//            return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), null);
-//          }
+                    //          if (xmlConfig != null)
+                    //          {
+                    //            return new GMLFeatureService(xmlConfig);
+                    //          } else
+                    //          {
+                    //            return new GMLFeatureService(documentFile.getName(), documentFile.toURI(), null);
+                    //          }
                 } else if (isShapeFile(documentFile)) {
-                    return new ShapeFileFeatureService(documentFile.getName(),
-                            documentFile.toURI(),
-                            documentSize,
-                            null);
-//          if (xmlConfig != null)
-//          {
-//            return new ShapeFileFeatureService(xmlConfig);
-//          } else
-//          {
-//            return new ShapeFileFeatureService(documentFile.getName(), documentFile.toURI(), null);
-//          }
+                    return new ShapeFileFeatureService(
+                        documentFile.getName(),
+                        documentFile.toURI(),
+                        documentSize,
+                        null
+                    );
+                    //          if (xmlConfig != null)
+                    //          {
+                    //            return new ShapeFileFeatureService(xmlConfig);
+                    //          } else
+                    //          {
+                    //            return new ShapeFileFeatureService(documentFile.getName(), documentFile.toURI(), null);
+                    //          }
                 } else {
                     throw new Exception("Inhalt des Dokumentes ist nicht bekannt und kann nicht verarbeitet werden");
                 }
@@ -367,8 +387,10 @@ public class DocumentFeatureServiceFactory {
      * @param  folder   DOCUMENT ME!
      */
     public static void showService(final H2FeatureService service, final String folder) {
-        final ActiveLayerModel model = (ActiveLayerModel)CismapBroker.getInstance().getMappingComponent()
-                    .getMappingModel();
+        final ActiveLayerModel model = (ActiveLayerModel) CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .getMappingModel();
         LayerCollection layerCollection = null;
 
         if (folder != null) {
@@ -384,8 +406,8 @@ public class DocumentFeatureServiceFactory {
                     for (int i = 0; i < layerCollection.size(); ++i) {
                         final Object tmp = layerCollection.get(i);
 
-                        if ((tmp instanceof LayerCollection) && ((LayerCollection)tmp).getName().equals(subFolder)) {
-                            layerCollection = (LayerCollection)tmp;
+                        if ((tmp instanceof LayerCollection) && ((LayerCollection) tmp).getName().equals(subFolder)) {
+                            layerCollection = (LayerCollection) tmp;
                             found = true;
                             break;
                         }
@@ -403,8 +425,8 @@ public class DocumentFeatureServiceFactory {
                     for (int i = 0; i < model.getChildCount(model.getRoot()); ++i) {
                         final Object tmp = model.getChild(model.getRoot(), i);
 
-                        if ((tmp instanceof LayerCollection) && ((LayerCollection)tmp).getName().equals(subFolder)) {
-                            layerCollection = (LayerCollection)tmp;
+                        if ((tmp instanceof LayerCollection) && ((LayerCollection) tmp).getName().equals(subFolder)) {
+                            layerCollection = (LayerCollection) tmp;
                             found = true;
                             break;
                         }

@@ -1,21 +1,26 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
+import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import edu.umd.cs.piccolo.PNode;
-
 import groovy.lang.GroovyShell;
-
+import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+import javax.swing.JOptionPane;
 import org.apache.log4j.Logger;
-
 import org.deegree.crs.components.Unit;
 import org.deegree.model.crs.CRSFactory;
 import org.deegree.model.crs.CRSTransformationException;
@@ -28,21 +33,7 @@ import org.deegree.model.spatialschema.GeometryFactory;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.model.spatialschema.Point;
 import org.deegree.ogcwebservices.wcts.data.GeometryData;
-
 import org.openide.util.NbBundle;
-
-import java.security.InvalidParameterException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
-
-import javax.swing.JOptionPane;
-
-import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -62,14 +53,12 @@ public class CrsTransformer {
         try {
             SHELL = new GroovyShell();
         } catch (Throwable th) {
-            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
-                NbBundle.getMessage(
-                    CrsTransformer.class,
-                    "CrsTransformer.static.message"),
-                NbBundle.getMessage(
-                    CrsTransformer.class,
-                    "CrsTransformer.static.title"),
-                JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(
+                CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(CrsTransformer.class, "CrsTransformer.static.message"),
+                NbBundle.getMessage(CrsTransformer.class, "CrsTransformer.static.title"),
+                JOptionPane.WARNING_MESSAGE
+            );
         }
         CRS_CORRECTION_FORMULA = new HashMap<>();
 
@@ -134,9 +123,8 @@ public class CrsTransformer {
      * @throws  CRSTransformationException  DOCUMENT ME!
      * @throws  IllegalArgumentException    DOCUMENT ME!
      */
-    public BoundingBox transformBoundingBox(final BoundingBox bbox, String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException {
+    public BoundingBox transformBoundingBox(final BoundingBox bbox, String sourceCrs)
+        throws UnknownCRSException, CRSTransformationException, IllegalArgumentException {
         if (isDefaultCrs(sourceCrs)) {
             sourceCrs = CismapBroker.getInstance().getDefaultCrs();
         }
@@ -144,30 +132,34 @@ public class CrsTransformer {
         Point minPoint = GeometryFactory.createPoint(bbox.getX1(), bbox.getY1(), coordSystem);
         Point maxPoint = GeometryFactory.createPoint(bbox.getX2(), bbox.getY2(), coordSystem);
 
-        if ((extractSridFromCrs(sourceCrs) == 3857)
-                    && ((extractSridFromCrs(destCrsAsString) == 31466)
-                        || (extractSridFromCrs(destCrsAsString) == 31467))) {
+        if (
+            (extractSridFromCrs(sourceCrs) == 3857) &&
+            ((extractSridFromCrs(destCrsAsString) == 31466) || (extractSridFromCrs(destCrsAsString) == 31467))
+        ) {
             // To transform a geometry from 3857 to 31466/31467, the geometry should be first transformed to an other
             // crs and then to 31466/31467. Otherwise, the transformation is not correct
             final GeoTransformer transformer4326 = new GeoTransformer("EPSG:4326");
-            minPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(minPoint);
-            maxPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(maxPoint);
+            minPoint = (org.deegree.model.spatialschema.Point) transformer4326.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point) transformer4326.transform(maxPoint);
 
-            minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
-            maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+            minPoint = (org.deegree.model.spatialschema.Point) transformer.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point) transformer.transform(maxPoint);
         } else {
-            minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
-            maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+            minPoint = (org.deegree.model.spatialschema.Point) transformer.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point) transformer.transform(maxPoint);
         }
         BoundingBox newBbox;
 
         if (bbox instanceof XBoundingBox) {
-            newBbox = new XBoundingBox(minPoint.getX(),
+            newBbox =
+                new XBoundingBox(
+                    minPoint.getX(),
                     minPoint.getY(),
                     maxPoint.getX(),
                     maxPoint.getY(),
                     crs.getIdentifier(),
-                    crs.getAxisUnits()[0].equals(Unit.METRE));
+                    crs.getAxisUnits()[0].equals(Unit.METRE)
+                );
         } else {
             newBbox = new BoundingBox(minPoint.getX(), minPoint.getY(), maxPoint.getX(), maxPoint.getY());
         }
@@ -186,10 +178,9 @@ public class CrsTransformer {
      * @throws  CRSTransformationException  DOCUMENT ME!
      * @throws  IllegalArgumentException    DOCUMENT ME!
      */
-    public XBoundingBox transformBoundingBox(final XBoundingBox bbox) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException {
-        return (XBoundingBox)transformBoundingBox(bbox, bbox.getSrs());
+    public XBoundingBox transformBoundingBox(final XBoundingBox bbox)
+        throws UnknownCRSException, CRSTransformationException, IllegalArgumentException {
+        return (XBoundingBox) transformBoundingBox(bbox, bbox.getSrs());
     }
 
     /**
@@ -208,14 +199,12 @@ public class CrsTransformer {
 
     //J-
     public <T extends com.vividsolutions.jts.geom.Geometry> T transformGeometry(final T geom, final String sourceCrs)
-            throws UnknownCRSException,
-            CRSTransformationException,
-            IllegalArgumentException,
-            GeometryException {
-        final com.vividsolutions.jts.geom.Geometry newGeom = (com.vividsolutions.jts.geom.Geometry)geom.clone();
+        throws UnknownCRSException, CRSTransformationException, IllegalArgumentException, GeometryException {
+        final com.vividsolutions.jts.geom.Geometry newGeom = (com.vividsolutions.jts.geom.Geometry) geom.clone();
 
-        return (T)fastTransformGeometry(newGeom, sourceCrs);
+        return (T) fastTransformGeometry(newGeom, sourceCrs);
     }
+
     //J+
 
     /**
@@ -233,11 +222,10 @@ public class CrsTransformer {
      */
 
     //J-
-    public <T extends com.vividsolutions.jts.geom.Geometry> T fastTransformGeometry(final T geom,
-            final String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException,
-        GeometryException {
+    public <T extends com.vividsolutions.jts.geom.Geometry> T fastTransformGeometry(
+        final T geom,
+        final String sourceCrs
+    ) throws UnknownCRSException, CRSTransformationException, IllegalArgumentException, GeometryException {
         final String srcCrs;
         if (isDefaultCrs(sourceCrs)) {
             srcCrs = CismapBroker.getInstance().getDefaultCrs();
@@ -245,8 +233,10 @@ public class CrsTransformer {
             srcCrs = sourceCrs;
         }
 
-
-        if (extractSridFromCrs(srcCrs) == 3857 && (extractSridFromCrs(destCrsAsString) == 31466 || extractSridFromCrs(destCrsAsString) == 31467)) {
+        if (
+            extractSridFromCrs(srcCrs) == 3857 &&
+            (extractSridFromCrs(destCrsAsString) == 31466 || extractSridFromCrs(destCrsAsString) == 31467)
+        ) {
             // To transform a geometry from 3857 to 31466/31467, the geometry should be first transformed to an other crs
             // and then to 31466/31467. Otherwise, the transformation is not correct
             T ret = transformToGivenCrs(geom, "EPSG:4326");
@@ -257,12 +247,13 @@ public class CrsTransformer {
             Geometry deegreeGeom = JTSAdapter.wrap(geom);
             deegreeGeom = transformer.transform(deegreeGeom, coordSystem.getCRS());
 
-            final T ret = (T)JTSAdapter.export(deegreeGeom);
+            final T ret = (T) JTSAdapter.export(deegreeGeom);
             setSrid(ret);
 
             return ret;
         }
     }
+
     //J+
 
     /**
@@ -279,11 +270,10 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      * @throws  GeometryException           DOCUMENT ME!
      */
-    public com.vividsolutions.jts.geom.Coordinate[] transformGeometry(final String sourceCrs,
-            final com.vividsolutions.jts.geom.Coordinate... coords) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException,
-        GeometryException {
+    public com.vividsolutions.jts.geom.Coordinate[] transformGeometry(
+        final String sourceCrs,
+        final com.vividsolutions.jts.geom.Coordinate... coords
+    ) throws UnknownCRSException, CRSTransformationException, IllegalArgumentException, GeometryException {
         final com.vividsolutions.jts.geom.GeometryFactory gfac = new com.vividsolutions.jts.geom.GeometryFactory();
         com.vividsolutions.jts.geom.Geometry geom;
 
@@ -317,14 +307,17 @@ public class CrsTransformer {
      * @param  oldWtst  DOCUMENT ME!
      * @param  newWtst  DOCUMENT ME!
      */
-    public static void transformPNodeToGivenCrs(final PNode node,
-            final String oldCrs,
-            final String newCrs,
-            final WorldToScreenTransform oldWtst,
-            final WorldToScreenTransform newWtst) {
+    public static void transformPNodeToGivenCrs(
+        final PNode node,
+        final String oldCrs,
+        final String newCrs,
+        final WorldToScreenTransform oldWtst,
+        final WorldToScreenTransform newWtst
+    ) {
         final com.vividsolutions.jts.geom.GeometryFactory fac = new com.vividsolutions.jts.geom.GeometryFactory(
-                new PrecisionModel(PrecisionModel.FLOATING),
-                extractSridFromCrs(oldCrs));
+            new PrecisionModel(PrecisionModel.FLOATING),
+            extractSridFromCrs(oldCrs)
+        );
         final double x = oldWtst.getWorldX(node.getXOffset());
         final double y = oldWtst.getWorldY(node.getYOffset());
         com.vividsolutions.jts.geom.Point p = fac.createPoint(new Coordinate(x, y));
@@ -352,7 +345,7 @@ public class CrsTransformer {
 
             return Integer.parseInt(crs.substring(crs.lastIndexOf(":") + 1)); // NOI18N
         } catch (final Exception e) {
-            LOG.error("Cannot extract the SRID from the CRS " + crs);         // NOI18N
+            LOG.error("Cannot extract the SRID from the CRS " + crs); // NOI18N
             return -1;
         }
     }
@@ -389,8 +382,7 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
-    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToCurrentCrs(
-            final T geom) {
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToCurrentCrs(final T geom) {
         final String currentSrs = CismapBroker.getInstance().getSrs().getCode();
 
         return transformToGivenCrs(geom, currentSrs);
@@ -405,8 +397,10 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the right CRS
      */
-    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToGivenCrs(final T geom,
-            final String crs) {
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToGivenCrs(
+        final T geom,
+        final String crs
+    ) {
         if (geom == null) {
             return null;
         }
@@ -451,22 +445,30 @@ public class CrsTransformer {
         if (!isDefaultCrs(curCrs)) {
             try {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("transform geometry from " + curCrs + " to " // NOI18N
-                                + CismapBroker.getInstance().getDefaultCrs());
+                    LOG.debug(
+                        "transform geometry from " +
+                        curCrs +
+                        " to " + // NOI18N
+                        CismapBroker.getInstance().getDefaultCrs()
+                    );
                 }
                 final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getDefaultCrs());
                 newGeom = transformer.transformGeometry(geom, curCrs);
             } catch (Exception e) {
-                LOG.error("Cannot transform the geometry from " + curCrs + " to " // NOI18N
-                            + CismapBroker.getInstance().getDefaultCrs(),
-                    e);
+                LOG.error(
+                    "Cannot transform the geometry from " +
+                    curCrs +
+                    " to " + // NOI18N
+                    CismapBroker.getInstance().getDefaultCrs(),
+                    e
+                );
                 newGeom = geom;
             }
         } else {
             newGeom = geom;
         }
 
-        return (T)newGeom;
+        return (T) newGeom;
     }
 
     /**
@@ -477,8 +479,7 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
-    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToMetricCrs(
-            final T geom) {
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToMetricCrs(final T geom) {
         if (geom == null) {
             return null;
         }
@@ -512,7 +513,7 @@ public class CrsTransformer {
             }
         }
 
-        return (T)newGeom;
+        return (T) newGeom;
     }
 
     /**
@@ -533,8 +534,7 @@ public class CrsTransformer {
             }
         }
 
-        if (metricCrs == null) {
-        }
+        if (metricCrs == null) {}
 
         return metricCrs;
     }
@@ -549,8 +549,9 @@ public class CrsTransformer {
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
     public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToMetricCrs(
-            final T geom,
-            final List<Crs> crsList) {
+        final T geom,
+        final List<Crs> crsList
+    ) {
         if (geom == null) {
             return null;
         }
@@ -583,7 +584,7 @@ public class CrsTransformer {
             }
         }
 
-        return (T)newGeom;
+        return (T) newGeom;
     }
 
     /**
@@ -594,9 +595,12 @@ public class CrsTransformer {
      * @return  DOCUMENT ME!
      */
     public static boolean isDefaultCrs(final String crs) {
-        if (crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias())
-                    || crs.endsWith(":0") || crs.endsWith(":-1") // NOI18N
-                    || crs.equals(CismapBroker.getInstance().getDefaultCrs())) {
+        if (
+            crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias()) ||
+            crs.endsWith(":0") ||
+            crs.endsWith(":-1") || // NOI18N
+            crs.equals(CismapBroker.getInstance().getDefaultCrs())
+        ) {
             return true;
         } else {
             return false;
@@ -634,11 +638,12 @@ public class CrsTransformer {
                 calculationRule = calculationRule.replace("long", String.valueOf(coord4326.getCoordinate().x));
                 calculationRule = calculationRule.replace("lat", String.valueOf(coord4326.getCoordinate().y));
             } else {
-                final com.vividsolutions.jts.geom.Point mapCentroid = CismapBroker.getInstance()
-                            .getMappingComponent()
-                            .getCurrentBoundingBoxFromCamera()
-                            .getGeometry(extractSridFromCrs(currentSrs))
-                            .getCentroid();
+                final com.vividsolutions.jts.geom.Point mapCentroid = CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getCurrentBoundingBoxFromCamera()
+                    .getGeometry(extractSridFromCrs(currentSrs))
+                    .getCentroid();
                 final com.vividsolutions.jts.geom.Point coord4326 = transformToGivenCrs(mapCentroid, "EPSG:4326");
 
                 calculationRule = calculationRule.replace("long", String.valueOf(coord4326.getCoordinate().x));
@@ -648,7 +653,7 @@ public class CrsTransformer {
             final Object o = SHELL.evaluate(calculationRule);
 
             if (o instanceof Number) {
-                return ((Number)o).doubleValue();
+                return ((Number) o).doubleValue();
             }
         }
 

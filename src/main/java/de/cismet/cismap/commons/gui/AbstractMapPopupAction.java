@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
 import com.vividsolutions.jts.geom.Point;
-
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 

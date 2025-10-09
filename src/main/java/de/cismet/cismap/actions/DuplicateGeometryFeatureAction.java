@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 thorsten
  *
@@ -32,33 +32,27 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-
-import java.util.List;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.CommonMultiAndSingleFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeaturesProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -67,9 +61,9 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = CommonFeatureAction.class)
-public class DuplicateGeometryFeatureAction extends AbstractAction implements CommonFeatureAction,
-    FeaturesProvider,
-    CommonMultiAndSingleFeatureAction {
+public class DuplicateGeometryFeatureAction
+    extends AbstractAction
+    implements CommonFeatureAction, FeaturesProvider, CommonMultiAndSingleFeatureAction {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -84,12 +78,16 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
      * Creates a new DuplicateGeometryFeatureAction object.
      */
     public DuplicateGeometryFeatureAction() {
-        super(NbBundle.getMessage(
+        super(
+            NbBundle.getMessage(
                 DuplicateGeometryFeatureAction.class,
-                "DuplicateGeometryFeatureAction.DuplicateGeometryFeatureAction()"));
+                "DuplicateGeometryFeatureAction.DuplicateGeometryFeatureAction()"
+            )
+        );
         super.putValue(
             Action.SMALL_ICON,
-            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raisePoly.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raisePoly.png"))
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -117,22 +115,23 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WaitDialog wd = new WaitDialog();
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     StaticSwingTools.showDialog(wd);
                 }
-            });
-        de.cismet.tools.CismetThreadPool.execute(new javax.swing.SwingWorker<Void, Void>() {
-
+            }
+        );
+        de.cismet.tools.CismetThreadPool.execute(
+            new javax.swing.SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     Thread.currentThread().setName("DuplicateGeometryFeatureAction");
 
                     if (featureList != null) {
                         for (final Feature feature : featureList) {
-                            final Geometry geom = (Geometry)feature.getGeometry().clone();
+                            final Geometry geom = (Geometry) feature.getGeometry().clone();
                             final PureNewFeature pnf = new PureNewFeature(geom);
 
                             if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
@@ -152,7 +151,7 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
                             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
                         }
                     } else {
-                        final Geometry geom = (Geometry)f.getGeometry().clone();
+                        final Geometry geom = (Geometry) f.getGeometry().clone();
                         final PureNewFeature pnf = new PureNewFeature(geom);
 
                         if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
@@ -179,7 +178,8 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
                     wd.setVisible(false);
                     wd.dispose();
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -201,7 +201,9 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
             NbBundle.getMessage(
                 DuplicateGeometryFeatureAction.class,
                 "DuplicateGeometryFeatureAction.DuplicateGeometriesFeatureAction()",
-                new Object[] { sourceList.size() }));
+                new Object[] { sourceList.size() }
+            )
+        );
     }
 
     @Override
@@ -214,6 +216,7 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
         return true;
     }
 }
+
 /**
  * DOCUMENT ME!
  *
@@ -229,9 +232,12 @@ class WaitDialog extends JDialog {
     public WaitDialog() {
         super(StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()), true);
         setLayout(new FlowLayout());
-        getContentPane().add(new JLabel(
-                new javax.swing.ImageIcon(
-                    getClass().getResource("/de/cismet/cismap/actions/raiseProgress.png"))));
+        getContentPane()
+            .add(
+                new JLabel(
+                    new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/raiseProgress.png"))
+                )
+            );
         final JProgressBar prb = new JProgressBar();
         prb.setForeground(new Color(51, 153, 204));
         prb.setBorderPainted(false);

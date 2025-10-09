@@ -1,21 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import java.awt.Color;
-import java.awt.Font;
-
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import java.awt.Color;
+import java.awt.Font;
 
 /**
  * The Style interface provides miscellaneous constants that are needed by different style-oriented classes. It extends
@@ -25,38 +24,37 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  * @version  $Revision$, $Date$
  */
 public interface Style extends ConvertableToXML, Comparable, Cloneable {
-
     //~ Instance fields --------------------------------------------------------
 
     // JDOM-elementconstants
     // TODO: use english String constants instead of "Keins", "Punkt" and so on
     String STYLE_ELEMENT = "StyleHistoryElement"; // NOI18N
-    String FILL = "Fill";                         // NOI18N
-    String LINE = "Line";                         // NOI18N
-    String LABEL = "Label";                       // NOI18N
-    String POINTSYMBOL = "Pointsymbol";           // NOI18N
-    String NO_POINTSYMBOL = "Keins";              // NOI18N
-    String AUTO_POINTSYMBOL = "Punkt";            // NOI18N
+    String FILL = "Fill"; // NOI18N
+    String LINE = "Line"; // NOI18N
+    String LABEL = "Label"; // NOI18N
+    String POINTSYMBOL = "Pointsymbol"; // NOI18N
+    String NO_POINTSYMBOL = "Keins"; // NOI18N
+    String AUTO_POINTSYMBOL = "Punkt"; // NOI18N
     int MIN_POINTSYMBOLSIZE = 5;
     int MAX_POINTSYMBOLSIZE = 50;
 
     // JDOM-attributes
-    String NAME = "name";             // NOI18N
-    String PAINT = "paint";           // NOI18N
-    String COLOR = "color";           // NOI18N
-    String HALO = "halo";             // NOI18N
-    String WIDTH = "width";           // NOI18N
-    String ALPHA = "alpha";           // NOI18N
-    String HIGHLIGHT = "highlight";   // NOI18N
-    String SIZE = "size";             // NOI18N
-    String FAMILY = "family";         // NOI18N
-    String STYLE = "style";           // NOI18N
-    String ATTRIBUTE = "attribute";   // NOI18N
-    String ALIGNMENT = "alignment";   // NOI18N
-    String MIN_SCALE = "minscale";    // NOI18N
-    String MAX_SCALE = "maxscale";    // NOI18N
+    String NAME = "name"; // NOI18N
+    String PAINT = "paint"; // NOI18N
+    String COLOR = "color"; // NOI18N
+    String HALO = "halo"; // NOI18N
+    String WIDTH = "width"; // NOI18N
+    String ALPHA = "alpha"; // NOI18N
+    String HIGHLIGHT = "highlight"; // NOI18N
+    String SIZE = "size"; // NOI18N
+    String FAMILY = "family"; // NOI18N
+    String STYLE = "style"; // NOI18N
+    String ATTRIBUTE = "attribute"; // NOI18N
+    String ALIGNMENT = "alignment"; // NOI18N
+    String MIN_SCALE = "minscale"; // NOI18N
+    String MAX_SCALE = "maxscale"; // NOI18N
     String MULTIPLIER = "multiplier"; // NOI18N
-    String AUTOSCALE = "autoscale";   // NOI18N
+    String AUTOSCALE = "autoscale"; // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 
@@ -160,6 +158,7 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
      * @return  DOCUMENT ME!
      */
     FeatureAnnotationSymbol getPointSymbol();
+
     /**
      * DOCUMENT ME!
      *
@@ -167,6 +166,7 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
      */
     @Deprecated
     void setPointSymbol(FeatureAnnotationSymbol pointSymbol);
+
     /**
      * DOCUMENT ME!
      *

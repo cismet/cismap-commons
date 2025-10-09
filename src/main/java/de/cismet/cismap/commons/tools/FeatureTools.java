@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,24 +12,16 @@
 package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.datatypes.Types;
-
-import org.openide.util.NbBundle;
-
-import java.math.BigDecimal;
-
-import java.sql.Timestamp;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
-import java.util.Date;
-
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Date;
+import org.apache.log4j.Logger;
+import org.deegree.datatypes.Types;
+import org.openide.util.NbBundle;
 
 /**
  * Some useful method for features.
@@ -63,33 +55,39 @@ public class FeatureTools {
     public static Class<?> getClass(final FeatureServiceAttribute attr) {
         if (attr.isGeometry()) {
             return String.class;
-        } else if (attr.getType().equals(String.valueOf(Types.CHAR))
-                    || attr.getType().equals(String.valueOf(Types.VARCHAR))
-                    || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.CHAR)) ||
+            attr.getType().equals(String.valueOf(Types.VARCHAR)) ||
+            attr.getType().equals(String.valueOf(Types.LONGVARCHAR))
+        ) {
             return String.class;
-        } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                    || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                    || attr.getType().equals(String.valueOf(Types.TINYINT))
-                    || attr.getType().equals("xsd:integer")) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.INTEGER)) ||
+            attr.getType().equals(String.valueOf(Types.SMALLINT)) ||
+            attr.getType().equals(String.valueOf(Types.TINYINT)) ||
+            attr.getType().equals("xsd:integer")
+        ) {
             return Integer.class;
-        } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
-                    || attr.getType().equals("xsd:long")) {
+        } else if (attr.getType().equals(String.valueOf(Types.BIGINT)) || attr.getType().equals("xsd:long")) {
             return Long.class;
-        } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
-                    || attr.getType().equals(String.valueOf(Types.FLOAT))
-                    || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                    || attr.getType().equals("xsd:float")
-                    || attr.getType().equals("xsd:decimal")
-                    || attr.getType().equals("xsd:double")) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.DOUBLE)) ||
+            attr.getType().equals(String.valueOf(Types.FLOAT)) ||
+            attr.getType().equals(String.valueOf(Types.DECIMAL)) ||
+            attr.getType().equals("xsd:float") ||
+            attr.getType().equals("xsd:decimal") ||
+            attr.getType().equals("xsd:double")
+        ) {
             return Double.class;
         } else if (attr.getType().equals(String.valueOf(Types.NUMERIC))) {
             return BigDecimal.class;
-        } else if (attr.getType().equals(String.valueOf(Types.DATE))
-                    || attr.getType().equals(String.valueOf(Types.TIME))
-                    || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.DATE)) ||
+            attr.getType().equals(String.valueOf(Types.TIME)) ||
+            attr.getType().equals(String.valueOf(Types.TIMESTAMP))
+        ) {
             return Date.class;
-        } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
-                    || attr.getType().equals("xsd:boolean")) {
+        } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN)) || attr.getType().equals("xsd:boolean")) {
             return Boolean.class;
         } else {
             return String.class;
@@ -112,8 +110,12 @@ public class FeatureTools {
             return String.valueOf(Types.INTEGER);
         } else if (cl.getName().endsWith("Long") || cl.getName().equals("long")) {
             return String.valueOf(Types.BIGINT);
-        } else if (cl.getName().endsWith("Double") || cl.getName().equals("double") || cl.getName().endsWith("Float")
-                    || cl.getName().equals("float")) {
+        } else if (
+            cl.getName().endsWith("Double") ||
+            cl.getName().equals("double") ||
+            cl.getName().endsWith("Float") ||
+            cl.getName().equals("float")
+        ) {
             return String.valueOf(Types.DOUBLE);
         } else if (cl.getName().endsWith("Date")) {
             return String.valueOf(Types.DATE);
@@ -138,33 +140,39 @@ public class FeatureTools {
     public static String getH2DataType(final FeatureServiceAttribute attr) {
         if (attr.isGeometry()) {
             return "Geometry";
-        } else if (attr.getType().equals(String.valueOf(Types.CHAR))
-                    || attr.getType().equals(String.valueOf(Types.VARCHAR))
-                    || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.CHAR)) ||
+            attr.getType().equals(String.valueOf(Types.VARCHAR)) ||
+            attr.getType().equals(String.valueOf(Types.LONGVARCHAR))
+        ) {
             return "VARCHAR";
-        } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                    || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                    || attr.getType().equals(String.valueOf(Types.TINYINT))
-                    || attr.getType().equals("xsd:integer")) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.INTEGER)) ||
+            attr.getType().equals(String.valueOf(Types.SMALLINT)) ||
+            attr.getType().equals(String.valueOf(Types.TINYINT)) ||
+            attr.getType().equals("xsd:integer")
+        ) {
             return "Integer";
-        } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
-                    || attr.getType().equals("xsd:long")) {
+        } else if (attr.getType().equals(String.valueOf(Types.BIGINT)) || attr.getType().equals("xsd:long")) {
             return "BIGINT";
-        } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
-                    || attr.getType().equals(String.valueOf(Types.FLOAT))
-                    || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                    || attr.getType().equals("xsd:float")
-                    || attr.getType().equals("xsd:decimal")
-                    || attr.getType().equals("xsd:double")) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.DOUBLE)) ||
+            attr.getType().equals(String.valueOf(Types.FLOAT)) ||
+            attr.getType().equals(String.valueOf(Types.DECIMAL)) ||
+            attr.getType().equals("xsd:float") ||
+            attr.getType().equals("xsd:decimal") ||
+            attr.getType().equals("xsd:double")
+        ) {
             return "Double";
-        } else if (attr.getType().equals(String.valueOf(Types.DATE))
-                    || attr.getType().equals(String.valueOf(Types.TIME))
-                    || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
+        } else if (
+            attr.getType().equals(String.valueOf(Types.DATE)) ||
+            attr.getType().equals(String.valueOf(Types.TIME)) ||
+            attr.getType().equals(String.valueOf(Types.TIMESTAMP))
+        ) {
             return "Timestamp";
         } else if (attr.getType().equals(String.valueOf(Types.NUMERIC))) {
             return "NUMERIC";
-        } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
-                    || attr.getType().equals("xsd:boolean")) {
+        } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN)) || attr.getType().equals("xsd:boolean")) {
             return "Boolean";
         } else if (attr.getType().equalsIgnoreCase("geometry")) {
             return "Geometry";
@@ -227,11 +235,14 @@ public class FeatureTools {
             }
         } catch (Exception e) {
             LOG.error("Wrong data type: " + objectAsString + " expected type: " + cl.toString(), e);
-            throw new Exception(NbBundle.getMessage(
+            throw new Exception(
+                NbBundle.getMessage(
                     FeatureTools.class,
                     "FeatureTools.convertObjectToClass.message",
                     objectAsString,
-                    cl.getName()));
+                    cl.getName()
+                )
+            );
         }
     }
 
@@ -246,15 +257,15 @@ public class FeatureTools {
         final String jtsGeomType = geom.getGeometryType();
 
         // JTS v1.12 strings
-        if ("Polygon".equals(jtsGeomType)) {             // NOI18N
+        if ("Polygon".equals(jtsGeomType)) { // NOI18N
             if (geom.isRectangle()) {
                 return AbstractNewFeature.geomTypes.RECTANGLE;
             } else {
                 return AbstractNewFeature.geomTypes.POLYGON;
             }
-        } else if ("Point".equals(jtsGeomType)) {        // NOI18N
+        } else if ("Point".equals(jtsGeomType)) { // NOI18N
             return AbstractNewFeature.geomTypes.POINT;
-        } else if ("LineString".equals(jtsGeomType)) {   // NOI18N
+        } else if ("LineString".equals(jtsGeomType)) { // NOI18N
             return AbstractNewFeature.geomTypes.LINESTRING;
         } else if ("MultiPolygon".equals(jtsGeomType)) { // NOI18N
             return AbstractNewFeature.geomTypes.MULTIPOLYGON;

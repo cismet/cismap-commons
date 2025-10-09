@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * CustomAction.java
  *
@@ -25,7 +25,6 @@ import de.cismet.cismap.commons.features.Feature;
  * @version  $Revision$, $Date$
  */
 public interface CustomAction {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

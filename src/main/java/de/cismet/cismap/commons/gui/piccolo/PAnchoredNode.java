@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 /**
@@ -20,6 +20,5 @@ public class PAnchoredNode {
     /**
      * Creates a new instance of PAnchoredNode.
      */
-    public PAnchoredNode() {
-    }
+    public PAnchoredNode() {}
 }

@@ -1,34 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable.creator;
 
+import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
+import static de.cismet.cismap.commons.gui.attributetable.creator.AbstractFeatureCreator.fillFeatureWithDefaultValues;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
-import java.awt.Cursor;
-import java.awt.EventQueue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JOptionPane;
-
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -38,14 +25,18 @@ import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.math.geometry.StaticGeometryFunctions;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
-
-import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
-import static de.cismet.cismap.commons.gui.attributetable.creator.AbstractFeatureCreator.fillFeatureWithDefaultValues;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.Cursor;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JOptionPane;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * Creates new features, which use primitive geometry types.
@@ -156,122 +147,139 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     }
 
     @Override
-    public void createFeature(final MappingComponent mc,
-            final FeatureServiceFeature feature) {
+    public void createFeature(final MappingComponent mc, final FeatureServiceFeature feature) {
         this.mc = mc;
         if ((feature != null) && (feature.getLayerProperties() != null)) {
             service = feature.getLayerProperties().getFeatureService();
         }
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final String oldInteractionMode = mc.getInteractionMode();
 
                     final CreaterGeometryListener listener = new CreaterGeometryListener(
-                            mc,
-                            new GeometryFinishedListener() {
+                        mc,
+                        new GeometryFinishedListener() {
+                            @Override
+                            public void geometryFinished(final Geometry g) {
+                                final WaitingDialogThread wdt = new WaitingDialogThread(
+                                    StaticSwingTools.getParentFrame(mc),
+                                    true,
+                                    "Erstelle Objekt",
+                                    null,
+                                    1000
+                                ) {
+                                    @Override
+                                    protected Object doInBackground() throws Exception {
+                                        Geometry geom = g;
 
-                                @Override
-                                public void geometryFinished(final Geometry g) {
-                                    final WaitingDialogThread wdt = new WaitingDialogThread(
-                                            StaticSwingTools.getParentFrame(mc),
-                                            true,
-                                            "Erstelle Objekt",
-                                            null,
-                                            1000) {
-
-                                            @Override
-                                            protected Object doInBackground() throws Exception {
-                                                Geometry geom = g;
-
-                                                if (mode.equals(CreateGeometryListenerInterface.LINESTRING)
-                                                            && geom.getGeometryType().equals("Point")) {
-                                                    geom = g.getFactory()
-                                                                    .createLineString(
-                                                                            new Coordinate[] {
-                                                                                g.getCoordinate(),
-                                                                                new Coordinate(
-                                                                                    g.getCoordinate().x
-                                                                                    + 1,
-                                                                                    g.getCoordinate().y
-                                                                                    + 1)
-                                                                            });
-                                                }
-
-                                                if (multi) {
-                                                    geom = StaticGeometryFunctions.toMultiGeometry(geom);
-                                                } else {
-                                                    geom = StaticGeometryFunctions.toSimpleGeometry(geom);
-                                                }
-
-                                                if ((minArea != 0.0)
-                                                            && mode.equals(CreateGeometryListenerInterface.POLYGON)
-                                                            && (geom.getArea() < minArea)) {
-                                                    JOptionPane.showMessageDialog(
-                                                        CismapBroker.getInstance().getMappingComponent(),
-                                                        NbBundle.getMessage(
-                                                            PrimitiveGeometryCreator.class,
-                                                            "PrimitiveGeometryCreator.createFeature().tooSmall.message",
-                                                            new Object[] { minArea }),
-                                                        NbBundle.getMessage(
-                                                            PrimitiveGeometryCreator.class,
-                                                            "PrimitiveGeometryCreator.createFeature().tooSmall.title"),
-                                                        JOptionPane.WARNING_MESSAGE);
-                                                    return null;
-                                                }
-                                                if ((minLength != 0.0)
-                                                            && mode.equals(CreateGeometryListenerInterface.LINESTRING)
-                                                            && (geom.getLength() < minLength)) {
-                                                    JOptionPane.showMessageDialog(
-                                                        CismapBroker.getInstance().getMappingComponent(),
-                                                        NbBundle.getMessage(
-                                                            PrimitiveGeometryCreator.class,
-                                                            "PrimitiveGeometryCreator.createFeature().tooShort.message",
-                                                            new Object[] { minLength }),
-                                                        NbBundle.getMessage(
-                                                            PrimitiveGeometryCreator.class,
-                                                            "PrimitiveGeometryCreator.createFeature().tooShort.title"),
-                                                        JOptionPane.WARNING_MESSAGE);
-                                                    return null;
-                                                }
-                                                feature.setGeometry(geom);
-                                                // mc.setInteractionMode(oldInteractionMode);
-
-                                                if (feature instanceof DefaultFeatureServiceFeature) {
-                                                    try {
-                                                        fillFeatureWithDefaultValues(
-                                                            (DefaultFeatureServiceFeature)feature,
-                                                            properties);
-                                                        ((DefaultFeatureServiceFeature)feature).saveChanges();
-                                                        fillFeatureWithDefaultValuesAfterSave(
-                                                            (DefaultFeatureServiceFeature)feature,
-                                                            properties);
-
-                                                        for (final FeatureCreatedListener featureCreatedListener
-                                                                    : PrimitiveGeometryCreator.this.listener) {
-                                                            featureCreatedListener.featureCreated(
-                                                                new FeatureCreatedEvent(
-                                                                    PrimitiveGeometryCreator.this,
-                                                                    feature));
+                                        if (
+                                            mode.equals(CreateGeometryListenerInterface.LINESTRING) &&
+                                            geom.getGeometryType().equals("Point")
+                                        ) {
+                                            geom =
+                                                g
+                                                    .getFactory()
+                                                    .createLineString(
+                                                        new Coordinate[] {
+                                                            g.getCoordinate(),
+                                                            new Coordinate(
+                                                                g.getCoordinate().x + 1,
+                                                                g.getCoordinate().y + 1
+                                                            ),
                                                         }
-                                                    } catch (Exception e) {
-                                                        LOG.error("Cannot save new feature", e);
-                                                    }
+                                                    );
+                                        }
+
+                                        if (multi) {
+                                            geom = StaticGeometryFunctions.toMultiGeometry(geom);
+                                        } else {
+                                            geom = StaticGeometryFunctions.toSimpleGeometry(geom);
+                                        }
+
+                                        if (
+                                            (minArea != 0.0) &&
+                                            mode.equals(CreateGeometryListenerInterface.POLYGON) &&
+                                            (geom.getArea() < minArea)
+                                        ) {
+                                            JOptionPane.showMessageDialog(
+                                                CismapBroker.getInstance().getMappingComponent(),
+                                                NbBundle.getMessage(
+                                                    PrimitiveGeometryCreator.class,
+                                                    "PrimitiveGeometryCreator.createFeature().tooSmall.message",
+                                                    new Object[] { minArea }
+                                                ),
+                                                NbBundle.getMessage(
+                                                    PrimitiveGeometryCreator.class,
+                                                    "PrimitiveGeometryCreator.createFeature().tooSmall.title"
+                                                ),
+                                                JOptionPane.WARNING_MESSAGE
+                                            );
+                                            return null;
+                                        }
+                                        if (
+                                            (minLength != 0.0) &&
+                                            mode.equals(CreateGeometryListenerInterface.LINESTRING) &&
+                                            (geom.getLength() < minLength)
+                                        ) {
+                                            JOptionPane.showMessageDialog(
+                                                CismapBroker.getInstance().getMappingComponent(),
+                                                NbBundle.getMessage(
+                                                    PrimitiveGeometryCreator.class,
+                                                    "PrimitiveGeometryCreator.createFeature().tooShort.message",
+                                                    new Object[] { minLength }
+                                                ),
+                                                NbBundle.getMessage(
+                                                    PrimitiveGeometryCreator.class,
+                                                    "PrimitiveGeometryCreator.createFeature().tooShort.title"
+                                                ),
+                                                JOptionPane.WARNING_MESSAGE
+                                            );
+                                            return null;
+                                        }
+                                        feature.setGeometry(geom);
+                                        // mc.setInteractionMode(oldInteractionMode);
+
+                                        if (feature instanceof DefaultFeatureServiceFeature) {
+                                            try {
+                                                fillFeatureWithDefaultValues(
+                                                    (DefaultFeatureServiceFeature) feature,
+                                                    properties
+                                                );
+                                                ((DefaultFeatureServiceFeature) feature).saveChanges();
+                                                fillFeatureWithDefaultValuesAfterSave(
+                                                    (DefaultFeatureServiceFeature) feature,
+                                                    properties
+                                                );
+
+                                                for (final FeatureCreatedListener featureCreatedListener : PrimitiveGeometryCreator.this.listener) {
+                                                    featureCreatedListener.featureCreated(
+                                                        new FeatureCreatedEvent(PrimitiveGeometryCreator.this, feature)
+                                                    );
                                                 }
-
-                                                return null;
+                                            } catch (Exception e) {
+                                                LOG.error("Cannot save new feature", e);
                                             }
-                                        };
+                                        }
 
-                                    wdt.start();
-                                }
-                            });
+                                        return null;
+                                    }
+                                };
 
-                    if ((CismapBroker.getInstance() != null)
-                                && (CismapBroker.getInstance().getMappingComponent() != null)) {
-                        final CreateNewGeometryListener result = (CreateNewGeometryListener)CismapBroker
-                                    .getInstance().getMappingComponent().getInputListener(MappingComponent.NEW_POLYGON);
+                                wdt.start();
+                            }
+                        }
+                    );
+
+                    if (
+                        (CismapBroker.getInstance() != null) &&
+                        (CismapBroker.getInstance().getMappingComponent() != null)
+                    ) {
+                        final CreateNewGeometryListener result = (CreateNewGeometryListener) CismapBroker
+                            .getInstance()
+                            .getMappingComponent()
+                            .getInputListener(MappingComponent.NEW_POLYGON);
                         listener.setShowCurrentLength(result.isShowCurrentLength());
                     }
                     geometryListener = listener;
@@ -280,7 +288,8 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
                     listener.setMode(mode);
                     mc.setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
                 }
-            });
+            }
+        );
     }
 
     @Override
@@ -292,22 +301,26 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
     public String getTypeName() {
         if (mode.equals(CreateGeometryListenerInterface.LINESTRING)) {
             return NbBundle.getMessage(
-                    PrimitiveGeometryCreator.class,
-                    "PrimitiveGeometryCreator.getTypeName().linestring");
+                PrimitiveGeometryCreator.class,
+                "PrimitiveGeometryCreator.getTypeName().linestring"
+            );
         } else if (mode.equals(CreateGeometryListenerInterface.POLYGON)) {
             return NbBundle.getMessage(
-                    PrimitiveGeometryCreator.class,
-                    "PrimitiveGeometryCreator.getTypeName().polygon");
+                PrimitiveGeometryCreator.class,
+                "PrimitiveGeometryCreator.getTypeName().polygon"
+            );
         } else if (mode.equals(CreateGeometryListenerInterface.POINT)) {
             return NbBundle.getMessage(PrimitiveGeometryCreator.class, "PrimitiveGeometryCreator.getTypeName().point");
         } else if (mode.equals(CreateGeometryListenerInterface.RECTANGLE)) {
             return NbBundle.getMessage(
-                    PrimitiveGeometryCreator.class,
-                    "PrimitiveGeometryCreator.getTypeName().rectangle");
+                PrimitiveGeometryCreator.class,
+                "PrimitiveGeometryCreator.getTypeName().rectangle"
+            );
         } else if (mode.equals(CreateGeometryListenerInterface.ELLIPSE)) {
             return NbBundle.getMessage(
-                    PrimitiveGeometryCreator.class,
-                    "PrimitiveGeometryCreator.getTypeName().ellipse");
+                PrimitiveGeometryCreator.class,
+                "PrimitiveGeometryCreator.getTypeName().ellipse"
+            );
         } else {
             return NbBundle.getMessage(PrimitiveGeometryCreator.class, "PrimitiveGeometryCreator.getTypeName().other");
         }
@@ -333,20 +346,21 @@ public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     @Override
     public void cancel() {
-//        if ((mc != null) && !activateResume) {
-//            if (mc.getTmpFeatureLayer().getChildrenCount() == 1) {
-//                tmpFeature = mc.getTmpFeatureLayer().getChild(0);
-//            }
-//            mc.getTmpFeatureLayer().removeAllChildren();
-//        }
+        //        if ((mc != null) && !activateResume) {
+        //            if (mc.getTmpFeatureLayer().getChildrenCount() == 1) {
+        //                tmpFeature = mc.getTmpFeatureLayer().getChild(0);
+        //            }
+        //            mc.getTmpFeatureLayer().removeAllChildren();
+        //        }
     }
 
     @Override
     public void resume() {
         CismapBroker.getInstance().getMappingComponent().setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
         if (mc != null) {
-            final CreateNewGeometryListener result = (CreateNewGeometryListener)mc.getInputListener(
-                    MappingComponent.NEW_POLYGON);
+            final CreateNewGeometryListener result = (CreateNewGeometryListener) mc.getInputListener(
+                MappingComponent.NEW_POLYGON
+            );
 
             if (geometryListener != null) {
                 geometryListener.setShowCurrentLength(result.isShowCurrentLength());

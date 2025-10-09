@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -22,7 +22,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
  * @version  $Revision$, $Date$
  */
 public interface FeatureCreator {
-
     //~ Instance fields --------------------------------------------------------
 
     String SIMPLE_GEOMETRY_LISTENER_KEY = "SimpleGeometryCreater";

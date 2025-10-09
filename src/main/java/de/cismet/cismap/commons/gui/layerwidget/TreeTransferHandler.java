@@ -1,33 +1,29 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import org.apache.log4j.Logger;
-
+import de.cismet.cismap.commons.rasterservice.MapService;
 import java.awt.EventQueue;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
-
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.rasterservice.MapService;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -54,9 +50,11 @@ public class TreeTransferHandler extends TransferHandler {
      */
     public TreeTransferHandler() {
         try {
-            final String mimeType = DataFlavor.javaJVMLocalObjectMimeType
-                        + ";class=\"" + javax.swing.tree.TreePath[].class.getName()
-                        + "\"";
+            final String mimeType =
+                DataFlavor.javaJVMLocalObjectMimeType +
+                ";class=\"" +
+                javax.swing.tree.TreePath[].class.getName() +
+                "\"";
             nodesFlavor = new DataFlavor(mimeType);
             flavors[0] = nodesFlavor;
         } catch (ClassNotFoundException e) {
@@ -72,8 +70,8 @@ public class TreeTransferHandler extends TransferHandler {
             return false;
         }
         support.setShowDropLocation(true);
-        final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
-        final JTree tree = (JTree)support.getComponent();
+        final JTree.DropLocation dl = (JTree.DropLocation) support.getDropLocation();
+        final JTree tree = (JTree) support.getComponent();
         final int dropRow = tree.getRowForPath(dl.getPath());
         final Object targetNode = ((dl.getPath() != null) ? dl.getPath().getLastPathComponent() : null);
 
@@ -125,7 +123,7 @@ public class TreeTransferHandler extends TransferHandler {
 
     @Override
     protected Transferable createTransferable(final JComponent c) {
-        final JTree tree = (JTree)c;
+        final JTree tree = (JTree) c;
         final TreePath[] paths = tree.getSelectionPaths();
         if (paths != null) {
             // Make up a node array for transfer and
@@ -163,20 +161,20 @@ public class TreeTransferHandler extends TransferHandler {
     @Override
     protected void exportDone(final JComponent source, final Transferable data, final int action) {
         if ((action & MOVE) == MOVE) {
-//            final JTree tree = (JTree)source;
-//            final ActiveLayerModel model = (ActiveLayerModel)tree.getModel();
-//            // Remove nodes saved in nodesToRemove in createTransferable.
-//            for (int i = 0; i < nodesToRemove.size(); i++) {
-//                final Object parent = nodesToRemove.get(i).getParentPath().getLastPathComponent();
-//
-//                if (parent.equals(model.getRoot())) {
-//                    model.removeLayer(nodesToRemove.get(i));
-//                } else if (parent instanceof LayerCollection) {
-//                    ((LayerCollection)parent).remove(nodesToRemove.get(i).getLastPathComponent());
-//                }
-//            }
-//
-//            model.fireTreeStructureChanged(this, new Object[] { model.getRoot() }, null, null);
+            //            final JTree tree = (JTree)source;
+            //            final ActiveLayerModel model = (ActiveLayerModel)tree.getModel();
+            //            // Remove nodes saved in nodesToRemove in createTransferable.
+            //            for (int i = 0; i < nodesToRemove.size(); i++) {
+            //                final Object parent = nodesToRemove.get(i).getParentPath().getLastPathComponent();
+            //
+            //                if (parent.equals(model.getRoot())) {
+            //                    model.removeLayer(nodesToRemove.get(i));
+            //                } else if (parent instanceof LayerCollection) {
+            //                    ((LayerCollection)parent).remove(nodesToRemove.get(i).getLastPathComponent());
+            //                }
+            //            }
+            //
+            //            model.fireTreeStructureChanged(this, new Object[] { model.getRoot() }, null, null);
         }
     }
 
@@ -192,15 +190,16 @@ public class TreeTransferHandler extends TransferHandler {
         }
 
         // Get drop location info.
-        final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
+        final JTree.DropLocation dl = (JTree.DropLocation) support.getDropLocation();
         final int childIndex = dl.getChildIndex();
         final TreePath dest = dl.getPath();
         final Object parent = ((dest != null) ? dest.getLastPathComponent() : null);
-        final JTree tree = (JTree)support.getComponent();
-        final ActiveLayerModel model = (ActiveLayerModel)((ActiveLayerModelWrapperWithoutProgress)tree.getModel())
-                    .getModel();
+        final JTree tree = (JTree) support.getComponent();
+        final ActiveLayerModel model = (ActiveLayerModel) (
+            (ActiveLayerModelWrapperWithoutProgress) tree.getModel()
+        ).getModel();
         // Configure for drop mode.
-        int index = childIndex;                       // DropMode.INSERT
+        int index = childIndex; // DropMode.INSERT
         if ((childIndex == -1) && (parent != null)) { // DropMode.ON
             index = model.getChildCount(parent);
         }
@@ -210,7 +209,7 @@ public class TreeTransferHandler extends TransferHandler {
             TreePath[] nodes = null;
             try {
                 final Transferable t = support.getTransferable();
-                nodes = (TreePath[])t.getTransferData(nodesFlavor);
+                nodes = (TreePath[]) t.getTransferData(nodesFlavor);
             } catch (UnsupportedFlavorException ufe) {
                 System.out.println("UnsupportedFlavor: " + ufe.getMessage());
             } catch (java.io.IOException ioe) {
@@ -229,7 +228,7 @@ public class TreeTransferHandler extends TransferHandler {
                         }
                     }
                 } else if (parentPath.getLastPathComponent() instanceof LayerCollection) {
-                    final LayerCollection parentCollection = (LayerCollection)parentPath.getLastPathComponent();
+                    final LayerCollection parentCollection = (LayerCollection) parentPath.getLastPathComponent();
                     if (parentCollection.indexOf(layer) > -1) {
                         if (parentCollection.indexOf(layer) < index) {
                             --index;
@@ -283,10 +282,12 @@ public class TreeTransferHandler extends TransferHandler {
      *
      * @return  DOCUMENT ME!
      */
-    private boolean dropPerformed(final TransferHandler.TransferSupport support,
-            final ActiveLayerModel activeLayerModel,
-            final int index,
-            final JComponent parent) {
+    private boolean dropPerformed(
+        final TransferHandler.TransferSupport support,
+        final ActiveLayerModel activeLayerModel,
+        final int index,
+        final JComponent parent
+    ) {
         return LayerDropUtils.drop(support, activeLayerModel, index, parent);
     }
 

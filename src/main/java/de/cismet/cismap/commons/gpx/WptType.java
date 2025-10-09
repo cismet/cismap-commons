@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -16,10 +16,8 @@ package de.cismet.cismap.commons.gpx;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -72,34 +70,36 @@ import javax.xml.datatype.XMLGregorianCalendar;
 @XmlType(
     name = "wptType",
     propOrder = {
-            "ele",
-            "time",
-            "magvar",
-            "geoidheight",
-            "name",
-            "cmt",
-            "desc",
-            "src",
-            "link",
-            "sym",
-            "type",
-            "fix",
-            "sat",
-            "hdop",
-            "vdop",
-            "pdop",
-            "ageofdgpsdata",
-            "dgpsid",
-            "extensions"
-        }
+        "ele",
+        "time",
+        "magvar",
+        "geoidheight",
+        "name",
+        "cmt",
+        "desc",
+        "src",
+        "link",
+        "sym",
+        "type",
+        "fix",
+        "sat",
+        "hdop",
+        "vdop",
+        "pdop",
+        "ageofdgpsdata",
+        "dgpsid",
+        "extensions",
+    }
 )
 public class WptType {
 
     //~ Instance fields --------------------------------------------------------
 
     protected BigDecimal ele;
+
     @XmlSchemaType(name = "dateTime")
     protected XMLGregorianCalendar time;
+
     protected BigDecimal magvar;
     protected BigDecimal geoidheight;
     protected String name;
@@ -110,24 +110,24 @@ public class WptType {
     protected String sym;
     protected String type;
     protected String fix;
+
     @XmlSchemaType(name = "nonNegativeInteger")
     protected BigInteger sat;
+
     protected BigDecimal hdop;
     protected BigDecimal vdop;
     protected BigDecimal pdop;
     protected BigDecimal ageofdgpsdata;
+
     @XmlSchemaType(name = "integer")
     protected Integer dgpsid;
+
     protected ExtensionsType extensions;
-    @XmlAttribute(
-        name = "lat",
-        required = true
-    )
+
+    @XmlAttribute(name = "lat", required = true)
     protected BigDecimal lat;
-    @XmlAttribute(
-        name = "lon",
-        required = true
-    )
+
+    @XmlAttribute(name = "lon", required = true)
     protected BigDecimal lon;
 
     //~ Methods ----------------------------------------------------------------

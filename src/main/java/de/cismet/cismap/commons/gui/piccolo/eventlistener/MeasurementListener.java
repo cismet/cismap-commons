@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -14,21 +14,17 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
-import java.util.Vector;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.awt.Color;
+import java.awt.geom.Point2D;
+import java.util.Vector;
 
 /**
  * DOCUMENT ME!
@@ -71,31 +67,26 @@ public class MeasurementListener extends PBasicInputEventHandler {
 
         if (inProgress) {
             final Point2D point = mc.isSnappingEnabled()
-                ? PFeatureTools.getNearestPointInArea(
-                            mc,
-                            pInputEvent.getCanvasPosition(),
-                            true,
-                            null).getPoint() : pInputEvent.getPosition();
+                ? PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition(), true, null).getPoint()
+                : pInputEvent.getPosition();
             updatePolygon(point);
         }
     }
-//    public void mousePressed(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-//        mouseClicked(pInputEvent);
-//    }
-//    public void mouseDragged(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-//         mouseMoved(pInputEvent);
-//    }
+
+    //    public void mousePressed(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    //        mouseClicked(pInputEvent);
+    //    }
+    //    public void mouseDragged(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    //         mouseMoved(pInputEvent);
+    //    }
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
         if (pInputEvent.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht finden
             if (pInputEvent.getClickCount() == 1) {
                 final Point2D point = mc.isSnappingEnabled()
-                    ? PFeatureTools.getNearestPointInArea(
-                                mc,
-                                pInputEvent.getCanvasPosition(),
-                                true,
-                                null).getPoint() : pInputEvent.getPosition();
+                    ? PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition(), true, null).getPoint()
+                    : pInputEvent.getPosition();
                 if (!inProgress) {
                     // Polygon erzeugen
                     tempFeature = new PPath();
@@ -140,18 +131,23 @@ public class MeasurementListener extends PBasicInputEventHandler {
         final float[] xp = new float[canvasPoints.length];
         final float[] yp = new float[canvasPoints.length];
         for (int i = 0; i < canvasPoints.length; ++i) {
-            xp[i] = (float)(canvasPoints[i].getX());
-            yp[i] = (float)(canvasPoints[i].getY());
-            coordArr[i] = new Coordinate(mc.getWtst().getSourceX(xp[i] - mc.getClip_offset_x()),
-                    mc.getWtst().getSourceY(yp[i] - mc.getClip_offset_y()));
+            xp[i] = (float) (canvasPoints[i].getX());
+            yp[i] = (float) (canvasPoints[i].getY());
+            coordArr[i] =
+                new Coordinate(
+                    mc.getWtst().getSourceX(xp[i] - mc.getClip_offset_x()),
+                    mc.getWtst().getSourceY(yp[i] - mc.getClip_offset_y())
+                );
         }
         final CoordinateSequence cs = new PackedCoordinateSequenceFactory().create(coordArr);
         final LineString ls = new LineString(
-                cs,
-                new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), CrsTransformer.getCurrentSrid()));
+            cs,
+            new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), CrsTransformer.getCurrentSrid())
+        );
         final Geometry geom = CrsTransformer.transformToMetricCrs(
-                ls,
-                CismapBroker.getInstance().getMappingComponent().getCrsList());
+            ls,
+            CismapBroker.getInstance().getMappingComponent().getCrsList()
+        );
         final double l = geom.getLength();
         return l;
     }
@@ -197,7 +193,7 @@ public class MeasurementListener extends PBasicInputEventHandler {
         }
         final Point2D[] p = new Point2D[points.size() + plus];
         for (int i = 0; i < points.size(); ++i) {
-            p[i] = (Point2D)(points.get(i));
+            p[i] = (Point2D) (points.get(i));
         }
         if (movin) {
             p[points.size()] = lastPoint;

@@ -1,21 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.linearreferencing.tools;
 
-import java.util.List;
-
-import javax.swing.table.TableCellEditor;
-
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
+import java.util.List;
+import javax.swing.table.TableCellEditor;
 
 /**
  * DOCUMENT ME!
@@ -24,7 +22,6 @@ import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
  * @version  $Revision$, $Date$
  */
 public interface StationTableCellEditorInterface extends TableCellEditor {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

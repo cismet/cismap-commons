@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -18,35 +18,28 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import org.apache.batik.ext.awt.image.codec.tiff.TIFFImage;
-import org.apache.log4j.Logger;
-
-import org.deegree.io.geotiff.GeoTiffReader;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.georeferencing.PointCoordinatePair;
+import org.apache.batik.ext.awt.image.codec.tiff.TIFFImage;
+import org.apache.log4j.Logger;
+import org.deegree.io.geotiff.GeoTiffReader;
 
 /**
  * DOCUMENT ME!
@@ -81,10 +74,11 @@ public class ImageFileUtils {
      * @version  $Revision$, $Date$
      */
     public enum Mode {
-
         //~ Enum constants -----------------------------------------------------
 
-        WORLDFILE, TIFF, GEO_REFERENCED
+        WORLDFILE,
+        TIFF,
+        GEO_REFERENCED,
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -187,8 +181,7 @@ public class ImageFileUtils {
         if (imageFile.getName().toLowerCase().endsWith("tif")) {
             try {
                 return Mode.TIFF;
-            } catch (final Exception ex) {
-            }
+            } catch (final Exception ex) {}
         }
         return (md != null) ? Mode.TIFF : Mode.GEO_REFERENCED;
     }
@@ -247,8 +240,10 @@ public class ImageFileUtils {
                         final String[] parts = line.substring(1).split(";|,");
                         if (parts.length == 4) {
                             final Point point = new Point(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
-                            final Coordinate coordinate = new Coordinate(Double.parseDouble(parts[2]),
-                                    Double.parseDouble(parts[3]));
+                            final Coordinate coordinate = new Coordinate(
+                                Double.parseDouble(parts[2]),
+                                Double.parseDouble(parts[3])
+                            );
                             pairs.add(new PointCoordinatePair(point, coordinate));
                         }
                     }
@@ -267,37 +262,42 @@ public class ImageFileUtils {
 
             if (index == matrix.length) {
                 final AffineTransformation transform = new AffineTransformation(
-                        matrix[0],
-                        matrix[2],
-                        matrix[4],
-                        matrix[1],
-                        matrix[3],
-                        matrix[5]);
+                    matrix[0],
+                    matrix[2],
+                    matrix[4],
+                    matrix[1],
+                    matrix[3],
+                    matrix[5]
+                );
 
                 final Dimension imageDimension = ImageFileUtils.getImageDimension(imageFile);
                 final double imageWidth = imageDimension.getWidth();
                 final double imageHeight = imageDimension.getHeight();
-                final Rectangle imageBounds = new Rectangle(0, 0, (int)imageWidth, (int)imageHeight);
+                final Rectangle imageBounds = new Rectangle(0, 0, (int) imageWidth, (int) imageHeight);
 
                 final GeometryFactory factory = new GeometryFactory(
-                        new PrecisionModel(),
-                        CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                    new PrecisionModel(),
+                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode())
+                );
                 final LinearRing linear = factory.createLinearRing(
-                        new Coordinate[] {
-                            new Coordinate(0, 0),
-                            new Coordinate(imageWidth, 0),
-                            new Coordinate(imageWidth, imageHeight),
-                            new Coordinate(0, imageHeight),
-                            new Coordinate(0, 0)
-                        });
+                    new Coordinate[] {
+                        new Coordinate(0, 0),
+                        new Coordinate(imageWidth, 0),
+                        new Coordinate(imageWidth, imageHeight),
+                        new Coordinate(0, imageHeight),
+                        new Coordinate(0, 0),
+                    }
+                );
 
-                final Envelope imageEnvelope = transform.transform(factory.createPolygon(linear, null))
-                            .getEnvelopeInternal();
+                final Envelope imageEnvelope = transform
+                    .transform(factory.createPolygon(linear, null))
+                    .getEnvelopeInternal();
                 final ImageFileMetaData metaData = new ImageFileMetaData(
-                        imageBounds,
-                        imageEnvelope,
-                        transform,
-                        (isRasterGeoReof) ? pairs.toArray(new PointCoordinatePair[0]) : null);
+                    imageBounds,
+                    imageEnvelope,
+                    transform,
+                    (isRasterGeoReof) ? pairs.toArray(new PointCoordinatePair[0]) : null
+                );
                 return metaData;
             }
         } catch (Exception e) {
@@ -320,8 +320,9 @@ public class ImageFileUtils {
         final int pos = imgFile.getName().lastIndexOf(".");
 
         if (pos == -1) {
-            throw new IOException("The file " + imgFile.getAbsolutePath()
-                        + " has not extension, so no reader can be found.");
+            throw new IOException(
+                "The file " + imgFile.getAbsolutePath() + " has not extension, so no reader can be found."
+            );
         }
 
         final String fileSuffix = imgFile.getName().substring(pos + 1);

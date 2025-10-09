@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * Created 27.10.2005 15:33:24 by nash
  *
@@ -17,21 +17,17 @@
 package de.preagro.jts2gmldom;
 
 import com.vividsolutions.jts.geom.*;
-
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-
-import java.util.Locale;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * <p>Class for creating DOM Elements containing valid GML representations of JTS geometries</p>
@@ -127,34 +123,43 @@ public class Jts2GmlDOM {
         final int geomType = GeomTypes.classifyGeometry(theGeom);
         // then do the handling
         switch (geomType) {
-            case GeomTypes.POINT: {
-                return pointToGmlElement((Point)theGeom);
-            }
-            case GeomTypes.LINESTRING: {
-                return lineStringToGmlElement((LineString)theGeom);
-            }
-            case GeomTypes.LINEARRING: {
-                return linearRingToGmlElement((LinearRing)theGeom);
-            }
-            case GeomTypes.POLYGON: {
-                return polygonToGmlElement((Polygon)theGeom);
-            }
-            case GeomTypes.GEOMETRYCOLLECTION: {
-                return geometryCollectionToGmlElement((GeometryCollection)theGeom);
-            }
-            case GeomTypes.MULTIPOINT: {
-                return multiPointToGmlElement((MultiPoint)theGeom);
-            }
-            case GeomTypes.MULTILINESTRING: {
-                return multiLineStringToGmlElement((MultiLineString)theGeom);
-            }
-            case GeomTypes.MULTIPOLYGON: {
-                return multiPolygonToGmlElement((MultiPolygon)theGeom);
-            }
+            case GeomTypes.POINT:
+                {
+                    return pointToGmlElement((Point) theGeom);
+                }
+            case GeomTypes.LINESTRING:
+                {
+                    return lineStringToGmlElement((LineString) theGeom);
+                }
+            case GeomTypes.LINEARRING:
+                {
+                    return linearRingToGmlElement((LinearRing) theGeom);
+                }
+            case GeomTypes.POLYGON:
+                {
+                    return polygonToGmlElement((Polygon) theGeom);
+                }
+            case GeomTypes.GEOMETRYCOLLECTION:
+                {
+                    return geometryCollectionToGmlElement((GeometryCollection) theGeom);
+                }
+            case GeomTypes.MULTIPOINT:
+                {
+                    return multiPointToGmlElement((MultiPoint) theGeom);
+                }
+            case GeomTypes.MULTILINESTRING:
+                {
+                    return multiLineStringToGmlElement((MultiLineString) theGeom);
+                }
+            case GeomTypes.MULTIPOLYGON:
+                {
+                    return multiPolygonToGmlElement((MultiPolygon) theGeom);
+                }
             case GeomTypes.UNKNOWN:
-            default: {
-                return null;
-            }
+            default:
+                {
+                    return null;
+                }
         }
     }
 
@@ -222,11 +227,15 @@ public class Jts2GmlDOM {
         // also need to sort out separators and so on for the lists based on
         // locale)
         final DecimalFormat formatter = new DecimalFormat(
-                EIGHT_DP_NUMBER_FORMAT,
-                new DecimalFormatSymbols(Locale.ENGLISH));
-        return (formatter.format(theCoord.x) + separator
-                        + formatter.format(theCoord.y)
-                        + (Double.isNaN(theCoord.z) ? "" : (separator + formatter.format(theCoord.z))));
+            EIGHT_DP_NUMBER_FORMAT,
+            new DecimalFormatSymbols(Locale.ENGLISH)
+        );
+        return (
+            formatter.format(theCoord.x) +
+            separator +
+            formatter.format(theCoord.y) +
+            (Double.isNaN(theCoord.z) ? "" : (separator + formatter.format(theCoord.z)))
+        );
     }
 
     /**
@@ -237,8 +246,7 @@ public class Jts2GmlDOM {
      * @return  DOCUMENT ME!
      */
     protected String getFormattedCoordList(final Coordinate[] theCoords) {
-        return getFormattedCoordList(theCoords, DEFAULT_TUPLE_SEPARATOR,
-                DEFAULT_LIST_SEPARATOR);
+        return getFormattedCoordList(theCoords, DEFAULT_TUPLE_SEPARATOR, DEFAULT_LIST_SEPARATOR);
     }
 
     /**
@@ -250,8 +258,7 @@ public class Jts2GmlDOM {
      * @return  DOCUMENT ME!
      */
     protected String getFormattedCoordList(final Coordinate[] theCoords, final String tupleSeparator) {
-        return getFormattedCoordList(theCoords, tupleSeparator,
-                DEFAULT_LIST_SEPARATOR);
+        return getFormattedCoordList(theCoords, tupleSeparator, DEFAULT_LIST_SEPARATOR);
     }
 
     /**
@@ -263,13 +270,14 @@ public class Jts2GmlDOM {
      *
      * @return  DOCUMENT ME!
      */
-    protected String getFormattedCoordList(final Coordinate[] theCoords,
-            final String tupleSeparator,
-            final String listSeparator) {
+    protected String getFormattedCoordList(
+        final Coordinate[] theCoords,
+        final String tupleSeparator,
+        final String listSeparator
+    ) {
         String coordList = EMPTY_STRING;
         for (int i = 0; i < theCoords.length; i++) {
-            coordList += ((i > 0) ? listSeparator : EMPTY_STRING)
-                        + getFormattedCoord(theCoords[i], tupleSeparator);
+            coordList += ((i > 0) ? listSeparator : EMPTY_STRING) + getFormattedCoord(theCoords[i], tupleSeparator);
         }
         return coordList;
     }
@@ -286,8 +294,7 @@ public class Jts2GmlDOM {
     public Element pointToGmlElement(final Point thePoint) throws DOMException {
         final Element pointElement = createElement(POINT);
         final Element posElement = createElement(POS);
-        addTextToElement(posElement,
-            getFormattedCoord(thePoint.getCoordinate()));
+        addTextToElement(posElement, getFormattedCoord(thePoint.getCoordinate()));
         pointElement.appendChild(posElement);
         return pointElement;
     }
@@ -329,7 +336,7 @@ public class Jts2GmlDOM {
      * @throws  DOMException  DOCUMENT ME!
      */
     protected Element linearThingToGmlElement(final LineString theLinearThing, final String elementName)
-            throws DOMException {
+        throws DOMException {
         final Element lineStringElement = createElement(elementName);
         final Element posListElement = createElement(POSLIST);
         addTextToElement(posListElement, getFormattedCoordList(theLinearThing.getCoordinates()));
@@ -419,9 +426,11 @@ public class Jts2GmlDOM {
      *
      * @throws  DOMException  DOCUMENT ME!
      */
-    protected Element collectionToGmlElement(final GeometryCollection theGeoms,
-            final String elementName,
-            final String associationName) throws DOMException {
+    protected Element collectionToGmlElement(
+        final GeometryCollection theGeoms,
+        final String elementName,
+        final String associationName
+    ) throws DOMException {
         final Element collectionElement = createElement(elementName);
         final int numGeoms = theGeoms.getNumGeometries();
         for (int i = 0; i < numGeoms; i++) {

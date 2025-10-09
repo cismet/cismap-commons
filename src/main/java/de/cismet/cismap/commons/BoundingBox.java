@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -14,12 +14,9 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
 import edu.umd.cs.piccolo.util.PBounds;
-
+import java.io.Serializable;
 import org.apache.log4j.Logger;
-
-
 //import org.deegree.gml.GMLGeometry;
 //import org.deegree.model.geometry.GM_Envelope;
 //import org.deegree.model.geometry.GM_Exception;
@@ -27,8 +24,6 @@ import org.apache.log4j.Logger;
 //import org.deegree_impl.model.geometry.GMLAdapter;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
-
-import java.io.Serializable;
 
 /**
  * Class to store a simple BoundingBox.
@@ -51,27 +46,26 @@ public class BoundingBox implements Cloneable, Serializable {
 
     //~ Constructors -----------------------------------------------------------
 
-// the classes GM_Object and GM_Envelope are not contained in the new cismetDeegree jar
-// public BoundingBox(GMLGeometry geom) {
-// try {
-// GM_Object gmo=GMLAdapter.wrap(geom);
-// GM_Envelope gme=gmo.getEnvelope();
-// setX1(gme.getMin().getX());
-// setX2(gme.getMax().getX());
-// setY1(gme.getMin().getY());
-// setY2(gme.getMax().getY());
-// }
-//
-// catch (GM_Exception gmEx) {
-// log.error("Error during creating BoundingBox from GML",gmEx);//NOI18N
-// }
-// }
+    // the classes GM_Object and GM_Envelope are not contained in the new cismetDeegree jar
+    // public BoundingBox(GMLGeometry geom) {
+    // try {
+    // GM_Object gmo=GMLAdapter.wrap(geom);
+    // GM_Envelope gme=gmo.getEnvelope();
+    // setX1(gme.getMin().getX());
+    // setX2(gme.getMax().getX());
+    // setY1(gme.getMin().getY());
+    // setY2(gme.getMax().getY());
+    // }
+    //
+    // catch (GM_Exception gmEx) {
+    // log.error("Error during creating BoundingBox from GML",gmEx);//NOI18N
+    // }
+    // }
 
     /**
      * Empty Constructor.
      */
-    public BoundingBox() {
-    }
+    public BoundingBox() {}
 
     /**
      * Creates a new BoundingBox object.
@@ -82,10 +76,10 @@ public class BoundingBox implements Cloneable, Serializable {
      */
     public BoundingBox(final Element parent) throws DataConversionException {
         final Element conf = parent.getChild("BoundingBox"); // NOI18N
-        setX1(conf.getAttribute("x1").getDoubleValue());     // NOI18N
-        setY1(conf.getAttribute("y1").getDoubleValue());     // NOI18N
-        setX2(conf.getAttribute("x2").getDoubleValue());     // NOI18N
-        setY2(conf.getAttribute("y2").getDoubleValue());     // NOI18N
+        setX1(conf.getAttribute("x1").getDoubleValue()); // NOI18N
+        setY1(conf.getAttribute("y1").getDoubleValue()); // NOI18N
+        setX2(conf.getAttribute("x2").getDoubleValue()); // NOI18N
+        setY2(conf.getAttribute("y2").getDoubleValue()); // NOI18N
     }
 
     /**
@@ -96,25 +90,25 @@ public class BoundingBox implements Cloneable, Serializable {
     public BoundingBox(final Geometry geom) {
         Geometry bb = geom.getEnvelope(); // .buffer(0.001d);
         if (geom instanceof Point) {
-            setX1(((Point)geom).getX());
-            setX2(((Point)geom).getX());
-            setY1(((Point)geom).getY());
-            setY2(((Point)geom).getY());
+            setX1(((Point) geom).getX());
+            setX2(((Point) geom).getX());
+            setY1(((Point) geom).getY());
+            setY2(((Point) geom).getY());
         } else if (bb instanceof Polygon) {
             // minx,miny
-            setX1(((Polygon)bb).getExteriorRing().getCoordinateN(0).x);
-            setY1(((Polygon)bb).getExteriorRing().getCoordinateN(0).y);
+            setX1(((Polygon) bb).getExteriorRing().getCoordinateN(0).x);
+            setY1(((Polygon) bb).getExteriorRing().getCoordinateN(0).y);
             // maxx,maxy
-            setX2(((Polygon)bb).getExteriorRing().getCoordinateN(2).x);
-            setY2(((Polygon)bb).getExteriorRing().getCoordinateN(2).y);
+            setX2(((Polygon) bb).getExteriorRing().getCoordinateN(2).x);
+            setY2(((Polygon) bb).getExteriorRing().getCoordinateN(2).y);
         } else if (bb instanceof LineString) {
             bb = bb.buffer(1).getEnvelope();
             // minx,miny
-            setX1(((Polygon)bb).getExteriorRing().getCoordinateN(0).x);
-            setY1(((Polygon)bb).getExteriorRing().getCoordinateN(0).y);
+            setX1(((Polygon) bb).getExteriorRing().getCoordinateN(0).x);
+            setY1(((Polygon) bb).getExteriorRing().getCoordinateN(0).y);
             // maxx,maxy
-            setX2(((Polygon)bb).getExteriorRing().getCoordinateN(2).x);
-            setY2(((Polygon)bb).getExteriorRing().getCoordinateN(2).y);
+            setX2(((Polygon) bb).getExteriorRing().getCoordinateN(2).x);
+            setY2(((Polygon) bb).getExteriorRing().getCoordinateN(2).y);
         } else {
             log.fatal("BoundingBox was not created by jtsGeometry:" + geom); // NOI18N
         }
@@ -293,6 +287,7 @@ public class BoundingBox implements Cloneable, Serializable {
     public String getGeometryFromTextLineString() {
         return "LINESTRING(" + getX1() + " " + getY1() + "," + getX2() + " " + getY2() + ")"; // NOI18N
     }
+
     /**
      * This Method return the BoundingBox like
      * BOX3D(-179.99999999999997,-105.48710130136223,176.35443037974682,114.6141645214226).
@@ -320,12 +315,12 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  DOCUMENT ME!
      */
     public PBounds getPBounds(final WorldToScreenTransform wtst) {
-        return new PBounds(wtst.getScreenX(x1),
-                wtst.getScreenY(y2),
-                x2
-                        - x1,
-                wtst.getScreenY(y1)
-                        - wtst.getScreenY(y2));
+        return new PBounds(
+            wtst.getScreenX(x1),
+            wtst.getScreenY(y2),
+            x2 - x1,
+            wtst.getScreenY(y1) - wtst.getScreenY(y2)
+        );
     }
 
     /**
@@ -336,20 +331,21 @@ public class BoundingBox implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
-        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
-        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
-        hash = (97 * hash) + (int)(Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
+        hash = (97 * hash) + (int) (Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
+        hash = (97 * hash) + (int) (Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
+        hash = (97 * hash) + (int) (Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
+        hash = (97 * hash) + (int) (Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
         return hash;
     }
 
     @Override
     public boolean equals(final Object other) {
         if (other instanceof BoundingBox) {
-            final BoundingBox bb = (BoundingBox)other;
+            final BoundingBox bb = (BoundingBox) other;
 
-            return ((getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1())
-                            && (getY2() == bb.getY2()));
+            return (
+                (getX1() == bb.getX1()) && (getX2() == bb.getX2()) && (getY1() == bb.getY1()) && (getY2() == bb.getY2())
+            );
         } else {
             return false;
         }
@@ -373,7 +369,7 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  the new double
      */
     public static String round(final double d) {
-        final double dd = ((double)(Math.round(d * 100))) / 100;
+        final double dd = ((double) (Math.round(d * 100))) / 100;
         final String pattern = "0.00"; // NOI18N
         final java.text.DecimalFormat myFormatter = new java.text.DecimalFormat(pattern);
         final java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
@@ -389,13 +385,14 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  DOCUMENT ME!
      */
     public Element getJDOMElement() {
-        final Element e = new Element("BoundingBox");    // NOI18N
+        final Element e = new Element("BoundingBox"); // NOI18N
         e.setAttribute("x1", new Double(x1).toString()); // NOI18N
         e.setAttribute("y1", new Double(y1).toString()); // NOI18N
         e.setAttribute("x2", new Double(x2).toString()); // NOI18N
         e.setAttribute("y2", new Double(y2).toString()); // NOI18N
         return e;
     }
+
     /**
      * public Geometry getGeometry() { // GeometryFactory gf=new GeometryFactory(); // LinearRing lr=gf.c //
      * gf.createPolygon() }.
@@ -421,9 +418,19 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  DOCUMENT ME!
      */
     public String toGmlString() {
-        return "<gml:Box><gml:coord><gml:X>" + getX1() + "</gml:X><gml:Y>" + getY1() + "</gml:Y></gml:coord>" // NOI18N
-                    + "<gml:coord><gml:X>" + getX2() + "</gml:X><gml:Y>" + getY2() + "</gml:Y></gml:coord>"   // NOI18N
-                    + "</gml:Box>";                                                                           // NOI18N
+        return (
+            "<gml:Box><gml:coord><gml:X>" +
+            getX1() +
+            "</gml:X><gml:Y>" +
+            getY1() +
+            "</gml:Y></gml:coord>" + // NOI18N
+            "<gml:coord><gml:X>" +
+            getX2() +
+            "</gml:X><gml:Y>" +
+            getY2() +
+            "</gml:Y></gml:coord>" + // NOI18N
+            "</gml:Box>"
+        ); // NOI18N
     }
 
     /**
@@ -432,9 +439,19 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  DOCUMENT ME!
      */
     public String toGml4WFS110String() {
-        return "<gml:Envelope><gml:lowerCorner>" + getX1()                                // NOI18N
-                    + " " + getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"          // NOI18N
-                    + getX2() + " " + getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+        return (
+            "<gml:Envelope><gml:lowerCorner>" +
+            getX1() + // NOI18N
+            " " +
+            getY1() +
+            "</gml:lowerCorner>" +
+            "<gml:upperCorner>" + // NOI18N
+            getX2() +
+            " " +
+            getY2() +
+            "</gml:upperCorner>" +
+            "</gml:Envelope>"
+        ); // NOI18N
     }
 
     /**

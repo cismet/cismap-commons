@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -13,16 +13,13 @@ package de.cismet.cismap.commons.gui.featureinfopanel;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
  * DOCUMENT ME!
@@ -44,8 +41,7 @@ public class WMSGetFeatureInfoDescription implements Feature {
     /**
      * Creates a new WMSGetFeatureInfoDescription object.
      */
-    public WMSGetFeatureInfoDescription() {
-    }
+    public WMSGetFeatureInfoDescription() {}
 
     /**
      * Creates a new WMSGetFeatureInfoDescription object.
@@ -55,10 +51,12 @@ public class WMSGetFeatureInfoDescription implements Feature {
      * @param  layer        DOCUMENT ME!
      * @param  service      DOCUMENT ME!
      */
-    public WMSGetFeatureInfoDescription(final Geometry geometry,
-            final PInputEvent pInputEvent,
-            final WMSLayer layer,
-            final WMSServiceLayer service) {
+    public WMSGetFeatureInfoDescription(
+        final Geometry geometry,
+        final PInputEvent pInputEvent,
+        final WMSLayer layer,
+        final WMSServiceLayer service
+    ) {
         this.layer = layer;
         this.service = service;
         this.geometry = geometry;
@@ -73,7 +71,7 @@ public class WMSGetFeatureInfoDescription implements Feature {
      * @return  the x
      */
     public int getX() {
-        return (int)getpInputEvent().getCanvasPosition().getX();
+        return (int) getpInputEvent().getCanvasPosition().getX();
     }
 
     /**
@@ -82,7 +80,7 @@ public class WMSGetFeatureInfoDescription implements Feature {
      * @return  the y
      */
     public int getY() {
-        return (int)getpInputEvent().getCanvasPosition().getY();
+        return (int) getpInputEvent().getCanvasPosition().getY();
     }
 
     /**
@@ -184,7 +182,7 @@ public class WMSGetFeatureInfoDescription implements Feature {
         String label = service.getName();
 
         if ((geometry != null) && (geometry instanceof Point)) {
-            label += round(((Point)geometry).getX()) + ", " + round(((Point)geometry).getY());
+            label += round(((Point) geometry).getX()) + ", " + round(((Point) geometry).getY());
         }
 
         return label;
@@ -198,7 +196,7 @@ public class WMSGetFeatureInfoDescription implements Feature {
      * @return  DOCUMENT ME!
      */
     private String round(final double value) {
-        final int precision = (int)Math.log10(value) + 3;
+        final int precision = (int) Math.log10(value) + 3;
         return new BigDecimal(value).round(new MathContext(precision, RoundingMode.HALF_EVEN)).toPlainString();
     }
 }

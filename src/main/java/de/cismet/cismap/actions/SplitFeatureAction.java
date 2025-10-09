@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -23,27 +23,21 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.util.LineStringExtracter;
 import com.vividsolutions.jts.operation.polygonize.Polygonizer;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.event.ActionEvent;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -68,12 +62,11 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
      * Creates a new DuplicateGeometryFeatureAction object.
      */
     public SplitFeatureAction() {
-        super(NbBundle.getMessage(
-                SplitFeatureAction.class,
-                "SplitFeatureAction.SplitFeatureAction()"));
+        super(NbBundle.getMessage(SplitFeatureAction.class, "SplitFeatureAction.SplitFeatureAction()"));
         super.putValue(
             Action.SMALL_ICON,
-            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-split.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-split.png"))
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -90,8 +83,11 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
 
     @Override
     public boolean isActive() {
-        return ((currentFeature instanceof PureNewFeature) && (currentFeature.getGeometry() instanceof Polygon)
-                        && (getIntersectingLineFeatureIfUnambigous(currentFeature) != null));
+        return (
+            (currentFeature instanceof PureNewFeature) &&
+            (currentFeature.getGeometry() instanceof Polygon) &&
+            (getIntersectingLineFeatureIfUnambigous(currentFeature) != null)
+        );
     }
 
     @Override
@@ -130,7 +126,7 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
         // Only keep polygons which are inside the input
         final List output = new ArrayList();
         for (int i = 0; i < polys.getNumGeometries(); i++) {
-            final Polygon candpoly = (Polygon)polys.getGeometryN(i);
+            final Polygon candpoly = (Polygon) polys.getGeometryN(i);
             if (poly.contains(candpoly.getInteriorPoint())) {
                 output.add(candpoly);
             }
@@ -147,9 +143,16 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
      */
     private Feature getIntersectingLineFeatureIfUnambigous(final Feature polygonfeature) {
         Feature lineFeature = null;
-        for (final Feature f : CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures()) {
-            if ((f != polygonfeature) && (f.getGeometry() instanceof LineString)
-                        && polygonfeature.getGeometry().intersects(f.getGeometry())) {
+        for (final Feature f : CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .getFeatureCollection()
+            .getAllFeatures()) {
+            if (
+                (f != polygonfeature) &&
+                (f.getGeometry() instanceof LineString) &&
+                polygonfeature.getGeometry().intersects(f.getGeometry())
+            ) {
                 if (lineFeature == null) {
                     lineFeature = f;
                 } else {
@@ -162,8 +165,8 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        de.cismet.tools.CismetThreadPool.execute(new javax.swing.SwingWorker<Void, Void>() {
-
+        de.cismet.tools.CismetThreadPool.execute(
+            new javax.swing.SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     Thread.currentThread().setName("SplitGeometryFeatureAction");
@@ -173,11 +176,11 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
                     final Geometry splitResult = splitPolygon(currentFeature.getGeometry(), lineFeature.getGeometry());
 
                     if (splitResult instanceof GeometryCollection) {
-                        for (int i = 0; i < ((GeometryCollection)splitResult).getNumGeometries(); i++) {
-                            final Geometry geom = ((GeometryCollection)splitResult).getGeometryN(i);
+                        for (int i = 0; i < ((GeometryCollection) splitResult).getNumGeometries(); i++) {
+                            final Geometry geom = ((GeometryCollection) splitResult).getGeometryN(i);
                             // the geometry should be cloned, because different polygons can use the same coordinate
                             // object and this can lead to problems, if the polygons will be moved on the map.
-                            final PureNewFeature pnf = new PureNewFeature((Geometry)geom.clone());
+                            final PureNewFeature pnf = new PureNewFeature((Geometry) geom.clone());
 
                             if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
                                 pnf.setGeometryType(PureNewFeature.geomTypes.LINESTRING);
@@ -195,14 +198,16 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
                             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
                             CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
                         }
-                        CismapBroker.getInstance()
-                                .getMappingComponent()
-                                .getFeatureCollection()
-                                .removeFeature(lineFeature);
-                        CismapBroker.getInstance()
-                                .getMappingComponent()
-                                .getFeatureCollection()
-                                .removeFeature(currentFeature);
+                        CismapBroker
+                            .getInstance()
+                            .getMappingComponent()
+                            .getFeatureCollection()
+                            .removeFeature(lineFeature);
+                        CismapBroker
+                            .getInstance()
+                            .getMappingComponent()
+                            .getFeatureCollection()
+                            .removeFeature(currentFeature);
                     }
 
                     return null;
@@ -216,21 +221,25 @@ public class SplitFeatureAction extends AbstractAction implements CommonFeatureA
                         LOG.error("Error while splitting geometries.", e);
 
                         final ErrorInfo errorInfo = new ErrorInfo(
-                                NbBundle.getMessage(
-                                    SplitFeatureAction.class,
-                                    "SplitFeatureAction.actionPerformed().done().title"),
-                                NbBundle.getMessage(
-                                    SplitFeatureAction.class,
-                                    "SplitFeatureAction.actionPerformed().done().message"),
-                                null,
-                                null,
-                                e,
-                                Level.ALL,
-                                null);
+                            NbBundle.getMessage(
+                                SplitFeatureAction.class,
+                                "SplitFeatureAction.actionPerformed().done().title"
+                            ),
+                            NbBundle.getMessage(
+                                SplitFeatureAction.class,
+                                "SplitFeatureAction.actionPerformed().done().message"
+                            ),
+                            null,
+                            null,
+                            e,
+                            Level.ALL,
+                            null
+                        );
                         JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
                     }
                 }
-            });
+            }
+        );
     }
 
     /**

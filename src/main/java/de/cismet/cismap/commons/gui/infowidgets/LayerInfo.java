@@ -1,30 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * LayerInfo.java
  *
  * Created on 16. Februar 2006, 13:58
  */
 package de.cismet.cismap.commons.gui.infowidgets;
-
-import org.openide.util.NbBundle;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
@@ -37,12 +23,20 @@ import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
-
 import de.cismet.commons.wms.capabilities.Layer;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.GUIWindow;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -110,8 +104,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void serverChanged(final CapabilityEvent e) {
-    }
+    public void serverChanged(final CapabilityEvent e) {}
 
     /**
      * DOCUMENT ME!
@@ -123,9 +116,9 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     @Override
     public void layerChanged(final CapabilityEvent e) {
         if (e.getCapabilityObject() instanceof Layer) {
-            setValues((Layer)e.getCapabilityObject());
+            setValues((Layer) e.getCapabilityObject());
         } else if (e.getCapabilityObject() instanceof DeegreeFeatureType) {
-            setValues(((FeatureType)e.getCapabilityObject()));
+            setValues(((FeatureType) e.getCapabilityObject()));
         }
     }
 
@@ -151,17 +144,19 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         jLabel1.setText(null);
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        addComponentListener(new java.awt.event.ComponentAdapter() {
-
+        addComponentListener(
+            new java.awt.event.ComponentAdapter() {
                 @Override
                 public void componentResized(final java.awt.event.ComponentEvent evt) {
                     formComponentResized(evt);
                 }
+
                 @Override
                 public void componentShown(final java.awt.event.ComponentEvent evt) {
                     formComponentShown(evt);
                 }
-            });
+            }
+        );
         setLayout(new java.awt.BorderLayout());
 
         panMain.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -195,9 +190,12 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
 
         jLabel3.setText(null);
 
-        lblFeatureInfo.setFont(new java.awt.Font("DejaVu Sans", 1, 13));                                      // NOI18N
-        lblFeatureInfo.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png"))); // NOI18N
+        lblFeatureInfo.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        lblFeatureInfo.setIcon(
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png")
+            )
+        ); // NOI18N
         lblFeatureInfo.setText(org.openide.util.NbBundle.getMessage(LayerInfo.class, "lblFeatureInfo.text")); // NOI18N
 
         lstSrs.setBackground(panMain.getBackground());
@@ -206,33 +204,67 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         final org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 420, Short.MAX_VALUE).add(
-                jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                    org.jdesktop.layout.GroupLayout.TRAILING,
-                    jPanel2Layout.createSequentialGroup().addContainerGap().add(
-                        jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                            jScrollPane2,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            408,
-                            Short.MAX_VALUE).add(
-                            jPanel2Layout.createSequentialGroup().add(lblFeatureInfo).addPreferredGap(
-                                org.jdesktop.layout.LayoutStyle.RELATED,
-                                174,
-                                org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).add(
-                            jLabel3,
-                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            408,
-                            Short.MAX_VALUE)).addContainerGap())));
+            jPanel2Layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 420, Short.MAX_VALUE)
+                .add(
+                    jPanel2Layout
+                        .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(
+                            org.jdesktop.layout.GroupLayout.TRAILING,
+                            jPanel2Layout
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .add(
+                                    jPanel2Layout
+                                        .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                        .add(
+                                            jScrollPane2,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            408,
+                                            Short.MAX_VALUE
+                                        )
+                                        .add(
+                                            jPanel2Layout
+                                                .createSequentialGroup()
+                                                .add(lblFeatureInfo)
+                                                .addPreferredGap(
+                                                    org.jdesktop.layout.LayoutStyle.RELATED,
+                                                    174,
+                                                    org.jdesktop.layout.GroupLayout.PREFERRED_SIZE
+                                                )
+                                        )
+                                        .add(
+                                            jLabel3,
+                                            org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
+                                            408,
+                                            Short.MAX_VALUE
+                                        )
+                                )
+                                .addContainerGap()
+                        )
+                )
+        );
         jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 226, Short.MAX_VALUE).add(
-                jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
-                    jPanel2Layout.createSequentialGroup().addContainerGap().add(lblFeatureInfo).addPreferredGap(
-                        org.jdesktop.layout.LayoutStyle.RELATED).add(jLabel3).addPreferredGap(
-                        org.jdesktop.layout.LayoutStyle.RELATED).add(
-                        jScrollPane2,
-                        org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                        173,
-                        Short.MAX_VALUE).addContainerGap())));
+            jPanel2Layout
+                .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(0, 226, Short.MAX_VALUE)
+                .add(
+                    jPanel2Layout
+                        .createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                        .add(
+                            jPanel2Layout
+                                .createSequentialGroup()
+                                .addContainerGap()
+                                .add(lblFeatureInfo)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jLabel3)
+                                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
+                                .addContainerGap()
+                        )
+                )
+        );
 
         sppMain.setRightComponent(jPanel2);
 
@@ -246,16 +278,15 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {} //GEN-FIRST:event_formComponentShown //GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentResized(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentResized
-    }                                                                            //GEN-LAST:event_formComponentResized
+    private void formComponentResized(final java.awt.event.ComponentEvent evt) {} //GEN-FIRST:event_formComponentResized //GEN-LAST:event_formComponentResized
+
     /**
      * End of variables declaration.
      *
@@ -265,27 +296,22 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         final Values v = new Values();
         try {
             v.title = layer.getTitle();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         try {
             v.name = layer.getName();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.description = layer.getAbstract();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.featureInfo = layer.isQueryable();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.srs = layer.getSrs();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         setValues(v);
     }
@@ -299,17 +325,14 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         final Values v = new Values();
         try {
             v.title = feature.getTitle();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
         try {
             v.name = WFSFeatureFactory.convertFeatureQnameToName(feature.getName());
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         try {
             v.description = feature.getAbstract();
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         v.featureInfo = false;
 
@@ -324,8 +347,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
                 tmp[v.srs.length] = feature.getDefaultSRS();
                 v.srs = tmp;
             }
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
 
         setValues(v);
     }
@@ -409,43 +431,37 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     }
 
     @Override
-    public void layerVisibilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerVisibilityChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {}
 
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof WMSServiceLayer) {
-            final List v = ((WMSServiceLayer)e.getLayer()).getWMSLayers();
+            final List v = ((WMSServiceLayer) e.getLayer()).getWMSLayers();
             if (v.size() == 1) {
                 final Object o = v.get(0);
                 if (o instanceof WMSLayer) {
-                    setValues(((WMSLayer)o).getOgcCapabilitiesLayer());
+                    setValues(((WMSLayer) o).getOgcCapabilitiesLayer());
                 }
             }
         } else if (e.getLayer() instanceof WebFeatureService) {
-            setValues(((WebFeatureService)e.getLayer()).getFeature());
+            setValues(((WebFeatureService) e.getLayer()).getFeature());
         }
     }
 
     @Override
-    public void layerRemoved(final ActiveLayerEvent e) {
-    }
+    public void layerRemoved(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerPositionChanged(final ActiveLayerEvent e) {
-    }
+    public void layerPositionChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-    }
+    public void layerInformationStatusChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerAdded(final ActiveLayerEvent e) {
-    }
+    public void layerAdded(final ActiveLayerEvent e) {}
 
     /**
      * DOCUMENT ME!
@@ -455,7 +471,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
      * @return  DOCUMENT ME!
      */
     public String getGDILanguageString(final String text) {
-        String ret = "";                                              // NOI18N
+        String ret = ""; // NOI18N
         try {
             for (final String lan : LANGUAGES) {
                 if (text.contains(lan)) {
@@ -473,7 +489,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
             }
             return text;
         } catch (Exception e) {
-            log.warn("Error while checking the GDI String", e);       // NOI18N
+            log.warn("Error while checking the GDI String", e); // NOI18N
             return text;
         }
     }
@@ -495,8 +511,9 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
 
     @Override
     public Icon getViewIcon() {
-        final Icon icoMap = new ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png"));
+        final Icon icoMap = new ImageIcon(
+            getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png")
+        );
         return Static2DTools.borderIcon(icoMap, 0, 3, 0, 1);
     }
 

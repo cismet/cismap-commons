@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
 import java.util.List;
@@ -18,7 +18,6 @@ import java.util.List;
  *           <p>An AggregateableFeatureInfoDisplay manages a list of similiar feature info displays in order to combine the information of them. The similiarity is expressed by an String.</p>
  */
 public interface AggregateableFeatureInfoDisplay {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

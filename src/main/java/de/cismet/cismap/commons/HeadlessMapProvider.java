@@ -1,35 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons;
-
-import java.awt.Image;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -47,6 +27,23 @@ import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
+import java.awt.Image;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * DOCUMENT ME!
@@ -69,10 +66,10 @@ public class HeadlessMapProvider {
      * @version  $Revision$, $Date$
      */
     public enum DominatingDimension {
-
         //~ Enum constants -----------------------------------------------------
 
-        SIZE, BOUNDINGBOX
+        SIZE,
+        BOUNDINGBOX,
     }
 
     /**
@@ -81,10 +78,16 @@ public class HeadlessMapProvider {
      * @version  $Revision$, $Date$
      */
     public enum NotificationLevel {
-
         //~ Enum constants -----------------------------------------------------
 
-        TIP, INFO, SUCCESS, EXPERT, WARN, ERROR, ERROR_REASON, UNLOCKED
+        TIP,
+        INFO,
+        SUCCESS,
+        EXPERT,
+        WARN,
+        ERROR,
+        ERROR_REASON,
+        UNLOCKED,
     }
 
     /**
@@ -93,10 +96,12 @@ public class HeadlessMapProvider {
      * @version  $Revision$, $Date$
      */
     public enum RoundingPrecision {
-
         //~ Enum constants -----------------------------------------------------
 
-        NO_ROUNDING, TENTH, HUNDRETH, THOUSANDTH
+        NO_ROUNDING,
+        TENTH,
+        HUNDRETH,
+        THOUSANDTH,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -145,19 +150,29 @@ public class HeadlessMapProvider {
                 mappingModel.setSrs(new Crs("EPSG:25832", "", "", true, true));
             }
 
-            if (CismapBroker.getInstance().getMappingComponent().getMappingModel().getInitialBoundingBox()
-                        instanceof XBoundingBox) {
-                boundingBox = (XBoundingBox)CismapBroker.getInstance().getMappingComponent().getMappingModel()
-                            .getInitialBoundingBox();
+            if (
+                CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getMappingModel()
+                    .getInitialBoundingBox() instanceof XBoundingBox
+            ) {
+                boundingBox =
+                    (XBoundingBox) CismapBroker
+                        .getInstance()
+                        .getMappingComponent()
+                        .getMappingModel()
+                        .getInitialBoundingBox();
             }
 
             final HashMap homeMap =
-                ((ActiveLayerModel)CismapBroker.getInstance().getMappingComponent().getMappingModel())
-                        .getHomeBoundingBoxes();
+                (
+                    (ActiveLayerModel) CismapBroker.getInstance().getMappingComponent().getMappingModel()
+                ).getHomeBoundingBoxes();
             final Set keys = homeMap.keySet();
 
             for (final Object key : keys) {
-                homeBoundingBox = (XBoundingBox)homeMap.get(key);
+                homeBoundingBox = (XBoundingBox) homeMap.get(key);
                 mappingModel.addHome(homeBoundingBox);
             }
 
@@ -239,8 +254,9 @@ public class HeadlessMapProvider {
      */
     public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
         final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
-        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
-            mappingComponent.getMappingModel().getSrs());
+        ((ActiveLayerModel) headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
+                mappingComponent.getMappingModel().getSrs()
+            );
         final boolean infoNodeVisible = mappingComponent.isInfoNodesVisible();
         headlessMapProvider.getMappingComponent().setInfoNodesVisible(infoNodeVisible);
 
@@ -252,23 +268,27 @@ public class HeadlessMapProvider {
         for (final Object position : positionsRaster) {
             boolean addable = false;
             final Object rasterService = rasterServices.get(position);
-            if ((rasterService instanceof RetrievalServiceLayer)
-                        && ((RetrievalServiceLayer)rasterService).isEnabled()) {
-                if ((rasterService instanceof PNodeProvider)
-                            && (((PNodeProvider)rasterService).getPNode() != null)
-                            && ((PNodeProvider)rasterService).getPNode().getVisible()) {
+            if (
+                (rasterService instanceof RetrievalServiceLayer) && ((RetrievalServiceLayer) rasterService).isEnabled()
+            ) {
+                if (
+                    (rasterService instanceof PNodeProvider) &&
+                    (((PNodeProvider) rasterService).getPNode() != null) &&
+                    ((PNodeProvider) rasterService).getPNode().getVisible()
+                ) {
                     addable = true;
                 }
             }
             if (addable) {
                 if (rasterService instanceof ModeLayer) {
-                    headlessMapProvider.addLayer(((ModeLayer)rasterService).getCurrentLayer());
+                    headlessMapProvider.addLayer(((ModeLayer) rasterService).getCurrentLayer());
                 } else {
-                    headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
+                    headlessMapProvider.addLayer((RetrievalServiceLayer) rasterService);
                 }
             } else {
                 LOG.warn(
-                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer"
+                );
             }
         }
 
@@ -281,10 +301,11 @@ public class HeadlessMapProvider {
         for (final Object position : positionsFeatures) {
             final Object featureService = featureServices.get(position);
             if (featureService instanceof RetrievalServiceLayer) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)featureService);
+                headlessMapProvider.addLayer((RetrievalServiceLayer) featureService);
             } else {
                 LOG.warn(
-                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer"
+                );
             }
         }
 
@@ -379,12 +400,12 @@ public class HeadlessMapProvider {
     public void addLayer(final RetrievalServiceLayer layer) {
         try {
             if (layer instanceof AbstractRetrievalService) {
-                final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
+                final AbstractRetrievalService l = ((AbstractRetrievalService) layer).cloneWithoutRetrievalListeners();
                 // TODO remove this hack
                 if (l instanceof SlidableWMSServiceLayerGroup) {
-                    ((SlidableWMSServiceLayerGroup)l).setPrintMode(true);
+                    ((SlidableWMSServiceLayerGroup) l).setPrintMode(true);
                 }
-                mappingModel.addLayer((RetrievalServiceLayer)l);
+                mappingModel.addLayer((RetrievalServiceLayer) l);
             } else {
                 mappingModel.addLayer(layer);
             }
@@ -436,15 +457,15 @@ public class HeadlessMapProvider {
      *
      * @return  DOCUMENT ME!
      */
-    public Future<Image> getImage(final int baseDpi,
-            final int targetDpi,
-            final double widthInPixels,
-            final double heightInPixels) {
+    public Future<Image> getImage(
+        final int baseDpi,
+        final int targetDpi,
+        final double widthInPixels,
+        final double heightInPixels
+    ) {
         printingResolution = targetDpi / CismapBroker.getInstance().getMappingComponent().getFeaturePrintingDpi();
-        final int imageWidth = (int)((double)widthInPixels / (double)baseDpi
-                        * (double)targetDpi);
-        final int imageHeight = (int)((double)heightInPixels / (double)baseDpi
-                        * (double)targetDpi);
+        final int imageWidth = (int) ((double) widthInPixels / (double) baseDpi * (double) targetDpi);
+        final int imageHeight = (int) ((double) heightInPixels / (double) baseDpi * (double) targetDpi);
         map.setStickyFeatureCorrectionFactor(printingResolution);
         resolution = targetDpi;
         return getImage(imageWidth, imageHeight);
@@ -460,7 +481,7 @@ public class HeadlessMapProvider {
      */
     public Future<Image> getImage(final int widthPixels, final int heightPixels) {
         if (boundingBox == null) {
-            boundingBox = (XBoundingBox)mappingModel.getHomeBoundingBoxes().get(mappingModel.getDefaultHomeSrs());
+            boundingBox = (XBoundingBox) mappingModel.getHomeBoundingBoxes().get(mappingModel.getDefaultHomeSrs());
             LOG.warn("No BoundingBox was set explicitly. Will use the Home-BoundingBox");
         }
 
@@ -469,13 +490,16 @@ public class HeadlessMapProvider {
         int correctedHeightPixels = heightPixels;
         XBoundingBox correctedBoundingBox = boundingBox;
 
-        correctedBoundingBox = new XBoundingBox(boundingBox.getX1(),
+        correctedBoundingBox =
+            new XBoundingBox(
+                boundingBox.getX1(),
                 boundingBox.getY1(),
                 boundingBox.getX2(),
                 boundingBox.getY2(),
                 boundingBox.getSrs(),
-                boundingBox.isMetric());
-        final double pixelRelation = ((double)widthPixels / (double)heightPixels);
+                boundingBox.isMetric()
+            );
+        final double pixelRelation = ((double) widthPixels / (double) heightPixels);
         final double boundingBoxRelation = (boundingBox.getWidth() / boundingBox.getHeight());
         if (pixelRelation != boundingBoxRelation) {
             if (dominatingDimension == HeadlessMapProvider.DominatingDimension.SIZE) {
@@ -502,9 +526,9 @@ public class HeadlessMapProvider {
             } else if (dominatingDimension == HeadlessMapProvider.DominatingDimension.BOUNDINGBOX) {
                 // adjusting width and height
                 if (boundingBoxRelation < pixelRelation) {
-                    correctedHeightPixels = (int)((widthPixels * boundingBox.getHeight()) / boundingBox.getWidth());
+                    correctedHeightPixels = (int) ((widthPixels * boundingBox.getHeight()) / boundingBox.getWidth());
                 } else {
-                    correctedWidthPixels = (int)((heightPixels * boundingBox.getWidth()) / boundingBox.getHeight());
+                    correctedWidthPixels = (int) ((heightPixels * boundingBox.getWidth()) / boundingBox.getHeight());
                 }
             }
         }
@@ -516,16 +540,24 @@ public class HeadlessMapProvider {
         // check the minimum map scale condition
         if ((minimumScaleDenominator > 0) && (map.getScaleDenominator() < minimumScaleDenominator)) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("map scale of " + map.getScaleDenominator() + " is less than the configured minimum scale ( "
-                            + minimumScaleDenominator + "). Using minimim scale");
+                LOG.debug(
+                    "map scale of " +
+                    map.getScaleDenominator() +
+                    " is less than the configured minimum scale ( " +
+                    minimumScaleDenominator +
+                    "). Using minimim scale"
+                );
             }
             final BoundingBox bb = map.getBoundingBoxFromScale(minimumScaleDenominator);
-            correctedBoundingBox = new XBoundingBox(bb.getX1(),
+            correctedBoundingBox =
+                new XBoundingBox(
+                    bb.getX1(),
                     bb.getY1(),
                     bb.getX2(),
                     bb.getY2(),
                     boundingBox.getSrs(),
-                    boundingBox.isMetric());
+                    boundingBox.isMetric()
+                );
             map.setNewViewBounds(null);
             map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
             waitUntilGotoBoundingBoxIsComplete();
@@ -542,12 +574,15 @@ public class HeadlessMapProvider {
                 scale = Math.round((map.getScaleDenominator() / 1000) + 0.5d) * 1000;
             }
             final BoundingBox bb = map.getBoundingBoxFromScale(scale);
-            correctedBoundingBox = new XBoundingBox(bb.getX1(),
+            correctedBoundingBox =
+                new XBoundingBox(
+                    bb.getX1(),
                     bb.getY1(),
                     bb.getX2(),
                     bb.getY2(),
                     boundingBox.getSrs(),
-                    boundingBox.isMetric());
+                    boundingBox.isMetric()
+                );
             map.setNewViewBounds(null);
             map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
             waitUntilGotoBoundingBoxIsComplete();
@@ -566,22 +601,20 @@ public class HeadlessMapProvider {
 
         for (final MapService m : mappingModel.getMapServices().values()) {
             if (m instanceof AbstractFeatureService) {
-                final AbstractFeatureService afs = (AbstractFeatureService)m;
+                final AbstractFeatureService afs = (AbstractFeatureService) m;
 
-                if (!afs.isVisibleInBoundingBox((XBoundingBox)map.getCurrentBoundingBoxFromCamera())) {
+                if (!afs.isVisibleInBoundingBox((XBoundingBox) map.getCurrentBoundingBoxFromCamera())) {
                     ++invisibleServices;
                 }
             }
         }
 
-        final HeadlessMapProvider.HeadlessMapProviderRetrievalListener listener =
-            new HeadlessMapProvider.HeadlessMapProviderRetrievalListener(
-                correctedWidthPixels,
-                correctedHeightPixels,
-                propertyChangeListener,
-                mappingModel.getFeatureServices().size()
-                        + mappingModel.getMapServices().size()
-                        - invisibleServices);
+        final HeadlessMapProvider.HeadlessMapProviderRetrievalListener listener = new HeadlessMapProvider.HeadlessMapProviderRetrievalListener(
+            correctedWidthPixels,
+            correctedHeightPixels,
+            propertyChangeListener,
+            mappingModel.getFeatureServices().size() + mappingModel.getMapServices().size() - invisibleServices
+        );
         map.addRepaintListener(listener);
 
         map.unlockWithoutReload();
@@ -619,8 +652,8 @@ public class HeadlessMapProvider {
      * @throws  ExecutionException    DOCUMENT ME!
      * @throws  InterruptedException  DOCUMENT ME!
      */
-    public Image getImageAndWait(final int widthPixels, final int heightPixels) throws ExecutionException,
-        InterruptedException {
+    public Image getImageAndWait(final int widthPixels, final int heightPixels)
+        throws ExecutionException, InterruptedException {
         return getImage(widthPixels, heightPixels).get();
     }
 
@@ -638,10 +671,12 @@ public class HeadlessMapProvider {
      * @throws  ExecutionException    DOCUMENT ME!
      * @throws  InterruptedException  DOCUMENT ME!
      */
-    public Image getImageAndWait(final int basedpi,
-            final int targetDpi,
-            final double widthInPixels,
-            final double heightInPixels) throws ExecutionException, InterruptedException {
+    public Image getImageAndWait(
+        final int basedpi,
+        final int targetDpi,
+        final double widthInPixels,
+        final double heightInPixels
+    ) throws ExecutionException, InterruptedException {
         return getImage(basedpi, targetDpi, widthInPixels, heightInPixels).get();
     }
 
@@ -718,9 +753,8 @@ public class HeadlessMapProvider {
      *
      * @version  $Revision$, $Date$
      */
-    class HeadlessMapProviderRetrievalListener implements Future<Image>,
-        RepaintListener,
-        ErroneousRetrievalServiceProvider {
+    class HeadlessMapProviderRetrievalListener
+        implements Future<Image>, RepaintListener, ErroneousRetrievalServiceProvider {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -746,10 +780,12 @@ public class HeadlessMapProvider {
          * @param  listener      DOCUMENT ME!
          * @param  serviceCount  DOCUMENT ME!
          */
-        public HeadlessMapProviderRetrievalListener(final int imageWidth,
-                final int imageHeight,
-                final List<PropertyChangeListener> listener,
-                final int serviceCount) {
+        public HeadlessMapProviderRetrievalListener(
+            final int imageWidth,
+            final int imageHeight,
+            final List<PropertyChangeListener> listener,
+            final int serviceCount
+        ) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
             services = new HashSet<RetrievalService>();
@@ -777,16 +813,23 @@ public class HeadlessMapProvider {
             }
 
             if (e.isInitialisationEvent()) {
-                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                            + "]: retrievalStarted ignored, initialisation event"); // NOI18N
+                LOG.error(
+                    e.getRetrievalService() +
+                    "[" +
+                    e.getRequestIdentifier() +
+                    "]: retrievalStarted ignored, initialisation event"
+                ); // NOI18N
                 return;
             }
 
-            sendNotification(org.openide.util.NbBundle.getMessage(
+            sendNotification(
+                org.openide.util.NbBundle.getMessage(
                     PrintingWidget.class,
                     "PrintingWidget.retrievalStarted(RetrievalEvent).msg",
-                    new Object[] { e.getRetrievalService() }),
-                HeadlessMapProvider.NotificationLevel.INFO); // NOI18N
+                    new Object[] { e.getRetrievalService() }
+                ),
+                HeadlessMapProvider.NotificationLevel.INFO
+            ); // NOI18N
 
             if (e.getRetrievalService() == null) {
                 System.out.println("service is null");
@@ -810,24 +853,34 @@ public class HeadlessMapProvider {
                 LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
 
                 if (e.isInitialisationEvent()) {
-                    LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                                + "]: retrievalError ignored, initialisation event"); // NOI18N
+                    LOG.error(
+                        e.getRetrievalService() +
+                        "[" +
+                        e.getRequestIdentifier() +
+                        "]: retrievalError ignored, initialisation event"
+                    ); // NOI18N
                     return;
                 }
             } else {
                 LOG.error("repaint error and RetrievalEvent is null", new Exception());
             }
 
-            sendNotification(org.openide.util.NbBundle.getMessage(
+            sendNotification(
+                org.openide.util.NbBundle.getMessage(
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg1",
-                    new Object[] { e.getRetrievalService() }),
-                HeadlessMapProvider.NotificationLevel.ERROR); // NOI18N
-            sendNotification(org.openide.util.NbBundle.getMessage(
+                    new Object[] { e.getRetrievalService() }
+                ),
+                HeadlessMapProvider.NotificationLevel.ERROR
+            ); // NOI18N
+            sendNotification(
+                org.openide.util.NbBundle.getMessage(
                     PrintingWidget.class,
-                    "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
+                    "PrintingWidget.retrievalError(RetrievalEvent).msg2"
+                ),
                 HeadlessMapProvider.NotificationLevel.ERROR_REASON,
-                e);                                           // NOI18N
+                e
+            ); // NOI18N
             repaintEvent.getRetrievalEvent().setHasErrors(true);
             repaintComplete(repaintEvent);
         }
@@ -845,67 +898,92 @@ public class HeadlessMapProvider {
                 LOG.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete"); // NOI18N
             }
             if (e.isInitialisationEvent()) {
-                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                            + "]: retrievalComplete ignored, initialisation event");                         // NOI18N
+                LOG.error(
+                    e.getRetrievalService() +
+                    "[" +
+                    e.getRequestIdentifier() +
+                    "]: retrievalComplete ignored, initialisation event"
+                ); // NOI18N
                 return;
             }
 
             if (e.getRetrievalService() instanceof ServiceLayer) {
                 if (!e.isHasErrors()) {
                     results.add(e.getRetrievalService());
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
-                            new Object[] { e.getRetrievalService() }),
-                        HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
+                            new Object[] { e.getRetrievalService() }
+                        ),
+                        HeadlessMapProvider.NotificationLevel.SUCCESS
+                    ); // NOI18N
                 } else {
                     erroneous.add(e.getRetrievalService());
                     if (e.getRetrievedObject() instanceof Image) {
-                        sendNotification(org.openide.util.NbBundle.getMessage(
+                        sendNotification(
+                            org.openide.util.NbBundle.getMessage(
                                 PrintingWidget.class,
                                 "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
-                                new Object[] { e.getRetrievalService() }),
+                                new Object[] { e.getRetrievalService() }
+                            ),
                             HeadlessMapProvider.NotificationLevel.ERROR_REASON,
-                            e);                                         // NOI18N
+                            e
+                        ); // NOI18N
                     }
                 }
             }
 
             if ((results.size() + erroneous.size()) == serviceCount) {
                 if (results.size() == serviceCount) {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"),
-                        HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.SUCCESS
+                    ); // NOI18N
                 } else if (services.isEmpty()) {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"),
-                        HeadlessMapProvider.NotificationLevel.WARN);    // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.WARN
+                    ); // NOI18N
                 } else {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg8"),
-                        HeadlessMapProvider.NotificationLevel.WARN);    // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg8"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.WARN
+                    ); // NOI18N
                 }
 
                 addFeaturesToTopLevelLayer();
 
                 if (erroneous.size() < results.size()) {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg4"),
-                        HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg4"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.SUCCESS
+                    ); // NOI18N
                 } else {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg5"),
-                        HeadlessMapProvider.NotificationLevel.INFO);    // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg5"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.INFO
+                    ); // NOI18N
                 }
 
                 LOG.info("Following layers were painted: " + results); // NOI18N
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("services:" + services);                 // NOI18N
+                    LOG.debug("services:" + services); // NOI18N
                 }
 
                 unlock();
@@ -937,17 +1015,21 @@ public class HeadlessMapProvider {
             // Add Existing Features as TopLevelLayer
             if (map.isFeatureCollectionVisible()) {
                 try {
-                    sendNotification(org.openide.util.NbBundle.getMessage(
+                    sendNotification(
+                        org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                        HeadlessMapProvider.NotificationLevel.INFO);                                        // NOI18N
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"
+                        ),
+                        HeadlessMapProvider.NotificationLevel.INFO
+                    ); // NOI18N
                 } catch (Throwable t) {
-                    LOG.error("Error while adding local features to the map", t);                           // NOI18N
+                    LOG.error("Error while adding local features to the map", t); // NOI18N
                 }
             } else {
                 final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
+                    PrintingWidget.class,
+                    "PrintingWidget.retrievalComplete(RetrievalEvent).msg9"
+                );
                 sendNotification(localFeaturesNotAddedMessage, HeadlessMapProvider.NotificationLevel.INFO); // NOI18N
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(localFeaturesNotAddedMessage);
@@ -987,22 +1069,28 @@ public class HeadlessMapProvider {
          * @param  level  the notification level
          * @param  e      a RetrievalEvent
          */
-        private void sendNotification(final String msg,
-                final HeadlessMapProvider.NotificationLevel level,
-                final RetrievalEvent e) {
+        private void sendNotification(
+            final String msg,
+            final HeadlessMapProvider.NotificationLevel level,
+            final RetrievalEvent e
+        ) {
             String prefix;
-            if ((msg != null) && (msg.trim().length() > 0)
-                        && (HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature)
-                        && (map.getSpecialFeatureCollection(PrintTemplateFeature.class).size() > 1)) {
-                prefix = ((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName() + ": ";
+            if (
+                (msg != null) &&
+                (msg.trim().length() > 0) &&
+                (HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature) &&
+                (map.getSpecialFeatureCollection(PrintTemplateFeature.class).size() > 1)
+            ) {
+                prefix = ((PrintTemplateFeature) HeadlessMapProvider.this.requestingObject).getName() + ": ";
             } else {
                 prefix = "";
             }
             final PropertyChangeEvent evt = new PropertyChangeEvent(
-                    HeadlessMapProvider.this,
-                    "notification",
-                    e,
-                    new HeadlessMapProvider.NotificationMessage(prefix + msg, level));
+                HeadlessMapProvider.this,
+                "notification",
+                e,
+                new HeadlessMapProvider.NotificationMessage(prefix + msg, level)
+            );
 
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
@@ -1078,9 +1166,8 @@ public class HeadlessMapProvider {
          * @throws  TimeoutException      DOCUMENT ME!
          */
         @Override
-        public Image get(final long timeout, final TimeUnit unit) throws InterruptedException,
-            ExecutionException,
-            TimeoutException {
+        public Image get(final long timeout, final TimeUnit unit)
+            throws InterruptedException, ExecutionException, TimeoutException {
             lock.lock();
             try {
                 if (!isDone()) {
@@ -1113,8 +1200,7 @@ public class HeadlessMapProvider {
         /**
          * Creates a new NotificationMessage object.
          */
-        public NotificationMessage() {
-        }
+        public NotificationMessage() {}
 
         /**
          * Creates a new NotificationMessage object.

@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui;
 
-import java.util.Collection;
-
 import de.cismet.cismap.commons.features.Feature;
+import java.util.Collection;
 
 /**
  * DOCUMENT ME!
@@ -22,7 +21,6 @@ import de.cismet.cismap.commons.features.Feature;
  * @version  $Revision$, $Date$
  */
 public interface MapListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

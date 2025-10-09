@@ -1,13 +1,22 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.simplelayerwidget;
-import edu.umd.cs.piccolo.PNode;
 
+import de.cismet.cismap.commons.PNodeProvider;
+import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.gui.imagetooltip.ImageToolTip;
+import edu.umd.cs.piccolo.PNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -18,9 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-
 import java.util.Vector;
-
 import javax.swing.ImageIcon;
 import javax.swing.JSlider;
 import javax.swing.JToolTip;
@@ -30,18 +37,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import de.cismet.cismap.commons.PNodeProvider;
-import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
-import de.cismet.tools.CismetThreadPool;
-
-import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
 /**
  * DOCUMENT ME!
@@ -65,34 +60,39 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     private ServiceLayer layer;
     private ImageIcon visibleIcon = null;
     private ImageIcon invisibleIcon = null;
-    private ImageIcon visibleRasterIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/rasterLayerVisible.png"));               // NOI18N
-    private ImageIcon invisibleRasterIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/rasterLayerNotVisible.png"));            // NOI18N
-    private ImageIcon visibleFeatureIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/featureLayerVisible.png"));              // NOI18N
-    private ImageIcon invisibleFeatureIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/featureLayerNotVisible.png"));           // NOI18N
-    private ImageIcon visibleCollectionIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/featureCollectionLayerVisible.png"));    // NOI18N
-    private ImageIcon invisibleCollectionIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/featureCollectionLayerNotVisible.png")); // NOI18N
+    private ImageIcon visibleRasterIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerVisible.png")
+    ); // NOI18N
+    private ImageIcon invisibleRasterIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerNotVisible.png")
+    ); // NOI18N
+    private ImageIcon visibleFeatureIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerVisible.png")
+    ); // NOI18N
+    private ImageIcon invisibleFeatureIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerNotVisible.png")
+    ); // NOI18N
+    private ImageIcon visibleCollectionIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerVisible.png")
+    ); // NOI18N
+    private ImageIcon invisibleCollectionIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerNotVisible.png")
+    ); // NOI18N
     private PNode transparentable;
     private int type;
     private Image errorImage = null;
     /** Creates new form LayerControl. */
     // SliderMenuItem slider=new SliderMenuItem();
     JSlider slider = new JSlider() {
-
-            @Override
-            public JToolTip createToolTip() {
-                if (errorImage != null) {
-                    return new ImageToolTip(errorImage);
-                } else {
-                    return super.createToolTip();
-                }
+        @Override
+        public JToolTip createToolTip() {
+            if (errorImage != null) {
+                return new ImageToolTip(errorImage);
+            } else {
+                return super.createToolTip();
             }
-        };
+        }
+    };
 
     private int errorAbolitionTime = 1000;
     private MappingComponent mappingComponent;
@@ -107,6 +107,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     private javax.swing.JMenuItem mitLayerName;
     private javax.swing.JPopupMenu pmenProps;
     private javax.swing.JProgressBar prbLayer;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -123,21 +124,24 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         this.errorAbolitionTime = errorAbolitionTime;
         this.type = type;
         switch (type) {
-            case RASTER_SERVICE: {
-                visibleIcon = visibleRasterIcon;
-                invisibleIcon = invisibleRasterIcon;
-                break;
-            }
-            case FEATURE_SERVICE: {
-                visibleIcon = visibleFeatureIcon;
-                invisibleIcon = invisibleFeatureIcon;
-                break;
-            }
-            case FEATURE_COLLECTION: {
-                visibleIcon = visibleCollectionIcon;
-                invisibleIcon = invisibleCollectionIcon;
-                break;
-            }
+            case RASTER_SERVICE:
+                {
+                    visibleIcon = visibleRasterIcon;
+                    invisibleIcon = invisibleRasterIcon;
+                    break;
+                }
+            case FEATURE_SERVICE:
+                {
+                    visibleIcon = visibleFeatureIcon;
+                    invisibleIcon = invisibleFeatureIcon;
+                    break;
+                }
+            case FEATURE_COLLECTION:
+                {
+                    visibleIcon = visibleCollectionIcon;
+                    invisibleIcon = invisibleCollectionIcon;
+                    break;
+                }
         }
         initComponents();
         lblIcon.setIcon(visibleIcon);
@@ -152,20 +156,22 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         addMouseListener(new MousePopupListener());
         // slider.setForeground(pmenProps.getBackground());
 
-//        prbLayer.setBorderPainted(false);
-        slider.addChangeListener(new ChangeListener() {
-
+        //        prbLayer.setBorderPainted(false);
+        slider.addChangeListener(
+            new ChangeListener() {
                 @Override
                 public void stateChanged(final ChangeEvent e) {
-                    java.awt.EventQueue.invokeLater(new Runnable() {
-
+                    java.awt.EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
-                                setTransparency((float)((int)((JSlider)e.getSource()).getValue() / 100.0));
+                                setTransparency((float) ((int) ((JSlider) e.getSource()).getValue() / 100.0));
                             }
-                        });
+                        }
+                    );
                 }
-            });
+            }
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -178,6 +184,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     public void addLayerSelectionChangedListener(final LayerControlSelectionChangedListener lc) {
         listener.add(lc);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -186,6 +193,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     public void removeLayerSelectionChangedListener(final LayerControlSelectionChangedListener lc) {
         listener.remove(lc);
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -194,6 +202,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
             lc.layerControlSelectionChanged(this);
         }
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -202,6 +211,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
             lc.layerWantsUp(this);
         }
     }
+
     /**
      * DOCUMENT ME!
      */
@@ -228,71 +238,77 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         lblLayerName = new javax.swing.JLabel();
         prbLayer = new javax.swing.JProgressBar();
 
-        mitLayerName.setText(org.openide.util.NbBundle.getMessage(
-                LayerControl.class,
-                "LayerControl.mitLayerName.text")); // NOI18N
+        mitLayerName.setText(
+            org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.mitLayerName.text")
+        ); // NOI18N
         mitLayerName.setEnabled(false);
         pmenProps.add(mitLayerName);
         pmenProps.add(jSeparator1);
 
-        mitGridEnabled.setText(org.openide.util.NbBundle.getMessage(
-                LayerControl.class,
-                "LayerControl.mitGridEnabled.text")); // NOI18N
+        mitGridEnabled.setText(
+            org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.mitGridEnabled.text")
+        ); // NOI18N
         pmenProps.add(mitGridEnabled);
 
         setToolTipText("");
-        addMouseListener(new java.awt.event.MouseAdapter() {
-
+        addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     formMouseClicked(evt);
                 }
+
                 @Override
                 public void mouseEntered(final java.awt.event.MouseEvent evt) {
                     formMouseEntered(evt);
                 }
-            });
-        addKeyListener(new java.awt.event.KeyAdapter() {
-
+            }
+        );
+        addKeyListener(
+            new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyPressed(final java.awt.event.KeyEvent evt) {
                     formKeyPressed(evt);
                 }
-            });
+            }
+        );
         setLayout(new java.awt.GridBagLayout());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(lblIndent, gridBagConstraints);
 
         lblIcon.setText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.lblIcon.text")); // NOI18N
-        lblIcon.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblIcon.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblIconMouseClicked(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(lblIcon, gridBagConstraints);
 
-        lblLayerName.setText(org.openide.util.NbBundle.getMessage(
-                LayerControl.class,
-                "LayerControl.lblLayerName.text")); // NOI18N
-        lblLayerName.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblLayerName.setText(
+            org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.lblLayerName.text")
+        ); // NOI18N
+        lblLayerName.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblLayerNameMouseClicked(evt);
                 }
-            });
-        lblLayerName.addKeyListener(new java.awt.event.KeyAdapter() {
-
+            }
+        );
+        lblLayerName.addKeyListener(
+            new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyPressed(final java.awt.event.KeyEvent evt) {
                     lblLayerNameKeyPressed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
@@ -316,9 +332,9 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
      */
     private void lblLayerNameKeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_lblLayerNameKeyPressed
         if (log.isDebugEnabled()) {
-            log.debug("LBL Key");                                            // NOI18N
+            log.debug("LBL Key"); // NOI18N
         }
-    }                                                                        //GEN-LAST:event_lblLayerNameKeyPressed
+    } //GEN-LAST:event_lblLayerNameKeyPressed
 
     /**
      * DOCUMENT ME!
@@ -327,14 +343,14 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
      */
     private void formKeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_formKeyPressed
         if (log.isDebugEnabled()) {
-            log.debug("Key");                                        // NOI18N
+            log.debug("Key"); // NOI18N
         }
         if (evt.getKeyCode() == evt.VK_UP) {
             fireLayerWantsUp();
         } else if (evt.getKeyCode() == evt.VK_DOWN) {
             fireLayerWantsDown();
         }
-    }                                                                //GEN-LAST:event_formKeyPressed
+    } //GEN-LAST:event_formKeyPressed
 
     /**
      * DOCUMENT ME!
@@ -345,7 +361,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         setSelected(!isSelected());
         fireLayerSelectionChanged();
         this.requestFocus();
-    }                                                                    //GEN-LAST:event_formMouseClicked
+    } //GEN-LAST:event_formMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -356,15 +372,14 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         setSelected(!isSelected());
         fireLayerSelectionChanged();
         this.requestFocus();
-    }                                                                            //GEN-LAST:event_lblLayerNameMouseClicked
+    } //GEN-LAST:event_lblLayerNameMouseClicked
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formMouseEntered(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_formMouseEntered
-    }                                                                    //GEN-LAST:event_formMouseEntered
+    private void formMouseEntered(final java.awt.event.MouseEvent evt) {} //GEN-FIRST:event_formMouseEntered //GEN-LAST:event_formMouseEntered
 
     /**
      * DOCUMENT ME!
@@ -378,7 +393,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
             transparentable.repaint();
         }
         syncIconWithEnabledState();
-    }                                                                       //GEN-LAST:event_lblIconMouseClicked
+    } //GEN-LAST:event_lblIconMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -387,19 +402,19 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         if (getLayer().isEnabled()) {
             lblIcon.setIcon(this.visibleIcon);
             if (getLayer() instanceof MapService) {
-//                mappingComponent.handleMapService(-1,(MapService)getLayer(),true);
+                //                mappingComponent.handleMapService(-1,(MapService)getLayer(),true);
             }
         } else {
             lblIcon.setIcon(this.invisibleIcon);
-            ((AbstractRetrievalService)getLayer()).fireRetrievalAborted(new RetrievalEvent());
+            ((AbstractRetrievalService) getLayer()).fireRetrievalAborted(new RetrievalEvent());
         }
         setObjectVisible(getLayer().isEnabled());
     }
 
     @Override
     public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     if (getLayer().isEnabled()) {
@@ -407,150 +422,151 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                         prbLayer.setIndeterminate(true);
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override
     public void retrievalProgress(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     if (getLayer().isEnabled()) {
                         prbLayer.setIndeterminate(false);
-                        prbLayer.setValue((int)(100 * e.getPercentageDone()));
+                        prbLayer.setValue((int) (100 * e.getPercentageDone()));
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override
     public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         final Runnable t = new Thread("LayerControl retrievalError()") {
+            @Override
+            public void run() {
+                if (getLayer().isEnabled()) {
+                    if (e.getRetrievedObject() instanceof Image) {
+                        final Image i = (Image) e.getRetrievedObject();
+                        final int newWidth = (int) (i.getWidth(null) * 0.7);
+                        final int newHeight = (int) (i.getHeight(null) * 0.7);
+                        if (log.isDebugEnabled()) {
+                            log.debug("w,h:" + newWidth + "," + newHeight); // NOI18N
+                        }
+                        final Image ii = i.getScaledInstance(newWidth, newHeight, i.SCALE_SMOOTH);
+                        BufferedImage bi = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+                        final Graphics2D g = (Graphics2D) bi.getGraphics();
+                        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                        g.drawImage(i, 0, 0, newWidth, newHeight, null);
+                        g.drawLine(10, 0, 20, 0);
 
-                @Override
-                public void run() {
-                    if (getLayer().isEnabled()) {
-                        if (e.getRetrievedObject() instanceof Image) {
-                            final Image i = (Image)e.getRetrievedObject();
-                            final int newWidth = (int)(i.getWidth(null) * 0.7);
-                            final int newHeight = (int)(i.getHeight(null) * 0.7);
-                            if (log.isDebugEnabled()) {
-                                log.debug("w,h:" + newWidth + "," + newHeight); // NOI18N
-                            }
-                            final Image ii = i.getScaledInstance(newWidth, newHeight, i.SCALE_SMOOTH);
-                            BufferedImage bi = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-                            final Graphics2D g = (Graphics2D)bi.getGraphics();
-                            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                RenderingHints.VALUE_ANTIALIAS_ON);
-                            g.setRenderingHint(RenderingHints.KEY_RENDERING,
-                                RenderingHints.VALUE_RENDER_QUALITY);
-                            g.drawImage(i, 0, 0, newWidth, newHeight, null);
-                            g.drawLine(10, 0, 20, 0);
+                        int maxX = 0;
+                        int maxY = 0;
+                        int minX = newWidth;
+                        int minY = newHeight;
+                        final int white = -1;
 
-                            int maxX = 0;
-                            int maxY = 0;
-                            int minX = newWidth;
-                            int minY = newHeight;
-                            final int white = -1;
-
-                            for (int x = 0; x < newWidth; ++x) {
-                                for (int y = 0; y < newHeight; ++y) {
-                                    final int val = bi.getRGB(x, y);
-                                    if (val != white) {
-                                        if (x > maxX) {
-                                            maxX = x;
-                                        }
-                                        if (x < minX) {
-                                            minX = x;
-                                        }
-                                        if (y > maxY) {
-                                            maxY = y;
-                                        }
-                                        if (y < minY) {
-                                            minY = y;
-                                        }
+                        for (int x = 0; x < newWidth; ++x) {
+                            for (int y = 0; y < newHeight; ++y) {
+                                final int val = bi.getRGB(x, y);
+                                if (val != white) {
+                                    if (x > maxX) {
+                                        maxX = x;
+                                    }
+                                    if (x < minX) {
+                                        minX = x;
+                                    }
+                                    if (y > maxY) {
+                                        maxY = y;
+                                    }
+                                    if (y < minY) {
+                                        minY = y;
                                     }
                                 }
                             }
-                            final int border = 5;
-                            if ((minX - border) < 0) {
-                                minX = 0;
-                            } else {
-                                minX -= border;
-                            }
-                            if ((minY - border) < 0) {
-                                minY = 0;
-                            } else {
-                                minY -= border;
-                            }
-                            if ((maxX + border) > newWidth) {
-                                maxX = newWidth;
-                            } else {
-                                maxX += border;
-                            }
-                            if ((maxY + border) > newHeight) {
-                                maxY = newHeight;
-                            } else {
-                                maxY += border;
-                            }
-                            try {
-                                bi = bi.getSubimage(minX, minY, maxX, maxY);
-                            } catch (Exception e) {
-                            }
-                            errorImage = bi;
-                            slider.setToolTipText(org.openide.util.NbBundle.getMessage(
-                                    LayerControl.class,
-                                    "LayerControl.slider.toolTipText1")); // NOI18N
-                        } else if (e.getRetrievedObject() instanceof String) {
-                            errorImage = null;
-                            final String message = (String)e.getRetrievedObject();
-//                  slider.setToolTipText("<html><b>Der Server lieferte folgende Fehlermeldung zur�ck:<br></b><body>"+message+"</body></html>");
-                            SwingUtilities.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        slider.setToolTipText(
-                                            org.openide.util.NbBundle.getMessage(
-                                                LayerControl.class,
-                                                "LayerControl.slider.toolTipText2",
-                                                new Object[] { message })); // NOI18N
-                                    }
-                                });
                         }
-                        SwingUtilities.invokeLater(new Runnable() {
-
+                        final int border = 5;
+                        if ((minX - border) < 0) {
+                            minX = 0;
+                        } else {
+                            minX -= border;
+                        }
+                        if ((minY - border) < 0) {
+                            minY = 0;
+                        } else {
+                            minY -= border;
+                        }
+                        if ((maxX + border) > newWidth) {
+                            maxX = newWidth;
+                        } else {
+                            maxX += border;
+                        }
+                        if ((maxY + border) > newHeight) {
+                            maxY = newHeight;
+                        } else {
+                            maxY += border;
+                        }
+                        try {
+                            bi = bi.getSubimage(minX, minY, maxX, maxY);
+                        } catch (Exception e) {}
+                        errorImage = bi;
+                        slider.setToolTipText(
+                            org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText1")
+                        ); // NOI18N
+                    } else if (e.getRetrievedObject() instanceof String) {
+                        errorImage = null;
+                        final String message = (String) e.getRetrievedObject();
+                        //                  slider.setToolTipText("<html><b>Der Server lieferte folgende Fehlermeldung zur�ck:<br></b><body>"+message+"</body></html>");
+                        SwingUtilities.invokeLater(
+                            new Runnable() {
                                 @Override
                                 public void run() {
-                                    prbLayer.setForeground(java.awt.Color.RED);
-                                    prbLayer.setIndeterminate(false);
-                                    prbLayer.setValue(100);
+                                    slider.setToolTipText(
+                                        org.openide.util.NbBundle.getMessage(
+                                            LayerControl.class,
+                                            "LayerControl.slider.toolTipText2",
+                                            new Object[] { message }
+                                        )
+                                    ); // NOI18N
                                 }
-                            });
-                        if (errorAbolitionTime > 0) {
-                            final java.awt.event.ActionListener timerAction = new java.awt.event.ActionListener() {
-
-                                    @Override
-                                    public void actionPerformed(final java.awt.event.ActionEvent event) {
-                                        resetProgressbarColor();
-                                    }
-                                };
-
-                            final javax.swing.Timer timer = new javax.swing.Timer(errorAbolitionTime, timerAction);
-                            timer.setRepeats(false);
-                            timer.start();
+                            }
+                        );
+                    }
+                    SwingUtilities.invokeLater(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                prbLayer.setForeground(java.awt.Color.RED);
+                                prbLayer.setIndeterminate(false);
+                                prbLayer.setValue(100);
+                            }
                         }
+                    );
+                    if (errorAbolitionTime > 0) {
+                        final java.awt.event.ActionListener timerAction = new java.awt.event.ActionListener() {
+                            @Override
+                            public void actionPerformed(final java.awt.event.ActionEvent event) {
+                                resetProgressbarColor();
+                            }
+                        };
+
+                        final javax.swing.Timer timer = new javax.swing.Timer(errorAbolitionTime, timerAction);
+                        timer.setRepeats(false);
+                        timer.start();
                     }
                 }
-            };
+            }
+        };
         CismetThreadPool.execute(t);
         // prbLayer.setForeground(new Color(255,0,0));
     }
 
     @Override
     public void retrievalComplete(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     if (getLayer().isEnabled()) {
@@ -564,19 +580,21 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                         }
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override
     public void retrievalAborted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     prbLayer.setIndeterminate(false);
                     prbLayer.setValue(0);
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -587,6 +605,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     public void setIndent(final String s) {
         lblIndent.setText(s);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -597,6 +616,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         lblLayerName.setText(layer.getName());
         mitLayerName.setText(layer.getName());
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -604,14 +624,15 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
      */
     public void setTransparentable(final PNode t) {
         transparentable = t;
-        slider.setValue((int)(100 * transparentable.getTransparency()));
-//        if (transparentable.getVisible()) {
-//            lblIcon.setIcon(visibleIcon);
-//        }
-//        else {
-//            lblIcon.setIcon(invisibleIcon);
-//        }
+        slider.setValue((int) (100 * transparentable.getTransparency()));
+        //        if (transparentable.getVisible()) {
+        //            lblIcon.setIcon(visibleIcon);
+        //        }
+        //        else {
+        //            lblIcon.setIcon(invisibleIcon);
+        //        }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -645,6 +666,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         transparentable.setTransparency(f);
         transparentable.repaint();
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -673,16 +695,15 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
             transparentable.setTransparency(0.1f);
         }
         final java.awt.event.ActionListener timerAction = new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent event) {
-                    if (positive) {
-                        transparentable.animateToTransparency(oldTrans, fadeDuration);
-                    } else {
-                        transparentable.setTransparency(oldTrans);
-                    }
+            @Override
+            public void actionPerformed(final java.awt.event.ActionEvent event) {
+                if (positive) {
+                    transparentable.animateToTransparency(oldTrans, fadeDuration);
+                } else {
+                    transparentable.setTransparency(oldTrans);
                 }
-            };
+            }
+        };
 
         final javax.swing.Timer timer = new javax.swing.Timer(flashDuration, timerAction);
         timer.setRepeats(false);
@@ -725,15 +746,15 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
      */
     public void setSelected(final boolean selected) {
         this.selected = selected;
-//        if (selected) {
-//            setBackground(java.awt.SystemColor.textHighlight);
-//            //setBackground(new java.awt.Color(51, 255, 51));
-//            //setBackground(javax.swing.UIManager.getDefaults().getColor("PropSheet.selectedSetBackground"));
-//            repaint();
-//        } else {
-//            setBackground(new Color(236,233,216));
-//            repaint();
-//        }
+        //        if (selected) {
+        //            setBackground(java.awt.SystemColor.textHighlight);
+        //            //setBackground(new java.awt.Color(51, 255, 51));
+        //            //setBackground(javax.swing.UIManager.getDefaults().getColor("PropSheet.selectedSetBackground"));
+        //            repaint();
+        //        } else {
+        //            setBackground(new Color(236,233,216));
+        //            repaint();
+        //        }
     }
 
     /**
@@ -760,14 +781,17 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         public void mousePressed(final MouseEvent e) {
             checkPopup(e);
         }
+
         @Override
         public void mouseClicked(final MouseEvent e) {
             checkPopup(e);
         }
+
         @Override
         public void mouseReleased(final MouseEvent e) {
             checkPopup(e);
         }
+
         /**
          * DOCUMENT ME!
          *
@@ -779,6 +803,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
             }
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -792,8 +817,8 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
          * Creates a new SliderMenuItem object.
          */
         public SliderMenuItem() {
-//            setBorder(new CompoundBorder(new TitledBorder("Control"),
-//                                  new EmptyBorder(1, 1, 1, 1)));
+            //            setBorder(new CompoundBorder(new TitledBorder("Control"),
+            //                                  new EmptyBorder(1, 1, 1, 1)));
 
             setMajorTickSpacing(25);
             setMinorTickSpacing(20);
@@ -802,20 +827,23 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void processMouseEvent(final MouseEvent e,
-                final MenuElement[] path,
-                final MenuSelectionManager manager) {
-        }
+        public void processMouseEvent(
+            final MouseEvent e,
+            final MenuElement[] path,
+            final MenuSelectionManager manager
+        ) {}
+
         @Override
-        public void processKeyEvent(final KeyEvent e, final MenuElement[] path, final MenuSelectionManager manager) {
-        }
+        public void processKeyEvent(final KeyEvent e, final MenuElement[] path, final MenuSelectionManager manager) {}
+
         @Override
-        public void menuSelectionChanged(final boolean isIncluded) {
-        }
+        public void menuSelectionChanged(final boolean isIncluded) {}
+
         @Override
         public MenuElement[] getSubElements() {
             return new MenuElement[0];
         }
+
         @Override
         public Component getComponent() {
             return this;

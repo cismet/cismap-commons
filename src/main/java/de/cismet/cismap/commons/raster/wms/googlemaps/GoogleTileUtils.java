@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * Originally written by Andrew Rowbottom.
  * Released freely into the public domain, use it how you want, don't blame me.
@@ -17,7 +17,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
 import java.text.DecimalFormat;
 
 /**
@@ -59,17 +58,25 @@ public class GoogleTileUtils {
         g.setColor(Color.black);
 
         final int scale = 400 / keyholeString.length();
-        g.setFont(new Font("Serif", Font.BOLD, scale));                                   // NOI18N
+        g.setFont(new Font("Serif", Font.BOLD, scale)); // NOI18N
         g.drawString(keyholeString + " (z=" + getTileZoom(keyholeString) + ")", 10, 200); // NOI18N
 
         final Rectangle2D r = getLatLong(keyholeString);
         final DecimalFormat df = new DecimalFormat("#.####"); // NOI18N
-        g.setFont(new Font("SanSerif", 0, 15));               // NOI18N
+        g.setFont(new Font("SanSerif", 0, 15)); // NOI18N
 
-        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX()) + " (w:" + df.format(r.getWidth()) + " h:"
-                    + df.format(r.getHeight()) + ")",
+        g.drawString(
+            df.format(r.getMinY()) +
+            "," +
+            df.format(r.getMinX()) +
+            " (w:" +
+            df.format(r.getWidth()) +
+            " h:" +
+            df.format(r.getHeight()) +
+            ")",
             10,
-            250);                                                                     // NOI18N
+            250
+        ); // NOI18N
         g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20); // NOI18N
         g.drawRect(1, 1, 255, 255);
         g.dispose();
@@ -94,17 +101,25 @@ public class GoogleTileUtils {
         g.setColor(Color.black);
 
         final int scale = 20;
-        g.setFont(new Font("Serif", Font.BOLD, scale));             // NOI18N
+        g.setFont(new Font("Serif", Font.BOLD, scale)); // NOI18N
         g.drawString("x:" + x + " y:" + y + " z:" + zoom, 10, 200); // NOI18N
 
         final Rectangle2D r = getLatLong(x, y, zoom);
         final DecimalFormat df = new DecimalFormat("#.####"); // NOI18N
-        g.setFont(new Font("SanSerif", 0, 15));               // NOI18N
+        g.setFont(new Font("SanSerif", 0, 15)); // NOI18N
 
-        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX()) + " (w:" + df.format(r.getWidth()) + " h:"
-                    + df.format(r.getHeight()) + ")",
+        g.drawString(
+            df.format(r.getMinY()) +
+            "," +
+            df.format(r.getMinX()) +
+            " (w:" +
+            df.format(r.getWidth()) +
+            " h:" +
+            df.format(r.getHeight()) +
+            ")",
             10,
-            250);                                                                     // NOI18N
+            250
+        ); // NOI18N
         g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20); // NOI18N
         g.drawRect(1, 1, 255, 255);
         g.dispose();
@@ -127,7 +142,7 @@ public class GoogleTileUtils {
             throw new RuntimeException("Keyhole string must start with 't'"); // NOI18N
         }
 
-        double lon = -180;     // x
+        double lon = -180; // x
         double lonWidth = 360; // width 360
 
         // double lat = -90;  // y
@@ -142,36 +157,37 @@ public class GoogleTileUtils {
             final char c = keyholeStr.charAt(i);
 
             switch (c) {
-                case 's': {
-                    // lat += latHeight;
-                    lon += lonWidth;
+                case 's':
+                    {
+                        // lat += latHeight;
+                        lon += lonWidth;
 
-                    break;
-                }
+                        break;
+                    }
+                case 'r':
+                    {
+                        lat += latHeight;
+                        lon += lonWidth;
 
-                case 'r': {
-                    lat += latHeight;
-                    lon += lonWidth;
+                        break;
+                    }
+                case 'q':
+                    {
+                        lat += latHeight;
 
-                    break;
-                }
-
-                case 'q': {
-                    lat += latHeight;
-
-                    // lon += lonWidth;
-                    break;
-                }
-
-                case 't': {
-                    // lat += latHeight;
-                    // lon += lonWidth;
-                    break;
-                }
-
-                default: {
-                    throw new RuntimeException("unknown char '" + c + "' when decoding keyhole string."); // NOI18N
-                }
+                        // lon += lonWidth;
+                        break;
+                    }
+                case 't':
+                    {
+                        // lat += latHeight;
+                        // lon += lonWidth;
+                        break;
+                    }
+                default:
+                    {
+                        throw new RuntimeException("unknown char '" + c + "' when decoding keyhole string."); // NOI18N
+                    }
             }
         }
 
@@ -210,7 +226,7 @@ public class GoogleTileUtils {
      * @return  DOCUMENT ME!
      */
     public static Rectangle2D.Double getLatLong(final int x, final int y, final int zoom) {
-        double lon = -180;     // x
+        double lon = -180; // x
         double lonWidth = 360; // width 360
 
         // double lat = -90;  // y

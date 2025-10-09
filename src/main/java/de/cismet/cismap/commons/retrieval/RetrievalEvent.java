@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class RetrievalEvent {
 
     public static final String SERVERERROR = "SERVERERROR"; // NOI18N
     public static final String CLIENTERROR = "CLIENTERROR"; // NOI18N
-    private static final String UNDEFINED = "UNDEFINED";    // NOI18N
+    private static final String UNDEFINED = "UNDEFINED"; // NOI18N
     private static String errorType = UNDEFINED;
 
     //~ Instance fields --------------------------------------------------------
@@ -43,8 +43,7 @@ public class RetrievalEvent {
     /**
      * Creates a new instance of RetrievalEvent.
      */
-    public RetrievalEvent() {
-    }
+    public RetrievalEvent() {}
 
     //~ Methods ----------------------------------------------------------------
 

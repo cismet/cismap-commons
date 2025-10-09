@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
 /**
@@ -20,6 +20,5 @@ public class RetrievalException extends Exception {
     /**
      * Creates a new instance of RetrievalException.
      */
-    public RetrievalException() {
-    }
+    public RetrievalException() {}
 }

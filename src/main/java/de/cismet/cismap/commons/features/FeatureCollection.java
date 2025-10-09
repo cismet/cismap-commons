@@ -1,15 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
-import java.util.Collection;
-import java.util.List;
 
 import de.cismet.cismap.commons.*;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -18,7 +18,6 @@ import de.cismet.cismap.commons.*;
  * @version  $Revision$, $Date$
  */
 public interface FeatureCollection extends ServiceLayer {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

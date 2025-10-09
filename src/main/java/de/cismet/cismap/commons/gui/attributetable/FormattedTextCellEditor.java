@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,10 +13,8 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import java.awt.Component;
-
 import java.text.Format;
 import java.text.ParseException;
-
 import javax.swing.AbstractCellEditor;
 import javax.swing.JFormattedTextField;
 import javax.swing.JTable;
@@ -50,7 +48,7 @@ public class FormattedTextCellEditor extends AbstractCellEditor implements Table
 
     @Override
     public Object getCellEditorValue() {
-//        return textField.getText();
+        //        return textField.getText();
         try {
             return textField.getFormatter().valueToString(textField.getValue());
         } catch (ParseException ex) {
@@ -59,13 +57,15 @@ public class FormattedTextCellEditor extends AbstractCellEditor implements Table
     }
 
     @Override
-    public Component getTableCellEditorComponent(final JTable table,
-            final Object value,
-            final boolean isSelected,
-            final int row,
-            final int column) {
+    public Component getTableCellEditorComponent(
+        final JTable table,
+        final Object value,
+        final boolean isSelected,
+        final int row,
+        final int column
+    ) {
         if (value instanceof String) {
-            textField.setText((String)value);
+            textField.setText((String) value);
         }
 
         return textField;

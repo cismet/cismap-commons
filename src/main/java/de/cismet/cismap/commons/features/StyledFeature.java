@@ -1,15 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
-import java.awt.Paint;
-
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import java.awt.Paint;
 
 /**
  * DOCUMENT ME!
@@ -18,7 +17,6 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  * @version  $Revision$, $Date$
  */
 public interface StyledFeature extends Feature {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

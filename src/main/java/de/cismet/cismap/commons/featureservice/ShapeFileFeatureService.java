@@ -1,43 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-
-import java.awt.event.ActionEvent;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-
-import java.net.URI;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import static de.cismet.cismap.commons.featureservice.AbstractFeatureService.SQL_QUERY_BUTTONS;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
@@ -48,8 +22,27 @@ import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
-
-import static de.cismet.cismap.commons.featureservice.AbstractFeatureService.SQL_QUERY_BUTTONS;
+import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 /**
  * DOCUMENT ME!
@@ -76,8 +69,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<="));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("||", "Or"));
-        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("()") {
-
+        SQL_QUERY_BUTTONS.add(
+            new DefaultQueryButtonAction("()") {
                 {
                     posCorrection = -1;
                 }
@@ -95,33 +88,44 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                         if (start == end) {
                             CorrectCarret(posCorrection);
                         } else {
-                            CorrectCarret((short)2);
+                            CorrectCarret((short) 2);
                         }
                     }
                 }
-            });
+            }
+        );
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("!", "Not"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("null"));
         layerIcons.put(
             LAYER_ENABLED_VISIBLE,
             new ImageIcon(
-                AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));                   // NOI18N
+                AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_ENABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_VISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"))); // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"
+                    )
+            )
+        ); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -159,10 +163,12 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public ShapeFileFeatureService(final String name,
-            final URI documentURI,
-            final long documentSize,
-            final List<FeatureServiceAttribute> attributes) throws Exception {
+    public ShapeFileFeatureService(
+        final String name,
+        final URI documentURI,
+        final long documentSize,
+        final List<FeatureServiceAttribute> attributes
+    ) throws Exception {
         super(name, documentURI, documentSize, attributes);
         this.maxFeatureCount = Integer.MAX_VALUE;
         checkFile();
@@ -212,12 +218,14 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         try {
-            final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
-                    this.getDocumentURI(),
-                    this.maxSupportedFeatureCount,
-                    this.layerInitWorker,
-                    parseSLD(getSLDDefiniton()),
-                    shapeCrs);
+            final ShapeFeatureFactory sff = new ShapeFeatureFactory(
+                this.getLayerProperties(),
+                this.getDocumentURI(),
+                this.maxSupportedFeatureCount,
+                this.layerInitWorker,
+                parseSLD(getSLDDefiniton()),
+                shapeCrs
+            );
             noGeometryRecognised = sff.isNoGeometryRecognised();
             errorInGeometryFound = sff.isErrorInGeometryFound();
             geometryType = sff.getGeometryType();
@@ -239,8 +247,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                 } else {
                     sldDefinition = sldString;
                     final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(
-                            new StringReader(
-                                sldString));
+                        new StringReader(sldString)
+                    );
 
                     if ((styles != null) && !styles.isEmpty()) {
                         sff.setSLDStyle(styles);
@@ -275,7 +283,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     public void setDocumentURI(final URI documentURI) {
         super.setDocumentURI(documentURI);
         if (this.getFeatureFactory() != null) {
-            ((ShapeFeatureFactory)this.getFeatureFactory()).setDocumentURI(documentURI);
+            ((ShapeFeatureFactory) this.getFeatureFactory()).setDocumentURI(documentURI);
         }
         checkFile();
     }
@@ -325,7 +333,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     public void setCrs(final Crs crs) {
         if (featureFactory != null) {
-            ((ShapeFeatureFactory)featureFactory).setCrs(crs);
+            ((ShapeFeatureFactory) featureFactory).setCrs(crs);
         } else {
             this.crs = crs;
         }
@@ -335,8 +343,11 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     public void setLayerProperties(final LayerProperties layerProperties, final boolean refreshFeatures) {
         super.setLayerProperties(layerProperties, refreshFeatures);
 
-        if (((sldDefinition == null) || sldDefinition.isEmpty()) && (layerProperties != null)
-                    && (layerProperties.getStyle() != null)) {
+        if (
+            ((sldDefinition == null) || sldDefinition.isEmpty()) &&
+            (layerProperties != null) &&
+            (layerProperties.getStyle() != null)
+        ) {
             final XMLOutputter out = new XMLOutputter(Format.getPrettyFormat()); // NOI18N
             final StringWriter writer = new StringWriter();
             try {
@@ -415,12 +426,12 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         return true;
     }
 
-// breaks DocumentFeatureServiceFactory
-//  @Override
-//  protected String getFeatureLayerType()
-//  {
-//    return SHAPE_FEATURELAYER_TYPE;
-//  }
+    // breaks DocumentFeatureServiceFactory
+    //  @Override
+    //  protected String getFeatureLayerType()
+    //  {
+    //    return SHAPE_FEATURELAYER_TYPE;
+    //  }
 
     @Override
     public String getGeometryType() {
@@ -443,7 +454,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         String crs = null;
 
         if (getFeatureFactory() != null) {
-            crs = ((ShapeFeatureFactory)getFeatureFactory()).getShapeCrs();
+            crs = ((ShapeFeatureFactory) getFeatureFactory()).getShapeCrs();
         } else if (shapeCrs != null) {
             crs = shapeCrs;
         }

@@ -1,15 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import java.util.Collection;
 import java.util.Vector;
-
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -67,13 +66,15 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
         switch (selectionMode) {
             case SINGLE_SELECTION:
             case SINGLE_INTERVAL_SELECTION:
-            case MULTIPLE_INTERVAL_SELECTION: {
-                this.selectionMode = selectionMode;
-                break;
-            }
-            default: {
-                throw new IllegalArgumentException("invalid selectionMode"); // NOI18N
-            }
+            case MULTIPLE_INTERVAL_SELECTION:
+                {
+                    this.selectionMode = selectionMode;
+                    break;
+                }
+            default:
+                {
+                    throw new IllegalArgumentException("invalid selectionMode"); // NOI18N
+                }
         }
     }
 
@@ -100,7 +101,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
                 }
                 final Vector<Feature> v = new Vector<Feature>();
                 for (int i = from; i <= to; ++i) {
-                    v.add((Feature)getAllFeatures().get(i));
+                    v.add((Feature) getAllFeatures().get(i));
                 }
                 select(v);
             }
@@ -140,7 +141,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
     @Override
     public boolean isSelectedIndex(final int index) {
         try {
-            return isSelected((Feature)getAllFeatures().get(index));
+            return isSelected((Feature) getAllFeatures().get(index));
         } catch (Throwable t) {
             log.error("Error in isSelectedIndex", t); // NOI18N
             return false;
@@ -450,7 +451,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             leadIndex = to;
             final Vector<Feature> v = new Vector<Feature>();
             for (int i = from; i <= to; ++i) {
-                v.add((Feature)getAllFeatures().get(i));
+                v.add((Feature) getAllFeatures().get(i));
             }
             return v;
         } catch (Throwable t) {

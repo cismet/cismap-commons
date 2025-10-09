@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.capabilitywidget;
-
-import org.jdom.Element;
-
-import java.util.Vector;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import java.util.Vector;
+import org.jdom.Element;
 
 /**
  * TODO: Diese Klasse kann entfernt werden, da sie keine zusaetzliche Funktionalitaet zur Klasse FeatureType besitzt.

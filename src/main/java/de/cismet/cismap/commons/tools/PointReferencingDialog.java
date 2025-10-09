@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -15,21 +15,6 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.datatypes.Types;
-
-import org.openide.util.NbBundle;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JOptionPane;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -41,9 +26,17 @@ import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import org.apache.log4j.Logger;
+import org.deegree.datatypes.Types;
+import org.openide.util.NbBundle;
 
 /**
  * This dialog allows to add point geometrie.
@@ -75,6 +68,7 @@ public class PointReferencingDialog extends javax.swing.JDialog {
     private javax.swing.JLabel lblFrom;
     private javax.swing.JLabel lblTill;
     private javax.swing.JLabel lblTitle;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -86,9 +80,7 @@ public class PointReferencingDialog extends javax.swing.JDialog {
      * @param  modal    DOCUMENT ME!
      * @param  service  DOCUMENT ME!
      */
-    public PointReferencingDialog(final java.awt.Frame parent,
-            final boolean modal,
-            final H2FeatureService service) {
+    public PointReferencingDialog(final java.awt.Frame parent, final boolean modal, final H2FeatureService service) {
         super(parent, modal);
         this.service = service;
         initComponents();
@@ -236,17 +228,23 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         butCancel = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(org.openide.util.NbBundle.getMessage(
+        setTitle(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.title",
-                new Object[] {})); // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         lblTitle.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
-        lblTitle.setText(org.openide.util.NbBundle.getMessage(
+        lblTitle.setText(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.lblTitle.text",
-                new Object[] {}));                            // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -280,10 +278,13 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(cbTill, gridBagConstraints);
 
         lblFrom.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblFrom.setText(org.openide.util.NbBundle.getMessage(
+        lblFrom.setText(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.lblFrom.text",
-                new Object[] {}));                           // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -292,10 +293,13 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblFrom, gridBagConstraints);
 
         lblTill.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblTill.setText(org.openide.util.NbBundle.getMessage(
+        lblTill.setText(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.lblTill.text",
-                new Object[] {}));                           // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -303,17 +307,21 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblTill, gridBagConstraints);
 
-        butApply.setText(org.openide.util.NbBundle.getMessage(
+        butApply.setText(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.butApply.text",
-                new Object[] {})); // NOI18N
-        butApply.addActionListener(new java.awt.event.ActionListener() {
-
+                new Object[] {}
+            )
+        ); // NOI18N
+        butApply.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     butApplyActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -323,17 +331,21 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         getContentPane().add(butApply, gridBagConstraints);
 
-        butCancel.setText(org.openide.util.NbBundle.getMessage(
+        butCancel.setText(
+            org.openide.util.NbBundle.getMessage(
                 PointReferencingDialog.class,
                 "PointReferencingDialog.butCancel.text",
-                new Object[] {})); // NOI18N
-        butCancel.addActionListener(new java.awt.event.ActionListener() {
-
+                new Object[] {}
+            )
+        ); // NOI18N
+        butCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     butCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 5;
@@ -356,254 +368,284 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         final String tillField = String.valueOf(cbTill.getSelectedItem());
 
         if (fromField.equals(tillField)) {
-            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+            JOptionPane.showConfirmDialog(
+                CismapBroker.getInstance().getMappingComponent(),
                 NbBundle.getMessage(
                     PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY"),
+                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY"
+                ),
                 NbBundle.getMessage(
                     PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY.title"),
+                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY.title"
+                ),
                 JOptionPane.DEFAULT_OPTION,
-                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.ERROR_MESSAGE
+            );
 
             return;
         }
 
-        final String tableName = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
-                NbBundle.getMessage(
-                    PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.tableName"),
-                NbBundle.getMessage(
-                    PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.tableName.title"),
-                JOptionPane.QUESTION_MESSAGE);
+        final String tableName = JOptionPane.showInputDialog(
+            CismapBroker.getInstance().getMappingComponent(),
+            NbBundle.getMessage(
+                PointReferencingDialog.class,
+                "PointReferencingDialog.butApplyActionPerformed.tableName"
+            ),
+            NbBundle.getMessage(
+                PointReferencingDialog.class,
+                "PointReferencingDialog.butApplyActionPerformed.tableName.title"
+            ),
+            JOptionPane.QUESTION_MESSAGE
+        );
 
         if ((tableName == null) || tableName.equals("")) {
             return;
         }
 
         if (H2FeatureService.tableAlreadyExists(tableName)) {
-            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+            JOptionPane.showConfirmDialog(
+                CismapBroker.getInstance().getMappingComponent(),
                 NbBundle.getMessage(
                     PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists"),
+                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists"
+                ),
                 NbBundle.getMessage(
                     PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists.title"),
+                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists.title"
+                ),
                 JOptionPane.DEFAULT_OPTION,
-                JOptionPane.ERROR_MESSAGE);
+                JOptionPane.ERROR_MESSAGE
+            );
 
             return;
         }
 
-        final WaitingDialogThread<ServiceWithHint> wdt = new WaitingDialogThread<ServiceWithHint>(StaticSwingTools
-                        .getParentFrame(
-                            getParent()),
-                true,
-                NbBundle.getMessage(
-                    PointReferencingDialog.class,
-                    "PointReferencingDialog.butApplyActionPerformed().text"),
-                null,
-                200) {
+        final WaitingDialogThread<ServiceWithHint> wdt = new WaitingDialogThread<ServiceWithHint>(
+            StaticSwingTools.getParentFrame(getParent()),
+            true,
+            NbBundle.getMessage(PointReferencingDialog.class, "PointReferencingDialog.butApplyActionPerformed().text"),
+            null,
+            200
+        ) {
+            @Override
+            protected ServiceWithHint doInBackground() throws Exception {
+                //                    return service.createPointGeometryInformation(
+                //                            fromField,
+                //                            tillField,
+                //                            tableName);
 
-                @Override
-                protected ServiceWithHint doInBackground() throws Exception {
-//                    return service.createPointGeometryInformation(
-//                            fromField,
-//                            tillField,
-//                            tableName);
+                service.initAndWait();
+                final Map<String, FeatureServiceAttribute> attributes = new HashMap<String, FeatureServiceAttribute>(
+                    service.getFeatureServiceAttributes()
+                );
+                String geometryField = null;
+                final List<String> attributeOrder = new ArrayList<String>(service.getOrderedFeatureServiceAttributes());
 
-                    service.initAndWait();
-                    final Map<String, FeatureServiceAttribute> attributes =
-                        new HashMap<String, FeatureServiceAttribute>(service.getFeatureServiceAttributes());
-                    String geometryField = null;
-                    final List<String> attributeOrder = new ArrayList<String>(
-                            service.getOrderedFeatureServiceAttributes());
+                for (final String key : attributes.keySet()) {
+                    final FeatureServiceAttribute attr = attributes.get(key);
 
-                    for (final String key : attributes.keySet()) {
-                        final FeatureServiceAttribute attr = attributes.get(key);
-
-                        if (attr.isGeometry()) {
-                            geometryField = key;
-                            break;
-                        }
+                    if (attr.isGeometry()) {
+                        geometryField = key;
+                        break;
                     }
-
-                    if (geometryField != null) {
-                        attributes.remove(geometryField);
-                        attributeOrder.remove(geometryField);
-                    }
-
-                    attributes.put("geom", new FeatureServiceAttribute("geom", String.valueOf(Types.GEOMETRY), true));
-                    attributeOrder.add(0, "geom");
-
-                    final List<FeatureServiceAttribute> featureServiceAttributes =
-                        new ArrayList<FeatureServiceAttribute>();
-
-                    for (final String key : attributeOrder) {
-                        final FeatureServiceAttribute attr = attributes.get(key);
-
-                        featureServiceAttributes.add(attr);
-                    }
-
-                    final List<FeatureServiceFeature> featureList = new ArrayList<FeatureServiceFeature>();
-                    final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
-                    final LayerProperties layerProperties = new DefaultLayerProperties();
-                    // add a dummy service, that contains the feature service attributes
-                    layerProperties.setFeatureService(new H2FeatureService(
-                            "dummy",
-                            "dummy",
-                            null,
-                            featureServiceAttributes));
-
-                    final List<FeatureServiceFeature> features = service.getFeatureFactory()
-                                .createFeatures(service.getQuery(), null, null, 0, 0, null);
-                    final List<FeatureServiceFeature> newFeatures = new ArrayList<FeatureServiceFeature>();
-                    int invalidCount = 0;
-
-                    for (final FeatureServiceFeature tmp : features) {
-                        final HashMap<String, Object> properties = new HashMap<String, Object>(
-                                featureServiceAttributes.size());
-                        final Double x;
-                        final Double y;
-
-                        try {
-                            if (tmp.getProperty(fromField) != null) {
-                                x = Double.parseDouble(tmp.getProperty(fromField).toString());
-                            } else {
-                                ++invalidCount;
-                                continue;
-                            }
-                        } catch (NumberFormatException e) {
-                            ++invalidCount;
-                            continue;
-                        }
-
-                        try {
-                            if (tmp.getProperty(tillField) != null) {
-                                y = Double.parseDouble(tmp.getProperty(tillField).toString());
-                            } else {
-                                ++invalidCount;
-                                continue;
-                            }
-                        } catch (NumberFormatException e) {
-                            ++invalidCount;
-                            continue;
-                        }
-
-                        if (((MIN_X != null) && (x < MIN_X)) || ((MAX_X != null) && (x > MAX_X))
-                                    || ((MIN_Y != null) && (y < MIN_Y))
-                                    || ((MAX_Y != null) && (y > MAX_Y))) {
-                            ++invalidCount;
-                            continue;
-                        }
-
-                        final Geometry g = geomFactory.createPoint(new Coordinate(x, y));
-
-                        for (final String propName : attributeOrder) {
-                            if (propName.equals("geom")) {
-                                properties.put(propName, g);
-                            } else {
-                                properties.put(propName, tmp.getProperty(propName));
-                            }
-                        }
-
-                        final DefaultFeatureServiceFeature lastFeature = new DefaultFeatureServiceFeature(
-                                tmp.getId(),
-                                g,
-                                layerProperties);
-                        lastFeature.setProperties(properties);
-                        featureList.add(lastFeature);
-                    }
-
-                    H2FeatureService internalService = null;
-                    String hint = null;
-
-                    if (featureList.size() > 0) {
-                        internalService = new H2FeatureService(
-                                tableName,
-                                H2FeatureServiceFactory.DB_NAME,
-                                tableName,
-                                featureServiceAttributes,
-                                featureList);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("create the new data source");
-                        }
-                        internalService.initAndWait();
-                    } else {
-                        hint = NbBundle.getMessage(
-                                PointReferencingDialog.class,
-                                "PointReferencingDialog.butApplyActionPerformed.themeNotCreated");
-                    }
-
-                    if ((hint == null) && (invalidCount > 0)) {
-                        hint = NbBundle.getMessage(
-                                PointReferencingDialog.class,
-                                "PointReferencingDialog.butApplyActionPerformed.themePartiallyCreated",
-                                featureList.size(),
-                                (featureList.size() + invalidCount));
-                    }
-
-                    return new ServiceWithHint(hint, internalService);
                 }
 
-                @Override
-                protected void done() {
+                if (geometryField != null) {
+                    attributes.remove(geometryField);
+                    attributeOrder.remove(geometryField);
+                }
+
+                attributes.put("geom", new FeatureServiceAttribute("geom", String.valueOf(Types.GEOMETRY), true));
+                attributeOrder.add(0, "geom");
+
+                final List<FeatureServiceAttribute> featureServiceAttributes = new ArrayList<FeatureServiceAttribute>();
+
+                for (final String key : attributeOrder) {
+                    final FeatureServiceAttribute attr = attributes.get(key);
+
+                    featureServiceAttributes.add(attr);
+                }
+
+                final List<FeatureServiceFeature> featureList = new ArrayList<FeatureServiceFeature>();
+                final GeometryFactory geomFactory = new GeometryFactory(
+                    new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs())
+                );
+                final LayerProperties layerProperties = new DefaultLayerProperties();
+                // add a dummy service, that contains the feature service attributes
+                layerProperties.setFeatureService(
+                    new H2FeatureService("dummy", "dummy", null, featureServiceAttributes)
+                );
+
+                final List<FeatureServiceFeature> features = service
+                    .getFeatureFactory()
+                    .createFeatures(service.getQuery(), null, null, 0, 0, null);
+                final List<FeatureServiceFeature> newFeatures = new ArrayList<FeatureServiceFeature>();
+                int invalidCount = 0;
+
+                for (final FeatureServiceFeature tmp : features) {
+                    final HashMap<String, Object> properties = new HashMap<String, Object>(
+                        featureServiceAttributes.size()
+                    );
+                    final Double x;
+                    final Double y;
+
                     try {
-                        final ServiceWithHint serviceWithHint = get();
-
-                        final String hint = serviceWithHint.getHint();
-
-                        if (hint != null) {
-                            JOptionPane.showMessageDialog(
-                                PointReferencingDialog.this,
-                                hint,
-                                NbBundle.getMessage(
-                                    PointReferencingDialog.class,
-                                    "PointReferencingDialog.butApplyActionPerformed.title"),
-                                JOptionPane.WARNING_MESSAGE);
-                        }
-
-                        final H2FeatureService service = serviceWithHint.getService();
-
-                        if (service != null) {
-                            final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
-
-                            if (cap != null) {
-                                cap.refreshJdbcTrees();
-                            }
-                        }
-                        lastFromProperty = cbFrom.getSelectedItem();
-                        lastTillProperty = cbTill.getSelectedItem();
-                    } catch (H2FeatureServiceFactory.NegativeValueException ex) {
-                        if (ex.isBoth()) {
-                            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
-                                NbBundle.getMessage(
-                                    PointReferencingDialog.class,
-                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes"),
-                                NbBundle.getMessage(
-                                    PointReferencingDialog.class,
-                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes.title"),
-                                JOptionPane.CANCEL_OPTION,
-                                JOptionPane.ERROR_MESSAGE);
+                        if (tmp.getProperty(fromField) != null) {
+                            x = Double.parseDouble(tmp.getProperty(fromField).toString());
                         } else {
-                            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
-                                NbBundle.getMessage(
-                                    PointReferencingDialog.class,
-                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute",
-                                    ex.getAttributeName()),
-                                NbBundle.getMessage(
-                                    PointReferencingDialog.class,
-                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute.title"),
-                                JOptionPane.CANCEL_OPTION,
-                                JOptionPane.ERROR_MESSAGE);
+                            ++invalidCount;
+                            continue;
                         }
-                    } catch (Exception e) {
-                        LOG.error("Error while adding point references", e);
+                    } catch (NumberFormatException e) {
+                        ++invalidCount;
+                        continue;
                     }
+
+                    try {
+                        if (tmp.getProperty(tillField) != null) {
+                            y = Double.parseDouble(tmp.getProperty(tillField).toString());
+                        } else {
+                            ++invalidCount;
+                            continue;
+                        }
+                    } catch (NumberFormatException e) {
+                        ++invalidCount;
+                        continue;
+                    }
+
+                    if (
+                        ((MIN_X != null) && (x < MIN_X)) ||
+                        ((MAX_X != null) && (x > MAX_X)) ||
+                        ((MIN_Y != null) && (y < MIN_Y)) ||
+                        ((MAX_Y != null) && (y > MAX_Y))
+                    ) {
+                        ++invalidCount;
+                        continue;
+                    }
+
+                    final Geometry g = geomFactory.createPoint(new Coordinate(x, y));
+
+                    for (final String propName : attributeOrder) {
+                        if (propName.equals("geom")) {
+                            properties.put(propName, g);
+                        } else {
+                            properties.put(propName, tmp.getProperty(propName));
+                        }
+                    }
+
+                    final DefaultFeatureServiceFeature lastFeature = new DefaultFeatureServiceFeature(
+                        tmp.getId(),
+                        g,
+                        layerProperties
+                    );
+                    lastFeature.setProperties(properties);
+                    featureList.add(lastFeature);
                 }
-            };
+
+                H2FeatureService internalService = null;
+                String hint = null;
+
+                if (featureList.size() > 0) {
+                    internalService =
+                        new H2FeatureService(
+                            tableName,
+                            H2FeatureServiceFactory.DB_NAME,
+                            tableName,
+                            featureServiceAttributes,
+                            featureList
+                        );
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("create the new data source");
+                    }
+                    internalService.initAndWait();
+                } else {
+                    hint =
+                        NbBundle.getMessage(
+                            PointReferencingDialog.class,
+                            "PointReferencingDialog.butApplyActionPerformed.themeNotCreated"
+                        );
+                }
+
+                if ((hint == null) && (invalidCount > 0)) {
+                    hint =
+                        NbBundle.getMessage(
+                            PointReferencingDialog.class,
+                            "PointReferencingDialog.butApplyActionPerformed.themePartiallyCreated",
+                            featureList.size(),
+                            (featureList.size() + invalidCount)
+                        );
+                }
+
+                return new ServiceWithHint(hint, internalService);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    final ServiceWithHint serviceWithHint = get();
+
+                    final String hint = serviceWithHint.getHint();
+
+                    if (hint != null) {
+                        JOptionPane.showMessageDialog(
+                            PointReferencingDialog.this,
+                            hint,
+                            NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.title"
+                            ),
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                    }
+
+                    final H2FeatureService service = serviceWithHint.getService();
+
+                    if (service != null) {
+                        final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
+
+                        if (cap != null) {
+                            cap.refreshJdbcTrees();
+                        }
+                    }
+                    lastFromProperty = cbFrom.getSelectedItem();
+                    lastTillProperty = cbTill.getSelectedItem();
+                } catch (H2FeatureServiceFactory.NegativeValueException ex) {
+                    if (ex.isBoth()) {
+                        JOptionPane.showConfirmDialog(
+                            CismapBroker.getInstance().getMappingComponent(),
+                            NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes"
+                            ),
+                            NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes.title"
+                            ),
+                            JOptionPane.CANCEL_OPTION,
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showConfirmDialog(
+                            CismapBroker.getInstance().getMappingComponent(),
+                            NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute",
+                                ex.getAttributeName()
+                            ),
+                            NbBundle.getMessage(
+                                PointReferencingDialog.class,
+                                "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute.title"
+                            ),
+                            JOptionPane.CANCEL_OPTION,
+                            JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error while adding point references", e);
+                }
+            }
+        };
 
         setVisible(false);
         wdt.start();
@@ -616,7 +658,7 @@ public class PointReferencingDialog extends javax.swing.JDialog {
      */
     private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancelActionPerformed
         setVisible(false);
-    }                                                                             //GEN-LAST:event_butCancelActionPerformed
+    } //GEN-LAST:event_butCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -640,17 +682,21 @@ public class PointReferencingDialog extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PointReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger
+                .getLogger(PointReferencingDialog.class.getName())
+                .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PointReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger
+                .getLogger(PointReferencingDialog.class.getName())
+                .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PointReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger
+                .getLogger(PointReferencingDialog.class.getName())
+                .log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PointReferencingDialog.class.getName())
-                    .log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger
+                .getLogger(PointReferencingDialog.class.getName())
+                .log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         //</editor-fold>

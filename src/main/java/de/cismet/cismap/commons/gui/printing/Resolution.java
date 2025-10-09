@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
@@ -35,6 +35,7 @@ public class Resolution {
         resolution = e.getAttribute("dpi").getIntValue(); // NOI18N
         text = e.getText();
     }
+
     /**
      * Creates a new Resolution object.
      *
@@ -52,10 +53,12 @@ public class Resolution {
     public String toString() {
         return text;
     }
+
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Resolution) && (((Resolution)obj).resolution == resolution);
+        return (obj instanceof Resolution) && (((Resolution) obj).resolution == resolution);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -64,9 +67,9 @@ public class Resolution {
      * @return  DOCUMENT ME!
      */
     public Element getElement(final boolean selected) {
-        final Element e = new Element("resolution");          // NOI18N
+        final Element e = new Element("resolution"); // NOI18N
         e.setAttribute("selected", String.valueOf(selected)); // NOI18N
-        e.setAttribute("dpi", resolution + "");               // NOI18N
+        e.setAttribute("dpi", resolution + ""); // NOI18N
         e.setText(text);
         return e;
     }

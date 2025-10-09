@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
@@ -20,7 +20,7 @@ public class AdditionalTemplateParameter {
     //~ Instance fields --------------------------------------------------------
 
     private String placeholder = ""; // NOI18N
-    private String title = "";       // NOI18N
+    private String title = ""; // NOI18N
 
     //~ Constructors -----------------------------------------------------------
 
@@ -31,7 +31,7 @@ public class AdditionalTemplateParameter {
      */
     public AdditionalTemplateParameter(final Element parameter) {
         placeholder = parameter.getAttribute("placeholder").getValue(); // NOI18N
-        title = parameter.getAttribute("title").getValue();             // NOI18N
+        title = parameter.getAttribute("title").getValue(); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -42,9 +42,9 @@ public class AdditionalTemplateParameter {
      * @return  DOCUMENT ME!
      */
     Element getElement() {
-        final Element e = new Element("parameter");      // NOI18N
+        final Element e = new Element("parameter"); // NOI18N
         e.setAttribute("placeholder", getPlaceholder()); // NOI18N
-        e.setAttribute("title", getTitle());             // NOI18N
+        e.setAttribute("title", getTitle()); // NOI18N
         return e;
     }
 

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -34,8 +34,7 @@ public class CapabilitiesListTreeNode {
     /**
      * Erzeugt einen CapabilitiesList-Knoten.
      */
-    public CapabilitiesListTreeNode() {
-    }
+    public CapabilitiesListTreeNode() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -72,7 +71,7 @@ public class CapabilitiesListTreeNode {
      * @return  Liste der Unterknoten
      */
     public List<CapabilitiesListTreeNode> getSubnodes() {
-        return (List<CapabilitiesListTreeNode>)subnodes.clone();
+        return (List<CapabilitiesListTreeNode>) subnodes.clone();
     }
 
     /**

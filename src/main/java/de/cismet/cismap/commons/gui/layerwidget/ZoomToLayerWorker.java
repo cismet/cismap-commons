@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,17 +12,6 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import java.lang.reflect.Method;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.SwingWorker;
-import javax.swing.tree.TreePath;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -41,10 +30,15 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
-
 import de.cismet.commons.wms.capabilities.Envelope;
 import de.cismet.commons.wms.capabilities.Layer;
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.SwingWorker;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -89,7 +83,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
             final Object layer = tmp.getLastPathComponent();
 
             if (layer instanceof LayerCollection) {
-                tpl.addAll(getAllServices(tmp.getParentPath(), (LayerCollection)layer));
+                tpl.addAll(getAllServices(tmp.getParentPath(), (LayerCollection) layer));
             } else {
                 tpl.add(tmp);
             }
@@ -114,7 +108,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
 
         for (final Object o : lc) {
             if (o instanceof LayerCollection) {
-                tpl.addAll(getAllServices(parentWithCollection, (LayerCollection)o));
+                tpl.addAll(getAllServices(parentWithCollection, (LayerCollection) o));
             } else if (o != null) {
                 tpl.add(parentWithCollection.pathByAddingChild(o));
             }
@@ -132,10 +126,11 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
             RetrievalServiceLayer rsl = null;
 
             if ((path != null) && (path.getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                rsl = (RetrievalServiceLayer)path.getLastPathComponent();
-            } else if ((path != null)
-                        && (path.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                rsl = (RetrievalServiceLayer)path.getParentPath().getLastPathComponent();
+                rsl = (RetrievalServiceLayer) path.getLastPathComponent();
+            } else if (
+                (path != null) && (path.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)
+            ) {
+                rsl = (RetrievalServiceLayer) path.getParentPath().getLastPathComponent();
             }
 
             if (rsl != null) {
@@ -148,9 +143,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
                     geom.setSRID(g.getSRID());
                 } else {
                     if (geom.getSRID() != g.getSRID()) {
-                        g = CrsTransformer.transformToGivenCrs(
-                                g,
-                                CrsTransformer.createCrsFromSrid(geom.getSRID()));
+                        g = CrsTransformer.transformToGivenCrs(g, CrsTransformer.createCrsFromSrid(geom.getSRID()));
                     }
                     final Geometry ge = g.getEnvelope();
                     ge.setSRID(geom.getSRID());
@@ -172,7 +165,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
         Geometry g = null;
 
         if (rsl instanceof AbstractFeatureService) {
-            final AbstractFeatureService afs = (AbstractFeatureService)rsl;
+            final AbstractFeatureService afs = (AbstractFeatureService) rsl;
 
             if (!afs.isInitialized()) {
                 try {
@@ -184,13 +177,13 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
         }
 
         if (rsl instanceof WMSServiceLayer) {
-            final Layer l = ((WMSServiceLayer)rsl).getLayerInformation();
+            final Layer l = ((WMSServiceLayer) rsl).getLayerInformation();
             Envelope envelope = null;
 
             if (l != null) {
                 envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
             } else {
-                final WMSCapabilities caps = ((WMSServiceLayer)rsl).getWmsCapabilities();
+                final WMSCapabilities caps = ((WMSServiceLayer) rsl).getWmsCapabilities();
 
                 if (caps != null) {
                     envelope = CapabilityWidget.getEnvelopeForWmsCaps(caps);
@@ -201,14 +194,14 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
                 g = CapabilityWidget.createGeometryFromEnvelope(envelope);
             }
         } else if (rsl instanceof WebFeatureService) {
-            final WebFeatureService l = ((WebFeatureService)rsl);
+            final WebFeatureService l = ((WebFeatureService) rsl);
             final Envelope envelope = CapabilityWidget.getEnvelopeFromFeatureType(l.getFeature());
 
             if (envelope != null) {
                 g = CapabilityWidget.createGeometryFromEnvelope(envelope);
             }
         } else if (rsl instanceof SlidableWMSServiceLayerGroup) {
-            final Layer l = ((SlidableWMSServiceLayerGroup)rsl).getLayerInformation();
+            final Layer l = ((SlidableWMSServiceLayerGroup) rsl).getLayerInformation();
 
             if (l != null) {
                 final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
@@ -218,7 +211,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
                 }
             }
         } else if (rsl instanceof SimpleWMS) {
-            final SimpleWMS wms = ((SimpleWMS)rsl);
+            final SimpleWMS wms = ((SimpleWMS) rsl);
             final Layer l = wms.getLayerInformation();
 
             if (l != null) {
@@ -229,26 +222,26 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
                 }
             }
         } else if (rsl instanceof ShapeFileFeatureService) {
-            final ShapeFileFeatureService sffs = (ShapeFileFeatureService)rsl;
-            g = ((ShapeFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+            final ShapeFileFeatureService sffs = (ShapeFileFeatureService) rsl;
+            g = ((ShapeFeatureFactory) sffs.getFeatureFactory()).getEnvelope();
         } else if (rsl instanceof JDBCFeatureService) {
-            final JDBCFeatureService sffs = (JDBCFeatureService)rsl;
-            g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+            final JDBCFeatureService sffs = (JDBCFeatureService) rsl;
+            g = ((JDBCFeatureFactory) sffs.getFeatureFactory()).getEnvelope();
         } else if (rsl.getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayer")) {
             try {
                 final Method getFeatureFactory = rsl.getClass().getMethod("getFeatureFactory");
                 final Object o = getFeatureFactory.invoke(rsl);
                 final Method getEnvelope = o.getClass().getMethod("getEnvelope");
                 getEnvelope.setAccessible(true);
-                g = (Geometry)getEnvelope.invoke(o);
+                g = (Geometry) getEnvelope.invoke(o);
             } catch (Exception e) {
                 LOG.error("Error while getting the envelope.", e);
             }
         } else if (rsl instanceof GMLFeatureService) {
-            final GMLFeatureService sffs = (GMLFeatureService)rsl;
-            g = ((GMLFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+            final GMLFeatureService sffs = (GMLFeatureService) rsl;
+            g = ((GMLFeatureFactory) sffs.getFeatureFactory()).getEnvelope();
         } else if (rsl instanceof ImageRasterService) {
-            final ImageRasterService irs = (ImageRasterService)rsl;
+            final ImageRasterService irs = (ImageRasterService) rsl;
             g = irs.getEnvelope();
         }
 

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * WFSFormTester.java
  *
@@ -12,19 +12,16 @@
  */
 package de.cismet.cismap.commons.wfsforms;
 
-import org.deegree.datatypes.QualifiedName;
-import org.deegree.model.feature.DefaultFeature;
-import org.deegree.model.feature.FeatureProperty;
-
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.net.URI;
-
 import java.util.HashMap;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -32,12 +29,9 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import org.deegree.datatypes.QualifiedName;
+import org.deegree.model.feature.DefaultFeature;
+import org.deegree.model.feature.FeatureProperty;
 
 /**
  * DOCUMENT ME!
@@ -63,6 +57,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     private javax.swing.JPanel panFill;
     private javax.swing.JProgressBar prbHits;
     private javax.swing.JTextField txtSearch;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -72,52 +67,55 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
      */
     public WFSFormBPlanSearch() {
         if (log.isDebugEnabled()) {
-            log.debug("new WFSFormBPlanSearch");            // NOI18N
+            log.debug("new WFSFormBPlanSearch"); // NOI18N
         }
         try {
             initComponents();
-            listComponents.put("cboHits", cboHits);         // NOI18N
+            listComponents.put("cboHits", cboHits); // NOI18N
             listComponents.put("cboHitsProgress", prbHits); // NOI18N
-//        cboStreets.setEditable(true);
-//        cboNr.setEditable(true);
+            //        cboStreets.setEditable(true);
+            //        cboNr.setEditable(true);
             StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboHits);
-//        prbLocationtypes.setPreferredSize(new java.awt.Dimension(1,5));
+            //        prbLocationtypes.setPreferredSize(new java.awt.Dimension(1,5));
             prbHits.setPreferredSize(new java.awt.Dimension(1, 5));
 
-            cboHits.setRenderer(new ListCellRenderer() {
-
+            cboHits.setRenderer(
+                new ListCellRenderer() {
                     @Override
-                    public Component getListCellRendererComponent(final JList list,
-                            final Object value,
-                            final int index,
-                            final boolean isSelected,
-                            final boolean cellHasFocus) {
+                    public Component getListCellRendererComponent(
+                        final JList list,
+                        final Object value,
+                        final int index,
+                        final boolean isSelected,
+                        final boolean cellHasFocus
+                    ) {
                         final DefaultListCellRenderer dlcr = new DefaultListCellRenderer();
-                        final JLabel lbl = (JLabel)(dlcr.getListCellRendererComponent(
-                                    list,
-                                    value,
-                                    index,
-                                    isSelected,
-                                    cellHasFocus));
-                        String additionalInfo = "";                // NOI18N
+                        final JLabel lbl = (JLabel) (
+                            dlcr.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                        );
+                        String additionalInfo = ""; // NOI18N
                         try {
-                            final FeatureProperty[] fpa = ((WFSFormFeature)value).getRawFeatureArray(
-                                    "app",
-                                    "alternativeGeographicIdentifier",
-                                    "http://www.deegree.org/app"); // NOI18N
+                            final FeatureProperty[] fpa =
+                                ((WFSFormFeature) value).getRawFeatureArray(
+                                        "app",
+                                        "alternativeGeographicIdentifier",
+                                        "http://www.deegree.org/app"
+                                    ); // NOI18N
                             if (fpa != null) {
                                 for (int i = 0; i < fpa.length; ++i) {
                                     if (i > 0) {
-                                        additionalInfo += ", ";    // NOI18N
+                                        additionalInfo += ", "; // NOI18N
                                     }
 
-                                    additionalInfo += ((DefaultFeature)fpa[i].getValue())
-                                                .getProperties(
-                                                    new QualifiedName(
-                                                        "app",
-                                                        "alternativeGeographicIdentifier",
-                                                        new URI("http://www.deegree.org/app")))[0].getValue()
-                                                .toString(); // NOI18N
+                                    additionalInfo +=
+                                        ((DefaultFeature) fpa[i].getValue()).getProperties(
+                                                new QualifiedName(
+                                                    "app",
+                                                    "alternativeGeographicIdentifier",
+                                                    new URI("http://www.deegree.org/app")
+                                                )
+                                            )[0].getValue()
+                                            .toString(); // NOI18N
                                 }
                             }
                         } catch (Exception ex) {
@@ -129,33 +127,36 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
                         }
                         return lbl;
                     }
-                });
+                }
+            );
 
             pMark.setVisible(false);
 
-            txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+            txtSearch
+                .getDocument()
+                .addDocumentListener(
+                    new DocumentListener() {
+                        @Override
+                        public void changedUpdate(final DocumentEvent e) {
+                            doSearch();
+                        }
 
-                    @Override
-                    public void changedUpdate(final DocumentEvent e) {
-                        doSearch();
-                    }
+                        @Override
+                        public void insertUpdate(final DocumentEvent e) {
+                            doSearch();
+                        }
 
-                    @Override
-                    public void insertUpdate(final DocumentEvent e) {
-                        doSearch();
+                        @Override
+                        public void removeUpdate(final DocumentEvent e) {
+                            doSearch();
+                        }
                     }
-
-                    @Override
-                    public void removeUpdate(final DocumentEvent e) {
-                        doSearch();
-                    }
-                });
+                );
 
             lblBehind.setMinimumSize(new Dimension(94, 16));
             lblBehind.setMaximumSize(new Dimension(94, 16));
             lblBehind.setPreferredSize(new Dimension(94, 16));
             super.addActionListener(this);
-
             // CismapBroker.getInstance().getMappingComponent().getHighlightingLayer().addChild(pMark);
         } catch (Exception e) {
             log.error("Could not Create WFForm", e); // NOI18N
@@ -165,8 +166,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void garbageDuringAutoCompletion(final JComboBox box) {
-    }
+    public void garbageDuringAutoCompletion(final JComboBox box) {}
 
     /**
      * DOCUMENT ME!
@@ -174,15 +174,15 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     private void doSearch() {
         if (txtSearch.getText().length() >= 2) {
             if (log.isDebugEnabled()) {
-                log.debug("doSearch");                      // NOI18N
+                log.debug("doSearch"); // NOI18N
             }
             final HashMap<String, String> hm = new HashMap<String, String>();
             hm.put("@@search_text@@", txtSearch.getText()); // NOI18N
-            requestRefresh("cboHits", hm);                  // NOI18N
+            requestRefresh("cboHits", hm); // NOI18N
         } else {
-            lblBehind.setText(org.openide.util.NbBundle.getMessage(
-                    WFSFormBPlanSearch.class,
-                    "WFSFormBPlanSearch.lblBehind.text"));  // NOI18N
+            lblBehind.setText(
+                org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text")
+            ); // NOI18N
         }
     }
 
@@ -211,13 +211,14 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
 
         cmdOk.setMnemonic('P');
         cmdOk.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.cmdOk.text")); // NOI18N
-        cmdOk.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdOk.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdOkActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
@@ -227,17 +228,21 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(cmdOk, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(
+        chkVisualize.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 WFSFormBPlanSearch.class,
-                "WFSFormBPlanSearch.chkVisualize.toolTipText")); // NOI18N
+                "WFSFormBPlanSearch.chkVisualize.toolTipText"
+            )
+        ); // NOI18N
         chkVisualize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkVisualize.addActionListener(new java.awt.event.ActionListener() {
-
+        chkVisualize.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     chkVisualizeActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -246,11 +251,12 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 0);
         add(chkVisualize, gridBagConstraints);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(
-                WFSFormBPlanSearch.class,
-                "WFSFormBPlanSearch.jLabel1.toolTipText"));                                  // NOI18N
+        jLabel1.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))
+        ); // NOI18N
+        jLabel1.setToolTipText(
+            org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.jLabel1.toolTipText")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -260,9 +266,12 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(
+        chkLockScale.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 WFSFormBPlanSearch.class,
-                "WFSFormBPlanSearch.chkLockScale.toolTipText")); // NOI18N
+                "WFSFormBPlanSearch.chkLockScale.toolTipText"
+            )
+        ); // NOI18N
         chkLockScale.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
@@ -272,11 +281,12 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.insets = new java.awt.Insets(7, 14, 0, 0);
         add(chkLockScale, gridBagConstraints);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(
-                WFSFormBPlanSearch.class,
-                "WFSFormBPlanSearch.jLabel2.toolTipText"));                                    // NOI18N
+        jLabel2.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))
+        ); // NOI18N
+        jLabel2.setToolTipText(
+            org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.jLabel2.toolTipText")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -288,16 +298,17 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         txtSearch.setMaximumSize(new java.awt.Dimension(100, 19));
         txtSearch.setMinimumSize(new java.awt.Dimension(100, 19));
         txtSearch.setPreferredSize(new java.awt.Dimension(100, 19));
-        txtSearch.addInputMethodListener(new java.awt.event.InputMethodListener() {
-
+        txtSearch.addInputMethodListener(
+            new java.awt.event.InputMethodListener() {
                 @Override
-                public void caretPositionChanged(final java.awt.event.InputMethodEvent evt) {
-                }
+                public void caretPositionChanged(final java.awt.event.InputMethodEvent evt) {}
+
                 @Override
                 public void inputMethodTextChanged(final java.awt.event.InputMethodEvent evt) {
                     txtSearchInputMethodTextChanged(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -306,9 +317,9 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
         add(txtSearch, gridBagConstraints);
 
-        lblBehind.setText(org.openide.util.NbBundle.getMessage(
-                WFSFormBPlanSearch.class,
-                "WFSFormBPlanSearch.lblBehind.text")); // NOI18N
+        lblBehind.setText(
+            org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text")
+        ); // NOI18N
         lblBehind.setMaximumSize(new java.awt.Dimension(120, 14));
         lblBehind.setMinimumSize(new java.awt.Dimension(120, 14));
         lblBehind.setPreferredSize(new java.awt.Dimension(120, 14));
@@ -326,9 +337,11 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         final org.jdesktop.layout.GroupLayout panFillLayout = new org.jdesktop.layout.GroupLayout(panFill);
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
-            panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 131, Short.MAX_VALUE));
+            panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 131, Short.MAX_VALUE)
+        );
         panFillLayout.setVerticalGroup(
-            panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 30, Short.MAX_VALUE));
+            panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 30, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 8;
@@ -343,13 +356,14 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         cboHits.setMaximumSize(new java.awt.Dimension(100, 19));
         cboHits.setMinimumSize(new java.awt.Dimension(100, 19));
         cboHits.setPreferredSize(new java.awt.Dimension(100, 19));
-        cboHits.addActionListener(new java.awt.event.ActionListener() {
-
+        cboHits.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cboHitsActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -371,13 +385,13 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 10);
         add(prbHits, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void txtSearchInputMethodTextChanged(final java.awt.event.InputMethodEvent evt) { //GEN-FIRST:event_txtSearchInputMethodTextChanged
-    }                                                                                         //GEN-LAST:event_txtSearchInputMethodTextChanged
+    private void txtSearchInputMethodTextChanged(final java.awt.event.InputMethodEvent evt) {} //GEN-FIRST:event_txtSearchInputMethodTextChanged //GEN-LAST:event_txtSearchInputMethodTextChanged
 
     /**
      * DOCUMENT ME!
@@ -417,7 +431,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
         mc.rescaleStickyNodes();
-    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
+    } //GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -426,19 +440,22 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
      */
     private void cboHitsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboHitsActionPerformed
         if (log.isDebugEnabled()) {
-            log.debug("cboHitssActionPerformed()");                             // NOI18N
+            log.debug("cboHitssActionPerformed()"); // NOI18N
         }
         if (cboHits.getSelectedItem() instanceof WFSFormFeature) {
-            hit = (WFSFormFeature)cboHits.getSelectedItem();
+            hit = (WFSFormFeature) cboHits.getSelectedItem();
         }
-    }                                                                           //GEN-LAST:event_cboHitsActionPerformed
+    } //GEN-LAST:event_cboHitsActionPerformed
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        lblBehind.setText(org.openide.util.NbBundle.getMessage(
+        lblBehind.setText(
+            org.openide.util.NbBundle.getMessage(
                 WFSFormBPlanSearch.class,
                 "WFSFormBPlanSearch.lblBehind.text2",
-                new Object[] { cboHits.getItemCount() }));             // NOI18N
+                new Object[] { cboHits.getItemCount() }
+            )
+        ); // NOI18N
         if (log.isDebugEnabled()) {
             log.debug("cboPois.getItemAt(0):" + cboHits.getItemAt(0)); // NOI18N
         }

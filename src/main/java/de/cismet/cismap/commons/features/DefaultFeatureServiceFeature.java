@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -26,16 +26,64 @@ import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.operation.buffer.OffsetCurveBuilder;
 import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
-
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.styling.CustomStyle;
+import de.cismet.cismap.commons.styling.EndPointStyle;
+import de.cismet.cismap.commons.styling.EndPointStyleDescription;
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PImage;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
-
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Paint;
+import java.awt.TexturePaint;
+import java.awt.Toolkit;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.RGBImageFilter;
+import java.awt.image.RescaleOp;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import javax.swing.ImageIcon;
+import javax.xml.namespace.QName;
 import org.apache.log4j.Logger;
 import org.apache.xerces.xs.XSElementDeclaration;
-
 import org.deegree.commons.tom.TypedObjectNode;
 import org.deegree.commons.tom.gml.GMLObjectCategory;
 import org.deegree.commons.tom.gml.property.Property;
@@ -65,69 +113,7 @@ import org.deegree.style.styling.components.Graphic;
 import org.deegree.style.styling.components.Halo;
 import org.deegree.style.styling.components.Mark;
 import org.deegree.style.styling.components.Stroke;
-
 import org.jfree.util.Log;
-
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.TexturePaint;
-import java.awt.Toolkit;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.FilteredImageSource;
-import java.awt.image.RGBImageFilter;
-import java.awt.image.RescaleOp;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-
-import java.io.File;
-
-import java.lang.reflect.Constructor;
-
-import java.math.BigDecimal;
-
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-
-import javax.swing.ImageIcon;
-
-import javax.xml.namespace.QName;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.featureservice.LayerProperties;
-import de.cismet.cismap.commons.featureservice.style.Style;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
-import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.gui.piccolo.PSticky;
-import de.cismet.cismap.commons.gui.piccolo.SelectionAwareTexturePaint;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.styling.CustomStyle;
-import de.cismet.cismap.commons.styling.EndPointStyle;
-import de.cismet.cismap.commons.styling.EndPointStyleDescription;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -171,8 +157,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * Creates a new uninitialised instance of DefaultFeatureServiceFeature. The id is set to -1, editable is set to
      * false, canBeSelected is set to true, hiding is set to false, any other properties set to null.
      */
-    public DefaultFeatureServiceFeature() {
-    }
+    public DefaultFeatureServiceFeature() {}
 
     /**
      * Initialises a new DefaultFeatureServiceFeature instance from an existing FeatureServiceFeature object. The
@@ -190,7 +175,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         this.setEditable(feature.isEditable());
         this.setCanBeSelected(feature.canBeSelected());
         if (feature instanceof DefaultFeatureServiceFeature) {
-            styles = ((DefaultFeatureServiceFeature)feature).styles;
+            styles = ((DefaultFeatureServiceFeature) feature).styles;
         }
 
         if ((feature.getProperties() != null) && (feature.getProperties().size() > 0)) {
@@ -199,11 +184,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         }
 
         if (feature.getLayerProperties() != null) {
-            this.setLayerProperties((LayerProperties)feature.getLayerProperties().clone());
+            this.setLayerProperties((LayerProperties) feature.getLayerProperties().clone());
         }
 
         if (feature.getGeometry() != null) {
-            this.setGeometry((Geometry)feature.getGeometry().clone());
+            this.setGeometry((Geometry) feature.getGeometry().clone());
         }
     }
 
@@ -229,10 +214,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  layerProperties  DOCUMENT ME!
      * @param  styles           DOCUMENT ME!
      */
-    public DefaultFeatureServiceFeature(final int id,
-            final Geometry geometry,
-            final LayerProperties layerProperties,
-            final List<org.deegree.style.se.unevaluated.Style> styles) {
+    public DefaultFeatureServiceFeature(
+        final int id,
+        final Geometry geometry,
+        final LayerProperties layerProperties,
+        final List<org.deegree.style.se.unevaluated.Style> styles
+    ) {
         this(id, geometry, layerProperties);
         this.styles = styles;
     }
@@ -281,8 +268,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             final String[] names = ruleSet.getAdditionalFieldNames();
 
             for (final String tmpName : names) {
-                final Object value = ruleSet.getAdditionalFieldValue(tmpName,
-                        this);
+                final Object value = ruleSet.getAdditionalFieldValue(tmpName, this);
                 container.put(tmpName, value);
             }
         }
@@ -392,6 +378,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     public void setIdExpression(final String idExpression) {
         this.layerProperties.setIdExpression(idExpression, layerProperties.getIdExpressionType());
     }
+
     /**
      * /** * Erzeugt ein JDOM-Element, das das DefaultFeatureServiceFeature und dessen Attribute * widerspiegelt. *
      * &#064;return JDOM-Element
@@ -434,7 +421,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public void setLinePaint(final Paint linePaint) {
-        this.getStyle().setLineColor((Color)linePaint);
+        this.getStyle().setLineColor((Color) linePaint);
         this.getStyle().setDrawLine(true);
     }
 
@@ -488,8 +475,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
         customFillingStyle = fillingStyle;
-//        this.getStyle().setFillColor((Color)fillingStyle);
-//        this.getStyle().setDrawFill(true);
+        //        this.getStyle().setFillColor((Color)fillingStyle);
+        //        this.getStyle().setDrawFill(true);
     }
 
     /**
@@ -584,8 +571,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public void setGeometry(Geometry geom) {
         if ((getLayerProperties() != null) && (getLayerProperties().getAttributeTableRuleSet() != null)) {
-            geom = (Geometry)getLayerProperties().getAttributeTableRuleSet()
-                        .afterEdit(this, "", -1, this.geometry, geom);
+            geom =
+                (Geometry) getLayerProperties().getAttributeTableRuleSet().afterEdit(this, "", -1, this.geometry, geom);
         }
         this.geometry = geom;
         setProperty(getGeometryFieldName(), geom);
@@ -597,10 +584,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @return  DOCUMENT ME!
      */
     private String getGeometryFieldName() {
-        if ((getLayerProperties() != null) && (getLayerProperties().getFeatureService() != null)
-                    && (getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
-            final Map<String, FeatureServiceAttribute> attributes = getLayerProperties().getFeatureService()
-                        .getFeatureServiceAttributes();
+        if (
+            (getLayerProperties() != null) &&
+            (getLayerProperties().getFeatureService() != null) &&
+            (getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)
+        ) {
+            final Map<String, FeatureServiceAttribute> attributes = getLayerProperties()
+                .getFeatureService()
+                .getFeatureServiceAttributes();
 
             for (final String key : attributes.keySet()) {
                 final FeatureServiceAttribute attr = attributes.get(key);
@@ -621,8 +612,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public boolean canBeSelected() {
         if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
-            if ((layerProperties.getFeatureService().getPNode() != null)
-                        && !layerProperties.getFeatureService().getPNode().getVisible()) {
+            if (
+                (layerProperties.getFeatureService().getPNode() != null) &&
+                !layerProperties.getFeatureService().getPNode().getVisible()
+            ) {
                 // A feature should not be selectable, if its layer is not visible
                 return false;
             }
@@ -803,7 +796,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
-        this.getStyle().setFontColor((Color)primaryAnnotationPaint);
+        this.getStyle().setFontColor((Color) primaryAnnotationPaint);
     }
 
     /**
@@ -935,7 +928,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public boolean equals(final Object obj) {
         if (obj.getClass().getName().equals(getClass().getName())) {
-            final DefaultFeatureServiceFeature other = (DefaultFeatureServiceFeature)obj;
+            final DefaultFeatureServiceFeature other = (DefaultFeatureServiceFeature) obj;
 
             if (getId() != -1) {
                 return getId() == other.getId();
@@ -968,10 +961,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  pfeature  DOCUMENT ME!
      * @param  map       DOCUMENT ME!
      */
-    protected void applyFill(final org.deegree.style.styling.components.UOM uom,
-            final Fill fill,
-            final PPath pfeature,
-            final MappingComponent map) {
+    protected void applyFill(
+        final org.deegree.style.styling.components.UOM uom,
+        final Fill fill,
+        final PPath pfeature,
+        final MappingComponent map
+    ) {
         pfeature.setPaint(getPaintFromDeegree(fill.graphic, fill.color, uom, pfeature, map));
         // applyGraphic(fill.graphic, pfeature);
     }
@@ -1000,42 +995,53 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  camera    DOCUMENT ME!
      * @param  selected  DOCUMENT ME!
      */
-    protected void applyPointStyling(final PImage image,
-            final PointStyling styling,
-            final WorldToScreenTransform wtst,
-            final double x,
-            final double y,
-            final PCamera camera,
-            final boolean selected) {
+    protected void applyPointStyling(
+        final PImage image,
+        final PointStyling styling,
+        final WorldToScreenTransform wtst,
+        final double x,
+        final double y,
+        final PCamera camera,
+        final boolean selected
+    ) {
         final BufferedImage buffImage = getImageFromDeegree(styling.graphic, selected);
 
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
-            ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
-            ((FixedPImage)image).setSweetSpotX(-1 * styling.graphic.anchorPointX);
-            ((FixedPImage)image).setSweetSpotY(-1 * styling.graphic.anchorPointY);
-            image.setOffset(wtst.getScreenX(x),
-                wtst.getScreenY(y));
-//            image.setOffset(wtst.getScreenX(x) - (buffImage.getWidth() / 2),
-//                wtst.getScreenY(y)
-//                        - (buffImage.getHeight() / 2));
+            ((FixedPImage) image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
+            ((FixedPImage) image).setSweetSpotX(-1 * styling.graphic.anchorPointX);
+            ((FixedPImage) image).setSweetSpotY(-1 * styling.graphic.anchorPointY);
+            image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
+            //            image.setOffset(wtst.getScreenX(x) - (buffImage.getWidth() / 2),
+            //                wtst.getScreenY(y)
+            //                        - (buffImage.getHeight() / 2));
         } else {
             // ((PImageWithDisplacement)image).setUOM(getUOMFromDeegree(styling.uom));
             final double multiplier = getMultiplierFromDeegreeUOM(styling.uom);
-            final double sizeMulti = styling.graphic.size / (double)(buffImage.getHeight());
+            final double sizeMulti = styling.graphic.size / (double) (buffImage.getHeight());
             image.setScale(multiplier * sizeMulti);
-            image.setOffset(wtst.getScreenX(
-                    x
-                            + ((styling.graphic.displacementX
-                                    + ((-styling.graphic.anchorPointX) * buffImage.getWidth() * sizeMulti))
-                                * multiplier)),
+            image.setOffset(
+                wtst.getScreenX(
+                    x +
+                    (
+                        (
+                            styling.graphic.displacementX +
+                            ((-styling.graphic.anchorPointX) * buffImage.getWidth() * sizeMulti)
+                        ) *
+                        multiplier
+                    )
+                ),
                 wtst.getScreenY(
-                    y
-                            + ((styling.graphic.displacementY
-                                    + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
+                    y +
+                    (
+                        (styling.graphic.displacementY + ((styling.graphic.anchorPointY) * styling.graphic.size)) *
+                        multiplier
+                    )
+                )
+            );
         }
         // image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
-        image.setTransparency((float)styling.graphic.opacity);
+        image.setTransparency((float) styling.graphic.opacity);
     }
 
     /**
@@ -1062,10 +1068,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  pfeature  DOCUMENT ME!
      * @param  map       DOCUMENT ME!
      */
-    protected void applyStroke(final org.deegree.style.styling.components.UOM uom,
-            final Stroke stroke,
-            final PPath pfeature,
-            final MappingComponent map) {
+    protected void applyStroke(
+        final org.deegree.style.styling.components.UOM uom,
+        final Stroke stroke,
+        final PPath pfeature,
+        final MappingComponent map
+    ) {
         final double multiplier = getMultiplierFromDeegreeUOM(uom);
         int linecap = BasicStroke.CAP_ROUND;
 
@@ -1092,27 +1100,33 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         if ((stroke.dasharray != null) && (stroke.dasharray.length != 0)) {
             dash_array = new float[stroke.dasharray.length];
             for (int i = 0; i < stroke.dasharray.length; i++) {
-                dash_array[i] = (float)(stroke.dasharray[i] * multiplier);
+                dash_array[i] = (float) (stroke.dasharray[i] * multiplier);
             }
         }
 
         java.awt.Stroke newStroke;
 
         if (uom == org.deegree.style.styling.components.UOM.Pixel) {
-            newStroke = new CustomFixedWidthStroke((float)(stroke.width),
+            newStroke =
+                new CustomFixedWidthStroke(
+                    (float) (stroke.width),
                     linecap,
                     lineJoin,
                     1.0F,
                     dash_array,
-                    (float)(stroke.dashoffset),
-                    map);
+                    (float) (stroke.dashoffset),
+                    map
+                );
         } else {
-            newStroke = new BasicStroke((float)(stroke.width * multiplier),
+            newStroke =
+                new BasicStroke(
+                    (float) (stroke.width * multiplier),
                     linecap,
                     lineJoin,
                     1.0F,
                     dash_array,
-                    (float)(stroke.dashoffset * multiplier));
+                    (float) (stroke.dashoffset * multiplier)
+                );
         }
 
         pfeature.setStroke(newStroke);
@@ -1146,9 +1160,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         pfeature.setPaint(null);
         for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
             final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
-                    pfeature.getMappingComponent().getScaleDenominator());
-            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
-                filteredStyle.evaluate(getDeegreeFeature(), evaluator);
+                pfeature.getMappingComponent().getScaleDenominator()
+            );
+            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings = filteredStyle.evaluate(
+                getDeegreeFeature(),
+                evaluator
+            );
             if (stylings == null) {
                 stylings = tempStylings;
             } else {
@@ -1160,7 +1177,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         while (it.hasNext()) {
             final Object child = it.next();
             if (child instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)child);
+                pfeature.getMappingComponent().removeStickyNode((PSticky) child);
             }
         }
         pfeature.removeAllChildren();
@@ -1168,7 +1185,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
         for (final PImage image : pfeature.sldStyledImage) {
             if (image instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                pfeature.getMappingComponent().removeStickyNode((PSticky) image);
             }
         }
         pfeature.sldStyledImage.clear();
@@ -1190,15 +1207,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         int polygonNr = -1;
         int textNr = 0;
         int imageNr = 0;
-        final List<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> reverseList =
-            new ArrayList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>>(stylings);
+        final List<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> reverseList = new ArrayList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>>(
+            stylings
+        );
         if ((geom != null) && !geom.getGeometryType().equalsIgnoreCase("Point")) {
             Collections.reverse(reverseList);
         }
         for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : reverseList) {
-            if ((styling.first instanceof PolygonStyling)
-                        && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
-                final PolygonStyling polygonStyle = (PolygonStyling)styling.first;
+            if (
+                (styling.first instanceof PolygonStyling) &&
+                ((geom instanceof Polygon) || (geom instanceof MultiPolygon))
+            ) {
+                final PolygonStyling polygonStyle = (PolygonStyling) styling.first;
                 PPath path;
 
                 if (polygonNr < 0) {
@@ -1211,35 +1231,37 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.sldStyledPolygon.add(path);
                         pfeature.addChild(path);
                     }
-                    path.setPathTo((GeneralPath)pfeature.getPathReference().clone());
+                    path.setPathTo((GeneralPath) pfeature.getPathReference().clone());
                 }
 
                 if ((polygonStyle.displacementX != 0.0) || (polygonStyle.displacementY != 0.0)) {
                     if (polygonStyle.uom == org.deegree.style.styling.components.UOM.Pixel) {
                         final MappingComponent mc = pfeature.getViewer();
                         final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
-                        final Geometry newGeom = (Geometry)geom.clone();
-                        newGeom.apply(new CoordinateFilter() {
-
+                        final Geometry newGeom = (Geometry) geom.clone();
+                        newGeom.apply(
+                            new CoordinateFilter() {
                                 @Override
                                 public void filter(final Coordinate coord) {
                                     coord.x = coord.x + (polygonStyle.displacementX * metrePerPixel);
                                     coord.y = coord.y + (polygonStyle.displacementY * metrePerPixel);
                                 }
-                            });
+                            }
+                        );
                         newGeom.geometryChanged();
                         setPath(path, newGeom, wtst);
                     } else {
                         final double multiplier = getMultiplierFromDeegreeUOM(polygonStyle.uom);
-                        final Geometry newGeom = (Geometry)geom.clone();
-                        newGeom.apply(new CoordinateFilter() {
-
+                        final Geometry newGeom = (Geometry) geom.clone();
+                        newGeom.apply(
+                            new CoordinateFilter() {
                                 @Override
                                 public void filter(final Coordinate coord) {
                                     coord.x = coord.x + (polygonStyle.displacementX * multiplier);
                                     coord.y = coord.y + (polygonStyle.displacementY * multiplier);
                                 }
-                            });
+                            }
+                        );
                         newGeom.geometryChanged();
                         setPath(path, newGeom, wtst);
                     }
@@ -1250,22 +1272,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         final MappingComponent mc = pfeature.getViewer();
                         final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
                         final Geometry newGeom = createOffsetCurve(
-                                geom,
-                                polygonStyle.perpendicularOffset
-                                        * metrePerPixel);
+                            geom,
+                            polygonStyle.perpendicularOffset * metrePerPixel
+                        );
                         setPath(path, newGeom, wtst);
                     } else {
                         final double multiplier = getMultiplierFromDeegreeUOM(polygonStyle.uom);
-                        final Geometry newGeom = createOffsetCurve(geom, polygonStyle.perpendicularOffset
-                                        * multiplier);
+                        final Geometry newGeom = createOffsetCurve(geom, polygonStyle.perpendicularOffset * multiplier);
                         setPath(path, newGeom, wtst);
                     }
                 }
-                applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
+                applyPolygonStyling(path, (PolygonStyling) styling.first, pfeature.getMappingComponent());
                 polygonNr++;
-            } else if ((styling.first instanceof LineStyling)
-                        && ((geom instanceof LineString) || (geom instanceof MultiLineString))) {
-                final LineStyling lineStyle = (LineStyling)styling.first;
+            } else if (
+                (styling.first instanceof LineStyling) &&
+                ((geom instanceof LineString) || (geom instanceof MultiLineString))
+            ) {
+                final LineStyling lineStyle = (LineStyling) styling.first;
                 PPath path;
 
                 if (polygonNr < 0) {
@@ -1278,7 +1301,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.sldStyledPolygon.add(path);
                         pfeature.addChild(path);
                     }
-                    path.setPathTo((GeneralPath)pfeature.getPathReference().clone());
+                    path.setPathTo((GeneralPath) pfeature.getPathReference().clone());
                 }
                 Geometry offsetGeom = geom;
 
@@ -1286,20 +1309,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     if (lineStyle.uom == org.deegree.style.styling.components.UOM.Pixel) {
                         final MappingComponent mc = pfeature.getViewer();
                         final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
-                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset
-                                        * metrePerPixel);
+                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset * metrePerPixel);
                         setPath(path, offsetGeom, wtst);
                     } else {
                         final double multiplier = getMultiplierFromDeegreeUOM(lineStyle.uom);
-                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset
-                                        * multiplier);
+                        offsetGeom = createOffsetCurve(geom, lineStyle.perpendicularOffset * multiplier);
                         setPath(path, offsetGeom, wtst);
                     }
                 }
 
                 final List<EndPointStyle> epStyles = getEndPointStyles();
 
-                applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
+                applyLineStyling(path, (LineStyling) styling.first, pfeature.getMappingComponent());
                 polygonNr++;
 
                 if (!epStyles.isEmpty()) {
@@ -1309,17 +1330,19 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
                         path = new PPath();
                         final GeneralPath newPath = tmpStyle.arrowhead(
-                                transformCoordinateArr(offsetGeom.getCoordinates(), wtst),
-                                metrePerPixel);
+                            transformCoordinateArr(offsetGeom.getCoordinates(), wtst),
+                            metrePerPixel
+                        );
                         pfeature.sldStyledPolygon.add(path);
                         pfeature.addChild(path);
                         path.setPathTo(newPath);
-                        applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
+                        applyLineStyling(path, (LineStyling) styling.first, pfeature.getMappingComponent());
                         polygonNr++;
                     }
                 }
-            } else if ((styling.first instanceof TextStyling) && (styling.third != null)
-                        && !styling.third.equals("null")) {
+            } else if (
+                (styling.first instanceof TextStyling) && (styling.third != null) && !styling.third.equals("null")
+            ) {
                 PFeature.PTextWithDisplacement text;
                 try {
                     text = pfeature.sldStyledText.get(textNr++);
@@ -1329,40 +1352,36 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     pfeature.addChild(text);
                     pfeature.getMappingComponent().addStickyNode(text);
                 }
-                final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                final Point intPoint = CrsTransformer
+                    .transformToGivenCrs(
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode()
+                    )
+                    .getInteriorPoint();
                 String value = styling.third;
                 try {
                     final double val = Double.parseDouble(styling.third);
 
-                    if (val == (long)val) {
-                        value = String.valueOf((long)val);
+                    if (val == (long) val) {
+                        value = String.valueOf((long) val);
                     }
-                } catch (NumberFormatException e) {
-                }
-                applyTextStyling(
-                    text,
-                    value,
-                    (TextStyling)styling.first,
-                    wtst,
-                    intPoint.getX(),
-                    intPoint.getY());
+                } catch (NumberFormatException e) {}
+                applyTextStyling(text, value, (TextStyling) styling.first, wtst, intPoint.getX(), intPoint.getY());
                 rescaleStickyNode(pfeature, text);
-            } else if ((styling.first instanceof PointStyling)
-                        && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
+            } else if (
+                (styling.first instanceof PointStyling) && ((geom instanceof Point) || (geom instanceof MultiPoint))
+            ) {
                 PImage image;
                 PImage selectedImage;
                 try {
                     image = pfeature.sldStyledImage.get(imageNr);
                     selectedImage = pfeature.sldStyledSelectedImage.get(imageNr++);
                 } catch (IndexOutOfBoundsException ex) {
-                    if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                         image = new FixedPImage();
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
                         selectedImage = new FixedPImage();
-                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) selectedImage);
                     } else {
                         image = new PImage();
                         selectedImage = new PImage();
@@ -1372,7 +1391,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     pfeature.sldStyledSelectedImage.add(selectedImage);
                     pfeature.addChild(image);
                 }
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                     if (!(image instanceof FixedPImage)) {
                         pfeature.removeChild(image);
                         pfeature.sldStyledImage.remove(image);
@@ -1382,12 +1401,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.sldStyledSelectedImage.add(selectedImage);
                         pfeature.addChild(image);
                         pfeature.addChild(selectedImage);
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
-                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) selectedImage);
                     }
                 } else {
                     if (image instanceof FixedPImage) {
-                        pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().removeStickyNode((PSticky) image);
                         pfeature.sldStyledImage.remove(image);
                         pfeature.sldStyledSelectedImage.remove(selectedImage);
                         pfeature.removeChild(image);
@@ -1397,29 +1416,33 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                         pfeature.addChild(image);
                     }
                 }
-                final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                final Point intPoint = CrsTransformer
+                    .transformToGivenCrs(
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode()
+                    )
+                    .getInteriorPoint();
                 applyPointStyling(
                     image,
-                    (PointStyling)styling.first,
+                    (PointStyling) styling.first,
                     wtst,
                     intPoint.getX(),
                     intPoint.getY(),
                     pfeature.getMappingComponent().getCamera(),
-                    false);
+                    false
+                );
                 applyPointStyling(
                     selectedImage,
-                    (PointStyling)styling.first,
+                    (PointStyling) styling.first,
                     wtst,
                     intPoint.getX(),
                     intPoint.getY(),
                     pfeature.getMappingComponent().getCamera(),
-                    true);
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
-                    rescaleStickyNode(pfeature, (PSticky)image);
-                    rescaleStickyNode(pfeature, (PSticky)selectedImage);
+                    true
+                );
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    rescaleStickyNode(pfeature, (PSticky) image);
+                    rescaleStickyNode(pfeature, (PSticky) selectedImage);
                 }
             }
         }
@@ -1449,7 +1472,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
         for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
             if (tempStyle instanceof CustomStyle) {
-                final CustomStyle cs = (CustomStyle)tempStyle;
+                final CustomStyle cs = (CustomStyle) tempStyle;
                 if (!cs.getEndPointStyles().isEmpty()) {
                     for (final EndPointStyleDescription epStyle : cs.getEndPointStyles()) {
                         try {
@@ -1458,7 +1481,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                             final Object o = constructor.newInstance();
 
                             if (o instanceof EndPointStyle) {
-                                epStyles.add((EndPointStyle)o);
+                                epStyles.add((EndPointStyle) o);
                             }
                         } catch (Exception ex) {
                             logger.error("Cannot find end point style class", ex);
@@ -1482,16 +1505,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     private Geometry createOffsetCurve(final Geometry geom, final double offset) {
         final BufferParameters bufParams = new BufferParameters();
         bufParams.setSingleSided(true);
-        final OffsetCurveBuilder curveBuilder = new OffsetCurveBuilder(geom.getPrecisionModel(),
-                bufParams);
+        final OffsetCurveBuilder curveBuilder = new OffsetCurveBuilder(geom.getPrecisionModel(), bufParams);
         final GeometryFactory factory = geom.getFactory();
 
         if (geom.getNumGeometries() > 1) {
             final List<Geometry> geomList = new ArrayList<Geometry>();
 
             for (int i = 0; i < geom.getNumGeometries(); ++i) {
-                final Coordinate[] newCoords = curveBuilder.getOffsetCurve(geom.getGeometryN(i).getCoordinates(),
-                        offset);
+                final Coordinate[] newCoords = curveBuilder.getOffsetCurve(
+                    geom.getGeometryN(i).getCoordinates(),
+                    offset
+                );
                 final Geometry newGeom = factory.createLineString(newCoords);
 
                 geomList.add(newGeom);
@@ -1523,15 +1547,16 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
             for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
                 final Coordinate[] transformedCoordArr = transformCoordinateArr(
-                        entityRingCoordArr[entityIndex][ringIndex],
-                        wtst);
+                    entityRingCoordArr[entityIndex][ringIndex],
+                    wtst
+                );
                 final int length = transformedCoordArr.length;
                 entityRingXArr[entityIndex][ringIndex] = new float[length];
                 entityRingYArr[entityIndex][ringIndex] = new float[length];
 
                 for (int coordIndex = 0; coordIndex < length; coordIndex++) {
-                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].x;
-                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].y;
+                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float) transformedCoordArr[coordIndex].x;
+                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float) transformedCoordArr[coordIndex].y;
                 }
             }
         }
@@ -1541,7 +1566,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         if (geom instanceof Point) {
             path.setPathToPolyline(
                 new float[] { entityRingXArr[0][0][0], entityRingXArr[0][0][0] },
-                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] });
+                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] }
+            );
         } else if ((geom instanceof LineString) || (geom instanceof MultiPoint)) {
             path.setPathToPolyline(entityRingXArr[0][0], entityRingYArr[0][0]);
         } else if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
@@ -1580,9 +1606,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         gp.reset();
 
         if (points.length > 0) {
-            gp.moveTo((float)points[0].x, (float)points[0].y);
+            gp.moveTo((float) points[0].x, (float) points[0].y);
             for (int i = 1; i < points.length; i++) {
-                gp.lineTo((float)points[i].x, (float)points[i].y);
+                gp.lineTo((float) points[i].x, (float) points[i].y);
             }
         }
 
@@ -1603,11 +1629,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         for (int i = 0; i < coordinateArr.length; ++i) {
             points[i] = new Coordinate();
             if (wtst == null) {
-                points[i].x = (float)(coordinateArr[i].x);
-                points[i].y = (float)(coordinateArr[i].y);
+                points[i].x = (float) (coordinateArr[i].x);
+                points[i].y = (float) (coordinateArr[i].y);
             } else {
-                points[i].x = (float)(wtst.getDestX(coordinateArr[i].x));
-                points[i].y = (float)(wtst.getDestY(coordinateArr[i].y));
+                points[i].x = (float) (wtst.getDestX(coordinateArr[i].x));
+                points[i].y = (float) (wtst.getDestY(coordinateArr[i].y));
             }
         }
 
@@ -1625,19 +1651,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         Coordinate[][][] otherCoords = null;
 
         if (geom instanceof Point) {
-            final Point point = (Point)geom;
-            otherCoords = new Coordinate[][][] {
-                    {
-                        { point.getCoordinate() }
-                    }
-                };
+            final Point point = (Point) geom;
+            otherCoords = new Coordinate[][][] { { { point.getCoordinate() } } };
         } else if (geom instanceof LineString) {
-            final LineString lineString = (LineString)geom;
-            otherCoords = new Coordinate[][][] {
-                    { lineString.getCoordinates() }
-                };
+            final LineString lineString = (LineString) geom;
+            otherCoords = new Coordinate[][][] { { lineString.getCoordinates() } };
         } else if (geom instanceof Polygon) {
-            final Polygon polygon = (Polygon)geom;
+            final Polygon polygon = (Polygon) geom;
             final int numOfHoles = polygon.getNumInteriorRing();
             otherCoords = new Coordinate[1][1 + numOfHoles][];
             otherCoords[0][0] = polygon.getExteriorRing().getCoordinates();
@@ -1647,24 +1667,22 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         } else if (geom instanceof LinearRing) {
             // doPolygon((Polygon)geom);
         } else if (geom instanceof MultiPoint) {
-            otherCoords = new Coordinate[][][] {
-                    { ((MultiPoint)geom).getCoordinates() }
-                };
+            otherCoords = new Coordinate[][][] { { ((MultiPoint) geom).getCoordinates() } };
         } else if (geom instanceof MultiLineString) {
-            final MultiLineString multiLineString = (MultiLineString)geom;
+            final MultiLineString multiLineString = (MultiLineString) geom;
             final int numOfGeoms = multiLineString.getNumGeometries();
             otherCoords = new Coordinate[numOfGeoms][][];
             for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
-                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
-                            .getCoordinates();
+                final Coordinate[] coordSubArr =
+                    ((LineString) multiLineString.getGeometryN(entityIndex)).getCoordinates();
                 otherCoords[entityIndex] = new Coordinate[][] { coordSubArr };
             }
         } else if (geom instanceof MultiPolygon) {
-            final MultiPolygon multiPolygon = (MultiPolygon)geom;
+            final MultiPolygon multiPolygon = (MultiPolygon) geom;
             final int numOfEntities = multiPolygon.getNumGeometries();
             otherCoords = new Coordinate[numOfEntities][][];
             for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
-                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
+                final Polygon polygon = (Polygon) multiPolygon.getGeometryN(entityIndex);
                 final int numOfHoles = polygon.getNumInteriorRing();
                 otherCoords[entityIndex] = new Coordinate[1 + numOfHoles][];
                 otherCoords[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
@@ -1673,7 +1691,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                 }
             }
         } else if (geom instanceof GeometryCollection) {
-            final GeometryCollection gc = (GeometryCollection)geom;
+            final GeometryCollection gc = (GeometryCollection) geom;
             final int numOfGeoms = gc.getNumGeometries();
             otherCoords = new Coordinate[numOfGeoms][][];
             for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
@@ -1706,12 +1724,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      * @param  x            DOCUMENT ME!
      * @param  y            DOCUMENT ME!
      */
-    protected void applyTextStyling(final PFeature.PTextWithDisplacement ptext,
-            final String value,
-            final TextStyling textStyling,
-            final WorldToScreenTransform wtst,
-            final double x,
-            final double y) {
+    protected void applyTextStyling(
+        final PFeature.PTextWithDisplacement ptext,
+        final String value,
+        final TextStyling textStyling,
+        final WorldToScreenTransform wtst,
+        final double x,
+        final double y
+    ) {
         ptext.setText(value);
         ptext.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
         /*ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
@@ -1729,10 +1749,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         Font font = null;
         try {
             for (final String fontName : textStyling.font.fontFamily) {
-                font = new Font(fontName, getFontStyling(textStyling.font), (int)textStyling.font.fontSize);
+                font = new Font(fontName, getFontStyling(textStyling.font), (int) textStyling.font.fontSize);
             }
-        } catch (Exception ex) {
-        }
+        } catch (Exception ex) {}
         ptext.setFont(font);
         ptext.setRotation(Math.toRadians(textStyling.rotation));
 
@@ -1750,24 +1769,26 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         }
 
         if (textStyling.uom == org.deegree.style.styling.components.UOM.Pixel) {
-//            final MappingComponent mc = pfeature.getViewer();
-//            final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
-            ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
+            //            final MappingComponent mc = pfeature.getViewer();
+            //            final double metrePerPixel = mc.getCamera().getViewBounds().getHeight() / mc.getHeight();
+            ptext.setDisplacement(
+                getUOMFromDeegree(textStyling.uom),
                 textStyling.displacementX,
                 textStyling.displacementY,
                 textStyling.anchorPointX,
                 textStyling.anchorPointY,
-                wtst);
+                wtst
+            );
         } else {
             final double multiplier = getMultiplierFromDeegreeUOM(textStyling.uom);
-            ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
-                textStyling.displacementX
-                        * multiplier,
-                textStyling.displacementY
-                        * multiplier,
+            ptext.setDisplacement(
+                getUOMFromDeegree(textStyling.uom),
+                textStyling.displacementX * multiplier,
+                textStyling.displacementY * multiplier,
                 textStyling.anchorPointX,
                 textStyling.anchorPointY,
-                wtst);
+                wtst
+            );
         }
     }
 
@@ -1782,12 +1803,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         final int bolt = font.bold ? 1 : 0;
         switch (font.fontStyle) {
             case OBLIQUE:
-            case ITALIC: {
-                return bolt + 2;
-            }
-            case NORMAL: {
-                return bolt;
-            }
+            case ITALIC:
+                {
+                    return bolt + 2;
+                }
+            case NORMAL:
+                {
+                    return bolt;
+                }
         }
         return bolt;
     }
@@ -1810,10 +1833,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         } else {
             BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
             if ((graphic.mark.fill != null) && (graphic.mark.fill.color != null)) {
-                final BufferedImage coloredVerion = new BufferedImage(temp.getWidth(),
-                        temp.getHeight(),
-                        BufferedImage.TYPE_INT_ARGB);
-                final Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
+                final BufferedImage coloredVerion = new BufferedImage(
+                    temp.getWidth(),
+                    temp.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB
+                );
+                final Graphics2D g = (Graphics2D) coloredVerion.getGraphics();
                 if (selected) {
                     g.setColor(PFeature.getHighlightingColorFromColor(graphic.mark.fill.color));
                 } else {
@@ -1831,7 +1856,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     0,
                     temp.getWidth(),
                     temp.getHeight(),
-                    null);
+                    null
+                );
                 temp = coloredVerion;
             }
             return temp;
@@ -1850,30 +1876,36 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     protected BufferedImage getImageFromWellKnownName(final Mark.SimpleMark mark) {
         URL url = null;
         switch (mark) {
-            case CIRCLE: {
-                url = getClass().getResource("/icon-circlerecord.png");
-                break;
-            }
-            case CROSS: {
-                url = getClass().getResource("/icon-plus.png");
-                break;
-            }
-            case SQUARE: {
-                url = getClass().getResource("/icon-squareapp.png");
-                break;
-            }
-            case STAR: {
-                url = getClass().getResource("/icon-star.png");
-                break;
-            }
-            case TRIANGLE: {
-                url = getClass().getResource("/icon-play.png");
-                break;
-            }
-            case X: {
-                url = getClass().getResource("/icon-remove.png");
-                break;
-            }
+            case CIRCLE:
+                {
+                    url = getClass().getResource("/icon-circlerecord.png");
+                    break;
+                }
+            case CROSS:
+                {
+                    url = getClass().getResource("/icon-plus.png");
+                    break;
+                }
+            case SQUARE:
+                {
+                    url = getClass().getResource("/icon-squareapp.png");
+                    break;
+                }
+            case STAR:
+                {
+                    url = getClass().getResource("/icon-star.png");
+                    break;
+                }
+            case TRIANGLE:
+                {
+                    url = getClass().getResource("/icon-play.png");
+                    break;
+                }
+            case X:
+                {
+                    url = getClass().getResource("/icon-remove.png");
+                    break;
+                }
         }
         if (url == null) {
             throw new RuntimeException("could not load Resource" + mark);
@@ -1881,12 +1913,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         final ImageIcon icon = new ImageIcon(url);
         final Image image = icon.getImage();
         if (image instanceof BufferedImage) {
-            return (BufferedImage)image;
+            return (BufferedImage) image;
         } else {
             final BufferedImage bimage = new BufferedImage(
-                    image.getWidth(null),
-                    image.getHeight(null),
-                    BufferedImage.TYPE_INT_ARGB);
+                image.getWidth(null),
+                image.getHeight(null),
+                BufferedImage.TYPE_INT_ARGB
+            );
             final Graphics2D g2d = bimage.createGraphics();
             g2d.drawImage(image, 0, 0, null);
             g2d.dispose();
@@ -1906,18 +1939,22 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     protected double getMultiplierFromDeegreeUOM(final org.deegree.style.styling.components.UOM uom) {
         switch (uom) {
-            case Foot: {
-                return 0.3048;
-            }
-            case Metre: {
-                return 1.0;
-            }
-            case Pixel: {
-                return 1.0;
-            }
-            case mm: {
-                return 0.001;
-            }
+            case Foot:
+                {
+                    return 0.3048;
+                }
+            case Metre:
+                {
+                    return 1.0;
+                }
+            case Pixel:
+                {
+                    return 1.0;
+                }
+            case mm:
+                {
+                    return 0.001;
+                }
         }
         throw new RuntimeException("unknown UOM" + uom.toString());
     }
@@ -1933,11 +1970,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      *
      * @return  DOCUMENT ME!
      */
-    protected Paint getPaintFromDeegree(final Graphic graphic,
-            final Color color,
-            final org.deegree.style.styling.components.UOM uom,
-            final PNode parent,
-            final MappingComponent map) {
+    protected Paint getPaintFromDeegree(
+        final Graphic graphic,
+        final Color color,
+        final org.deegree.style.styling.components.UOM uom,
+        final PNode parent,
+        final MappingComponent map
+    ) {
         if (graphic == null) {
             return color;
         } else {
@@ -1945,46 +1984,44 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             final BufferedImage image = getImageFromDeegree(graphic, false);
             Paint texture;
             if (uom != org.deegree.style.styling.components.UOM.Pixel) {
-                texture = new TexturePaint(
+                texture =
+                    new TexturePaint(
                         image,
                         new Rectangle2D.Double(
                             0,
                             0,
-                            multiplier
-                                    * graphic.size
-                                    * image.getWidth()
-                                    / image.getHeight(),
-                            graphic.size
-                                    * multiplier));
+                            multiplier * graphic.size * image.getWidth() / image.getHeight(),
+                            graphic.size * multiplier
+                        )
+                    );
             } else {
                 final RescaleOp rescaleOp = new RescaleOp(0.25f, 0f, null);
 
-                texture = new SelectionAwareTexturePaint(
+                texture =
+                    new SelectionAwareTexturePaint(
                         image,
                         rescaleOp.filter(image, null),
                         rescaleOp.filter(image, null),
                         new Rectangle2D.Double(
                             0,
                             0,
-                            multiplier
-                                    * graphic.size
-                                    * image.getWidth(),
-                            multiplier
-                                    * graphic.size
-                                    * image.getHeight()));
-//                texture = new PFixedTexturePaint(
-//                        image,
-//                        new Rectangle2D.Double(
-//                            0,
-//                            0,
-//                            multiplier
-//                                    * graphic.size
-//                                    * image.getWidth()
-//                                    / image.getHeight(),
-//                            graphic.size
-//                                    * multiplier),
-//                        parent);
-//                map.addStickyNode((PFixedTexturePaint)texture);
+                            multiplier * graphic.size * image.getWidth(),
+                            multiplier * graphic.size * image.getHeight()
+                        )
+                    );
+                //                texture = new PFixedTexturePaint(
+                //                        image,
+                //                        new Rectangle2D.Double(
+                //                            0,
+                //                            0,
+                //                            multiplier
+                //                                    * graphic.size
+                //                                    * image.getWidth()
+                //                                    / image.getHeight(),
+                //                            graphic.size
+                //                                    * multiplier),
+                //                        parent);
+                //                map.addStickyNode((PFixedTexturePaint)texture);
             }
             return texture;
         }
@@ -2001,18 +2038,22 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     protected UOM getUOMFromDeegree(final org.deegree.style.styling.components.UOM uom) {
         switch (uom) {
-            case Foot: {
-                return UOM.foot;
-            }
-            case Metre: {
-                return UOM.metre;
-            }
-            case Pixel: {
-                return UOM.pixel;
-            }
-            case mm: {
-                return UOM.mm;
-            }
+            case Foot:
+                {
+                    return UOM.foot;
+                }
+            case Metre:
+                {
+                    return UOM.metre;
+                }
+            case Pixel:
+                {
+                    return UOM.pixel;
+                }
+            case mm:
+                {
+                    return UOM.mm;
+                }
         }
         throw new RuntimeException("unknown UOM" + uom.toString());
     }
@@ -2050,9 +2091,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
         if (bImage == null) {
             Image image = ensureRGBAImage(unselectedImage);
-            image = Toolkit.getDefaultToolkit()
-                        .createImage(new FilteredImageSource(image.getSource(),
-                                    new SelectedFilter()));
+            image =
+                Toolkit
+                    .getDefaultToolkit()
+                    .createImage(new FilteredImageSource(image.getSource(), new SelectedFilter()));
             final int width = image.getWidth(null);
             final int height = image.getHeight(null);
             bImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -2074,9 +2116,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     private BufferedImage ensureRGBAImage(BufferedImage image) {
         if ((image != null) && (image.getType() != BufferedImage.TYPE_INT_ARGB)) {
-            final BufferedImage tmpImg = new BufferedImage(image.getWidth(),
-                    image.getHeight(),
-                    BufferedImage.TYPE_INT_ARGB);
+            final BufferedImage tmpImg = new BufferedImage(
+                image.getWidth(),
+                image.getHeight(),
+                BufferedImage.TYPE_INT_ARGB
+            );
             final Graphics g = tmpImg.getGraphics();
             g.drawImage(image, 0, 0, null);
             g.dispose();
@@ -2276,7 +2320,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     deegreeProperties.add(null);
                 } else {
                     if (value instanceof BigDecimal) {
-                        deegreeProperties.add(new DeegreeProperty(qname, ((BigDecimal)value).doubleValue()));
+                        deegreeProperties.add(new DeegreeProperty(qname, ((BigDecimal) value).doubleValue()));
                     } else {
                         deegreeProperties.add(new DeegreeProperty(qname, value));
                     }
@@ -2371,8 +2415,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         /**
          * Creates a new DeegreeFeatureType object.
          */
-        public DeegreeFeatureType() {
-        }
+        public DeegreeFeatureType() {}
 
         //~ Methods ------------------------------------------------------------
 
@@ -2461,35 +2504,53 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             if (value == null) {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
             } else if (value instanceof String) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((String)value,
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.STRING));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    (String) value,
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.STRING
+                    )
+                );
             } else if (value instanceof Float) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue(new Double((Float)value),
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    new Double((Float) value),
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.DOUBLE
+                    )
+                );
             } else if (value instanceof Boolean) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Boolean)value,
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.BOOLEAN));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    (Boolean) value,
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.BOOLEAN
+                    )
+                );
             } else if (value instanceof Double) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Double)value,
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    (Double) value,
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.DOUBLE
+                    )
+                );
             } else if (value instanceof Integer) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Integer)value,
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    (Integer) value,
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.INTEGER
+                    )
+                );
             } else if (value instanceof Long) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Long)value,
-                        new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(
+                    (Long) value,
+                    new org.deegree.commons.tom.primitive.PrimitiveType(
+                        org.deegree.commons.tom.primitive.BaseType.INTEGER
+                    )
+                );
             } else if (value instanceof org.deegree.geometry.Geometry) {
-                return ((org.deegree.geometry.Geometry)value);
+                return ((org.deegree.geometry.Geometry) value);
             } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
                 try {
-                    final org.deegree.model.spatialschema.Geometry geo = ((org.deegree.model.spatialschema.Geometry)
-                            value);
+                    final org.deegree.model.spatialschema.Geometry geo =
+                        ((org.deegree.model.spatialschema.Geometry) value);
                     final Geometry g = JTSAdapter.export(geo);
                     if (geo.getCoordinateSystem() != null) {
                         final int srid = CrsTransformer.extractSridFromCrs(geo.getCoordinateSystem().getIdentifier());
@@ -2501,174 +2562,174 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                     return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
                 }
             } else if (value instanceof Geometry) {
-                return defaultGeom.createFromJTS((Geometry)value, null);
-//                return new org.deegree.geometry.Geometry() {
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public void setId(final String string) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public void setProperties(final List<Property> list) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean isSFSCompliant() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public int getCoordinateDimension() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
-//                                final org.deegree.commons.uom.Measure msr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
-//                                final org.deegree.commons.uom.Measure msr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.primitive.Point getCentroid() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public Envelope getEnvelope() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry getDifference(
-//                                final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry getIntersection(
-//                                final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.geometry.Geometry getConvexHull() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
-//                                final org.deegree.commons.uom.Unit unit) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public String getId() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public List<Property> getProperties() {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//
-//                        @Override
-//                        public List<Property> getProperties(final QName qname) {
-//                            throw new UnsupportedOperationException("Not supported yet.");
-//                        }
-//                    };
+                return defaultGeom.createFromJTS((Geometry) value, null);
+                //                return new org.deegree.geometry.Geometry() {
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public void setId(final String string) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public void setProperties(final List<Property> list) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean isSFSCompliant() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public int getCoordinateDimension() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
+                //                                final org.deegree.commons.uom.Measure msr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
+                //                                final org.deegree.commons.uom.Measure msr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.primitive.Point getCentroid() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public Envelope getEnvelope() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry getDifference(
+                //                                final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry getIntersection(
+                //                                final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.geometry.Geometry getConvexHull() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
+                //                                final org.deegree.commons.uom.Unit unit) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public String getId() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public List<Property> getProperties() {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //
+                //                        @Override
+                //                        public List<Property> getProperties(final QName qname) {
+                //                            throw new UnsupportedOperationException("Not supported yet.");
+                //                        }
+                //                    };
             } else {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
             }
@@ -2735,8 +2796,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
 
             final Color newColor = PFeature.getHighlightingColorFromColor(c);
 
-            return (argb & 0xff000000) | (newColor.getRed() << 0x10) | (newColor.getGreen() << 0x08)
-                        | (newColor.getBlue());
+            return (
+                (argb & 0xff000000) | (newColor.getRed() << 0x10) | (newColor.getGreen() << 0x08) | (newColor.getBlue())
+            );
         }
     }
 }

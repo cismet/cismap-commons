@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -14,12 +14,9 @@ import com.vividsolutions.jts.io.ByteOrderValues;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
-
-import org.openide.util.lookup.ServiceProvider;
-
 import de.cismet.cismap.commons.CrsTransformer;
-
 import de.cismet.commons.converter.ConversionException;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Creates a geometry from (E)WKB. However, the conversion back from a geometry produces WKB only. If the input is EWKB
@@ -43,7 +40,7 @@ public final class GeomFromWkbConverter implements BinaryToGeometryConverter {
     @Override
     public Geometry convertForward(final byte[] from, final String... params) throws ConversionException {
         if ((from == null) || (from.length == 0)) {
-            throw new IllegalArgumentException("'from' must not be null or empty");                       // NOI18N
+            throw new IllegalArgumentException("'from' must not be null or empty"); // NOI18N
         }
         if ((params == null) || (params.length < 1)) {
             throw new IllegalArgumentException("no parameters provided, epsgcode is required parameter"); // NOI18N
@@ -72,10 +69,7 @@ public final class GeomFromWkbConverter implements BinaryToGeometryConverter {
         }
 
         int endian = ByteOrderValues.LITTLE_ENDIAN;
-        if ((params != null)
-                    && (params.length > 0)
-                    && (params[0] != null)
-                    && "XDR".equalsIgnoreCase(params[0])) {
+        if ((params != null) && (params.length > 0) && (params[0] != null) && "XDR".equalsIgnoreCase(params[0])) {
             endian = ByteOrderValues.BIG_ENDIAN;
         }
 

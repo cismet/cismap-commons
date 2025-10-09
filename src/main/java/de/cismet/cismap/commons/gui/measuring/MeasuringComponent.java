@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 srichter
  *
@@ -31,14 +31,6 @@ package de.cismet.cismap.commons.gui.measuring;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import java.awt.Cursor;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -51,8 +43,12 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
-
 import de.cismet.tools.collections.TypeSafeCollections;
+import java.awt.Cursor;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -75,6 +71,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cismap.commons.gui.MappingComponent map;
     private javax.swing.JPanel panCenter;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -83,14 +80,17 @@ public class MeasuringComponent extends javax.swing.JPanel {
      * Creates new form MeasuringComponent.
      */
     public MeasuringComponent() {
-        this(new XBoundingBox(
+        this(
+            new XBoundingBox(
                 2583621.251964098d,
                 5682507.032498134d,
                 2584022.9413952776d,
                 5682742.852810634d,
                 "EPSG:31466",
-                false),
-            new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", false, true));
+                false
+            ),
+            new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", false, true)
+        );
     }
 
     /**
@@ -157,7 +157,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         if (map != null) {
             final FeatureCollection fc = map.getFeatureCollection();
             if (fc instanceof DefaultFeatureCollection) {
-                ((DefaultFeatureCollection)fc).clear();
+                ((DefaultFeatureCollection) fc).clear();
             } else {
                 fc.removeAllFeatures();
             }
@@ -179,7 +179,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
     public void addFeature(final Feature feature) {
         if (feature != null) {
             if (feature instanceof RasterDocumentFeature) {
-                mainRasterDocumentFeature = (RasterDocumentFeature)feature;
+                mainRasterDocumentFeature = (RasterDocumentFeature) feature;
             }
 
             getFeatureCollection().addFeature(feature);
@@ -256,8 +256,8 @@ public class MeasuringComponent extends javax.swing.JPanel {
             map.zoomToFeatureCollection();
         } else {
             // lazy zoom if map is hidden and has size zero.
-            map.addComponentListener(new ComponentAdapter() {
-
+            map.addComponentListener(
+                new ComponentAdapter() {
                     @Override
                     public void componentResized(final ComponentEvent e) {
                         if ((map.getWidth() > 0) && (map.getHeight() > 0)) {
@@ -265,7 +265,8 @@ public class MeasuringComponent extends javax.swing.JPanel {
                             map.removeComponentListener(this);
                         }
                     }
-                });
+                }
+            );
         }
     }
 

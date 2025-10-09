@@ -1,35 +1,28 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.tools;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Exceptions;
-
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import java.awt.Image;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-
-import de.cismet.cismap.commons.BoundingBox;
-
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import org.apache.log4j.Logger;
+import org.openide.util.Exceptions;
 
 /**
  * A Download, which creates a world file from a map image and a bounding box and saves it to a file.
@@ -58,10 +51,12 @@ public class WorldFileDownload extends AbstractDownload {
      * @param  boundingBoxFromMap  DOCUMENT ME!
      * @param  fileAbsolutPath     DOCUMENT ME!
      */
-    public WorldFileDownload(final String title,
-            final Future<Image> futureImage,
-            final BoundingBox boundingBoxFromMap,
-            final String fileAbsolutPath) {
+    public WorldFileDownload(
+        final String title,
+        final Future<Image> futureImage,
+        final BoundingBox boundingBoxFromMap,
+        final String fileAbsolutPath
+    ) {
         this.futureImage = futureImage;
         this.boundingBoxFromMap = boundingBoxFromMap;
         this.title = title;
@@ -199,17 +194,20 @@ public class WorldFileDownload extends AbstractDownload {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final WorldFileDownload other = (WorldFileDownload)obj;
+        final WorldFileDownload other = (WorldFileDownload) obj;
         if ((this.title == null) ? (other.title != null) : (!this.title.equals(other.title))) {
             return false;
         }
-        if ((this.fileToSaveTo != other.fileToSaveTo)
-                    && ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))) {
+        if (
+            (this.fileToSaveTo != other.fileToSaveTo) &&
+            ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))
+        ) {
             return false;
         }
-        if ((this.boundingBoxFromMap != other.boundingBoxFromMap)
-                    && ((this.boundingBoxFromMap == null) || !this.boundingBoxFromMap.equals(
-                            other.boundingBoxFromMap))) {
+        if (
+            (this.boundingBoxFromMap != other.boundingBoxFromMap) &&
+            ((this.boundingBoxFromMap == null) || !this.boundingBoxFromMap.equals(other.boundingBoxFromMap))
+        ) {
             return false;
         }
         return true;

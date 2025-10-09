@@ -1,29 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.layerwidget;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.awt.EventQueue;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.CidsLayerFactory;
 import de.cismet.cismap.commons.Crs;
@@ -35,8 +21,16 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
-
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -64,8 +58,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     /**
      * Creates a new LayerCollection object.
      */
-    public LayerCollection() {
-    }
+    public LayerCollection() {}
 
     /**
      * Creates a new LayerCollection object.
@@ -74,9 +67,11 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      * @param  capabilities  DOCUMENT ME!
      * @param  model         DOCUMENT ME!
      */
-    public LayerCollection(final Element e,
-            final HashMap<String, WMSCapabilities> capabilities,
-            final ActiveLayerModel model) {
+    public LayerCollection(
+        final Element e,
+        final HashMap<String, WMSCapabilities> capabilities,
+        final ActiveLayerModel model
+    ) {
         this.model = model;
 
         try {
@@ -85,12 +80,12 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
             if (e.getName().equals(XML_ELEMENT_NAME)) {
                 this.initFromElement(e, capabilities);
             } else {
-                LOG.error("LayerCollection could not be initailised from xml: unsupported element '" + e.getName()
-                            + "'"); // NOI18N
+                LOG.error(
+                    "LayerCollection could not be initailised from xml: unsupported element '" + e.getName() + "'"
+                ); // NOI18N
                 throw new ClassNotFoundException(
-                    "LayerCollection could not be initailised from xml: unsupported element '"
-                            + e.getName()
-                            + "'"); // NOI18N
+                    "LayerCollection could not be initailised from xml: unsupported element '" + e.getName() + "'"
+                ); // NOI18N
             }
         } catch (Exception ex) {
             LOG.error("Exception while creating LayerCollection", ex);
@@ -108,27 +103,31 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      * @throws  Exception  DOCUMENT ME!
      */
     private void initFromElement(Element element, final HashMap<String, WMSCapabilities> capabilities)
-            throws Exception {
+        throws Exception {
         if (element == null) {
             element = this.getInitElement();
         } else {
-            this.setInitElement((Element)element.clone());
+            this.setInitElement((Element) element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                  // NOI18N
-        {
-            this.setName(element.getAttributeValue("name"));                            // NOI18N
+        if (
+            element.getAttributeValue("name") != null
+        ) { // NOI18N
+            this.setName(element.getAttributeValue("name")); // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                               // NOI18N
-        {
-            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N
+        if (
+            element.getAttributeValue("enabled") != null
+        ) { // NOI18N
+            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled"))); // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                          // NOI18N
-        {
+        if (
+            element.getAttributeValue("translucency") != null
+        ) { // NOI18N
             this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (element.getAttributeValue("layerPosition") != null)                         // NOI18N
-        {
+        if (
+            element.getAttributeValue("layerPosition") != null
+        ) { // NOI18N
             this.setLayerPosition(element.getAttribute("layerPosition").getIntValue()); // NOI18N
         }
 
@@ -171,7 +170,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                 add(layer);
 
                 if (layer instanceof RetrievalServiceLayer) {
-                    model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
+                    model.registerRetrievalServiceLayer((RetrievalServiceLayer) layer);
                 }
             }
         } catch (Throwable t) {
@@ -187,17 +186,17 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     public void setCrs(final Crs srs) {
         for (final Object layer : this) {
             if (layer instanceof WMSServiceLayer) {
-                ((WMSServiceLayer)layer).setSrs(srs.getCode());
+                ((WMSServiceLayer) layer).setSrs(srs.getCode());
             } else if (layer instanceof SlidableWMSServiceLayerGroup) {
-                ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
+                ((SlidableWMSServiceLayerGroup) layer).setSrs(srs.getCode());
             } else if (layer instanceof WebFeatureService) {
-                ((WebFeatureService)layer).setCrs(srs);
+                ((WebFeatureService) layer).setCrs(srs);
             } else if (layer instanceof ShapeFileFeatureService) {
-                ((ShapeFileFeatureService)layer).setCrs(srs);
+                ((ShapeFileFeatureService) layer).setCrs(srs);
             } else if (layer instanceof JDBCFeatureService) {
-                ((JDBCFeatureService)layer).setCrs(srs);
+                ((JDBCFeatureService) layer).setCrs(srs);
             } else if (layer instanceof LayerCollection) {
-                ((LayerCollection)layer).setCrs(srs);
+                ((LayerCollection) layer).setCrs(srs);
             } else {
                 LOG.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
             }
@@ -216,9 +215,9 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      */
     public Element toElement() {
         final Element element = new Element(XML_ELEMENT_NAME);
-        element.setAttribute("name", getName());                                                // NOI18N
-        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());               // NOI18N
-        element.setAttribute("translucency", new Float(getTranslucency()).toString());          // NOI18N
+        element.setAttribute("name", getName()); // NOI18N
+        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString()); // NOI18N
+        element.setAttribute("translucency", new Float(getTranslucency()).toString()); // NOI18N
         element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString()); // NOI18N
 
         // Zuerst alle RasterLayer
@@ -233,7 +232,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
             if (service instanceof ServiceLayer) {
                 // es reicht völlig aus, die Layer Position erst beim Speichern der
                 // Konfiugration zu setzten und nicht bei jedem Aufruf von moveLayerUp/Down.
-                ((ServiceLayer)service).setLayerPosition(counter);
+                ((ServiceLayer) service).setLayerPosition(counter);
             }
 
             if (service instanceof SimpleFeatureSupportingRasterLayer) {
@@ -277,9 +276,9 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     public void setEnabled(final boolean enabled) {
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
-                ((LayerCollection)tmp).setEnabled(enabled);
+                ((LayerCollection) tmp).setEnabled(enabled);
             } else if (tmp instanceof ServiceLayer) {
-                ((ServiceLayer)tmp).setEnabled(enabled);
+                ((ServiceLayer) tmp).setEnabled(enabled);
             }
         }
     }
@@ -295,11 +294,11 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
-                if (((LayerCollection)tmp).isEnabled()) {
+                if (((LayerCollection) tmp).isEnabled()) {
                     enabled = true;
                 }
             } else if (tmp instanceof ServiceLayer) {
-                if (((ServiceLayer)tmp).isEnabled()) {
+                if (((ServiceLayer) tmp).isEnabled()) {
                     enabled = true;
                 }
 
@@ -309,7 +308,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                     final TreePath tp = new TreePath(new Object[] { this, tmp });
 
                     if (tp.getLastPathComponent() instanceof RetrievalServiceLayer) {
-                        final RetrievalServiceLayer rl = (RetrievalServiceLayer)tp.getLastPathComponent();
+                        final RetrievalServiceLayer rl = (RetrievalServiceLayer) tp.getLastPathComponent();
                         if (rl.getPNode() == null) {
                             model.registerRetrievalServiceLayer(rl);
                         }
@@ -324,7 +323,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     @Override
     public boolean add(final Object e) {
         if (e instanceof LayerCollection) {
-            ((LayerCollection)e).setModel(model);
+            ((LayerCollection) e).setModel(model);
         }
 
         return super.add(e);
@@ -333,7 +332,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     @Override
     public void add(final int index, final Object element) {
         if (element instanceof LayerCollection) {
-            ((LayerCollection)element).setModel(model);
+            ((LayerCollection) element).setModel(model);
         }
 
         super.add(index, element);
@@ -343,7 +342,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     public boolean addAll(final Collection<? extends Object> c) {
         for (final Object element : c) {
             if (element instanceof LayerCollection) {
-                ((LayerCollection)element).setModel(model);
+                ((LayerCollection) element).setModel(model);
             }
         }
 
@@ -354,7 +353,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     public boolean addAll(final int index, final Collection<? extends Object> c) {
         for (final Object element : c) {
             if (element instanceof LayerCollection) {
-                ((LayerCollection)element).setModel(model);
+                ((LayerCollection) element).setModel(model);
             }
         }
 
@@ -390,7 +389,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
-                ((LayerCollection)tmp).setModel(model);
+                ((LayerCollection) tmp).setModel(model);
             }
         }
     }

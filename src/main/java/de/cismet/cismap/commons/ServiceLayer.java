@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 /**
@@ -14,7 +14,6 @@ package de.cismet.cismap.commons;
  * @version  $Revision$, $Date$
  */
 public interface ServiceLayer {
-
     //~ Instance fields --------------------------------------------------------
 
     int LAYER_ENABLED_VISIBLE = 0;

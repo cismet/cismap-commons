@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.*;
-
+import de.cismet.tools.collections.TypeSafeCollections;
 import java.util.Arrays;
 import java.util.Collection;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -71,7 +69,7 @@ public final class FeatureGroups {
         if (subFeatures != null) {
             for (final Feature f : featureGroup) {
                 if (f instanceof FeatureGroup) {
-                    result.addAll(expand((FeatureGroup)f, includeGroups));
+                    result.addAll(expand((FeatureGroup) f, includeGroups));
                 } else {
                     result.add(f);
                 }
@@ -163,7 +161,7 @@ public final class FeatureGroups {
                 union = factory.buildGeometry(Arrays.asList(array));
 
                 if (union instanceof GeometryCollection) {
-                    union = ((GeometryCollection)union).union();
+                    union = ((GeometryCollection) union).union();
                 }
             }
 

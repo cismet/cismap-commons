@@ -1,20 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import java.util.Comparator;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureWithId;
+import java.util.Comparator;
 
 /**
  * DOCUMENT ME!
@@ -30,8 +29,8 @@ public class PFeatureComparable implements Comparator<Feature> {
     public int compare(final Feature o1, final Feature o2) {
         // if tester and PFeature are FeatureWithId-objects
         if ((o1 instanceof FeatureWithId) && (o2 instanceof FeatureWithId)) {
-            final Integer id1 = ((FeatureWithId)o1).getId();
-            final Integer id2 = ((FeatureWithId)o2).getId();
+            final Integer id1 = ((FeatureWithId) o1).getId();
+            final Integer id2 = ((FeatureWithId) o2).getId();
             if ((id1 != -1) && (id2 != -1)) {
                 return id1.compareTo(id2);
             } else {

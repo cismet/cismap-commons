@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,14 +12,11 @@
  */
 package de.cismet.cismap.commons.drophandler.filematcher.builtin;
 
-import org.apache.commons.io.FilenameUtils;
-
+import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
 import java.io.File;
-
 import java.util.Arrays;
 import java.util.Collection;
-
-import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * DOCUMENT ME!

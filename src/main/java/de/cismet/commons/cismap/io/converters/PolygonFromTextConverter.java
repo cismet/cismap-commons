@@ -1,21 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
-
+import de.cismet.commons.converter.ConversionException;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
-
-import de.cismet.commons.converter.ConversionException;
 
 /**
  * Creates a polygon geometry from the provided coordinates. At least three coordinates are expected. If the first and
@@ -31,7 +29,7 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
 
     @Override
     protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException {
+        throws ConversionException {
         if (coordinates.length < 3) {
             throw new ConversionException("too few coordinates for polygon: " + coordinates.length); // NOI18N
         }
@@ -60,8 +58,9 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                PolygonFromTextConverter.class,
-                "PolygonFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
+            PolygonFromTextConverter.class,
+            "PolygonFromTextConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -72,8 +71,9 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
     @Override
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PolygonFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+            PointFromTextConverter.class,
+            "PolygonFromTextConverter.getFormatDescription().returnValue"
+        ); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -81,10 +81,9 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
 
     @Override
     public String getFormatHtmlDescription() {
-        final String desc = NbBundle.getMessage(
-                    PointFromTextConverter.class,
-                    "PolygonFromTextConverter.getFormatHtmlDescription().returnValue")
-                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String desc = NbBundle
+            .getMessage(PointFromTextConverter.class, "PolygonFromTextConverter.getFormatHtmlDescription().returnValue")
+            .replaceAll("<[/]?html>", ""); // NOI18N
         final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
 
         return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
@@ -93,9 +92,10 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PolygonFromTextConverter.getFormatExample().returnValue",
-                getDecimalSeparator()); // NOI18N
+            PointFromTextConverter.class,
+            "PolygonFromTextConverter.getFormatExample().returnValue",
+            getDecimalSeparator()
+        ); // NOI18N
     }
 
     /**

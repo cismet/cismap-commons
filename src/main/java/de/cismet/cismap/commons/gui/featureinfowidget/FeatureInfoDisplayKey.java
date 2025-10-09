@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
 /**
@@ -77,7 +77,7 @@ public class FeatureInfoDisplayKey {
             return false;
         }
 
-        final FeatureInfoDisplayKey other = (FeatureInfoDisplayKey)obj;
+        final FeatureInfoDisplayKey other = (FeatureInfoDisplayKey) obj;
         if ((this.javaclass == null) ? (other.javaclass != null) : (!this.javaclass.equals(other.javaclass))) {
             return false;
         } else if ((this.server == null) ? (other.server != null) : (!this.server.equals(other.server))) {
@@ -104,9 +104,9 @@ public class FeatureInfoDisplayKey {
         final StringBuilder sb = new StringBuilder(super.toString());
 
         sb.append(" [javaclass=").append(javaclass); // NOI18N
-        sb.append(", server=").append(server);       // NOI18N
-        sb.append(", layer=").append(layer);         // NOI18N
-        sb.append("]");                              // NOI18N
+        sb.append(", server=").append(server); // NOI18N
+        sb.append(", layer=").append(layer); // NOI18N
+        sb.append("]"); // NOI18N
 
         return sb.toString();
     }

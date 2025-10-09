@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * KeyboardListener.java
  *
@@ -15,16 +15,13 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
-
 import java.awt.event.KeyEvent;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -63,7 +60,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
     public void keyPressed(final PInputEvent event) {
         super.keyPressed(event);
         if (log.isDebugEnabled()) {
-            log.debug("keyPressed " + event);                                                  // NOI18N
+            log.debug("keyPressed " + event); // NOI18N
         }
         if (event.getKeyChar() == 'a') {
             zoom(0.95f, event, 0, 800);
@@ -78,10 +75,11 @@ public class KeyboardListener extends PBasicInputEventHandler {
         } else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
             pan(X_PAN, 0.05f, 0, 800);
         } else if (event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-            final CreateNewGeometryListener listener = (CreateNewGeometryListener)viewer.getInputListener(
-                    MappingComponent.NEW_POLYGON);
+            final CreateNewGeometryListener listener = (CreateNewGeometryListener) viewer.getInputListener(
+                MappingComponent.NEW_POLYGON
+            );
             if (log.isDebugEnabled()) {
-                log.debug("Event an CreateGeometryListener weitergeleitet:" + listener);       // NOI18N
+                log.debug("Event an CreateGeometryListener weitergeleitet:" + listener); // NOI18N
             }
             listener.keyPressed(event);
         } else {
@@ -118,16 +116,15 @@ public class KeyboardListener extends PBasicInputEventHandler {
         try {
             refreshTime = System.currentTimeMillis() + delayTime;
             if ((refreshThread == null) || !refreshThread.isAlive()) {
-                refreshThread = new Thread("KeyboardListener pan()") {
-
+                refreshThread =
+                    new Thread("KeyboardListener pan()") {
                         @Override
                         public void run() {
                             while (System.currentTimeMillis() < refreshTime) {
                                 try {
                                     sleep(100);
                                     // log.debug("WAIT");
-                                } catch (InterruptedException iex) {
-                                }
+                                } catch (InterruptedException iex) {}
                             }
                             // log.debug("ZOOOOOOOOOOOOOOOOOOOOOOOOOOOM");
                             viewer.setNewViewBounds(b);
@@ -171,11 +168,12 @@ public class KeyboardListener extends PBasicInputEventHandler {
             final double offsetY = (newHeight - oldHeight) / 2;
 
             // Offsetverschiebung sorgt daf\u00FCr das der Punkt auf den man geclickt hat an der gleichen Stelle bleibt
-// double xR=e.getPosition().getX()-offsetX;
-// double yR=e.getPosition().getY()-offsetY;
-            b.setOrigin(viewer.getCamera().getViewBounds().getOrigin().getX() - offsetX,
-                viewer.getCamera().getViewBounds().getOrigin().getY()
-                        - offsetY); // );
+            // double xR=e.getPosition().getX()-offsetX;
+            // double yR=e.getPosition().getY()-offsetY;
+            b.setOrigin(
+                viewer.getCamera().getViewBounds().getOrigin().getX() - offsetX,
+                viewer.getCamera().getViewBounds().getOrigin().getY() - offsetY
+            ); // );
             b.setSize(newWidth, newHeight);
             viewer.getHandleLayer().removeAllChildren();
             viewer.getCamera().animateViewToCenterBounds(b, true, localAnimationDuration);
@@ -183,21 +181,20 @@ public class KeyboardListener extends PBasicInputEventHandler {
             if (localAnimationDuration == 0) {
                 CismapBroker.getInstance().fireMapBoundsChanged();
             }
-//        if (e.getComponent() instanceof SimpleFeatureViewer) {
-//            ((SimpleFeatureViewer)e.getComponent()).refreshBackground();
-//        }
+            //        if (e.getComponent() instanceof SimpleFeatureViewer) {
+            //            ((SimpleFeatureViewer)e.getComponent()).refreshBackground();
+            //        }
             refreshTime = System.currentTimeMillis() + delayTime;
             if ((refreshThread == null) || !refreshThread.isAlive()) {
-                refreshThread = new Thread("MappingComponent KeyListener-Timeout") {
-
+                refreshThread =
+                    new Thread("MappingComponent KeyListener-Timeout") {
                         @Override
                         public void run() {
                             while (System.currentTimeMillis() < refreshTime) {
                                 try {
                                     sleep(100);
                                     // log.debug("WAIT");
-                                } catch (InterruptedException iex) {
-                                }
+                                } catch (InterruptedException iex) {}
                             }
                             // log.debug("ZOOOOOOOOOOOOOOOOOOOOOOOOOOOM");
                             viewer.setNewViewBounds(b);

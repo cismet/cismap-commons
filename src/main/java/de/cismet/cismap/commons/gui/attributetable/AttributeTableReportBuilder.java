@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -24,7 +24,13 @@ import ar.com.fdvs.dj.domain.constants.Border;
 import ar.com.fdvs.dj.domain.constants.Transparency;
 import ar.com.fdvs.dj.domain.entities.Subreport;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
-
+import java.awt.Color;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JFrame;
+import javax.swing.JTable;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
@@ -32,16 +38,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.swing.JRViewer;
-
-import java.awt.Color;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.swing.JFrame;
-import javax.swing.JTable;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 
 /**
  * Generates a jasper report for the attribute table.
@@ -98,25 +94,28 @@ public class AttributeTableReportBuilder {
         int col;
         boolean firstPart = true;
 
-        drb.setTitle(title)
-                .setUseFullPageWidth(true)
-                .setTemplateFile("de/cismet/cismap/commons/gui/attributetable/AttributeTableTemplate.jrxml")
-                .setPrintBackgroundOnOddRows(true)
-                .setOddRowBackgroundStyle(oddRowStyle)
-                .setDefaultStyles(titleStyle, titleStyle, columnHeaderStyle, columnDetailStyle);
+        drb
+            .setTitle(title)
+            .setUseFullPageWidth(true)
+            .setTemplateFile("de/cismet/cismap/commons/gui/attributetable/AttributeTableTemplate.jrxml")
+            .setPrintBackgroundOnOddRows(true)
+            .setOddRowBackgroundStyle(oddRowStyle)
+            .setDefaultStyles(titleStyle, titleStyle, columnHeaderStyle, columnDetailStyle);
 
         for (col = 0; col < table.getColumnCount(); ++col) {
             final int width = table.getColumn(table.getColumnName(col)).getWidth();
             totalWidth += width;
 
             if (totalWidth > PAGE_WIDTH) {
-                final Subreport subreport = new SubReportBuilder().setStartInNewPage(!firstPart)
-                            .setDataSource(
-                                    DJConstants.DATA_SOURCE_ORIGIN_PARAMETER,
-                                    DJConstants.DATA_SOURCE_TYPE_JRDATASOURCE,
-                                    AttributeTableReportBuilder.DATASOURCE_NAME)
-                            .setDynamicReport(createSubreport(table, lastCol, col), new ClassicLayoutManager())
-                            .build();
+                final Subreport subreport = new SubReportBuilder()
+                    .setStartInNewPage(!firstPart)
+                    .setDataSource(
+                        DJConstants.DATA_SOURCE_ORIGIN_PARAMETER,
+                        DJConstants.DATA_SOURCE_TYPE_JRDATASOURCE,
+                        AttributeTableReportBuilder.DATASOURCE_NAME
+                    )
+                    .setDynamicReport(createSubreport(table, lastCol, col), new ClassicLayoutManager())
+                    .build();
                 drb.addConcatenatedReport(subreport);
                 firstPart = false;
                 lastCol = col;
@@ -124,16 +123,18 @@ public class AttributeTableReportBuilder {
             }
         }
 
-        final Subreport subreport = new SubReportBuilder().setStartInNewPage(!firstPart)
-                    .setDataSource(
-                            DJConstants.DATA_SOURCE_ORIGIN_PARAMETER,
-                            DJConstants.DATA_SOURCE_TYPE_JRDATASOURCE,
-                            AttributeTableReportBuilder.DATASOURCE_NAME)
-                    .setDynamicReport(createSubreport(table, lastCol, col), new ClassicLayoutManager())
-                    .build();
+        final Subreport subreport = new SubReportBuilder()
+            .setStartInNewPage(!firstPart)
+            .setDataSource(
+                DJConstants.DATA_SOURCE_ORIGIN_PARAMETER,
+                DJConstants.DATA_SOURCE_TYPE_JRDATASOURCE,
+                AttributeTableReportBuilder.DATASOURCE_NAME
+            )
+            .setDynamicReport(createSubreport(table, lastCol, col), new ClassicLayoutManager())
+            .build();
         drb.addConcatenatedReport(subreport);
 
-//        drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGMENT_CENTER);
+        //        drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGMENT_CENTER);
 
         return drb.build();
     }
@@ -149,9 +150,7 @@ public class AttributeTableReportBuilder {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    private DynamicReport createSubreport(final JTable table,
-            final int fromCol,
-            final int untilCol) throws Exception {
+    private DynamicReport createSubreport(final JTable table, final int fromCol, final int untilCol) throws Exception {
         final TableModel model = table.getModel();
         final DynamicReportBuilder drb = new DynamicReportBuilder();
         final AbstractColumn[] abstractColumns = new AbstractColumn[model.getColumnCount()];
@@ -160,18 +159,21 @@ public class AttributeTableReportBuilder {
             final int width = table.getColumn(table.getColumnName(col)).getWidth();
             final int modelCol = table.convertColumnIndexToModel(col);
 
-            abstractColumns[col] = ColumnBuilder.getNew()
-                        .setColumnProperty(String.valueOf(modelCol), String.class.getName())
-                        .setTitle(model.getColumnName(modelCol))
-                        .setWidth(width)
-                        .build();
+            abstractColumns[col] =
+                ColumnBuilder
+                    .getNew()
+                    .setColumnProperty(String.valueOf(modelCol), String.class.getName())
+                    .setTitle(model.getColumnName(modelCol))
+                    .setWidth(width)
+                    .build();
             drb.addColumn(abstractColumns[col]);
         }
 
-        drb.setMargins(20, 20, 20, 20)
-                .setDefaultStyles(titleStyle, titleStyle, columnHeaderStyle, columnDetailStyle)
-                .setPrintBackgroundOnOddRows(true)
-                .setOddRowBackgroundStyle(oddRowStyle);
+        drb
+            .setMargins(20, 20, 20, 20)
+            .setDefaultStyles(titleStyle, titleStyle, columnHeaderStyle, columnDetailStyle)
+            .setPrintBackgroundOnOddRows(true)
+            .setOddRowBackgroundStyle(oddRowStyle);
 
         return drb.build();
     }
@@ -190,49 +192,49 @@ public class AttributeTableReportBuilder {
             final JRDataSource ds = new TableDataSource(new CustomTableModel());
             final Map<String, Object> map = new HashMap<String, Object>();
             map.put("table_data", ds);
-            final DynamicReport report = new AttributeTableReportBuilder().buildReport(
-                    "Titel",
-                    new JTable(new CustomTableModel()));
+            final DynamicReport report = new AttributeTableReportBuilder()
+                .buildReport("Titel", new JTable(new CustomTableModel()));
             final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
-                    report,
-                    new ClassicLayoutManager(),
-                    map);
+                report,
+                new ClassicLayoutManager(),
+                map
+            );
 
             for (final Object key : map.keySet()) {
                 final Object o = map.get(key);
 
                 if (o instanceof JasperReport) {
-                    final JasperReport jr = (JasperReport)o;
+                    final JasperReport jr = (JasperReport) o;
                     DynamicJasperHelper.generateJRXML(
                         jr,
                         "UTF-8",
-                        System.getProperty("user.dir")
-                                + "/target/reports/"
-                                + key
-                                + ".jrxml");
+                        System.getProperty("user.dir") + "/target/reports/" + key + ".jrxml"
+                    );
                 }
             }
 
             DynamicJasperHelper.generateJRXML(
                 jasperReport,
                 "UTF-8",
-                System.getProperty("user.dir")
-                        + "/target/reports/table_report.jrxml");
+                System.getProperty("user.dir") + "/target/reports/table_report.jrxml"
+            );
             final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, map, ds);
 
             final JRViewer aViewer = new JRViewer(jasperPrint);
-            final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
-                        AttributeTable.class,
-                        "AttributeTable.butPrintPreviewActionPerformed.aFrame.title")); // NOI18N
+            final JFrame aFrame = new JFrame(
+                org.openide.util.NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butPrintPreviewActionPerformed.aFrame.title"
+                )
+            ); // NOI18N
             aFrame.getContentPane().add(aViewer);
             final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
             aFrame.setSize(screenSize.width / 2, screenSize.height / 2);
             final java.awt.Insets insets = aFrame.getInsets();
-            aFrame.setSize(aFrame.getWidth() + insets.left + insets.right,
-                aFrame.getHeight()
-                        + insets.top
-                        + insets.bottom
-                        + 20);
+            aFrame.setSize(
+                aFrame.getWidth() + insets.left + insets.right,
+                aFrame.getHeight() + insets.top + insets.bottom + 20
+            );
             aFrame.setLocationRelativeTo(frame);
             aFrame.setVisible(true);
         } catch (Exception e) {
@@ -310,12 +312,12 @@ public class AttributeTableReportBuilder {
 
         String[] cols = { "ab", "cd", "ef", "gh" };
         String[][] attr = {
-                { "a", "b", "c", "d" },
-                { "a1", "b1", "c1", "d1" },
-                { "a2", "b2", "c2", "d2" },
-                { "a3", "b3", "c3", "d3" },
-                { "a4", "4b", "c4", "4d" }
-            };
+            { "a", "b", "c", "d" },
+            { "a1", "b1", "c1", "d1" },
+            { "a2", "b2", "c2", "d2" },
+            { "a3", "b3", "c3", "d3" },
+            { "a4", "4b", "c4", "4d" },
+        };
 
         //~ Methods ------------------------------------------------------------
 
@@ -355,11 +357,9 @@ public class AttributeTableReportBuilder {
         }
 
         @Override
-        public void addTableModelListener(final TableModelListener l) {
-        }
+        public void addTableModelListener(final TableModelListener l) {}
 
         @Override
-        public void removeTableModelListener(final TableModelListener l) {
-        }
+        public void removeTableModelListener(final TableModelListener l) {}
     }
 }

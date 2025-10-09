@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /**
  * Copyright (C) 1998-2000 by University of Maryland, College Park, MD 20742, USA
  * All rights reserved.
@@ -12,7 +12,6 @@
 package pswing;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
@@ -68,19 +67,22 @@ public class PSwingMouseMotionEvent extends PSwingMouseEvent {
      */
     @Override
     public void dispatchTo(final Object listener) {
-        final MouseMotionListener mouseMotionListener = (MouseMotionListener)listener;
+        final MouseMotionListener mouseMotionListener = (MouseMotionListener) listener;
         switch (getID()) {
-            case PSwingMouseEvent.MOUSE_DRAGGED: {
-                mouseMotionListener.mouseDragged(this);
-                break;
-            }
-            case PSwingMouseEvent.MOUSE_MOVED: {
-                mouseMotionListener.mouseMoved(this);
-                break;
-            }
-            default: {
-                throw new RuntimeException("ZMouseMotionEvent with bad ID"); // NOI18N
-            }
+            case PSwingMouseEvent.MOUSE_DRAGGED:
+                {
+                    mouseMotionListener.mouseDragged(this);
+                    break;
+                }
+            case PSwingMouseEvent.MOUSE_MOVED:
+                {
+                    mouseMotionListener.mouseMoved(this);
+                    break;
+                }
+            default:
+                {
+                    throw new RuntimeException("ZMouseMotionEvent with bad ID"); // NOI18N
+                }
         }
     }
 }

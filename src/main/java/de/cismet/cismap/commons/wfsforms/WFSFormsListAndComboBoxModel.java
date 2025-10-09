@@ -1,23 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
-import org.apache.log4j.Priority;
-
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.feature.FeatureProgressListener;
-import org.deegree.model.feature.GMLFeatureCollectionDocument;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
-
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.security.WebAccessManager;
+import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.CurrentStackTrace;
+import de.cismet.tools.StaticHtmlTools;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -25,32 +19,27 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-
 import java.net.URL;
-
 import java.nio.charset.Charset;
-
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
-
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;
-
-import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
-
-import de.cismet.security.WebAccessManager;
-
-import de.cismet.tools.CismetThreadPool;
-import de.cismet.tools.CurrentStackTrace;
-import de.cismet.tools.StaticHtmlTools;
+import org.apache.log4j.Priority;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.FeatureProgressListener;
+import org.deegree.model.feature.GMLFeatureCollectionDocument;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
 
 /**
  * DOCUMENT ME!
@@ -68,11 +57,13 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private final String loadingMessage = org.openide.util.NbBundle.getMessage(
-            WFSFormsListAndComboBoxModel.class,
-            "WFSFormsListAndComboBoxModel.loadingMessage"); // NOI18N
+        WFSFormsListAndComboBoxModel.class,
+        "WFSFormsListAndComboBoxModel.loadingMessage"
+    ); // NOI18N
     private final String errorMessage = org.openide.util.NbBundle.getMessage(
-            WFSFormsListAndComboBoxModel.class,
-            "WFSFormsListAndComboBoxModel.errorMessage");   // NOI18N
+        WFSFormsListAndComboBoxModel.class,
+        "WFSFormsListAndComboBoxModel.errorMessage"
+    ); // NOI18N
     private final Vector<WFSFormFeature> features = new Vector<WFSFormFeature>();
     private final Vector<ActionListener> actionListener = new Vector<ActionListener>();
     private FeatureCollection fc = null;
@@ -99,8 +90,11 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public WFSFormsListAndComboBoxModel(final WFSFormQuery query, final JComponent comp, final JProgressBar progressBar)
-            throws Exception {
+    public WFSFormsListAndComboBoxModel(
+        final WFSFormQuery query,
+        final JComponent comp,
+        final JProgressBar progressBar
+    ) throws Exception {
         this(query, null, comp, progressBar);
     }
 
@@ -114,21 +108,22 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public WFSFormsListAndComboBoxModel(final WFSFormQuery query,
-            final HashMap replacingValues,
-            final JComponent comp,
-            final JProgressBar progressBar) throws Exception {
+    public WFSFormsListAndComboBoxModel(
+        final WFSFormQuery query,
+        final HashMap replacingValues,
+        final JComponent comp,
+        final JProgressBar progressBar
+    ) throws Exception {
         this.progressBar = progressBar;
         this.comp = comp;
         this.query = query;
 
         final Runnable t = new Thread("WFSFormsListAndComboBoxModel()") {
-
-                @Override
-                public void run() {
-                    refresh(replacingValues);
-                }
-            };
+            @Override
+            public void run() {
+                refresh(replacingValues);
+            }
+        };
         CismetThreadPool.execute(t);
     }
 
@@ -141,23 +136,24 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
      */
     public void refresh(final HashMap replacingValues) {
         this.latestReplacingValues = replacingValues;
-//        log.fatal("in refresh() --> EventQueue.isDispatchThread():"+EventQueue.isDispatchThread());
+        //        log.fatal("in refresh() --> EventQueue.isDispatchThread():"+EventQueue.isDispatchThread());
         final GMLFeatureCollectionDocument gmlDocument = new GMLFeatureCollectionDocument();
         try {
             if (!started) {
-                EventQueue.invokeLater(new Runnable() {
-
+                EventQueue.invokeLater(
+                    new Runnable() {
                         @Override
                         public void run() {
                             WFSFormsListAndComboBoxModel.this.comp.setEnabled(false);
                         }
-                    });
+                    }
+                );
                 if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
                     Color visible = WFSFormsListAndComboBoxModel.this.progressBar.getForeground();
                     visible = new Color(visible.getRed(), visible.getGreen(), visible.getBlue(), 255);
                     final Color visibleCopy = visible;
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 comp.setToolTipText("Empfangen..."); // NOI18N
@@ -166,7 +162,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                                 WFSFormsListAndComboBoxModel.this.progressBar.setVisible(true);
                                 WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(true);
                             }
-                        });
+                        }
+                    );
                 }
                 started = false;
                 finished = false;
@@ -179,62 +176,63 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                         log.debug("replacingValues.keySet()" + replacingValues.keySet()); // NOI18N
                     }
                     for (final Object key : keys) {
-                        postString = postString.replaceAll((String)key, (String)replacingValues.get(key));
+                        postString = postString.replaceAll((String) key, (String) replacingValues.get(key));
                     }
                 }
 
                 log.info("WFS Query:\n" + StaticHtmlTools.stringToHTMLString(postString)); // NOI18N
-                final String modifiedString = getRightEncodedString(postString);           // NOI18N
-//                final String modifiedString = getRightEncodedString(new String(
-//                            postString.getBytes("UTF-8"),
-//                            "ISO-8859-1"));                                              // NOI18N
+                final String modifiedString = getRightEncodedString(postString); // NOI18N
+                //                final String modifiedString = getRightEncodedString(new String(
+                //                            postString.getBytes("UTF-8"),
+                //                            "ISO-8859-1"));                                              // NOI18N
 
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("in EDT:" + EventQueue.isDispatchThread()); // NOI18N
                     }
-                    final InputStream resp = WebAccessManager.getInstance()
-                                .doRequest(new URL(query.getServerUrl()), modifiedString, ACCESS_METHODS.POST_REQUEST);
+                    final InputStream resp = WebAccessManager
+                        .getInstance()
+                        .doRequest(new URL(query.getServerUrl()), modifiedString, ACCESS_METHODS.POST_REQUEST);
 
                     if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
-                        EventQueue.invokeLater(new Runnable() {
-
+                        EventQueue.invokeLater(
+                            new Runnable() {
                                 @Override
                                 public void run() {
                                     WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(true);
                                 }
-                            });
+                            }
+                        );
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("Start parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
                     }
                     started = true;
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 WFSFormsListAndComboBoxModel.this.fireContentsChanged(
-                                    WFSFormsListAndComboBoxModel.this,
-                                    0,
-                                    0);
+                                        WFSFormsListAndComboBoxModel.this,
+                                        0,
+                                        0
+                                    );
                             }
-                        });
+                        }
+                    );
 
                     final long start = System.currentTimeMillis();
 
                     // FileReader reader = new FileReader("request");
 
-                    gmlDocument.load(new InputStreamReader(
-                            resp,
-                            Charset.forName("UTF-8")),
-                        "http://dummyURL"); // NOI18N
+                    gmlDocument.load(new InputStreamReader(resp, Charset.forName("UTF-8")), "http://dummyURL"); // NOI18N
                     // gmlDocument.load(new InputStreamReader(new
                     // FileInputStream("request"),Charset.forName("iso-8859-1")),"http://dummyURL");
                     gmlDocument.addFeatureProgressListener(this);
                     max = gmlDocument.getFeatureCount();
                     if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
-                        EventQueue.invokeLater(new Runnable() {
-
+                        EventQueue.invokeLater(
+                            new Runnable() {
                                 @Override
                                 public void run() {
                                     WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(false);
@@ -243,14 +241,15 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                                         log.debug("Feature count: " + max); // NOI18N
                                     }
                                 }
-                            });
+                            }
+                        );
                     }
                     fc = gmlDocument.parse();
                     log.info("WFS Result:\n" + StaticHtmlTools.stringToHTMLString(gmlDocument.getAsPrettyString())); // NOI18N
 
                     gmlDocument.removeFeatureProgressListener(this);
                     if (log.isDebugEnabled()) {
-                        log.debug("Featurecollection " + fc);     // NOI18N
+                        log.debug("Featurecollection " + fc); // NOI18N
                     }
                     for (int i = 0; i < fc.size(); ++i) {
                         features.add(new WFSFormFeature(fc.getFeature(i), query));
@@ -261,7 +260,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
 
                     final long stop = System.currentTimeMillis();
                     if (log.isEnabledFor(Priority.INFO)) {
-                        log.info(((stop - start) / 1000.0) + " Sekunden dauerte das Parsen");             // NOI18N
+                        log.info(((stop - start) / 1000.0) + " Sekunden dauerte das Parsen"); // NOI18N
                     }
                     if (log.isDebugEnabled()) {
                         log.debug("Ended parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
@@ -270,30 +269,32 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                     error = false;
                     selectedValue = null;
                     WFSFormsListAndComboBoxModel.this.fireContentsChanged(
-                        WFSFormsListAndComboBoxModel.this,
-                        0,
-                        fc.size()
-                                - 1);
+                            WFSFormsListAndComboBoxModel.this,
+                            0,
+                            fc.size() - 1
+                        );
                     fireActionPerformed(null);
                     if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
                         Color invisible = WFSFormsListAndComboBoxModel.this.progressBar.getForeground();
                         invisible = new Color(invisible.getRed(), invisible.getGreen(), invisible.getBlue(), 0);
                         final Color invisibleCopy = invisible;
-                        EventQueue.invokeLater(new Runnable() {
-
+                        EventQueue.invokeLater(
+                            new Runnable() {
                                 @Override
                                 public void run() {
                                     WFSFormsListAndComboBoxModel.this.progressBar.setForeground(invisibleCopy);
                                 }
-                            });
+                            }
+                        );
                     }
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 WFSFormsListAndComboBoxModel.this.comp.setEnabled(true);
                             }
-                        });
+                        }
+                    );
 
                     comp.setToolTipText("");
                 } catch (Throwable t) {
@@ -304,7 +305,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                 }
             }
         } catch (Exception e) {
-            log.error("Error while loading the features.", e);               // NOI18N
+            log.error("Error while loading the features.", e); // NOI18N
             gmlDocument.removeFeatureProgressListener(this);
             reportRetrievalError(e);
         }
@@ -324,8 +325,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
         } else {
             error = true;
             retryCounter = 0;
-            EventQueue.invokeLater(new Runnable() {
-
+            EventQueue.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         final Color oldForeground = progressBar.getForeground();
@@ -334,26 +335,25 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                         progressBar.setValue(progressBar.getMaximum());
                         // refresh view -> show error message
                         final MouseAdapter retryListener = new MouseAdapter() {
-
-                                @Override
-                                public void mouseClicked(final MouseEvent e) {
-                                    if (e.getClickCount() > 1) {
-                                        comp.removeMouseListener(this);
-                                        progressBar.setForeground(oldForeground);
-                                        final Runnable t = new Thread(
-                                                "WFSFormsListAndComboBoxModel reportRetrievalError()") {
-
-                                                @Override
-                                                public void run() {
-                                                    refresh(latestReplacingValues);
-                                                }
-                                            };
-                                        CismetThreadPool.execute(t);
-                                    }
+                            @Override
+                            public void mouseClicked(final MouseEvent e) {
+                                if (e.getClickCount() > 1) {
+                                    comp.removeMouseListener(this);
+                                    progressBar.setForeground(oldForeground);
+                                    final Runnable t = new Thread(
+                                        "WFSFormsListAndComboBoxModel reportRetrievalError()"
+                                    ) {
+                                        @Override
+                                        public void run() {
+                                            refresh(latestReplacingValues);
+                                        }
+                                    };
+                                    CismetThreadPool.execute(t);
                                 }
-                            };
+                            }
+                        };
                         if (comp instanceof JComboBox) {
-                            final Component c = ((JComboBox)comp).getEditor().getEditorComponent();
+                            final Component c = ((JComboBox) comp).getEditor().getEditorComponent();
                             if (c != null) {
                                 c.addMouseListener(retryListener);
                             }
@@ -365,7 +365,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                         }
                         fireContentsChanged(this, 0, 0);
                     }
-                });
+                }
+            );
         }
     }
 
@@ -428,10 +429,11 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
             return errorMessage;
         } else if (!finished) {
             return org.openide.util.NbBundle.getMessage(
-                    WFSFormsListAndComboBoxModel.class,
-                    "WFSFormListAndComboBoxModel.getSelectedItem().return"); // NOI18N
+                WFSFormsListAndComboBoxModel.class,
+                "WFSFormListAndComboBoxModel.getSelectedItem().return"
+            ); // NOI18N
         } else if (getSize() == 0) {
-            return "";                                                       // NOI18N
+            return ""; // NOI18N
         } else {
             return selectedValue;
         }
@@ -452,7 +454,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
             final Element rootObject = doc.getRootElement();
             return rootObject.getChildren("featureMember", Namespace.getNamespace("http://www.opengis.net/gml")).size(); // NOI18N
         } catch (Exception jex) {
-            log.warn("error during featurecounting", jex);                                                               // NOI18N
+            log.warn("error during featurecounting", jex); // NOI18N
             return -1;
         }
     }
@@ -495,8 +497,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
     /**
      * DOCUMENT ME!
      */
-    public void featureProgress() {
-    }
+    public void featureProgress() {}
 
     /**
      * DOCUMENT ME!
@@ -535,13 +536,13 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
      * @return  DOCUMENT ME!
      */
     private String getRightEncodedString(final String s) {
-//        try {
-//            return new String(s.getBytes("UTF-8"), "ISO-8859-1");
-//        }
-//        catch (Exception e){
-//            log.error("Fehler beim KOnvertieren",e);
-//            return null;
-//        }
+        //        try {
+        //            return new String(s.getBytes("UTF-8"), "ISO-8859-1");
+        //        }
+        //        catch (Exception e){
+        //            log.error("Fehler beim KOnvertieren",e);
+        //            return null;
+        //        }
 
         String ret = s;
         ret = ret.replaceAll("ä", "&#228;");

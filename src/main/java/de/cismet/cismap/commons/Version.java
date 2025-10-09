@@ -1,11 +1,12 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
+
 /*
  * Version.java
  *
@@ -55,8 +56,7 @@ public class Version {
     /**
      * Creates a new instance of Version.
      */
-    public Version() {
-    }
+    public Version() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -68,6 +68,7 @@ public class Version {
     public static void main(final String[] args) {
         System.out.println(getVersion());
     }
+
     /**
      * DOCUMENT ME!
      *

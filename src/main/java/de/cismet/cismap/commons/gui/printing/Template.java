@@ -1,22 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import java.util.Objects;
 import java.util.Vector;
-
 import javax.swing.ImageIcon;
-
-import de.cismet.cismap.commons.features.AbstractNewFeature;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -32,17 +28,17 @@ public class Template {
 
     //~ Instance fields --------------------------------------------------------
 
-    private String title = "";                                                       // NOI18N
-    private String file = "";                                                        // NOI18N
-    private String className = "";                                                   // NOI18N
-    private String mapPlaceholder = "";                                              // NOI18N
-    private String northArrowPlaceholder = "northarrow";                             // NOI18N
+    private String title = ""; // NOI18N
+    private String file = ""; // NOI18N
+    private String className = ""; // NOI18N
+    private String mapPlaceholder = ""; // NOI18N
+    private String northArrowPlaceholder = "northarrow"; // NOI18N
     private int mapWidth = 0;
     private int mapHeight = 0;
-    private String scaleDemoninatorPlaceholder = "";                                 // NOI18N
+    private String scaleDemoninatorPlaceholder = ""; // NOI18N
     private Vector<AdditionalTemplateParameter> additionalParameters = new Vector<AdditionalTemplateParameter>();
     private String iconPath = "/de/cismet/cismap/commons/gui/printing/document.png"; // NOI18N
-    private String shortname = "";                                                   // NOI18N
+    private String shortname = ""; // NOI18N
     private transient ImageIcon icon = null;
 
     //~ Constructors -----------------------------------------------------------
@@ -55,32 +51,29 @@ public class Template {
      * @throws  Exception  DOCUMENT ME!
      */
     public Template(final Element template) throws Exception {
-        title = template.getAttribute("title").getValue();                                             // NOI18N
-        file = template.getAttribute("file").getValue();                                               // NOI18N
-        className = template.getAttribute("className").getValue();                                     // NOI18N
-        mapPlaceholder = template.getAttribute("mapPlaceholder").getValue();                           // NOI18N
+        title = template.getAttribute("title").getValue(); // NOI18N
+        file = template.getAttribute("file").getValue(); // NOI18N
+        className = template.getAttribute("className").getValue(); // NOI18N
+        mapPlaceholder = template.getAttribute("mapPlaceholder").getValue(); // NOI18N
         try {
-            mapPlaceholder = template.getAttribute("northArrowPlaceholder").getValue();                // NOI18N
-        } catch (Exception skip) {
-        }
-        mapWidth = template.getAttribute("mapWidth").getIntValue();                                    // NOI18N
-        mapHeight = template.getAttribute("mapHeight").getIntValue();                                  // NOI18N
+            mapPlaceholder = template.getAttribute("northArrowPlaceholder").getValue(); // NOI18N
+        } catch (Exception skip) {}
+        mapWidth = template.getAttribute("mapWidth").getIntValue(); // NOI18N
+        mapHeight = template.getAttribute("mapHeight").getIntValue(); // NOI18N
         scaleDemoninatorPlaceholder = template.getAttribute("scaleDenominatorPlaceholder").getValue(); // NOI18N
         try {
-            iconPath = template.getAttribute("iconPath").getValue();                                   // NOI18N
-        } catch (Exception skip) {
-        }
+            iconPath = template.getAttribute("iconPath").getValue(); // NOI18N
+        } catch (Exception skip) {}
         try {
-            shortname = template.getAttribute("shortname").getValue();                                 // NOI18N
-        } catch (Exception skip) {
-        }
-//        List additionalParameterList=template.getChildren("parameter");
-//        for (Object elem : additionalParameterList) {
-//            if (elem instanceof Element) {
-//                AdditionalTemplateParameter p=new AdditionalTemplateParameter((Element)elem);
-//                additionalParameters.add(p);
-//            }
-//        }
+            shortname = template.getAttribute("shortname").getValue(); // NOI18N
+        } catch (Exception skip) {}
+        //        List additionalParameterList=template.getChildren("parameter");
+        //        for (Object elem : additionalParameterList) {
+        //            if (elem instanceof Element) {
+        //                AdditionalTemplateParameter p=new AdditionalTemplateParameter((Element)elem);
+        //                additionalParameters.add(p);
+        //            }
+        //        }
         setIcon(); // creates the IconImage
     }
 
@@ -99,36 +92,39 @@ public class Template {
      * @return  DOCUMENT ME!
      */
     public Element getElement(final boolean selected) {
-        final Element e = new Element("template");                                       // NOI18N
-        e.setAttribute("selected", String.valueOf(selected));                            // NOI18N
-        e.setAttribute("title", getTitle());                                             // NOI18N
-        e.setAttribute("file", getFile());                                               // NOI18N
-        e.setAttribute("className", getClassName());                                     // NOI18N
-        e.setAttribute("mapPlaceholder", getMapPlaceholder());                           // NOI18N
-        e.setAttribute("northArrowPlaceholder", getMapPlaceholder());                    // NOI18N
-        e.setAttribute("mapWidth", getMapWidth() + "");                                  // NOI18N
-        e.setAttribute("mapHeight", getMapHeight() + "");                                // NOI18N
+        final Element e = new Element("template"); // NOI18N
+        e.setAttribute("selected", String.valueOf(selected)); // NOI18N
+        e.setAttribute("title", getTitle()); // NOI18N
+        e.setAttribute("file", getFile()); // NOI18N
+        e.setAttribute("className", getClassName()); // NOI18N
+        e.setAttribute("mapPlaceholder", getMapPlaceholder()); // NOI18N
+        e.setAttribute("northArrowPlaceholder", getMapPlaceholder()); // NOI18N
+        e.setAttribute("mapWidth", getMapWidth() + ""); // NOI18N
+        e.setAttribute("mapHeight", getMapHeight() + ""); // NOI18N
         e.setAttribute("scaleDenominatorPlaceholder", getScaleDemoninatorPlaceholder()); // NOI18N
-        e.setAttribute("iconPath", getIconPath() + "");                                  // NOI18N
-        e.setAttribute("shortname", getShortname() + "");                                // NOI18N
-//        for (AdditionalTemplateParameter elem : additionalParameters) {
-//            e.addContent(elem.getElement());
-//        }
+        e.setAttribute("iconPath", getIconPath() + ""); // NOI18N
+        e.setAttribute("shortname", getShortname() + ""); // NOI18N
+        //        for (AdditionalTemplateParameter elem : additionalParameters) {
+        //            e.addContent(elem.getElement());
+        //        }
         return e;
     }
 
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Template) && (((Template)obj).title.equals(title))
-                    && (((Template)obj).file.equals(file))
-                    && (((Template)obj).getClassName().equals(getClassName()))
-                    && (((Template)obj).mapPlaceholder.equals(mapPlaceholder))
-                    && (((Template)obj).northArrowPlaceholder.equals(northArrowPlaceholder))
-                    && (((Template)obj).mapWidth == mapWidth)
-                    && (((Template)obj).mapHeight == mapHeight)
-                    && (((Template)obj).iconPath.equals(iconPath))
-                    && (((Template)obj).shortname.equals(shortname))
-                    && (((Template)obj).scaleDemoninatorPlaceholder.equals(scaleDemoninatorPlaceholder));
+        return (
+            (obj instanceof Template) &&
+            (((Template) obj).title.equals(title)) &&
+            (((Template) obj).file.equals(file)) &&
+            (((Template) obj).getClassName().equals(getClassName())) &&
+            (((Template) obj).mapPlaceholder.equals(mapPlaceholder)) &&
+            (((Template) obj).northArrowPlaceholder.equals(northArrowPlaceholder)) &&
+            (((Template) obj).mapWidth == mapWidth) &&
+            (((Template) obj).mapHeight == mapHeight) &&
+            (((Template) obj).iconPath.equals(iconPath)) &&
+            (((Template) obj).shortname.equals(shortname)) &&
+            (((Template) obj).scaleDemoninatorPlaceholder.equals(scaleDemoninatorPlaceholder))
+        );
     }
 
     @Override
@@ -358,8 +354,7 @@ public class Template {
      */
     public final void setIcon() {
         try {
-            icon = new javax.swing.ImageIcon(Template.class.getResource(
-                        iconPath)); // NOI18N
+            icon = new javax.swing.ImageIcon(Template.class.getResource(iconPath)); // NOI18N
         } catch (Exception e) {
             LOG.warn("Problem when setting the Icon of a Template.", e);
         }

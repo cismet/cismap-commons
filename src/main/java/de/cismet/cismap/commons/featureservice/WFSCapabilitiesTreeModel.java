@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.featureservice;
-
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.Vector;
 
 /**
  * Das WFSCapabilitiesTreeModel liegt hinter dem WFSCapabilitiesTree und gibt vor was dieser anzeigt.
@@ -116,8 +114,7 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      * @param  newValue  the new value from the TreeCellEditor
      */
     @Override
-    public void valueForPathChanged(final javax.swing.tree.TreePath path, final Object newValue) {
-    }
+    public void valueForPathChanged(final javax.swing.tree.TreePath path, final Object newValue) {}
 
     /**
      * Removes a listener previously added with <code>addTreeModelListener</code>.
@@ -177,10 +174,12 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
             } else {
                 if (index < childs) {
                     return ((parent instanceof FeatureType) && (nodes.get(parent) != null))
-                        ? nodes.get(parent).get(index) : null;
+                        ? nodes.get(parent).get(index)
+                        : null;
                 } else {
                     return ((parent instanceof FeatureType) && (nodes.get(parent) != null))
-                        ? nodes.get(parent).get(index - childs) : null;
+                        ? nodes.get(parent).get(index - childs)
+                        : null;
                 }
             }
         }
@@ -229,11 +228,17 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
         final List<FeatureType> allValidNodes = new ArrayList<FeatureType>();
 
         for (final FeatureType feature : nodes.keySet()) {
-            if (((feature.getTitle() != null)
-                            && (feature.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
-                        || ((feature.getName() != null)
-                            && (feature.getName().toString().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
-                        || (containsFilterString(feature.getKeywords()))) {
+            if (
+                (
+                    (feature.getTitle() != null) &&
+                    (feature.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1)
+                ) ||
+                (
+                    (feature.getName() != null) &&
+                    (feature.getName().toString().toLowerCase().indexOf(filterString.toLowerCase()) != -1)
+                ) ||
+                (containsFilterString(feature.getKeywords()))
+            ) {
                 allValidNodes.add(feature);
             }
         }

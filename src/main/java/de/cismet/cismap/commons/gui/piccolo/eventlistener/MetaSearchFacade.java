@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import edu.umd.cs.piccolo.PNode;
-
 import javax.swing.JDialog;
 
 /**
@@ -18,7 +17,6 @@ import javax.swing.JDialog;
  * @version  $Revision$, $Date$
  */
 public interface MetaSearchFacade {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,21 +12,18 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JTable;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
-
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 
 /**
  * DOCUMENT ME!
@@ -44,11 +41,13 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public Object afterEdit(final FeatureServiceFeature feature,
-            final String column,
-            final int row,
-            final Object oldValue,
-            final Object newValue) {
+    public Object afterEdit(
+        final FeatureServiceFeature feature,
+        final String column,
+        final int row,
+        final Object oldValue,
+        final Object newValue
+    ) {
         return newValue;
     }
 
@@ -68,12 +67,10 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public void beforeSave(final FeatureServiceFeature feature) {
-    }
+    public void beforeSave(final FeatureServiceFeature feature) {}
 
     @Override
-    public void afterSave(final TableModel model) {
-    }
+    public void afterSave(final TableModel model) {}
 
     @Override
     public String[] getAdditionalFieldNames() {
@@ -106,11 +103,12 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public void mouseClicked(final FeatureServiceFeature feature,
-            final String columnName,
-            final Object value,
-            final int clickCount) {
-    }
+    public void mouseClicked(
+        final FeatureServiceFeature feature,
+        final String columnName,
+        final Object value,
+        final int clickCount
+    ) {}
 
     @Override
     public int getIndexOfAdditionalFieldName(final String name) {
@@ -134,8 +132,11 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
 
     @Override
     public FeatureServiceFeature cloneFeature(final FeatureServiceFeature feature) {
-        final DefaultFeatureServiceFeature newFeature = (DefaultFeatureServiceFeature)feature
-                    .getLayerProperties().getFeatureService().getFeatureFactory().createNewFeature();
+        final DefaultFeatureServiceFeature newFeature = (DefaultFeatureServiceFeature) feature
+            .getLayerProperties()
+            .getFeatureService()
+            .getFeatureFactory()
+            .createNewFeature();
 
         final HashMap<String, Object> properties = feature.getProperties();
 
@@ -159,8 +160,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public void exportFeatures() {
-    }
+    public void exportFeatures() {}
 
     /**
      * DOCUMENT ME!
@@ -176,8 +176,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
      * DOCUMENT ME!
      */
     @Override
-    public void printFeatures() {
-    }
+    public void printFeatures() {}
 
     @Override
     public void copyProperties(final FeatureServiceFeature sourceFeature, final FeatureServiceFeature targetFeature) {
@@ -190,15 +189,15 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
             }
         }
 
-        final boolean hasIdExpression = targetFeature.getLayerProperties().getIdExpressionType()
-                    == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
-        final Map<String, FeatureServiceAttribute> attributeMap = targetFeature.getLayerProperties()
-                    .getFeatureService()
-                    .getFeatureServiceAttributes();
+        final boolean hasIdExpression =
+            targetFeature.getLayerProperties().getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
+        final Map<String, FeatureServiceAttribute> attributeMap = targetFeature
+            .getLayerProperties()
+            .getFeatureService()
+            .getFeatureServiceAttributes();
 
         for (final String attrKey : attributeMap.keySet()) {
-            if (hasIdExpression
-                        && targetFeature.getLayerProperties().getIdExpression().equalsIgnoreCase(attrKey)) {
+            if (hasIdExpression && targetFeature.getLayerProperties().getIdExpression().equalsIgnoreCase(attrKey)) {
                 // do not change the id
                 continue;
             }
@@ -223,7 +222,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     private Object getFeaturePropertyIgnoreCase(final FeatureServiceFeature feature, final String name) {
         for (final Object prop : feature.getProperties().keySet()) {
             if (prop instanceof String) {
-                final String propName = (String)prop;
+                final String propName = (String) prop;
                 if (propName.equalsIgnoreCase(name)) {
                     return feature.getProperty(propName);
                 }

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * PureNewFeature.java
  *
@@ -20,18 +20,15 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.geom.Point2D;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import java.awt.Color;
+import java.awt.Paint;
+import java.awt.geom.Point2D;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 
 /**
  * DOCUMENT ME!
@@ -43,16 +40,21 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
 
     //~ Static fields/initializers ---------------------------------------------
 
-    static ImageIcon icoPoint = new javax.swing.ImageIcon(AbstractNewFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/point.png"));     // NOI18N
-    static ImageIcon icoPolyline = new javax.swing.ImageIcon(AbstractNewFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/polyline.png"));  // NOI18N
-    static ImageIcon icoPolygon = new javax.swing.ImageIcon(AbstractNewFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/polygon.png"));   // NOI18N
-    static ImageIcon icoEllipse = new javax.swing.ImageIcon(AbstractNewFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/ellipse.png"));   // NOI18N
-    static ImageIcon icoRectangle = new javax.swing.ImageIcon(AbstractNewFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/rectangle.png")); // NOI18N
+    static ImageIcon icoPoint = new javax.swing.ImageIcon(
+        AbstractNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png")
+    ); // NOI18N
+    static ImageIcon icoPolyline = new javax.swing.ImageIcon(
+        AbstractNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png")
+    ); // NOI18N
+    static ImageIcon icoPolygon = new javax.swing.ImageIcon(
+        AbstractNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png")
+    ); // NOI18N
+    static ImageIcon icoEllipse = new javax.swing.ImageIcon(
+        AbstractNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png")
+    ); // NOI18N
+    static ImageIcon icoRectangle = new javax.swing.ImageIcon(
+        AbstractNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png")
+    ); // NOI18N
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(AbstractNewFeature.class);
 
@@ -64,10 +66,16 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
      * @version  $Revision$, $Date$
      */
     public static enum geomTypes {
-
         //~ Enum constants -----------------------------------------------------
 
-        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, MULTIPOLYGON, TEXT, UNKNOWN
+        ELLIPSE,
+        LINESTRING,
+        RECTANGLE,
+        POINT,
+        POLYGON,
+        MULTIPOLYGON,
+        TEXT,
+        UNKNOWN,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -109,7 +117,7 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
         synchronized (canvasPoints) {
             try {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("canvasPoints " + canvasPoints);                   // NOI18N
+                    LOG.debug("canvasPoints " + canvasPoints); // NOI18N
                 }
                 final Coordinate[] coordArr = new Coordinate[canvasPoints.length];
                 final float[] xp = new float[canvasPoints.length];
@@ -118,16 +126,16 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("canvasPoints[" + i + "]:" + canvasPoints[i]); // NOI18N
                     }
-                    xp[i] = (float)(canvasPoints[i].getX());
-                    yp[i] = (float)(canvasPoints[i].getY());
+                    xp[i] = (float) (canvasPoints[i].getX());
+                    yp[i] = (float) (canvasPoints[i].getY());
                     coordArr[i] = new Coordinate(wtst.getSourceX(xp[i]), wtst.getSourceY(yp[i]));
                 }
                 init(coordArr, wtst);
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("pureNewFeature created");                         // NOI18N
+                    LOG.debug("pureNewFeature created"); // NOI18N
                 }
             } catch (Exception e) {
-                LOG.error("Error during creating a PureNewfeatures", e);         // NOI18N
+                LOG.error("Error during creating a PureNewfeatures", e); // NOI18N
             }
         }
     }
@@ -152,8 +160,10 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
      */
     private void init(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
         try {
-            final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                    CrsTransformer.getCurrentSrid());
+            final GeometryFactory gf = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.getCurrentSrid()
+            );
             // TODO Im Moment nur f�r einfache Polygone ohne L�cher
             if (coordArr.length == 1) {
                 // Point

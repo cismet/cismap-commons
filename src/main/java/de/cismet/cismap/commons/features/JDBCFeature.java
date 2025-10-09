@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -15,35 +15,27 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequenceFactory;
-
-import org.h2.jdbc.JdbcClob;
-
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
+import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.util.SelectionManager;
+import de.cismet.cismap.linearreferencing.tools.StationEditorInterface;
 import java.awt.Color;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.io.BufferedReader;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
-import de.cismet.cismap.commons.gui.attributetable.H2AttributeTableRuleSet;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.util.SelectionManager;
-
-import de.cismet.cismap.linearreferencing.tools.StationEditorInterface;
+import org.h2.jdbc.JdbcClob;
 
 /**
  * DOCUMENT ME!
@@ -97,16 +89,17 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 }
                 stations.clear();
             } else {
-                if (!editable
-                            || CismapBroker.getInstance().getMappingComponent().getFeatureCollection().contains(this)) {
+                if (
+                    !editable || CismapBroker.getInstance().getMappingComponent().getFeatureCollection().contains(this)
+                ) {
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
                 }
             }
 
             if (editable) {
-                final H2AttributeTableRuleSet tableRuleSet = (H2AttributeTableRuleSet)getLayerProperties()
-                            .getAttributeTableRuleSet();
+                final H2AttributeTableRuleSet tableRuleSet = (H2AttributeTableRuleSet) getLayerProperties()
+                    .getAttributeTableRuleSet();
 
                 if (!((tableRuleSet.getAllLinRefInfos() != null) && !tableRuleSet.getAllLinRefInfos().isEmpty())) {
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(this);
@@ -209,7 +202,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private Object getPrepareObject(final Object o) {
         if (o instanceof JdbcClob) {
             try {
-                final BufferedReader r = new BufferedReader(((JdbcClob)o).getCharacterStream());
+                final BufferedReader r = new BufferedReader(((JdbcClob) o).getCharacterStream());
                 String tmp;
                 final StringBuilder resultString = new StringBuilder();
 
@@ -276,11 +269,12 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
         try {
             final String sql = String.format(
-                    checkSql,
-                    featureInfo.getIdField(),
-                    featureInfo.getTableName(),
-                    featureInfo.getIdField(),
-                    getId());
+                checkSql,
+                featureInfo.getIdField(),
+                featureInfo.getTableName(),
+                featureInfo.getIdField(),
+                getId()
+            );
             final ResultSet rs = st.executeQuery(sql);
             final boolean alreadyExists = ((rs != null) && rs.next());
 
@@ -322,14 +316,15 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             }
 
             if ((getLayerProperties() != null) && (getLayerProperties().getFeatureService() != null)) {
-                final JDBCFeatureFactory factory = (JDBCFeatureFactory)getLayerProperties().getFeatureService()
-                            .getFeatureFactory();
+                final JDBCFeatureFactory factory = (JDBCFeatureFactory) getLayerProperties()
+                    .getFeatureService()
+                    .getFeatureFactory();
 
                 if (factory instanceof H2FeatureServiceFactory) {
                     final Geometry envelope = factory.getEnvelope();
 
                     if ((getGeometry() != null) && (envelope != null) && !envelope.contains(getGeometry())) {
-                        ((H2FeatureServiceFactory)factory).determineEnvelope();
+                        ((H2FeatureServiceFactory) factory).determineEnvelope();
                     }
                 }
             }
@@ -492,10 +487,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
 
         final String query = String.format(
-                insertSql,
-                featureInfo.getTableName(),
-                listToString(attributes),
-                listToString(values));
+            insertSql,
+            featureInfo.getTableName(),
+            listToString(attributes),
+            listToString(values)
+        );
         st.executeUpdate(query);
 
         super.getProperties().clear();
@@ -533,10 +529,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         super.setProperties(getProperties());
 
         final String deleteStat = String.format(
-                DELETE_STATEMENT,
-                featureInfo.getTableName(),
-                featureInfo.getIdField(),
-                getId());
+            DELETE_STATEMENT,
+            featureInfo.getTableName(),
+            featureInfo.getIdField(),
+            getId()
+        );
         final Statement st = featureInfo.getConnection().createStatement();
         st.executeUpdate(deleteStat);
         deleted = true;
@@ -609,15 +606,14 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      */
     public PropertyChangeListener getPropertyChangeListener() {
         return new PropertyChangeListener() {
-
-                @Override
-                public void propertyChange(final PropertyChangeEvent evt) {
-                    for (final String name : stations.keySet()) {
-                        setProperty(name, stations.get(name).getValue());
-                        firePropertyChange(name, evt.getOldValue(), evt.getNewValue());
-                    }
+            @Override
+            public void propertyChange(final PropertyChangeEvent evt) {
+                for (final String name : stations.keySet()) {
+                    setProperty(name, stations.get(name).getValue());
+                    firePropertyChange(name, evt.getOldValue(), evt.getNewValue());
                 }
-            };
+            }
+        };
     }
 
     /**
@@ -649,7 +645,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     @Override
     public Geometry getGeometry() {
         if (existProperties()) {
-            return (Geometry)super.getProperty(featureInfo.getGeoField());
+            return (Geometry) super.getProperty(featureInfo.getGeoField());
         } else {
             return getOriginalGeometry();
         }
@@ -664,9 +660,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         Geometry g = null;
         g = featureInfo.getGeometryFromCache(getId());
         if (g != null) {
-            final GeometryFactory fg = new GeometryFactory(g.getPrecisionModel(),
-                    g.getSRID(),
-                    CoordinateArraySequenceFactory.instance());
+            final GeometryFactory fg = new GeometryFactory(
+                g.getPrecisionModel(),
+                g.getSRID(),
+                CoordinateArraySequenceFactory.instance()
+            );
             g = fg.createGeometry(g);
         }
         if (g != null) {
@@ -686,7 +684,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 ps.setInt(1, getId());
                 rs = ps.executeQuery();
                 if (rs.next()) {
-                    g = (Geometry)rs.getObject(1);
+                    g = (Geometry) rs.getObject(1);
                     g.setSRID(featureInfo.getSrid());
                 }
             }
@@ -717,11 +715,13 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      */
     private Geometry toSerializableGeometry(final Geometry g) {
         if (g instanceof LineString) {
-            final LineString ls = (LineString)g;
+            final LineString ls = (LineString) g;
             if (ls.getCoordinateSequence() instanceof com.vividsolutions.jts.geom.impl.PackedCoordinateSequence) {
-                final GeometryFactory fg = new GeometryFactory(g.getPrecisionModel(),
-                        g.getSRID(),
-                        CoordinateArraySequenceFactory.instance());
+                final GeometryFactory fg = new GeometryFactory(
+                    g.getPrecisionModel(),
+                    g.getSRID(),
+                    CoordinateArraySequenceFactory.instance()
+                );
                 final Geometry newGeometry = fg.createGeometry(g);
 
                 return newGeometry;
@@ -743,10 +743,13 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
         final Geometry oldGeom = getGeometry();
 
-        if (((oldGeom == null) != (geom == null))
-                    || (((oldGeom != null) && (geom != null)
-                            && (!oldGeom.getEnvelope().equalsExact(geom.getEnvelope()))) || !oldGeom.equalsExact(
-                            geom))) {
+        if (
+            ((oldGeom == null) != (geom == null)) ||
+            (
+                ((oldGeom != null) && (geom != null) && (!oldGeom.getEnvelope().equalsExact(geom.getEnvelope()))) ||
+                !oldGeom.equalsExact(geom)
+            )
+        ) {
             // the old geometry and the new geometry are different
             featureInfo.clearCache();
             super.addProperty(featureInfo.getGeoField(), geom);
@@ -759,11 +762,12 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof JDBCFeature) {
-            final JDBCFeature other = (JDBCFeature)obj;
+            final JDBCFeature other = (JDBCFeature) obj;
 
             if ((getId() != -1) || (other.getId() != -1)) {
-                return featureInfo.getTableName().equals(other.featureInfo.getTableName())
-                            && (getId() == other.getId());
+                return (
+                    featureInfo.getTableName().equals(other.featureInfo.getTableName()) && (getId() == other.getId())
+                );
             } else {
                 return obj == other;
             }
@@ -776,9 +780,13 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     public int hashCode() {
         int hash = 7;
         hash = (41 * hash) + this.getId();
-        hash = (41 * hash)
-                    + (((this.featureInfo != null) && (this.featureInfo.getTableName() != null))
-                        ? this.featureInfo.getTableName().hashCode() : 0);
+        hash =
+            (41 * hash) +
+            (
+                ((this.featureInfo != null) && (this.featureInfo.getTableName() != null))
+                    ? this.featureInfo.getTableName().hashCode()
+                    : 0
+            );
         return hash;
     }
 
@@ -805,8 +813,10 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         final Geometry geom = getGeometry();
         final Geometry backupGeometry = getOriginalGeometry();
 
-        if (((backupGeometry == null) != (geom == null))
-                    || ((backupGeometry != null) && (geom != null) && !backupGeometry.equalsExact(geom))) {
+        if (
+            ((backupGeometry == null) != (geom == null)) ||
+            ((backupGeometry != null) && (geom != null) && !backupGeometry.equalsExact(geom))
+        ) {
             // The geometry will not changed with the setGeometry() method, but also within the geometry object itself.
             return true;
         } else {

@@ -1,59 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.commons.utils.Pair;
-import org.deegree.rendering.r2d.legends.Legends;
-import org.deegree.style.persistence.sld.SLDParser;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.Namespace;
-
-import org.openide.util.Exceptions;
-
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringReader;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.swing.Icon;
-import javax.swing.SwingWorker;
-
-import javax.xml.stream.XMLInputFactory;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
@@ -75,8 +31,40 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.styling.CustomSLDParser;
-
 import de.cismet.tools.StaticXMLTools;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.Icon;
+import javax.swing.SwingWorker;
+import javax.xml.stream.XMLInputFactory;
+import org.apache.log4j.Logger;
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
+import org.deegree.style.persistence.sld.SLDParser;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -84,14 +72,16 @@ import de.cismet.tools.StaticXMLTools;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, QT> extends AbstractRetrievalService
-        implements MapService,
-            ServiceLayer,
-            RetrievalServiceLayer,
-            FeatureMapService,
-            ConvertableToXML,
-            Cloneable,
-            SLDStyledLayer {
+public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, QT>
+    extends AbstractRetrievalService
+    implements
+        MapService,
+        ServiceLayer,
+        RetrievalServiceLayer,
+        FeatureMapService,
+        ConvertableToXML,
+        Cloneable,
+        SLDStyledLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -115,8 +105,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Or"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("_", 1));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("%", 1));
-        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("()") {
-
+        SQL_QUERY_BUTTONS.add(
+            new DefaultQueryButtonAction("()") {
                 {
                     posCorrection = -1;
                 }
@@ -134,11 +124,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                         if (start == end) {
                             CorrectCarret(posCorrection);
                         } else {
-                            CorrectCarret((short)2);
+                            CorrectCarret((short) 2);
                         }
                     }
                 }
-            });
+            }
+        );
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Is"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Null"));
@@ -214,26 +205,29 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public AbstractFeatureService(final Element e) throws Exception {
         // this();
-        LOG.info("creating new FeatureService instance from xml element '" + e.getName() + "'");                      // NOI18N
+        LOG.info("creating new FeatureService instance from xml element '" + e.getName() + "'"); // NOI18N
         if (e.getName().equals(this.getFeatureLayerType())) {
             this.initFromElement(e);
         } else if (e.getChild(this.getFeatureLayerType()) != null) {
             this.initFromElement(e.getChild(this.getFeatureLayerType()));
         } else {
             LOG.error("FeatureService could not be initailised from xml: unsupported element '" + e.getName() + "'"); // NOI18N
-            throw new ClassNotFoundException("FeatureService could not be initailised from xml: unsupported element '"
-                        + e.getName() + "'");                                                                         // NOI18N
+            throw new ClassNotFoundException(
+                "FeatureService could not be initailised from xml: unsupported element '" + e.getName() + "'"
+            ); // NOI18N
         }
 
         if (this.getLayerProperties() == null) {
             LOG.warn(
-                "LayerProperties not properly initialised from XML Element, creating new Properties upon next retrieval"); // NOI18N
+                "LayerProperties not properly initialised from XML Element, creating new Properties upon next retrieval"
+            ); // NOI18N
             this.layerProperties = this.createLayerProperties();
         }
 
         if ((this.getFeatureServiceAttributes() == null) || (this.getFeatureServiceAttributes().size() == 0)) {
             LOG.warn(
-                "FeatureServiceAttributes not properly initialised from XML Element, creating new Attributes upon next retrieval"); // NOI18N
+                "FeatureServiceAttributes not properly initialised from XML Element, creating new Attributes upon next retrieval"
+            ); // NOI18N
         }
     }
 
@@ -268,7 +262,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         // The cloned featureService and the origin featureService should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
         // used in 2 different MappingComponents
-// this.setPNode(afs.getPNode());
+        // this.setPNode(afs.getPNode());
         this.setTranslucency(afs.getTranslucency());
         this.setEncoding(afs.getEncoding());
         this.setEnabled(afs.isEnabled());
@@ -298,7 +292,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected void init() throws Exception {
         // *should* never happen ....
         if ((layerInitWorker == null) || layerInitWorker.isDone()) {
-            LOG.error("strange synchronisation problem in Layer Initialisation Thread");           // NOI18N
+            LOG.error("strange synchronisation problem in Layer Initialisation Thread"); // NOI18N
             throw new Exception("strange synchronisation problem in Layer Initialisation Thread"); // NOI18N
         }
 
@@ -329,7 +323,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("init(): Layer Properties already created");                                   // NOI18N
+                    LOG.debug("init(): Layer Properties already created"); // NOI18N
                 }
             }
         }
@@ -375,7 +369,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(
-                        "init(): Feature Service Attributes not yet set, creating new  Feature Service Attribute"); // NOI18N
+                        "init(): Feature Service Attributes not yet set, creating new  Feature Service Attribute"
+                    ); // NOI18N
                 }
             }
             try {
@@ -383,8 +378,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             } catch (UnsupportedOperationException uoe) {
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Feature Factory '" + this.getFeatureFactory().getClass().getSimpleName()
-                                    + "' does not support Attributes");                                             // NOI18N
+                        LOG.debug(
+                            "Feature Factory '" +
+                            this.getFeatureFactory().getClass().getSimpleName() +
+                            "' does not support Attributes"
+                        ); // NOI18N
                     }
                 }
                 if (this.getFeatureServiceAttributes() == null) {
@@ -394,13 +392,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("init(): Feature Service Attributes already created");                                // NOI18N
+                    LOG.debug("init(): Feature Service Attributes already created"); // NOI18N
                 }
             }
             try {
                 final List<FeatureServiceAttribute> l = featureFactory.createAttributes(layerInitWorker);
-                final Map<String, FeatureServiceAttribute> currentAttributes =
-                    new HashMap<String, FeatureServiceAttribute>();
+                final Map<String, FeatureServiceAttribute> currentAttributes = new HashMap<String, FeatureServiceAttribute>();
 
                 for (final FeatureServiceAttribute attr : l) {
                     currentAttributes.put(attr.getName(), attr);
@@ -416,8 +413,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             } catch (UnsupportedOperationException uoe) {
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Feature Factory '" + this.getFeatureFactory().getClass().getSimpleName()
-                                    + "' does not support Attributes"); // NOI18N
+                        LOG.debug(
+                            "Feature Factory '" +
+                            this.getFeatureFactory().getClass().getSimpleName() +
+                            "' does not support Attributes"
+                        ); // NOI18N
                     }
                 }
             }
@@ -431,14 +431,19 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         // ..........................................................................
 
         // idExpression plausibility check
-        if ((this.getLayerProperties().getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME)
-                    && (this.getLayerProperties().getIdExpression() != null)
-                    && (this.getFeatureServiceAttributes() != null)
-                    && (this.getFeatureServiceAttributes().size() > 0)) {
+        if (
+            (this.getLayerProperties().getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME) &&
+            (this.getLayerProperties().getIdExpression() != null) &&
+            (this.getFeatureServiceAttributes() != null) &&
+            (this.getFeatureServiceAttributes().size() > 0)
+        ) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("checking if property id expression '" + this.getLayerProperties().getIdExpression()
-                                + "' is valid");                                       // NOI18N
+                    LOG.debug(
+                        "checking if property id expression '" +
+                        this.getLayerProperties().getIdExpression() +
+                        "' is valid"
+                    ); // NOI18N
                 }
             }
             boolean found = false;
@@ -452,7 +457,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 if (found) {
                     if (DEBUG) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("attribute is valid: " + attribute.getName());   // NOI18N
+                            LOG.debug("attribute is valid: " + attribute.getName()); // NOI18N
                         }
                     }
                     break;
@@ -460,8 +465,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             if (!found) {
-                LOG.warn("property id expression '" + this.getLayerProperties().getIdExpression()
-                            + "' not found in attributes, resetting to undefined"); // NOI18N
+                LOG.warn(
+                    "property id expression '" +
+                    this.getLayerProperties().getIdExpression() +
+                    "' not found in attributes, resetting to undefined"
+                ); // NOI18N
                 this.getLayerProperties().setIdExpression(null, LayerProperties.EXPRESSIONTYPE_UNDEFINED);
             }
         }
@@ -479,7 +487,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
         }
         this.initConcreteInstance();
-
         // initilaized = true is set in the layerInitWorker
     }
 
@@ -564,12 +571,19 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
         if ((workerThread != null) && (!workerThread.isDone() || !workerThread.isCancelled())) {
             if (workerThread != null) {
-                LOG.warn("canceling Worker Thread: " + workerThread);    // NOI18N
+                LOG.warn("canceling Worker Thread: " + workerThread); // NOI18N
                 final boolean cancel = workerThread.cancel(true);
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Worker Thread: " + workerThread + " canceled: " + cancel + " ("
-                                    + workerThread.isCancelled() + ")"); // NOI18N
+                        LOG.debug(
+                            "Worker Thread: " +
+                            workerThread +
+                            " canceled: " +
+                            cancel +
+                            " (" +
+                            workerThread.isCancelled() +
+                            ")"
+                        ); // NOI18N
                     }
                 }
             }
@@ -591,30 +605,34 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public synchronized void retrieve(final boolean forced) {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("retrieve started (forced = " + forced + ")");       // NOI18N
+                LOG.debug("retrieve started (forced = " + forced + ")"); // NOI18N
             }
         }
         if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("old retrieval thread still running, trying to cancel '"
-                                + featureRetrievalWorker.getId() + "' (already canceled = "
-                                + featureRetrievalWorker.isCancelled() + ")"); // NOI18N
+                    LOG.debug(
+                        "old retrieval thread still running, trying to cancel '" +
+                        featureRetrievalWorker.getId() +
+                        "' (already canceled = " +
+                        featureRetrievalWorker.isCancelled() +
+                        ")"
+                    ); // NOI18N
                 }
             }
             final FeatureRetrievalWorker currentWorker = featureRetrievalWorker;
-//            new Thread(new Runnable() {
-//
-//                @Override
-//                public void run() {
+            //            new Thread(new Runnable() {
+            //
+            //                @Override
+            //                public void run() {
             synchronized (featureFactory) {
                 if (featureFactory instanceof AbstractFeatureFactory) {
-                    ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
+                    ((AbstractFeatureFactory) featureFactory).waitUntilInterruptedIsAllowed();
                 }
                 cancel(currentWorker);
             }
-//                }
-//            }).start();
+            //                }
+            //            }).start();
         }
 
         if (!this.isEnabled() && !this.isVisible()) {
@@ -623,30 +641,30 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         }
 
         // Initialisierung bereits vorgenommen, d.h. es gibt z.B. Feature Service Attribute
-        if (this.isInitialized() && !this.isRefreshNeeded()                                                  /*&& !forced*/) {
+        if (this.isInitialized() && !this.isRefreshNeeded()/*&& !forced*/) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Layer already initialized, starting feature retrieval");                      // NOI18N
+                    LOG.debug("Layer already initialized, starting feature retrieval"); // NOI18N
                 }
             }
             if (forced && (getFeatureFactory() instanceof CachingFeatureFactory)) {
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("retrieval forced, flushing cache");                                       // NOI18N
+                        LOG.debug("retrieval forced, flushing cache"); // NOI18N
                     }
                 }
                 if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
-                    LOG.warn("must wait until thread '" + featureRetrievalWorker
-                                + "' is finished before flushing cache");                                    // NOI18N
-                    while (!featureRetrievalWorker.isDone()) {
-                    }
+                    LOG.warn(
+                        "must wait until thread '" + featureRetrievalWorker + "' is finished before flushing cache"
+                    ); // NOI18N
+                    while (!featureRetrievalWorker.isDone()) {}
                     if (DEBUG) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("thread '" + featureRetrievalWorker + "'is finished, flushing cache"); // NOI18N
                         }
                     }
                 }
-                ((CachingFeatureFactory)getFeatureFactory()).flush();
+                ((CachingFeatureFactory) getFeatureFactory()).flush();
             }
 
             this.featureRetrievalWorker = new FeatureRetrievalWorker();
@@ -654,15 +672,20 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Layer not yet initialized (" + this.initialized + ") or refresh needed ("
-                                + this.isRefreshNeeded() + "), starting LayerInitWorker"); // NOI18N
+                    LOG.debug(
+                        "Layer not yet initialized (" +
+                        this.initialized +
+                        ") or refresh needed (" +
+                        this.isRefreshNeeded() +
+                        "), starting LayerInitWorker"
+                    ); // NOI18N
                 }
             }
             if (layerInitWorker == null) {
                 layerInitWorker = new LayerInitWorker();
                 layerInitWorker.execute();
             } else {
-                LOG.warn("Layer wird z.Z. initialisiert --> request wird ignoriert");      // NOI18N
+                LOG.warn("Layer wird z.Z. initialisiert --> request wird ignoriert"); // NOI18N
             }
         }
     }
@@ -860,15 +883,17 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
             // layer properties are appiled to last created features
             if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
-                LOG.warn("must wait until thread '" + featureRetrievalWorker
-                            + "' is finished before applying new layer properties");   // NOI18N
+                LOG.warn(
+                    "must wait until thread '" +
+                    featureRetrievalWorker +
+                    "' is finished before applying new layer properties"
+                ); // NOI18N
                 while (!featureRetrievalWorker.isDone()) {
                     // wait ....
                 }
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("thread '" + featureRetrievalWorker
-                                    + "' is finished, applying new layer properties"); // NOI18N
+                        LOG.debug("thread '" + featureRetrievalWorker + "' is finished, applying new layer properties"); // NOI18N
                     }
                 }
             }
@@ -892,15 +917,17 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
             // layer properties are applied to last created features
             if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
-                LOG.warn("must wait until thread '" + featureRetrievalWorker
-                            + "' is finished before applying new layer properties");   // NOI18N
+                LOG.warn(
+                    "must wait until thread '" +
+                    featureRetrievalWorker +
+                    "' is finished before applying new layer properties"
+                ); // NOI18N
                 while (!featureRetrievalWorker.isDone()) {
                     // wait ....
                 }
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("thread '" + featureRetrievalWorker
-                                    + "' is finished, applying new layer properties"); // NOI18N
+                        LOG.debug("thread '" + featureRetrievalWorker + "' is finished, applying new layer properties"); // NOI18N
                     }
                 }
             }
@@ -1039,8 +1066,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @param  width   DOCUMENT ME!
      */
     @Override
-    public void setSize(final int height, final int width) {
-    }
+    public void setSize(final int height, final int width) {}
 
     /**
      * DOCUMENT ME!
@@ -1089,17 +1115,17 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public Element toElement() {
         final Element element = new Element(getFeatureLayerType());
-        element.setAttribute("name", getName());                                                    // NOI18N
-        element.setAttribute("type", this.getClass().getCanonicalName());                           // NOI18N
-        element.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString());       // NOI18N
-        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                   // NOI18N
-        element.setAttribute("translucency", new Float(getTranslucency()).toString());              // NOI18N
+        element.setAttribute("name", getName()); // NOI18N
+        element.setAttribute("type", this.getClass().getCanonicalName()); // NOI18N
+        element.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString()); // NOI18N
+        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString()); // NOI18N
+        element.setAttribute("translucency", new Float(getTranslucency()).toString()); // NOI18N
         element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString()); // NOI18N
-        element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
-        element.setAttribute("isSelectable", Boolean.toString(this.isSelectable()));                // NOI18N
+        element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString()); // NOI18N
+        element.setAttribute("isSelectable", Boolean.toString(this.isSelectable())); // NOI18N
 
         if ((this.getFeatureServiceAttributes() != null) && (this.getFeatureServiceAttributes().size() > 0)) {
-            final Element attrib = new Element("Attributes");                    // NOI18N
+            final Element attrib = new Element("Attributes"); // NOI18N
             for (final String key : getOrderedFeatureServiceAttributes()) {
                 final FeatureServiceAttribute e = getFeatureServiceAttributes().get(key);
                 attrib.addContent(e.toElement());
@@ -1140,42 +1166,35 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (element == null) {
             element = this.getInitElement();
         } else {
-            this.setInitElement((Element)element.clone());
+            this.setInitElement((Element) element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                  // NOI18N
-        {
-            this.setName(element.getAttributeValue("name"));                            // NOI18N
+        if (element.getAttributeValue("name") != null) { // NOI18N
+            this.setName(element.getAttributeValue("name")); // NOI18N
         }
-        if (element.getAttributeValue("visible") != null)                               // NOI18N
-        {
-            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));     // NOI18N
+        if (element.getAttributeValue("visible") != null) { // NOI18N
+            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible"))); // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                          // NOI18N
-        {
+        if (element.getAttributeValue("translucency") != null) { // NOI18N
             this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                               // NOI18N
-        {
+        if (element.getAttributeValue("enabled") != null) { // NOI18N
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
             if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
-                this.setEnabled(false);                                                     // NOI18N
+                this.setEnabled(false); // NOI18N
             } else {
-                this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N
+                this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled"))); // NOI18N
             }
         }
-        if (element.getAttributeValue("maxFeatureCount") != null)                           // NOI18N
-        {
+        if (element.getAttributeValue("maxFeatureCount") != null) { // NOI18N
             this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue()); // NOI18N
         }
-        if (element.getAttributeValue("layerPosition") != null)                             // NOI18N
-        {
-            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());     // NOI18N
+        if (element.getAttributeValue("layerPosition") != null) { // NOI18N
+            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue()); // NOI18N
         }
-        if (element.getAttributeValue("isSelectable") != null)                              // NOI18N
-        {
-            this.setSelectable(element.getAttribute("isSelectable").getBooleanValue());     // NOI18N
+        if (element.getAttributeValue("isSelectable") != null) { // NOI18N
+            this.setSelectable(element.getAttribute("isSelectable").getBooleanValue()); // NOI18N
         }
 
         final Element xmlAttributes = element.getChild("Attributes"); // NOI18N
@@ -1186,33 +1205,36 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         }
 
         if (element.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) == null) {
-            LOG.warn("fromElement: restoring object from deprecated xml element");              // NOI18N
+            LOG.warn("fromElement: restoring object from deprecated xml element"); // NOI18N
             try {
                 this.fromOldElement(element);
             } catch (final Exception e) {
                 LOG.warn("could not restore deprecated configuration: \n" + e.getMessage(), e); // NOI18N
             }
-        } else if (element.getChild("LayerProperties") != null)                                 // NOI18N
-        {
+        } else if (element.getChild("LayerProperties") != null) { // NOI18N
             LayerProperties restoredLayerProperties = null;
             try {
                 final Element layerPropertiesElement = element.getChild(LayerProperties.LAYER_PROPERTIES_ELEMENT);
-                restoredLayerProperties = (LayerProperties)XMLObjectFactory.restoreObjectfromElement(
-                        layerPropertiesElement);
+                restoredLayerProperties =
+                    (LayerProperties) XMLObjectFactory.restoreObjectfromElement(layerPropertiesElement);
                 restoredLayerProperties.setFeatureService(this);
             } catch (Exception t) {
-                LOG.error("could not restore generic style element '"                           // NOI18N
-                            + element.getChild("LayerProperties").getAttribute(ConvertableToXML.TYPE_ATTRIBUTE)
-                            + "': \n" + t.getMessage(),
-                    t);                                                                         // NOI18N
+                LOG.error(
+                    "could not restore generic style element '" + // NOI18N
+                    element.getChild("LayerProperties").getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) +
+                    "': \n" +
+                    t.getMessage(),
+                    t
+                ); // NOI18N
             }
             this.layerProperties = restoredLayerProperties;
         } else {
-            LOG.warn("no layer properties ");                                                   // NOI18N
+            LOG.warn("no layer properties "); // NOI18N
         }
         final Element sldStyle = element.getChild(
-                "StyledLayerDescriptor",
-                Namespace.getNamespace("http://www.opengis.net/sld"));
+            "StyledLayerDescriptor",
+            Namespace.getNamespace("http://www.opengis.net/sld")
+        );
         if (sldStyle != null) {
             sldDefinition = new org.jdom.output.XMLOutputter().outputString(sldStyle);
         }
@@ -1230,43 +1252,48 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Deprecated
     private void fromOldElement(final Element element) {
         final DefaultFeatureServiceFeature wfsFeature = new DefaultFeatureServiceFeature();
-        final Element renderingFeature = element.getChild("renderingFeature").getChild("DefaultWFSFeature");            // NOI18N
-        wfsFeature.setIdExpression(renderingFeature.getAttributeValue("idExpression"));                                 // NOI18N
-        final int lineWidth = Integer.parseInt(renderingFeature.getAttributeValue("lineWidth"));                        // NOI18N
+        final Element renderingFeature = element.getChild("renderingFeature").getChild("DefaultWFSFeature"); // NOI18N
+        wfsFeature.setIdExpression(renderingFeature.getAttributeValue("idExpression")); // NOI18N
+        final int lineWidth = Integer.parseInt(renderingFeature.getAttributeValue("lineWidth")); // NOI18N
         wfsFeature.setLineWidth(lineWidth);
-        wfsFeature.setTransparency(Float.parseFloat(renderingFeature.getAttributeValue("transparency")));               // NOI18N
-        wfsFeature.setPrimaryAnnotation(renderingFeature.getAttributeValue("primaryAnnotation"));                       // NOI18N
-        wfsFeature.setSecondaryAnnotation(renderingFeature.getAttributeValue("secondaryAnnotation"));                   // NOI18N
-        wfsFeature.setPrimaryAnnotationScaling(Double.parseDouble(
-                renderingFeature.getAttributeValue("primaryAnnotationScaling")));                                       // NOI18N
-        wfsFeature.setPrimaryAnnotationJustification(Float.parseFloat(
-                renderingFeature.getAttributeValue("primaryAnnotationJustification")));                                 // NOI18N
+        wfsFeature.setTransparency(Float.parseFloat(renderingFeature.getAttributeValue("transparency"))); // NOI18N
+        wfsFeature.setPrimaryAnnotation(renderingFeature.getAttributeValue("primaryAnnotation")); // NOI18N
+        wfsFeature.setSecondaryAnnotation(renderingFeature.getAttributeValue("secondaryAnnotation")); // NOI18N
+        wfsFeature.setPrimaryAnnotationScaling(
+            Double.parseDouble(renderingFeature.getAttributeValue("primaryAnnotationScaling"))
+        ); // NOI18N
+        wfsFeature.setPrimaryAnnotationJustification(
+            Float.parseFloat(renderingFeature.getAttributeValue("primaryAnnotationJustification"))
+        ); // NOI18N
         wfsFeature.setMaxScaleDenominator(Integer.parseInt(renderingFeature.getAttributeValue("maxScaleDenominator"))); // NOI18N
         wfsFeature.setMinScaleDenominator(Integer.parseInt(renderingFeature.getAttributeValue("minScaleDenominator"))); // NOI18N
-        wfsFeature.setAutoScale(Boolean.parseBoolean(renderingFeature.getAttributeValue("autoscale")));                 // NOI18N
+        wfsFeature.setAutoScale(Boolean.parseBoolean(renderingFeature.getAttributeValue("autoscale"))); // NOI18N
 
         // color kann null sein (fill disabled oder line disabled)
         Color fill = null;
         Color line = null;
 
-        if (renderingFeature.getChild("fillingColor") != null)                                                           // NOI18N
-        {
+        if (renderingFeature.getChild("fillingColor") != null) { // NOI18N
             fill = StaticXMLTools.convertXMLElementToColor(renderingFeature.getChild("fillingColor").getChild("Color")); // NOI18N
         }
         wfsFeature.setFillingPaint(fill);
 
-        if (renderingFeature.getChild("lineColor") != null)                                                           // NOI18N
-        {
+        if (renderingFeature.getChild("lineColor") != null) { // NOI18N
             line = StaticXMLTools.convertXMLElementToColor(renderingFeature.getChild("lineColor").getChild("Color")); // NOI18N
         }
         wfsFeature.setLinePaint(line);
 
-        wfsFeature.setPrimaryAnnotationFont(StaticXMLTools.convertXMLElementToFont(
-                renderingFeature.getChild("primaryAnnotationFont").getChild("Font")));   // NOI18N
-        wfsFeature.setPrimaryAnnotationPaint(StaticXMLTools.convertXMLElementToColor(
-                renderingFeature.getChild("primaryAnnotationColor").getChild("Color"))); // NOI18N
-        wfsFeature.setHighlightingEnabled(Boolean.parseBoolean(
-                renderingFeature.getAttributeValue("highlightingEnabled")));             // NOI18N
+        wfsFeature.setPrimaryAnnotationFont(
+            StaticXMLTools.convertXMLElementToFont(renderingFeature.getChild("primaryAnnotationFont").getChild("Font"))
+        ); // NOI18N
+        wfsFeature.setPrimaryAnnotationPaint(
+            StaticXMLTools.convertXMLElementToColor(
+                renderingFeature.getChild("primaryAnnotationColor").getChild("Color")
+            )
+        ); // NOI18N
+        wfsFeature.setHighlightingEnabled(
+            Boolean.parseBoolean(renderingFeature.getAttributeValue("highlightingEnabled"))
+        ); // NOI18N
         wfsFeature.getLayerProperties().getStyle().setPointSymbolFilename(Style.AUTO_POINTSYMBOL);
 
         this.layerProperties = wfsFeature.getLayerProperties();
@@ -1357,8 +1384,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public List retrieveFeatures(final BoundingBox boundingBox, final int offset, final int limit, final String orderBy)
-            throws Exception {
+    public List retrieveFeatures(
+        final BoundingBox boundingBox,
+        final int offset,
+        final int limit,
+        final String orderBy
+    ) throws Exception {
         if (!initialized) {
             initAndWait();
         }
@@ -1411,9 +1442,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @throws  Exception  DOCUMENT ME!
      */
     protected List<FT> retrieveFeatures(final FeatureRetrievalWorker worker) throws Exception {
-        if (initialisationError
-                    || ((this instanceof WebFeatureService) && (((WebFeatureService)this).getFeature() == null))) {
-            if (((this instanceof WebFeatureService) && (((WebFeatureService)this).getFeature() == null))) {
+        if (
+            initialisationError ||
+            ((this instanceof WebFeatureService) && (((WebFeatureService) this).getFeature() == null))
+        ) {
+            if (((this instanceof WebFeatureService) && (((WebFeatureService) this).getFeature() == null))) {
                 initialisationError = true;
             }
             initFromElement(null);
@@ -1441,8 +1474,15 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         final long start = System.currentTimeMillis();
         final List<FT> features = getFeatureFactory().createFeatures(this.getQuery(), this.getBoundingBox(), worker);
         if ((features != null) && LOG.isInfoEnabled()) {
-            LOG.info("FRW[" + worker.getId() + "]: " + features.size() + " features retrieved in "
-                        + (System.currentTimeMillis() - start) + " ms");                                        // NOI18N
+            LOG.info(
+                "FRW[" +
+                worker.getId() +
+                "]: " +
+                features.size() +
+                " features retrieved in " +
+                (System.currentTimeMillis() - start) +
+                " ms"
+            ); // NOI18N
         } else {
             LOG.warn("FRW[" + worker.getId() + "]: no features found (canceled=" + worker.isCancelled() + ")"); // NOI18N
         }
@@ -1502,8 +1542,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     @Override
     public Reader getSLDDefiniton() {
-        return (sldDefinition == null) ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
-                                       : new StringReader(sldDefinition);
+        return (sldDefinition == null)
+            ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
+            : new StringReader(sldDefinition);
     }
 
     @Override
@@ -1514,8 +1555,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             return;
         }
         sldDefinition = inputStream;
-        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
-                    inputStream));
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(
+            new StringReader(inputStream)
+        );
         if ((styles == null) || styles.isEmpty()) {
             return;
         }
@@ -1586,10 +1628,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
         if (featureFactory instanceof AbstractFeatureFactory) {
-            getLegend(getLegendStyle().get(0),
-                width,
-                height,
-                g2d);
+            getLegend(getLegendStyle().get(0), width, height, g2d);
         }
     }
 
@@ -1599,13 +1638,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @return  DOCUMENT ME!
      */
     private List<org.deegree.style.se.unevaluated.Style> getLegendStyle() {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory) featureFactory);
         final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
 
         if (styles == null) {
             try {
-                final InputStream is = getClass().getResourceAsStream(
-                        "/de/cismet/cismap/commons/featureservice/defaultSld.xml");
+                final InputStream is = getClass()
+                    .getResourceAsStream("/de/cismet/cismap/commons/featureservice/defaultSld.xml");
                 final BufferedReader r = new BufferedReader(new InputStreamReader(is));
                 final StringBuilder sldString = new StringBuilder();
                 String tmp;
@@ -1622,9 +1661,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 sld = sld.replace("$fillingColor$", color2RGBCode(fillingColor));
                 sld = sld.replace("$lineColor$", color2RGBCode(lineColor));
                 sld = sld.replace("$geomProperty$", getGeoProperty());
-                sld = sld.replace(
+                sld =
+                    sld.replace(
                         "$pointSymbolUrl$",
-                        getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png").toString());
+                        getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png").toString()
+                    );
 
                 if (getGeometryType().toLowerCase().contains("point")) {
                     sld = removeRule(sld, "basicLineStyle");
@@ -1737,19 +1778,18 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @param  height  DOCUMENT ME!
      * @param  g2d     DOCUMENT ME!
      */
-    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
-            final int width,
-            final int height,
-            final Graphics2D g2d) {
-        legends.paintLegend(style,
-            width,
-            height,
-            g2d);
+    private void getLegend(
+        final org.deegree.style.se.unevaluated.Style style,
+        final int width,
+        final int height,
+        final Graphics2D g2d
+    ) {
+        legends.paintLegend(style, width, height, g2d);
     }
 
     @Override
     public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory) featureFactory);
         final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
         for (int i = 0; i < styles.size(); i++) {
             legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
@@ -1764,12 +1804,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (lastCreatedFeatures.size() > 0) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(lastCreatedFeatures.size()
-                                + " last created features refreshed, fiering retrival event"); // NOI18N
+                    LOG.debug(lastCreatedFeatures.size() + " last created features refreshed, fiering retrival event"); // NOI18N
                 }
             }
-            EventQueue.invokeLater(new Runnable() {
-
+            EventQueue.invokeLater(
+                new Runnable() {
                     @Override
                     public void run() {
                         final RetrievalEvent re = new RetrievalEvent();
@@ -1781,7 +1820,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                         fireRetrievalStarted(re);
                         fireRetrievalComplete(re);
                     }
-                });
+                }
+            );
         } else {
             LOG.warn("no last created features that could be refreshed found"); // NOI18N
         }
@@ -1827,13 +1867,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         final FeatureFactory ff = getFeatureFactory();
 
         if (ff instanceof AbstractFeatureFactory) {
-            final List<org.deegree.style.se.unevaluated.Style> styles = ((AbstractFeatureFactory)ff).getStyle(
-                    ((AbstractFeatureFactory)ff).layerName);
+            final List<org.deegree.style.se.unevaluated.Style> styles =
+                ((AbstractFeatureFactory) ff).getStyle(((AbstractFeatureFactory) ff).layerName);
 
             if (styles != null) {
                 for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
                     final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
-                            CismapBroker.getInstance().getMappingComponent().getScaleDenominator());
+                        CismapBroker.getInstance().getMappingComponent().getScaleDenominator()
+                    );
                     final List rules = filteredStyle.getRules();
 
                     return !((rules == null) || rules.isEmpty());
@@ -1891,8 +1932,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("FRW[" + this.getId() + "]: doInBackground() started"); // NOI18N
                 }
             }
-            EventQueue.invokeAndWait(new Runnable() {
-
+            EventQueue.invokeAndWait(
+                new Runnable() {
                     @Override
                     public void run() {
                         final RetrievalEvent r = new RetrievalEvent();
@@ -1900,7 +1941,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                         r.setPercentageDone(-1);
                         fireRetrievalStarted(r);
                     }
-                });
+                }
+            );
 
             // check if canceled .......................................................
             if (this.isCancelled()) {
@@ -1960,8 +2002,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     re.setRetrievedObject(results);
                     fireRetrievalComplete(re);
                 } else {
-                    LOG.warn("FRW[" + this.getId() + "]: FeatureRetrieverWorker brachte keine Ergebnisse (canceled="
-                                + this.isCancelled() + ")");                                                 // NOI18N
+                    LOG.warn(
+                        "FRW[" +
+                        this.getId() +
+                        "]: FeatureRetrieverWorker brachte keine Ergebnisse (canceled=" +
+                        this.isCancelled() +
+                        ")"
+                    ); // NOI18N
                     // setErrorMessage("Feature Request brachte keine Ergebnisse");
                     final RetrievalEvent re = new RetrievalEvent();
                     re.setHasErrors(false);
@@ -1975,8 +2022,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     }
                 }
             } catch (final Exception e) {
-                LOG.error("FRW[" + this.getId() + "]: Fehler im FeatureRetrieverWorker (done): \n" + e.getMessage(),
-                    e); // NOI18N
+                LOG.error("FRW[" + this.getId() + "]: Fehler im FeatureRetrieverWorker (done): \n" + e.getMessage(), e); // NOI18N
 
                 final RetrievalEvent re = new RetrievalEvent();
                 re.setRequestIdentifier(this.getId());
@@ -1994,9 +2040,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
          */
         @Override
         public void propertyChange(final PropertyChangeEvent evt) {
-            if (evt.getPropertyName().equals("progress")) // NOI18N
-            {
-                final int progress = (Integer)evt.getNewValue();
+            if (evt.getPropertyName().equals("progress")) { // NOI18N
+                final int progress = (Integer) evt.getNewValue();
                 // AbstractFeatureService.this.setProgress(progress);
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
@@ -2033,6 +2078,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         //~ Instance fields ----------------------------------------------------
 
         private final long id = System.nanoTime();
+
         // private final long id = System.currentTimeMillis();
 
         //~ Constructors -------------------------------------------------------
@@ -2069,8 +2115,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("LIW[" + this.getId() + "]: doInBackground() started"); // NOI18N
                 }
             }
-            EventQueue.invokeAndWait(new Runnable() {
-
+            EventQueue.invokeAndWait(
+                new Runnable() {
                     @Override
                     public void run() {
                         final RetrievalEvent r = new RetrievalEvent();
@@ -2079,7 +2125,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                         r.setInitialisationEvent(true);
                         fireRetrievalStarted(r);
                     }
-                });
+                }
+            );
 
             init();
             return null;
@@ -2165,9 +2212,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
          */
         @Override
         public void propertyChange(final PropertyChangeEvent evt) {
-            if (evt.getPropertyName().equals("progress")) // NOI18N
-            {
-                final int progress = (Integer)evt.getNewValue();
+            if (evt.getPropertyName().equals("progress")) { // NOI18N
+                final int progress = (Integer) evt.getNewValue();
                 // AbstractFeatureService.this.setProgress(progress);
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {

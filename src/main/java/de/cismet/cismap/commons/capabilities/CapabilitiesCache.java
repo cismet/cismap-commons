@@ -1,29 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.capabilities;
 
+import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import de.cismet.security.WebAccessManager;
+import de.cismet.tools.CalculationCache;
+import de.cismet.tools.Calculator;
+import de.cismet.tools.TimeoutThread;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.net.URL;
-
 import java.nio.charset.Charset;
-
-import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
-
-import de.cismet.security.WebAccessManager;
-
-import de.cismet.tools.CalculationCache;
-import de.cismet.tools.Calculator;
-import de.cismet.tools.TimeoutThread;
 
 /**
  * Caches the result of capability requests.

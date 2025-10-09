@@ -1,17 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.preferences;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -22,10 +21,10 @@ public class CapabilityLink {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String OGC = "OGC";                 // NOI18N
-    public static final String OGC_DEPRECATED = "OGC-WMS";  // NOI18N
-    public static final String SEPARATOR = "SEPARATOR";     // NOI18N
-    public static final String MENU = "MENU";               // NOI18N
+    public static final String OGC = "OGC"; // NOI18N
+    public static final String OGC_DEPRECATED = "OGC-WMS"; // NOI18N
+    public static final String SEPARATOR = "SEPARATOR"; // NOI18N
+    public static final String MENU = "MENU"; // NOI18N
     public static final String INTERNAL_DB = "INTERNAL-DB"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -48,18 +47,17 @@ public class CapabilityLink {
      * @param  parent  DOCUMENT ME!
      */
     public CapabilityLink(final Element parent) {
-        final Element e = parent.getChild("capabilities");                           // NOI18N
-        type = e.getAttribute("type").getValue();                                    // NOI18N
+        final Element e = parent.getChild("capabilities"); // NOI18N
+        type = e.getAttribute("type").getValue(); // NOI18N
         try {
-            active = e.getAttribute("active").getBooleanValue();                     // NOI18N
-        } catch (Exception notHandled) {
-        }
+            active = e.getAttribute("active").getBooleanValue(); // NOI18N
+        } catch (Exception notHandled) {}
         try {
             reverseAxisOrder = e.getAttribute("reverseAxisOrder").getBooleanValue(); // NOI18N
         } catch (Exception notHandled) {
             // nothing to do
         }
-        alias = e.getAttributeValue("alias");                                        // NOI18N
+        alias = e.getAttributeValue("alias"); // NOI18N
 
         link = e.getTextTrim();
         link = CismapBroker.getInstance().urlToAlias(link);
@@ -101,11 +99,13 @@ public class CapabilityLink {
      * @param  title             DOCUMENT ME!
      * @param  subparent         DOCUMENT ME!
      */
-    public CapabilityLink(final String type,
-            final String link,
-            final boolean reverseAxisOrder,
-            final String title,
-            final String subparent) {
+    public CapabilityLink(
+        final String type,
+        final String link,
+        final boolean reverseAxisOrder,
+        final String title,
+        final String subparent
+    ) {
         this.type = type;
         this.link = CismapBroker.getInstance().urlToAlias(link);
         this.title = title;
@@ -123,12 +123,14 @@ public class CapabilityLink {
      * @param  subparent         DOCUMENT ME!
      * @param  alias             DOCUMENT ME!
      */
-    public CapabilityLink(final String type,
-            final String link,
-            final boolean reverseAxisOrder,
-            final boolean active,
-            final String subparent,
-            final String alias) {
+    public CapabilityLink(
+        final String type,
+        final String link,
+        final boolean reverseAxisOrder,
+        final boolean active,
+        final String subparent,
+        final String alias
+    ) {
         this.type = type;
         this.link = link;
         this.active = active;
@@ -147,12 +149,14 @@ public class CapabilityLink {
      * @param  active            DOCUMENT ME!
      * @param  alias             DOCUMENT ME!
      */
-    public CapabilityLink(final String type,
-            final String link,
-            final boolean reverseAxisOrder,
-            final String version,
-            final boolean active,
-            final String alias) {
+    public CapabilityLink(
+        final String type,
+        final String link,
+        final boolean reverseAxisOrder,
+        final String version,
+        final boolean active,
+        final String alias
+    ) {
         this(type, link, active, null);
         this.version = version;
         this.alias = alias;
@@ -206,9 +210,9 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element elem = new Element("capabilities");                            // NOI18N
+        final Element elem = new Element("capabilities"); // NOI18N
         if (CismapBroker.getInstance().isAlias(link)) {
-            elem.setAttribute("alias", link);                                        // NOI18N
+            elem.setAttribute("alias", link); // NOI18N
         } else if (CismapBroker.getInstance().isAliasDefinedForUrl(link)) {
             elem.setAttribute("alias", CismapBroker.getInstance().urlToAlias(link)); // NOI18N
         }
@@ -216,16 +220,16 @@ public class CapabilityLink {
         final CDATA cd = new CDATA(CismapBroker.getInstance().aliasToUrl(link));
         elem.addContent(cd);
 
-        elem.setAttribute(new Attribute("type", type));                                  // NOI18N
+        elem.setAttribute(new Attribute("type", type)); // NOI18N
         if (isReverseAxisOrder()) {
             elem.setAttribute("reverseAxisOrder", String.valueOf(isReverseAxisOrder())); // NOI18N
         }
         if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent));                    // NOI18N
+            elem.setAttribute(new Attribute("subparent", subparent)); // NOI18N
         }
-        elem.setAttribute(new Attribute("active", new Boolean(active).toString()));      // NOI18N
+        elem.setAttribute(new Attribute("active", new Boolean(active).toString())); // NOI18N
         if (version != null) {
-            elem.setAttribute(new Attribute("version", version));                        // NOI18N
+            elem.setAttribute(new Attribute("version", version)); // NOI18N
         }
         return elem;
     }
@@ -236,19 +240,19 @@ public class CapabilityLink {
      * @return  DOCUMENT ME!
      */
     public Element getElementAsListEntry() {
-        final Element elem = new Element("capabilitiesList");                            // NOI18N
+        final Element elem = new Element("capabilitiesList"); // NOI18N
         final CDATA cd = new CDATA(link);
         elem.addContent(cd);
-        elem.setAttribute("titlestring", title);                                         // NOI18N
+        elem.setAttribute("titlestring", title); // NOI18N
         if (!isReverseAxisOrder()) {
             elem.setAttribute("reverseAxisOrder", String.valueOf(isReverseAxisOrder())); // NOI18N
         }
-        elem.setAttribute(new Attribute("type", type));                                  // NOI18N
+        elem.setAttribute(new Attribute("type", type)); // NOI18N
         if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent));                    // NOI18N
+            elem.setAttribute(new Attribute("subparent", subparent)); // NOI18N
         }
         if (version != null) {
-            elem.setAttribute(new Attribute("version", version));                        // NOI18N
+            elem.setAttribute(new Attribute("version", version)); // NOI18N
         }
         return elem;
     }

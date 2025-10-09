@@ -1,27 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.*;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
-import java.util.Collection;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.*;
@@ -31,6 +17,14 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteA
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRemoveEntityAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRemoveHoleAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.awt.Color;
+import java.awt.geom.Point2D;
+import java.util.Collection;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
 
 /**
  * DOCUMENT ME!
@@ -100,14 +94,17 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
         final double mouseCoordX = wtst.getSourceX(mousePosition.getX() - getMappingComponent().getClip_offset_x());
         final double mouseCoordY = wtst.getSourceY(mousePosition.getY() - getMappingComponent().getClip_offset_y());
         final Coordinate mouseCoord = new Coordinate(mouseCoordX, mouseCoordY);
-        final int currentSrid = CrsTransformer.extractSridFromCrs(getMappingComponent().getMappingModel().getSrs()
-                        .getCode());
-        final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                currentSrid);
-        final Point mousePoint = CrsTransformer.transformToGivenCrs(geometryFactory.createPoint(
-                    mouseCoord),
-                CrsTransformer.createCrsFromSrid(
-                    selectedPFeature.getFeature().getGeometry().getSRID()));
+        final int currentSrid = CrsTransformer.extractSridFromCrs(
+            getMappingComponent().getMappingModel().getSrs().getCode()
+        );
+        final GeometryFactory geometryFactory = new GeometryFactory(
+            new PrecisionModel(PrecisionModel.FLOATING),
+            currentSrid
+        );
+        final Point mousePoint = CrsTransformer.transformToGivenCrs(
+            geometryFactory.createPoint(mouseCoord),
+            CrsTransformer.createCrsFromSrid(selectedPFeature.getFeature().getGeometry().getSRID())
+        );
         return mousePoint;
     }
 
@@ -121,8 +118,10 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
             if ((geometryChecks != null) && !geometryChecks.isEmpty()) {
                 final Point2D lastPoint = pInputEvent.getPosition();
                 final WorldToScreenTransform wtst = mappingComponent.getWtst();
-                final Coordinate lastCoordinate = new Coordinate(wtst.getSourceX((float)lastPoint.getX()),
-                        wtst.getSourceY((float)lastPoint.getY()));
+                final Coordinate lastCoordinate = new Coordinate(
+                    wtst.getSourceX((float) lastPoint.getX()),
+                    wtst.getSourceY((float) lastPoint.getY())
+                );
                 boolean ignoreLastGeometryCoordinate = false;
 
                 if (points.size() < tempGeometry.getCoordinates().length) {
@@ -141,30 +140,42 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
         if (pInputEvent.isLeftMouseButton()) {
             if (pInputEvent.getClickCount() == 1) {
                 if (!isInProgress()) {
-                    if (pInputEvent.isAltDown()
-                                && (isInMode(POLYGON) || isInMode(ELLIPSE) || isInMode(RECTANGLE)
-                                    || isInMode(RECTANGLE_FROM_LINE))) {
-                        final Collection selectedFeatures = getMappingComponent().getFeatureCollection()
-                                    .getSelectedFeatures();
+                    if (
+                        pInputEvent.isAltDown() &&
+                        (isInMode(POLYGON) || isInMode(ELLIPSE) || isInMode(RECTANGLE) || isInMode(RECTANGLE_FROM_LINE))
+                    ) {
+                        final Collection selectedFeatures = getMappingComponent()
+                            .getFeatureCollection()
+                            .getSelectedFeatures();
                         if ((selectedPFeature != null) && (selectedFeatures.size() == 1)) {
-                            final PFeature pFeature = getMappingComponent().getPFeatureHM()
-                                        .get((Feature)selectedFeatures.toArray()[0]);
-                            if ((pFeature != null)
-                                        && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
-                                            || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                            final PFeature pFeature = getMappingComponent()
+                                .getPFeatureHM()
+                                .get((Feature) selectedFeatures.toArray()[0]);
+                            if (
+                                (pFeature != null) &&
+                                (
+                                    (pFeature.getFeature().getGeometry() instanceof MultiPolygon) ||
+                                    (pFeature.getFeature().getGeometry() instanceof Polygon)
+                                )
+                            ) {
                                 final Point mousePoint = getMousePoint(pInputEvent.getPosition());
                                 selectedEntityPosition = pFeature.getEntityPositionUnderPoint(mousePoint);
                                 creatingHole = selectedEntityPosition != -1;
                                 super.mousePressed(pInputEvent);
                             }
                         } else {
-                            final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                                    pInputEvent,
-                                    new Class[] { PFeature.class },
-                                    true);
-                            if ((pFeature != null)
-                                        && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
-                                            || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                            final PFeature pFeature = (PFeature) PFeatureTools.getFirstValidObjectUnderPointer(
+                                pInputEvent,
+                                new Class[] { PFeature.class },
+                                true
+                            );
+                            if (
+                                (pFeature != null) &&
+                                (
+                                    (pFeature.getFeature().getGeometry() instanceof MultiPolygon) ||
+                                    (pFeature.getFeature().getGeometry() instanceof Polygon)
+                                )
+                            ) {
                                 getMappingComponent().getFeatureCollection().select(pFeature.getFeature());
                                 selectedPFeature = pFeature;
                             }
@@ -202,8 +213,10 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
 
         if (tempFeatureCoordinates.length == 3) {
             final int currentSrid = selectedPFeature.getFeature().getGeometry().getSRID();
-            final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                    currentSrid);
+            final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                currentSrid
+            );
             final Point point = geometryFactory.createPoint(tempFeatureCoordinates[1]);
             if (creatingHole) {
                 return selectedPFeature.getEntityPositionUnderPoint(point) == selectedEntityPosition;
@@ -231,10 +244,9 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
         super.mouseMoved(pInputEvent);
         if (isInMode(POLYGON) || isInMode(ELLIPSE) || isInMode(RECTANGLE) || isInMode(RECTANGLE_FROM_LINE)) {
             multiPolygonPointerAnnotation.setOffset(
-                pInputEvent.getCanvasPosition().getX()
-                        + 20.0d,
-                pInputEvent.getCanvasPosition().getY()
-                        + 20.0d);
+                pInputEvent.getCanvasPosition().getX() + 20.0d,
+                pInputEvent.getCanvasPosition().getY() + 20.0d
+            );
 
             final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
             if ((selectedPFeature == null) || (selectedFeatures.size() != 1)) {
@@ -271,8 +283,10 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
                 if ((geometryChecks != null) && !geometryChecks.isEmpty()) {
                     final Point2D lastPoint = pInputEvent.getPosition();
                     final WorldToScreenTransform wtst = mappingComponent.getWtst();
-                    final Coordinate lastCoordinate = new Coordinate(wtst.getSourceX(lastPoint.getX()),
-                            wtst.getSourceY(lastPoint.getY()));
+                    final Coordinate lastCoordinate = new Coordinate(
+                        wtst.getSourceX(lastPoint.getX()),
+                        wtst.getSourceY(lastPoint.getY())
+                    );
 
                     for (final GeometryCheckInterface check : geometryChecks) {
                         if (!check.check(tempGeometry, lastCoordinate, true)) {
@@ -285,10 +299,9 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
 
                 if (errorFound) {
                     multiPolygonPointerAnnotation.setOffset(
-                        pInputEvent.getCanvasPosition().getX()
-                                + 20.0d,
-                        pInputEvent.getCanvasPosition().getY()
-                                + 20.0d);
+                        pInputEvent.getCanvasPosition().getX() + 20.0d,
+                        pInputEvent.getCanvasPosition().getY() + 20.0d
+                    );
                 }
                 multiPolygonPointerAnnotation.setVisible(errorFound);
             }
@@ -308,29 +321,35 @@ public class CreateNewGeometryListener extends CreateGeometryListener implements
                 final PNotificationCenter pn = PNotificationCenter.defaultCenter();
                 pn.postNotification(
                     CreateGeometryListener.GEOMETRY_CREATED_NOTIFICATION,
-                    (AbstractNewFeature)newFeature);
+                    (AbstractNewFeature) newFeature
+                );
 
-                getMappingComponent().getMemUndo()
-                        .addAction(new FeatureDeleteAction(getMappingComponent(), newFeature));
+                getMappingComponent()
+                    .getMemUndo()
+                    .addAction(new FeatureDeleteAction(getMappingComponent(), newFeature));
                 getMappingComponent().getMemRedo().clear();
             } else {
-                final Polygon polygon = (Polygon)newFeature.getGeometry();
+                final Polygon polygon = (Polygon) newFeature.getGeometry();
 
                 if (creatingHole) {
                     selectedPFeature.addHoleToEntity(selectedEntityPosition, polygon.getExteriorRing());
-                    getMappingComponent().getMemUndo()
-                            .addAction(new FeatureRemoveHoleAction(
-                                    getMappingComponent(),
-                                    selectedPFeature.getFeature(),
-                                    selectedEntityPosition,
-                                    polygon.getExteriorRing()));
+                    getMappingComponent()
+                        .getMemUndo()
+                        .addAction(
+                            new FeatureRemoveHoleAction(
+                                getMappingComponent(),
+                                selectedPFeature.getFeature(),
+                                selectedEntityPosition,
+                                polygon.getExteriorRing()
+                            )
+                        );
                 } else {
                     selectedPFeature.addEntity(polygon);
-                    getMappingComponent().getMemUndo()
-                            .addAction(new FeatureRemoveEntityAction(
-                                    mappingComponent,
-                                    selectedPFeature.getFeature(),
-                                    polygon));
+                    getMappingComponent()
+                        .getMemUndo()
+                        .addAction(
+                            new FeatureRemoveEntityAction(mappingComponent, selectedPFeature.getFeature(), polygon)
+                        );
                 }
 
                 getMappingComponent().getMemRedo().clear();

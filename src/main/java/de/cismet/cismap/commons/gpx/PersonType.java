@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -42,14 +42,7 @@ import javax.xml.bind.annotation.XmlType;
  * @version  $Revision$, $Date$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    name = "personType",
-    propOrder = {
-            "name",
-            "email",
-            "link"
-        }
-)
+@XmlType(name = "personType", propOrder = { "name", "email", "link" })
 public class PersonType {
 
     //~ Instance fields --------------------------------------------------------

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -24,40 +24,31 @@
 package de.cismet.cismap.commons.wfs;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.Attribute;
-import org.jdom.Content;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-
-import java.net.URL;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.xml.namespace.QName;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-
 import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
-
 import de.cismet.security.WebAccessManager;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import javax.xml.namespace.QName;
+import org.apache.log4j.Logger;
+import org.jdom.Attribute;
+import org.jdom.Content;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.XMLOutputter;
 
 /**
  * This class invokes Web Feature services and creates WFS requests. This class considers the WFS version while creating
@@ -83,20 +74,20 @@ public class WFSFacade {
     /** XSD namespace-contant. */
     private static final Namespace xsd = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema"); // NOI18N
     /** name of the CismapQuery-element. */
-    private static final String GET_FEATURE_100 = "getFeatureQuery100";                     // NOI18N
-    private static final String GET_FEATURE_110 = "getFeatureQuery110";                     // NOI18N
+    private static final String GET_FEATURE_100 = "getFeatureQuery100"; // NOI18N
+    private static final String GET_FEATURE_110 = "getFeatureQuery110"; // NOI18N
     private static final String CISMET_DESCRIBE_FEATURE_TYPE = "CismapDescribeFeatureType"; // NOI18N
-    private static final String DESCRIBE_FEATURE_TYPE = "DescribeFeatureType";              // NOI18N
-    private static final String GET_FEATURE = "GetFeature";                                 // NOI18N
-    private static final String QUERY = "Query";                                            // NOI18N
-    private static final String FILTER = "Filter";                                          // NOI18N
-    private static final String BBOX = "BBOX";                                              // NOI18N
-    private static final String TYPENAME = "TypeName";                                      // NOI18N
-    private static final String PROPERTY_NAME = "PropertyName";                             // NOI18N
-    private static final String TYPE_NAME_ATTR = "typeName";                                // NOI18N
-    private static final String VERSION_ATTR = "version";                                   // NOI18N
-    private static final String MAX_FEATURES_ATTR = "maxFeatures";                          // NOI18N
-    private static final URL XML_FILE = WFSFacade.class.getResource("wfs.xml");             // TODO Auslagern//NOI18N
+    private static final String DESCRIBE_FEATURE_TYPE = "DescribeFeatureType"; // NOI18N
+    private static final String GET_FEATURE = "GetFeature"; // NOI18N
+    private static final String QUERY = "Query"; // NOI18N
+    private static final String FILTER = "Filter"; // NOI18N
+    private static final String BBOX = "BBOX"; // NOI18N
+    private static final String TYPENAME = "TypeName"; // NOI18N
+    private static final String PROPERTY_NAME = "PropertyName"; // NOI18N
+    private static final String TYPE_NAME_ATTR = "typeName"; // NOI18N
+    private static final String VERSION_ATTR = "version"; // NOI18N
+    private static final String MAX_FEATURES_ATTR = "maxFeatures"; // NOI18N
+    private static final URL XML_FILE = WFSFacade.class.getResource("wfs.xml"); // TODO Auslagern//NOI18N
     public static final String CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER = "<cismapBoundingBoxAsGmlPlaceholder />";
     public static final String CISMAP_RESULT_TYPE_PLACEHOLDER = "cismapResultTypePlaceholder";
     public static final String SRS_NAME_PLACEHOLDER = "SRSNAME_PLACEHOLDER";
@@ -144,20 +135,31 @@ public class WFSFacade {
         final String request;
         final XMLOutputter out = new XMLOutputter();
         final QName featureName = feature.getName();
-        final Element requestElement = (Element)rootNode.getChild(CISMET_DESCRIBE_FEATURE_TYPE)
-                    .getChild(DESCRIBE_FEATURE_TYPE, WFS)
-                    .clone();
+        final Element requestElement = (Element) rootNode
+            .getChild(CISMET_DESCRIBE_FEATURE_TYPE)
+            .getChild(DESCRIBE_FEATURE_TYPE, WFS)
+            .clone();
 
         // set version
-        if (!version.equals("1.0.0") && !version.equals("1.1.0")) {                                     // NOI18N
-            logger.error("unknown service version used: " + version + " service"                        // NOI18N
-                        + cap.getURL() + ". Try to use a 1.1.0 request with version string" + version); // NOI18N
+        if (!version.equals("1.0.0") && !version.equals("1.1.0")) { // NOI18N
+            logger.error(
+                "unknown service version used: " +
+                version +
+                " service" + // NOI18N
+                cap.getURL() +
+                ". Try to use a 1.1.0 request with version string" +
+                version
+            ); // NOI18N
         }
-        requestElement.getAttribute(VERSION_ATTR).setValue(version);                                    // NOI18N
+        requestElement.getAttribute(VERSION_ATTR).setValue(version); // NOI18N
 
         // set namespace
-        if ((featureName.getPrefix() != null) && (!featureName.getPrefix().equals(""))
-                    && (featureName.getNamespaceURI() != null) && !featureName.getNamespaceURI().equals("")) {
+        if (
+            (featureName.getPrefix() != null) &&
+            (!featureName.getPrefix().equals("")) &&
+            (featureName.getNamespaceURI() != null) &&
+            !featureName.getNamespaceURI().equals("")
+        ) {
             final Namespace ns = Namespace.getNamespace(featureName.getPrefix(), featureName.getNamespaceURI());
             requestElement.addNamespaceDeclaration(ns);
         }
@@ -165,8 +167,11 @@ public class WFSFacade {
         // set feature type
         requestElement.getChild(TYPENAME, WFS).setText(feature.getPrefixedNameString());
 
-        request = "SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=" + version + "&TYPENAME="
-                    + feature.getPrefixedNameString();
+        request =
+            "SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=" +
+            version +
+            "&TYPENAME=" +
+            feature.getPrefixedNameString();
         final String response = getRequest(cap.getURL(), request);
 
         try {
@@ -190,13 +195,18 @@ public class WFSFacade {
         final String version = cap.getVersion();
         Element request;
 
-        if (version.equals("1.0.0")) {                                            // NOI18N
+        if (version.equals("1.0.0")) { // NOI18N
             request = getFeature100Request(feature);
-        } else if (version.equals("1.1.0")) {                                     // NOI18N
+        } else if (version.equals("1.1.0")) { // NOI18N
             request = getFeature110Request(feature);
         } else {
-            logger.error("unknown service version used: " + version + " service"  // NOI18N
-                        + cap.getURL() + ". Try to use a version 1.1.0 request"); // NOI18N
+            logger.error(
+                "unknown service version used: " +
+                version +
+                " service" + // NOI18N
+                cap.getURL() +
+                ". Try to use a version 1.1.0 request"
+            ); // NOI18N
             request = getFeature110Request(feature);
         }
 
@@ -214,11 +224,13 @@ public class WFSFacade {
      *
      * @return  the new getFeature request
      */
-    public String setGetFeatureBoundingBox(final String query,
-            final XBoundingBox bbox,
-            final FeatureType feature,
-            final String mapCrs,
-            final boolean reverseAxisOrder) {
+    public String setGetFeatureBoundingBox(
+        final String query,
+        final XBoundingBox bbox,
+        final FeatureType feature,
+        final String mapCrs,
+        final boolean reverseAxisOrder
+    ) {
         return setGetFeatureBoundingBox(query, bbox, feature, mapCrs, reverseAxisOrder, false);
     }
 
@@ -234,12 +246,14 @@ public class WFSFacade {
      *
      * @return  the new getFeature request
      */
-    public String setGetFeatureBoundingBox(final String query,
-            final XBoundingBox bbox,
-            final FeatureType feature,
-            final String mapCrs,
-            final boolean reverseAxisOrder,
-            final boolean onlyFeatureCount) {
+    public String setGetFeatureBoundingBox(
+        final String query,
+        final XBoundingBox bbox,
+        final FeatureType feature,
+        final String mapCrs,
+        final boolean reverseAxisOrder,
+        final boolean onlyFeatureCount
+    ) {
         String request;
         String envelope;
         final String crs = getOptimalCrsForFeature(feature, mapCrs);
@@ -251,32 +265,89 @@ public class WFSFacade {
             logger.debug("optimal crs: " + crs);
         }
 
-        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                                  // NOI18N
-            envelope = "<gml:Box srsName=\"" + bbox.getSrs() + "\"><gml:coord><gml:X>" + tbbox.getX1()
-                        + "</gml:X><gml:Y>" + tbbox.getY1()                                                    // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                        // NOI18N
-                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";           // NOI18N
-        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                           // NOI18N
+        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) { // NOI18N
+            envelope =
+                "<gml:Box srsName=\"" +
+                bbox.getSrs() +
+                "\"><gml:coord><gml:X>" +
+                tbbox.getX1() +
+                "</gml:X><gml:Y>" +
+                tbbox.getY1() + // NOI18N
+                "</gml:Y></gml:coord>" +
+                "<gml:coord><gml:X>" +
+                tbbox.getX2() + // NOI18N
+                "</gml:X><gml:Y>" +
+                tbbox.getY2() +
+                "</gml:Y></gml:coord>" +
+                "</gml:Box>"; // NOI18N
+        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) { // NOI18N
             if (reverseAxisOrder) {
-                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getY1() // NOI18N
-                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
-                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
+                envelope =
+                    "<gml:Envelope srsName=\"" +
+                    bbox.getSrs() +
+                    "\"><gml:lowerCorner>" +
+                    tbbox.getY1() + // NOI18N
+                    " " +
+                    tbbox.getX1() +
+                    "</gml:lowerCorner>" +
+                    "<gml:upperCorner>" + // NOI18N
+                    tbbox.getY2() +
+                    " " +
+                    tbbox.getX2() +
+                    "</gml:upperCorner>" +
+                    "</gml:Envelope>"; // NOI18N
             } else {
-                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getX1() // NOI18N
-                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
-                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
+                envelope =
+                    "<gml:Envelope srsName=\"" +
+                    bbox.getSrs() +
+                    "\"><gml:lowerCorner>" +
+                    tbbox.getX1() + // NOI18N
+                    " " +
+                    tbbox.getY1() +
+                    "</gml:lowerCorner>" +
+                    "<gml:upperCorner>" + // NOI18N
+                    tbbox.getX2() +
+                    " " +
+                    tbbox.getY2() +
+                    "</gml:upperCorner>" +
+                    "</gml:Envelope>"; // NOI18N
             }
         } else {
-            logger.error("unknown service version used: " + cap.getVersion()                                   // NOI18N
-                        + ". Try to use a version 1.1.0 request");                                             // NOI18N
+            logger.error(
+                "unknown service version used: " +
+                cap.getVersion() + // NOI18N
+                ". Try to use a version 1.1.0 request"
+            ); // NOI18N
             if (reverseAxisOrder) {
-                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getY1() // NOI18N
-                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
-                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
+                envelope =
+                    "<gml:Envelope srsName=\"" +
+                    bbox.getSrs() +
+                    "\"><gml:lowerCorner>" +
+                    tbbox.getY1() + // NOI18N
+                    " " +
+                    tbbox.getX1() +
+                    "</gml:lowerCorner>" +
+                    "<gml:upperCorner>" + // NOI18N
+                    tbbox.getY2() +
+                    " " +
+                    tbbox.getX2() +
+                    "</gml:upperCorner>" +
+                    "</gml:Envelope>"; // NOI18N
             } else {
-                envelope = "<gml:Envelope srsName=\"" + bbox.getSrs() + "\"><gml:lowerCorner>" + tbbox.getX1() // NOI18N
-                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                 // NOI18N
-                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>";  // NOI18N
+                envelope =
+                    "<gml:Envelope srsName=\"" +
+                    bbox.getSrs() +
+                    "\"><gml:lowerCorner>" +
+                    tbbox.getX1() + // NOI18N
+                    " " +
+                    tbbox.getY1() +
+                    "</gml:lowerCorner>" +
+                    "<gml:upperCorner>" + // NOI18N
+                    tbbox.getX2() +
+                    " " +
+                    tbbox.getY2() +
+                    "</gml:upperCorner>" +
+                    "</gml:Envelope>"; // NOI18N
             }
         }
 
@@ -336,7 +407,8 @@ public class WFSFacade {
         }
 
         logger.error(
-            "The feature type cannot be extracted from the wfs request. So the supported crs cannot be determined exactly."); // NOI18N
+            "The feature type cannot be extracted from the wfs request. So the supported crs cannot be determined exactly."
+        ); // NOI18N
 
         return null;
     }
@@ -383,8 +455,11 @@ public class WFSFacade {
             version = "1.1.0";
         }
         if (!(version.equals("1.0.0") || version.equals("1.1.0"))) {
-            logger.error("unknown wfs version: " + version // NOI18N
-                        + ". Try to handle this version like version 1.1.0"); // NOI18N
+            logger.error(
+                "unknown wfs version: " +
+                version + // NOI18N
+                ". Try to handle this version like version 1.1.0"
+            ); // NOI18N
         }
         if (logger.isDebugEnabled()) {
             logger.debug("setting may maxFeatureCount of WFS Query to " + maxFeatureCount); // NOI18N
@@ -409,9 +484,12 @@ public class WFSFacade {
             logger.error("version string is null. Try to use version 1.1.0", new Exception());
             version = "1.1.0";
         }
-        if (!(version.equals("1.0.0") || version.equals("1.1.0"))) {          // NOI18N
-            logger.error("unknown wfs version: " + version                    // NOI18N
-                        + ". Try to handle this version like version 1.1.0"); // NOI18N
+        if (!(version.equals("1.0.0") || version.equals("1.1.0"))) { // NOI18N
+            logger.error(
+                "unknown wfs version: " +
+                version + // NOI18N
+                ". Try to handle this version like version 1.1.0"
+            ); // NOI18N
         }
         query.getChild(QUERY, WFS).removeChildren(PROPERTY_NAME, WFS);
         final Collection<Content> propertyElements = new ArrayList<Content>();
@@ -439,15 +517,19 @@ public class WFSFacade {
             logger.error("version string is null. Try to use version 1.1.0", new Exception());
             version = "1.1.0";
         }
-        if (!(version.equals("1.0.0") || version.equals("1.1.0"))) {          // NOI18N
-            logger.error("unknown wfs version: " + version                    // NOI18N
-                        + ". Try to handle this version like version 1.1.0"); // NOI18N
+        if (!(version.equals("1.0.0") || version.equals("1.1.0"))) { // NOI18N
+            logger.error(
+                "unknown wfs version: " +
+                version + // NOI18N
+                ". Try to handle this version like version 1.1.0"
+            ); // NOI18N
         }
-        query.getChild(QUERY, WFS)
-                .getChild(FILTER, OGC)
-                .getChild(BBOX, OGC)
-                .getChild(PROPERTY_NAME, OGC)
-                .setText(geoName);
+        query
+            .getChild(QUERY, WFS)
+            .getChild(FILTER, OGC)
+            .getChild(BBOX, OGC)
+            .getChild(PROPERTY_NAME, OGC)
+            .setText(geoName);
     }
 
     /**
@@ -459,7 +541,7 @@ public class WFSFacade {
      * @return  null, if the given feature has no geometry attribute
      */
     private Element getFeature100Request(final FeatureType feature) {
-        final Element requestElement = (Element)rootNode.getChild(GET_FEATURE_100).getChild(GET_FEATURE, WFS).clone();
+        final Element requestElement = (Element) rootNode.getChild(GET_FEATURE_100).getChild(GET_FEATURE, WFS).clone();
         final QName featureName = feature.getName();
 
         if (feature.getNameOfGeometryAtrtibute() == null) {
@@ -502,7 +584,7 @@ public class WFSFacade {
      * @return  null, if the given property has no geometry attribute
      */
     private Element getFeature110Request(final FeatureType feature) {
-        final Element requestElement = (Element)rootNode.getChild(GET_FEATURE_110).getChild(GET_FEATURE, WFS).clone();
+        final Element requestElement = (Element) rootNode.getChild(GET_FEATURE_110).getChild(GET_FEATURE, WFS).clone();
         final QName featureName = feature.getName();
 
         if (feature.getNameOfGeometryAtrtibute() == null) {
@@ -550,8 +632,9 @@ public class WFSFacade {
     private String postRequest(final URL serverURL, final String request) throws IOException, Exception {
         logger.info("post request (" + serverURL + ")"); // NOI18N
 
-        final InputStream resp = WebAccessManager.getInstance()
-                    .doRequest(serverURL, request, ACCESS_METHODS.POST_REQUEST);
+        final InputStream resp = WebAccessManager
+            .getInstance()
+            .doRequest(serverURL, request, ACCESS_METHODS.POST_REQUEST);
         final char[] buffer = new char[256];
         final StringBuilder response = new StringBuilder();
         final BufferedReader br = new BufferedReader(new InputStreamReader(resp));
@@ -580,8 +663,9 @@ public class WFSFacade {
     private String getRequest(final URL serverURL, final String request) throws IOException, Exception {
         logger.info("post request (" + serverURL + ")"); // NOI18N
 
-        final InputStream resp = WebAccessManager.getInstance()
-                    .doRequest(serverURL, request, ACCESS_METHODS.GET_REQUEST);
+        final InputStream resp = WebAccessManager
+            .getInstance()
+            .doRequest(serverURL, request, ACCESS_METHODS.GET_REQUEST);
         final char[] buffer = new char[256];
         final StringBuilder response = new StringBuilder();
         final BufferedReader br = new BufferedReader(new InputStreamReader(resp));

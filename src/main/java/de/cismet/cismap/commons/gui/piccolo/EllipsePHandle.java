@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,11 +12,9 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
-
 import java.awt.geom.Point2D;
 
 /**
@@ -45,8 +43,8 @@ public class EllipsePHandle extends PHandle {
      * @param  pfeature  DOCUMENT ME!
      */
     public EllipsePHandle(final PFeature pfeature) {
-        super(new PLocator() {
-
+        super(
+            new PLocator() {
                 @Override
                 public double locateX() {
                     return pfeature.getBounds().getMaxX();
@@ -56,8 +54,9 @@ public class EllipsePHandle extends PHandle {
                 public double locateY() {
                     return pfeature.getBounds().getMaxY();
                 }
-            }, pfeature.getViewer());
-
+            },
+            pfeature.getViewer()
+        );
         this.pfeature = pfeature;
         this.startPoint = pfeature.getBounds().getOrigin();
     }
@@ -68,25 +67,27 @@ public class EllipsePHandle extends PHandle {
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent pInputEvent) {
         final int n = pfeature.getCoordArr(0, 0).length - 1;
 
-        final Point2D dragPoint = (Point2D)pInputEvent.getPosition();
+        final Point2D dragPoint = (Point2D) pInputEvent.getPosition();
         final double a = startPoint.getX() - dragPoint.getX();
         final double b = startPoint.getY() - dragPoint.getY();
         final double startX = startPoint.getX();
         final double startY = startPoint.getY();
 
         final Coordinate[] coordArr = createEllipseCoordinates(
-                n,
-                a,
-                b,
-                pInputEvent.isControlDown(),
-                pInputEvent.isShiftDown());
+            n,
+            a,
+            b,
+            pInputEvent.isControlDown(),
+            pInputEvent.isShiftDown()
+        );
         for (int i = 0; i < coordArr.length; i++) {
             pfeature.moveCoordinateToNewPiccoloPosition(
                 0,
                 0,
                 i,
-                (float)(startX - coordArr[i].x),
-                (float)(startY - coordArr[i].y));
+                (float) (startX - coordArr[i].x),
+                (float) (startY - coordArr[i].y)
+            );
         }
 
         relocateHandle();
@@ -103,11 +104,13 @@ public class EllipsePHandle extends PHandle {
      *
      * @return  DOCUMENT ME!
      */
-    public static Coordinate[] createEllipseCoordinates(final int numOfEdges,
-            double a,
-            double b,
-            final boolean isCentered,
-            final boolean isCircle) {
+    public static Coordinate[] createEllipseCoordinates(
+        final int numOfEdges,
+        double a,
+        double b,
+        final boolean isCentered,
+        final boolean isCircle
+    ) {
         final Coordinate[] coordArr = new Coordinate[numOfEdges + 1];
 
         if (isCircle) {
@@ -139,7 +142,7 @@ public class EllipsePHandle extends PHandle {
             if (isCentered) { // zentriert
                 x = a * Math.cos(Math.toRadians(degrees));
                 y = b * Math.sin(Math.toRadians(degrees));
-            } else {          // innerhalb der gezogenen boundingbox
+            } else { // innerhalb der gezogenen boundingbox
                 x = (a / 2) + ((a / 2) * Math.cos(Math.toRadians(degrees)));
                 y = (b / 2) + ((b / 2) * Math.sin(Math.toRadians(degrees)));
             }

@@ -1,23 +1,21 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.simplelayerwidget;
-//import de.cismet.cismap.commons.DefaultMappingModel;
-import edu.umd.cs.piccolo.PNode;
-
-import java.awt.GridBagConstraints;
-import java.awt.event.MouseListener;
-
-import java.util.Iterator;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.rasterservice.MapService;
+//import de.cismet.cismap.commons.DefaultMappingModel;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.GridBagConstraints;
+import java.awt.event.MouseListener;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * DOCUMENT ME!
@@ -25,8 +23,9 @@ import de.cismet.cismap.commons.rasterservice.MapService;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implements MouseListener,
-    LayerControlSelectionChangedListener {
+public class SimpleInternalLayerWidget
+    extends javax.swing.JInternalFrame
+    implements MouseListener, LayerControlSelectionChangedListener {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -42,6 +41,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
     private javax.swing.JPanel panFeatureCollection;
     private javax.swing.JPanel panFeatureServices;
     private javax.swing.JPanel panRasterServices;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -55,7 +55,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
         initComponents();
         putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
         this.mappingComponent = mappingComponent;
-//setClosable(true);
+        //setClosable(true);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -69,9 +69,10 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      */
     public LayerControl showFeatureCollection(final int errorAbolitionTime) {
         final LayerControl control = new LayerControl(
-                mappingComponent,
-                LayerControl.FEATURE_COLLECTION,
-                errorAbolitionTime);
+            mappingComponent,
+            LayerControl.FEATURE_COLLECTION,
+            errorAbolitionTime
+        );
         control.addLayerSelectionChangedListener(this);
         final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
@@ -97,9 +98,10 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      */
     public LayerControl addRasterService(final int position, final ServiceLayer layer, final int errorAbolitionTime) {
         final LayerControl control = new LayerControl(
-                mappingComponent,
-                LayerControl.RASTER_SERVICE,
-                errorAbolitionTime);
+            mappingComponent,
+            LayerControl.RASTER_SERVICE,
+            errorAbolitionTime
+        );
         control.setLayer(layer);
         control.addLayerSelectionChangedListener(this);
         final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
@@ -116,6 +118,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
         control.syncIconWithEnabledState();
         return control;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -127,9 +130,10 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      */
     public LayerControl addFeatureService(final int position, final ServiceLayer layer, final int errorAbolitionTime) {
         final LayerControl control = new LayerControl(
-                mappingComponent,
-                LayerControl.FEATURE_SERVICE,
-                errorAbolitionTime);
+            mappingComponent,
+            LayerControl.FEATURE_SERVICE,
+            errorAbolitionTime
+        );
         control.setLayer(layer);
         control.addLayerSelectionChangedListener(this);
         final GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
@@ -164,13 +168,14 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         setResizable(true);
-        addKeyListener(new java.awt.event.KeyAdapter() {
-
+        addKeyListener(
+            new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyPressed(final java.awt.event.KeyEvent evt) {
                     formKeyPressed(evt);
                 }
-            });
+            }
+        );
 
         panRasterServices.setLayout(new java.awt.GridBagLayout());
 
@@ -219,29 +224,28 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formKeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_formKeyPressed
-    }                                                                //GEN-LAST:event_formKeyPressed
+    private void formKeyPressed(final java.awt.event.KeyEvent evt) {} //GEN-FIRST:event_formKeyPressed //GEN-LAST:event_formKeyPressed
 
-//    public static void main(String[] args) {
-//        try {
-//            //ClearLookManager.setMode(ClearLookMode.DEBUG);
-//            PlasticLookAndFeel.setMyCurrentTheme(new ExperienceBlue());
-//            //com.jgoodies.plaf.plastic.PlasticLookAndFeel.setMyCurrentTheme(new com.jgoodies.plaf.plastic.theme.DesertBlue());
-//            javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-//        } catch (Exception e) {
-//        }
-//       JFrame frame = new JFrame("Example");
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        JDesktopPane jdp=new JDesktopPane();
-//        frame.setContentPane(jdp);
-//        SimpleInternalLayerWidget sil= new SimpleInternalLayerWidget();
-//        jdp.add(sil);
-//        sil.show();
-//
-//        frame.setSize(300, 300);
-//        frame.setVisible(true);
-//
-//    }
+    //    public static void main(String[] args) {
+    //        try {
+    //            //ClearLookManager.setMode(ClearLookMode.DEBUG);
+    //            PlasticLookAndFeel.setMyCurrentTheme(new ExperienceBlue());
+    //            //com.jgoodies.plaf.plastic.PlasticLookAndFeel.setMyCurrentTheme(new com.jgoodies.plaf.plastic.theme.DesertBlue());
+    //            javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+    //        } catch (Exception e) {
+    //        }
+    //       JFrame frame = new JFrame("Example");
+    //        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    //        JDesktopPane jdp=new JDesktopPane();
+    //        frame.setContentPane(jdp);
+    //        SimpleInternalLayerWidget sil= new SimpleInternalLayerWidget();
+    //        jdp.add(sil);
+    //        sil.show();
+    //
+    //        frame.setSize(300, 300);
+    //        frame.setVisible(true);
+    //
+    //    }
 
     /**
      * Invoked when a mouse button has been released on a component.
@@ -249,8 +253,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      * @param  e  DOCUMENT ME!
      */
     @Override
-    public void mouseReleased(final java.awt.event.MouseEvent e) {
-    }
+    public void mouseReleased(final java.awt.event.MouseEvent e) {}
 
     /**
      * Invoked when a mouse button has been pressed on a component.
@@ -258,8 +261,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      * @param  e  DOCUMENT ME!
      */
     @Override
-    public void mousePressed(final java.awt.event.MouseEvent e) {
-    }
+    public void mousePressed(final java.awt.event.MouseEvent e) {}
 
     /**
      * Invoked when the mouse exits a component.
@@ -267,8 +269,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      * @param  e  DOCUMENT ME!
      */
     @Override
-    public void mouseExited(final java.awt.event.MouseEvent e) {
-    }
+    public void mouseExited(final java.awt.event.MouseEvent e) {}
 
     /**
      * Invoked when the mouse enters a component.
@@ -276,8 +277,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
      * @param  e  DOCUMENT ME!
      */
     @Override
-    public void mouseEntered(final java.awt.event.MouseEvent e) {
-    }
+    public void mouseEntered(final java.awt.event.MouseEvent e) {}
 
     /**
      * Invoked when the mouse button has been clicked (pressed and released) on a component.
@@ -287,7 +287,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
     @Override
     public void mouseClicked(final java.awt.event.MouseEvent e) {
         if ((e.getSource() instanceof LayerControl) && (e.getClickCount() > 1) && (e.getButton() == e.BUTTON1)) {
-            final LayerControl flashControl = (LayerControl)e.getSource();
+            final LayerControl flashControl = (LayerControl) e.getSource();
             final Vector allControls = new Vector();
             allControls.addAll(rasterLayerControls);
             allControls.addAll(featureLayerControls);
@@ -295,15 +295,14 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
             flashControl.flashObject(true, 1000, 3000);
             final Iterator it = allControls.iterator();
             final java.awt.event.ActionListener timerAction = new java.awt.event.ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final java.awt.event.ActionEvent event) {
-                        while (it.hasNext()) {
-                            final LayerControl lc = (LayerControl)it.next();
-                            lc.flashObject(false, 0, 4000);
-                        }
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent event) {
+                    while (it.hasNext()) {
+                        final LayerControl lc = (LayerControl) it.next();
+                        lc.flashObject(false, 0, 4000);
                     }
-                };
+                }
+            };
 
             final javax.swing.Timer timer = new javax.swing.Timer(1000, timerAction);
             timer.setRepeats(false);
@@ -313,51 +312,51 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame implem
 
     @Override
     public void layerControlSelectionChanged(final LayerControl lc) {
-//        boolean sel=lc.isSelected();
-//        for (LayerControl lac:rasterLayerControls) {
-//            lac.setSelected(false);
-//        }
-//        for (LayerControl lac:featureLayerControls) {
-//            lac.setSelected(false);
-//        }
-//        lc.setSelected(sel);
+        //        boolean sel=lc.isSelected();
+        //        for (LayerControl lac:rasterLayerControls) {
+        //            lac.setSelected(false);
+        //        }
+        //        for (LayerControl lac:featureLayerControls) {
+        //            lac.setSelected(false);
+        //        }
+        //        lc.setSelected(sel);
     }
 
     @Override
     public void layerWantsUp(final LayerControl lc) {
-//        log.debug("layerWantsUp");
-//        if (rasterLayerControls.contains(lc)) {
-//            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
-//                DefaultMappingModel dmm=((DefaultMappingModel)(mappingComponent.getMappingModel()));
-//                int newP=dmm.moveRasterServiceUp((RasterService)lc.getLayer());
-//                PNode p=((RasterService)(dmm.getRasterServices().get(newP+1))).getPImage();
-//                lc.getPNode().moveInBackOf(p);
-//
-//
-//            }
-//        } else if (featureLayerControls.contains(lc)) {
-//            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
-//                DefaultMappingModel dmm=((DefaultMappingModel)(mappingComponent.getMappingModel()));
-//                int newP=dmm.moveFeatureServiceUp((FeatureService)lc.getLayer());
-//                PNode p=((FeatureService)(dmm.getFeatureServices().get(newP+1))).getPNode();
-//                lc.getPNode().moveInBackOf(p);
-//
-//            }
-//
-//        }
+        //        log.debug("layerWantsUp");
+        //        if (rasterLayerControls.contains(lc)) {
+        //            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
+        //                DefaultMappingModel dmm=((DefaultMappingModel)(mappingComponent.getMappingModel()));
+        //                int newP=dmm.moveRasterServiceUp((RasterService)lc.getLayer());
+        //                PNode p=((RasterService)(dmm.getRasterServices().get(newP+1))).getPImage();
+        //                lc.getPNode().moveInBackOf(p);
+        //
+        //
+        //            }
+        //        } else if (featureLayerControls.contains(lc)) {
+        //            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
+        //                DefaultMappingModel dmm=((DefaultMappingModel)(mappingComponent.getMappingModel()));
+        //                int newP=dmm.moveFeatureServiceUp((FeatureService)lc.getLayer());
+        //                PNode p=((FeatureService)(dmm.getFeatureServices().get(newP+1))).getPNode();
+        //                lc.getPNode().moveInBackOf(p);
+        //
+        //            }
+        //
+        //        }
     }
 
     @Override
     public void layerWantsDown(final LayerControl lc) {
-//        log.debug("layerWantsDown");
-//        if (rasterLayerControls.contains(lc)) {
-//            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
-//                ((DefaultMappingModel)(mappingComponent.getMappingModel())).moveRasterServiceDown((RasterService)lc.getLayer());
-//            }
-//        } else if (featureLayerControls.contains(lc)) {
-//            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
-//                ((DefaultMappingModel)(mappingComponent.getMappingModel())).moveFeatureServiceDown((FeatureService)lc.getLayer());
-//            }
-//        }
+        //        log.debug("layerWantsDown");
+        //        if (rasterLayerControls.contains(lc)) {
+        //            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
+        //                ((DefaultMappingModel)(mappingComponent.getMappingModel())).moveRasterServiceDown((RasterService)lc.getLayer());
+        //            }
+        //        } else if (featureLayerControls.contains(lc)) {
+        //            if (mappingComponent.getMappingModel() instanceof DefaultMappingModel) {
+        //                ((DefaultMappingModel)(mappingComponent.getMappingModel())).moveFeatureServiceDown((FeatureService)lc.getLayer());
+        //            }
+        //        }
     }
 }

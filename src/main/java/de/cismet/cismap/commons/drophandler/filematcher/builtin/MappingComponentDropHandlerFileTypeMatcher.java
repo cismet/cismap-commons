@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,15 +12,13 @@
  */
 package de.cismet.cismap.commons.drophandler.filematcher.builtin;
 
+import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
 import java.io.File;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
 
 /**
  * DOCUMENT ME!
@@ -50,10 +48,13 @@ public class MappingComponentDropHandlerFileTypeMatcher implements MappingCompon
      * @version  $Revision$, $Date$
      */
     public enum FileType {
-
         //~ Enum constants -----------------------------------------------------
 
-        ANY, VIDEO, IMAGE, TEXT, BINARY
+        ANY,
+        VIDEO,
+        IMAGE,
+        TEXT,
+        BINARY,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -82,22 +83,26 @@ public class MappingComponentDropHandlerFileTypeMatcher implements MappingCompon
         final Collection<String> extensions = new ArrayList<>();
         for (final FileType type : types) {
             switch (type) {
-                case VIDEO: {
-                    extensions.addAll(Arrays.asList(VIDEO_TYPES));
-                }
-                break;
-                case IMAGE: {
-                    extensions.addAll(Arrays.asList(IMAGE_TYPES));
-                }
-                break;
-                case TEXT: {
-                    extensions.addAll(Arrays.asList(TEXT_TYPES));
-                }
-                break;
-                case BINARY: {
-                    extensions.addAll(Arrays.asList(BINARY_TYPES));
-                }
-                break;
+                case VIDEO:
+                    {
+                        extensions.addAll(Arrays.asList(VIDEO_TYPES));
+                    }
+                    break;
+                case IMAGE:
+                    {
+                        extensions.addAll(Arrays.asList(IMAGE_TYPES));
+                    }
+                    break;
+                case TEXT:
+                    {
+                        extensions.addAll(Arrays.asList(TEXT_TYPES));
+                    }
+                    break;
+                case BINARY:
+                    {
+                        extensions.addAll(Arrays.asList(BINARY_TYPES));
+                    }
+                    break;
             }
         }
         this.types = types;
@@ -115,5 +120,4 @@ public class MappingComponentDropHandlerFileTypeMatcher implements MappingCompon
         }
     }
 }
-
 //layerwidgetprovider

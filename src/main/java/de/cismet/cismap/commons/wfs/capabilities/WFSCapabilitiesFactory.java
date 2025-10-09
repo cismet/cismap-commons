@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -23,16 +23,13 @@
  */
 package de.cismet.cismap.commons.wfs.capabilities;
 
-import org.apache.log4j.Logger;
-
-import java.io.ByteArrayInputStream;
-
 import de.cismet.cismap.commons.capabilities.AbstractVersionNegotiator;
 import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeWFSCapabilities;
-
 import de.cismet.tools.CalculationCache;
 import de.cismet.tools.Calculator;
+import java.io.ByteArrayInputStream;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -73,8 +70,9 @@ public class WFSCapabilitiesFactory {
      *
      * @version  $Revision$, $Date$
      */
-    private static class InternalWFSCapabilitiesFactory extends AbstractVersionNegotiator
-            implements Calculator<String, WFSCapabilities> {
+    private static class InternalWFSCapabilitiesFactory
+        extends AbstractVersionNegotiator
+        implements Calculator<String, WFSCapabilities> {
 
         //~ Methods ------------------------------------------------------------
 

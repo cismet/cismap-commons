@@ -1,15 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import java.awt.Color;
-
 import de.cismet.cismap.commons.features.SearchFeature;
+import java.awt.Color;
 
 /**
  * DOCUMENT ME!
@@ -18,7 +17,6 @@ import de.cismet.cismap.commons.features.SearchFeature;
  * @version  $Revision$, $Date$
  */
 public interface CreateSearchGeometryListener extends CreateGeometryListenerInterface {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

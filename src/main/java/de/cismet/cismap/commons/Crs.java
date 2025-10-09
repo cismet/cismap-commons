@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import org.apache.log4j.Logger;
-
 import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
@@ -41,8 +40,7 @@ public class Crs {
     /**
      * Creates a new Crs object.
      */
-    public Crs() {
-    }
+    public Crs() {}
 
     /**
      * Creates a new Crs object.
@@ -56,17 +54,21 @@ public class Crs {
         try {
             this.metric = elem.getAttribute("metric").getBooleanValue();
         } catch (DataConversionException e) {
-            log.error("attribute metric of element crs must be e boolean. The current value is "
-                        + elem.getAttribute("selected").getValue(),
-                e);
+            log.error(
+                "attribute metric of element crs must be e boolean. The current value is " +
+                elem.getAttribute("selected").getValue(),
+                e
+            );
         }
 
         try {
             this.selected = elem.getAttribute("selected").getBooleanValue();
         } catch (DataConversionException e) {
-            log.error("attribute selected of element crs must be e boolean. The current value is "
-                        + elem.getAttribute("selected").getValue(),
-                e);
+            log.error(
+                "attribute selected of element crs must be e boolean. The current value is " +
+                elem.getAttribute("selected").getValue(),
+                e
+            );
         }
 
         try {
@@ -76,9 +78,11 @@ public class Crs {
                 this.defaultCrs = attr.getBooleanValue();
             }
         } catch (DataConversionException e) {
-            log.error("attribute defaultCrs of element crs must be e boolean. The current value is "
-                        + elem.getAttribute("defaultCrs").getValue(),
-                e);
+            log.error(
+                "attribute defaultCrs of element crs must be e boolean. The current value is " +
+                elem.getAttribute("defaultCrs").getValue(),
+                e
+            );
         }
 
         try {
@@ -88,9 +92,11 @@ public class Crs {
                 this.hideInCrsSwitcher = elem.getAttribute("hideInCrsSwitcher").getBooleanValue();
             }
         } catch (DataConversionException e) {
-            log.error("attribute hideForChooser of element crs must be e boolean. The current value is "
-                        + elem.getAttribute("hideInCrsSwitcher").getValue(),
-                e);
+            log.error(
+                "attribute hideForChooser of element crs must be e boolean. The current value is " +
+                elem.getAttribute("hideInCrsSwitcher").getValue(),
+                e
+            );
         }
 
         esriDefinition = elem.getTextTrim();
@@ -105,11 +111,13 @@ public class Crs {
      * @param  metric     DOCUMENT ME!
      * @param  selected   DOCUMENT ME!
      */
-    public Crs(final String code,
-            final String shortname,
-            final String name,
-            final boolean metric,
-            final boolean selected) {
+    public Crs(
+        final String code,
+        final String shortname,
+        final String name,
+        final boolean metric,
+        final boolean selected
+    ) {
         this.code = code;
         this.shortname = shortname;
         this.name = name;
@@ -125,13 +133,13 @@ public class Crs {
      * @return  DOCUMENT ME!
      */
     public Element getJDOMElement() {
-        final Element e = new Element("crs");                                   // NOI18N
-        e.setAttribute("shortname", shortname);                                 // NOI18N
-        e.setAttribute("name", name);                                           // NOI18N
-        e.setAttribute("code", code);                                           // NOI18N
-        e.setAttribute("metric", String.valueOf(metric));                       // NOI18N
-        e.setAttribute("selected", String.valueOf(selected));                   // NOI18N
-        e.setAttribute("defaultCrs", String.valueOf(defaultCrs));               // NOI18N
+        final Element e = new Element("crs"); // NOI18N
+        e.setAttribute("shortname", shortname); // NOI18N
+        e.setAttribute("name", name); // NOI18N
+        e.setAttribute("code", code); // NOI18N
+        e.setAttribute("metric", String.valueOf(metric)); // NOI18N
+        e.setAttribute("selected", String.valueOf(selected)); // NOI18N
+        e.setAttribute("defaultCrs", String.valueOf(defaultCrs)); // NOI18N
         e.setAttribute("hideInCrsSwitcher", String.valueOf(hideInCrsSwitcher)); // NOI18N
         e.setText(esriDefinition);
         return e;
@@ -235,7 +243,7 @@ public class Crs {
     @Override
     public boolean equals(final Object obj) {
         if (obj instanceof Crs) {
-            final Crs other = (Crs)obj;
+            final Crs other = (Crs) obj;
             return other.code.equals(code);
         } else {
             return false;

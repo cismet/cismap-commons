@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,13 +12,11 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.deegree.io.shpapi.ShapeFile;
-import org.deegree.model.feature.FeatureCollection;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.deegree.io.shpapi.ShapeFile;
+import org.deegree.model.feature.FeatureCollection;
 
 /**
  * DOCUMENT ME!

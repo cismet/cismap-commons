@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,23 +13,19 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.deegree.style.se.unevaluated.Style;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Paint;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.util.FilePersistenceManager;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Paint;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.deegree.style.se.unevaluated.Style;
 
 /**
  * DOCUMENT ME!
@@ -53,8 +49,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     /**
      * Creates a new PersistentFeature object.
      */
-    public PersistentFeature() {
-    }
+    public PersistentFeature() {}
 
     /**
      * Creates a new PersistentFeature object.
@@ -82,10 +77,14 @@ public class PersistentFeature implements FeatureServiceFeature {
      * @return  DOCUMENT ME!
      */
     private String getGeometryFieldName() {
-        if ((getLayerProperties() != null) && (getLayerProperties().getFeatureService() != null)
-                    && (getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
-            final Map<String, FeatureServiceAttribute> attributes = getLayerProperties().getFeatureService()
-                        .getFeatureServiceAttributes();
+        if (
+            (getLayerProperties() != null) &&
+            (getLayerProperties().getFeatureService() != null) &&
+            (getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)
+        ) {
+            final Map<String, FeatureServiceAttribute> attributes = getLayerProperties()
+                .getFeatureService()
+                .getFeatureServiceAttributes();
 
             for (final String key : attributes.keySet()) {
                 final FeatureServiceAttribute attr = attributes.get(key);
@@ -121,32 +120,28 @@ public class PersistentFeature implements FeatureServiceFeature {
     @Override
     public Geometry getGeometry() {
         if (geomField == null) {
-            return (Geometry)pm.load(geometryId);
+            return (Geometry) pm.load(geometryId);
         } else {
-            return (Geometry)getProperties().get(geomField);
+            return (Geometry) getProperties().get(geomField);
         }
     }
 
     @Override
-    public void setGeometry(final Geometry geom) {
-    }
+    public void setGeometry(final Geometry geom) {}
 
     @Override
     public HashMap getProperties() {
-        return (HashMap)pm.load(containerId);
+        return (HashMap) pm.load(containerId);
     }
 
     @Override
-    public void setProperties(final HashMap properties) {
-    }
+    public void setProperties(final HashMap properties) {}
 
     @Override
-    public void addProperty(final String propertyName, final Object property) {
-    }
+    public void addProperty(final String propertyName, final Object property) {}
 
     @Override
-    public void removeProperty(final String propertyName) {
-    }
+    public void removeProperty(final String propertyName) {}
 
     @Override
     public Object getProperty(final String propertyName) {
@@ -154,8 +149,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setProperty(final String propertyName, final Object propertyValue) {
-    }
+    public void setProperty(final String propertyName, final Object propertyValue) {}
 
     @Override
     public int getId() {
@@ -178,8 +172,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setLinePaint(final Paint linePaint) {
-    }
+    public void setLinePaint(final Paint linePaint) {}
 
     @Override
     public int getLineWidth() {
@@ -187,8 +180,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setLineWidth(final int width) {
-    }
+    public void setLineWidth(final int width) {}
 
     @Override
     public Paint getFillingPaint() {
@@ -196,8 +188,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setFillingPaint(final Paint fillingStyle) {
-    }
+    public void setFillingPaint(final Paint fillingStyle) {}
 
     @Override
     public float getTransparency() {
@@ -205,8 +196,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setTransparency(final float transparrency) {
-    }
+    public void setTransparency(final float transparrency) {}
 
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
@@ -214,8 +204,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
-    }
+    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {}
 
     @Override
     public boolean isHighlightingEnabled() {
@@ -223,8 +212,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setHighlightingEnabled(final boolean enabled) {
-    }
+    public void setHighlightingEnabled(final boolean enabled) {}
 
     @Override
     public boolean canBeSelected() {
@@ -232,8 +220,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setCanBeSelected(final boolean canBeSelected) {
-    }
+    public void setCanBeSelected(final boolean canBeSelected) {}
 
     @Override
     public boolean isEditable() {
@@ -241,8 +228,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setEditable(final boolean editable) {
-    }
+    public void setEditable(final boolean editable) {}
 
     @Override
     public boolean isHidden() {
@@ -250,8 +236,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void hide(final boolean hiding) {
-    }
+    public void hide(final boolean hiding) {}
 
     @Override
     public String getPrimaryAnnotation() {
@@ -264,8 +249,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setPrimaryAnnotationVisible(final boolean visible) {
-    }
+    public void setPrimaryAnnotationVisible(final boolean visible) {}
 
     @Override
     public Font getPrimaryAnnotationFont() {
@@ -288,8 +272,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setPrimaryAnnotationJustification(final float just) {
-    }
+    public void setPrimaryAnnotationJustification(final float just) {}
 
     @Override
     public String getSecondaryAnnotation() {
@@ -297,24 +280,19 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setPrimaryAnnotation(final String primaryAnnotation) {
-    }
+    public void setPrimaryAnnotation(final String primaryAnnotation) {}
 
     @Override
-    public void setPrimaryAnnotationFont(final Font primaryAnnotationFont) {
-    }
+    public void setPrimaryAnnotationFont(final Font primaryAnnotationFont) {}
 
     @Override
-    public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
-    }
+    public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {}
 
     @Override
-    public void setPrimaryAnnotationScaling(final double primaryAnnotationScaling) {
-    }
+    public void setPrimaryAnnotationScaling(final double primaryAnnotationScaling) {}
 
     @Override
-    public void setSecondaryAnnotation(final String secondaryAnnotation) {
-    }
+    public void setSecondaryAnnotation(final String secondaryAnnotation) {}
 
     @Override
     public boolean isAutoscale() {
@@ -322,8 +300,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setAutoScale(final boolean autoScale) {
-    }
+    public void setAutoScale(final boolean autoScale) {}
 
     @Override
     public Integer getMinScaleDenominator() {
@@ -336,16 +313,13 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setMinScaleDenominator(final Integer min) {
-    }
+    public void setMinScaleDenominator(final Integer min) {}
 
     @Override
-    public void setMaxScaleDenominator(final Integer max) {
-    }
+    public void setMaxScaleDenominator(final Integer max) {}
 
     @Override
-    public void setPrimaryAnnotationHalo(final Color paint) {
-    }
+    public void setPrimaryAnnotationHalo(final Color paint) {}
 
     @Override
     public Color getPrimaryAnnotationHalo() {
@@ -353,8 +327,7 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setId(final int id) {
-    }
+    public void setId(final int id) {}
 
     @Override
     public String getIdExpression() {
@@ -362,16 +335,13 @@ public class PersistentFeature implements FeatureServiceFeature {
     }
 
     @Override
-    public void setIdExpression(final String idExpression) {
-    }
+    public void setIdExpression(final String idExpression) {}
 
     @Override
-    public void applyStyle(final PFeature pFeature, final WorldToScreenTransform wtst) {
-    }
+    public void applyStyle(final PFeature pFeature, final WorldToScreenTransform wtst) {}
 
     @Override
-    public void setSLDStyles(final List<Style> style) {
-    }
+    public void setSLDStyles(final List<Style> style) {}
 
     @Override
     public String getName() {

@@ -1,27 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import org.deegree.style.se.unevaluated.Style;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import javax.swing.SwingWorker;
+import org.deegree.style.se.unevaluated.Style;
 
 /**
  * Factory class that creates a collection of features from arbitrary data sources (e.g. from a WFS, da database
@@ -37,7 +34,6 @@ import de.cismet.cismap.commons.featureservice.*;
  * @version  $Revision$, $Date$
  */
 public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cloneable {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -58,7 +54,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @throws  Exception                 if something went wrong during parsing
      */
     List<FT> createFeatures(QT query, BoundingBox boundingBox, SwingWorker workerThread)
-            throws TooManyFeaturesException, Exception;
+        throws TooManyFeaturesException, Exception;
 
     /**
      * Returns instances of features {@code FT} that match the optional query and that fall into the optional
@@ -80,12 +76,14 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @throws  TooManyFeaturesException  if the maximum number of features is reached during processing
      * @throws  Exception                 if something went wrong during parsing
      */
-    List<FT> createFeatures(QT query,
-            BoundingBox boundingBox,
-            SwingWorker workerThread,
-            int offset,
-            int limit,
-            FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception;
+    List<FT> createFeatures(
+        QT query,
+        BoundingBox boundingBox,
+        SwingWorker workerThread,
+        int offset,
+        int limit,
+        FeatureServiceAttribute[] orderBy
+    ) throws TooManyFeaturesException, Exception;
 
     /**
      * This operation can be used to retrieve the last created features without the need to invoke the
@@ -108,9 +106,8 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @throws  UnsupportedOperationException  if the factory does not support the creation attributes
      * @throws  Exception                      if something went wrong during parsing
      */
-    List<FeatureServiceAttribute> createAttributes(SwingWorker workerThread) throws TooManyFeaturesException,
-        UnsupportedOperationException,
-        Exception;
+    List<FeatureServiceAttribute> createAttributes(SwingWorker workerThread)
+        throws TooManyFeaturesException, UnsupportedOperationException, Exception;
 
     /**
      * Sets the layerProperties that are applied to all features constructed. If the list of the last created features

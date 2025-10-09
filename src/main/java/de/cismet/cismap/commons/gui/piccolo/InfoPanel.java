@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * InfoPanel.java
  *
@@ -12,10 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.PNode;
-
-import pswing.PSwing;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -24,17 +23,13 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.CismetThreadPool;
+import pswing.PSwing;
 
 /**
  * DOCUMENT ME!
@@ -47,7 +42,7 @@ public class InfoPanel extends JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png"));     // NOI18N
+    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png")); // NOI18N
     private ImageIcon icoShrink = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shrink.png")); // NOI18N
     private PFeature pfeature;
     private PNode pNodeParent;
@@ -58,6 +53,7 @@ public class InfoPanel extends JPanel {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblTitle;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -72,7 +68,7 @@ public class InfoPanel extends JPanel {
         try {
             initComponents();
             cmdMore.setIcon(icoMore);
-            cmdMore.setText("");           // NOI18N
+            cmdMore.setText(""); // NOI18N
             cmdMore.setOpaque(false);
             this.more = more;
             if (more == null) {
@@ -81,26 +77,23 @@ public class InfoPanel extends JPanel {
             } else {
                 this.add(more, BorderLayout.CENTER);
                 more.setVisible(false);
-                more.addComponentListener(new ComponentListener() {
+                more.addComponentListener(
+                    new ComponentListener() {
+                        @Override
+                        public void componentHidden(final ComponentEvent e) {}
 
                         @Override
-                        public void componentHidden(final ComponentEvent e) {
-                        }
-
-                        @Override
-                        public void componentMoved(final ComponentEvent e) {
-                        }
+                        public void componentMoved(final ComponentEvent e) {}
 
                         @Override
                         public void componentResized(final ComponentEvent e) {
                             // TODO: calling revalidate outside the EDT looks like an error!
                             final Runnable t = new Thread("InfoPanel componentResized()") {
-
-                                    @Override
-                                    public void run() {
-                                        revalidate();
-                                    }
-                                };
+                                @Override
+                                public void run() {
+                                    revalidate();
+                                }
+                            };
                             CismetThreadPool.execute(t);
                             pSwing.reshape();
                             // pNodeParent.repaint();
@@ -108,9 +101,9 @@ public class InfoPanel extends JPanel {
                         }
 
                         @Override
-                        public void componentShown(final ComponentEvent e) {
-                        }
-                    });
+                        public void componentShown(final ComponentEvent e) {}
+                    }
+                );
             }
         } catch (Throwable t) {
             log.error("Error in InfoPanel"); // NOI18N
@@ -141,16 +134,17 @@ public class InfoPanel extends JPanel {
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         lblTitle.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
-        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12));                                              // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lblTitle.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
         lblTitle.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 3, 8, 3));
-        lblTitle.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        lblTitle.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     lblTitleMouseClicked(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(lblTitle, java.awt.BorderLayout.CENTER);
 
         jPanel2.setOpaque(false);
@@ -158,13 +152,14 @@ public class InfoPanel extends JPanel {
         cmdMore.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.cmdMore.text")); // NOI18N
         cmdMore.setBorderPainted(false);
         cmdMore.setFocusPainted(false);
-        cmdMore.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdMore.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdMoreActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel2.add(cmdMore);
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.LINE_END);
@@ -179,7 +174,7 @@ public class InfoPanel extends JPanel {
      */
     private void lblTitleMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblTitleMouseClicked
         cmdMoreActionPerformed(null);
-    }                                                                        //GEN-LAST:event_lblTitleMouseClicked
+    } //GEN-LAST:event_lblTitleMouseClicked
 
     /**
      * DOCUMENT ME!
@@ -190,7 +185,7 @@ public class InfoPanel extends JPanel {
         if (CismapBroker.getInstance().getMappingComponent().isInfoNodesVisible()) {
             setExpanded(!isExpanded());
         }
-    }                                                                           //GEN-LAST:event_cmdMoreActionPerformed
+    } //GEN-LAST:event_cmdMoreActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -289,7 +284,7 @@ public class InfoPanel extends JPanel {
             comp.getComponent(i).doLayout();
 
             if (comp.getComponent(i) instanceof JComponent) {
-                adjustSize((JComponent)comp.getComponent(i));
+                adjustSize((JComponent) comp.getComponent(i));
             }
         }
     }

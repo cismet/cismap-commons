@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 jruiz
  *
@@ -28,22 +28,17 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import org.jdesktop.beansbinding.AbstractBindingListener;
-import org.jdesktop.beansbinding.Binding;
-import org.jdesktop.beansbinding.Converter;
-
+import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.event.KeyEvent;
-
 import java.text.NumberFormat;
-
 import java.util.LinkedList;
-
 import javax.swing.JFormattedTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import org.jdesktop.beansbinding.AbstractBindingListener;
+import org.jdesktop.beansbinding.Binding;
+import org.jdesktop.beansbinding.Converter;
 
 /**
  * DOCUMENT ME!
@@ -90,6 +85,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
     private javax.swing.JTextField txtSurface;
     private javax.swing.JTextField txtWidth;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -110,28 +106,31 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         lblLength.setText(format.format(length));
         this.length = length;
 
-        bindingGroup.addBindingListener(new AbstractBindingListener() {
-
+        bindingGroup.addBindingListener(
+            new AbstractBindingListener() {
                 @Override
                 public void synced(final Binding bndng) {
                     fireStateChanged();
                 }
-            });
+            }
+        );
 
-        jRadioButton1.addChangeListener(new ChangeListener() {
-
+        jRadioButton1.addChangeListener(
+            new ChangeListener() {
                 @Override
                 public void stateChanged(final ChangeEvent ce) {
                     fireStateChanged();
                 }
-            });
+            }
+        );
 
         getRootPane().setDefaultButton(btnOK);
         StaticSwingTools.doClickButtonOnKeyStroke(btnOK, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), getRootPane());
         StaticSwingTools.doClickButtonOnKeyStroke(
             btnCancel,
             KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-            getRootPane());
+            getRootPane()
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -181,9 +180,9 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
 
         panParams.setLayout(new java.awt.GridBagLayout());
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel1.text")); // NOI18N
+        jLabel1.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel1.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -192,9 +191,9 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jLabel1, gridBagConstraints);
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel2.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -203,9 +202,12 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         panParams.add(jLabel2, gridBagConstraints);
 
         txtSurface.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
-        txtSurface.setText(org.openide.util.NbBundle.getMessage(
+        txtSurface.setText(
+            org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.txtSurface.text")); // NOI18N
+                "RectangleFromLineDialog.txtSurface.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -218,11 +220,12 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         txtWidth.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
 
         final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                txtSurface,
-                org.jdesktop.beansbinding.ELProperty.create("${text}"),
-                txtWidth,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+            org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+            txtSurface,
+            org.jdesktop.beansbinding.ELProperty.create("${text}"),
+            txtWidth,
+            org.jdesktop.beansbinding.BeanProperty.create("text")
+        );
         binding.setSourceNullValue("0,00");
         binding.setSourceUnreadableValue("0,00");
         binding.setConverter(new WidthToSurfaceConverter());
@@ -236,9 +239,9 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(txtWidth, gridBagConstraints);
 
-        jLabel3.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel3.text")); // NOI18N
+        jLabel3.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel3.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -247,9 +250,9 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jLabel3, gridBagConstraints);
 
-        jLabel4.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel4.text")); // NOI18N
+        jLabel4.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel4.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -261,15 +264,21 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
 
         buttonGroup1.add(jRadioButton1);
         jRadioButton1.setSelected(true);
-        jRadioButton1.setText(org.openide.util.NbBundle.getMessage(
+        jRadioButton1.setText(
+            org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jRadioButton1.text")); // NOI18N
+                "RectangleFromLineDialog.jRadioButton1.text"
+            )
+        ); // NOI18N
         panSide.add(jRadioButton1);
 
         buttonGroup1.add(jRadioButton2);
-        jRadioButton2.setText(org.openide.util.NbBundle.getMessage(
+        jRadioButton2.setText(
+            org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jRadioButton2.text_3")); // NOI18N
+                "RectangleFromLineDialog.jRadioButton2.text_3"
+            )
+        ); // NOI18N
         panSide.add(jRadioButton2);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -280,17 +289,17 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(panSide, gridBagConstraints);
 
-        jLabel5.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel5.text")); // NOI18N
+        jLabel5.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel5.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jLabel5, gridBagConstraints);
 
-        jLabel6.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel6.text")); // NOI18N
+        jLabel6.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.jLabel6.text")
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -299,9 +308,12 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         panParams.add(jLabel6, gridBagConstraints);
 
         lblLength.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblLength.setText(org.openide.util.NbBundle.getMessage(
+        lblLength.setText(
+            org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.lblLength.text")); // NOI18N
+                "RectangleFromLineDialog.lblLength.text"
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -319,28 +331,33 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
 
         jPanel1.setLayout(new java.awt.GridLayout(1, 0, 5, 0));
 
-        btnCancel.setText(org.openide.util.NbBundle.getMessage(
+        btnCancel.setText(
+            org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.btnCancel.text_2")); // NOI18N
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
-
+                "RectangleFromLineDialog.btnCancel.text_2"
+            )
+        ); // NOI18N
+        btnCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(btnCancel);
 
-        btnOK.setText(org.openide.util.NbBundle.getMessage(
-                RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.btnOK.text_2")); // NOI18N
-        btnOK.addActionListener(new java.awt.event.ActionListener() {
-
+        btnOK.setText(
+            org.openide.util.NbBundle.getMessage(RectangleFromLineDialog.class, "RectangleFromLineDialog.btnOK.text_2")
+        ); // NOI18N
+        btnOK.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     btnOKActionPerformed(evt);
                 }
-            });
+            }
+        );
         jPanel1.add(btnOK);
 
         panButtons.add(jPanel1);
@@ -446,7 +463,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
     private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         returnStatus = STATUS_OK;
         dispose();
-    }                                                                         //GEN-LAST:event_btnOKActionPerformed
+    } //GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -456,7 +473,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
     private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    } //GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -464,24 +481,27 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
+        java.awt.EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final RectangleFromLineDialog dialog = new RectangleFromLineDialog(
-                            new javax.swing.JFrame(),
-                            true,
-                            0);
-                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-
+                        new javax.swing.JFrame(),
+                        true,
+                        0
+                    );
+                    dialog.addWindowListener(
+                        new java.awt.event.WindowAdapter() {
                             @Override
                             public void windowClosing(final java.awt.event.WindowEvent e) {
                                 System.exit(0);
                             }
-                        });
+                        }
+                    );
                     dialog.setVisible(true);
                 }
-            });
+            }
+        );
     }
 
     //~ Inner Classes ----------------------------------------------------------

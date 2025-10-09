@@ -1,12 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -16,15 +22,6 @@ import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A download for JasperReports. The disadvantage of this class is that it needs the already created parameters and
@@ -56,10 +53,7 @@ public class JasperDownload extends AbstractCancellableDownload {
      * @param  title      The title of the download.
      * @param  filename   A String containing the filename.
      */
-    public JasperDownload(final JasperPrint print,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperDownload(final JasperPrint print, final String directory, final String title, final String filename) {
         prints.add(print);
         this.directory = directory;
         this.title = title;
@@ -78,10 +72,12 @@ public class JasperDownload extends AbstractCancellableDownload {
      * @param  title      The title of the download.
      * @param  filename   A String containing the filename.
      */
-    public JasperDownload(final Collection<JasperPrint> prints,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperDownload(
+        final Collection<JasperPrint> prints,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this.prints.addAll(prints);
         this.directory = directory;
         this.title = title;
@@ -101,12 +97,14 @@ public class JasperDownload extends AbstractCancellableDownload {
      * @param  title       DOCUMENT ME!
      * @param  filename    DOCUMENT ME!
      */
-    public JasperDownload(final JasperReport report,
-            final Map parameters,
-            final JRDataSource dataSource,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperDownload(
+        final JasperReport report,
+        final Map parameters,
+        final JRDataSource dataSource,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this.report = report;
         this.parameters = parameters;
         this.dataSource = dataSource;

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,22 +12,18 @@
  */
 package de.cismet.cismap.commons.features;
 
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import java.sql.Connection;
-
-import java.util.logging.Level;
+import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
+import static de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory.ID_TOKEN;
 
 import de.cismet.cismap.commons.featureservice.factory.PostgisAction;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
-
 import de.cismet.tools.ConnectionInfo;
-
-import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
-import static de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory.ID_TOKEN;
+import java.sql.Connection;
+import java.util.logging.Level;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 /**
  * DOCUMENT ME!
@@ -54,10 +50,12 @@ public class UpdateablePostgisFeature extends PostgisFeature {
      * @param  action          DOCUMENT ME!
      * @param  connection      DOCUMENT ME!
      */
-    public UpdateablePostgisFeature(final ConnectionInfo connectionInfo,
-            final RetrievalService parentService,
-            final PostgisAction action,
-            final Connection connection) {
+    public UpdateablePostgisFeature(
+        final ConnectionInfo connectionInfo,
+        final RetrievalService parentService,
+        final PostgisAction action,
+        final Connection connection
+    ) {
         this.connectionInfo = connectionInfo;
         this.parentService = parentService;
         this.action = action;
@@ -103,13 +101,14 @@ public class UpdateablePostgisFeature extends PostgisFeature {
         } catch (Exception ex) {
             logger.error("Error during doAction(): " + ex.getMessage(), ex);
             final ErrorInfo ei = new ErrorInfo(
-                    "Fehler",
-                    "Fehler beim Zugriff auf den FeatureService",
-                    null,
-                    null,
-                    ex,
-                    Level.ALL,
-                    null);
+                "Fehler",
+                "Fehler beim Zugriff auf den FeatureService",
+                null,
+                null,
+                ex,
+                Level.ALL,
+                null
+            );
             JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), ei);
         }
     }

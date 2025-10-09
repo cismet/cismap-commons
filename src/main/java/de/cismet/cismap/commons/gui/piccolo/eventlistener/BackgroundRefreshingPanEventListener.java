@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * BackgroundRefreshingPanEventListener.java
  *
@@ -12,29 +12,23 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.StaticDebuggingTools;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PPanEventHandler;
 import edu.umd.cs.piccolo.nodes.PImage;
-
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.swing.JComponent;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.tools.StaticDebuggingTools;
 
 /**
  * DOCUMENT ME!
@@ -75,18 +69,18 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         // 2. Alle FeatureLayer die sichtbar sein sollen wieder sichtbar machen
         super.dragActivityFinalStep(pInputEvent);
         panStarted = false;
-//        if (pInputEvent.getComponent() instanceof SimpleFeatureViewer) {
-//            ((SimpleFeatureViewer)pInputEvent.getComponent()).refreshBackground();
-//        }
+        //        if (pInputEvent.getComponent() instanceof SimpleFeatureViewer) {
+        //            ((SimpleFeatureViewer)pInputEvent.getComponent()).refreshBackground();
+        //        }
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+            final MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
 
             // mc.showHandles(false);
             if (imageBoosterActive) {
-//                if (mappingComponent == null) {
-//                    mappingComponent = mc;
-//                    mc.getCamera().addPropertyChangeListener(this);
-//                }
+                //                if (mappingComponent == null) {
+                //                    mappingComponent = mc;
+                //                    mc.getCamera().addPropertyChangeListener(this);
+                //                }
                 mc.getRasterServiceLayer().setVisible(rasterServiceLayerVisible);
                 mc.getDragPerformanceImproverLayer().setVisible(false);
                 mc.getDragPerformanceImproverLayer().removeAllChildren();
@@ -102,7 +96,7 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
                 mc.queryServices();
             }
         }
-//        propertyChange(null);
+        //        propertyChange(null);
     }
 
     /**
@@ -117,8 +111,8 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         // 3. Alle FeatureLayer unsichtbar machen
         panStarted = true;
         if (aEvent.getComponent() instanceof MappingComponent) {
-            final MappingComponent mc = (MappingComponent)aEvent.getComponent();
-//            mc.getHandleLayer().removeAllChildren();
+            final MappingComponent mc = (MappingComponent) aEvent.getComponent();
+            //            mc.getHandleLayer().removeAllChildren();
             imageBoosterActive = StaticDebuggingTools.checkHomeForFile("panPerformanceBooster");
 
             if (imageBoosterActive) {
@@ -152,19 +146,19 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         // hier nur noch \u00FCberpr\u00FCft ob es aktualisiert werden muss.
         // evtl auch nur einen einfachen Layer nehmen. Vielleicht bringts das auch schon
         rasterServiceLayerVisible = mc.getRasterServiceLayer().getVisible();
-//        lock.readLock().lock();
-//        try {
-//            if (image == null) {
+        //        lock.readLock().lock();
+        //        try {
+        //            if (image == null) {
         image = mc.getCamera().toImage();
-//            }
+        //            }
         pi = new PImage(image);
-//        } finally {
-//            lock.readLock().unlock();
-//        }
+        //        } finally {
+        //            lock.readLock().unlock();
+        //        }
         mc.getDragPerformanceImproverLayer().removeAllChildren();
         mc.getDragPerformanceImproverLayer().addChild(pi);
-//        Point2D p2d=
-//                new Point(0,0));
+        //        Point2D p2d=
+        //                new Point(0,0));
         pi.scale(1 / mc.getCamera().getViewScale());
         pi.setOffset(mc.getCamera().getViewBounds().getOrigin());
         pi.setTransparency(0.5f);
@@ -178,9 +172,11 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
      * @return  the given component as image
      */
     private BufferedImage componentToImage(final JComponent component) {
-        final BufferedImage img = new BufferedImage(component.getWidth(),
-                component.getHeight(),
-                BufferedImage.TYPE_INT_ARGB_PRE);
+        final BufferedImage img = new BufferedImage(
+            component.getWidth(),
+            component.getHeight(),
+            BufferedImage.TYPE_INT_ARGB_PRE
+        );
         final Graphics g = img.getGraphics();
         g.setColor(component.getForeground());
         g.setFont(component.getFont());
@@ -199,20 +195,22 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
     public void propertyChange(final PropertyChangeEvent evt) {
         if (!panStarted) {
             image = null;
-            new Thread(new Runnable() {
-
+            new Thread(
+                new Runnable() {
                     @Override
                     public void run() {
                         lock.writeLock().lock();
 
                         try {
                             image = mappingComponent.getCamera().toImage();
-//                            image = componentToImage(mappingComponent);
+                            //                            image = componentToImage(mappingComponent);
                         } finally {
                             lock.writeLock().unlock();
                         }
                     }
-                }).start();
+                }
+            )
+                .start();
         }
     }
 }

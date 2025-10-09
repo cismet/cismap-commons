@@ -1,35 +1,30 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.util.PLocator;
-
-import pswing.PSwing;
-import pswing.PSwingCanvas;
-
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.text.DecimalFormat;
-
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
+import pswing.PSwing;
+import pswing.PSwingCanvas;
 
 /**
  * DOCUMENT ME!
@@ -41,14 +36,16 @@ public class LinearReferencedPointMarkPHandle extends PPath {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            LinearReferencedPointMarkPHandle.class);
+        LinearReferencedPointMarkPHandle.class
+    );
 
     public static final double DEFAULT_HANDLE_SIZE = 8;
     public static final Shape DEFAULT_HANDLE_SHAPE = new Ellipse2D.Double(
-            0f,
-            0f,
-            DEFAULT_HANDLE_SIZE,
-            DEFAULT_HANDLE_SIZE);
+        0f,
+        0f,
+        DEFAULT_HANDLE_SIZE,
+        DEFAULT_HANDLE_SIZE
+    );
     public static final Color DEFAULT_COLOR = Color.BLUE;
 
     //~ Instance fields --------------------------------------------------------
@@ -68,11 +65,12 @@ public class LinearReferencedPointMarkPHandle extends PPath {
      * @param  listener  DOCUMENT ME!
      * @param  mc        DOCUMENT ME!
      */
-    public LinearReferencedPointMarkPHandle(final PLocator locator,
-            final CreateLinearReferencedMarksListener listener,
-            final MappingComponent mc) {
+    public LinearReferencedPointMarkPHandle(
+        final PLocator locator,
+        final CreateLinearReferencedMarksListener listener,
+        final MappingComponent mc
+    ) {
         super(DEFAULT_HANDLE_SHAPE);
-
         this.mc = mc;
         this.locator = locator;
         this.measurementListener = listener;
@@ -104,23 +102,22 @@ public class LinearReferencedPointMarkPHandle extends PPath {
      */
     private void installEventListener() {
         final PBasicInputEventHandler moveAndClickListener = new PBasicInputEventHandler() {
+            @Override
+            public void mouseClicked(final PInputEvent pInputEvent) {
+                handleClicked(pInputEvent);
+            }
 
-                @Override
-                public void mouseClicked(final PInputEvent pInputEvent) {
-                    handleClicked(pInputEvent);
-                }
-
-                @Override
-                public void mouseEntered(final PInputEvent pInputEvent) {
-//                    switch (measurementListener.getModus()) {
-//                        case MARK_SELECTION: {
-                    measurementListener.getPLayer().removeChild(LinearReferencedPointMarkPHandle.this);
-                    measurementListener.getPLayer().addChild(LinearReferencedPointMarkPHandle.this);
-//                            break;
-//                        }
-//                    }
-                }
-            };
+            @Override
+            public void mouseEntered(final PInputEvent pInputEvent) {
+                //                    switch (measurementListener.getModus()) {
+                //                        case MARK_SELECTION: {
+                measurementListener.getPLayer().removeChild(LinearReferencedPointMarkPHandle.this);
+                measurementListener.getPLayer().addChild(LinearReferencedPointMarkPHandle.this);
+                //                            break;
+                //                        }
+                //                    }
+            }
+        };
 
         addInputEventListener(moveAndClickListener);
     }
@@ -131,19 +128,19 @@ public class LinearReferencedPointMarkPHandle extends PPath {
      * @param  pInputEvent  DOCUMENT ME!
      */
     private void handleClicked(final PInputEvent pInputEvent) {
-//        switch (measurementListener.getModus()) {
-//            case MARK_SELECTION: {
-//                if (log.isDebugEnabled()) {
-//                    log.debug("handle selected");
-//                }
+        //        switch (measurementListener.getModus()) {
+        //            case MARK_SELECTION: {
+        //                if (log.isDebugEnabled()) {
+        //                    log.debug("handle selected");
+        //                }
         if (pInputEvent.isRightMouseButton()) {
-            final MouseEvent swingEvent = ((MouseEvent)pInputEvent.getSourceSwingEvent());
+            final MouseEvent swingEvent = ((MouseEvent) pInputEvent.getSourceSwingEvent());
             measurementListener.setSelectedMark(this);
             measurementListener.getContextMenu().show(pswingComp.getComponent(), swingEvent.getX(), swingEvent.getY());
         }
-//                break;
-//            }
-//        }
+        //                break;
+        //            }
+        //        }
     }
 
     /**
@@ -152,7 +149,7 @@ public class LinearReferencedPointMarkPHandle extends PPath {
     private void initPanel() {
         measurementPanel = new LinearReferencedPointInfoPanel();
 
-        pswingComp = new PSwing((PSwingCanvas)mc, measurementPanel);
+        pswingComp = new PSwing((PSwingCanvas) mc, measurementPanel);
         measurementPanel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
@@ -173,13 +170,15 @@ public class LinearReferencedPointMarkPHandle extends PPath {
      * DOCUMENT ME!
      */
     protected void installHandleEventHandlers() {
-        addPropertyChangeListener(PNode.PROPERTY_TRANSFORM, new PropertyChangeListener() {
-
+        addPropertyChangeListener(
+            PNode.PROPERTY_TRANSFORM,
+            new PropertyChangeListener() {
                 @Override
                 public void propertyChange(final PropertyChangeEvent evt) {
                     relocateHandle();
                 }
-            });
+            }
+        );
     }
 
     /**

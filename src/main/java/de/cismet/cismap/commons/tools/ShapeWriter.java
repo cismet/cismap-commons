@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,11 +12,9 @@
  */
 package de.cismet.cismap.commons.tools;
 
-import java.io.File;
-
-import java.util.List;
-
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import java.io.File;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -25,7 +23,6 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
  * @version  $Revision$, $Date$
  */
 public interface ShapeWriter {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -38,7 +35,7 @@ public interface ShapeWriter {
      * @throws  Exception  DOCUMENT ME!
      */
     void writeShape(FeatureServiceFeature[] features, List<String[]> aliasAttributeList, File fileToSaveTo)
-            throws Exception;
+        throws Exception;
     /**
      * DOCUMENT ME!
      *
@@ -49,5 +46,5 @@ public interface ShapeWriter {
      * @throws  Exception  DOCUMENT ME!
      */
     void writeDbf(FeatureServiceFeature[] features, List<String[]> aliasAttributeList, File fileToSaveTo)
-            throws Exception;
+        throws Exception;
 }

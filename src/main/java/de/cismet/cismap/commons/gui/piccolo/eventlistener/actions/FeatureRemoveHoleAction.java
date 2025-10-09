@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,7 +12,6 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import com.vividsolutions.jts.geom.LineString;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -42,10 +41,12 @@ public class FeatureRemoveHoleAction implements CustomAction {
      * @param  position  the postion of the hole in the polygon
      * @param  hole      the hole to remove
      */
-    public FeatureRemoveHoleAction(final MappingComponent mc,
-            final Feature f,
-            final int position,
-            final LineString hole) {
+    public FeatureRemoveHoleAction(
+        final MappingComponent mc,
+        final Feature f,
+        final int position,
+        final LineString hole
+    ) {
         this.hole = hole;
         this.mc = mc;
         this.f = f;
@@ -74,9 +75,7 @@ public class FeatureRemoveHoleAction implements CustomAction {
      */
     @Override
     public String info() {
-        return org.openide.util.NbBundle.getMessage(
-                FeatureCreateAction.class,
-                "FeatureRemoveHoleAction.info().return"); // NOI18N
+        return org.openide.util.NbBundle.getMessage(FeatureCreateAction.class, "FeatureRemoveHoleAction.info().return"); // NOI18N
     }
 
     /**

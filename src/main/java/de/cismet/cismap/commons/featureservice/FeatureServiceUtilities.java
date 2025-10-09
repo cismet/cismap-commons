@@ -1,33 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import org.deegree.datatypes.Types;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.Namespace;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
-
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.nio.charset.Charset;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -35,9 +27,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
-
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import org.deegree.datatypes.Types;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.Namespace;
+import org.jdom.output.Format;
+import org.jdom.output.XMLOutputter;
 
 /**
  * The FeatureServiceUtilities class provides various methods to make the FeatureService- funcionality possible.
@@ -53,38 +48,39 @@ public class FeatureServiceUtilities {
     private static final String ALTERNATE_ENCODING_STRING = "encoding=\"";
 
     public static final String[] GEO_PROPERTY_TYPES = {
-            "GeometryPropertyType",
-            "GeometricPrimtivePropertyType",
-            "PointPropertyType",
-            "CurvePropertyType",
-            "SurfacePropertyType",
-            "SolidPropertyType",
-            "PointPropertyType",
-            "CompositeCurveType",
-            "CompositeSurfaceType",
-            "CompositeSolidType",
-            "GeometricComplexPropertyType",
-            "MultiGeometryPropertyType",
-            "MultiPointPropertyType",
-            "MultiCurvePropertyType",
-            "MultiSurfacePropertyType",
-            "MultiSolidPropertyType",
-            "MultiGeometryPropertyType",
-            "MultiLineStringPropertyType",
-            "GEOMETRY",
-            String.valueOf(Types.GEOMETRY),
-            String.valueOf(Types.MULTICURVE),
-            String.valueOf(Types.MULTIGEOMETRY),
-            String.valueOf(Types.MULTIPOINT),
-            String.valueOf(Types.MULTISURFACE),
-            String.valueOf(Types.POINT),
-            String.valueOf(Types.CURVE),
-            String.valueOf(Types.SURFACE),
-            String.valueOf(Types.OTHER) // H2 Geometry type
-        };
+        "GeometryPropertyType",
+        "GeometricPrimtivePropertyType",
+        "PointPropertyType",
+        "CurvePropertyType",
+        "SurfacePropertyType",
+        "SolidPropertyType",
+        "PointPropertyType",
+        "CompositeCurveType",
+        "CompositeSurfaceType",
+        "CompositeSolidType",
+        "GeometricComplexPropertyType",
+        "MultiGeometryPropertyType",
+        "MultiPointPropertyType",
+        "MultiCurvePropertyType",
+        "MultiSurfacePropertyType",
+        "MultiSolidPropertyType",
+        "MultiGeometryPropertyType",
+        "MultiLineStringPropertyType",
+        "GEOMETRY",
+        String.valueOf(Types.GEOMETRY),
+        String.valueOf(Types.MULTICURVE),
+        String.valueOf(Types.MULTIGEOMETRY),
+        String.valueOf(Types.MULTIPOINT),
+        String.valueOf(Types.MULTISURFACE),
+        String.valueOf(Types.POINT),
+        String.valueOf(Types.CURVE),
+        String.valueOf(Types.SURFACE),
+        String.valueOf(Types.OTHER), // H2 Geometry type
+    };
     /** Log4J initialisation. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            "de.cismet.cismap.commons.featureservice.FeatureServiceUtilities"); // NOI18N
+        "de.cismet.cismap.commons.featureservice.FeatureServiceUtilities"
+    ); // NOI18N
     /** typestring of the string-type. */
     public static final String STRING_PROPERTY_TYPE = "string"; // NOI18N
     /** typestring of the integer-type. */
@@ -106,44 +102,44 @@ public class FeatureServiceUtilities {
     /** WFS namespace-contant. */
     public static final Namespace WFS = Namespace.getNamespace("wfs", "http://www.opengis.net/wfs"); // NOI18N
 
-//  /** OGC namespace-contant */
-//  public static final Namespace OGC = Namespace.getNamespace("ogc", "http://www.opengis.net/ogc");//NOI18N
-//  /** GML namespace-contant */
-//  public static final Namespace GML = Namespace.getNamespace("gml", "http://www.opengis.net/gml");//NOI18N
-//  /** OWS namespace-contant */
-//  public static final Namespace OWS = Namespace.getNamespace("ows", "http://www.opengis.net/ows");//NOI18N
-//  /** XSD namespace-contant */
-//  public static final Namespace xsd = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema");//NOI18N
-//  /** name of the CismapQuery-element */
-//  public static final String CISMAP_QUERY = "CismapQuery";//NOI18N
-//  /** name of the Query-element */
-//  public static final String QUERY = "Query";//NOI18N
-//  /** name of the CismapDescribeFeatureType-element */
-//  public static final String CISMAP_DESCRIBEFEATURETYPE = "CismapDescribeFeatureType";//NOI18N
-//  /** name of the DescribeFeatureType-element */
-//  public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType";//NOI18N
-//  /** name of the CismapGetCapabilities-element */
-//  public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities";//NOI18N
-//  /** name of the GetCapabilities-element */
-//  public static final String GETCAPABILITIES = "GetCapabilities";//NOI18N
-//  /** name of the ServiceIdentification-element */
-//  public static final String SERVICE_IDENT = "ServiceIdentification";//NOI18N
-//  /** name of the Filter-element */
-//  public static final String FILTER = "Filter";//NOI18N
-//  /** name of the BoundingBox-element */
-//  public static final String BBOX = "BBOX";//NOI18N
-//  /** name of the GetFeature-element */
-//  public static final String TYPE_NAME = "typeName";//NOI18N
-//  /** name of the GetFeature-element */
-//  public static final String DEFAULT_TYPENAME = "TypeName";//NOI18N
-//  /** name of the GetFeature-element */
-//  public static final String PROPERTY_NAME = "PropertyName";//NOI18N
-//  /** typestring of the GML-geometry-type */
-//  public static final String GEO_PROPERTY_TYPE = "GeometryPropertyType";//NOI18N
-//  /** typestring of the GML-geometry-type */
-//  public static final String GEO_PROPERTY_TYPE_WITH_NS = "gml:GeometryPropertyType";//NOI18N
-//  /** name of the maxFeatures-attribute */
-//  public final static String MAX_FEATURES = "maxFeatures";//NOI18N
+    //  /** OGC namespace-contant */
+    //  public static final Namespace OGC = Namespace.getNamespace("ogc", "http://www.opengis.net/ogc");//NOI18N
+    //  /** GML namespace-contant */
+    //  public static final Namespace GML = Namespace.getNamespace("gml", "http://www.opengis.net/gml");//NOI18N
+    //  /** OWS namespace-contant */
+    //  public static final Namespace OWS = Namespace.getNamespace("ows", "http://www.opengis.net/ows");//NOI18N
+    //  /** XSD namespace-contant */
+    //  public static final Namespace xsd = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema");//NOI18N
+    //  /** name of the CismapQuery-element */
+    //  public static final String CISMAP_QUERY = "CismapQuery";//NOI18N
+    //  /** name of the Query-element */
+    //  public static final String QUERY = "Query";//NOI18N
+    //  /** name of the CismapDescribeFeatureType-element */
+    //  public static final String CISMAP_DESCRIBEFEATURETYPE = "CismapDescribeFeatureType";//NOI18N
+    //  /** name of the DescribeFeatureType-element */
+    //  public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType";//NOI18N
+    //  /** name of the CismapGetCapabilities-element */
+    //  public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities";//NOI18N
+    //  /** name of the GetCapabilities-element */
+    //  public static final String GETCAPABILITIES = "GetCapabilities";//NOI18N
+    //  /** name of the ServiceIdentification-element */
+    //  public static final String SERVICE_IDENT = "ServiceIdentification";//NOI18N
+    //  /** name of the Filter-element */
+    //  public static final String FILTER = "Filter";//NOI18N
+    //  /** name of the BoundingBox-element */
+    //  public static final String BBOX = "BBOX";//NOI18N
+    //  /** name of the GetFeature-element */
+    //  public static final String TYPE_NAME = "typeName";//NOI18N
+    //  /** name of the GetFeature-element */
+    //  public static final String DEFAULT_TYPENAME = "TypeName";//NOI18N
+    //  /** name of the GetFeature-element */
+    //  public static final String PROPERTY_NAME = "PropertyName";//NOI18N
+    //  /** typestring of the GML-geometry-type */
+    //  public static final String GEO_PROPERTY_TYPE = "GeometryPropertyType";//NOI18N
+    //  /** typestring of the GML-geometry-type */
+    //  public static final String GEO_PROPERTY_TYPE_WITH_NS = "gml:GeometryPropertyType";//NOI18N
+    //  /** name of the maxFeatures-attribute */
+    //  public final static String MAX_FEATURES = "maxFeatures";//NOI18N
 
     static {
         Arrays.sort(GEO_PROPERTY_TYPES);
@@ -160,7 +156,7 @@ public class FeatureServiceUtilities {
      */
     public static String elementToString(final Element e) {
         if (e == null) {
-            return "";                                                           // NOI18N
+            return ""; // NOI18N
         } else {
             final XMLOutputter out = new XMLOutputter(Format.getPrettyFormat()); // NOI18N
             return out.outputString(e);
@@ -213,30 +209,31 @@ public class FeatureServiceUtilities {
      * @throws  Exception    DOCUMENT ME!
      */
     public static TreeMap<FeatureType, Vector<FeatureServiceAttribute>> getElementDeclarations(
-            final WFSCapabilities cap) throws IOException, Exception {
+        final WFSCapabilities cap
+    ) throws IOException, Exception {
         if (log.isDebugEnabled()) {
             log.debug("getElementDeclarations(" + cap.getURL() + ")"); // NOI18N
         }
         // create hashmap that will be returned
         final TreeMap<FeatureType, Vector<FeatureServiceAttribute>> result = new TreeMap<>(
-                new Comparator<FeatureType>() {
+            new Comparator<FeatureType>() {
+                @Override
+                public int compare(final FeatureType o1, final FeatureType o2) {
+                    final String title1 = ((o1 == null) ? null : o1.getTitle());
+                    final String title2 = ((o2 == null) ? null : o2.getTitle());
 
-                    @Override
-                    public int compare(final FeatureType o1, final FeatureType o2) {
-                        final String title1 = ((o1 == null) ? null : o1.getTitle());
-                        final String title2 = ((o2 == null) ? null : o2.getTitle());
-
-                        if ((title1 == null) && (title2 == null)) {
-                            return 0;
-                        } else if (title1 == null) {
-                            return -1;
-                        } else if (title2 == null) {
-                            return 1;
-                        } else {
-                            return title1.compareTo(title2);
-                        }
+                    if ((title1 == null) && (title2 == null)) {
+                        return 0;
+                    } else if (title1 == null) {
+                        return -1;
+                    } else if (title2 == null) {
+                        return 1;
+                    } else {
+                        return title1.compareTo(title2);
                     }
-                });
+                }
+            }
+        );
 
         for (final FeatureType ft : cap.getFeatureTypeList()) {
             final Vector<FeatureServiceAttribute> attributes = ft.getFeatureAttributes();
@@ -276,9 +273,10 @@ public class FeatureServiceUtilities {
      * @return  vector with FeatureServiceAttributes
      */
     public static HashMap<String, FeatureServiceAttribute> getFeatureServiceAttributes(
-            final Element describeFeatureXML) {
+        final Element describeFeatureXML
+    ) {
         final HashMap<String, FeatureServiceAttribute> fsaMap = new HashMap(describeFeatureXML.getChildren().size());
-        for (final Element currentElement : (List<Element>)describeFeatureXML.getChildren()) {
+        for (final Element currentElement : (List<Element>) describeFeatureXML.getChildren()) {
             try {
                 final FeatureServiceAttribute fsa = new FeatureServiceAttribute(currentElement);
                 fsaMap.put(fsa.getName(), fsa);
@@ -296,10 +294,9 @@ public class FeatureServiceUtilities {
      *
      * @return  list with the ordered FeatureServiceAttributes
      */
-    public static List<String> getOrderedFeatureServiceAttributes(
-            final Element describeFeatureXML) {
+    public static List<String> getOrderedFeatureServiceAttributes(final Element describeFeatureXML) {
         final List<String> fsaList = new ArrayList(describeFeatureXML.getChildren().size());
-        for (final Element currentElement : (List<Element>)describeFeatureXML.getChildren()) {
+        for (final Element currentElement : (List<Element>) describeFeatureXML.getChildren()) {
             try {
                 final FeatureServiceAttribute fsa = new FeatureServiceAttribute(currentElement);
                 fsaList.add(fsa.getName());

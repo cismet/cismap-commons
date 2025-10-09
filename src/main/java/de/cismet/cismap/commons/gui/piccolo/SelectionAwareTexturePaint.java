@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Geometry;
-
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.Rectangle;
@@ -40,10 +39,11 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
      * @version  $Revision$, $Date$
      */
     public enum SelectionMode {
-
         //~ Enum constants -----------------------------------------------------
 
-        HIGHLIGHTED, SELECTED, UNSELECTED
+        HIGHLIGHTED,
+        SELECTED,
+        UNSELECTED,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -68,10 +68,12 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
      * @param  selectedImage     this image is used, if the corresponding feature is selected
      * @param  rec               the Rectangle2D in user space used to anchor and replicate the texture
      */
-    public SelectionAwareTexturePaint(final BufferedImage defaultImage,
-            final BufferedImage highlightedImage,
-            final BufferedImage selectedImage,
-            final Rectangle2D rec) {
+    public SelectionAwareTexturePaint(
+        final BufferedImage defaultImage,
+        final BufferedImage highlightedImage,
+        final BufferedImage selectedImage,
+        final Rectangle2D rec
+    ) {
         paint = new TexturePaint(defaultImage, rec);
         this.rec = rec;
         this.currentRec = rec;
@@ -100,30 +102,35 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
      */
     public void setMode(final SelectionMode mode) {
         switch (mode) {
-            case HIGHLIGHTED: {
-                paint = new TexturePaint(highlightedImage, currentRec);
-                this.currentImage = highlightedImage;
-                break;
-            }
-            case SELECTED: {
-                paint = new TexturePaint(selectedImage, currentRec);
-                this.currentImage = selectedImage;
-                break;
-            }
-            case UNSELECTED: {
-                paint = new TexturePaint(defaultImage, currentRec);
-                this.currentImage = defaultImage;
-                break;
-            }
+            case HIGHLIGHTED:
+                {
+                    paint = new TexturePaint(highlightedImage, currentRec);
+                    this.currentImage = highlightedImage;
+                    break;
+                }
+            case SELECTED:
+                {
+                    paint = new TexturePaint(selectedImage, currentRec);
+                    this.currentImage = selectedImage;
+                    break;
+                }
+            case UNSELECTED:
+                {
+                    paint = new TexturePaint(defaultImage, currentRec);
+                    this.currentImage = defaultImage;
+                    break;
+                }
         }
     }
 
     @Override
-    public PaintContext createContext(final ColorModel cm,
-            final Rectangle deviceBounds,
-            final Rectangle2D userBounds,
-            final AffineTransform xform,
-            final RenderingHints hints) {
+    public PaintContext createContext(
+        final ColorModel cm,
+        final Rectangle deviceBounds,
+        final Rectangle2D userBounds,
+        final AffineTransform xform,
+        final RenderingHints hints
+    ) {
         return paint.createContext(cm, deviceBounds, userBounds, xform, hints);
     }
 
@@ -135,10 +142,11 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
     @Override
     public Object clone() {
         final SelectionAwareTexturePaint clone = new SelectionAwareTexturePaint(
-                defaultImage,
-                highlightedImage,
-                selectedImage,
-                rec);
+            defaultImage,
+            highlightedImage,
+            selectedImage,
+            rec
+        );
         clone.currentRec = currentRec;
         clone.currentImage = currentImage;
         return clone;
@@ -166,15 +174,8 @@ public class SelectionAwareTexturePaint implements Paint, Cloneable, PaintWrappe
             factor *= Math.sqrt(geom.getArea());
         }
 
-        currentRec = new Rectangle2D.Double(
-                rec.getMinX(),
-                rec.getMinY(),
-                rec.getWidth()
-                        * factor,
-                rec.getHeight()
-                        * factor);
-        paint = new TexturePaint(
-                defaultImage,
-                currentRec);
+        currentRec =
+            new Rectangle2D.Double(rec.getMinX(), rec.getMinY(), rec.getWidth() * factor, rec.getHeight() * factor);
+        paint = new TexturePaint(defaultImage, currentRec);
     }
 }

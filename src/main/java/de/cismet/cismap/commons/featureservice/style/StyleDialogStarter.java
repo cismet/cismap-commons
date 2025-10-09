@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,29 +12,22 @@
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-import org.openide.util.NbBundle;
-
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.commons.concurrency.CismetExecutors;
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-
 import javax.swing.Icon;
 import javax.swing.JDialog;
-
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-
-import de.cismet.commons.concurrency.CismetExecutors;
-
-import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.WaitingDialogThread;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -66,16 +59,19 @@ public class StyleDialogStarter extends WaitingDialogThread<JDialog> {
      * @param  panel            DOCUMENT ME!
      * @param  delay            DOCUMENT ME!
      */
-    public StyleDialogStarter(final Frame parent,
-            final AbstractFeatureService selectedService,
-            final ArrayList<String> panel,
-            final int delay) {
+    public StyleDialogStarter(
+        final Frame parent,
+        final AbstractFeatureService selectedService,
+        final ArrayList<String> panel,
+        final int delay
+    ) {
         super(
             parent,
             true,
             NbBundle.getMessage(StyleDialogStarter.class, "StyleDialogStarter.StyleDialogStarter()"),
             null,
-            delay);
+            delay
+        );
         this.parentFrame = parent;
         this.selectedService = selectedService;
         this.panel = panel;
@@ -87,15 +83,15 @@ public class StyleDialogStarter extends WaitingDialogThread<JDialog> {
     protected JDialog doInBackground() throws Exception {
         if (styleDialog == null) {
             if (log.isDebugEnabled()) {
-                log.debug("creating new StyleDialog '"
-                            + parentFrame.getTitle() + "'"); // NOI18N
+                log.debug("creating new StyleDialog '" + parentFrame.getTitle() + "'"); // NOI18N
             }
 
             final String lookupkey = CismapBroker.getInstance().getFeatureStylingComponentKey();
 
             if ((lookupkey != null) && !lookupkey.isEmpty()) {
-                final Lookup.Result<StyleDialogInterface> result = Lookup.getDefault()
-                            .lookupResult(StyleDialogInterface.class);
+                final Lookup.Result<StyleDialogInterface> result = Lookup
+                    .getDefault()
+                    .lookupResult(StyleDialogInterface.class);
 
                 for (final StyleDialogInterface dialog : result.allInstances()) {
                     if (lookupkey.equals(dialog.getKey())) {
@@ -111,10 +107,11 @@ public class StyleDialogStarter extends WaitingDialogThread<JDialog> {
         // set style from the layer properties
 
         return styleDialog.configureDialog(
-                selectedService,
-                parentFrame,
-                CismapBroker.getInstance().getMappingComponent(),
-                panel);
+            selectedService,
+            parentFrame,
+            CismapBroker.getInstance().getMappingComponent(),
+            panel
+        );
     }
 
     @Override
@@ -122,10 +119,9 @@ public class StyleDialogStarter extends WaitingDialogThread<JDialog> {
         try {
             final JDialog dialog = get();
 
-            dialog.setPreferredSize(new Dimension(
-                    dialog.getPreferredSize().width
-                            + 70,
-                    dialog.getPreferredSize().height));
+            dialog.setPreferredSize(
+                new Dimension(dialog.getPreferredSize().width + 70, dialog.getPreferredSize().height)
+            );
             if (log.isDebugEnabled()) {
                 log.debug("set dialog visible"); // NOI18N
             }
@@ -137,19 +133,21 @@ public class StyleDialogStarter extends WaitingDialogThread<JDialog> {
 
                 final ExecutorService es = CismetExecutors.newSingleThreadExecutor();
                 es.submit(r);
-                es.submit(new Runnable() {
-
+                es.submit(
+                    new Runnable() {
                         @Override
                         public void run() {
-                            EventQueue.invokeLater(new Runnable() {
-
+                            EventQueue.invokeLater(
+                                new Runnable() {
                                     @Override
                                     public void run() {
                                         fireStyleDialogClosed(new StyleDialogClosedEvent(styleDialog));
                                     }
-                                });
+                                }
+                            );
                         }
-                    });
+                    }
+                );
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Style Dialog canceled"); // NOI18N

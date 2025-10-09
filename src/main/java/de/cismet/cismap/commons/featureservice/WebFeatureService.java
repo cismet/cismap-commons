@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleWebFeatureService.java
  *
@@ -14,23 +14,6 @@
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
-//import org.deegree2.model.feature.Feature;
-//import org.deegree2.model.feature.FeatureCollection;
-//import org.deegree2.model.feature.GMLFeatureCollectionDocument;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.DataConversionException;
-import org.jdom.Element;
-
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-
-import java.util.HashMap;
-import java.util.List;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.LayerInfoProvider;
@@ -45,8 +28,20 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-
 import de.cismet.commons.wms.capabilities.Layer;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.util.HashMap;
+import java.util.List;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+//import org.deegree2.model.feature.Feature;
+//import org.deegree2.model.feature.FeatureCollection;
+//import org.deegree2.model.feature.GMLFeatureCollectionDocument;
+
+import org.apache.log4j.Logger;
+import org.jdom.DataConversionException;
+import org.jdom.Element;
 
 /**
  * This class provides access to a Web Feature service. Requests will be send to a WFS instance. The response will be
@@ -69,23 +64,33 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         layerIcons.put(
             LAYER_ENABLED_VISIBLE,
             new ImageIcon(
-                AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerWfs.png")));                   // NOI18N
+                AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfs.png")
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_ENABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerWfsInvisible.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerWfsInvisible.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_VISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfs.png")));          // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfs.png"
+                    )
+            )
+        ); // NOI18N
         layerIcons.put(
             LAYER_DISABLED_INVISIBLE,
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfsInvisible.png"))); // NOI18N
+                        "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfsInvisible.png"
+                    )
+            )
+        ); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -133,7 +138,6 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      */
     public WebFeatureService(final Element e) throws Exception {
         super(e);
-
         if (e.getAttribute("reverseAxisOrder") != null) {
             try {
                 this.reverseAxisOrder = e.getAttribute("reverseAxisOrder").getBooleanValue(); // NOI18N
@@ -154,11 +158,13 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      *
      * @throws  Exception  if something went wrong
      */
-    public WebFeatureService(final String name,
-            final String host,
-            final Element query,
-            final List<FeatureServiceAttribute> attributes,
-            final FeatureType feature) throws Exception {
+    public WebFeatureService(
+        final String name,
+        final String host,
+        final Element query,
+        final List<FeatureServiceAttribute> attributes,
+        final FeatureType feature
+    ) throws Exception {
         this(name, host, query, attributes, feature, false);
     }
 
@@ -175,12 +181,14 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      *
      * @throws  Exception  if something went wrong
      */
-    public WebFeatureService(final String name,
-            final String host,
-            final Element query,
-            final List<FeatureServiceAttribute> attributes,
-            final FeatureType feature,
-            final boolean reverseAxisOrder) throws Exception {
+    public WebFeatureService(
+        final String name,
+        final String host,
+        final Element query,
+        final List<FeatureServiceAttribute> attributes,
+        final FeatureType feature,
+        final boolean reverseAxisOrder
+    ) throws Exception {
         super(name, attributes);
         crs = CismapBroker.getInstance().getSrs();
         setFeature(feature);
@@ -239,12 +247,13 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         final Element parentElement = super.toElement();
 
         final CapabilityLink capLink = new CapabilityLink(
-                CapabilityLink.OGC,
-                hostname,
-                reverseAxisOrder,
-                getVersion(),
-                false,
-                CismapBroker.getInstance().urlToAlias((capabilitiesLink == null) ? hostname : capabilitiesLink));
+            CapabilityLink.OGC,
+            hostname,
+            reverseAxisOrder,
+            getVersion(),
+            false,
+            CismapBroker.getInstance().urlToAlias((capabilitiesLink == null) ? hostname : capabilitiesLink)
+        );
 
         if (reverseAxisOrder) {
             parentElement.setAttribute("reverseAxisOrder", "true");
@@ -301,8 +310,12 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
                 final WFSCapabilities cap = fac.createCapabilities(capLink);
 
                 if ((cap != null) && !cap.getVersion().equals(cp.getVersion())) {
-                    LOG.warn("Cannot retrieve the wfs capabilities for version " + cp.getVersion() + " but for version "
-                                + cap.getVersion());
+                    LOG.warn(
+                        "Cannot retrieve the wfs capabilities for version " +
+                        cp.getVersion() +
+                        " but for version " +
+                        cap.getVersion()
+                    );
                 }
 
                 feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
@@ -313,9 +326,9 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
                 this.backupVersion = cp.getVersion();
                 this.setQueryElement(query);
                 this.setHostname(cp.getLink());
-//                if (getInitialisationError()) {
-//                    throw ex;
-//                }
+                //                if (getInitialisationError()) {
+                //                    throw ex;
+                //                }
                 setInitialisationError(true);
             }
         } else {
@@ -364,7 +377,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     protected void setHostname(final String hostname) {
         this.hostname = hostname;
         if (this.getFeatureFactory() != null) {
-            ((WFSFeatureFactory)this.getFeatureFactory()).setHostname(hostname);
+            ((WFSFeatureFactory) this.getFeatureFactory()).setHostname(hostname);
         }
     }
 
@@ -426,9 +439,10 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         // + \" / \" + app:flurstn;} else {return app:flurstz;}", LayerProperties.EXPRESSIONTYPE_GROOVY);
         defaultLayerProperties.setPrimaryAnnotationExpression(
             "app:flurstz",
-            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);                                               // NOI18N
+            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME
+        ); // NOI18N
         defaultLayerProperties.getStyle().setMultiplier(1d);
-        defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12));               // NOI18N
+        defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12)); // NOI18N
         defaultLayerProperties.setIdExpression("app:gid", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME); // NOI18N
         defaultLayerProperties.setQueryType(LayerProperties.QUERYTYPE_XML);
         defaultLayerProperties.setFeatureService(this);
@@ -438,12 +452,14 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new WFSFeatureFactory(this.getLayerProperties(),
-                this.getHostname(),
-                this.feature,
-                getCrs(),
-                parseSLD(getSLDDefiniton()),
-                reverseAxisOrder);
+        return new WFSFeatureFactory(
+            this.getLayerProperties(),
+            this.getHostname(),
+            this.feature,
+            getCrs(),
+            parseSLD(getSLDDefiniton()),
+            reverseAxisOrder
+        );
     }
 
     /**
@@ -486,8 +502,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     }
 
     @Override
-    public void setLayerQuerySelected(final boolean selected) {
-    }
+    public void setLayerQuerySelected(final boolean selected) {}
 
     @Override
     public boolean isQueryable() {
@@ -537,15 +552,15 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     public void setCrs(final Crs crs) {
         this.crs = crs;
         if (featureFactory != null) {
-            ((WFSFeatureFactory)featureFactory).setCrs(crs);
+            ((WFSFeatureFactory) featureFactory).setCrs(crs);
         }
-//        try {
-//            featureFactory = createFeatureFactory();
-//            this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
-//            this.featureFactory.setLayerProperties(layerProperties);
-//        } catch (Exception e) {
-//            LOG.error("Error while creating a new feature factory.", e);
-//        }
+        //        try {
+        //            featureFactory = createFeatureFactory();
+        //            this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
+        //            this.featureFactory.setLayerProperties(layerProperties);
+        //        } catch (Exception e) {
+        //            LOG.error("Error while creating a new feature factory.", e);
+        //        }
     }
 
     @Override

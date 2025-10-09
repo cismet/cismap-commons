@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleMoveListener.java
  *
@@ -13,30 +13,25 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.*;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.util.PBounds;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import java.awt.Color;
-import java.awt.geom.Point2D;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PBounds;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.Color;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import javax.swing.SwingWorker;
 
 /**
  * DOCUMENT ME!
@@ -49,7 +44,8 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            PerpendicularIntersectionListener.class);
+        PerpendicularIntersectionListener.class
+    );
     private static final Color COLOR_PERPENDICULAR_HANDLE = new Color(205, 133, 0, 150);
 
     //~ Enums ------------------------------------------------------------------
@@ -60,10 +56,11 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      * @version  $Revision$, $Date$
      */
     private static enum Stage {
-
         //~ Enum constants -----------------------------------------------------
 
-        SELECT_FEATURE, CREATE_PERPENDICULAR, ADD_HANDLES
+        SELECT_FEATURE,
+        CREATE_PERPENDICULAR,
+        ADD_HANDLES,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -94,8 +91,8 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
         this.mappingComponent = mappingComponent;
 
         perpendicularPathLine = new PPath();
-        locator = new PLocator() {
-
+        locator =
+            new PLocator() {
                 @Override
                 public double locateX() {
                     if (perpendicularCoordinate != null) {
@@ -114,8 +111,8 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                     }
                 }
             };
-        perpendicularHandle = new PHandle(locator, mappingComponent) {
-
+        perpendicularHandle =
+            new PHandle(locator, mappingComponent) {
                 @Override
                 public void handleClicked(final PInputEvent e) {
                     finishCreatePerpendicular();
@@ -157,14 +154,17 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
         }
         featureHandles.clear();
         for (final Object obj : col) {
-            if ((obj instanceof Feature) && ((Feature)obj).isEditable()) {
-                final Feature feature = (Feature)obj;
-                final PFeature pFeature = (PFeature)mappingComponent.getPFeatureHM().get(feature);
+            if ((obj instanceof Feature) && ((Feature) obj).isEditable()) {
+                final Feature feature = (Feature) obj;
+                final PFeature pFeature = (PFeature) mappingComponent.getPFeatureHM().get(feature);
 
                 if (pFeature != null) {
                     final Geometry geometry = pFeature.getFeature().getGeometry();
-                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                                || (geometry instanceof MultiPolygon)) {
+                    if (
+                        (geometry instanceof Polygon) ||
+                        (geometry instanceof LineString) ||
+                        (geometry instanceof MultiPolygon)
+                    ) {
                         for (int entityIndex = 0; entityIndex < pFeature.getNumOfEntities(); entityIndex++) {
                             for (int ringIndex = 0; ringIndex < pFeature.getNumOfRings(entityIndex); ringIndex++) {
                                 final float[] xp = pFeature.getXp(entityIndex, ringIndex);
@@ -179,12 +179,14 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                                 // So it is far easier to iterate backwards to avoid this.
                                 for (int coordPosition = xp.length - 1; coordPosition > 0; coordPosition--) {
                                     final LineSegment segment = new LineSegment(
-                                            xp[coordPosition - 1],
-                                            yp[coordPosition - 1],
-                                            xp[coordPosition],
-                                            yp[coordPosition]);
-                                    featureHandles.add(new PHandle(new PLocator() {
-
+                                        xp[coordPosition - 1],
+                                        yp[coordPosition - 1],
+                                        xp[coordPosition],
+                                        yp[coordPosition]
+                                    );
+                                    featureHandles.add(
+                                        new PHandle(
+                                            new PLocator() {
                                                 @Override
                                                 public double locateX() {
                                                     return segment.p0.x;
@@ -194,27 +196,38 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                                                 public double locateY() {
                                                     return segment.p0.y;
                                                 }
-                                            }, mappingComponent));
+                                            },
+                                            mappingComponent
+                                        )
+                                    );
                                     if (isInAddHandleStage) {
                                         final Coordinate intersectionCoord = segment.intersection(perpendicularSegment);
 
                                         if (intersectionCoord != null) {
                                             // pFeature arbeitet nur mit float genauigkeit
-                                            final Coordinate floatSegmentStartCoord = new Coordinate((float)
-                                                    segment.p0.x,
-                                                    (float)segment.p0.y);
-                                            final Coordinate floatSegmentEndCoord = new Coordinate((float)segment.p1.x,
-                                                    (float)segment.p1.y);
+                                            final Coordinate floatSegmentStartCoord = new Coordinate(
+                                                (float) segment.p0.x,
+                                                (float) segment.p0.y
+                                            );
+                                            final Coordinate floatSegmentEndCoord = new Coordinate(
+                                                (float) segment.p1.x,
+                                                (float) segment.p1.y
+                                            );
 
-                                            if (!(floatSegmentStartCoord.equals2D(intersectionCoord)
-                                                            || floatSegmentEndCoord.equals2D(intersectionCoord))) {
+                                            if (
+                                                !(
+                                                    floatSegmentStartCoord.equals2D(intersectionCoord) ||
+                                                    floatSegmentEndCoord.equals2D(intersectionCoord)
+                                                )
+                                            ) {
                                                 final AddHandle addHandle = new AddHandle(
-                                                        pFeature,
-                                                        entityIndex,
-                                                        ringIndex,
-                                                        coordPosition,
-                                                        intersectionCoord,
-                                                        segment);
+                                                    pFeature,
+                                                    entityIndex,
+                                                    ringIndex,
+                                                    coordPosition,
+                                                    intersectionCoord,
+                                                    segment
+                                                );
                                                 addHandles.add(addHandle);
                                             }
                                         }
@@ -253,12 +266,15 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                 final int snappingDistance = mappingComponent.getSnappingRectSize() / 2;
 
                 if (mappingComponent.isSnappingEnabled()) {
-                    final Point2D localTriggerPoint = mappingComponent.getCamera()
-                                .viewToLocal((Point2D)triggerPoint.clone());
-                    final Point2D localNearestSegmentStartPoint = mappingComponent.getCamera()
-                                .viewToLocal(new Point2D.Double(nearestSegment.p0.x, nearestSegment.p0.y));
-                    final Point2D localNearestSegmentEndPoint = mappingComponent.getCamera()
-                                .viewToLocal(new Point2D.Double(nearestSegment.p1.x, nearestSegment.p1.y));
+                    final Point2D localTriggerPoint = mappingComponent
+                        .getCamera()
+                        .viewToLocal((Point2D) triggerPoint.clone());
+                    final Point2D localNearestSegmentStartPoint = mappingComponent
+                        .getCamera()
+                        .viewToLocal(new Point2D.Double(nearestSegment.p0.x, nearestSegment.p0.y));
+                    final Point2D localNearestSegmentEndPoint = mappingComponent
+                        .getCamera()
+                        .viewToLocal(new Point2D.Double(nearestSegment.p1.x, nearestSegment.p1.y));
 
                     if (localTriggerPoint.distance(localNearestSegmentStartPoint) < snappingDistance) {
                         perpendicularCoordinate = nearestSegment.p0;
@@ -277,47 +293,51 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                 // extend bounds to bounds of all features in featurecollection
                 final List<Feature> allFeatures = mappingComponent.getFeatureCollection().getAllFeatures();
                 for (final Feature feature : allFeatures) {
-                    final PFeature pfeature = (PFeature)mappingComponent.getPFeatureHM().get(feature);
+                    final PFeature pfeature = (PFeature) mappingComponent.getPFeatureHM().get(feature);
                     bounds.add(pfeature.getBounds());
                 }
 
                 // create all 4 bounds lines
                 final LineSegment top = new LineSegment(
-                        bounds.getMinX(),
-                        bounds.getMinY(),
-                        bounds.getMaxX(),
-                        bounds.getMinY());
+                    bounds.getMinX(),
+                    bounds.getMinY(),
+                    bounds.getMaxX(),
+                    bounds.getMinY()
+                );
                 final LineSegment bottom = new LineSegment(
-                        bounds.getMinX(),
-                        bounds.getMaxY(),
-                        bounds.getMaxX(),
-                        bounds.getMaxY());
+                    bounds.getMinX(),
+                    bounds.getMaxY(),
+                    bounds.getMaxX(),
+                    bounds.getMaxY()
+                );
                 final LineSegment left = new LineSegment(
-                        bounds.getMinX(),
-                        bounds.getMinY(),
-                        bounds.getMinX(),
-                        bounds.getMaxY());
+                    bounds.getMinX(),
+                    bounds.getMinY(),
+                    bounds.getMinX(),
+                    bounds.getMaxY()
+                );
                 final LineSegment right = new LineSegment(
-                        bounds.getMaxX(),
-                        bounds.getMinY(),
-                        bounds.getMaxX(),
-                        bounds.getMaxY());
+                    bounds.getMaxX(),
+                    bounds.getMinY(),
+                    bounds.getMaxX(),
+                    bounds.getMaxY()
+                );
 
                 // the diagonal of the bounds is the longest possible line
                 // that can cross the boundslines
-                final double maxLength = Math.sqrt(
-                        Math.pow(bounds.getWidth(), 2)
-                                * Math.pow(bounds.getHeight(), 2));
+                final double maxLength = Math.sqrt(Math.pow(bounds.getWidth(), 2) * Math.pow(bounds.getHeight(), 2));
 
                 // create left and right perpendicular of the segment
                 final LineSegment leftyPerpendicular = leftyPerpendicular(
-                        nearestSegment,
-                        perpendicularCoordinate,
-                        maxLength);
+                    nearestSegment,
+                    perpendicularCoordinate,
+                    maxLength
+                );
                 final LineSegment rightyPerpendicular = rightyPerpendicular(
-                        nearestSegment,
-                        perpendicularCoordinate,
-                        maxLength);
+                    nearestSegment,
+                    perpendicularCoordinate,
+                    maxLength
+                );
 
                 // check for each bounds line if it intersects with the perpendiculars
                 final Collection<LineSegment> boundLines = new ArrayList<LineSegment>();
@@ -330,8 +350,7 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                 Coordinate rightyIntersection = null;
 
                 final Iterator<LineSegment> boundsIterator = boundLines.iterator();
-                while (boundsIterator.hasNext()
-                            && ((leftyIntersection == null) || (rightyIntersection == null))) {
+                while (boundsIterator.hasNext() && ((leftyIntersection == null) || (rightyIntersection == null))) {
                     final LineSegment boundsLine = boundsIterator.next();
                     if (leftyIntersection == null) {
                         leftyIntersection = boundsLine.intersection(leftyPerpendicular);
@@ -356,24 +375,24 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
         try {
             if (stage == Stage.CREATE_PERPENDICULAR) {
                 new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        recalculatePerpendicular(event);
+                        return null;
+                    }
 
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            recalculatePerpendicular(event);
-                            return null;
+                    @Override
+                    protected void done() {
+                        try {
+                            get();
+                        } catch (final Exception ex) {
+                            LOG.warn(ex, ex);
                         }
-
-                        @Override
-                        protected void done() {
-                            try {
-                                get();
-                            } catch (final Exception ex) {
-                                LOG.warn(ex, ex);
-                            }
-                            refreshHandles();
-                            relocatePerpendicularHandle();
-                        }
-                    }.execute();
+                        refreshHandles();
+                        relocatePerpendicularHandle();
+                    }
+                }
+                    .execute();
             }
         } catch (final Exception ex) {
             LOG.info("Exception in mouseMoved", ex);
@@ -386,15 +405,15 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
     private void relocatePerpendicularHandle() {
         if (mappingComponent.getHandleLayer().getChildrenReference().contains(perpendicularPathLine)) {
             if (perpendicularSegment != null) {
-                final Point2D localPerpendicularSegmentStartPoint = mappingComponent.getCamera()
-                            .viewToLocal(new Point2D.Double(perpendicularSegment.p0.x, perpendicularSegment.p0.y));
-                final Point2D localPerpendicularSegmentEndPoint = mappingComponent.getCamera()
-                            .viewToLocal(new Point2D.Double(perpendicularSegment.p1.x, perpendicularSegment.p1.y));
+                final Point2D localPerpendicularSegmentStartPoint = mappingComponent
+                    .getCamera()
+                    .viewToLocal(new Point2D.Double(perpendicularSegment.p0.x, perpendicularSegment.p0.y));
+                final Point2D localPerpendicularSegmentEndPoint = mappingComponent
+                    .getCamera()
+                    .viewToLocal(new Point2D.Double(perpendicularSegment.p1.x, perpendicularSegment.p1.y));
                 perpendicularPathLine.setPathToPolyline(
-                    new Point2D[] {
-                        localPerpendicularSegmentStartPoint,
-                        localPerpendicularSegmentEndPoint
-                    });
+                    new Point2D[] { localPerpendicularSegmentStartPoint, localPerpendicularSegmentEndPoint }
+                );
             }
         }
         if (mappingComponent.getHandleLayer().getChildrenReference().contains(perpendicularHandle)) {
@@ -465,13 +484,17 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      * DOCUMENT ME!
      */
     public void init() {
-        if ((mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
-                    && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).getSelectedFeatures()
-                        .size() == 1)) {
+        if (
+            (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) &&
+            (((DefaultFeatureCollection) mappingComponent.getFeatureCollection()).getSelectedFeatures().size() == 1)
+        ) {
             final Feature old = selectedFeature;
             selectedFeature =
-                ((Collection<Feature>)((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                            .getSelectedFeatures()).toArray(new Feature[0])[0];
+                (
+                    (Collection<Feature>) (
+                        (DefaultFeatureCollection) mappingComponent.getFeatureCollection()
+                    ).getSelectedFeatures()
+                ).toArray(new Feature[0])[0];
             if (old != selectedFeature) {
                 perpendicularSegment = null;
                 perpendicularCoordinate = null;
@@ -484,28 +507,28 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
             stage = Stage.SELECT_FEATURE;
         }
         new SwingWorker<Void, Void>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    if (selectedFeature == null) {
-                        featureHandles.clear();
-                        addHandles.clear();
-                    } else {
-                        createFeatureHandles(selectedFeature);
-                    }
-                    return null;
+            @Override
+            protected Void doInBackground() throws Exception {
+                if (selectedFeature == null) {
+                    featureHandles.clear();
+                    addHandles.clear();
+                } else {
+                    createFeatureHandles(selectedFeature);
                 }
+                return null;
+            }
 
-                @Override
-                protected void done() {
-                    try {
-                        get();
-                    } catch (final Exception ex) {
-                        LOG.warn(ex, ex);
-                    }
-                    refreshHandles();
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (final Exception ex) {
+                    LOG.warn(ex, ex);
                 }
-            }.execute();
+                refreshHandles();
+            }
+        }
+            .execute();
     }
 
     /**
@@ -528,34 +551,35 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
             refreshHandles();
         } else if (event.isLeftMouseButton()) {
             if (stage == Stage.SELECT_FEATURE) {
-                final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                        event,
-                        new Class[] { PFeature.class },
-                        true);
+                final PFeature pFeature = (PFeature) PFeatureTools.getFirstValidObjectUnderPointer(
+                    event,
+                    new Class[] { PFeature.class },
+                    true
+                );
                 if (pFeature != null) {
                     selectedFeature = pFeature.getFeature();
                     mappingComponent.getFeatureCollection().select(selectedFeature);
                     new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            stage = Stage.CREATE_PERPENDICULAR;
+                            recalculatePerpendicular(event);
+                            createFeatureHandles(selectedFeature);
+                            return null;
+                        }
 
-                            @Override
-                            protected Void doInBackground() throws Exception {
-                                stage = Stage.CREATE_PERPENDICULAR;
-                                recalculatePerpendicular(event);
-                                createFeatureHandles(selectedFeature);
-                                return null;
+                        @Override
+                        protected void done() {
+                            try {
+                                get();
+                            } catch (final Exception ex) {
+                                LOG.warn(ex, ex);
                             }
-
-                            @Override
-                            protected void done() {
-                                try {
-                                    get();
-                                } catch (final Exception ex) {
-                                    LOG.warn(ex, ex);
-                                }
-                                refreshHandles();
-                                relocatePerpendicularHandle();
-                            }
-                        }.execute();
+                            refreshHandles();
+                            relocatePerpendicularHandle();
+                        }
+                    }
+                        .execute();
                 }
             } else if (stage == Stage.CREATE_PERPENDICULAR) {
                 finishCreatePerpendicular();
@@ -572,24 +596,24 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      */
     private void finishCreatePerpendicular() {
         new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                stage = Stage.ADD_HANDLES;
+                createAddHandles();
+                return null;
+            }
 
-                @Override
-                protected Void doInBackground() throws Exception {
-                    stage = Stage.ADD_HANDLES;
-                    createAddHandles();
-                    return null;
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (final Exception ex) {
+                    LOG.warn(ex, ex);
                 }
-
-                @Override
-                protected void done() {
-                    try {
-                        get();
-                    } catch (final Exception ex) {
-                        LOG.warn(ex, ex);
-                    }
-                    refreshHandles();
-                }
-            }.execute();
+                refreshHandles();
+            }
+        }
+            .execute();
     }
 
     /**
@@ -597,29 +621,29 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      */
     private void finishAddHandles() {
         new SwingWorker<Boolean, Void>() {
-
-                @Override
-                protected Boolean doInBackground() throws Exception {
-                    stage = Stage.CREATE_PERPENDICULAR;
-                    for (final AddHandle addHandle : addHandles) {
-                        if (addHandle.isSelected()) {
-                            addHandle.insertCoordinate();
-                        }
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                stage = Stage.CREATE_PERPENDICULAR;
+                for (final AddHandle addHandle : addHandles) {
+                    if (addHandle.isSelected()) {
+                        addHandle.insertCoordinate();
                     }
-                    createFeatureHandles(selectedFeature);
-                    return null;
                 }
+                createFeatureHandles(selectedFeature);
+                return null;
+            }
 
-                @Override
-                protected void done() {
-                    try {
-                        get();
-                    } catch (final Exception ex) {
-                        LOG.warn(ex, ex);
-                    }
-                    refreshHandles();
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (final Exception ex) {
+                    LOG.warn(ex, ex);
                 }
-            }.execute();
+                refreshHandles();
+            }
+        }
+            .execute();
     }
 
     /**
@@ -632,10 +656,12 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      *
      * @return  DOCUMENT ME!
      */
-    private LineSegment perpendicular(final LineSegment segment,
-            final Coordinate perpendicularStart,
-            final double length,
-            final boolean isLefty) {
+    private LineSegment perpendicular(
+        final LineSegment segment,
+        final Coordinate perpendicularStart,
+        final double length,
+        final boolean isLefty
+    ) {
         final double deltaX = segment.p1.x - segment.p0.x;
         final double deltaY = segment.p1.y - segment.p0.y;
 
@@ -659,9 +685,11 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      *
      * @return  DOCUMENT ME!
      */
-    private LineSegment leftyPerpendicular(final LineSegment segment,
-            final Coordinate perpendicularStart,
-            final double length) {
+    private LineSegment leftyPerpendicular(
+        final LineSegment segment,
+        final Coordinate perpendicularStart,
+        final double length
+    ) {
         return perpendicular(segment, perpendicularStart, length, true);
     }
 
@@ -674,9 +702,11 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
      *
      * @return  DOCUMENT ME!
      */
-    private LineSegment rightyPerpendicular(final LineSegment segment,
-            final Coordinate perpendicularStart,
-            final double length) {
+    private LineSegment rightyPerpendicular(
+        final LineSegment segment,
+        final Coordinate perpendicularStart,
+        final double length
+    ) {
         return perpendicular(segment, perpendicularStart, length, false);
     }
 
@@ -692,21 +722,23 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
     private LineSegment getNearestSegment(final Coordinate trigger, final Feature feature) {
         LineSegment segment = null;
         double dist = Double.POSITIVE_INFINITY;
-        final PFeature pfeature = (PFeature)mappingComponent.getPFeatureHM().get(feature);
+        final PFeature pfeature = (PFeature) mappingComponent.getPFeatureHM().get(feature);
         if (pfeature != null) {
             final Geometry geometry = pfeature.getFeature().getGeometry();
-            if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                        || (geometry instanceof MultiPolygon)) {
+            if (
+                (geometry instanceof Polygon) || (geometry instanceof LineString) || (geometry instanceof MultiPolygon)
+            ) {
                 for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
                     for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
                         final float[] xp = pfeature.getXp(entityIndex, ringIndex);
                         final float[] yp = pfeature.getYp(entityIndex, ringIndex);
                         for (int coordIndex = xp.length - 1; coordIndex > 0; coordIndex--) {
                             final LineSegment tmpSegment = new LineSegment(
-                                    xp[coordIndex - 1],
-                                    yp[coordIndex - 1],
-                                    xp[coordIndex],
-                                    yp[coordIndex]);
+                                xp[coordIndex - 1],
+                                yp[coordIndex - 1],
+                                xp[coordIndex],
+                                yp[coordIndex]
+                            );
                             final double tmpDist = tmpSegment.distance(trigger);
                             if (tmpDist < dist) {
                                 dist = tmpDist;
@@ -750,14 +782,16 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
          * @param  coordinate      DOCUMENT ME!
          * @param  segment         DOCUMENT ME!
          */
-        public AddHandle(final PFeature pFeature,
-                final int entityPosition,
-                final int ringPosition,
-                final int coordPosition,
-                final Coordinate coordinate,
-                final LineSegment segment) {
-            super(new PLocator() {
-
+        public AddHandle(
+            final PFeature pFeature,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final Coordinate coordinate,
+            final LineSegment segment
+        ) {
+            super(
+                new PLocator() {
                     @Override
                     public double locateX() {
                         return coordinate.x;
@@ -767,8 +801,9 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
                     public double locateY() {
                         return coordinate.y;
                     }
-                }, mappingComponent);
-
+                },
+                mappingComponent
+            );
             this.pFeature = pFeature;
             this.entityPosition = entityPosition;
             this.ringPosition = ringPosition;
@@ -800,8 +835,8 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
          * DOCUMENT ME!
          */
         public void insertCoordinate() {
-            final float handleX = (float)coordinate.x;
-            final float handleY = (float)coordinate.y;
+            final float handleX = (float) coordinate.x;
+            final float handleY = (float) coordinate.y;
             pFeature.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
         }
     }

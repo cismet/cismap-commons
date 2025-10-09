@@ -1,16 +1,17 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * MappingModelListener.java
  *
  * Created on 10. M�rz 2005, 11:25
  */
 package de.cismet.cismap.commons;
+
 import de.cismet.cismap.commons.rasterservice.MapService;
 
 /**
@@ -20,7 +21,6 @@ import de.cismet.cismap.commons.rasterservice.MapService;
  * @version  $Revision$, $Date$
  */
 public interface MappingModelListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

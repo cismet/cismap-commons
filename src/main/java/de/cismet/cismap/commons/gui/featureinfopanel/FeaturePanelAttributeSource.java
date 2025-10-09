@@ -1,25 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.featureinfopanel;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRDataSourceProvider;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRField;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.design.JRDesignField;
-
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 /**
  * DOCUMENT ME!
@@ -43,12 +42,7 @@ public class FeaturePanelAttributeSource implements JRDataSource, JRDataSourcePr
      */
     public FeaturePanelAttributeSource() {
         // sample data to test this JRDataSourceProvider in ireport
-        model = new DefaultTableModel(
-                new String[][] {
-                    { "a", "b" },
-                    { "c", "d" }
-                },
-                new String[] { "name", "value" });
+        model = new DefaultTableModel(new String[][] { { "a", "b" }, { "c", "d" } }, new String[] { "name", "value" });
     }
 
     /**
@@ -111,6 +105,5 @@ public class FeaturePanelAttributeSource implements JRDataSource, JRDataSourcePr
     }
 
     @Override
-    public void dispose(final JRDataSource dataSource) throws JRException {
-    }
+    public void dispose(final JRDataSource dataSource) throws JRException {}
 }

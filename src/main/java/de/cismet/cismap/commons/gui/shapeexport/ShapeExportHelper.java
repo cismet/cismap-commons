@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,19 +12,17 @@
  */
 package de.cismet.cismap.commons.gui.shapeexport;
 
-import org.deegree.io.shpapi.shape_new.ShapeFile;
-import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
-
 import java.util.Date;
 import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.deegree.io.shpapi.shape_new.ShapeFile;
+import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
 
 /**
  * DOCUMENT ME!
@@ -47,11 +45,13 @@ public class ShapeExportHelper {
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    public static void writeShapeFileToZip(final org.deegree.model.feature.FeatureCollection featureCollection,
-            final String shapeFileName,
-            final File tempDirectory,
-            final ZipOutputStream zipStream,
-            final String esriWKT) throws Exception {
+    public static void writeShapeFileToZip(
+        final org.deegree.model.feature.FeatureCollection featureCollection,
+        final String shapeFileName,
+        final File tempDirectory,
+        final ZipOutputStream zipStream,
+        final String esriWKT
+    ) throws Exception {
         File tmpSubDirectory = null;
 
         try {
@@ -65,13 +65,9 @@ public class ShapeExportHelper {
             } while (tmpSubDirectory.exists());
 
             tmpSubDirectory.mkdirs();
-            final String shapeFileBase = tmpSubDirectory.getAbsoluteFile()
-                        + separator
-                        + shapeFileName;
+            final String shapeFileBase = tmpSubDirectory.getAbsoluteFile() + separator + shapeFileName;
 
-            final ShapeFile shape = new ShapeFile(
-                    featureCollection,
-                    shapeFileBase);
+            final ShapeFile shape = new ShapeFile(featureCollection, shapeFileBase);
             final ShapeFileWriter writer = new ShapeFileWriter(shape);
             writer.write();
 
@@ -116,7 +112,7 @@ public class ShapeExportHelper {
      * @throws  Exception  DOCUMENT ME!
      */
     private static void zipDirectory(final File inputDir, final ZipOutputStream out, final String dirName)
-            throws Exception {
+        throws Exception {
         final int BYTES_ARRAY_LENGTH = 256;
         final byte[] tmp = new byte[BYTES_ARRAY_LENGTH];
         int byteCount;

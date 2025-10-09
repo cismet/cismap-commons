@@ -1,34 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.openide.WizardDescriptor;
-import org.openide.util.NbBundle;
-
-import java.awt.EventQueue;
-
-import java.util.concurrent.ExecutorService;
-
 import de.cismet.cismap.commons.Crs;
-
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 import de.cismet.commons.cismap.io.converters.MultiGeometriesProvider;
-
 import de.cismet.commons.concurrency.CismetConcurrency;
-
 import de.cismet.commons.converter.Converter;
-
 import de.cismet.commons.gui.wizard.AbstractWizardPanel;
 import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
+import java.awt.EventQueue;
+import java.util.concurrent.ExecutorService;
+import org.apache.log4j.Logger;
+import org.openide.WizardDescriptor;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -82,14 +73,13 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
      */
     public void setGeometry(final Geometry geometry) {
         final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                AddGeometriesToMapPreviewWizardPanel.this.geometry = geometry;
 
-                @Override
-                public void run() {
-                    AddGeometriesToMapPreviewWizardPanel.this.geometry = geometry;
-
-                    changeSupport.fireChange();
-                }
-            };
+                changeSupport.fireChange();
+            }
+        };
 
         if (EventQueue.isDispatchThread()) {
             r.run();
@@ -114,14 +104,13 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
      */
     public void setBusy(final boolean busy) {
         final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                AddGeometriesToMapPreviewWizardPanel.this.busy = busy;
 
-                @Override
-                public void run() {
-                    AddGeometriesToMapPreviewWizardPanel.this.busy = busy;
-
-                    changeSupport.fireChange();
-                }
-            };
+                changeSupport.fireChange();
+            }
+        };
 
         if (EventQueue.isDispatchThread()) {
             r.run();
@@ -146,14 +135,13 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
      */
     public void setStatusMessage(final String statusMessage) {
         final Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                AddGeometriesToMapPreviewWizardPanel.this.statusMessage = statusMessage;
 
-                @Override
-                public void run() {
-                    AddGeometriesToMapPreviewWizardPanel.this.statusMessage = statusMessage;
-
-                    changeSupport.fireChange();
-                }
-            };
+                changeSupport.fireChange();
+            }
+        };
 
         if (EventQueue.isDispatchThread()) {
             r.run();
@@ -209,15 +197,15 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
 
     @Override
     protected void read(final WizardDescriptor wizard) {
-        geometry = (Geometry)wizard.getProperty(PROP_GEOMETRY);
-        previewUrl = (String)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_PREVIEW_GETMAP_URL);
-        currentCrs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
+        geometry = (Geometry) wizard.getProperty(PROP_GEOMETRY);
+        previewUrl = (String) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_PREVIEW_GETMAP_URL);
+        currentCrs = (Crs) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
         // TODO: user proper executor
         final ExecutorService executor = CismetConcurrency.getInstance("cismap-commons").getDefaultExecutor(); // NOI18N
 
-        executor.execute(new Thread("AddGeometriesToMapPreviewWizardPanel read()") {
-
+        executor.execute(
+            new Thread("AddGeometriesToMapPreviewWizardPanel read()") {
                 @Override
                 public void run() {
                     setGeometry(null);
@@ -225,17 +213,20 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                     setStatusMessage(
                         NbBundle.getMessage(
                             AddGeometriesToMapPreviewWizardPanel.class,
-                            "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.convertingData")); // NOI18N
+                            "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.convertingData"
+                        )
+                    ); // NOI18N
                     setBusy(true);
 
-                    final Converter converter = (Converter)wizard.getProperty(
-                            AbstractConverterChooseWizardPanel.PROP_CONVERTER);
+                    final Converter converter = (Converter) wizard.getProperty(
+                        AbstractConverterChooseWizardPanel.PROP_CONVERTER
+                    );
                     final Object data = wizard.getProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
-                    final Crs crs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
+                    final Crs crs = (Crs) wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
                     assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
 
-                    final GeometryConverter geomConverter = (GeometryConverter)converter;
+                    final GeometryConverter geomConverter = (GeometryConverter) converter;
                     try {
                         @SuppressWarnings("unchecked")
                         final Geometry geom = geomConverter.convertForward(data, crs.getCode());
@@ -243,23 +234,28 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                         setStatusMessage(
                             NbBundle.getMessage(
                                 AddGeometriesToMapPreviewWizardPanel.class,
-                                "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.conversionSuccessful")); // NOI18N
+                                "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.conversionSuccessful"
+                            )
+                        ); // NOI18N
 
                         setGeometry(geom);
 
                         multipleGeometries = (geomConverter instanceof MultiGeometriesProvider);
                     } catch (final Exception ex) {
-                        LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex);             // NOI18N
+                        LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex); // NOI18N
                         setStatusMessage(
                             NbBundle.getMessage(
                                 AddGeometriesToMapPreviewWizardPanel.class,
                                 "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.convertError", // NOI18N
-                                ex.getLocalizedMessage()));
+                                ex.getLocalizedMessage()
+                            )
+                        );
                     } finally {
                         setBusy(false);
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override

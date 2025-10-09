@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -16,7 +16,6 @@ package de.cismet.cismap.commons.gpx;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
@@ -46,13 +45,7 @@ import javax.xml.bind.annotation.XmlType;
  * @version  $Revision$, $Date$
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    name = "trksegType",
-    propOrder = {
-            "trkpt",
-            "extensions"
-        }
-)
+@XmlType(name = "trksegType", propOrder = { "trkpt", "extensions" })
 public class TrksegType {
 
     //~ Instance fields --------------------------------------------------------

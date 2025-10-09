@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -23,22 +23,6 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.GeometryCombiner;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.event.ActionEvent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.CheckedFeaturesProvider;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
@@ -46,6 +30,16 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeaturesProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -71,12 +65,11 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
      * Creates a new DuplicateGeometryFeatureAction object.
      */
     public MergeFeatureAction() {
-        super(NbBundle.getMessage(
-                MergeFeatureAction.class,
-                "MergeFeatureAction.MergeFeatureAction()"));
+        super(NbBundle.getMessage(MergeFeatureAction.class, "MergeFeatureAction.MergeFeatureAction()"));
         super.putValue(
             Action.SMALL_ICON,
-            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-join.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/actions/arrow-join.png"))
+        );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -103,8 +96,8 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        de.cismet.tools.CismetThreadPool.execute(new javax.swing.SwingWorker<Void, Void>() {
-
+        de.cismet.tools.CismetThreadPool.execute(
+            new javax.swing.SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     Thread.currentThread().setName("MergeFeatureAction");
@@ -116,8 +109,9 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
                     }
 
                     final GeometryFactory gf = new GeometryFactory(
-                            new PrecisionModel(PrecisionModel.FLOATING),
-                            CrsTransformer.getCurrentSrid());
+                        new PrecisionModel(PrecisionModel.FLOATING),
+                        CrsTransformer.getCurrentSrid()
+                    );
                     final Geometry geometryCollection = gf.buildGeometry(allGeoms);
 
                     final Geometry geom = geometryCollection.union();
@@ -149,21 +143,25 @@ public class MergeFeatureAction extends AbstractAction implements CommonFeatureA
                         LOG.error("Problem while merging geometries.", e);
 
                         final ErrorInfo errorInfo = new ErrorInfo(
-                                NbBundle.getMessage(
-                                    MergeFeatureAction.class,
-                                    "MergeFeatureAction.actionPerformed().done().title"),
-                                NbBundle.getMessage(
-                                    MergeFeatureAction.class,
-                                    "MergeFeatureAction.actionPerformed().done().message"),
-                                null,
-                                null,
-                                e,
-                                Level.ALL,
-                                null);
+                            NbBundle.getMessage(
+                                MergeFeatureAction.class,
+                                "MergeFeatureAction.actionPerformed().done().title"
+                            ),
+                            NbBundle.getMessage(
+                                MergeFeatureAction.class,
+                                "MergeFeatureAction.actionPerformed().done().message"
+                            ),
+                            null,
+                            null,
+                            e,
+                            Level.ALL,
+                            null
+                        );
                         JXErrorPane.showDialog(CismapBroker.getInstance().getMappingComponent(), errorInfo);
                     }
                 }
-            });
+            }
+        );
     }
 
     @Override

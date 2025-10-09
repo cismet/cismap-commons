@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * SimpleWmsGetMapUrl.java
  *
@@ -33,8 +33,8 @@ public class SimpleWmsGetMapUrl {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String WIDTH_TOKEN = "<cismap:width>";              // NOI18N
-    public static final String HEIGHT_TOKEN = "<cismap:height>";            // NOI18N
+    public static final String WIDTH_TOKEN = "<cismap:width>"; // NOI18N
+    public static final String HEIGHT_TOKEN = "<cismap:height>"; // NOI18N
     public static final String BOUNDING_BOX_TOKEN = "<cismap:boundingBox>"; // NOI18N
 
     // NOTE: not configurable
@@ -42,7 +42,7 @@ public class SimpleWmsGetMapUrl {
     public static final String BOUNDING_BOX_TOKEN_LL_Y = "<cismap:boundingBox_ll_y>"; // NOI18N
     public static final String BOUNDING_BOX_TOKEN_UR_X = "<cismap:boundingBox_ur_x>"; // NOI18N
     public static final String BOUNDING_BOX_TOKEN_UR_Y = "<cismap:boundingBox_ur_y>"; // NOI18N
-    public static final String SRS_TOKEN = "<cismap:srs>";                            // NOI18N
+    public static final String SRS_TOKEN = "<cismap:srs>"; // NOI18N
 
     public static final String EPSG_NAMESPACE = "http://www.opengis.net/gml/srs/epsg.xml"; // NOI18N
 
@@ -92,10 +92,12 @@ public class SimpleWmsGetMapUrl {
      * @param  heightToken       DOCUMENT ME!
      * @param  boundingBoxToken  DOCUMENT ME!
      */
-    public SimpleWmsGetMapUrl(final String urlTemplate,
-            final String widthToken,
-            final String heightToken,
-            final String boundingBoxToken) {
+    public SimpleWmsGetMapUrl(
+        final String urlTemplate,
+        final String widthToken,
+        final String heightToken,
+        final String boundingBoxToken
+    ) {
         this(urlTemplate, widthToken, heightToken, boundingBoxToken, null);
     }
 
@@ -108,11 +110,13 @@ public class SimpleWmsGetMapUrl {
      * @param  boundingBoxToken  DOCUMENT ME!
      * @param  payloadTemplate   DOCUMENT ME!
      */
-    public SimpleWmsGetMapUrl(final String urlTemplate,
-            final String widthToken,
-            final String heightToken,
-            final String boundingBoxToken,
-            final String payloadTemplate) {
+    public SimpleWmsGetMapUrl(
+        final String urlTemplate,
+        final String widthToken,
+        final String heightToken,
+        final String boundingBoxToken,
+        final String payloadTemplate
+    ) {
         this.urlTemplate = urlTemplate;
         this.widthToken = widthToken;
         this.heightToken = heightToken;
@@ -191,6 +195,7 @@ public class SimpleWmsGetMapUrl {
     public void setX1(final double coord) {
         x1 = coord;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -199,6 +204,7 @@ public class SimpleWmsGetMapUrl {
     public void setY1(final double coord) {
         y1 = coord;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -207,6 +213,7 @@ public class SimpleWmsGetMapUrl {
     public void setX2(final double coord) {
         x2 = coord;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -224,6 +231,7 @@ public class SimpleWmsGetMapUrl {
     public String getUrlTemplate() {
         return urlTemplate;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -238,15 +246,17 @@ public class SimpleWmsGetMapUrl {
         // NOTE: the payload will not be inserted here, since this is the place where the getMap GET url is built
         String url = urlTemplate.replaceAll(widthToken, new Integer(width).toString());
         url = url.replaceAll(heightToken, new Integer(height).toString());
-        url = url.replaceAll(
+        url =
+            url.replaceAll(
                 boundingBoxToken,
-                new Double(x1).toString()
-                        + "," // NOI18N
-                        + new Double(y1).toString()
-                        + "," // NOI18N
-                        + new Double(x2).toString()
-                        + "," // NOI18N
-                        + new Double(y2).toString());
+                new Double(x1).toString() +
+                "," + // NOI18N
+                new Double(y1).toString() +
+                "," + // NOI18N
+                new Double(x2).toString() +
+                "," + // NOI18N
+                new Double(y2).toString()
+            );
 
         // we can always replace all since the code is always present, requests without SRS_TOKEN won't be affected
         url = url.replaceAll(SRS_TOKEN, CismapBroker.getInstance().getSrs().getCode());

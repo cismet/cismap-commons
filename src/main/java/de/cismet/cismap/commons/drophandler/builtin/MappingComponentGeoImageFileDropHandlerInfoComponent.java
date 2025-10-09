@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,22 +12,16 @@
  */
 package de.cismet.cismap.commons.drophandler.builtin;
 
-import lombok.Getter;
-
-import org.apache.log4j.Logger;
-
+import de.cismet.tools.BrowserLauncher;
+import de.cismet.tools.ExifReader;
+import de.cismet.tools.gui.ImageUtil;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-
 import java.io.File;
-
 import javax.swing.ImageIcon;
-
-import de.cismet.tools.BrowserLauncher;
-import de.cismet.tools.ExifReader;
-
-import de.cismet.tools.gui.ImageUtil;
+import lombok.Getter;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -44,7 +38,9 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final File imageFile;
+    @Getter
+    private final File imageFile;
+
     private final ImageIcon reducedIcon;
     private final int reducedWidth;
     private final int reducedHeight;
@@ -52,6 +48,7 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -97,18 +94,21 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
             jLabel1,
             org.openide.util.NbBundle.getMessage(
                 MappingComponentGeoImageFileDropHandlerInfoComponent.class,
-                "MappingComponentGeoImageFileDropHandlerInfoComponent.jLabel1.text")); // NOI18N
+                "MappingComponentGeoImageFileDropHandlerInfoComponent.jLabel1.text"
+            )
+        ); // NOI18N
         jLabel1.setToolTipText(imageFile.getAbsolutePath());
         jLabel1.setMaximumSize(new Dimension(reducedWidth, reducedHeight));
         jLabel1.setMinimumSize(new Dimension(reducedWidth, reducedHeight));
         jLabel1.setPreferredSize(new Dimension(reducedWidth, reducedHeight));
-        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
-
+        jLabel1.addMouseListener(
+            new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(final java.awt.event.MouseEvent evt) {
                     jLabel1MouseClicked(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -134,5 +134,5 @@ public class MappingComponentGeoImageFileDropHandlerInfoComponent extends javax.
         if (evt.getClickCount() > 1) {
             BrowserLauncher.openURLorFile(imageFile.getAbsolutePath());
         }
-    }                                                                       //GEN-LAST:event_jLabel1MouseClicked
+    } //GEN-LAST:event_jLabel1MouseClicked
 }

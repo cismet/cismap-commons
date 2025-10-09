@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.capabilities;
-
-import org.apache.log4j.Logger;
-
-import java.net.MalformedURLException;
 
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
 import de.cismet.security.exceptions.MissingArgumentException;
 import de.cismet.security.exceptions.NoHandlerForURLException;
 import de.cismet.security.exceptions.RequestFailedException;
+import java.net.MalformedURLException;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -50,12 +48,8 @@ public abstract class AbstractVersionNegotiator extends de.cismet.commons.capabi
      * @throws  Exception                            DOCUMENT ME!
      */
     @Override
-    protected StringBuilder readStringFromlink(final String url) throws MalformedURLException,
-        MissingArgumentException,
-        AccessMethodIsNotSupportedException,
-        RequestFailedException,
-        NoHandlerForURLException,
-        Exception {
+    protected StringBuilder readStringFromlink(final String url)
+        throws MalformedURLException, MissingArgumentException, AccessMethodIsNotSupportedException, RequestFailedException, NoHandlerForURLException, Exception {
         final CapabilitiesCache cache = CapabilitiesCache.getInstance();
 
         return new StringBuilder(cache.calcValue(url));

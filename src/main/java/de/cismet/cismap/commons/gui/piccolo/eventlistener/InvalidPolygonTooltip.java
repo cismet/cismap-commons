@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.RoundRectangle2D;
-
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -34,45 +32,45 @@ public class InvalidPolygonTooltip extends PNode {
      * @version  $Revision$, $Date$
      */
     public static enum Mode {
-
         //~ Enum constants -----------------------------------------------------
 
-        SELECT_FEATURE, HOLE_ERROR, ENTITY_ERROR
+        SELECT_FEATURE,
+        HOLE_ERROR,
+        ENTITY_ERROR,
     }
 
     //~ Instance fields --------------------------------------------------------
 
     private final Color COLOR_BACKGROUND = new Color(255, 255, 222, 200);
     private final String[] selectContent = {
-            "Es muss genau eine Geometrie",
-            "selektiert sein. Selektieren",
-            "Sie jetzt eine Geometrie",
-            "indem Sie [alt] gedrückt",
-            "halten, während sie auf die",
-            "gewünschte Geometrie",
-            "klicken."
-        };
+        "Es muss genau eine Geometrie",
+        "selektiert sein. Selektieren",
+        "Sie jetzt eine Geometrie",
+        "indem Sie [alt] gedrückt",
+        "halten, während sie auf die",
+        "gewünschte Geometrie",
+        "klicken.",
+    };
     private final String[] holeContent = {
-            "Löcher müssen vollständig in",
-            "ihrem eigenen Teil-Polygon",
-            "liegen, und dürfen andere",
-            "Teil-Polygone oder Löcher",
-            "nicht berühren."
-        };
+        "Löcher müssen vollständig in",
+        "ihrem eigenen Teil-Polygon",
+        "liegen, und dürfen andere",
+        "Teil-Polygone oder Löcher",
+        "nicht berühren.",
+    };
     private final String[] entityContent = {
-            "Teil-Polygone dürfen keine",
-            "anderen Teil-Polygone",
-            "berühren. Sie dürfen dabei",
-            "durchaus in Löchern liegen."
-        };
+        "Teil-Polygone dürfen keine",
+        "anderen Teil-Polygone",
+        "berühren. Sie dürfen dabei",
+        "durchaus in Löchern liegen.",
+    };
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new TransformationTooltip object.
      */
-    public InvalidPolygonTooltip() {
-    }
+    public InvalidPolygonTooltip() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -88,21 +86,24 @@ public class InvalidPolygonTooltip extends PNode {
         String[] content = new String[] {};
 
         switch (mode) {
-            case SELECT_FEATURE: {
-                title = "Polygon selektieren";
-                content = selectContent;
-            }
-            break;
-            case HOLE_ERROR: {
-                title = "Ungültiges MultiPolygon";
-                content = holeContent;
-            }
-            break;
-            case ENTITY_ERROR: {
-                title = "Ungültiges MultiPolygon";
-                content = entityContent;
-            }
-            break;
+            case SELECT_FEATURE:
+                {
+                    title = "Polygon selektieren";
+                    content = selectContent;
+                }
+                break;
+            case HOLE_ERROR:
+                {
+                    title = "Ungültiges MultiPolygon";
+                    content = holeContent;
+                }
+                break;
+            case ENTITY_ERROR:
+                {
+                    title = "Ungültiges MultiPolygon";
+                    content = entityContent;
+                }
+                break;
         }
 
         setCustomText(title, content);
@@ -118,10 +119,11 @@ public class InvalidPolygonTooltip extends PNode {
         final PText defaultPText = new PText();
 
         final Font defaultFont = defaultPText.getFont();
-        final Font boldDefaultFont = new Font(defaultFont.getName(),
-                defaultFont.getStyle()
-                        + Font.BOLD,
-                defaultFont.getSize());
+        final Font boldDefaultFont = new Font(
+            defaultFont.getName(),
+            defaultFont.getStyle() + Font.BOLD,
+            defaultFont.getSize()
+        );
 
         final PText pTextTitle = new PText(title);
         pTextTitle.setOffset(5, 5);

@@ -1,41 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.infowidgets;
-
-import org.openide.util.NbBundle;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Image;
-
-import java.net.URL;
-import java.net.URLEncoder;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -49,13 +19,35 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleLegendProvider;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
-
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -75,6 +67,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane scpLegends;
     private javax.swing.JTable tblLegends;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -170,39 +163,36 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     }
 
     @Override
-    public void layerVisibilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerVisibilityChanged(final ActiveLayerEvent e) {}
 
     @Override
-    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
-    }
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {}
 
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (log.isDebugEnabled()) {
-            log.debug("layerRemoved() fired");                                   // NOI18N
+            log.debug("layerRemoved() fired"); // NOI18N
         }
         if (e.getLayer() instanceof WMSServiceLayer) {
-            removeWmsServiceLayer((WMSServiceLayer)e.getLayer());
+            removeWmsServiceLayer((WMSServiceLayer) e.getLayer());
         } else if (e.getLayer() instanceof WMSLayer) {
-            removeWMSLayer((WMSLayer)e.getLayer());
+            removeWMSLayer((WMSLayer) e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             removeLegendByUrl(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup) e.getLayer();
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
-                    removeWmsServiceLayer((WMSServiceLayer)elem);
+                    removeWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        }                                                                        /*else if(e.getLayer() instanceof
-                                                                                  * ServiceLayer) {
-                                                                                  * removeLegendByName(((ServiceLayer)e.getLayer()).getName());}*/
-        else {
+        }/*else if(e.getLayer() instanceof
+         * ServiceLayer) {
+         * removeLegendByName(((ServiceLayer)e.getLayer()).getName());}*/ else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -218,7 +208,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         while (it.hasNext()) {
             final Object elem = it.next();
             if (elem instanceof WMSLayer) {
-                final WMSLayer wl = (WMSLayer)elem;
+                final WMSLayer wl = (WMSLayer) elem;
                 removeWMSLayer(wl);
             }
         }
@@ -234,7 +224,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         if (wl.getOgcCapabilitiesLayer() == null) {
             if (log.isDebugEnabled()) {
                 log.debug(
-                    "in removeWMSLayer waren die capabilities null. kann die Legende nicht entferenen. Wahrscheinlich war deshalb auch gar keine drin. ");
+                    "in removeWMSLayer waren die capabilities null. kann die Legende nicht entferenen. Wahrscheinlich war deshalb auch gar keine drin. "
+                );
             }
         } else {
             final String title = wl.getOgcCapabilitiesLayer().getTitle();
@@ -257,21 +248,28 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         if (log.isDebugEnabled()) {
-            log.debug("layerSelectionChanged() fired");                          // NOI18N
+            log.debug("layerSelectionChanged() fired"); // NOI18N
         }
-        if ((e.getLayer() instanceof WMSLayer) || (e.getLayer() instanceof WMSServiceLayer)
-                    || (e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
+        if (
+            (e.getLayer() instanceof WMSLayer) ||
+            (e.getLayer() instanceof WMSServiceLayer) ||
+            (e.getLayer() instanceof SlidableWMSServiceLayerGroup)
+        ) {
             WMSLayer layer = null;
             if (e.getLayer() instanceof WMSLayer) {
-                layer = (WMSLayer)e.getLayer();
-            } else if ((e.getLayer() instanceof WMSServiceLayer)
-                        && (((WMSServiceLayer)e.getLayer()).getWMSLayers().size() == 1)) {
-                layer = (WMSLayer)((WMSServiceLayer)e.getLayer()).getWMSLayers().get(0);
-            } else if ((e.getLayer() instanceof SlidableWMSServiceLayerGroup)
-                        && (((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().size() > 0)) {
-                final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().get(0);
+                layer = (WMSLayer) e.getLayer();
+            } else if (
+                (e.getLayer() instanceof WMSServiceLayer) &&
+                (((WMSServiceLayer) e.getLayer()).getWMSLayers().size() == 1)
+            ) {
+                layer = (WMSLayer) ((WMSServiceLayer) e.getLayer()).getWMSLayers().get(0);
+            } else if (
+                (e.getLayer() instanceof SlidableWMSServiceLayerGroup) &&
+                (((SlidableWMSServiceLayerGroup) e.getLayer()).getLayers().size() > 0)
+            ) {
+                final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup) e.getLayer()).getLayers().get(0);
                 if (sLayer.getWMSLayers().size() == 1) {
-                    layer = (WMSLayer)sLayer.getWMSLayers().get(0);
+                    layer = (WMSLayer) sLayer.getWMSLayers().get(0);
                 }
             }
             try {
@@ -284,7 +282,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 }
             }
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             scrollToLegend(slp.getLegendUrl());
         }
     }
@@ -303,37 +301,36 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         }
 
         if (e.getLayer() instanceof WMSServiceLayer) {
-            addWmsServiceLayer((WMSServiceLayer)e.getLayer());
+            addWmsServiceLayer((WMSServiceLayer) e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup) e.getLayer();
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
-                    addWmsServiceLayer((WMSServiceLayer)elem);
+                    addWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        }                                                                        /*else if (e.getLayer() instanceof
-                                                                                  * SLDStyledLayer) { final
-                                                                                  * SLDStyledLayer sldLayer =
-                                                                                  * (SLDStyledLayer) e.getLayer();
-                                                                                  * Pair<Integer, Integer> size =
-                                                                                  * sldLayer.getLegendSize();
-                                                                                  * BufferedImage legendImage = new
-                                                                                  * BufferedImage(size.first,
-                                                                                  * size.second,
-                                                                                  * BufferedImage.TYPE_4BYTE_ABGR);
-                                                                                  * sldLayer.getLegend(legendImage.getWidth(),
-                                                                                  * legendImage.getHeight(),
-                                                                                  * legendImage.createGraphics());
-                                                                                  * addLegend(legendImage,
-                                                                                  * ((ServiceLayer)e.getLayer()).getName());}
-                                                                                  */
-        else {
+        }/*else if (e.getLayer() instanceof
+         * SLDStyledLayer) { final
+         * SLDStyledLayer sldLayer =
+         * (SLDStyledLayer) e.getLayer();
+         * Pair<Integer, Integer> size =
+         * sldLayer.getLegendSize();
+         * BufferedImage legendImage = new
+         * BufferedImage(size.first,
+         * size.second,
+         * BufferedImage.TYPE_4BYTE_ABGR);
+         * sldLayer.getLegend(legendImage.getWidth(),
+         * legendImage.getHeight(),
+         * legendImage.createGraphics());
+         * addLegend(legendImage,
+         * ((ServiceLayer)e.getLayer()).getName());}
+         */ else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -350,7 +347,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             while (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSLayer) {
-                    final WMSLayer wl = (WMSLayer)elem;
+                    final WMSLayer wl = (WMSLayer) elem;
                     final String title = wl.getOgcCapabilitiesLayer().getTitle();
                     final String name = wl.getOgcCapabilitiesLayer().getName();
                     String url = null;
@@ -366,7 +363,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                         wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
                         this.addLegend(url, name);
                         if (log.isDebugEnabled()) {
-                            log.debug("added legend:" + name + "=" + url);      // NOI18N
+                            log.debug("added legend:" + name + "=" + url); // NOI18N
                         }
                     }
                 }
@@ -404,8 +401,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     final StringTokenizer stKeyVal = new StringTokenizer(stParam.nextToken(), "=");
 
                     if (stKeyVal.countTokens() == 2) {
-                        urlString += "&" + stKeyVal.nextToken() + "="
-                                    + URLEncoder.encode(stKeyVal.nextToken(), "UTF-8");
+                        urlString +=
+                            "&" + stKeyVal.nextToken() + "=" + URLEncoder.encode(stKeyVal.nextToken(), "UTF-8");
                     }
                 }
             }
@@ -415,8 +412,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     }
 
     @Override
-    public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-    }
+    public void layerInformationStatusChanged(final ActiveLayerEvent e) {}
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -432,11 +428,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         scpLegends.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         scpLegends.setDoubleBuffered(true);
         tblLegends.setBackground(new java.awt.Color(236, 233, 216));
-        tblLegends.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {
-                    { null }
-                },
-                new String[] { "Title 1" }));
+        tblLegends.setModel(
+            new javax.swing.table.DefaultTableModel(new Object[][] { { null } }, new String[] { "Title 1" })
+        );
 
         setLayout(new java.awt.BorderLayout());
 
@@ -447,7 +441,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     public void statusValueChanged(final StatusEvent e) {
         if (e.getName().equals(StatusEvent.AWAKED_FROM_DUMMY)) {
             if (e.getValue() instanceof WMSServiceLayer) {
-                addWmsServiceLayer((WMSServiceLayer)e.getValue());
+                addWmsServiceLayer((WMSServiceLayer) e.getValue());
             }
         }
     }
@@ -549,36 +543,33 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setIcon(null);
-                        lblImage.setText("..."); // NOI18N
-                        if (maxWidth > 0) {
-                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
-                        }
-                        tableModel.fireTableDataChanged();
+                @Override
+                public void run() {
+                    lblImage.setIcon(null);
+                    lblImage.setText("..."); // NOI18N
+                    if (maxWidth > 0) {
+                        tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
                     }
-                };
+                    tableModel.fireTableDataChanged();
+                }
+            };
 
             dispatch(r);
         }
 
         @Override
-        public void retrievalProgress(final RetrievalEvent e) {
-        }
+        public void retrievalProgress(final RetrievalEvent e) {}
 
         @Override
         public void retrievalError(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setText("");                     // NOI18N
-                        log.error("Error while loading legend."); // NOI18N
-                        tableModel.fireTableDataChanged();
-                    }
-                };
+                @Override
+                public void run() {
+                    lblImage.setText(""); // NOI18N
+                    log.error("Error while loading legend."); // NOI18N
+                    tableModel.fireTableDataChanged();
+                }
+            };
 
             dispatch(r);
         }
@@ -586,26 +577,25 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
             if (e.getRetrievedObject() instanceof Image) {
-                final Image image = (Image)e.getRetrievedObject();
+                final Image image = (Image) e.getRetrievedObject();
                 final ImageIcon ii = new ImageIcon(image);
 
                 final Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        lblImage.setText(""); // NOI18N
+                        lblImage.setIcon(ii);
 
-                        @Override
-                        public void run() {
-                            lblImage.setText(""); // NOI18N
-                            lblImage.setIcon(ii);
-
-                            tableModel.fireTableDataChanged();
-                            int newWidth = image.getWidth(null) + 10; // because of the border and stuff of the JTable
-                            if (newWidth < tblLegends.getPreferredSize().width) {
-                                newWidth = tblLegends.getPreferredSize().width;
-                            } else {
-                                maxWidth = newWidth;
-                            }
-                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
+                        tableModel.fireTableDataChanged();
+                        int newWidth = image.getWidth(null) + 10; // because of the border and stuff of the JTable
+                        if (newWidth < tblLegends.getPreferredSize().width) {
+                            newWidth = tblLegends.getPreferredSize().width;
+                        } else {
+                            maxWidth = newWidth;
                         }
-                    };
+                        tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
+                    }
+                };
 
                 dispatch(r);
             }
@@ -614,12 +604,11 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setText(""); // NOI18N
-                    }
-                };
+                @Override
+                public void run() {
+                    lblImage.setText(""); // NOI18N
+                }
+            };
 
             dispatch(r);
         }
@@ -645,7 +634,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public boolean equals(final Object tester) {
             if (tester instanceof LegendPanel) {
-                final LegendPanel t = (LegendPanel)tester;
+                final LegendPanel t = (LegendPanel) tester;
                 return t.url.equals(url);
             } else {
                 return false;
@@ -681,13 +670,15 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
          * @return  DOCUMENT ME!
          */
         @Override
-        public Component getTableCellRendererComponent(final JTable table,
-                final Object value,
-                final boolean isSelected,
-                final boolean hasFocus,
-                final int row,
-                final int column) {
-            final Component component = (Component)value;
+        public Component getTableCellRendererComponent(
+            final JTable table,
+            final Object value,
+            final boolean isSelected,
+            final boolean hasFocus,
+            final int row,
+            final int column
+        ) {
+            final Component component = (Component) value;
             if (isSelected) {
                 component.setBackground(Color.white); // javax.swing.UIManager.getDefaults().getColor("Table.highlight"));
                 component.setForeground(Legend.this.getForeground());
@@ -696,8 +687,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 component.setForeground(Legend.this.getForeground());
             }
 
-            if (table.getRowHeight(row) != (int)component.getPreferredSize().getHeight()) {
-                table.setRowHeight(row, (int)component.getPreferredSize().getHeight());
+            if (table.getRowHeight(row) != (int) component.getPreferredSize().getHeight()) {
+                table.setRowHeight(row, (int) component.getPreferredSize().getHeight());
             }
 
             return component;
@@ -765,13 +756,14 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             if (EventQueue.isDispatchThread()) {
                 fireTableStructureChanged();
             } else {
-                EventQueue.invokeLater(new Runnable() {
-
+                EventQueue.invokeLater(
+                    new Runnable() {
                         @Override
                         public void run() {
                             LegendModel.super.fireTableStructureChanged();
                         }
-                    });
+                    }
+                );
             }
         }
 

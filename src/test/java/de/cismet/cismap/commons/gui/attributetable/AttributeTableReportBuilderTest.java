@@ -1,5 +1,7 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
+import static org.junit.Assert.*;
+
 import ar.com.fdvs.dj.core.DynamicJasperHelper;
 import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
 import ar.com.fdvs.dj.domain.DynamicReport;
@@ -22,7 +24,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -30,8 +31,7 @@ import static org.junit.Assert.*;
  */
 public class AttributeTableReportBuilderTest {
 
-    public AttributeTableReportBuilderTest() {
-    }
+    public AttributeTableReportBuilderTest() {}
 
     @BeforeClass
     public static void setUpClass() {
@@ -41,30 +41,30 @@ public class AttributeTableReportBuilderTest {
     }
 
     @AfterClass
-    public static void tearDownClass() {
-    }
+    public static void tearDownClass() {}
 
     @Before
-    public void setUp() {
-    }
+    public void setUp() {}
 
     @After
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     @Test
     public void test010AttributeTableReportBuilder() throws Exception {
-        final JRDataSource tableDataSource = new AttributeTableReportBuilderTest.TableDataSource(new AttributeTableReportBuilderTest.CustomTableModel());
+        final JRDataSource tableDataSource = new AttributeTableReportBuilderTest.TableDataSource(
+            new AttributeTableReportBuilderTest.CustomTableModel()
+        );
         final Map<String, Object> generatedParams = new HashMap<String, Object>();
         generatedParams.put("table_data", tableDataSource);
-        final DynamicReport dynamicReport = new AttributeTableReportBuilder().buildReport(
-                "Titel",
-                new JTable(new AttributeTableReportBuilderTest.CustomTableModel()));
+        final DynamicReport dynamicReport = new AttributeTableReportBuilder()
+            .buildReport("Titel", new JTable(new AttributeTableReportBuilderTest.CustomTableModel()));
         assertNotNull(dynamicReport);
 
-        final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(dynamicReport,
-                new ClassicLayoutManager(),
-                generatedParams);
+        final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
+            dynamicReport,
+            new ClassicLayoutManager(),
+            generatedParams
+        );
         assertNotNull(jasperReport);
 
         for (final String key : generatedParams.keySet()) {
@@ -72,15 +72,9 @@ public class AttributeTableReportBuilderTest {
 
             if (o instanceof JasperReport) {
                 final JasperReport jr = (JasperReport) o;
-                String reportFile = System.getProperty("user.dir")
-                        + "/target/reports/"
-                        + key
-                        + ".jrxml";
+                String reportFile = System.getProperty("user.dir") + "/target/reports/" + key + ".jrxml";
 
-                DynamicJasperHelper.generateJRXML(
-                        jr,
-                        "UTF-8",
-                        reportFile);
+                DynamicJasperHelper.generateJRXML(jr, "UTF-8", reportFile);
 
                 final JasperReport restoredReport = JasperCompileManager.compileReport(reportFile);
                 assertNotNull(restoredReport);
@@ -94,9 +88,7 @@ public class AttributeTableReportBuilderTest {
         }
 
         final String reportFile = System.getProperty("user.dir") + "/target/reports/table_report.jrxml";
-        DynamicJasperHelper.generateJRXML(
-                jasperReport,
-                "UTF-8", reportFile);
+        DynamicJasperHelper.generateJRXML(jasperReport, "UTF-8", reportFile);
 
         final JasperReport restoredReport = JasperCompileManager.compileReport(reportFile);
         assertNotNull(restoredReport);
@@ -109,7 +101,6 @@ public class AttributeTableReportBuilderTest {
 
         final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, generatedParams, tableDataSource);
         assertNotNull(jasperPrint);
-
         // DISABLED: java.awt.HeadlessException thown in headless mode (on ci server)
         //final JRViewer aViewer = new JRViewer(jasperPrint);
         //assertNotNull(aViewer);
@@ -171,13 +162,13 @@ public class AttributeTableReportBuilderTest {
     private static class CustomTableModel implements TableModel {
 
         //~ Instance fields ----------------------------------------------------
-        String[] cols = {"ab", "cd", "ef", "gh"};
+        String[] cols = { "ab", "cd", "ef", "gh" };
         String[][] attr = {
-            {"a", "b", "c", "d"},
-            {"a1", "b1", "c1", "d1"},
-            {"a2", "b2", "c2", "d2"},
-            {"a3", "b3", "c3", "d3"},
-            {"a4", "4b", "c4", "4d"}
+            { "a", "b", "c", "d" },
+            { "a1", "b1", "c1", "d1" },
+            { "a2", "b2", "c2", "d2" },
+            { "a3", "b3", "c3", "d3" },
+            { "a4", "4b", "c4", "4d" },
         };
 
         //~ Methods ------------------------------------------------------------
@@ -217,11 +208,9 @@ public class AttributeTableReportBuilderTest {
         }
 
         @Override
-        public void addTableModelListener(final TableModelListener l) {
-        }
+        public void addTableModelListener(final TableModelListener l) {}
 
         @Override
-        public void removeTableModelListener(final TableModelListener l) {
-        }
+        public void removeTableModelListener(final TableModelListener l) {}
     }
 }

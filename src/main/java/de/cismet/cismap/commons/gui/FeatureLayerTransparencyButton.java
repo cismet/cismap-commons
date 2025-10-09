@@ -1,12 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -17,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -26,8 +26,6 @@ import javax.swing.JSlider;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.SwingConstants;
-
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -92,28 +90,29 @@ public class FeatureLayerTransparencyButton extends JButton {
         gridBagConstraints.insets = new Insets(2, 2, 2, 2);
         setLayout(new GridBagLayout());
 
-        addActionListener(new ActionListener() {
-
+        addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent evt) {
                     if (CismapBroker.getInstance().getMappingComponent() != null) {
-                        final float transp = CismapBroker.getInstance()
-                                    .getMappingComponent()
-                                    .getFeatureLayer()
-                                    .getTransparency();
-                        final int intValue = (int)(transp * 100);
+                        final float transp = CismapBroker
+                            .getInstance()
+                            .getMappingComponent()
+                            .getFeatureLayer()
+                            .getTransparency();
+                        final int intValue = (int) (transp * 100);
                         slider.setValue(intValue);
                     }
 
                     updateLabel();
                     popup.show(
                         FeatureLayerTransparencyButton.this,
-                        (getWidth() / 2)
-                                - (POPUP_WIDTH / 2),
-                        getHeight()
-                                + 2);
+                        (getWidth() / 2) - (POPUP_WIDTH / 2),
+                        getHeight() + 2
+                    );
                 }
-            });
+            }
+        );
 
         popup.add(panPopup);
     }
@@ -124,7 +123,7 @@ public class FeatureLayerTransparencyButton extends JButton {
      * DOCUMENT ME!
      */
     private void updateLabel() {
-        final int intValue = (int)slider.getValue();
+        final int intValue = (int) slider.getValue();
         if (prevValue != intValue) {
             labPercentage.setText(String.format("%d%%", slider.getValue()));
         }
@@ -158,19 +157,17 @@ public class FeatureLayerTransparencyButton extends JButton {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public void processMouseEvent(final MouseEvent e,
-                final MenuElement[] path,
-                final MenuSelectionManager manager) {
-        }
+        public void processMouseEvent(
+            final MouseEvent e,
+            final MenuElement[] path,
+            final MenuSelectionManager manager
+        ) {}
 
         @Override
-        public void processKeyEvent(final KeyEvent e, final MenuElement[] path,
-                final MenuSelectionManager manager) {
-        }
+        public void processKeyEvent(final KeyEvent e, final MenuElement[] path, final MenuSelectionManager manager) {}
 
         @Override
-        public void menuSelectionChanged(final boolean isIncluded) {
-        }
+        public void menuSelectionChanged(final boolean isIncluded) {}
 
         @Override
         public MenuElement[] getSubElements() {
@@ -203,18 +200,18 @@ public class FeatureLayerTransparencyButton extends JButton {
 
         @Override
         public void mouseDragged(final MouseEvent me) {
-            final int intValue = (int)slider.getValue();
+            final int intValue = (int) slider.getValue();
             if (CismapBroker.getInstance().getMappingComponent() != null) {
-                CismapBroker.getInstance()
-                        .getMappingComponent()
-                        .getFeatureLayer()
-                        .setTransparency((float)intValue / 100f);
+                CismapBroker
+                    .getInstance()
+                    .getMappingComponent()
+                    .getFeatureLayer()
+                    .setTransparency((float) intValue / 100f);
             }
             updateLabel();
         }
 
         @Override
-        public void mouseReleased(final MouseEvent me) {
-        }
+        public void mouseReleased(final MouseEvent me) {}
     }
 }

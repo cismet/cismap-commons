@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * Memento.java
  *
@@ -15,15 +15,14 @@
  */
 package de.cismet.cismap.commons.interaction.memento;
 
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Observable;
 import java.util.Stack;
-
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
 
 /**
  * Die Memento-Klasse liefert die Moeglichkeit Aktionen zu speichern und zu einem spaeteren Zeitpunkt wieder nach dem
@@ -113,8 +112,12 @@ public class Memento extends Observable implements MementoInterface {
             for (final Feature feature : f) {
                 final CustomAction lastAction = history.lastElement();
 
-                if (!((lastAction instanceof FeatureCreateAction)
-                                && ((FeatureCreateAction)lastAction).featureConcerned(feature))) {
+                if (
+                    !(
+                        (lastAction instanceof FeatureCreateAction) &&
+                        ((FeatureCreateAction) lastAction).featureConcerned(feature)
+                    )
+                ) {
                     final List<CustomAction> historyList = new ArrayList<CustomAction>(history);
 
                     for (final CustomAction action : historyList) {

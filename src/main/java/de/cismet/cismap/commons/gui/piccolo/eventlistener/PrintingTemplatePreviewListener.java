@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,26 +12,11 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import static java.lang.Thread.sleep;
+
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.EventQueue;
-import java.awt.PopupMenu;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -42,10 +27,18 @@ import de.cismet.cismap.commons.gui.printing.Scale;
 import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-
 import de.cismet.tools.CismetThreadPool;
-
-import static java.lang.Thread.sleep;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.EventQueue;
+import java.awt.PopupMenu;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /**
  * DOCUMENT ME!
@@ -58,7 +51,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
-            PrintingTemplatePreviewListener.class);
+        PrintingTemplatePreviewListener.class
+    );
     //
 
     public static final String WIDTH = "WIDTH";
@@ -79,7 +73,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     private String oldInteractionMode;
     private PrintTemplateFeature printTemplateStyledFeature;
     private boolean oldOverlappingCheck = true;
-//    private String bestimmerDimension = WIDTH;
+
+    //    private String bestimmerDimension = WIDTH;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -92,13 +87,13 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         super(mappingComponent);
         this.cleared = true;
         this.mappingComponent = mappingComponent;
-//        this.featureMoveListenerDelegate = new FeatureMoveListener(mappingComponent);
+        //        this.featureMoveListenerDelegate = new FeatureMoveListener(mappingComponent);
         this.backupFeature = new ArrayList<Feature>();
         this.backupHoldFeature = new ArrayList<Feature>();
         this.oldInteractionMode = "PAN";
         // listener to remove the template feature and reset the old state if interaction mode is changed by user
-        this.mapInteractionModeListener = new PropertyChangeListener() {
-
+        this.mapInteractionModeListener =
+            new PropertyChangeListener() {
                 @Override
                 public void propertyChange(final PropertyChangeEvent evt) {
                     if ((evt != null) && MappingComponent.PROPERTY_MAP_INTERACTION_MODE.equals(evt.getPropertyName())) {
@@ -139,10 +134,11 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     private void zoom(final double scale, final PrintTemplateFeature printingTemplate) {
         final Point centroid = printingTemplate.getGeometry().getCentroid();
         final AffineTransformation at = AffineTransformation.scaleInstance(
-                scale,
-                scale,
-                centroid.getX(),
-                centroid.getY());
+            scale,
+            scale,
+            centroid.getX(),
+            centroid.getY()
+        );
         final Geometry g = at.transform(printingTemplate.getGeometry());
         printingTemplate.setGeometry(g);
         final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printingTemplate);
@@ -180,21 +176,19 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      * @param  selectedTemplate    DOCUMENT ME!
      * @param  oldInteractionMode  DOCUMENT ME!
      */
-    public void init(final Scale selectedScale,
-            final Resolution selectedResolution,
-            final Template selectedTemplate,
-            final String oldInteractionMode) {
+    public void init(
+        final Scale selectedScale,
+        final Resolution selectedResolution,
+        final Template selectedTemplate,
+        final String oldInteractionMode
+    ) {
         init();
 
         this.oldInteractionMode = oldInteractionMode;
 
-        printTemplateStyledFeature = new PrintTemplateFeature(
-                selectedTemplate,
-                selectedResolution,
-                selectedScale,
-                mappingComponent);
-        final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
-            mappingComponent.getFeatureCollection();
+        printTemplateStyledFeature =
+            new PrintTemplateFeature(selectedTemplate, selectedResolution, selectedScale, mappingComponent);
+        final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
         oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
         CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
@@ -210,10 +204,11 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      */
     private void ensureVisibilityOfPrintingTemplates() {
         if (!mappingComponent.isFixedMapExtent()) {
-            mappingComponent.zoomToAFeatureCollection(mappingComponent.getSpecialFeatureCollection(
-                    PrintTemplateFeature.class),
+            mappingComponent.zoomToAFeatureCollection(
+                mappingComponent.getSpecialFeatureCollection(PrintTemplateFeature.class),
                 false,
-                mappingComponent.isFixedMapScale());
+                mappingComponent.isFixedMapScale()
+            );
         }
     }
 
@@ -239,12 +234,12 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         if (!(o instanceof PFeature)) {
             return;
         }
-        final PFeature sel = (PFeature)o;
+        final PFeature sel = (PFeature) o;
 
         if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
             return;
         }
-        final PrintTemplateFeature ptf = (PrintTemplateFeature)sel.getFeature();
+        final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
 
         if (ptf.getScale().getDenominator() == 0) {
             if (log.isDebugEnabled()) {
@@ -264,20 +259,20 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      * DOCUMENT ME!
      */
     public void cleanUpAndRestoreFeatures() {
-//        if (!cleared) {
-//            mappingComponent.removePropertyChangeListener(mapInteractionModeListener);
-//            if (printTemplateStyledFeature != null) {
-//                final FeatureCollection mapFeatureCollection = mappingComponent.getFeatureCollection();
-//                mapFeatureCollection.unholdFeature(printTemplateStyledFeature);
-//                mapFeatureCollection.removeFeature(printTemplateStyledFeature);
-//                printTemplateStyledFeature = null;
-//            }
-//            if (MappingComponent.PRINTING_AREA_SELECTION.equals(mappingComponent.getInteractionMode())) {
-//                mappingComponent.setInteractionMode(oldInteractionMode);
-//            }
-//        }
-//        cleared = true;
-//        CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
+        //        if (!cleared) {
+        //            mappingComponent.removePropertyChangeListener(mapInteractionModeListener);
+        //            if (printTemplateStyledFeature != null) {
+        //                final FeatureCollection mapFeatureCollection = mappingComponent.getFeatureCollection();
+        //                mapFeatureCollection.unholdFeature(printTemplateStyledFeature);
+        //                mapFeatureCollection.removeFeature(printTemplateStyledFeature);
+        //                printTemplateStyledFeature = null;
+        //            }
+        //            if (MappingComponent.PRINTING_AREA_SELECTION.equals(mappingComponent.getInteractionMode())) {
+        //                mappingComponent.setInteractionMode(oldInteractionMode);
+        //            }
+        //        }
+        //        cleared = true;
+        //        CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
     }
 
     /**
@@ -287,24 +282,24 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         final int delayTime = 500;
         zoomTime = System.currentTimeMillis() + delayTime;
         if ((zoomThread == null) || !zoomThread.isAlive()) {
-            zoomThread = new Thread("PrintFrameListener adjustMap()") {
-
+            zoomThread =
+                new Thread("PrintFrameListener adjustMap()") {
                     @Override
                     public void run() {
                         while (System.currentTimeMillis() < zoomTime) {
                             try {
                                 sleep(100);
                                 // log.debug("WAIT");
-                            } catch (InterruptedException iex) {
-                            }
+                            } catch (InterruptedException iex) {}
                         }
-                        EventQueue.invokeLater(new Runnable() {
-
+                        EventQueue.invokeLater(
+                            new Runnable() {
                                 @Override
                                 public void run() {
                                     ensureVisibilityOfPrintingTemplates();
                                 }
-                            });
+                            }
+                        );
                     }
                 };
             zoomThread.setPriority(Thread.NORM_PRIORITY);

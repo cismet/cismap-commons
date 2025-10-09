@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 jweintraut
  *
@@ -23,35 +23,25 @@
  */
 package de.cismet.cismap.commons.gui.shapeexport;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
+import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
+import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
+import de.cismet.tools.collections.TypeSafeCollections;
+import de.cismet.tools.configuration.Configurable;
+import de.cismet.tools.configuration.NoWriteError;
+import de.cismet.tools.gui.menu.CidsUiComponent;
 import java.awt.Component;
-
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.swing.JButton;
-
-import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
-import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
-
-import de.cismet.tools.collections.TypeSafeCollections;
-
-import de.cismet.tools.configuration.Configurable;
-import de.cismet.tools.configuration.NoWriteError;
-
-import de.cismet.tools.gui.menu.CidsUiComponent;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * This class configures the shape export functionality in cismap. Therefore it reads the corresponding part of
@@ -107,19 +97,23 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
         for (final ExportWFS wfs : wfsList) {
             ExportWFS copiedWFS = null;
             if (wfs.getTargetCRS() != null) {
-                copiedWFS = new ExportWFS(
+                copiedWFS =
+                    new ExportWFS(
                         new String(wfs.getTopic()),
                         new String(wfs.getFile()),
                         new String(wfs.getQuery()),
                         wfs.getUrl(),
-                        new String(wfs.getTargetCRS()));
+                        new String(wfs.getTargetCRS())
+                    );
             } else {
-                copiedWFS = new ExportWFS(
+                copiedWFS =
+                    new ExportWFS(
                         new String(wfs.getTopic()),
                         new String(wfs.getFile()),
                         new String(wfs.getQuery()),
                         wfs.getUrl(),
-                        null);
+                        null
+                    );
             }
 
             result.add(copiedWFS);
@@ -182,8 +176,11 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
 
         final Element bbox = cismapShapeExport.getChild(XML_BBOX_TOKEN);
         if ((bbox == null) || (bbox.getText() == null) || (bbox.getText().trim().length() == 0)) {
-            LOG.warn("There is no replacement token configured for shape export. Using default replacement token '"
-                        + bboxToken + "'.");
+            LOG.warn(
+                "There is no replacement token configured for shape export. Using default replacement token '" +
+                bboxToken +
+                "'."
+            );
         } else {
             bboxToken = bbox.getText();
         }
@@ -191,7 +188,8 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
         final Element destination = cismapShapeExport.getChild(XML_DESTINATION);
         if (destination == null) {
             LOG.warn(
-                "There is no destination directory and file name configured for shape export. Using default directory and default file name.");
+                "There is no destination directory and file name configured for shape export. Using default directory and default file name."
+            );
         }
 
         if (destination != null) {
@@ -205,8 +203,11 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
 
         final Element file = destination.getChild(XML_FILE);
         if ((file == null) || (file.getText() == null) || (file.getText().trim().length() == 0)) {
-            LOG.warn("There is no destination file name configured for shape export. Using default file name '"
-                        + destinationFile + "'.");
+            LOG.warn(
+                "There is no destination file name configured for shape export. Using default file name '" +
+                destinationFile +
+                "'."
+            );
         } else {
             destinationFile = file.getText();
         }
@@ -214,9 +215,10 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
         final Element extension = destination.getChild(XML_EXTENSION);
         if ((extension == null) || (extension.getText() == null) || (extension.getText().trim().length() == 0)) {
             LOG.warn(
-                "There is no destination file extension configured for shape export. Using default file extension '"
-                        + destinationFileExtension
-                        + "'.");
+                "There is no destination file extension configured for shape export. Using default file extension '" +
+                destinationFileExtension +
+                "'."
+            );
         } else {
             destinationFileExtension = extension.getText();
         }
@@ -245,28 +247,37 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
                     contentOfWfsFile = wfsFile.getText();
                 }
 
-                if ((contentOfTitle != null) && (contentOfTitle.trim().length() > 0)
-                            && (contentOfUrl != null)
-                            && (contentOfUrl.trim().length() > 0)
-                            && (contentOfQuery != null)
-                            && (contentOfQuery.trim().length() > 0)) {
+                if (
+                    (contentOfTitle != null) &&
+                    (contentOfTitle.trim().length() > 0) &&
+                    (contentOfUrl != null) &&
+                    (contentOfUrl.trim().length() > 0) &&
+                    (contentOfQuery != null) &&
+                    (contentOfQuery.trim().length() > 0)
+                ) {
                     URL convertedUrl = null;
 
                     try {
                         convertedUrl = new URL(contentOfUrl);
                     } catch (MalformedURLException e) {
-                        LOG.error("The given URL for WFS '" + contentOfTitle
-                                    + "' is invalid. This WFS will be skipped for shape export.",
-                            e);
+                        LOG.error(
+                            "The given URL for WFS '" +
+                            contentOfTitle +
+                            "' is invalid. This WFS will be skipped for shape export.",
+                            e
+                        );
                     }
 
                     if (convertedUrl != null) {
-                        wfsList.add(new ExportWFS(
+                        wfsList.add(
+                            new ExportWFS(
                                 contentOfTitle,
                                 contentOfWfsFile,
                                 contentOfQuery,
                                 convertedUrl,
-                                contentOfTargetCRS));
+                                contentOfTargetCRS
+                            )
+                        );
                     }
                 }
             }
@@ -274,7 +285,8 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
 
         if (wfsList.isEmpty()) {
             LOG.warn(
-                "Could not read the list of WFSs for shape export. The export functionality will not be available.");
+                "Could not read the list of WFSs for shape export. The export functionality will not be available."
+            );
             enableShapeExport = false;
         }
     }
@@ -303,10 +315,11 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider, Cid
 
             final List<ToolbarComponentDescription> preparationList = TypeSafeCollections.newArrayList();
             final ToolbarComponentDescription shapeExport = new ToolbarComponentDescription(
-                    "tlbMain",
-                    btnShapeExport,
-                    ToolbarPositionHint.AFTER,
-                    "cmdClipboard");
+                "tlbMain",
+                btnShapeExport,
+                ToolbarPositionHint.AFTER,
+                "cmdClipboard"
+            );
             preparationList.add(shapeExport);
 
             toolbarComponents = Collections.unmodifiableList(preparationList);

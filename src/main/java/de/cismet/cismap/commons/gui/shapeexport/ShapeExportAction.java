@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 jweintraut
  *
@@ -24,31 +24,23 @@
 package de.cismet.cismap.commons.gui.shapeexport;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-
-import java.io.File;
-
-import java.util.Collection;
-import java.util.LinkedList;
-
-import javax.swing.AbstractAction;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.downloadmanager.HttpDownload;
 import de.cismet.tools.gui.downloadmanager.MultipleDownload;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.Collection;
+import java.util.LinkedList;
+import javax.swing.AbstractAction;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * This action is responsible for the the steps to be done when the user wants to start a shape export.
@@ -71,8 +63,8 @@ public class ShapeExportAction extends AbstractAction {
         super();
         putValue(
             SMALL_ICON,
-            new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/shapeexport_small.png")));
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shapeexport_small.png"))
+        );
         putValue(SHORT_DESCRIPTION, NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.tooltiptext"));
         putValue(NAME, NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
     }
@@ -83,16 +75,20 @@ public class ShapeExportAction extends AbstractAction {
     public void actionPerformed(final ActionEvent e) {
         Collection<ExportWFS> wfsList = null;
 
-        final ShapeExportDialog dialog = new ShapeExportDialog(CismapBroker.getInstance().getMappingComponent(),
-                ShapeExport.getWFSList());
+        final ShapeExportDialog dialog = new ShapeExportDialog(
+            CismapBroker.getInstance().getMappingComponent(),
+            ShapeExport.getWFSList()
+        );
         StaticSwingTools.showDialog(dialog);
 
         if (dialog.isCancelled()) {
             return;
         }
 
-        XBoundingBox boundingBox = (XBoundingBox)CismapBroker.getInstance().getMappingComponent()
-                    .getCurrentBoundingBoxFromCamera();
+        XBoundingBox boundingBox = (XBoundingBox) CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .getCurrentBoundingBoxFromCamera();
 
         wfsList = dialog.getSelectedWFSs();
         for (final ExportWFS wfs : wfsList) {
@@ -105,8 +101,10 @@ public class ShapeExportAction extends AbstractAction {
         }
 
         if (
-            !DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(
-                        CismapBroker.getInstance().getMappingComponent())) {
+            !DownloadManagerDialog
+                .getInstance()
+                .showAskingForUserTitleDialog(CismapBroker.getInstance().getMappingComponent())
+        ) {
             return;
         }
         final String jobname = DownloadManagerDialog.getInstance().getJobName();
@@ -138,12 +136,14 @@ public class ShapeExportAction extends AbstractAction {
                 filenameForDownload = filenameFromShapeExport;
             }
 
-            final HttpDownload download = new HttpDownload(wfs.getUrl(),
-                    wfs.getQuery(),
-                    destinationDirectory,
-                    wfs.getTopic(),
-                    filenameForDownload,
-                    extension);
+            final HttpDownload download = new HttpDownload(
+                wfs.getUrl(),
+                wfs.getQuery(),
+                destinationDirectory,
+                wfs.getTopic(),
+                filenameForDownload,
+                extension
+            );
 
             downloads.add(download);
         }

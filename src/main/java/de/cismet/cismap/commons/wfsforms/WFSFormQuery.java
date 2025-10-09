@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
 import org.jdom.Element;
@@ -19,7 +19,7 @@ public class WFSFormQuery {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String INITIAL = "INITIAL";   // NOI18N
+    public static final String INITIAL = "INITIAL"; // NOI18N
     public static final String FOLLOWUP = "FOLLOWUP"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -47,8 +47,7 @@ public class WFSFormQuery {
     /**
      * Creates a new instance of WFSFormQuery.
      */
-    public WFSFormQuery() {
-    }
+    public WFSFormQuery() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -159,6 +158,7 @@ public class WFSFormQuery {
     public void setExtentProperty(final String positionProperty) {
         this.extentProperty = extentProperty;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -273,21 +273,21 @@ public class WFSFormQuery {
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
-        final Element ret = new Element("wfsFormQuery");                   // NOI18N
-        ret.setAttribute("id", getId());                                   // NOI18N
-        ret.setAttribute("title", getTitle());                             // NOI18N
-        ret.setAttribute("server", getServerUrl());                        // NOI18N
-        ret.setAttribute("queryFile", getFilename());                      // NOI18N
-        ret.setAttribute("propertyPrefix", getFilename());                 // NOI18N
-        ret.setAttribute("propertyNamespace", getFilename());              // NOI18N
+        final Element ret = new Element("wfsFormQuery"); // NOI18N
+        ret.setAttribute("id", getId()); // NOI18N
+        ret.setAttribute("title", getTitle()); // NOI18N
+        ret.setAttribute("server", getServerUrl()); // NOI18N
+        ret.setAttribute("queryFile", getFilename()); // NOI18N
+        ret.setAttribute("propertyPrefix", getFilename()); // NOI18N
+        ret.setAttribute("propertyNamespace", getFilename()); // NOI18N
         ret.setAttribute("displayTextProperty", getDisplayTextProperty()); // NOI18N
-        ret.setAttribute("extentProperty", getExtentProperty());           // NOI18N
-        ret.setAttribute("positionProperty", getExtentProperty());         // NOI18N
-        ret.setAttribute("idProperty", getIdProperty());                   // NOI18N
-        ret.setAttribute("type", getType());                               // NOI18N
-        ret.setAttribute("componentName", getComponentName());             // NOI18N
+        ret.setAttribute("extentProperty", getExtentProperty()); // NOI18N
+        ret.setAttribute("positionProperty", getExtentProperty()); // NOI18N
+        ret.setAttribute("idProperty", getIdProperty()); // NOI18N
+        ret.setAttribute("type", getType()); // NOI18N
+        ret.setAttribute("componentName", getComponentName()); // NOI18N
         if (getQueryPlaceholder() != null) {
-            ret.setAttribute("queryPlaceholder", getQueryPlaceholder());   // NOI18N
+            ret.setAttribute("queryPlaceholder", getQueryPlaceholder()); // NOI18N
         }
         return ret;
     }

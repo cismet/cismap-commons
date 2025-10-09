@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,24 +12,17 @@
  */
 package de.cismet.cismap.commons.gui.options;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.Color;
-
-import javax.swing.JPanel;
-
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.lookupoptions.AbstractOptionsPanel;
 import de.cismet.lookupoptions.OptionsCategory;
 import de.cismet.lookupoptions.OptionsPanelController;
-
 import de.cismet.tools.configuration.NoWriteError;
+import java.awt.Color;
+import javax.swing.JPanel;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
@@ -43,8 +36,9 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
     //~ Static fields/initializers ---------------------------------------------
 
     private static final String OPTION_NAME = NbBundle.getMessage(
-            GPSDirectionOptions.class,
-            "GPSDirectionOptions.OPTION_NAME");
+        GPSDirectionOptions.class,
+        "GPSDirectionOptions.OPTION_NAME"
+    );
     private static Logger LOG = Logger.getLogger(GPSDirectionOptions.class);
     private static final String CONFIGURATION = "GPSDirectionOptions";
     private static final String GPS_ANGLE_DIRECTION_CONFIG = "GpsAngleDirection";
@@ -57,10 +51,11 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
      * @version  $Revision$, $Date$
      */
     public static enum GPSDirection {
-
         //~ Enum constants -----------------------------------------------------
 
-        AUTO, CW, CCW
+        AUTO,
+        CW,
+        CCW,
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -73,6 +68,7 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
     private javax.swing.JRadioButton rbAuto;
     private javax.swing.JRadioButton rbClockwise;
     private javax.swing.JRadioButton rbCounterClockwise;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -109,14 +105,17 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
             org.openide.util.NbBundle.getMessage(
                 GPSDirectionOptions.class,
                 "GPSDirectionOptions.rbAuto.text",
-                new Object[] {})); // NOI18N
-        rbAuto.addActionListener(new java.awt.event.ActionListener() {
-
+                new Object[] {}
+            )
+        ); // NOI18N
+        rbAuto.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     rbAutoActionPerformed(evt);
                 }
-            });
+            }
+        );
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -131,7 +130,9 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
             org.openide.util.NbBundle.getMessage(
                 GPSDirectionOptions.class,
                 "GPSDirectionOptions.rbClockwise.text",
-                new Object[] {})); // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -145,7 +146,9 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
             org.openide.util.NbBundle.getMessage(
                 GPSDirectionOptions.class,
                 "GPSDirectionOptions.rbCounterClockwise.text",
-                new Object[] {})); // NOI18N
+                new Object[] {}
+            )
+        ); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -154,7 +157,7 @@ public class GPSDirectionOptions extends AbstractOptionsPanel implements Options
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(rbCounterClockwise, gridBagConstraints);
-    }                              // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!

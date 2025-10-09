@@ -1,22 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.options;
-
-import org.openide.util.ImageUtilities;
-import org.openide.util.lookup.ServiceProvider;
-
-import java.awt.Image;
-
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 
 import de.cismet.lookupoptions.AbstractOptionsCategory;
 import de.cismet.lookupoptions.OptionsCategory;
+import java.awt.Image;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import org.openide.util.ImageUtilities;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!

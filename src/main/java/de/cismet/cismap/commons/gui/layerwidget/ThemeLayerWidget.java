@@ -1,71 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.FOLDER;
+import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
+
 import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.EventObject;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
-import javax.swing.DropMode;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.UIManager;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreeCellEditor;
-import javax.swing.tree.TreePath;
-
 import de.cismet.cismap.commons.PNodeProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
@@ -97,20 +46,60 @@ import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
-
 import de.cismet.commons.wms.capabilities.Layer;
-
 import de.cismet.tools.Static2DTools;
-
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.GUIWindow;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
-
 import de.cismet.veto.VetoException;
-
-import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.FOLDER;
-import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import javax.swing.DropMode;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.UIManager;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.TreeCellEditor;
+import javax.swing.tree.TreePath;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -119,9 +108,9 @@ import static de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem.ROOT;
  * @version  $Revision$, $Date$
  */
 @org.openide.util.lookup.ServiceProvider(service = GUIWindow.class)
-public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener,
-    SelectionChangedListener,
-    GUIWindow { // implements
+public class ThemeLayerWidget
+    extends javax.swing.JPanel
+    implements TreeSelectionListener, SelectionChangedListener, GUIWindow { // implements
 
     //~ Instance fields --------------------------------------------------------
 
@@ -138,6 +127,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -156,8 +146,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.setDropMode(DropMode.ON_OR_INSERT);
         transferHandler = new TreeTransferHandler();
         tree.setTransferHandler(transferHandler);
-        popupMenu.addPopupMenuListener(new PopupMenuListener() {
-
+        popupMenu.addPopupMenuListener(
+            new PopupMenuListener() {
                 @Override
                 public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {
                     synchronized (popupMenu.getTreeLock()) {
@@ -166,7 +156,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             final Object component = popupMenu.getComponent(i);
 
                             if (component instanceof ThemeLayerMenuItem) {
-                                final ThemeLayerMenuItem menuItem = (ThemeLayerMenuItem)component;
+                                final ThemeLayerMenuItem menuItem = (ThemeLayerMenuItem) component;
                                 menuItem.refreshText(paths);
                             }
                         }
@@ -174,18 +164,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 }
 
                 @Override
-                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
-                }
+                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {}
 
                 @Override
-                public void popupMenuCanceled(final PopupMenuEvent e) {
-                }
-            });
-        tree.addTreeWillExpandListener(new TreeWillExpandListener() {
-
+                public void popupMenuCanceled(final PopupMenuEvent e) {}
+            }
+        );
+        tree.addTreeWillExpandListener(
+            new TreeWillExpandListener() {
                 @Override
-                public void treeWillExpand(final TreeExpansionEvent event) throws ExpandVetoException {
-                }
+                public void treeWillExpand(final TreeExpansionEvent event) throws ExpandVetoException {}
 
                 @Override
                 public void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {
@@ -193,10 +181,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         throw new ExpandVetoException(event);
                     }
                 }
-            });
+            }
+        );
 
-        tree.addTreeExpansionListener(new TreeExpansionListener() {
-
+        tree.addTreeExpansionListener(
+            new TreeExpansionListener() {
                 @Override
                 public void treeExpanded(final TreeExpansionEvent event) {
                     saveExpandedPaths();
@@ -216,17 +205,21 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         expendedPaths.add(en.nextElement());
                     }
                 }
-            });
+            }
+        );
 
-        CismapBroker.getInstance().addStatusListener(new StatusListener() {
-
-                @Override
-                public void statusValueChanged(final StatusEvent e) {
-                    if (e.getName().equals(StatusEvent.SCALE)) {
-                        ThemeLayerWidget.this.repaint();
+        CismapBroker
+            .getInstance()
+            .addStatusListener(
+                new StatusListener() {
+                    @Override
+                    public void statusValueChanged(final StatusEvent e) {
+                        if (e.getName().equals(StatusEvent.SCALE)) {
+                            ThemeLayerWidget.this.repaint();
+                        }
                     }
                 }
-            });
+            );
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -238,7 +231,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         if (tree != null) {
             tree.repaint();
             tree.revalidate();
-//            tree.updateUI();
+            //            tree.updateUI();
         }
     }
 
@@ -252,37 +245,43 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         final ActiveLayerModelWrapperWithoutProgress model = new ActiveLayerModelWrapperWithoutProgress(layerModel);
         tree.setModel(model);
         model.addTreeToUpdate(tree);
-        CismapBroker.getInstance().getMappingComponent().addRepaintListener(new RepaintListener() {
+        CismapBroker
+            .getInstance()
+            .getMappingComponent()
+            .addRepaintListener(
+                new RepaintListener() {
+                    @Override
+                    public void repaintStart(final RepaintEvent e) {}
 
-                @Override
-                public void repaintStart(final RepaintEvent e) {
-                }
+                    @Override
+                    public void repaintComplete(final RepaintEvent e) {
+                        if ((e != null) && (e.getRetrievalEvent() != null)) {
+                            if (e.getRetrievalEvent().isInitialisationEvent()) {
+                                updateTree();
+                            }
+                        }
+                    }
 
-                @Override
-                public void repaintComplete(final RepaintEvent e) {
-                    if ((e != null) && (e.getRetrievalEvent() != null)) {
-                        if (e.getRetrievalEvent().isInitialisationEvent()) {
-                            updateTree();
+                    @Override
+                    public void repaintError(final RepaintEvent e) {
+                        if ((e != null) && (e.getRetrievalEvent() != null)) {
+                            if (e.getRetrievalEvent().isInitialisationEvent()) {
+                                updateTree();
+                            }
                         }
                     }
                 }
-
-                @Override
-                public void repaintError(final RepaintEvent e) {
-                    if ((e != null) && (e.getRetrievalEvent() != null)) {
-                        if (e.getRetrievalEvent().isInitialisationEvent()) {
-                            updateTree();
-                        }
+            );
+        SelectionManager
+            .getInstance()
+            .addSelectionChangedListener(
+                new SelectionChangedListener() {
+                    @Override
+                    public void selectionChanged(final SelectionChangedEvent event) {
+                        updateTree();
                     }
                 }
-            });
-        SelectionManager.getInstance().addSelectionChangedListener(new SelectionChangedListener() {
-
-                @Override
-                public void selectionChanged(final SelectionChangedEvent event) {
-                    updateTree();
-                }
-            });
+            );
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());
@@ -308,8 +307,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.getSelectionModel().addTreeSelectionListener(this);
         createPopupMenu();
         tree.addMouseListener(popupMenuListener);
-        tree.addMouseListener(new MouseAdapter() {
-
+        tree.addMouseListener(
+            new MouseAdapter() {
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     if (!e.isPopupTrigger() && (e.getClickCount() == 1)) {
@@ -332,10 +331,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         }
                     }
                 }
-            });
+            }
+        );
 
-        model.addTreeModelListener(new TreeModelListener() {
-
+        model.addTreeModelListener(
+            new TreeModelListener() {
                 @Override
                 public void treeNodesChanged(final TreeModelEvent e) {
                     resetExpansion();
@@ -355,7 +355,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 public void treeStructureChanged(final TreeModelEvent e) {
                     resetExpansion();
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -416,14 +417,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
 
             if (o instanceof ServiceLayer) {
-                serviceLayerList.add((ServiceLayer)o);
+                serviceLayerList.add((ServiceLayer) o);
             }
             if (o instanceof AbstractFeatureService) {
                 feature = true;
 
                 if (!featureSelected) {
-                    final List<Feature> featuresForService = SelectionManager.getInstance()
-                                .getSelectedFeatures((AbstractFeatureService)o);
+                    final List<Feature> featuresForService = SelectionManager
+                        .getInstance()
+                        .getSelectedFeatures((AbstractFeatureService) o);
 
                     if ((featuresForService != null) && !featuresForService.isEmpty()) {
                         featureSelected = true;
@@ -433,7 +435,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             if (o instanceof RetrievalServiceLayer) {
                 if (!geometry) {
-                    final RetrievalServiceLayer rsl = ((RetrievalServiceLayer)o);
+                    final RetrievalServiceLayer rsl = ((RetrievalServiceLayer) o);
                     Geometry bounds = null;
 
                     try {
@@ -538,12 +540,12 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 changeVisibility(layerModel.getChild(layerModel.getRoot(), i));
             }
         } else if (objectToChange instanceof LayerCollection) {
-            final LayerCollection lc = (LayerCollection)objectToChange;
+            final LayerCollection lc = (LayerCollection) objectToChange;
             final boolean visibility = !lc.isEnabled();
 
             changeVisibility(lc, visibility);
         } else if (objectToChange instanceof ServiceLayer) {
-            final ServiceLayer sl = (ServiceLayer)objectToChange;
+            final ServiceLayer sl = (ServiceLayer) objectToChange;
             final boolean visibility = !sl.isEnabled();
             changeVisibility(sl, visibility);
         }
@@ -559,7 +561,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     private void changeVisibility(final Object objectToChange, final boolean visible) {
         if (objectToChange instanceof LayerCollection) {
-            final LayerCollection lc = (LayerCollection)objectToChange;
+            final LayerCollection lc = (LayerCollection) objectToChange;
 
             for (int i = 0; i < lc.size(); ++i) {
                 changeVisibility(lc.get(i), visible);
@@ -567,7 +569,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         } else if (objectToChange instanceof ServiceLayer) {
             boolean changeVisibility = false;
             boolean statusChanged = false;
-            final ServiceLayer sl = (ServiceLayer)objectToChange;
+            final ServiceLayer sl = (ServiceLayer) objectToChange;
 
             if (sl.isEnabled() != visible) {
                 sl.setEnabled(visible);
@@ -575,7 +577,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
 
             if (objectToChange instanceof PNodeProvider) {
-                final PNodeProvider pr = (PNodeProvider)objectToChange;
+                final PNodeProvider pr = (PNodeProvider) objectToChange;
 
                 if ((pr.getPNode() != null) && (pr.getPNode().getVisible() != visible)) {
                     if (!visible) {
@@ -583,7 +585,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             final PNode node = pr.getPNode().getChild(i);
 
                             if (node instanceof PFeature) {
-                                ((PFeature)node).releaseResources();
+                                ((PFeature) node).releaseResources();
                             }
                         }
                         pr.getPNode().removeAllChildren();
@@ -601,16 +603,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
 
             if (visible && statusChanged && (objectToChange instanceof MapService)) {
-                ((MapService)objectToChange).setBoundingBox(
-                    CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera());
-                ((RetrievalServiceLayer)objectToChange).retrieve(true);
+                ((MapService) objectToChange).setBoundingBox(
+                        CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera()
+                    );
+                ((RetrievalServiceLayer) objectToChange).retrieve(true);
 
-                if (((RetrievalServiceLayer)objectToChange).isEnabled() != visible) {
+                if (((RetrievalServiceLayer) objectToChange).isEnabled() != visible) {
                     // if the layer was a dummy layer, the visibility can be changed during the retrieve method
-                    ((RetrievalServiceLayer)objectToChange).setEnabled(visible);
+                    ((RetrievalServiceLayer) objectToChange).setEnabled(visible);
 
                     if (objectToChange instanceof AbstractWMS) {
-                        ((AbstractWMS)objectToChange).setVisible(visible);
+                        ((AbstractWMS) objectToChange).setVisible(visible);
                     }
                 }
             }
@@ -647,28 +650,31 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     public void selectionChanged(final SelectionChangedEvent event) {
         refreshTimer.cancel();
         refreshTimer = new Timer();
-        refreshTimer.schedule(new TimerTask() {
-
+        refreshTimer.schedule(
+            new TimerTask() {
                 @Override
                 public void run() {
-                    EventQueue.invokeLater(new Runnable() {
-
+                    EventQueue.invokeLater(
+                        new Runnable() {
                             @Override
                             public void run() {
                                 createPopupMenu();
                                 tree.updateUI();
                             }
-                        });
+                        }
+                    );
                 }
-            }, 100);
+            },
+            100
+        );
     }
 
     /**
      * DOCUMENT ME!
      */
     private void resetExpansion() {
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
@@ -683,7 +689,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         tree.expandPath(tp);
                     }
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -727,8 +734,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private void removePath(final TreePath path) throws VetoException {
         try {
             if (path.getLastPathComponent() instanceof MapService) {
-                final ThemeLayerEvent event = new ThemeLayerEvent((MapService)path.getLastPathComponent(),
-                        this);
+                final ThemeLayerEvent event = new ThemeLayerEvent((MapService) path.getLastPathComponent(), this);
                 fireRemoveLayerEvent(event);
             }
             layerModel.removeLayer(path);
@@ -744,18 +750,20 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     @Override
     public String getViewTitle() {
         return org.openide.util.NbBundle.getMessage(
-                ThemeLayerWidget.class,
-                "CismapPlugin.CismapPlugin(PluginContext).vThemeLayer.title");
+            ThemeLayerWidget.class,
+            "CismapPlugin.CismapPlugin(PluginContext).vThemeLayer.title"
+        );
     }
 
     @Override
     public Icon getViewIcon() {
-        return Static2DTools.borderIcon(new ImageIcon(
-                    getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png")),
-                0,
-                3,
-                0,
-                1);
+        return Static2DTools.borderIcon(
+            new ImageIcon(getClass().getResource("/de/cismet/cismap/navigatorplugin/map.png")),
+            0,
+            3,
+            0,
+            1
+        );
     }
 
     @Override
@@ -783,13 +791,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new AddFolderMenuItem object.
          */
         public AddFolderMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.addPopupMenu().pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.addPopupMenu().pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -801,15 +806,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if (paths.length == 1) {
                 final Object selectedComponent = paths[0].getLastPathComponent();
                 if (selectedComponent instanceof LayerCollection) {
-//                    final LayerCollection lc = (LayerCollection)selectedComponent;
+                    //                    final LayerCollection lc = (LayerCollection)selectedComponent;
                     final LayerCollection newLayer = new LayerCollection();
                     layerModel.addEmptyLayerCollection(paths[0], newLayer);
-//                    lc.add(newLayer);
-//                    layerModel.fireTreeStructureChanged(
-//                        layerModel,
-//                        paths[0].getPath(),
-//                        null,
-//                        new Object[] { newLayer });
+                    //                    lc.add(newLayer);
+                    //                    layerModel.fireTreeStructureChanged(
+                    //                        layerModel,
+                    //                        paths[0].getPath(),
+                    //                        null,
+                    //                        new Object[] { newLayer });
                 } else if (selectedComponent.equals(layerModel.getRoot())) {
                     layerModel.addEmptyLayerCollection(new LayerCollection());
                 }
@@ -834,14 +839,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new VisibilityMenuItem object.
          */
         public VisibilityMenuItem() {
-            this(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.VisibilityMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY,
-                true);
+            this(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.VisibilityMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY,
+                true
+            );
             newSection = true;
         }
 
@@ -876,7 +878,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final Object selectedComponent = path.getLastPathComponent();
 
                 if (selectedComponent instanceof ServiceLayer) {
-                    final ServiceLayer layer = (ServiceLayer)selectedComponent;
+                    final ServiceLayer layer = (ServiceLayer) selectedComponent;
                     if (layer.isEnabled() != shouldBeEnabled) {
                         layer.setEnabled(shouldBeEnabled);
                     }
@@ -884,7 +886,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         changeVisibility(selectedComponent, shouldBeEnabled);
                     }
                 } else if (selectedComponent instanceof LayerCollection) {
-                    final LayerCollection layer = (LayerCollection)selectedComponent;
+                    final LayerCollection layer = (LayerCollection) selectedComponent;
 
                     if (layer.isEnabled() != shouldBeEnabled) {
                         changeVisibility(selectedComponent, shouldBeEnabled);
@@ -916,14 +918,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new VisibilityMenuItem object.
          */
         public InvisibilityMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.InvisibilityMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY,
-                false);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.InvisibilityMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY,
+                false
+            );
         }
     }
 
@@ -944,14 +943,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new VisibilityMenuItem object.
          */
         public AllSelectableMenuItem() {
-            this(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AllSelectableMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY,
-                true);
+            this(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AllSelectableMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY,
+                true
+            );
             newSection = true;
         }
 
@@ -986,10 +982,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final Object selectedComponent = path.getLastPathComponent();
 
                 if (selectedComponent instanceof AbstractFeatureService) {
-                    final AbstractFeatureService layer = (AbstractFeatureService)selectedComponent;
+                    final AbstractFeatureService layer = (AbstractFeatureService) selectedComponent;
                     layer.setSelectable(shouldBeEnabled);
                 } else if (selectedComponent instanceof LayerCollection) {
-                    final LayerCollection layer = (LayerCollection)selectedComponent;
+                    final LayerCollection layer = (LayerCollection) selectedComponent;
                     makeSelectable(layer);
                 } else if (selectedComponent.equals(layerModel.getRoot())) {
                     final List<TreePath> tp = new ArrayList<TreePath>();
@@ -1015,9 +1011,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         private void makeSelectable(final LayerCollection lc) {
             for (final Object layer : lc) {
                 if (layer instanceof AbstractFeatureService) {
-                    ((AbstractFeatureService)layer).setSelectable(shouldBeEnabled);
+                    ((AbstractFeatureService) layer).setSelectable(shouldBeEnabled);
                 } else if (layer instanceof LayerCollection) {
-                    makeSelectable((LayerCollection)layer);
+                    makeSelectable((LayerCollection) layer);
                 }
             }
         }
@@ -1036,16 +1032,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new VisibilityMenuItem object.
          */
         public AllUnselectableMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.AllUnselectableMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY,
-                false);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AllUnselectableMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY,
+                false
+            );
         }
     }
 
@@ -1062,13 +1053,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new EntensionMenuItem object.
          */
         public ExpandMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.EntensionMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.EntensionMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
             newSection = true;
         }
 
@@ -1109,13 +1097,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new EntensionMenuItem object.
          */
         public AddThemeMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AddThemeMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AddThemeMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1139,13 +1124,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new EntensionMenuItem object.
          */
         public CollapseMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.CollapseMenuItem.pmenuItem.text"),
-                ROOT
-                        | FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.CollapseMenuItem.pmenuItem.text"),
+                ROOT | FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1173,12 +1155,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveGroupMenuItem object.
          */
         public RemoveGroupMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.RemoveGroupMenuItem.pmenuItem.text"),
-                FOLDER
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.RemoveGroupMenuItem.pmenuItem.text"),
+                FOLDER | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1195,9 +1175,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 } catch (VetoException ex) {
                     // nothing to do
                 }
-//                for (final TreePath tp : expendedPaths) {
-//                    tree.expandPath(tp);
-//                }
+                //                for (final TreePath tp : expendedPaths) {
+                //                    tree.expandPath(tp);
+                //                }
             }
         }
 
@@ -1210,7 +1190,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          */
         private void removeGroupLayerContent(final TreePath path) throws VetoException {
             if (path.getLastPathComponent() instanceof LayerCollection) {
-                final LayerCollection lc = (LayerCollection)path.getLastPathComponent();
+                final LayerCollection lc = (LayerCollection) path.getLastPathComponent();
                 final List<Object> children = new ArrayList<Object>(lc);
 
                 for (final Object o : children) {
@@ -1237,15 +1217,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public RemoveThemeMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.RemoveThemeMenuItem.pmenuItem.text"),
-                NODE
-                        | FEATURE_SERVICE
-                        | MULTI
-                        | FEATURE_SELECTED
-                        | GEOMETRY
-                        | NO_FEATURE_SELECTED
-                        | RASTER_MAP_SERVICE
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.RemoveThemeMenuItem.pmenuItem.text"),
+                NODE |
+                FEATURE_SERVICE |
+                MULTI |
+                FEATURE_SELECTED |
+                GEOMETRY |
+                NO_FEATURE_SELECTED |
+                RASTER_MAP_SERVICE |
+                NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1255,48 +1237,51 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             final TreePath[] paths = tree.getSelectionPaths();
             tree.setSelectionPath(null);
 
-            final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(this),
-                    true,
-                    NbBundle.getMessage(
-                        SelectAllMenuItem.class,
-                        "ThemeLayerWidget.RemoveThemeMenuItem.actionPerformed.text"),
-                    null,
-                    500,
-                    true) {
+            final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(
+                StaticSwingTools.getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    SelectAllMenuItem.class,
+                    "ThemeLayerWidget.RemoveThemeMenuItem.actionPerformed.text"
+                ),
+                null,
+                500,
+                true
+            ) {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    Thread.currentThread().setName("ThemeLayerWidget_remove_theme");
+                    int progress = 0;
+                    wd.setMax(paths.length);
 
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        Thread.currentThread().setName("ThemeLayerWidget_remove_theme");
-                        int progress = 0;
-                        wd.setMax(paths.length);
-
-                        for (final TreePath tmpPath : paths) {
-                            wd.setProgress(++progress);
-                            EventQueue.invokeAndWait(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            removePath(tmpPath);
-                                        } catch (VetoException ex) {
-                                            // nothing to do
-                                        }
+                    for (final TreePath tmpPath : paths) {
+                        wd.setProgress(++progress);
+                        EventQueue.invokeAndWait(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        removePath(tmpPath);
+                                    } catch (VetoException ex) {
+                                        // nothing to do
                                     }
-                                });
-                        }
-
-                        return null;
+                                }
+                            }
+                        );
                     }
 
-                    @Override
-                    protected void done() {
-                        try {
-                            get();
-                        } catch (Exception e) {
-                            log.error("Error while removing layer from tree", e);
-                        }
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        get();
+                    } catch (Exception e) {
+                        log.error("Error while removing layer from tree", e);
                     }
-                };
+                }
+            };
             wdt.start();
         }
     }
@@ -1314,20 +1299,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public ZoomToSelectedItemsMenuItem() {
-            super(NbBundle.getMessage(
+            super(
+                NbBundle.getMessage(
                     ThemeLayerWidget.class,
-                    "ThemeLayerWidget.ZoomToSelectedItemsMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED,
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED);
+                    "ThemeLayerWidget.ZoomToSelectedItemsMenuItem.pmenuItem.text"
+                ),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED,
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1343,7 +1322,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             final List<Feature> features = new ArrayList<Feature>();
 
             for (final TreePath o : paths) {
-                final AbstractFeatureService afs = (AbstractFeatureService)o.getLastPathComponent();
+                final AbstractFeatureService afs = (AbstractFeatureService) o.getLastPathComponent();
                 final List<Feature> featuresForService = SelectionManager.getInstance().getSelectedFeatures(afs);
 
                 if (featuresForService != null) {
@@ -1351,8 +1330,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 }
             }
 
-            final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(features.toArray(new Feature[features.size()]),
-                    10);
+            final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(
+                features.toArray(new Feature[features.size()]),
+                10
+            );
             worker.execute();
         }
     }
@@ -1370,14 +1351,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public ZoomToThemeMenuItem() {
-            super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.ZoomToThemeMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | RASTER_MAP_SERVICE);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.ZoomToThemeMenuItem.pmenuItem.text"),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | RASTER_MAP_SERVICE
+            );
             newSection = true;
         }
 
@@ -1404,16 +1381,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public OpenAttributeTableMenuItem() {
-            super(NbBundle.getMessage(
+            super(
+                NbBundle.getMessage(
                     ThemeLayerWidget.class,
-                    "ThemeLayerWidget.OpenAttributeTableMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+                    "ThemeLayerWidget.OpenAttributeTableMenuItem.pmenuItem.text"
+                ),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1429,7 +1403,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath path : paths) {
                 if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
                     AttributeTableFactory.getInstance().showAttributeTable(service);
                 }
             }
@@ -1449,14 +1423,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new EditModeMenuItem object.
          */
         public EditModeMenuItem() {
-            super(NbBundle.getMessage(EditModeMenuItem.class, "ThemeLayerWidget.EditModeMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(EditModeMenuItem.class, "ThemeLayerWidget.EditModeMenuItem.pmenuItem.text"),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
             newSection = true;
         }
 
@@ -1473,7 +1443,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath path : paths) {
                 if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    if (!((AbstractFeatureService)path.getLastPathComponent()).isEditable()) {
+                    if (!((AbstractFeatureService) path.getLastPathComponent()).isEditable()) {
                         return false;
                     }
                 }
@@ -1488,7 +1458,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath path : paths) {
                 if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
                     AttributeTableFactory.getInstance().switchProcessingMode(service);
                 }
             }
@@ -1502,7 +1472,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath tp : paths) {
                 if (tp.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)tp.getLastPathComponent();
+                    final AbstractFeatureService service = (AbstractFeatureService) tp.getLastPathComponent();
                     if (!SelectionManager.getInstance().getEditableServices().contains(service)) {
                         isInProcessingMode = false;
                     }
@@ -1510,13 +1480,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
 
             if (!isInProcessingMode) {
-                setText(NbBundle.getMessage(
-                        ThemeLayerWidget.class,
-                        "ThemeLayerWidget.EditModeMenuItem.pmenuItem.text"));
+                setText(
+                    NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.EditModeMenuItem.pmenuItem.text")
+                );
             } else {
-                setText(NbBundle.getMessage(
-                        ThemeLayerWidget.class,
-                        "ThemeLayerWidget.NoEditModeMenuItem.pmenuItem.text"));
+                setText(
+                    NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.NoEditModeMenuItem.pmenuItem.text")
+                );
             }
         }
     }
@@ -1534,16 +1504,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public SelectAllMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.SelectAllMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.SelectAllMenuItem.pmenuItem.text"),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
             newSection = true;
         }
 
@@ -1558,106 +1522,98 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public void actionPerformed(final ActionEvent e) {
             final TreePath[] paths = tree.getSelectionPaths();
 
-//            for (final TreePath path : paths) {
-//                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-//                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
-//                    final List<Feature> toBeSelected = new ArrayList<Feature>();
-//                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
-//                        final PFeature feature = (PFeature)featureObject;
-//
-//                        if (!feature.isSelected()) {
-//                            feature.setSelected(true);
-//                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
-//                                        .getMappingComponent()
-//                                        .getInputEventListener()
-//                                        .get(MappingComponent.SELECT);
-//                            sl.addSelectedFeature(feature);
-//                            toBeSelected.add(feature.getFeature());
-//                        }
-//                    }
-//
-//                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
-//                            .addToSelection(toBeSelected);
-//                }
+            //            for (final TreePath path : paths) {
+            //                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+            //                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+            //                    final List<Feature> toBeSelected = new ArrayList<Feature>();
+            //                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
+            //                        final PFeature feature = (PFeature)featureObject;
+            //
+            //                        if (!feature.isSelected()) {
+            //                            feature.setSelected(true);
+            //                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
+            //                                        .getMappingComponent()
+            //                                        .getInputEventListener()
+            //                                        .get(MappingComponent.SELECT);
+            //                            sl.addSelectedFeature(feature);
+            //                            toBeSelected.add(feature.getFeature());
+            //                        }
+            //                    }
+            //
+            //                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+            //                            .addToSelection(toBeSelected);
+            //                }
 
-            final WaitingDialogThread<List<FeatureServiceFeature>> wdt =
-                new WaitingDialogThread<List<FeatureServiceFeature>>(StaticSwingTools.getParentFrame(this),
-                    true,
-                    NbBundle.getMessage(
-                        SelectAllMenuItem.class,
-                        "ThemeLayerWidget.SelectAllMenuItem.actionPerformed.text"),
-                    null,
-                    500,
-                    true) {
+            final WaitingDialogThread<List<FeatureServiceFeature>> wdt = new WaitingDialogThread<List<FeatureServiceFeature>>(
+                StaticSwingTools.getParentFrame(this),
+                true,
+                NbBundle.getMessage(SelectAllMenuItem.class, "ThemeLayerWidget.SelectAllMenuItem.actionPerformed.text"),
+                null,
+                500,
+                true
+            ) {
+                @Override
+                protected List<FeatureServiceFeature> doInBackground() throws Exception {
+                    Thread.currentThread().setName("ThemeLayerWidget_select_all");
+                    final List<FeatureServiceFeature> toBeSelected = new ArrayList<FeatureServiceFeature>();
 
-                    @Override
-                    protected List<FeatureServiceFeature> doInBackground() throws Exception {
-                        Thread.currentThread().setName("ThemeLayerWidget_select_all");
-                        final List<FeatureServiceFeature> toBeSelected = new ArrayList<FeatureServiceFeature>();
+                    for (final TreePath path : paths) {
+                        if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                            final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
+                            final XBoundingBox bb = null;
+                            service.initAndWait();
+                            final FeatureFactory factory = service.getFeatureFactory();
+                            List<FeatureServiceFeature> featureList;
+                            final int pageSize = service.getMaxFeaturesPerPage();
 
-                        for (final TreePath path : paths) {
-                            if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                                final AbstractFeatureService service = (AbstractFeatureService)
-                                    path.getLastPathComponent();
-                                final XBoundingBox bb = null;
-                                service.initAndWait();
-                                final FeatureFactory factory = service.getFeatureFactory();
-                                List<FeatureServiceFeature> featureList;
-                                final int pageSize = service.getMaxFeaturesPerPage();
+                            if (pageSize != -1) {
+                                final AttributeTable table = SelectionManager
+                                    .getInstance()
+                                    .getAttributeTableForService(service);
 
-                                if (pageSize != -1) {
-                                    final AttributeTable table = SelectionManager.getInstance()
-                                                .getAttributeTableForService(service);
-
-                                    if (table == null) {
-                                        featureList = factory.createFeatures(
-                                                service.getQuery(),
-                                                bb,
-                                                null,
-                                                0,
-                                                pageSize,
-                                                null);
-                                    } else {
-                                        EventQueue.invokeLater(new Runnable() {
-
-                                                @Override
-                                                public void run() {
-                                                    table.selectAll();
-                                                }
-                                            });
-
-                                        return null;
-                                    }
+                                if (table == null) {
+                                    featureList =
+                                        factory.createFeatures(service.getQuery(), bb, null, 0, pageSize, null);
                                 } else {
-                                    featureList = factory.createFeatures(service.getQuery(),
-                                            bb,
-                                            null, 0, 0, null);
+                                    EventQueue.invokeLater(
+                                        new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                table.selectAll();
+                                            }
+                                        }
+                                    );
+
+                                    return null;
                                 }
-
-                                toBeSelected.addAll(featureList);
+                            } else {
+                                featureList = factory.createFeatures(service.getQuery(), bb, null, 0, 0, null);
                             }
 
-                            if (Thread.interrupted() || canceled) {
-                                return null;
-                            }
+                            toBeSelected.addAll(featureList);
                         }
 
-                        return toBeSelected;
-                    }
-
-                    @Override
-                    protected void done() {
-                        try {
-                            final List<FeatureServiceFeature> features = get();
-
-                            if (features != null) {
-                                SelectionManager.getInstance().addSelectedFeatures(features);
-                            }
-                        } catch (Exception e) {
-                            log.error("Error while selecting all features", e);
+                        if (Thread.interrupted() || canceled) {
+                            return null;
                         }
                     }
-                };
+
+                    return toBeSelected;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final List<FeatureServiceFeature> features = get();
+
+                        if (features != null) {
+                            SelectionManager.getInstance().addSelectedFeatures(features);
+                        }
+                    } catch (Exception e) {
+                        log.error("Error while selecting all features", e);
+                    }
+                }
+            };
             wdt.start();
         }
     }
@@ -1675,16 +1631,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public InvertSelectionTableMenuItem() {
-            super(NbBundle.getMessage(
+            super(
+                NbBundle.getMessage(
                     ThemeLayerWidget.class,
-                    "ThemeLayerWidget.InvertSelectionTableMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+                    "ThemeLayerWidget.InvertSelectionTableMenuItem.pmenuItem.text"
+                ),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1699,15 +1652,18 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             final TreePath[] paths = tree.getSelectionPaths();
 
             final WaitingDialogThread<List[]> wdt;
-            wdt = new WaitingDialogThread<List[]>(StaticSwingTools.getParentFrame(this),
+            wdt =
+                new WaitingDialogThread<List[]>(
+                    StaticSwingTools.getParentFrame(this),
                     true,
                     NbBundle.getMessage(
                         SelectAllMenuItem.class,
-                        "ThemeLayerWidget.InvertSelectionTableMenuItem.actionPerformed.text"),
+                        "ThemeLayerWidget.InvertSelectionTableMenuItem.actionPerformed.text"
+                    ),
                     null,
                     500,
-                    true) {
-
+                    true
+                ) {
                     @Override
                     protected List[] doInBackground() throws Exception {
                         Thread.currentThread().setName("ThemeLayerWidget_invert_selection");
@@ -1717,8 +1673,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
                         for (final TreePath path : paths) {
                             if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                                final AbstractFeatureService service = (AbstractFeatureService)
-                                    path.getLastPathComponent();
+                                final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
                                 final XBoundingBox bb = null;
                                 service.initAndWait();
                                 final FeatureFactory factory = service.getFeatureFactory();
@@ -1726,22 +1681,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                 final int pageSize = service.getMaxFeaturesPerPage();
 
                                 if (pageSize != -1) {
-                                    featureList = factory.createFeatures(
-                                            service.getQuery(),
-                                            bb,
-                                            null,
-                                            0,
-                                            pageSize,
-                                            null);
+                                    featureList =
+                                        factory.createFeatures(service.getQuery(), bb, null, 0, pageSize, null);
                                 } else {
-                                    featureList = factory.createFeatures(service.getQuery(),
-                                            bb,
-                                            null, 0, 0, null);
+                                    featureList = factory.createFeatures(service.getQuery(), bb, null, 0, 0, null);
                                 }
 
                                 toBeSelected.addAll(featureList);
-                                final List<Feature> selectedFeatures = SelectionManager.getInstance()
-                                            .getSelectedFeatures(service);
+                                final List<Feature> selectedFeatures = SelectionManager
+                                    .getInstance()
+                                    .getSelectedFeatures(service);
                                 toBeSelected.removeAll(selectedFeatures);
                                 toBeUnselected.addAll(selectedFeatures);
                             }
@@ -1786,22 +1735,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public ClearSelectionMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.ClearSelectionMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY,
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.ClearSelectionMenuItem.pmenuItem.text"),
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY,
+                NODE | MULTI | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1817,7 +1755,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath path : paths) {
                 if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
                     final List<Feature> toBeUnselected = SelectionManager.getInstance().getSelectedFeatures(service);
                     SelectionManager.getInstance().removeSelectedFeatures(toBeUnselected);
                 }
@@ -1838,15 +1776,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public OptionsMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.OptionsMenuItem.pmenuItem.text"),
-                NODE
-                        | FEATURE_SERVICE
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.OptionsMenuItem.pmenuItem.text"),
+                NODE | FEATURE_SERVICE | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1860,7 +1793,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public void actionPerformed(final ActionEvent e) {
             final TreePath path = tree.getSelectionPath();
 
-            final AbstractFeatureService selectedService = (AbstractFeatureService)path.getLastPathComponent();
+            final AbstractFeatureService selectedService = (AbstractFeatureService) path.getLastPathComponent();
             final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
             final ArrayList<String> args = new ArrayList<String>();
             args.add("Allgemein");
@@ -1873,13 +1806,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             final StyleDialogStarter starter = new StyleDialogStarter(parentFrame, selectedService, args, 500);
 
-            starter.addStyleDialogClosedListener(new StyleDialogClosedListener() {
-
+            starter.addStyleDialogClosedListener(
+                new StyleDialogClosedListener() {
                     @Override
                     public void StyleDialogClosed(final StyleDialogClosedEvent evt) {
                         tree.updateUI();
                     }
-                });
+                }
+            );
 
             starter.start();
         }
@@ -1898,16 +1832,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          * Creates a new RemoveThemeMenuItem object.
          */
         public SelectableMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"),
-                NODE
-                        | FEATURE_SERVICE
-                        | MULTI
-                        | GEOMETRY
-                        | FEATURE_SELECTED
-                        | NO_FEATURE_SELECTED
-                        | NO_GEOMETRY);
+            super(
+                NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"),
+                NODE | FEATURE_SERVICE | MULTI | GEOMETRY | FEATURE_SELECTED | NO_FEATURE_SELECTED | NO_GEOMETRY
+            );
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1923,7 +1851,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath path : paths) {
                 if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final AbstractFeatureService service = (AbstractFeatureService) path.getLastPathComponent();
                     service.setSelectable(!service.isSelectable());
 
                     // workaround to avoid visualisation problems without this workaround, the
@@ -1941,20 +1869,20 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             for (final TreePath tp : paths) {
                 if (tp.getLastPathComponent() instanceof AbstractFeatureService) {
-                    if (!((AbstractFeatureService)tp.getLastPathComponent()).isSelectable()) {
+                    if (!((AbstractFeatureService) tp.getLastPathComponent()).isSelectable()) {
                         isSelected = false;
                     }
                 }
             }
 
             if (!isSelected) {
-                setText(NbBundle.getMessage(
-                        ThemeLayerWidget.class,
-                        "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"));
+                setText(
+                    NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text")
+                );
             } else {
-                setText(NbBundle.getMessage(
-                        ThemeLayerWidget.class,
-                        "ThemeLayerWidget.NotSelectionMenuItem.pmenuItem.text"));
+                setText(
+                    NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.NotSelectionMenuItem.pmenuItem.text")
+                );
             }
         }
     }
@@ -1983,7 +1911,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          */
         public CheckBoxNodeRenderer() {
             fontValue = UIManager.getFont("Tree.font");
-            drawsFocusBorderAroundIcon = (Boolean)UIManager.get("Tree.drawsFocusBorderAroundIcon");
+            drawsFocusBorderAroundIcon = (Boolean) UIManager.get("Tree.drawsFocusBorderAroundIcon");
             selectionBorderColor = UIManager.getColor("Tree.selectionBorderColor");
             selectionForeground = UIManager.getColor("Tree.selectionForeground");
             selectionBackground = UIManager.getColor("Tree.selectionBackground");
@@ -1999,21 +1927,24 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         }
 
         @Override
-        public Component getTreeCellRendererComponent(final JTree tree,
-                final Object value,
-                final boolean selected,
-                final boolean expanded,
-                final boolean leaf,
-                final int row,
-                final boolean hasFocus) {
+        public Component getTreeCellRendererComponent(
+            final JTree tree,
+            final Object value,
+            final boolean selected,
+            final boolean expanded,
+            final boolean leaf,
+            final int row,
+            final boolean hasFocus
+        ) {
             JLabel lab = null;
             synchronized (ThemeLayerWidget.this.getTreeLock()) {
                 String label = "<html>";
                 boolean modifiable = false;
 
-                if ((value instanceof AbstractFeatureService)
-                            && SelectionManager.getInstance().getEditableServices().contains(
-                                (AbstractFeatureService)value)) {
+                if (
+                    (value instanceof AbstractFeatureService) &&
+                    SelectionManager.getInstance().getEditableServices().contains((AbstractFeatureService) value)
+                ) {
                     modifiable = true;
                 }
 
@@ -2021,19 +1952,22 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     label += "<span color=\"#FF0000\">" + value.toString() + "</span>";
                 } else {
                     if (value.equals(layerModel.getRoot())) {
-                        label += NbBundle.getMessage(
+                        label +=
+                            NbBundle.getMessage(
                                 CheckBoxNodeRenderer.class,
-                                "ThemeLayerWidget.CheckBoxNodeRenderer.getTreeCellRendererComponent.root");
+                                "ThemeLayerWidget.CheckBoxNodeRenderer.getTreeCellRendererComponent.root"
+                            );
                     } else {
                         label += value.toString();
                     }
                 }
-                final AbstractFeatureService service = ((value instanceof AbstractFeatureService)
-                        ? (AbstractFeatureService)value : null);
+                final AbstractFeatureService service =
+                    ((value instanceof AbstractFeatureService) ? (AbstractFeatureService) value : null);
 
                 if (service != null) {
-                    final Integer selectedFeatureCount = SelectionManager.getInstance()
-                                .getSelectedFeaturesCount(service);
+                    final Integer selectedFeatureCount = SelectionManager
+                        .getInstance()
+                        .getSelectedFeaturesCount(service);
                     if (log.isDebugEnabled()) {
                         log.debug("selection " + String.valueOf(service) + " Anzahl: " + selectedFeatureCount);
                     }
@@ -2041,8 +1975,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         label += " | " + selectedFeatureCount;
                     }
 
-                    final Integer modifiableFeatureCount = SelectionManager.getInstance()
-                                .getModifiableFeaturesCount(service);
+                    final Integer modifiableFeatureCount = SelectionManager
+                        .getInstance()
+                        .getModifiableFeaturesCount(service);
 
                     if (modifiableFeatureCount != null) {
                         label += " | <span color=\"#FF0000\">" + modifiableFeatureCount + "</span>";
@@ -2051,14 +1986,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 label += "</html>";
 
                 final Component ret = super.getTreeCellRendererComponent(
-                        tree,
-                        value,
-                        selected,
-                        expanded,
-                        leaf,
-                        row,
-                        hasFocus);
-                final JLabel retLab = (JLabel)ret;
+                    tree,
+                    value,
+                    selected,
+                    expanded,
+                    leaf,
+                    row,
+                    hasFocus
+                );
+                final JLabel retLab = (JLabel) ret;
                 lab = new JLabel(label, retLab.getIcon(), retLab.getHorizontalAlignment());
 
                 if (value instanceof LayerCollection) {
@@ -2074,7 +2010,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             pan.setLayout(new GridBagLayout());
 
             if (value instanceof AbstractFeatureService) {
-                if (((AbstractFeatureService)value).isSelectable()) {
+                if (((AbstractFeatureService) value).isSelectable()) {
                     final Font boldFont = lab.getFont().deriveFont(Font.BOLD);
                     lab.setFont(boldFont);
                 }
@@ -2083,8 +2019,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if (fontValue != null) {
                 leafRenderer.setFont(fontValue);
             }
-            leafRenderer.setFocusPainted((drawsFocusBorderAroundIcon != null)
-                        && (drawsFocusBorderAroundIcon.booleanValue()));
+            leafRenderer.setFocusPainted(
+                (drawsFocusBorderAroundIcon != null) && (drawsFocusBorderAroundIcon.booleanValue())
+            );
 
             leafRenderer.setEnabled(tree.isEnabled());
 
@@ -2104,20 +2041,20 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final Object box = CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera();
 
                 if (box instanceof XBoundingBox) {
-                    final XBoundingBox currentBBox = (XBoundingBox)box;
+                    final XBoundingBox currentBBox = (XBoundingBox) box;
 
-                    if (!((AbstractFeatureService)value).isVisibleInBoundingBox(currentBBox)) {
+                    if (!((AbstractFeatureService) value).isVisibleInBoundingBox(currentBBox)) {
                         leafRenderer.setEnabled(false);
                     }
                 }
             } else if (value instanceof WMSServiceLayer) {
-                final WMSServiceLayer serviceLayer = (WMSServiceLayer)value;
+                final WMSServiceLayer serviceLayer = (WMSServiceLayer) value;
                 double min = Double.MIN_VALUE;
                 double max = Double.MAX_VALUE;
                 Layer tmpLayer = null;
 
-                if (((WMSServiceLayer)value).getWMSLayers().size() == 1) {
-                    tmpLayer = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getOgcCapabilitiesLayer();
+                if (((WMSServiceLayer) value).getWMSLayers().size() == 1) {
+                    tmpLayer = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0)).getOgcCapabilitiesLayer();
 
                     if (tmpLayer != null) {
                         min = tmpLayer.getScaleDenominationMin();
@@ -2125,8 +2062,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     }
                 }
 
-                if ((tmpLayer == null) && (serviceLayer.getWmsCapabilities() != null)
-                            && (serviceLayer.getWmsCapabilities().getLayer() != null)) {
+                if (
+                    (tmpLayer == null) &&
+                    (serviceLayer.getWmsCapabilities() != null) &&
+                    (serviceLayer.getWmsCapabilities().getLayer() != null)
+                ) {
                     min = serviceLayer.getWmsCapabilities().getLayer().getScaleDenominationMin();
                     max = serviceLayer.getWmsCapabilities().getLayer().getScaleDenominationMax();
                 }
@@ -2138,13 +2078,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 }
             }
 
-            if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
+            if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService) value).isFileNotFound()) {
                 lab.setForeground(Color.GRAY);
-            } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
+            } else if ((value instanceof H2FeatureService) && ((H2FeatureService) value).isTableNotFound()) {
                 lab.setForeground(Color.GRAY);
             } else if (value instanceof ImageRasterService) {
-                if ((((ImageRasterService)value).getImageFile() != null)
-                            && !((ImageRasterService)value).getImageFile().exists()) {
+                if (
+                    (((ImageRasterService) value).getImageFile() != null) &&
+                    !((ImageRasterService) value).getImageFile().exists()
+                ) {
                     lab.setForeground(Color.GRAY);
                 }
             }
@@ -2169,10 +2111,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          */
         protected boolean isValueSelected(final Object value) {
             if (value instanceof ServiceLayer) {
-                final ServiceLayer layer = (ServiceLayer)value;
+                final ServiceLayer layer = (ServiceLayer) value;
                 return layer.isEnabled();
             } else if (value instanceof LayerCollection) {
-                final LayerCollection layer = (LayerCollection)value;
+                final LayerCollection layer = (LayerCollection) value;
                 return layer.isEnabled();
             } else if (value.equals(layerModel.getRoot())) {
                 boolean enabled = true;
@@ -2180,11 +2122,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 for (int i = 0; i < layerModel.getChildCount(layerModel.getRoot()); ++i) {
                     final Object tmpLayer = layerModel.getChild(layerModel.getRoot(), i);
                     if (tmpLayer instanceof LayerCollection) {
-                        if (!((LayerCollection)tmpLayer).isEnabled()) {
+                        if (!((LayerCollection) tmpLayer).isEnabled()) {
                             enabled = false;
                         }
                     } else if (tmpLayer instanceof ServiceLayer) {
-                        if (!((ServiceLayer)tmpLayer).isEnabled()) {
+                        if (!((ServiceLayer) tmpLayer).isEnabled()) {
                             enabled = false;
                         }
                     }
@@ -2223,26 +2165,29 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public Component getTreeCellRendererComponent(final JTree tree,
-                final Object value,
-                final boolean selected,
-                final boolean expanded,
-                final boolean leaf,
-                final int row,
-                final boolean hasFocus) {
-            final JPanel pan = (JPanel)super.getTreeCellRendererComponent(
-                    tree,
-                    value,
-                    selected,
-                    expanded,
-                    leaf,
-                    row,
-                    hasFocus);
+        public Component getTreeCellRendererComponent(
+            final JTree tree,
+            final Object value,
+            final boolean selected,
+            final boolean expanded,
+            final boolean leaf,
+            final int row,
+            final boolean hasFocus
+        ) {
+            final JPanel pan = (JPanel) super.getTreeCellRendererComponent(
+                tree,
+                value,
+                selected,
+                expanded,
+                leaf,
+                row,
+                hasFocus
+            );
             if (!(pan.getComponent(0) instanceof JCheckBox)) {
                 // the root element has no checkbox
                 return pan;
             }
-            final JCheckBox leafRenderer = (JCheckBox)pan.getComponent(0);
+            final JCheckBox leafRenderer = (JCheckBox) pan.getComponent(0);
             final Component ret = pan.getComponent(1);
 
             if (lastAdapter != null) {
@@ -2250,8 +2195,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
             treeEditorTextField = null;
 
-            lastAdapter = new MouseAdapter() {
-
+            lastAdapter =
+                new MouseAdapter() {
                     @Override
                     public void mousePressed(final MouseEvent e) {
                         createPopupMenu();
@@ -2273,10 +2218,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         }
                         if (ret instanceof JLabel) {
                             final String text = value.toString();
-                            ((JLabel)ret).setText("");
+                            ((JLabel) ret).setText("");
                             treeEditorTextField = new JTextField(text);
-                            treeEditorTextField.addKeyListener(new KeyAdapter() {
-
+                            treeEditorTextField.addKeyListener(
+                                new KeyAdapter() {
                                     @Override
                                     public void keyTyped(final KeyEvent e) {
                                         if (e.getKeyChar() == '\n') {
@@ -2287,14 +2232,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                             tree.stopEditing();
                                         }
                                     }
-                                });
-                            treeEditorTextField.setPreferredSize(((JLabel)ret).getPreferredSize());
-                            treeEditorTextField.setMinimumSize(((JLabel)ret).getMinimumSize());
-                            treeEditorTextField.setMaximumSize(((JLabel)ret).getMaximumSize());
+                                }
+                            );
+                            treeEditorTextField.setPreferredSize(((JLabel) ret).getPreferredSize());
+                            treeEditorTextField.setMinimumSize(((JLabel) ret).getMinimumSize());
+                            treeEditorTextField.setMaximumSize(((JLabel) ret).getMaximumSize());
                             treeEditorTextField.setEditable(true);
-                            ((JLabel)ret).setMinimumSize(null);
-                            ((JLabel)ret).setMaximumSize(null);
-                            ((JLabel)ret).setPreferredSize(null);
+                            ((JLabel) ret).setMinimumSize(null);
+                            ((JLabel) ret).setMaximumSize(null);
+                            ((JLabel) ret).setPreferredSize(null);
                             pan.add(
                                 treeEditorTextField,
                                 new GridBagConstraints(
@@ -2308,7 +2254,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                     GridBagConstraints.HORIZONTAL,
                                     new Insets(0, 0, 0, 0),
                                     0,
-                                    0));
+                                    0
+                                )
+                            );
                             treeEditorTextField.setSelectionStart(0);
                             treeEditorTextField.setSelectionEnd(treeEditorTextField.getText().length());
                             treeEditorTextField.setFocusable(true);
@@ -2321,16 +2269,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             ret.addMouseListener(lastAdapter);
 
-            leafRenderer.addActionListener(new ActionListener() {
-
+            leafRenderer.addActionListener(
+                new ActionListener() {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         changeVisibility(value);
                     }
-                });
+                }
+            );
 
-            leafRenderer.addMouseListener(new MouseAdapter() {
-
+            leafRenderer.addMouseListener(
+                new MouseAdapter() {
                     @Override
                     public void mouseReleased(final MouseEvent e) {
                         // The action performed method will not be invoked, if the checkbox is disabled
@@ -2339,18 +2288,21 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             changeVisibility(value);
                         }
                     }
-                });
+                }
+            );
 
             return pan;
         }
 
         @Override
-        public Component getTreeCellEditorComponent(final JTree tree,
-                final Object value,
-                final boolean isSelected,
-                final boolean expanded,
-                final boolean leaf,
-                final int row) {
+        public Component getTreeCellEditorComponent(
+            final JTree tree,
+            final Object value,
+            final boolean isSelected,
+            final boolean expanded,
+            final boolean leaf,
+            final int row
+        ) {
             this.value = value;
             return getTreeCellRendererComponent(tree, value, true, expanded, leaf, row, true);
         }
@@ -2380,8 +2332,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         }
 
         @Override
-        public void cancelCellEditing() {
-        }
+        public void cancelCellEditing() {}
 
         /**
          * Adds the <code>CellEditorListener</code>.
@@ -2410,10 +2361,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          */
         private void setNewName(final String name) {
             if (value instanceof ServiceLayer) {
-                final ServiceLayer layer = (ServiceLayer)value;
+                final ServiceLayer layer = (ServiceLayer) value;
                 layer.setName(name);
             } else if (value instanceof LayerCollection) {
-                final LayerCollection layer = (LayerCollection)value;
+                final LayerCollection layer = (LayerCollection) value;
                 layer.setName(name);
             }
         }

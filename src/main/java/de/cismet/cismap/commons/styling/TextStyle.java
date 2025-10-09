@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * TextStyle.java
  *
@@ -25,6 +25,5 @@ public class TextStyle {
     /**
      * Creates a new instance of TextStyle.
      */
-    public TextStyle() {
-    }
+    public TextStyle() {}
 }

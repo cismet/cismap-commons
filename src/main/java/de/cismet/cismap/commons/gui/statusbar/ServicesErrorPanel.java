@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * ServicesErrorPanel.java
  *
@@ -24,6 +24,7 @@ public class ServicesErrorPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblErrorIcon;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,14 +49,18 @@ public class ServicesErrorPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-        lblErrorIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/error.png"))); // NOI18N
-        lblErrorIcon.setText(org.openide.util.NbBundle.getMessage(
+        lblErrorIcon.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/error.png"))
+        ); // NOI18N
+        lblErrorIcon.setText(
+            org.openide.util.NbBundle.getMessage(ServicesErrorPanel.class, "ServicesErrorPanel.lblErrorIcon.text")
+        ); // NOI18N
+        lblErrorIcon.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 ServicesErrorPanel.class,
-                "ServicesErrorPanel.lblErrorIcon.text"));                                      // NOI18N
-        lblErrorIcon.setToolTipText(org.openide.util.NbBundle.getMessage(
-                ServicesErrorPanel.class,
-                "ServicesErrorPanel.lblErrorIcon.toolTipText"));                               // NOI18N
+                "ServicesErrorPanel.lblErrorIcon.toolTipText"
+            )
+        ); // NOI18N
         add(lblErrorIcon, java.awt.BorderLayout.CENTER);
-    }                                                                                          // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 }

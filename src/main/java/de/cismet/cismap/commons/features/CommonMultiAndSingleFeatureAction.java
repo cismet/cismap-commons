@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2011 thorsten
  *
@@ -24,7 +24,6 @@
 package de.cismet.cismap.commons.features;
 
 import java.util.List;
-
 import javax.swing.Action;
 
 /**
@@ -33,5 +32,4 @@ import javax.swing.Action;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public interface CommonMultiAndSingleFeatureAction {
-}
+public interface CommonMultiAndSingleFeatureAction {}

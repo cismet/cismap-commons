@@ -1,12 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -14,13 +18,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
-
-import java.io.File;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * JasperReportDownload is a Download which can be immediately added to the DownloadManager and allows it to create the
@@ -63,11 +60,13 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
-    public JasperReportDownload(final String reportResourceName,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperReportDownload(
+        final String reportResourceName,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this(reportResourceName, dataSourceGenerator, directory, title, filename, ".pdf");
     }
 
@@ -81,12 +80,14 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @param  filename             DOCUMENT ME!
      * @param  extension            DOCUMENT ME!
      */
-    public JasperReportDownload(final String reportResourceName,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename,
-            final String extension) {
+    public JasperReportDownload(
+        final String reportResourceName,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename,
+        final String extension
+    ) {
         this.reportResourceName = reportResourceName;
         this.parameters = new HashMap();
         this.dataSourceGenerator = dataSourceGenerator;
@@ -108,12 +109,14 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
-    public JasperReportDownload(final String reportResourceName,
-            final Map parameters,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperReportDownload(
+        final String reportResourceName,
+        final Map parameters,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this.reportResourceName = reportResourceName;
         this.parameters = parameters;
         this.dataSourceGenerator = dataSourceGenerator;
@@ -134,12 +137,14 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
-    public JasperReportDownload(final String reportResourceName,
-            final JasperReportParametersGenerator parametersGenerator,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperReportDownload(
+        final String reportResourceName,
+        final JasperReportParametersGenerator parametersGenerator,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this.reportResourceName = reportResourceName;
         this.parametersGenerator = parametersGenerator;
         this.dataSourceGenerator = dataSourceGenerator;
@@ -160,12 +165,14 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
-    public JasperReportDownload(final JasperReport reportResource,
-            final JasperReportParametersGenerator parametersGenerator,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
+    public JasperReportDownload(
+        final JasperReport reportResource,
+        final JasperReportParametersGenerator parametersGenerator,
+        final JasperReportDataSourceGenerator dataSourceGenerator,
+        final String directory,
+        final String title,
+        final String filename
+    ) {
         this.reportResource = reportResource;
         this.parametersGenerator = parametersGenerator;
         this.dataSourceGenerator = dataSourceGenerator;
@@ -208,8 +215,10 @@ public class JasperReportDownload extends AbstractCancellableDownload {
         try {
             JasperReport jasperReport = reportResource;
             if (jasperReport == null) {
-                jasperReport = (JasperReport)JRLoader.loadObject(JasperReportDownload.class.getResourceAsStream(
-                            reportResourceName));
+                jasperReport =
+                    (JasperReport) JRLoader.loadObject(
+                        JasperReportDownload.class.getResourceAsStream(reportResourceName)
+                    );
             }
             print = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
         } catch (JRException ex) {
@@ -272,7 +281,6 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @version  $Revision$, $Date$
      */
     public interface JasperReportParametersGenerator {
-
         //~ Methods ------------------------------------------------------------
 
         /**
@@ -290,7 +298,6 @@ public class JasperReportDownload extends AbstractCancellableDownload {
      * @version  $Revision$, $Date$
      */
     public interface JasperReportDataSourceGenerator {
-
         //~ Methods ------------------------------------------------------------
 
         /**

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -13,7 +13,6 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
-
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -71,9 +70,7 @@ public class FeatureAddHoleAction implements CustomAction {
      */
     @Override
     public String info() {
-        return org.openide.util.NbBundle.getMessage(
-                FeatureCreateAction.class,
-                "FeatureAddHoleAction.info().return"); // NOI18N
+        return org.openide.util.NbBundle.getMessage(FeatureCreateAction.class, "FeatureAddHoleAction.info().return"); // NOI18N
     }
 
     /**

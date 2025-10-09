@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.demo;
 
 import java.util.regex.Matcher;
@@ -22,6 +22,7 @@ public class NewJFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -59,13 +60,13 @@ public class NewJFrame extends javax.swing.JFrame {
      * @param  args  the command line arguments
      */
     public static void main(final String[] args) {
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new NewJFrame().setVisible(true);
-//            }
-//        });
+        //        java.awt.EventQueue.invokeLater(new Runnable() {
+        //            public void run() {
+        //                new NewJFrame().setVisible(true);
+        //            }
+        //        });
 
-        String valueString = "  23";                                       // NOI18N
+        String valueString = "  23"; // NOI18N
         int i = -1;
         valueString = valueString.trim();
         boolean hatAlphaTeil = false;
@@ -78,11 +79,11 @@ public class NewJFrame extends javax.swing.JFrame {
             hatAlphaTeil = true;
         }
         if (hatAlphaTeil) {
-            System.out.println(i + " " + valueString.substring(0, i));     // NOI18N
+            System.out.println(i + " " + valueString.substring(0, i)); // NOI18N
             final String intString = valueString.substring(0, i - 1);
             final String alphaRest = valueString.substring(i - 1, valueString.length());
-            System.out.println("intString." + intString.trim() + ".");     // NOI18N
-            System.out.println("alphaRest." + alphaRest.trim() + ".");     // NOI18N
+            System.out.println("intString." + intString.trim() + "."); // NOI18N
+            System.out.println("alphaRest." + alphaRest.trim() + "."); // NOI18N
         }
     }
 }

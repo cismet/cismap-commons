@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * PFeature.java
  *
@@ -13,44 +13,9 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import Sirius.util.collections.MultiMap;
-
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-
-import edu.umd.cs.piccolo.PCamera;
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PImage;
-import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolo.nodes.PText;
-import edu.umd.cs.piccolo.util.PBounds;
-import edu.umd.cs.piccolo.util.PDimension;
-
-import pswing.PSwing;
-
-import java.awt.*;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.BufferedImage;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import java.lang.ref.SoftReference;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
@@ -62,8 +27,33 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointF
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-
 import de.cismet.tools.CurrentStackTrace;
+import edu.umd.cs.piccolo.PCamera;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PImage;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.nodes.PText;
+import edu.umd.cs.piccolo.util.PBounds;
+import edu.umd.cs.piccolo.util.PDimension;
+import java.awt.*;
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.lang.ref.SoftReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import pswing.PSwing;
 
 /**
  * DOCUMENT ME!
@@ -78,12 +68,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PFeature.class);
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private static final Stroke FIXED_WIDTH_STROKE = new FixedWidthStroke();
-    private static ImageIcon pushpinIco = new javax.swing.ImageIcon(PFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
-    private static ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(PFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
+    private static ImageIcon pushpinIco = new javax.swing.ImageIcon(
+        PFeature.class.getResource("/de/cismet/cismap/commons/gui/res/pushpin.png")
+    ); // NOI18N
+    private static ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(
+        PFeature.class.getResource("/de/cismet/cismap/commons/gui/res/pushpinSelected.png")
+    ); // NOI18N
     private static final Map<String, SoftReference<Image>> IMAGE_CACHE = Collections.synchronizedMap(
-            new HashMap<String, SoftReference<Image>>());
+        new HashMap<String, SoftReference<Image>>()
+    );
 
     //~ Instance fields --------------------------------------------------------
 
@@ -121,7 +114,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private MappingComponent viewer;
     private Stroke stroke = null;
     private Paint strokePaint = null;
-//    private ColorTintFilter tinter;
+    //    private ColorTintFilter tinter;
     private boolean ignoreStickyFeature = false;
     private InfoPanel infoPanel;
     private JComponent infoComponent;
@@ -159,11 +152,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  y_offset  DOCUMENT ME!
      * @param  viewer    DOCUMENT ME!
      */
-    public PFeature(final Feature feature,
-            final WorldToScreenTransform wtst,
-            final double x_offset,
-            final double y_offset,
-            final MappingComponent viewer) {
+    public PFeature(
+        final Feature feature,
+        final WorldToScreenTransform wtst,
+        final double x_offset,
+        final double y_offset,
+        final MappingComponent viewer
+    ) {
         this(feature, wtst, x_offset, y_offset, viewer, false);
     }
 
@@ -177,11 +172,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  viewer        DOCUMENT ME!
      */
     @Deprecated
-    public PFeature(final Point2D[] canvasPoints,
-            final WorldToScreenTransform wtst,
-            final double x_offset,
-            final double y_offset,
-            final MappingComponent viewer) {
+    public PFeature(
+        final Point2D[] canvasPoints,
+        final WorldToScreenTransform wtst,
+        final double x_offset,
+        final double y_offset,
+        final MappingComponent viewer
+    ) {
         this(new PureNewFeature(canvasPoints, wtst), wtst, 0, 0, viewer);
     }
 
@@ -195,11 +192,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  viewer    DOCUMENT ME!
      */
     @Deprecated
-    public PFeature(final Coordinate[] coordArr,
-            final WorldToScreenTransform wtst,
-            final double x_offset,
-            final double y_offset,
-            final MappingComponent viewer) {
+    public PFeature(
+        final Coordinate[] coordArr,
+        final WorldToScreenTransform wtst,
+        final double x_offset,
+        final double y_offset,
+        final MappingComponent viewer
+    ) {
         this(new PureNewFeature(coordArr, wtst), wtst, 0, 0, viewer);
     }
 
@@ -214,18 +213,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  ignoreStickyfeature  DOCUMENT ME!
      */
     @Deprecated
-    public PFeature(final Feature feature,
-            final WorldToScreenTransform wtst,
-            final double x_offset,
-            final double y_offset,
-            final MappingComponent viewer,
-            final boolean ignoreStickyfeature) {
+    public PFeature(
+        final Feature feature,
+        final WorldToScreenTransform wtst,
+        final double x_offset,
+        final double y_offset,
+        final MappingComponent viewer,
+        final boolean ignoreStickyfeature
+    ) {
         try {
             setFeature(feature);
             this.ignoreStickyFeature = ignoreStickyfeature;
             this.wtst = wtst;
-//            this.x_offset=x_offset;
-//            this.y_offset=y_offset;
+            //            this.x_offset=x_offset;
+            //            this.y_offset=y_offset;
             this.x_offset = 0;
             this.y_offset = 0;
             this.viewer = viewer;
@@ -238,37 +239,42 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // the scale must be checked, when the view scale wass changed
             final FeatureRenderer renderer = getFeatureRenderer();
 
-            if ((feature instanceof StyledFeature)
-                        && (((StyledFeature)feature).getFillingPaint() instanceof SelectionAwareTexturePaint)) {
+            if (
+                (feature instanceof StyledFeature) &&
+                (((StyledFeature) feature).getFillingPaint() instanceof SelectionAwareTexturePaint)
+            ) {
                 tPropertyChange = new TexturePaintPropertyChangeListener();
                 viewer.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, tPropertyChange);
             }
             if ((renderer instanceof ScaleAwareFeatureRenderer) && (viewer != null) && (viewer.getCamera() != null)) {
-                viewer.getCamera()
-                        .addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
-
-                                @Override
-                                public void propertyChange(final PropertyChangeEvent evt) {
-                                    if (!drawFeature()) {
-                                        if (pi != null) {
-                                            viewer.removeStickyNode(pi);
-                                        }
-                                        if (piSelected != null) {
-                                            viewer.removeStickyNode(piSelected);
-                                        }
-                                        if (stickyChild instanceof PSticky) {
-                                            viewer.removeStickyNode((PSticky)stickyChild);
-                                        }
-                                        removeAllChildren();
+                viewer
+                    .getCamera()
+                    .addPropertyChangeListener(
+                        PCamera.PROPERTY_VIEW_TRANSFORM,
+                        new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(final PropertyChangeEvent evt) {
+                                if (!drawFeature()) {
+                                    if (pi != null) {
+                                        viewer.removeStickyNode(pi);
                                     }
-                                    visualize();
+                                    if (piSelected != null) {
+                                        viewer.removeStickyNode(piSelected);
+                                    }
+                                    if (stickyChild instanceof PSticky) {
+                                        viewer.removeStickyNode((PSticky) stickyChild);
+                                    }
+                                    removeAllChildren();
                                 }
-                            });
+                                visualize();
+                            }
+                        }
+                    );
             }
 
             stroke = getStroke();
             strokePaint = getStrokePaint();
-//            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
+            //            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
         } catch (Throwable t) {
             LOG.error("Error in constructor of PFeature", t); // NOI18N
         }
@@ -296,7 +302,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public PBounds boundsFromRectPolygonGeom(final Geometry g) {
         if (g instanceof Polygon) {
-            final Polygon poly = (Polygon)g;
+            final Polygon poly = (Polygon) g;
             if (poly.isRectangle()) {
                 final Coordinate[] coords = poly.getCoordinates();
                 final Coordinate first = coords[0];
@@ -340,8 +346,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         Geometry geom = null;
 
         if (feature instanceof DefaultFeatureServiceFeature) {
-            final FeatureSimplifier simplifier = ((DefaultFeatureServiceFeature)feature).getLayerProperties()
-                        .getFeatureSimplifier();
+            final FeatureSimplifier simplifier =
+                ((DefaultFeatureServiceFeature) feature).getLayerProperties().getFeatureSimplifier();
 
             if (simplifier != null) {
                 geom = CrsTransformer.transformToGivenCrs(simplifier.simplify(feature), getViewerCrs().getCode());
@@ -353,7 +359,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         if (feature instanceof RasterDocumentFeature) {
-            final RasterDocumentFeature rdf = (RasterDocumentFeature)feature;
+            final RasterDocumentFeature rdf = (RasterDocumentFeature) feature;
             try {
                 final PBounds bounds = boundsFromRectPolygonGeom(geom);
                 final PImage pImage = new PImage(rdf.getRasterDocument());
@@ -383,35 +389,42 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         } else {
             doGeometry(geom);
             if (feature instanceof StyledFeature) {
-                if ((pi == null)
-                            || ((pi != null) && pi.equals(((StyledFeature)feature).getPointAnnotationSymbol()))) {
+                if ((pi == null) || ((pi != null) && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
                     // log.debug("Sweetspot updated");
-// pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
-// .getImage());
+                    // pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
+                    // .getImage());
                     setFeatureAnnotationSymbols();
-                } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
-                            && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
-//                        log.fatal("Sweetspot updated");                                                                  // NOI18N
-                    final FeatureAnnotationSymbol piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
+                } else if (
+                    (pi != null) &&
+                    (getFeature() != null) &&
+                    (getFeature() instanceof StyledFeature) &&
+                    (((StyledFeature) getFeature()).getPointAnnotationSymbol() != null)
+                ) {
+                    //                        log.fatal("Sweetspot updated");                                                                  // NOI18N
+                    final FeatureAnnotationSymbol piOrig = ((StyledFeature) getFeature()).getPointAnnotationSymbol();
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("newSweetSpotx: "
-                                    + piOrig.getSweetSpotX()); // NOI18N
+                        LOG.debug("newSweetSpotx: " + piOrig.getSweetSpotX()); // NOI18N
                     }
                     final double sweetSpotX = piOrig.getSweetSpotX();
                     final double sweetSpotY = piOrig.getSweetSpotY();
                     if (piOrig.getSelectedFeatureAnnotationSymbol() == null) {
-                        final double sweetX = (10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
-                                    / piSelected.getImage().getWidth(null);
-                        final double sweetY = (10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
-                                    / piSelected.getImage().getHeight(null);
+                        final double sweetX =
+                            (10 + (piOrig.getImage().getWidth(null) * sweetSpotX)) /
+                            piSelected.getImage().getWidth(null);
+                        final double sweetY =
+                            (10 + (piOrig.getImage().getHeight(null) * sweetSpotY)) /
+                            piSelected.getImage().getHeight(null);
                         pi.setImage(piOrig.getImage());
                         pi.setSweetSpotX(sweetX);
                         pi.setSweetSpotY(sweetY);
-                        piSelected.setImage(highlightImageAsSelected(
+                        piSelected.setImage(
+                            highlightImageAsSelected(
                                 piOrig.getImage(),
                                 new Color(0.3f, 0.3f, 1.0f, 0.4f),
                                 new Color(0.2f, 0.2f, 1.0f, 0.8f),
-                                10));
+                                10
+                            )
+                        );
                         piSelected.setSweetSpotX(sweetX);
                         piSelected.setSweetSpotY(sweetY);
                     } else {
@@ -429,15 +442,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             if (geom instanceof Polygon) {
                 if (pi instanceof ShowAlsoOnPolygons) {
-                    final Point p = ((Polygon)geom).getInteriorPoint();
+                    final Point p = ((Polygon) geom).getInteriorPoint();
                     addAnnotation(p.getX(), p.getY());
                 }
-            } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
-            } else if (geom instanceof MultiPolygon) {
+            } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {} else if (
+                geom instanceof MultiPolygon
+            ) {
                 /*                final com.vividsolutions.jts.geom.Point intPoint = CrsTransformer.transformToGivenCrs(
                  * geom, viewer.getMappingModel().getSrs().getCode()) .getInteriorPoint();
                  * addAnnotation(intPoint.getX(), intPoint.getY());*/
-// MultiPolygon mp = (MultiPolygon) geom;
+                // MultiPolygon mp = (MultiPolygon) geom;
             } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
                 addAnnotation(entityRingCoordArr[0][0][0].x, entityRingCoordArr[0][0][0].y);
             }
@@ -456,7 +470,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         if (getFeature() instanceof StyledFeature) {
-            piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
+            piOrig = ((StyledFeature) getFeature()).getPointAnnotationSymbol();
         }
 
         if ((piOrig == null) || (piOrig.getImage() == null)) {
@@ -471,8 +485,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             piSelected.setSweetSpotX(0.46d);
             piSelected.setSweetSpotY(0.9d);
         } else {
-            final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
-            final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
+            final double sweetSpotX = ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX();
+            final double sweetSpotY = ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY();
             if ((piOrig != null) && (piOrig.getSelectedFeatureAnnotationSymbol() == null)) {
                 /*
                  * in this case we visualize the selection with a blue box around the icon of the
@@ -481,15 +495,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (!selectedPiEdited) {
                     selectedPiEdited = true;
                     final Image iconImage = piOrig.getImage();
-                    piSelected = new FeatureAnnotationSymbol(highlightImageAsSelected(
+                    piSelected =
+                        new FeatureAnnotationSymbol(
+                            highlightImageAsSelected(
                                 iconImage,
                                 new Color(0.3f, 0.3f, 1.0f, 0.4f),
                                 new Color(0.2f, 0.2f, 1.0f, 0.8f),
-                                10));
-                    final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
-                                    / piSelected.getImage().getWidth(null));
-                    final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
-                                    / piSelected.getImage().getHeight(null));
+                                10
+                            )
+                        );
+                    final double sweetX =
+                        ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX)) / piSelected.getImage().getWidth(null));
+                    final double sweetY =
+                        (
+                            (10 + (piOrig.getImage().getHeight(null) * sweetSpotY)) /
+                            piSelected.getImage().getHeight(null)
+                        );
                     piSelected.setSweetSpotX(sweetX);
                     piSelected.setSweetSpotY(sweetY);
                 }
@@ -499,9 +520,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if ((pi == null)) {
                 pi = new FeatureAnnotationSymbol();
                 final Image iconImage = piOrig.getImage();
-                final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
-                        iconImage.getHeight(null),
-                        BufferedImage.TYPE_INT_ARGB);
+                final BufferedImage img = new BufferedImage(
+                    iconImage.getWidth(null),
+                    iconImage.getHeight(null),
+                    BufferedImage.TYPE_INT_ARGB
+                );
                 final Graphics g = img.getGraphics();
                 g.drawImage(iconImage, 0, 0, null);
                 if (piOrig.getSelectedFeatureAnnotationSymbol() == null) {
@@ -510,10 +533,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                      * selected FeatureAnnotationSymbol
                      */
                     pi.setImage(highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10));
-                    final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
-                                    / piSelected.getImage().getWidth(null));
-                    final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
-                                    / piSelected.getImage().getHeight(null));
+                    final double sweetX =
+                        ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX)) / piSelected.getImage().getWidth(null));
+                    final double sweetY =
+                        (
+                            (10 + (piOrig.getImage().getHeight(null) * sweetSpotY)) /
+                            piSelected.getImage().getHeight(null)
+                        );
                     pi.setSweetSpotX(sweetX);
                     pi.setSweetSpotY(sweetY);
                 } else {
@@ -577,11 +603,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final float[] origYArr = entityRingYArr[entityPosition][ringPosition];
         final Geometry geometry = getFeature().getGeometry();
 
-        if (((geometry instanceof Polygon) && (origCoordArr != null)
-                        && ((origCoordArr.length - 1) > coordPosition))
-                    || ((geometry instanceof LineString) && (origCoordArr != null)
-                        && (origCoordArr.length > coordPosition)
-                        && (origCoordArr.length > 2))) {
+        if (
+            ((geometry instanceof Polygon) && (origCoordArr != null) && ((origCoordArr.length - 1) > coordPosition)) ||
+            (
+                (geometry instanceof LineString) &&
+                (origCoordArr != null) &&
+                (origCoordArr.length > coordPosition) &&
+                (origCoordArr.length > 2)
+            )
+        ) {
             final Coordinate[] newCoordArr = new Coordinate[origCoordArr.length + 1];
             final float[] newXArr = new float[origXArr.length + 1];
             final float[] newYArr = new float[origYArr.length + 1];
@@ -594,7 +624,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             // zu entferndes Element duplizieren, hier muss geklont werden
-            newCoordArr[coordPosition + 1] = (Coordinate)(origCoordArr[coordPosition].clone());
+            newCoordArr[coordPosition + 1] = (Coordinate) (origCoordArr[coordPosition].clone());
             newXArr[coordPosition + 1] = origXArr[coordPosition];
             newYArr[coordPosition + 1] = origYArr[coordPosition];
 
@@ -705,13 +735,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (getFeature().isEditable()) {
                 // geometryfactory erzeugen
                 final GeometryFactory geometryFactory = new GeometryFactory(
-                        new PrecisionModel(PrecisionModel.FLOATING),
-                        CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+                    new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.extractSridFromCrs(getViewerCrs().getCode())
+                );
 
                 // sonderfall multipolygon TODO eigentlich garkein sonderfall, multipoint und multilinestring müssen
                 // langfristig genauso behandelt werden
-                if ((getFeature().getGeometry() instanceof MultiPolygon)
-                            || ((getFeature().getGeometry() instanceof Polygon) && (entityRingCoordArr.length > 1))) {
+                if (
+                    (getFeature().getGeometry() instanceof MultiPolygon) ||
+                    ((getFeature().getGeometry() instanceof Polygon) && (entityRingCoordArr.length > 1))
+                ) {
                     final Collection<Polygon> polygons = new ArrayList<Polygon>(entityRingCoordArr.length);
                     for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
                         final Polygon polygon = createPolygon(entityRingCoordArr[entityIndex], geometryFactory);
@@ -719,8 +752,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
 
                     // multipolygon aus den polygonen erzeugen
-                    final MultiPolygon multiPolygon = geometryFactory.createMultiPolygon(polygons.toArray(
-                                new Polygon[0]));
+                    final MultiPolygon multiPolygon = geometryFactory.createMultiPolygon(
+                        polygons.toArray(new Polygon[0])
+                    );
 
                     assignSynchronizedGeometry(multiPolygon);
                 } else if ((getFeature().getGeometry() instanceof MultiPoint)) {
@@ -733,11 +767,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             LOG.warn("coordArr==null"); // NOI18N
                         } else {
                             final boolean isPoint = entityRingCoordArr[0][0].length == 1;
-                            final boolean isPolygon = (entityRingCoordArr[0][0].length > 3)
-                                        && entityRingCoordArr[0][0][0].equals(
-                                            entityRingCoordArr[0][0][entityRingCoordArr[0][0].length - 1]);
-                            final boolean isLineString = !isPoint
-                                        && (!isPolygon || (getFeature().getGeometry() instanceof LineString));
+                            final boolean isPolygon =
+                                (entityRingCoordArr[0][0].length > 3) &&
+                                entityRingCoordArr[0][0][0].equals(
+                                        entityRingCoordArr[0][0][entityRingCoordArr[0][0].length - 1]
+                                    );
+                            final boolean isLineString =
+                                !isPoint && (!isPolygon || (getFeature().getGeometry() instanceof LineString));
 
                             if (isPoint) {
                                 assignSynchronizedGeometry(createPoint(entityRingCoordArr[0][0][0], geometryFactory));
@@ -765,13 +801,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final String oldCrs = CrsTransformer.createCrsFromSrid(oldGeom.getSRID());
         final String newCrs = CrsTransformer.createCrsFromSrid(newGeom.getSRID());
 
-//        if (!newGeom.isValid()) {
-//            doGeometry(oldGeom);
-//            return;
-//        }
-//
-        if ((newGeom.getSRID() == oldGeom.getSRID())
-                    || (CrsTransformer.isDefaultCrs(oldCrs) && CrsTransformer.isDefaultCrs(newCrs))) {
+        //        if (!newGeom.isValid()) {
+        //            doGeometry(oldGeom);
+        //            return;
+        //        }
+        //
+        if (
+            (newGeom.getSRID() == oldGeom.getSRID()) ||
+            (CrsTransformer.isDefaultCrs(oldCrs) && CrsTransformer.isDefaultCrs(newCrs))
+        ) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("feature and pfeature geometry differ, but have the same crs and will be synchronized."); // NOI18N
             }
@@ -801,7 +839,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     LOG.debug("feature and pfeature geometry do not differ."); // NOI18N
                 }
             } catch (final Exception e) {
-                LOG.error("Cannot synchronize feature.", e);                   // NOI18N
+                LOG.error("Cannot synchronize feature.", e); // NOI18N
             }
         }
     }
@@ -836,8 +874,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final FeatureRenderer renderer = getFeatureRenderer();
 
         if (renderer instanceof ScaleAwareFeatureRenderer) {
-            final int minScale = ((ScaleAwareFeatureRenderer)renderer).getMinScale();
-            final int maxScale = ((ScaleAwareFeatureRenderer)renderer).getMaxScale();
+            final int minScale = ((ScaleAwareFeatureRenderer) renderer).getMinScale();
+            final int maxScale = ((ScaleAwareFeatureRenderer) renderer).getMaxScale();
             final double scale = viewer.getScaleDenominator();
 
             return (maxScale <= scale) && (minScale >= scale);
@@ -853,10 +891,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private FeatureRenderer getFeatureRenderer() {
         if (feature instanceof FeatureRendererAwareFeature) {
-            FeatureRenderer renderer = ((FeatureRendererAwareFeature)feature).getFeatureRenderer();
+            FeatureRenderer renderer = ((FeatureRendererAwareFeature) feature).getFeatureRenderer();
 
             if (renderer == null) {
-                renderer = ((FeatureRendererAwareFeature)feature).getParentFeatureRenderer();
+                renderer = ((FeatureRendererAwareFeature) feature).getParentFeatureRenderer();
             }
 
             return renderer;
@@ -876,19 +914,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         Coordinate[][][] otherCoords = null;
 
         if (geom instanceof Point) {
-            final Point point = (Point)geom;
-            otherCoords = new Coordinate[][][] {
-                    {
-                        { point.getCoordinate() }
-                    }
-                };
+            final Point point = (Point) geom;
+            otherCoords = new Coordinate[][][] { { { point.getCoordinate() } } };
         } else if (geom instanceof LineString) {
-            final LineString lineString = (LineString)geom;
-            otherCoords = new Coordinate[][][] {
-                    { lineString.getCoordinates() }
-                };
+            final LineString lineString = (LineString) geom;
+            otherCoords = new Coordinate[][][] { { lineString.getCoordinates() } };
         } else if (geom instanceof Polygon) {
-            final Polygon polygon = (Polygon)geom;
+            final Polygon polygon = (Polygon) geom;
             final int numOfHoles = polygon.getNumInteriorRing();
             otherCoords = new Coordinate[1][1 + numOfHoles][];
             otherCoords[0][0] = polygon.getExteriorRing().getCoordinates();
@@ -898,24 +930,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         } else if (geom instanceof LinearRing) {
             // doPolygon((Polygon)geom);
         } else if (geom instanceof MultiPoint) {
-            otherCoords = new Coordinate[][][] {
-                    { ((MultiPoint)geom).getCoordinates() }
-                };
+            otherCoords = new Coordinate[][][] { { ((MultiPoint) geom).getCoordinates() } };
         } else if (geom instanceof MultiLineString) {
-            final MultiLineString multiLineString = (MultiLineString)geom;
+            final MultiLineString multiLineString = (MultiLineString) geom;
             final int numOfGeoms = multiLineString.getNumGeometries();
             otherCoords = new Coordinate[numOfGeoms][][];
             for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
-                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
-                            .getCoordinates();
+                final Coordinate[] coordSubArr =
+                    ((LineString) multiLineString.getGeometryN(entityIndex)).getCoordinates();
                 otherCoords[entityIndex] = new Coordinate[][] { coordSubArr };
             }
         } else if (geom instanceof MultiPolygon) {
-            final MultiPolygon multiPolygon = (MultiPolygon)geom;
+            final MultiPolygon multiPolygon = (MultiPolygon) geom;
             final int numOfEntities = multiPolygon.getNumGeometries();
             otherCoords = new Coordinate[numOfEntities][][];
             for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
-                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
+                final Polygon polygon = (Polygon) multiPolygon.getGeometryN(entityIndex);
                 final int numOfHoles = polygon.getNumInteriorRing();
                 otherCoords[entityIndex] = new Coordinate[1 + numOfHoles][];
                 otherCoords[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
@@ -924,7 +954,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
         } else if (geom instanceof GeometryCollection) {
-            final GeometryCollection gc = (GeometryCollection)geom;
+            final GeometryCollection gc = (GeometryCollection) geom;
             final int numOfGeoms = gc.getNumGeometries();
             otherCoords = new Coordinate[numOfGeoms][][];
             for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
@@ -960,13 +990,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             entityRingYArr[entityIndex] = new float[entityRingCoordArr[entityIndex].length][];
             for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
                 final Coordinate[] transformedCoordArr = transformCoordinateArr(
-                        entityRingCoordArr[entityIndex][ringIndex]);
+                    entityRingCoordArr[entityIndex][ringIndex]
+                );
                 final int length = transformedCoordArr.length;
                 entityRingXArr[entityIndex][ringIndex] = new float[length];
                 entityRingYArr[entityIndex][ringIndex] = new float[length];
                 for (int coordIndex = 0; coordIndex < length; coordIndex++) {
-                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].x;
-                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].y;
+                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float) transformedCoordArr[coordIndex].x;
+                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float) transformedCoordArr[coordIndex].y;
                 }
             }
         }
@@ -1019,9 +1050,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final GeneralPath gp = new GeneralPath();
         gp.reset();
         if (points.length > 0) {
-            gp.moveTo((float)points[0].x, (float)points[0].y);
+            gp.moveTo((float) points[0].x, (float) points[0].y);
             for (int i = 1; i < points.length; i++) {
-                gp.lineTo((float)points[i].x, (float)points[i].y);
+                gp.lineTo((float) points[i].x, (float) points[i].y);
             }
         }
         // use getPathReference().append(gp, false); instead of append(gp, false); due to performance reasons
@@ -1040,11 +1071,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         for (int i = 0; i < coordinateArr.length; ++i) {
             points[i] = new Coordinate();
             if (wtst == null) {
-                points[i].x = (float)(coordinateArr[i].x + x_offset);
-                points[i].y = (float)(coordinateArr[i].y + y_offset);
+                points[i].x = (float) (coordinateArr[i].x + x_offset);
+                points[i].y = (float) (coordinateArr[i].y + y_offset);
             } else {
-                points[i].x = (float)(wtst.getDestX(coordinateArr[i].x) + x_offset);
-                points[i].y = (float)(wtst.getDestY(coordinateArr[i].y) + y_offset);
+                points[i].x = (float) (wtst.getDestX(coordinateArr[i].x) + x_offset);
+                points[i].y = (float) (wtst.getDestY(coordinateArr[i].y) + y_offset);
             }
         }
 
@@ -1063,7 +1094,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // is not null, but the object to delete does not exist)
                 removeChild(primaryAnnotation);
             }
-            viewer.removeStickyNode((StickyPText)primaryAnnotation);
+            viewer.removeStickyNode((StickyPText) primaryAnnotation);
         }
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
@@ -1077,7 +1108,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // hier muss die Anpassung bei den WFS Features hin.
             Stroke overridingstroke = null;
             if (getFeature() instanceof XStyledFeature) {
-                final XStyledFeature xsf = (XStyledFeature)getFeature();
+                final XStyledFeature xsf = (XStyledFeature) getFeature();
                 overridingstroke = xsf.getLineStyle();
             }
 
@@ -1086,7 +1117,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             if ((getFeature() instanceof StyledFeature) && (overridingstroke == null)) {
-                final StyledFeature sf = (StyledFeature)getFeature();
+                final StyledFeature sf = (StyledFeature) getFeature();
                 if (sf.getLineWidth() <= 1) {
                     setStroke(FIXED_WIDTH_STROKE);
                 } else {
@@ -1102,24 +1133,28 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (overridingstroke != null) {
                 setStroke(overridingstroke);
             }
-            if ((getFeature().getGeometry() instanceof LineString)
-                        || (getFeature().getGeometry() instanceof MultiLineString)) {
+            if (
+                (getFeature().getGeometry() instanceof LineString) ||
+                (getFeature().getGeometry() instanceof MultiLineString)
+            ) {
                 if ((feature instanceof StyledFeature)) {
-                    final java.awt.Paint linePaint = ((StyledFeature)feature).getLinePaint();
+                    final java.awt.Paint linePaint = ((StyledFeature) feature).getLinePaint();
                     if (linePaint != null) {
                         setStrokePaint(linePaint);
                     }
                 }
             } else if ((feature instanceof StyledFeature)) {
-                final java.awt.Paint paint = ((StyledFeature)feature).getFillingPaint();
-                final java.awt.Paint linePaint = ((StyledFeature)feature).getLinePaint();
+                final java.awt.Paint paint = ((StyledFeature) feature).getFillingPaint();
+                final java.awt.Paint linePaint = ((StyledFeature) feature).getLinePaint();
                 if (paint != null) {
                     if (paint instanceof SelectionAwareTexturePaint) {
-                        ((SelectionAwareTexturePaint)paint).setScale(viewer.getCamera().getViewScale(),
-                            CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode()));
-                        setPaint(((SelectionAwareTexturePaint)paint).getPaint());
+                        ((SelectionAwareTexturePaint) paint).setScale(
+                                viewer.getCamera().getViewScale(),
+                                CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode())
+                            );
+                        setPaint(((SelectionAwareTexturePaint) paint).getPaint());
                     } else if (paint instanceof PaintWrapper) {
-                        setPaint(((PaintWrapper)paint).getPaint());
+                        setPaint(((PaintWrapper) paint).getPaint());
                     } else {
                         setPaint(paint);
                     }
@@ -1131,7 +1166,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             if (feature instanceof SLDStyledFeature) {
-                ((SLDStyledFeature)feature).applyStyle(this, wtst);
+                ((SLDStyledFeature) feature).applyStyle(this, wtst);
                 nonHighlightingPaint = getPaint();
             }
 
@@ -1140,22 +1175,31 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             setSelected(this.isSelected());
 
             // TODO:Wenn feature=labeledFeature jetzt noch Anpassungen machen
-            if (((feature instanceof AnnotatedFeature) && ((AnnotatedFeature)feature).isPrimaryAnnotationVisible()
-                            && (((AnnotatedFeature)feature).getPrimaryAnnotation() != null)) && drawFeature()) {
-                final AnnotatedFeature af = (AnnotatedFeature)feature;
+            if (
+                (
+                    (feature instanceof AnnotatedFeature) &&
+                    ((AnnotatedFeature) feature).isPrimaryAnnotationVisible() &&
+                    (((AnnotatedFeature) feature).getPrimaryAnnotation() != null)
+                ) &&
+                drawFeature()
+            ) {
+                final AnnotatedFeature af = (AnnotatedFeature) feature;
                 primaryAnnotation = new StickyPText(" " + af.getPrimaryAnnotation() + " ");
                 primaryAnnotation.setJustification(af.getPrimaryAnnotationJustification());
                 if (af.isAutoscale() && !(getFeature().getGeometry() instanceof Point)) {
                     stickyChild = primaryAnnotation;
                 }
-                viewer.getCamera()
-                        .addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
-
-                                @Override
-                                public void propertyChange(final PropertyChangeEvent evt) {
-                                    setVisibility(primaryAnnotation, af);
-                                }
-                            });
+                viewer
+                    .getCamera()
+                    .addPropertyChangeListener(
+                        PCamera.PROPERTY_VIEW_TRANSFORM,
+                        new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(final PropertyChangeEvent evt) {
+                                setVisibility(primaryAnnotation, af);
+                            }
+                        }
+                    );
                 // if (true || af.getMaxScaleDenominator() == null || af.getMinScaleDenominator() == null ||
                 // af.getMaxScaleDenominator() > denom && af.getMinScaleDenominator() < denom) {
 
@@ -1177,18 +1221,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
                 final boolean vis = primaryAnnotation.getVisible();
 
-                final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
-                            getViewerCrs().getCode())
-                            .getInteriorPoint();
+                final Point intPoint = CrsTransformer
+                    .transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode())
+                    .getInteriorPoint();
 
-                if ((stickyChild != null) && (af.getPrimaryAnnotationJustification() == 0.0)
-                            && (getFeature().getGeometry() instanceof Point)) {
+                if (
+                    (stickyChild != null) &&
+                    (af.getPrimaryAnnotationJustification() == 0.0) &&
+                    (getFeature().getGeometry() instanceof Point)
+                ) {
                     if (annotationListener == null) {
-                        annotationListener = new PropertyChangeListener() {
-
+                        annotationListener =
+                            new PropertyChangeListener() {
                                 @Override
                                 public void propertyChange(final PropertyChangeEvent evt) {
-                                    justifyAnnotations((PNode)evt.getSource(), af.isAutoscale());
+                                    justifyAnnotations((PNode) evt.getSource(), af.isAutoscale());
                                 }
                             };
 
@@ -1208,8 +1255,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 addChild(primaryAnnotation);
 
                 if (!ignoreStickyFeature && af.isAutoscale()) {
-                    viewer.addStickyNode((StickyPText)primaryAnnotation);
-                    viewer.rescaleStickyNode((StickyPText)primaryAnnotation);
+                    viewer.addStickyNode((StickyPText) primaryAnnotation);
+                    viewer.rescaleStickyNode((StickyPText) primaryAnnotation);
                 }
                 setVisibility(primaryAnnotation, af);
             }
@@ -1224,8 +1271,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private void justifyAnnotations(final PNode source, final boolean autoScale) {
         if ((primaryAnnotation != null) && (source != null)) {
-            final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
-                    getViewerCrs().getCode()).getInteriorPoint();
+            final Point intPoint = CrsTransformer
+                .transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode())
+                .getInteriorPoint();
             final PBounds bounds = source.getFullBoundsReference();
             if (autoScale) {
                 primaryAnnotation.setScale(source.getScale());
@@ -1234,10 +1282,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (feature instanceof DrawingFeature) {
                 primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
             } else {
-                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
+                primaryAnnotation.setOffset(
+                    wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
                     // + (bounds.getWidth() / 4),
-                    wtst.getScreenY(intPoint.getY())
-                            - (bounds.getHeight() / 2));
+                    wtst.getScreenY(intPoint.getY()) - (bounds.getHeight() / 2)
+                );
             }
         }
     }
@@ -1250,8 +1299,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private void setVisibility(final PText ptext, final AnnotatedFeature af) {
         final double denom = viewer.getScaleDenominator();
-        if ((af.getMaxScaleDenominator() == null) || (af.getMinScaleDenominator() == null)
-                    || ((af.getMaxScaleDenominator() > denom) && (af.getMinScaleDenominator() < denom))) {
+        if (
+            (af.getMaxScaleDenominator() == null) ||
+            (af.getMinScaleDenominator() == null) ||
+            ((af.getMaxScaleDenominator() > denom) && (af.getMinScaleDenominator() < denom))
+        ) {
             ptext.setVisible(true);
         } else {
             ptext.setVisible(false);
@@ -1267,11 +1319,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  newValueX       original das Original-Array
      * @param  newValueY       der einzuf\u00FCgende Wert
      */
-    public void insertCoordinate(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float newValueX,
-            final float newValueY) {
+    public void insertCoordinate(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float newValueX,
+        final float newValueY
+    ) {
         insertCoordinate(entityPosition, ringPosition, coordPosition, newValueX, newValueY, true);
     }
 
@@ -1285,19 +1339,24 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  newValueY       DOCUMENT ME!
      * @param  addUndo         DOCUMENT ME!
      */
-    public void insertCoordinate(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float newValueX,
-            final float newValueY,
-            final boolean addUndo) {
+    public void insertCoordinate(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float newValueX,
+        final float newValueY,
+        final boolean addUndo
+    ) {
         insertCoordinateToPosition(entityPosition, ringPosition, coordPosition, newValueX, newValueY, addUndo);
 
-        if (viewer.isSnappingEnabled()
-                    && ((getFeature().getGeometry() instanceof LineString)
-                        || (getFeature().getGeometry() instanceof Polygon)
-                        || (getFeature().getGeometry() instanceof MultiPolygon))) { // Snapping Modus
-
+        if (
+            viewer.isSnappingEnabled() &&
+            (
+                (getFeature().getGeometry() instanceof LineString) ||
+                (getFeature().getGeometry() instanceof Polygon) ||
+                (getFeature().getGeometry() instanceof MultiPolygon)
+            )
+        ) { // Snapping Modus
             // Features suchen bei denen der zukünftige neue
             // Punkt auf einer identischen Linie sitzt
             final float[] xp = getXp(entityPosition, ringPosition);
@@ -1307,32 +1366,38 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // neuer punkt ist auf coordPosition gelandet, die alte Linie war also
             // von coordPosition - 1 zu coordPosition + 1
             if (coordPosition > 0) {
-                segment = new LineSegment(
+                segment =
+                    new LineSegment(
                         xp[coordPosition - 1],
                         yp[coordPosition - 1],
                         xp[coordPosition + 1],
-                        yp[coordPosition + 1]);
+                        yp[coordPosition + 1]
+                    );
             } else {
                 segment = new LineSegment(xp[xp.length - 1], yp[yp.length - 1], xp[1], yp[1]);
             }
 
             // Alle Objekte durchlaufen
             for (final Feature otherFeature : viewer.getFeatureCollection().getAllFeatures()) {
-                final PFeature otherPFeature = (PFeature)viewer.getPFeatureHM().get(otherFeature);
+                final PFeature otherPFeature = (PFeature) viewer.getPFeatureHM().get(otherFeature);
                 if ((otherPFeature != null) && otherPFeature.getFeature().isEditable()) {
                     final Geometry geometry = otherPFeature.getFeature().getGeometry();
-                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                                || (geometry instanceof MultiPolygon)) {
+                    if (
+                        (geometry instanceof Polygon) ||
+                        (geometry instanceof LineString) ||
+                        (geometry instanceof MultiPolygon)
+                    ) {
                         for (int entityIndex = 0; entityIndex < otherPFeature.getNumOfEntities(); entityIndex++) {
                             for (int ringIndex = 0; ringIndex < otherPFeature.getNumOfRings(entityIndex); ringIndex++) {
                                 final float[] otherXp = otherPFeature.getXp(entityIndex, ringIndex);
                                 final float[] otherYp = otherPFeature.getYp(entityIndex, ringIndex);
                                 for (int coordIndex = otherXp.length - 1; coordIndex > 0; coordIndex--) {
                                     final LineSegment otherSegment = new LineSegment(
-                                            otherXp[coordIndex - 1],
-                                            otherYp[coordIndex - 1],
-                                            otherXp[coordIndex],
-                                            otherYp[coordIndex]);
+                                        otherXp[coordIndex - 1],
+                                        otherYp[coordIndex - 1],
+                                        otherXp[coordIndex],
+                                        otherYp[coordIndex]
+                                    );
                                     // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes =>
                                     // identische
                                     if (otherSegment.equalsTopo(segment)) {
@@ -1343,7 +1408,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                             coordIndex,
                                             newValueX,
                                             newValueY,
-                                            addUndo);
+                                            addUndo
+                                        );
                                     }
                                 }
                             }
@@ -1366,22 +1432,34 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    private boolean insertCoordinateToPosition(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float newValueX,
-            final float newValueY,
-            final boolean addUndo) {
+    private boolean insertCoordinateToPosition(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float newValueX,
+        final float newValueY,
+        final boolean addUndo
+    ) {
         final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] originalXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] originalYArr = entityRingYArr[entityPosition][ringPosition];
 
-        if ((((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon))
-                        && (originalXArr != null)
-                        && ((originalXArr.length - 1) >= coordPosition))
-                    || ((getFeature().getGeometry() instanceof LineString) && (originalXArr != null)
-                        && (originalXArr.length > coordPosition)
-                        && (originalXArr.length >= 2))) {
+        if (
+            (
+                (
+                    (getFeature().getGeometry() instanceof Polygon) ||
+                    (getFeature().getGeometry() instanceof MultiPolygon)
+                ) &&
+                (originalXArr != null) &&
+                ((originalXArr.length - 1) >= coordPosition)
+            ) ||
+            (
+                (getFeature().getGeometry() instanceof LineString) &&
+                (originalXArr != null) &&
+                (originalXArr.length > coordPosition) &&
+                (originalXArr.length >= 2)
+            )
+        ) {
             final Coordinate[] newCoordArr = new Coordinate[originalCoordArr.length + 1];
             final float[] newXArr = new float[originalXArr.length + 1];
             final float[] newYArr = new float[originalYArr.length + 1];
@@ -1393,8 +1471,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 newYArr[i] = originalYArr[i];
             }
 
-            newCoordArr[coordPosition] = new Coordinate(viewer.getWtst().getSourceX(newValueX),
-                    viewer.getWtst().getSourceY(newValueY));
+            newCoordArr[coordPosition] =
+                new Coordinate(viewer.getWtst().getSourceX(newValueX), viewer.getWtst().getSourceY(newValueY));
             newXArr[coordPosition] = newValueX;
             newYArr[coordPosition] = newValueY;
 
@@ -1405,8 +1483,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 newYArr[i + 1] = originalYArr[i];
             }
 
-            if ((getFeature().getGeometry() instanceof Polygon)
-                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+            if (
+                (getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)
+            ) {
                 // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
                 if ((coordPosition == 0) || (coordPosition == (originalCoordArr.length - 1))) {
                     newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
@@ -1417,15 +1496,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             if (setNewCoordinates(entityPosition, ringPosition, newXArr, newYArr, newCoordArr)) {
                 if (addUndo) {
-                    viewer.getMemUndo()
-                            .addAction(new HandleDeleteAction(
-                                    viewer,
-                                    feature,
-                                    entityPosition,
-                                    ringPosition,
-                                    coordPosition,
-                                    newValueX,
-                                    newValueY));
+                    viewer
+                        .getMemUndo()
+                        .addAction(
+                            new HandleDeleteAction(
+                                viewer,
+                                feature,
+                                entityPosition,
+                                ringPosition,
+                                coordPosition,
+                                newValueX,
+                                newValueY
+                            )
+                        );
                 }
                 return true;
             }
@@ -1454,20 +1537,32 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    public boolean removeCoordinate(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final boolean addUndo) {
+    public boolean removeCoordinate(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final boolean addUndo
+    ) {
         final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] originalXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] originalYArr = entityRingYArr[entityPosition][ringPosition];
 
-        if ((((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon))
-                        && (originalCoordArr != null)
-                        && ((originalCoordArr.length - 1) > coordPosition))
-                    || ((getFeature().getGeometry() instanceof LineString) && (originalCoordArr != null)
-                        && (originalCoordArr.length > coordPosition)
-                        && (originalCoordArr.length > 2))) {
+        if (
+            (
+                (
+                    (getFeature().getGeometry() instanceof Polygon) ||
+                    (getFeature().getGeometry() instanceof MultiPolygon)
+                ) &&
+                (originalCoordArr != null) &&
+                ((originalCoordArr.length - 1) > coordPosition)
+            ) ||
+            (
+                (getFeature().getGeometry() instanceof LineString) &&
+                (originalCoordArr != null) &&
+                (originalCoordArr.length > coordPosition) &&
+                (originalCoordArr.length > 2)
+            )
+        ) {
             final Coordinate[] newCoordArr = new Coordinate[originalCoordArr.length - 1];
             final float[] newXArr = new float[originalXArr.length - 1];
             final float[] newYArr = new float[originalYArr.length - 1];
@@ -1491,8 +1586,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist (nur beim Polygon)
-            if (((coordPosition == 0) && (getFeature().getGeometry() instanceof Polygon))
-                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+            if (
+                ((coordPosition == 0) && (getFeature().getGeometry() instanceof Polygon)) ||
+                (getFeature().getGeometry() instanceof MultiPolygon)
+            ) {
                 newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
                 newXArr[newXArr.length - 1] = newXArr[0];
                 newXArr[newYArr.length - 1] = newYArr[0];
@@ -1504,15 +1601,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // Das w\u00E4re zwar optimal (Performance) korrigiert allerdings nicht die falschen
                 // Locator
                 if (addUndo) {
-                    viewer.getMemUndo()
-                            .addAction(new HandleAddAction(
-                                    viewer,
-                                    getFeature(),
-                                    entityPosition,
-                                    ringPosition,
-                                    coordPosition,
-                                    removedX,
-                                    removedY));
+                    viewer
+                        .getMemUndo()
+                        .addAction(
+                            new HandleAddAction(
+                                viewer,
+                                getFeature(),
+                                entityPosition,
+                                ringPosition,
+                                coordPosition,
+                                removedX,
+                                removedY
+                            )
+                        );
                 }
                 return true;
             }
@@ -1528,8 +1629,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void addHandles(final PNode handleLayer) {
         if (getFeature() instanceof LinearReferencedPointFeature) {
             addLinearReferencedPointPHandle(handleLayer);
-        } else if ((getFeature() instanceof AbstractNewFeature)
-                    && (((AbstractNewFeature)getFeature()).getGeometryType() == AbstractNewFeature.geomTypes.ELLIPSE)) {
+        } else if (
+            (getFeature() instanceof AbstractNewFeature) &&
+            (((AbstractNewFeature) getFeature()).getGeometryType() == AbstractNewFeature.geomTypes.ELLIPSE)
+        ) {
             addEllipseHandle(handleLayer);
         } else {
             for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
@@ -1558,24 +1661,26 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  ringPosition    DOCUMENT ME!
      * @param  coordPosition   Position des Punktes im Koordinatenarray
      */
-    public void addHandle(final PNode handleLayer,
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition) {
+    public void addHandle(
+        final PNode handleLayer,
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition
+    ) {
         final int positionInArray = coordPosition;
 
         final PHandle h = new TransformationPHandle(this, entityPosition, ringPosition, positionInArray);
 
-//        EventQueue.invokeLater(new Runnable() {
-//
-//            public void run() {
+        //        EventQueue.invokeLater(new Runnable() {
+        //
+        //            public void run() {
         handleLayer.addChild(h);
         h.addClientProperty("coordinate", entityRingCoordArr[entityPosition][ringPosition][coordPosition]); // NOI18N
-        h.addClientProperty("coordinate_position_entity", new Integer(entityPosition));                     // NOI18N
-        h.addClientProperty("coordinate_position_ring", new Integer(ringPosition));                         // NOI18N
-        h.addClientProperty("coordinate_position_coord", new Integer(coordPosition));                       // NOI18N
-//            }
-//        });
+        h.addClientProperty("coordinate_position_entity", new Integer(entityPosition)); // NOI18N
+        h.addClientProperty("coordinate_position_ring", new Integer(ringPosition)); // NOI18N
+        h.addClientProperty("coordinate_position_coord", new Integer(coordPosition)); // NOI18N
+        //            }
+        //        });
     }
 
     /**
@@ -1589,10 +1694,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  MultiMap mit Features, die die Bedingungen erf\u00FCllen
      */
-    public MultiMap checkforGlueCoords(
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition) {
+    public MultiMap checkforGlueCoords(final int entityPosition, final int ringPosition, final int coordPosition) {
         final GeometryFactory gf = new GeometryFactory();
         final MultiMap glueCoords = new MultiMap();
 
@@ -1603,8 +1705,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // f.getGeometry().intersects(PFeature.this.getFeature().getGeometry()) ){
             if (!f.equals(PFeature.this.getFeature())) {
                 final Geometry fgeo = CrsTransformer.transformToGivenCrs(f.getGeometry(), getViewerCrs().getCode());
-                final Geometry thisGeo = CrsTransformer.transformToGivenCrs(PFeature.this.getFeature().getGeometry(),
-                        getViewerCrs().getCode());
+                final Geometry thisGeo = CrsTransformer.transformToGivenCrs(
+                    PFeature.this.getFeature().getGeometry(),
+                    getViewerCrs().getCode()
+                );
                 if (fgeo.buffer(0.01).intersects(thisGeo.buffer(0.01))) {
                     final Coordinate coord = entityRingCoordArr[entityPosition][ringPosition][coordPosition];
                     final Point p = gf.createPoint(coord);
@@ -1624,7 +1728,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             }
                         } else if (viewer.isFeatureDebugging()) {
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("checkforGlueCoords() Abstand: " + abstand);                                  // NOI18N
+                                LOG.debug("checkforGlueCoords() Abstand: " + abstand); // NOI18N
                             }
                         }
                     }
@@ -1693,10 +1797,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  ringPosition    DOCUMENT ME!
      * @param  coordPosition   DOCUMENT ME!
      */
-    private void addRotationHandle(final PNode handleLayer,
-            final int entityPosition,
-            final int ringPosition,
-            final int coordPosition) {
+    private void addRotationHandle(
+        final PNode handleLayer,
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition
+    ) {
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("addRotationHandles():add from " + coordPosition + ". RotationHandle"); // NOI18N
@@ -1704,19 +1810,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         final PHandle rotHandle = new RotationPHandle(
-                this,
-                entityPosition,
-                ringPosition,
-                coordPosition,
-                mid,
-                pivotHandle);
+            this,
+            entityPosition,
+            ringPosition,
+            coordPosition,
+            mid,
+            pivotHandle
+        );
 
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
         handleLayer.addChild(rotHandle);
         rotHandle.addClientProperty("coordinate", entityRingCoordArr[entityPosition][ringPosition][coordPosition]); // NOI18N
-        rotHandle.addClientProperty("coordinate_position_entity", new Integer(entityPosition));                     // NOI18N
-        rotHandle.addClientProperty("coordinate_position_ring", new Integer(ringPosition));                         // NOI18N
-        rotHandle.addClientProperty("coordinate_position_coord", new Integer(coordPosition));                       // NOI18N
+        rotHandle.addClientProperty("coordinate_position_entity", new Integer(entityPosition)); // NOI18N
+        rotHandle.addClientProperty("coordinate_position_ring", new Integer(ringPosition)); // NOI18N
+        rotHandle.addClientProperty("coordinate_position_coord", new Integer(coordPosition)); // NOI18N
     }
 
     /**
@@ -1736,7 +1843,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final Collection selectedFeatures = getViewer().getFeatureCollection().getSelectedFeatures();
             Rectangle2D tmpBounds = getBounds().getBounds2D();
             for (final Object o : selectedFeatures) {
-                final PFeature pf = (PFeature)getViewer().getPFeatureHM().get(o);
+                final PFeature pf = (PFeature) getViewer().getPFeatureHM().get(o);
                 if ((pf != null) && !(selectedFeatures.contains(pf))) {
                     tmpBounds = pf.getBounds().getBounds2D().createUnion(tmpBounds);
                 }
@@ -1747,7 +1854,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
             if (selArr != null) {
                 for (final Object o : selArr) {
-                    final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
+                    final PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
                     if (pf != null) {
                         pf.setPivotPoint(allBounds.getCenter2D());
                     }
@@ -1759,7 +1866,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
                         handleLayer.addChild(pivotHandle);
                         for (final Object o : selArr) {
-                            final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
+                            final PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
                             pf.pivotHandle = this.pivotHandle;
                         }
                     }
@@ -1830,7 +1937,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             matrix[0][1] = sin * (-1);
             matrix[1][0] = sin;
             matrix[1][1] = cos;
-        } else {          // Counterclockwise
+        } else { // Counterclockwise
             rad *= -1;
             cos = Math.cos(rad);
             sin = Math.sin(rad);
@@ -1844,16 +1951,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
         for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
             for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
-                for (int coordIndex = entityRingCoordArr[entityIndex][ringIndex].length - 1; coordIndex >= 0;
-                            coordIndex--) {
+                for (
+                    int coordIndex = entityRingCoordArr[entityIndex][ringIndex].length - 1;
+                    coordIndex >= 0;
+                    coordIndex--
+                ) {
                     final double dx = entityRingXArr[entityIndex][ringIndex][coordIndex] - tempMid.getX();
                     final double dy = entityRingYArr[entityIndex][ringIndex][coordIndex] - tempMid.getY();
 
                     // Clockwise
                     final float resultX = new Double(tempMid.getX() + ((dx * matrix[0][0]) + (dy * matrix[0][1])))
-                                .floatValue();
+                        .floatValue();
                     final float resultY = new Double(tempMid.getY() + ((dx * matrix[1][0]) + (dy * matrix[1][1])))
-                                .floatValue();
+                        .floatValue();
 
                     moveCoordinateToNewPiccoloPosition(entityIndex, ringIndex, coordIndex, resultX, resultY, false);
                 }
@@ -1906,11 +2016,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  newX            neue X-Koordinate
      * @param  newY            neue Y-Koordinate
      */
-    public void moveCoordinateToNewPiccoloPosition(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float newX,
-            final float newY) {
+    public void moveCoordinateToNewPiccoloPosition(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float newX,
+        final float newY
+    ) {
         moveCoordinateToNewPiccoloPosition(entityPosition, ringPosition, coordPosition, newX, newY, true);
     }
 
@@ -1924,20 +2036,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  newY            DOCUMENT ME!
      * @param  doUpdatePath    DOCUMENT ME!
      */
-    public void moveCoordinateToNewPiccoloPosition(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final float newX,
-            final float newY,
-            final boolean doUpdatePath) {
+    public void moveCoordinateToNewPiccoloPosition(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final float newX,
+        final float newY,
+        final boolean doUpdatePath
+    ) {
         final Coordinate[] origCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] origXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] origYArr = entityRingYArr[entityPosition][ringPosition];
 
         final Coordinate[] newCoordArr = new Coordinate[origCoordArr.length];
         System.arraycopy(origCoordArr, 0, newCoordArr, 0, newCoordArr.length);
-        newCoordArr[coordPosition] = new Coordinate(wtst.getSourceX(newX - x_offset),
-                wtst.getSourceY(newY - y_offset));
+        newCoordArr[coordPosition] = new Coordinate(wtst.getSourceX(newX - x_offset), wtst.getSourceY(newY - y_offset));
 
         final Geometry geometry = getFeature().getGeometry();
         if ((coordPosition == 0) && ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon))) {
@@ -1970,11 +2083,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    public boolean moveCoordinate(final int entityPosition,
-            final int ringPosition,
-            final int coordPosition,
-            final Coordinate coordinate,
-            final boolean doUpdatePath) {
+    public boolean moveCoordinate(
+        final int entityPosition,
+        final int ringPosition,
+        final int coordPosition,
+        final Coordinate coordinate,
+        final boolean doUpdatePath
+    ) {
         final Coordinate[] origCoordArr = entityRingCoordArr[entityPosition][ringPosition];
 
         final Coordinate[] newCoordArr = new Coordinate[origCoordArr.length];
@@ -2024,7 +2139,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void addSplitHandle(final PHandle p) {
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("addSplitHandle()");                                                               // NOI18N
+                LOG.debug("addSplitHandle()"); // NOI18N
             }
         }
         if ((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)) {
@@ -2041,15 +2156,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (viewer.isFeatureDebugging()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("after addSplitHandle: splitPolygonFromHandle=" + splitPolygonFromHandle); // NOI18N
-                        LOG.debug("in addSplitHandle this=" + this);                                         // NOI18N
+                        LOG.debug("in addSplitHandle this=" + this); // NOI18N
                     }
                 }
             } else if (splitPolygonToHandle == null) {
                 splitPolygonToHandle = p;
                 p.setSelected(true);
-                splitPoints.add(new Point2D.Double(
+                splitPoints.add(
+                    new Point2D.Double(
                         splitPolygonToHandle.getLocator().locateX(),
-                        splitPolygonToHandle.getLocator().locateY()));
+                        splitPolygonToHandle.getLocator().locateY()
+                    )
+                );
             } else {
                 p.setSelected(false);
             }
@@ -2060,9 +2178,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             } else if (splitLineAtHandle == null) {
                 splitLineAtHandle = p;
                 p.setSelected(true);
-                lineSplitPoint = new Point2D.Double(
+                lineSplitPoint =
+                    new Point2D.Double(
                         splitLineAtHandle.getLocator().locateX(),
-                        splitLineAtHandle.getLocator().locateY());
+                        splitLineAtHandle.getLocator().locateY()
+                    );
             } else {
                 p.setSelected(false);
             }
@@ -2075,11 +2195,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return  Point2D
      */
     public Point2D getFirstSplitHandle() {
-        if ((splitPolygonFromHandle != null)
-                    && (splitPolygonFromHandle.getClientProperty("coordinate") instanceof Coordinate)) { // NOI18N
-            final Coordinate c = ((Coordinate)splitPolygonFromHandle.getClientProperty("coordinate"));   // NOI18N
-            final Point2D ret = new Point2D.Double((double)splitPolygonFromHandle.getLocator().locateX(),
-                    (double)splitPolygonFromHandle.getLocator().locateY());
+        if (
+            (splitPolygonFromHandle != null) &&
+            (splitPolygonFromHandle.getClientProperty("coordinate") instanceof Coordinate)
+        ) { // NOI18N
+            final Coordinate c = ((Coordinate) splitPolygonFromHandle.getClientProperty("coordinate")); // NOI18N
+            final Point2D ret = new Point2D.Double(
+                (double) splitPolygonFromHandle.getLocator().locateX(),
+                (double) splitPolygonFromHandle.getLocator().locateY()
+            );
             return ret;
         } else {
             return null;
@@ -2095,10 +2219,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final CurrentStackTrace cst = new CurrentStackTrace();
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("splitPolygonFromHandle:" + splitPolygonFromHandle, cst);                                   // NOI18N
-                LOG.debug("splitPolygonToHandle:" + splitPolygonToHandle, cst);                                       // NOI18N
+                LOG.debug("splitPolygonFromHandle:" + splitPolygonFromHandle, cst); // NOI18N
+                LOG.debug("splitPolygonToHandle:" + splitPolygonToHandle, cst); // NOI18N
                 LOG.debug("inSplitProgress=" + ((splitPolygonFromHandle != null) && (splitPolygonToHandle == null))); // NOI18N
-                LOG.debug("in inSplitProgress this=" + this);                                                         // NOI18N
+                LOG.debug("in inSplitProgress this=" + this); // NOI18N
             }
         }
 
@@ -2125,10 +2249,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // TODO multipolygon / multilinestring
             final Coordinate[] coordArrOrig = entityRingCoordArr[0][0];
 
-            if ((getFeature().getGeometry() instanceof Polygon)
-                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
-                int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))); // NOI18N
-                int to = ((Integer)(splitPolygonToHandle.getClientProperty("coordinate_position_coord")));     // NOI18N
+            if (
+                (getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)
+            ) {
+                int from = ((Integer) (splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))); // NOI18N
+                int to = ((Integer) (splitPolygonToHandle.getClientProperty("coordinate_position_coord"))); // NOI18N
 
                 splitPolygonToHandle = null;
                 splitPolygonFromHandle = null;
@@ -2153,7 +2278,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 int counter = 0;
 
                 for (int i = from; i <= to; ++i) {
-                    coordArr1[counter] = (Coordinate)coordArrOrig[i].clone();
+                    coordArr1[counter] = (Coordinate) coordArrOrig[i].clone();
                     counter++;
                 }
                 if (swapped) {
@@ -2163,9 +2288,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     }
                     for (int i = 1; i < (splitPoints.size() - 1); ++i) {
-                        final Point2D splitPoint = (Point2D)splitPoints.get(i);
-                        final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
-                                wtst.getSourceY(splitPoint.getY()));
+                        final Point2D splitPoint = (Point2D) splitPoints.get(i);
+                        final Coordinate splitCoord = new Coordinate(
+                            wtst.getSourceX(splitPoint.getX()),
+                            wtst.getSourceY(splitPoint.getY())
+                        );
                         coordArr1[counter] = splitCoord;
                         counter++;
                     }
@@ -2176,22 +2303,25 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     }
                     for (int i = splitPoints.size() - 2; i > 0; --i) {
-                        final Point2D splitPoint = (Point2D)splitPoints.get(i);
-                        final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
-                                wtst.getSourceY(splitPoint.getY()));
+                        final Point2D splitPoint = (Point2D) splitPoints.get(i);
+                        final Coordinate splitCoord = new Coordinate(
+                            wtst.getSourceX(splitPoint.getX()),
+                            wtst.getSourceY(splitPoint.getY())
+                        );
                         coordArr1[counter] = splitCoord;
                         counter++;
                     }
                 }
-                coordArr1[counter] = (Coordinate)coordArrOrig[from].clone();
+                coordArr1[counter] = (Coordinate) coordArrOrig[from].clone();
 
                 // Zweites Polygon
                 // Größe Array= (Anzahl vorh. Coords) - (anzahl vorh. Handles des ersten Polygons) + (SplitLinie )
-                final Coordinate[] coordArr2 =
-                    new Coordinate[(coordArrOrig.length) - (to - from + 1) + splitPoints.size()];
+                final Coordinate[] coordArr2 = new Coordinate[(coordArrOrig.length) -
+                (to - from + 1) +
+                splitPoints.size()];
                 counter = 0;
                 for (int i = 0; i <= from; ++i) {
-                    coordArr2[counter] = (Coordinate)coordArrOrig[i].clone();
+                    coordArr2[counter] = (Coordinate) coordArrOrig[i].clone();
                     counter++;
                 }
                 if (swapped) {
@@ -2201,9 +2331,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     }
                     for (int i = splitPoints.size() - 2; i > 0; --i) {
-                        final Point2D splitPoint = (Point2D)splitPoints.get(i);
-                        final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
-                                wtst.getSourceY(splitPoint.getY()));
+                        final Point2D splitPoint = (Point2D) splitPoints.get(i);
+                        final Coordinate splitCoord = new Coordinate(
+                            wtst.getSourceX(splitPoint.getX()),
+                            wtst.getSourceY(splitPoint.getY())
+                        );
                         coordArr2[counter] = splitCoord;
                         counter++;
                     }
@@ -2214,16 +2346,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     }
                     for (int i = 1; i < (splitPoints.size() - 1); ++i) {
-                        final Point2D splitPoint = (Point2D)splitPoints.get(i);
-                        final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
-                                wtst.getSourceY(splitPoint.getY()));
+                        final Point2D splitPoint = (Point2D) splitPoints.get(i);
+                        final Coordinate splitCoord = new Coordinate(
+                            wtst.getSourceX(splitPoint.getX()),
+                            wtst.getSourceY(splitPoint.getY())
+                        );
                         coordArr2[counter] = splitCoord;
                         counter++;
                     }
                 }
 
                 for (int i = to; i < coordArrOrig.length; ++i) {
-                    coordArr2[counter] = (Coordinate)coordArrOrig[i].clone();
+                    coordArr2[counter] = (Coordinate) coordArrOrig[i].clone();
                     counter++;
                 }
 
@@ -2233,7 +2367,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 splittedFeatureArr[1] = new SplittedNewFeature(coordArr2, wtst, this);
                 splittedFeatureArr[1].setEditable(true);
             } else if (getFeature().getGeometry() instanceof LineString) {
-                final int at = ((Integer)(splitLineAtHandle.getClientProperty("coordinate_position_coord")));
+                final int at = ((Integer) (splitLineAtHandle.getClientProperty("coordinate_position_coord")));
                 splitLineAtHandle = null;
 
                 final Coordinate[] coordArrSplit2 = new Coordinate[coordArrOrig.length - at];
@@ -2241,10 +2375,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                 for (int i = 0; i < coordArrOrig.length; ++i) {
                     if (i <= at) {
-                        coordArrSplit1[i] = (Coordinate)coordArrOrig[i].clone();
+                        coordArrSplit1[i] = (Coordinate) coordArrOrig[i].clone();
                     }
                     if (i >= at) {
-                        coordArrSplit2[i - at] = (Coordinate)coordArrOrig[i].clone();
+                        coordArrSplit2[i - at] = (Coordinate) coordArrOrig[i].clone();
                     }
                 }
                 splittedFeatureArr[0] = new SplittedNewFeature(coordArrSplit1, wtst, this);
@@ -2274,14 +2408,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
                 for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
-                    for (int coordIndex = 0; coordIndex < entityRingCoordArr[entityIndex][ringIndex].length;
-                                ++coordIndex) {
+                    for (
+                        int coordIndex = 0;
+                        coordIndex < entityRingCoordArr[entityIndex][ringIndex].length;
+                        ++coordIndex
+                    ) {
                         final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
                         final float[] xArr = entityRingXArr[entityIndex][ringIndex];
                         final float[] yArr = entityRingYArr[entityIndex][ringIndex];
 
-                        xArr[coordIndex] = xArr[coordIndex] + (float)(dim.getWidth() / (float)scale);
-                        yArr[coordIndex] = yArr[coordIndex] + (float)(dim.getHeight() / (float)scale);
+                        xArr[coordIndex] = xArr[coordIndex] + (float) (dim.getWidth() / (float) scale);
+                        yArr[coordIndex] = yArr[coordIndex] + (float) (dim.getHeight() / (float) scale);
                         coordArr[coordIndex].x = wtst.getSourceX(xArr[coordIndex]); // -x_offset);
                         coordArr[coordIndex].y = wtst.getSourceY(yArr[coordIndex]); // -y_offset);
                     }
@@ -2293,7 +2430,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             visualize();
             refreshDesign();
         } catch (NullPointerException npe) {
-            LOG.warn("error at moveFeature:", npe);                                 // NOI18N
+            LOG.warn("error at moveFeature:", npe); // NOI18N
         }
     }
 
@@ -2302,21 +2439,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void resetInfoNodePosition() {
         if (stickyChild != null) {
-            final Geometry geom = CrsTransformer.transformToGivenCrs(getFeature().getGeometry(),
-                    getViewerCrs().getCode());
+            final Geometry geom = CrsTransformer.transformToGivenCrs(
+                getFeature().getGeometry(),
+                getViewerCrs().getCode()
+            );
             if (viewer.isFeatureDebugging()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("getFeature().getGeometry():" + geom);                  // NOI18N
+                    LOG.debug("getFeature().getGeometry():" + geom); // NOI18N
                 }
             }
             if (viewer.isFeatureDebugging()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("getFeature().getGeometry().getInteriorPoint().getY():" // NOI18N
-                                + geom.getInteriorPoint().getY());
+                    LOG.debug(
+                        "getFeature().getGeometry().getInteriorPoint().getY():" + // NOI18N
+                        geom.getInteriorPoint().getY()
+                    );
                 }
             }
-            stickyChild.setOffset(wtst.getScreenX(geom.getInteriorPoint().getX()),
-                wtst.getScreenY(geom.getInteriorPoint().getY()));
+            stickyChild.setOffset(
+                wtst.getScreenX(geom.getInteriorPoint().getX()),
+                wtst.getScreenY(geom.getInteriorPoint().getY())
+            );
         }
     }
 
@@ -2350,8 +2493,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     @Override
     public void refresh() {
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     if (LOG.isDebugEnabled()) {
@@ -2359,7 +2502,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                     PFeature.this.refreshInfoNode();
                 }
-            });
+            }
+        );
     }
 
     /**
@@ -2369,12 +2513,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (LOG.isDebugEnabled()) {
             LOG.debug("refreshInfoNodeName"); // NOI18N
         }
-        if ((!(feature instanceof InfoNodeAwareFeature)
-                        || ((feature instanceof InfoNodeAwareFeature)
-                            && ((InfoNodeAwareFeature)feature).hasInfoNode()))
-                    && (feature instanceof XStyledFeature)) {
+        if (
+            (
+                !(feature instanceof InfoNodeAwareFeature) ||
+                ((feature instanceof InfoNodeAwareFeature) && ((InfoNodeAwareFeature) feature).hasInfoNode())
+            ) &&
+            (feature instanceof XStyledFeature)
+        ) {
             if (infoPanel != null) {
-                infoPanel.setTitleText(((XStyledFeature)feature).getName());
+                infoPanel.setTitleText(((XStyledFeature) feature).getName());
             }
         }
     }
@@ -2385,11 +2532,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addInfoNode() {
         try {
-            if ((!(getFeature() instanceof InfoNodeAwareFeature)
-                            || ((getFeature() instanceof InfoNodeAwareFeature)
-                                && ((InfoNodeAwareFeature)getFeature()).hasInfoNode()))
-                        && (getFeature() instanceof XStyledFeature)) {
-                final XStyledFeature xsf = (XStyledFeature)getFeature();
+            if (
+                (
+                    !(getFeature() instanceof InfoNodeAwareFeature) ||
+                    (
+                        (getFeature() instanceof InfoNodeAwareFeature) &&
+                        ((InfoNodeAwareFeature) getFeature()).hasInfoNode()
+                    )
+                ) &&
+                (getFeature() instanceof XStyledFeature)
+            ) {
+                final XStyledFeature xsf = (XStyledFeature) getFeature();
 
                 if (infoComponent == null) {
                     infoComponent = xsf.getInfoComponent(this);
@@ -2413,14 +2566,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 pswingComp.resetBounds();
                 pswingComp.setOffset(0, 0);
 
-//            PText pt=new PText(xsf.getName());
-//            if (getFeature().isEditable()) {
-//                pt.setTextPaint(new Color(255,0,0));
-//            } else {
-//                pt.setTextPaint(new Color(0,0,0));
-//            }
-//            int width=(int)(pt.getWidth()+pi.getWidth());
-//            int height=(int)(pi.getHeight());
+                //            PText pt=new PText(xsf.getName());
+                //            if (getFeature().isEditable()) {
+                //                pt.setTextPaint(new Color(255,0,0));
+                //            } else {
+                //                pt.setTextPaint(new Color(0,0,0));
+                //            }
+                //            int width=(int)(pt.getWidth()+pi.getWidth());
+                //            int height=(int)(pi.getHeight());
                 // Dieser node wird gebraucht damit die Mouseover sachen funktionieren. Geht nicht mit einem PSwing.
                 // Auch nicht wenn das PSwing Element ParentNodeIsAPFeature & PSticky implementieren
                 final StickyPPath p = new StickyPPath(new Rectangle(0, 0, 1, 1));
@@ -2438,8 +2591,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     p.setOffset(stickyChild.getWidth(), 0);
                 } else if (getFeature().getGeometry() != null) {
                     syncGeometry();
-                    final Geometry geom = CrsTransformer.transformToGivenCrs(getFeature().getGeometry(),
-                            getViewerCrs().getCode());
+                    final Geometry geom = CrsTransformer.transformToGivenCrs(
+                        getFeature().getGeometry(),
+                        getViewerCrs().getCode()
+                    );
                     Point interiorPoint = null;
                     try {
                         interiorPoint = geom.getInteriorPoint();
@@ -2453,8 +2608,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         final Geometry union = collection.buffer(0);
                         interiorPoint = union.getInteriorPoint();
                     }
-                    p.setOffset(wtst.getScreenX(interiorPoint.getX()),
-                        wtst.getScreenY(interiorPoint.getY()));
+                    p.setOffset(wtst.getScreenX(interiorPoint.getX()), wtst.getScreenY(interiorPoint.getY()));
                     addChild(p);
                     p.setWidth(pswingComp.getWidth());
                     p.setHeight(pswingComp.getHeight());
@@ -2483,16 +2637,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else if (infoNode != null) {
                     infoNode.setVisible(false);
                 }
-                pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() { // NOI18N
+                pswingComp.addPropertyChangeListener(
+                    "fullBounds",
+                    new PropertyChangeListener() { // NOI18N
                         @Override
                         public void propertyChange(final PropertyChangeEvent evt) {
                             p.setWidth(pswingComp.getWidth());
                             p.setHeight(pswingComp.getHeight());
                         }
-                    });
+                    }
+                );
             }
         } catch (Throwable t) {
-            LOG.error("Error in AddInfoNode", t);       // NOI18N
+            LOG.error("Error in AddInfoNode", t); // NOI18N
         }
     }
 
@@ -2518,7 +2675,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final PBounds all = viewer.getCamera().getViewBounds();
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("getViewBounds()" + all);             // NOI18N
+                LOG.debug("getViewBounds()" + all); // NOI18N
             }
         }
         final PBounds newBounds = new PBounds();
@@ -2530,7 +2687,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
         if (viewer.isFeatureDebugging()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("newBounds" + newBounds);             // NOI18N
+                LOG.debug("newBounds" + newBounds); // NOI18N
             }
         }
         viewer.getCamera().animateViewToCenterBounds(newBounds.getBounds2D(), true, viewer.getAnimationDuration());
@@ -2637,9 +2794,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     @Override
     public void setHighlighting(final boolean highlighting) {
-        final boolean highlightingEnabledIfStyledFeature = ((getFeature() != null)
-                        && !(getFeature() instanceof StyledFeature))
-                    || ((getFeature() != null) && ((StyledFeature)getFeature()).isHighlightingEnabled());
+        final boolean highlightingEnabledIfStyledFeature =
+            ((getFeature() != null) && !(getFeature() instanceof StyledFeature)) ||
+            ((getFeature() != null) && ((StyledFeature) getFeature()).isHighlightingEnabled());
         if (!isSelected() && (getPaint() != null) && highlightingEnabledIfStyledFeature) {
             highlighted = highlighting;
             if (highlighted) {
@@ -2647,24 +2804,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     nonHighlightingPaint = getPaint();
                 }
                 if (nonHighlightingPaint instanceof Color) {
-                    final Color c = (Color)nonHighlightingPaint;
+                    final Color c = (Color) nonHighlightingPaint;
 
                     setPaintOnAllFeatures(getHighlightingColorFromColor(c));
                 } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                    final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)nonHighlightingPaint;
-                    final SelectionAwareTexturePaint highlightingPaint = (SelectionAwareTexturePaint)
-                        texturePaint.clone();
+                    final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint) nonHighlightingPaint;
+                    final SelectionAwareTexturePaint highlightingPaint = (SelectionAwareTexturePaint) texturePaint.clone();
                     highlightingPaint.setMode(SelectionAwareTexturePaint.SelectionMode.HIGHLIGHTED);
 
                     setPaintOnAllFeatures(highlightingPaint.getPaint());
                 } else if (nonHighlightingPaint instanceof PaintWrapper) {
-                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
+                    setPaintOnAllFeatures(((PaintWrapper) nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(new Color(1f, 1f, 1f, 0.6f));
                 }
             } else {
                 if (nonHighlightingPaint instanceof PaintWrapper) {
-                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
+                    setPaintOnAllFeatures(((PaintWrapper) nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(nonHighlightingPaint);
                 }
@@ -2681,9 +2837,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return  DOCUMENT ME!
      */
     public static Color getHighlightingColorFromColor(final Color c) {
-        int red = (int)(c.getRed() + 70);
-        int green = (int)(c.getGreen() + 70);
-        int blue = (int)(c.getBlue() + 70);
+        int red = (int) (c.getRed() + 70);
+        int green = (int) (c.getGreen() + 70);
+        int blue = (int) (c.getBlue() + 70);
         if (red > 255) {
             red = 255;
         }
@@ -2763,7 +2919,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         boolean showSelected = true;
         if (getFeature() instanceof DrawSelectionFeature) {
-            showSelected = (((DrawSelectionFeature)getFeature()).isDrawingSelection());
+            showSelected = (((DrawSelectionFeature) getFeature()).isDrawingSelection());
         }
         if (showSelected) {
             showSelected(selected);
@@ -2810,7 +2966,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     }
                 }
-//                else {
+                //                else {
                 /*
                  * since we have two different FeatureAnnotationSymbols for selection and normal we have to switch the
                  * infoNode to them depending on selection state
@@ -2842,7 +2998,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         pi.addChild(infoNode);
                     }
                 }
-//                }
+                //                }
                 viewer.rescaleStickyNode(pi);
                 viewer.rescaleStickyNode(piSelected);
             }
@@ -2851,8 +3007,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (selected) {
                 final CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f, viewer);
                 setStroke(fws);
-                final Paint strokePaint = javax.swing.UIManager.getDefaults()
-                            .getColor("Cismap.featureSelectionForeground");
+                final Paint strokePaint = javax.swing.UIManager
+                    .getDefaults()
+                    .getColor("Cismap.featureSelectionForeground");
                 if (strokePaint != null) {
                     setStrokePaint(strokePaint);
                 } else {
@@ -2860,17 +3017,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
                 setPaintOnAllFeatures(null);
             } else {
-//                setStroke(new FixedWidthStroke());
-//                if (stroke != null) {
+                //                setStroke(new FixedWidthStroke());
+                //                if (stroke != null) {
                 setStroke(stroke);
-//                } else {
-//                    setStroke(FIXED_WIDTH_STROKE);
-//                }
-//                if (strokePaint != null) {
+                //                } else {
+                //                    setStroke(FIXED_WIDTH_STROKE);
+                //                }
+                //                if (strokePaint != null) {
                 setStrokePaint(strokePaint);
-//                } else {
-//                    setStrokePaint(Color.black);
-//                }
+                //                } else {
+                //                    setStrokePaint(Color.black);
+                //                }
             }
         } // POLYGON
         else {
@@ -2883,10 +3040,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (selected) {
                 if (feature instanceof CustomSelectionStyleFeature) {
                     moveToFront();
-                    setPaint(((CustomSelectionStyleFeature)feature).getSelectionFillingPaint());
-                    setStrokePaint(((CustomSelectionStyleFeature)feature).getSelectionLinePaint());
+                    setPaint(((CustomSelectionStyleFeature) feature).getSelectionFillingPaint());
+                    setStrokePaint(((CustomSelectionStyleFeature) feature).getSelectionLinePaint());
 
-                    final int lineWidth = ((CustomSelectionStyleFeature)feature).getSelectionLineWidth();
+                    final int lineWidth = ((CustomSelectionStyleFeature) feature).getSelectionLineWidth();
                     if (lineWidth <= 1) {
                         setStroke(FIXED_WIDTH_STROKE);
                     } else {
@@ -2896,47 +3053,46 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else {
                     nonSelectedPaint = getPaint();
                     if ((nonSelectedPaint instanceof Color) && (nonHighlightingPaint instanceof Color)) {
-                        final Color c = (Color)nonHighlightingPaint;
+                        final Color c = (Color) nonHighlightingPaint;
                         if (c != null) {
                             final Stroke selectionStroke = getStroke();
                             Color selectionColor = null;
                             try {
-                                selectionColor = javax.swing.UIManager.getDefaults()
-                                            .getColor("Cismap.featureSelectionForeground");
+                                selectionColor =
+                                    javax.swing.UIManager.getDefaults().getColor("Cismap.featureSelectionForeground");
                             } catch (Exception e) {
                                 if (LOG.isDebugEnabled()) {
                                     LOG.debug(
                                         "Error when getting javax.swing.UIManager.getDefaults().getColor(\"Cismap.featureSelectionForeground\")",
-                                        e);
+                                        e
+                                    );
                                 }
                             }
                             if (selectionColor == null) {
-                                selectionColor = javax.swing.UIManager.getDefaults()
-                                            .getColor("Table.selectionBackground");
+                                selectionColor =
+                                    javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground");
                             }
 
-                            final int red = (int)(selectionColor.getRed());     // NOI18N
-                            final int green = (int)(selectionColor.getGreen()); // NOI18N
-                            final int blue = (int)(selectionColor.getBlue());   // NOI18N
+                            final int red = (int) (selectionColor.getRed()); // NOI18N
+                            final int green = (int) (selectionColor.getGreen()); // NOI18N
+                            final int blue = (int) (selectionColor.getBlue()); // NOI18N
                             setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha() / 2));
                             setStrokeOnAllFeatures(selectionStroke);
                         }
                     } else if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                        final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint)
-                            nonHighlightingPaint;
-                        final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint)
-                            texturePaint.clone();
+                        final SelectionAwareTexturePaint texturePaint = (SelectionAwareTexturePaint) nonHighlightingPaint;
+                        final SelectionAwareTexturePaint selectedPaint = (SelectionAwareTexturePaint) texturePaint.clone();
                         selectedPaint.setMode(SelectionAwareTexturePaint.SelectionMode.SELECTED);
                         setPaintOnAllFeatures(selectedPaint.getPaint());
                     } else if (nonHighlightingPaint instanceof PaintWrapper) {
-                        setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
+                        setPaintOnAllFeatures(((PaintWrapper) nonHighlightingPaint).getPaint());
                     } else {
                         setPaintOnAllFeatures(new Color(172, 210, 248, 178));
                     }
                 }
             } else {
                 if (nonHighlightingPaint instanceof PaintWrapper) {
-                    setPaintOnAllFeatures(((PaintWrapper)nonHighlightingPaint).getPaint());
+                    setPaintOnAllFeatures(((PaintWrapper) nonHighlightingPaint).getPaint());
                 } else {
                     setPaintOnAllFeatures(nonHighlightingPaint);
                 }
@@ -3051,10 +3207,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final boolean isInBounds = (entityPosition >= 0) && (entityPosition < origEntityCoordArr.length);
 
             if (isInBounds) {
-                if (origEntityCoordArr.length == 1) {           // wenn nur ein entity drin
+                if (origEntityCoordArr.length == 1) { // wenn nur ein entity drin
                     entityRingCoordArr = new Coordinate[0][][]; // dann nur durch leeres ersetzen
-                } else {                                        // wenn mehr als ein entity drin
-
+                } else { // wenn mehr als ein entity drin
                     // neues entityRingCoordArr mit entity-länge - 1, und originaldaten daten darin kopieren außer
                     // entityPosition
                     final Coordinate[][][] newEntityCoordArr = new Coordinate[origEntityCoordArr.length - 1][][];
@@ -3063,12 +3218,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     // alles nach entityPosition
                     System.arraycopy(
                         origEntityCoordArr,
-                        entityPosition
-                                + 1,
+                        entityPosition + 1,
                         newEntityCoordArr,
                         entityPosition,
-                        newEntityCoordArr.length
-                                - entityPosition);
+                        newEntityCoordArr.length - entityPosition
+                    );
                     // original durch neues ersetzen
                     entityRingCoordArr = newEntityCoordArr;
                 }
@@ -3141,7 +3295,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final boolean isRingInBounds = (holePosition >= 0) && (holePosition < origRingCoordArr.length);
 
             if (isRingInBounds) {
-                final Polygon entityPolygon = ((Polygon)getFeature().getGeometry().getGeometryN(entityPosition));
+                final Polygon entityPolygon = ((Polygon) getFeature().getGeometry().getGeometryN(entityPosition));
                 final Geometry holeGeometry = entityPolygon.getInteriorRingN(holePosition - 1).getEnvelope(); // zu entfernende
                 // Geometrie, ohne
                 // Löcher
@@ -3150,12 +3304,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     System.arraycopy(origRingCoordArr, 0, newRingCoordArr, 0, holePosition);
                     System.arraycopy(
                         origRingCoordArr,
-                        holePosition
-                                + 1,
+                        holePosition + 1,
                         newRingCoordArr,
                         holePosition,
-                        newRingCoordArr.length
-                                - holePosition);
+                        newRingCoordArr.length - holePosition
+                    );
 
                     // original durch neues ersetzen
                     entityRingCoordArr[entityPosition] = newRingCoordArr;
@@ -3181,13 +3334,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Geometry geometry = getFeature().getGeometry();
         final boolean isInBounds = (entityPosition >= 0) && (entityPosition < geometry.getNumGeometries());
         if (isInBounds) {
-            final Polygon polygon = (Polygon)geometry.getGeometryN(entityPosition);
+            final Polygon polygon = (Polygon) geometry.getGeometryN(entityPosition);
 
             if (polygon.getNumInteriorRing() > 0) { // hat überhaupt löscher ?
                 for (int ringIndex = 0; ringIndex < polygon.getNumInteriorRing(); ringIndex++) {
                     final Geometry envelope = polygon.getInteriorRingN(ringIndex).getEnvelope();
                     if (envelope.covers(point)) {
-                        return ringIndex + 1;       // +1 weil ring 0 der äußere ring ist
+                        return ringIndex + 1; // +1 weil ring 0 der äußere ring ist
                     }
                 }
             }
@@ -3320,37 +3473,32 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         if (toSelect != null) {
             final int doubleInset = 2 * insetSize;
-            final BufferedImage tint = new BufferedImage(toSelect.getWidth(null) + doubleInset,
-                    toSelect.getHeight(null)
-                            + doubleInset,
-                    BufferedImage.TYPE_INT_ARGB);
-            final Graphics2D g2d = (Graphics2D)tint.getGraphics();
+            final BufferedImage tint = new BufferedImage(
+                toSelect.getWidth(null) + doubleInset,
+                toSelect.getHeight(null) + doubleInset,
+                BufferedImage.TYPE_INT_ARGB
+            );
+            final Graphics2D g2d = (Graphics2D) tint.getGraphics();
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g2d.setPaint(colFill);
             g2d.fillRoundRect(
                 0,
                 0,
-                toSelect.getWidth(null)
-                        - 1
-                        + doubleInset,
-                toSelect.getHeight(null)
-                        - 1
-                        + doubleInset,
+                toSelect.getWidth(null) - 1 + doubleInset,
+                toSelect.getHeight(null) - 1 + doubleInset,
                 10,
-                10);
+                10
+            );
             g2d.setPaint(colEdge);
             g2d.drawRoundRect(
                 0,
                 0,
-                toSelect.getWidth(null)
-                        - 1
-                        + doubleInset,
-                toSelect.getHeight(null)
-                        - 1
-                        + doubleInset,
+                toSelect.getWidth(null) - 1 + doubleInset,
+                toSelect.getHeight(null) - 1 + doubleInset,
                 10,
-                10);
+                10
+            );
             g2d.drawImage(toSelect, insetSize, insetSize, null);
 
             IMAGE_CACHE.put(toSelect.toString() + colFill + colEdge, new SoftReference<Image>(tint));
@@ -3455,11 +3603,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    private boolean setNewCoordinates(final int entityPosition,
-            final int ringPosition,
-            final float[] xp,
-            final float[] yp,
-            final Coordinate[] coordArr) {
+    private boolean setNewCoordinates(
+        final int entityPosition,
+        final int ringPosition,
+        final float[] xp,
+        final float[] yp,
+        final Coordinate[] coordArr
+    ) {
         if (isValidWithThisCoordinates(entityPosition, ringPosition, coordArr)) {
             entityRingCoordArr[entityPosition][ringPosition] = coordArr;
             entityRingXArr[entityPosition][ringPosition] = xp;
@@ -3471,7 +3621,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             getViewer().showHandles(false);
             final Collection<Feature> features = new ArrayList<Feature>();
             features.add(getFeature());
-            ((DefaultFeatureCollection)getViewer().getFeatureCollection()).fireFeaturesChanged(features);
+            ((DefaultFeatureCollection) getViewer().getFeatureCollection()).fireFeaturesChanged(features);
 
             return true;
         } else {
@@ -3488,10 +3638,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return  DOCUMENT ME!
      */
     public boolean isValid(final int entityPosition, final int ringPosition) {
-        return isValidWithThisCoordinates(
-                entityPosition,
-                ringPosition,
-                getCoordArr(entityPosition, ringPosition));
+        return isValidWithThisCoordinates(entityPosition, ringPosition, getCoordArr(entityPosition, ringPosition));
     }
 
     /**
@@ -3507,16 +3654,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Geometry newGeometry;
         try {
             final GeometryFactory geometryFactory = new GeometryFactory(
-                    new PrecisionModel(PrecisionModel.FLOATING),
-                    CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
-            if ((getFeature().getGeometry() instanceof Polygon)
-                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getViewerCrs().getCode())
+            );
+            if (
+                (getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)
+            ) {
                 newGeometry = createPolygon(ringCoordArr, geometryFactory);
-            } else if ((getFeature().getGeometry() instanceof LineString)
-                        || (getFeature().getGeometry() instanceof MultiLineString)) {
+            } else if (
+                (getFeature().getGeometry() instanceof LineString) ||
+                (getFeature().getGeometry() instanceof MultiLineString)
+            ) {
                 newGeometry = createLineString(ringCoordArr[0], geometryFactory);
-            } else if ((getFeature().getGeometry() instanceof Point)
-                        || (getFeature().getGeometry() instanceof MultiPoint)) {
+            } else if (
+                (getFeature().getGeometry() instanceof Point) || (getFeature().getGeometry() instanceof MultiPoint)
+            ) {
                 newGeometry = createPoint(ringCoordArr[0][0], geometryFactory);
             } else {
                 if (LOG.isDebugEnabled()) {
@@ -3579,7 +3731,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             0,
             tempRingCoordArr,
             0,
-            entityRingCoordArr[entityPosition].length);
+            entityRingCoordArr[entityPosition].length
+        );
         tempRingCoordArr[entityRingCoordArr[entityPosition].length] = coordArr;
         return isValidWithThisEntity(entityPosition, tempRingCoordArr);
     }
@@ -3593,9 +3746,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    public boolean isValidWithThisCoordinates(final int entityPosition,
-            final int ringPosition,
-            final Coordinate[] coordArr) {
+    public boolean isValidWithThisCoordinates(
+        final int entityPosition,
+        final int ringPosition,
+        final Coordinate[] coordArr
+    ) {
         // copy von original teil-polygon machen
         final Coordinate[][] tempRingCoordArr = new Coordinate[entityRingCoordArr[entityPosition].length][];
         System.arraycopy(
@@ -3603,7 +3758,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             0,
             tempRingCoordArr,
             0,
-            entityRingCoordArr[entityPosition].length);
+            entityRingCoordArr[entityPosition].length
+        );
         // ring in der kopie austauschen
         tempRingCoordArr[ringPosition] = coordArr;
 
@@ -3620,7 +3776,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (geom instanceof Point) {
             setPathToPolyline(
                 new float[] { entityRingXArr[0][0][0], entityRingXArr[0][0][0] },
-                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] });
+                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] }
+            );
         } else if ((geom instanceof LineString) || (geom instanceof MultiPoint)) {
             setPathToPolyline(entityRingXArr[0][0], entityRingYArr[0][0]);
         } else if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
@@ -3729,9 +3886,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @deprecated  DOCUMENT ME!
      */
     public void setCoordArr(final Coordinate[] coordArr) {
-        entityRingCoordArr = new Coordinate[][][] {
-                { coordArr }
-            };
+        entityRingCoordArr = new Coordinate[][][] { { coordArr } };
         updateXpAndYp();
     }
 
@@ -3805,17 +3960,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         if ((stickyChild != null) && (stickyChild instanceof PSticky)) {
-            viewer.removeStickyNode((PSticky)stickyChild);
+            viewer.removeStickyNode((PSticky) stickyChild);
         }
 
         if ((secondStickyChild != null) && (stickyChild instanceof PSticky)) {
-            viewer.removeStickyNode((PSticky)secondStickyChild);
+            viewer.removeStickyNode((PSticky) secondStickyChild);
         }
 
         if (sldStyledImage != null) {
             for (final PImage i : sldStyledImage) {
                 if (i instanceof PSticky) {
-                    viewer.removeStickyNode((PSticky)i);
+                    viewer.removeStickyNode((PSticky) i);
                 }
             }
         }
@@ -3823,7 +3978,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (sldStyledSelectedImage != null) {
             for (final PImage i : sldStyledSelectedImage) {
                 if (i instanceof PSticky) {
-                    viewer.removeStickyNode((PSticky)i);
+                    viewer.removeStickyNode((PSticky) i);
                 }
             }
         }
@@ -3831,7 +3986,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (sldStyledText != null) {
             for (final PTextWithDisplacement text : sldStyledText) {
                 if (text instanceof PSticky) {
-                    viewer.removeStickyNode((PSticky)text);
+                    viewer.removeStickyNode((PSticky) text);
                 }
             }
         }
@@ -3860,8 +4015,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         public void propertyChange(final PropertyChangeEvent evt) {
             if (scale != viewer.getCamera().getViewScale()) {
                 if (nonHighlightingPaint instanceof SelectionAwareTexturePaint) {
-                    ((SelectionAwareTexturePaint)nonHighlightingPaint).setScale(viewer.getCamera().getViewScale(),
-                        CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode()));
+                    ((SelectionAwareTexturePaint) nonHighlightingPaint).setScale(
+                            viewer.getCamera().getViewScale(),
+                            CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode())
+                        );
                     PFeature.this.repaint();
                 }
                 scale = viewer.getCamera().getViewScale();
@@ -3944,8 +4101,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         public void setScale(final double scale) {
             offset(-scaledDisplacementX, -scaledDisplacementY);
             super.setScale(scale);
-            scaledDisplacementX = (displacementX + ((-anchorPointX) * (double)this.getWidth())) * scale;
-            scaledDisplacementY = (displacementY + ((anchorPointY) * (double)this.getHeight())) * scale;
+            scaledDisplacementX = (displacementX + ((-anchorPointX) * (double) this.getWidth())) * scale;
+            scaledDisplacementY = (displacementY + ((anchorPointY) * (double) this.getHeight())) * scale;
             offset(scaledDisplacementX, scaledDisplacementY);
         }
 
@@ -3959,12 +4116,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
          * @param  anchorPointY    DOCUMENT ME!
          * @param  wtst            DOCUMENT ME!
          */
-        public void setDisplacement(final SLDStyledFeature.UOM uomFromDeegree,
-                final double displacementX,
-                final double displacementY,
-                final double anchorPointX,
-                final double anchorPointY,
-                final WorldToScreenTransform wtst) {
+        public void setDisplacement(
+            final SLDStyledFeature.UOM uomFromDeegree,
+            final double displacementX,
+            final double displacementY,
+            final double anchorPointX,
+            final double anchorPointY,
+            final WorldToScreenTransform wtst
+        ) {
             this.uom = uomFromDeegree;
             this.displacementX = displacementX;
             this.displacementY = displacementY;

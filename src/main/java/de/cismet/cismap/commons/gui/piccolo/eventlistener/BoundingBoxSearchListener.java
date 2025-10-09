@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.util.PBounds;
-
-import java.awt.geom.Point2D;
 
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.util.PBounds;
+import java.awt.geom.Point2D;
 
 /**
  * DOCUMENT ME!
@@ -29,8 +27,7 @@ public class BoundingBoxSearchListener extends RectangleRubberBandListener {
     /**
      * Creates a new instance of BoundingBoxSearchListener.
      */
-    public BoundingBoxSearchListener() {
-    }
+    public BoundingBoxSearchListener() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -45,8 +42,8 @@ public class BoundingBoxSearchListener extends RectangleRubberBandListener {
         boundingBoxPoints[1] = new Point2D.Double(pb.getMaxX(), pb.getMaxY());
 
         final Point2D[] p = new Point2D[5];
-        p[0] = (Point2D)boundingBoxPoints[0];
-        p[2] = (Point2D)boundingBoxPoints[1];
+        p[0] = (Point2D) boundingBoxPoints[0];
+        p[2] = (Point2D) boundingBoxPoints[1];
         p[1] = new Point2D.Double(p[0].getX(), p[2].getY());
         p[3] = new Point2D.Double(p[2].getX(), p[0].getY());
         p[4] = p[0];

@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,33 +12,24 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.datatypes.Types;
-import org.deegree.model.spatialschema.GeometryException;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import org.jdesktop.swingx.JXTable;
-
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.tools.FeatureTools;
+import de.cismet.math.geometry.StaticGeometryFunctions;
 import java.lang.reflect.Constructor;
-
 import java.sql.Timestamp;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
-
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.tools.FeatureTools;
-
-import de.cismet.math.geometry.StaticGeometryFunctions;
+import org.apache.log4j.Logger;
+import org.deegree.datatypes.Types;
+import org.deegree.model.spatialschema.GeometryException;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.jdesktop.swingx.JXTable;
 
 /**
  * DOCUMENT ME!
@@ -73,10 +64,12 @@ public class SimpleAttributeTableModel implements TableModel {
      * @param  propertyContainer                DOCUMENT ME!
      * @param  tableRuleSet                     DOCUMENT ME!
      */
-    public SimpleAttributeTableModel(final List<String> orderedFeatureServiceAttributes,
-            final Map<String, FeatureServiceAttribute> featureServiceAttributes,
-            final List<FeatureServiceFeature> propertyContainer,
-            final AttributeTableRuleSet tableRuleSet) {
+    public SimpleAttributeTableModel(
+        final List<String> orderedFeatureServiceAttributes,
+        final Map<String, FeatureServiceAttribute> featureServiceAttributes,
+        final List<FeatureServiceFeature> propertyContainer,
+        final AttributeTableRuleSet tableRuleSet
+    ) {
         this.featureServiceAttributes = featureServiceAttributes;
         this.orderedFeatureServiceAttributes = orderedFeatureServiceAttributes;
         this.featureList = propertyContainer;
@@ -290,19 +283,23 @@ public class SimpleAttributeTableModel implements TableModel {
         final String key = attributeNames[col];
         final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
 
-        return ((attr != null)
-                        && (attr.getType().equals(String.valueOf(Types.INTEGER))
-                            || attr.getType().equals(String.valueOf(Types.BIGINT))
-                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                            || attr.getType().equals(String.valueOf(Types.TINYINT))
-                            || attr.getType().equals(String.valueOf(Types.NUMERIC))
-                            || attr.getType().equals(String.valueOf(Types.DOUBLE))
-                            || attr.getType().equals(String.valueOf(Types.FLOAT))
-                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                            || attr.getType().equals("xsd:float")
-                            || attr.getType().equals("xsd:decimal")
-                            || attr.getType().equals("xsd:double")
-                            || attr.getType().equals("xsd:integer")));
+        return (
+            (attr != null) &&
+            (
+                attr.getType().equals(String.valueOf(Types.INTEGER)) ||
+                attr.getType().equals(String.valueOf(Types.BIGINT)) ||
+                attr.getType().equals(String.valueOf(Types.SMALLINT)) ||
+                attr.getType().equals(String.valueOf(Types.TINYINT)) ||
+                attr.getType().equals(String.valueOf(Types.NUMERIC)) ||
+                attr.getType().equals(String.valueOf(Types.DOUBLE)) ||
+                attr.getType().equals(String.valueOf(Types.FLOAT)) ||
+                attr.getType().equals(String.valueOf(Types.DECIMAL)) ||
+                attr.getType().equals("xsd:float") ||
+                attr.getType().equals("xsd:decimal") ||
+                attr.getType().equals("xsd:double") ||
+                attr.getType().equals("xsd:integer")
+            )
+        );
     }
 
     /**
@@ -416,12 +413,18 @@ public class SimpleAttributeTableModel implements TableModel {
         Object value = featureList.get(rowIndex).getProperty(attributeNames[columnIndex]);
 
         if (value instanceof Geometry) {
-            value = ((Geometry)value).getGeometryType();
+            value = ((Geometry) value).getGeometryType();
         } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
-            final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)value);
+            final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry) value);
             try {
-                if (featureList.get(rowIndex).getLayerProperties().getFeatureService().getGeometryType().startsWith(
-                                "Multi")) {
+                if (
+                    featureList
+                        .get(rowIndex)
+                        .getLayerProperties()
+                        .getFeatureService()
+                        .getGeometryType()
+                        .startsWith("Multi")
+                ) {
                     final Geometry geometry = JTSAdapter.export(geom);
 
                     if (geometry != null) {
@@ -450,7 +453,7 @@ public class SimpleAttributeTableModel implements TableModel {
                     }
                 }
             } else if (colClass.getClass().isAssignableFrom(Date.class) && (value instanceof Timestamp)) {
-                return new Date(((Timestamp)value).getTime());
+                return new Date(((Timestamp) value).getTime());
             }
         }
 
@@ -483,7 +486,7 @@ public class SimpleAttributeTableModel implements TableModel {
         this.attributeNames = remove(this.attributeNames, col);
         this.attributeAlias = remove(this.attributeAlias, col);
         fireTableStructureChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
-//        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+        //        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
 
     /**
@@ -492,7 +495,7 @@ public class SimpleAttributeTableModel implements TableModel {
     public void showColumns() {
         fillHeaderArrays();
         fireTableStructureChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
-//        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+        //        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
 
     /**

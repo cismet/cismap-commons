@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * AuthenticationCanceledException.java
  *
@@ -29,9 +29,12 @@ public class AuthenticationCanceledException extends Exception {
      * Creates a new instance of AuthenticationCanceledException.
      */
     public AuthenticationCanceledException() {
-        super(org.openide.util.NbBundle.getMessage(
+        super(
+            org.openide.util.NbBundle.getMessage(
                 AuthenticationCanceledException.class,
-                "AuthenticationCanceledException.AuthenticationCanceledException()")); // NOI18N
+                "AuthenticationCanceledException.AuthenticationCanceledException()"
+            )
+        ); // NOI18N
     }
 
     /**

@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.preferences;
-
-import org.jdom.Element;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
 
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -52,8 +50,8 @@ public class LayersPreferences {
             this.cismapPreferences.log.warn("Read preferences. Error. appFeatureLayer.enabled  ", e);
         } // NOI18N
         try {
-            appFeatureLayerTranslucency = parent.getChild("appFeatureLayer").getAttribute("translucency")
-                        .getFloatValue();
+            appFeatureLayerTranslucency =
+                parent.getChild("appFeatureLayer").getAttribute("translucency").getFloatValue();
         } catch (Exception e) {
             this.cismapPreferences.log.warn("Read preferences. Error. appFeatureLayer.translucency  ", e);
         } // NOI18N
@@ -68,46 +66,44 @@ public class LayersPreferences {
         while (it.hasNext()) {
             final Object o = it.next();
             if (o instanceof Element) {
-                final Element el = (Element)o;
+                final Element el = (Element) o;
                 try {
                     boolean skip = false;
                     try {
                         skip = el.getAttribute("skip").getBooleanValue();
-                    } catch (Exception skipException) {
-                    }                                                                        // NOI18N
+                    } catch (Exception skipException) {} // NOI18N
                     if (!skip) {
                         final SimpleWMS swms = new SimpleWMS(el);
                         rasterServices.put(new Integer(swms.getLayerPosition()), swms);
                     }
                 } catch (Exception ex) {
-                    log.warn("Read preferences. Error. SimpleWMS erzeugen  ", ex);           // NOI18N
+                    log.warn("Read preferences. Error. SimpleWMS erzeugen  ", ex); // NOI18N
                 }
             }
         }
-        final List simplePostgisFeatureServiceList = parent.getChild("featureLayers")
-                    .getChildren("simplePostgisFeatureService");                             // NOI18N
+        final List simplePostgisFeatureServiceList = parent
+            .getChild("featureLayers")
+            .getChildren("simplePostgisFeatureService"); // NOI18N
         it = simplePostgisFeatureServiceList.iterator();
         while (it.hasNext()) {
             final Object o = it.next();
             if (o instanceof Element) {
-                final Element el = (Element)o;
+                final Element el = (Element) o;
                 if (log.isDebugEnabled()) {
-                    log.debug("parsing '" + el.getName() + "' layer preferences");           // NOI18N
+                    log.debug("parsing '" + el.getName() + "' layer preferences"); // NOI18N
                 }
                 try {
                     if (log.isDebugEnabled()) {
-                        log.debug("SimplePostgisFeatureService added");                      // NOI18N
+                        log.debug("SimplePostgisFeatureService added"); // NOI18N
                     }
                     boolean skip = false;
                     boolean updateable = false;
                     try {
                         skip = el.getAttribute("skip").getBooleanValue();
-                    } catch (Exception skipException) {
-                    }                                                                        // NOI18N
+                    } catch (Exception skipException) {} // NOI18N
                     try {
                         updateable = el.getAttribute("updateable").getBooleanValue();
-                    } catch (Exception skipException) {
-                    }                                                                        // NOI18N
+                    } catch (Exception skipException) {} // NOI18N
                     if (!skip) {
                         SimplePostgisFeatureService spfs = null;
                         if (updateable) {
@@ -124,24 +120,23 @@ public class LayersPreferences {
             }
         }
 
-        final List simplePostgisWebServiceList = parent.getChild("featureLayers")
-                    .getChildren("simpleWebFeatureService");                                     // NOI18N
+        final List simplePostgisWebServiceList = parent
+            .getChild("featureLayers")
+            .getChildren("simpleWebFeatureService"); // NOI18N
         it = simplePostgisWebServiceList.iterator();
         while (it.hasNext()) {
             final Object o = it.next();
             if (o instanceof Element) {
-                final Element el = (Element)o;
+                final Element el = (Element) o;
                 try {
                     boolean skip = false;
                     boolean updateable = false;
                     try {
                         skip = el.getAttribute("skip").getBooleanValue();
-                    } catch (Exception skipException) {
-                    }                                                                            // NOI18N
+                    } catch (Exception skipException) {} // NOI18N
                     try {
                         updateable = el.getAttribute("updateable").getBooleanValue();
-                    } catch (Exception skipException) {
-                    }                                                                            // NOI18N
+                    } catch (Exception skipException) {} // NOI18N
                     if (!skip) {
                         WebFeatureService swfs = null;
                         if (updateable) {
@@ -152,7 +147,7 @@ public class LayersPreferences {
                         }
                         featureServices.put(new Integer(swfs.getLayerPosition()), swfs);
                         if (log.isDebugEnabled()) {
-                            log.debug("SimpleWebFeatureService added");                          // NOI18N
+                            log.debug("SimpleWebFeatureService added"); // NOI18N
                         }
                     }
                 } catch (Exception ex) {

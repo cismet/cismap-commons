@@ -1,24 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.wfs.capabilities.deegree;
-
-import org.apache.log4j.Logger;
-
-import org.deegree.ogcwebservices.getcapabilities.InvalidCapabilitiesException;
-import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
-import org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType;
-
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.net.URL;
 
 import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.exceptions.ParserException;
@@ -29,11 +16,17 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureTypeList;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.deegree.DeegreeFeatureTypeDescription;
-
 import de.cismet.commons.capabilities.Service;
-
 import de.cismet.tools.CalculationCache;
 import de.cismet.tools.Calculator;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import org.apache.log4j.Logger;
+import org.deegree.ogcwebservices.getcapabilities.InvalidCapabilitiesException;
+import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
+import org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType;
+import org.xml.sax.SAXException;
 
 /**
  * Parses WFS Capabilities documents.
@@ -51,7 +44,8 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
     private final org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities cap;
     private final CalculationCache<String, FeatureTypeList> cache = new CalculationCache<String, FeatureTypeList>(
-            new FeatureTypeListRetriever());
+        new FeatureTypeListRetriever()
+    );
     private final URL url;
     private Service service;
     private WFSFacade facade;
@@ -69,9 +63,8 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
      * @throws  IOException                   DOCUMENT ME!
      * @throws  SAXException                  DOCUMENT ME!
      */
-    public DeegreeWFSCapabilities(final InputStream in, final String link) throws InvalidCapabilitiesException,
-        IOException,
-        SAXException {
+    public DeegreeWFSCapabilities(final InputStream in, final String link)
+        throws InvalidCapabilitiesException, IOException, SAXException {
         originalLink = link;
         String urlString = link;
         final WFSCapabilitiesDocument parser = new WFSCapabilitiesDocument();
@@ -82,7 +75,7 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
         this.url = new URL(urlString);
 
         parser.load(in, link);
-        cap = (org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities)parser.parseCapabilities();
+        cap = (org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities) parser.parseCapabilities();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -168,8 +161,10 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public FeatureTypeDescription getFeatureTypeDescription(final String featureTypeDescription,
-                final FeatureType feature) throws ParserException {
+        public FeatureTypeDescription getFeatureTypeDescription(
+            final String featureTypeDescription,
+            final FeatureType feature
+        ) throws ParserException {
             return new DeegreeFeatureTypeDescription(featureTypeDescription, feature);
         }
     }

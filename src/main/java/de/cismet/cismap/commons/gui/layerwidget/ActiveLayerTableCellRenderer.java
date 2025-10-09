@@ -1,41 +1,11 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
-
-import org.openide.util.NbBundle;
-
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JSlider;
-import javax.swing.JTable;
-import javax.swing.Timer;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.LayerInfoProvider;
@@ -52,13 +22,36 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.util.SLDStyleUtil;
-
 import de.cismet.commons.wms.capabilities.Style;
-
 import de.cismet.tools.CurrentStackTrace;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JProgressBar;
+import javax.swing.JSlider;
+import javax.swing.JTable;
+import javax.swing.Timer;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -97,22 +90,20 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
     private StyleLabel styleLabel = new StyleLabel();
     private boolean isWidgetTable = false;
     private JProgressBar progressBar = new JProgressBar(0, 100) {
-
-            @Override
-            public boolean isDisplayable() {
-                // This does the trick. It makes sure animation is always performed
-                return true;
-            }
-        };
+        @Override
+        public boolean isDisplayable() {
+            // This does the trick. It makes sure animation is always performed
+            return true;
+        }
+    };
 
     private JProgressBar progressIndeterminate = new JProgressBar(0, 100) {
-
-            @Override
-            public boolean isDisplayable() {
-                // This does the trick. It makes sure animation is always performed
-                return true;
-            }
-        };
+        @Override
+        public boolean isDisplayable() {
+            // This does the trick. It makes sure animation is always performed
+            return true;
+        }
+    };
 
     //~ Constructors -----------------------------------------------------------
 
@@ -120,14 +111,16 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
      * Creates a new instance of ActiveLayerTableCellRenderer.
      */
     public ActiveLayerTableCellRenderer() {
-//        progress.setUI(new MetalProgressBarUI());
-//        progress.setString("");progress.setStringPainted(true);
-//        progressIndeterminate.setUI(new MetalProgressBarUI());
-//        progressIndeterminate.setString("");progressIndeterminate.setStringPainted(true);
-        styleIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/style.png"));         // NOI18N
-        unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png")); // NOI18N
+        //        progress.setUI(new MetalProgressBarUI());
+        //        progress.setString("");progress.setStringPainted(true);
+        //        progressIndeterminate.setUI(new MetalProgressBarUI());
+        //        progressIndeterminate.setString("");progressIndeterminate.setStringPainted(true);
+        styleIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png")); // NOI18N
+        unselectedStyleIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png")
+            ); // NOI18N
         moreButton.setEnabled(false);
         styleLabel.setOpaque(false);
         styleLabel.setBackground(Color.WHITE);
@@ -141,25 +134,35 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         progressIndeterminate.add(slider2, BorderLayout.CENTER);
         progressIndeterminate.setIndeterminate(true);
 
-        layersIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layers.png"));   // NOI18N
-        layerIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layer.png"));    // NOI18N
-        layersInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layers_i.png")); // NOI18N
-        layerInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));  // NOI18N
+        layersIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png")); // NOI18N
+        layerIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer.png")); // NOI18N
+        layersInfoIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers_i.png")); // NOI18N
+        layerInfoIcon =
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer_i.png")); // NOI18N
 
-        okIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/enable30.png"));   // NOI18N
-        errorIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/error.png"));      // NOI18N
-        refreshIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"));    // NOI18N
-        refreshNeededIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/refresh30.png"));  // NOI18N
-        inProgressIcon = new javax.swing.ImageIcon(getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/inProgress.png")); // NOI18N
+        okIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/enable30.png")
+            ); // NOI18N
+        errorIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/error.png")
+            ); // NOI18N
+        refreshIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png")
+            ); // NOI18N
+        refreshNeededIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh30.png")
+            ); // NOI18N
+        inProgressIcon =
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/inProgress.png")
+            ); // NOI18N
     }
 
     /**
@@ -187,12 +190,14 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
      * @return  the default table cell renderer
      */
     @Override
-    public Component getTableCellRendererComponent(final JTable table,
-            final Object value,
-            final boolean isSelected,
-            final boolean hasFocus,
-            final int row,
-            final int column) {
+    public Component getTableCellRendererComponent(
+        final JTable table,
+        final Object value,
+        final boolean isSelected,
+        final boolean hasFocus,
+        final int row,
+        final int column
+    ) {
         if (DEBUG) {
             if (log.isDebugEnabled()) {
                 log.debug(value + ": column=" + column);
@@ -200,12 +205,13 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         }
         if (value instanceof ModeLayer) {
             return getTableCellRendererComponent(
-                    table,
-                    ((ModeLayer)value).getCurrentLayer(),
-                    isSelected,
-                    hasFocus,
-                    row,
-                    column);
+                table,
+                ((ModeLayer) value).getCurrentLayer(),
+                isSelected,
+                hasFocus,
+                row,
+                column
+            );
         }
 
         if (DEBUG) {
@@ -235,9 +241,8 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             }
         } else {
             if (internalWidgetParent == null) {
-                internalWidgetParent = StaticSwingTools.findSpecificParentComponent(
-                        table,
-                        NewSimpleInternalLayerWidget.class);
+                internalWidgetParent =
+                    StaticSwingTools.findSpecificParentComponent(table, NewSimpleInternalLayerWidget.class);
                 internalWidgetParent.setErrorImage(null);
             } else {
                 internalWidgetParent.setErrorImage(null);
@@ -248,56 +253,66 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             // label.setIconTextGap(4);
             setHorizontalAlignment(JLabel.CENTER);
             if (value instanceof RetrievalServiceLayer) {
-                final int progress = ((RetrievalServiceLayer)value).getProgress();
-                if (((RetrievalServiceLayer)value).isRefreshNeeded()) {
+                final int progress = ((RetrievalServiceLayer) value).getProgress();
+                if (((RetrievalServiceLayer) value).isRefreshNeeded()) {
                     if (DEBUG) {
-                        log.warn(value + " isRefreshNeeded");                 // NOI18N
+                        log.warn(value + " isRefreshNeeded"); // NOI18N
                     }
                     setIcon(refreshNeededIcon);
                 } else if ((progress > 0) && (progress < 100)) {
                     if (DEBUG) {
                         if (log.isDebugEnabled()) {
-                            log.debug(value + " isInProgress");               // NOI18N
+                            log.debug(value + " isInProgress"); // NOI18N
                         }
                     }
                     setIcon(inProgressIcon);
-                } else if (((RetrievalServiceLayer)value).hasErrors()) {
+                } else if (((RetrievalServiceLayer) value).hasErrors()) {
                     if (DEBUG) {
-                        log.warn(value + " has errors");                      // NOI18N
+                        log.warn(value + " has errors"); // NOI18N
                     }
                     setIcon(errorIcon);
-                    if (((RetrievalServiceLayer)value).getErrorObject() instanceof Image) {
+                    if (((RetrievalServiceLayer) value).getErrorObject() instanceof Image) {
                         if (!isWidgetTable) {
                             if (layerWidgetParent == null) {
-                                layerWidgetParent = StaticSwingTools.findSpecificParentComponent(
-                                        table,
-                                        LayerWidget.class);
-                                layerWidgetParent.setErrorImage((Image)((RetrievalServiceLayer)value).getErrorObject());
+                                layerWidgetParent =
+                                    StaticSwingTools.findSpecificParentComponent(table, LayerWidget.class);
+                                layerWidgetParent.setErrorImage(
+                                    (Image) ((RetrievalServiceLayer) value).getErrorObject()
+                                );
                             } else {
-                                layerWidgetParent.setErrorImage((Image)((RetrievalServiceLayer)value).getErrorObject());
+                                layerWidgetParent.setErrorImage(
+                                    (Image) ((RetrievalServiceLayer) value).getErrorObject()
+                                );
                             }
                         } else {
                             if (internalWidgetParent == null) {
-                                internalWidgetParent = StaticSwingTools.findSpecificParentComponent(
+                                internalWidgetParent =
+                                    StaticSwingTools.findSpecificParentComponent(
                                         table,
-                                        NewSimpleInternalLayerWidget.class);
-                                internalWidgetParent.setErrorImage((Image)((RetrievalServiceLayer)value)
-                                            .getErrorObject());
+                                        NewSimpleInternalLayerWidget.class
+                                    );
+                                internalWidgetParent.setErrorImage(
+                                    (Image) ((RetrievalServiceLayer) value).getErrorObject()
+                                );
                             } else {
-                                internalWidgetParent.setErrorImage((Image)((RetrievalServiceLayer)value)
-                                            .getErrorObject());
+                                internalWidgetParent.setErrorImage(
+                                    (Image) ((RetrievalServiceLayer) value).getErrorObject()
+                                );
                             }
                         }
-                        setToolTipText(org.openide.util.NbBundle.getMessage(
+                        setToolTipText(
+                            org.openide.util.NbBundle.getMessage(
                                 ActiveLayerTableCellRenderer.class,
-                                "ActiveLayerTableCellRenderer.toolTipText")); // NOI18N
-                    } else if (((RetrievalServiceLayer)value).getErrorObject() instanceof String) {
-                        setToolTipText(((RetrievalServiceLayer)value).getErrorObject().toString());
+                                "ActiveLayerTableCellRenderer.toolTipText"
+                            )
+                        ); // NOI18N
+                    } else if (((RetrievalServiceLayer) value).getErrorObject() instanceof String) {
+                        setToolTipText(((RetrievalServiceLayer) value).getErrorObject().toString());
                     }
                 } else {
                     if (DEBUG) {
                         if (log.isDebugEnabled()) {
-                            log.debug(value + " isFinished");                 // NOI18N
+                            log.debug(value + " isFinished"); // NOI18N
                         }
                     }
                     setIcon(okIcon);
@@ -306,14 +321,14 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 setIcon(okIcon);
             }
         } else if (realColumn == 2) {
-            setText("");                                                      // NOI18N
+            setText(""); // NOI18N
             setIcon(null);
             if (value instanceof WMSServiceLayer) {
-                if (((WMSServiceLayer)value).getWMSLayers().size() > 1) {
-                    setText("");                                              // NOI18N
+                if (((WMSServiceLayer) value).getWMSLayers().size() > 1) {
+                    setText(""); // NOI18N
                 } else {
                     setHorizontalAlignment(JLabel.LEFT);
-                    setText("");                                              // NOI18N
+                    setText(""); // NOI18N
                     // label.setIconTextGap(4);
                     Style selectedStyle = null;
                     String styleName = null;
@@ -321,9 +336,9 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     int styleCount = 0;
 
                     // Kann nur ein WMSLayer haben (wegen Bedingung weiter oben)
-                    final List<WMSLayer> wmsLayers = ((WMSServiceLayer)value).getWMSLayers();
+                    final List<WMSLayer> wmsLayers = ((WMSServiceLayer) value).getWMSLayers();
 
-                    if (!((WMSServiceLayer)value).isDummy() && !wmsLayers.isEmpty()) {
+                    if (!((WMSServiceLayer) value).isDummy() && !wmsLayers.isEmpty()) {
                         selectedStyle = wmsLayers.get(0).getSelectedStyle();
                         styleCount = wmsLayers.get(0).getOgcCapabilitiesLayer().getStyles().length;
                     } else if (!wmsLayers.isEmpty()) {
@@ -352,34 +367,39 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     }
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug("is it null? " + ((AbstractFeatureService)value).getLayerProperties());
+                    log.debug("is it null? " + ((AbstractFeatureService) value).getLayerProperties());
                 }
 
-                final AbstractFeatureService service = (AbstractFeatureService)value;
+                final AbstractFeatureService service = (AbstractFeatureService) value;
                 final FeatureFactory ff = service.getFeatureFactory();
                 BasicStyle basicStyle = null;
 
                 if (ff instanceof AbstractFeatureFactory) {
-                    final AbstractFeatureFactory aff = (AbstractFeatureFactory)ff;
+                    final AbstractFeatureFactory aff = (AbstractFeatureFactory) ff;
                     final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
 
                     basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
                 }
 
-                if ((service.getLayerProperties() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
+                if (
+                    (service.getLayerProperties() != null) &&
+                    (service.getLayerProperties().getAttributeTableRuleSet() != null) &&
+                    (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)
+                ) {
                     setHorizontalAlignment(JLabel.LEFT);
-                    setText(NbBundle.getMessage(
+                    setText(
+                        NbBundle.getMessage(
                             ActiveLayerTableCellRenderer.class,
-                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
+                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"
+                        )
+                    );
                     setIcon(unselectedStyleIcon);
                 } else {
                     if (basicStyle != null) {
                         styleLabel.style = basicStyle;
                     } else {
-                        if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                            styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                        if (((AbstractFeatureService) value).getLayerProperties() != null) {
+                            styleLabel.style = ((AbstractFeatureService) value).getLayerProperties().getStyle();
                         }
                     }
 
@@ -392,28 +412,29 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             setText(""); // NOI18N
             setIcon(null);
             setHorizontalAlignment(JLabel.LEFT);
-//            if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() > 1) {
-//            } else {
-//                if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
-//                    wmsLayer = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
-//                } else if (value instanceof WMSLayer) {
-//                    wmsLayer = (WMSLayer) value;
-//                }
-//                if (wmsLayer != null && wmsLayer.getOgcCapabilitiesLayer().isQueryable()) {
-//                    return booleanRenderer.getTableCellRendererComponent(table, new Boolean(wmsLayer.isQuerySelected()), isSelected, hasFocus, row, column);
-//                } else {
-//                    setIcon(null);
-//                    setText("");//NOI18N
-//                }
-//            }
-            if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider)value).isQueryable()) {
+            //            if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() > 1) {
+            //            } else {
+            //                if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
+            //                    wmsLayer = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
+            //                } else if (value instanceof WMSLayer) {
+            //                    wmsLayer = (WMSLayer) value;
+            //                }
+            //                if (wmsLayer != null && wmsLayer.getOgcCapabilitiesLayer().isQueryable()) {
+            //                    return booleanRenderer.getTableCellRendererComponent(table, new Boolean(wmsLayer.isQuerySelected()), isSelected, hasFocus, row, column);
+            //                } else {
+            //                    setIcon(null);
+            //                    setText("");//NOI18N
+            //                }
+            //            }
+            if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider) value).isQueryable()) {
                 return booleanRenderer.getTableCellRendererComponent(
-                        table,
-                        ((LayerInfoProvider)value).isLayerQuerySelected(),
-                        isSelected,
-                        hasFocus,
-                        row,
-                        column);
+                    table,
+                    ((LayerInfoProvider) value).isLayerQuerySelected(),
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column
+                );
             } else {
                 setIcon(null);
                 setText(""); // NOI18N
@@ -421,31 +442,38 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         } else if (realColumn == 4) {
             // Component returnComp = null;
             if (value instanceof RetrievalServiceLayer) {
-                slider.setValue((int)(((RetrievalServiceLayer)value).getTranslucency() * 100));
-                slider2.setValue((int)(((RetrievalServiceLayer)value).getTranslucency() * 100));
+                slider.setValue((int) (((RetrievalServiceLayer) value).getTranslucency() * 100));
+                slider2.setValue((int) (((RetrievalServiceLayer) value).getTranslucency() * 100));
                 this.slider.updateUI();
                 this.slider2.updateUI();
 
-                final int currentProgress = ((RetrievalServiceLayer)value).getProgress();
+                final int currentProgress = ((RetrievalServiceLayer) value).getProgress();
                 // -1: progress is indeterminate
-                if ((currentProgress == -1) && ((RetrievalServiceLayer)value).isEnabled()
-                            && !((RetrievalServiceLayer)value).isRefreshNeeded()) {
+                if (
+                    (currentProgress == -1) &&
+                    ((RetrievalServiceLayer) value).isEnabled() &&
+                    !((RetrievalServiceLayer) value).isRefreshNeeded()
+                ) {
                     if (indeterminateProgressTimers.get(realRow) == null) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
                                 log.debug("new indeterminateProgressTimers[" + realRow + "] created"); // NOI18N
                             }
                         }
-                        indeterminateProgressTimers.put(realRow, new Timer(30, new ActionListener() {
-
+                        indeterminateProgressTimers.put(
+                            realRow,
+                            new Timer(
+                                30,
+                                new ActionListener() {
                                     @Override
                                     public void actionPerformed(final ActionEvent e) {
-                                        final int currentProgress = ((RetrievalServiceLayer)value).getProgress();
+                                        final int currentProgress = ((RetrievalServiceLayer) value).getProgress();
 
                                         // redraw only progress bar column (indeterminate)
-                                        ((TreeTableModelAdapter)(table.getModel())).fireTableCellUpdated(
-                                            realRow,
-                                            realColumn);
+                                        ((TreeTableModelAdapter) (table.getModel())).fireTableCellUpdated(
+                                                realRow,
+                                                realColumn
+                                            );
 
                                         if ((currentProgress == 0) || (currentProgress == 100)) {
                                             final Timer timer = indeterminateProgressTimers.get(realRow);
@@ -455,23 +483,27 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             if (DEBUG) {
                                                 if (log.isDebugEnabled()) {
                                                     log.debug(
-                                                        value
-                                                                + ": indeterminateProgressTimer["
-                                                                + realRow
-                                                                + "] stopped from Timer"); // NOI18N
+                                                        value +
+                                                        ": indeterminateProgressTimer[" +
+                                                        realRow +
+                                                        "] stopped from Timer"
+                                                    ); // NOI18N
                                                 }
                                             }
 
                                             // redraw all columns (including status icon)
                                             final TableModelEvent evt = new TableModelEvent(
-                                                    table.getModel(),
-                                                    realRow,
-                                                    realRow,
-                                                    TableModelEvent.UPDATE);
-                                            ((TreeTableModelAdapter)(table.getModel())).fireTableChanged(evt);
+                                                table.getModel(),
+                                                realRow,
+                                                realRow,
+                                                TableModelEvent.UPDATE
+                                            );
+                                            ((TreeTableModelAdapter) (table.getModel())).fireTableChanged(evt);
                                         }
                                     }
-                                }));
+                                }
+                            )
+                        );
                     }
 
                     if (!indeterminateProgressTimers.get(realRow).isRunning()) {
@@ -492,18 +524,33 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 } else {
                     if (DEBUG) {
                         if (log.isDebugEnabled()) {
-                            log.debug(value + ": getProgress(): " + currentProgress + " (realColumn=" + realColumn
-                                        + ", realRow=" + realRow + ") (column=" + column + ", row=" + row + ")"); // NOI18N
+                            log.debug(
+                                value +
+                                ": getProgress(): " +
+                                currentProgress +
+                                " (realColumn=" +
+                                realColumn +
+                                ", realRow=" +
+                                realRow +
+                                ") (column=" +
+                                column +
+                                ", row=" +
+                                row +
+                                ")"
+                            ); // NOI18N
                         }
                     }
 
                     this.progressBar.setValue(currentProgress);
-                    if ((indeterminateProgressTimers.get(realRow) != null)
-                                && ((currentProgress == 100) || (currentProgress == 0))) {
+                    if (
+                        (indeterminateProgressTimers.get(realRow) != null) &&
+                        ((currentProgress == 100) || (currentProgress == 0))
+                    ) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
-                                log.debug(value + ": indeterminateProgressTimer[" + realRow
-                                            + "] stopped from Renderer"); // NOI18N
+                                log.debug(
+                                    value + ": indeterminateProgressTimer[" + realRow + "] stopped from Renderer"
+                                ); // NOI18N
                             }
                         }
                         final Timer timer = indeterminateProgressTimers.get(realRow);
@@ -518,11 +565,13 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                         }
 
                         // redraw all columns (including status icon)
-                        final TableModelEvent evt = new TableModelEvent(table.getModel(),
-                                realRow,
-                                realRow,
-                                TableModelEvent.UPDATE);
-                        ((TreeTableModelAdapter)(table.getModel())).fireTableChanged(evt);
+                        final TableModelEvent evt = new TableModelEvent(
+                            table.getModel(),
+                            realRow,
+                            realRow,
+                            TableModelEvent.UPDATE
+                        );
+                        ((TreeTableModelAdapter) (table.getModel())).fireTableChanged(evt);
                     }
                 }
 
@@ -543,7 +592,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 setIcon(null);
                 setText(""); // NOI18N
             }
-//            return new JLabel("turned off");
+            //            return new JLabel("turned off");
         } else if (realColumn == 5) {
             if (value instanceof WMSServiceLayer) {
                 moreButton.setEnabled(false);
@@ -553,7 +602,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             return moreButton;
         } else {
             setIcon(null);
-            setText("");     // NOI18N
+            setText(""); // NOI18N
         }
 
         return this;
@@ -579,22 +628,21 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         protected void paintComponent(final Graphics g) {
             try {
                 if (style != null) {
-                    final Graphics2D g2d = (Graphics2D)g;
+                    final Graphics2D g2d = (Graphics2D) g;
                     g.setColor(ActiveLayerTableCellRenderer.this.getBackground());
                     g.fillRect(0, 0, getWidth(), getHeight());
                     if (style.isDrawFill() && (style.getFillColor() != null)) {
-                        g2d.setColor((Color)style.getFillColor());
+                        g2d.setColor((Color) style.getFillColor());
                         g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
                     }
                     if (style.isDrawLine() && (style.getLineColor() != null)) {
-                        g2d.setColor((Color)style.getLineColor());
+                        g2d.setColor((Color) style.getLineColor());
                         final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
                         g2d.setStroke(new BasicStroke(width));
                         g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
                     }
                 }
-            } catch (Exception ex) {
-            }
+            } catch (Exception ex) {}
         }
     }
 }

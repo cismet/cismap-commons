@@ -1,29 +1,25 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons;
 
-import org.apache.log4j.Logger;
-
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-
 import java.io.StringReader;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import java.util.logging.Level;
+import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 /**
  * The XMLObjectFactory factory recreates arbitrary objects from xml documents.<br/>
@@ -51,12 +47,8 @@ public class XMLObjectFactory {
      * @throws  InvocationTargetException  DOCUMENT ME!
      * @throws  Exception                  DOCUMENT ME!
      */
-    public static Object restoreObjectfromElement(final Element element) throws ClassNotFoundException,
-        InstantiationException,
-        IllegalAccessException,
-        IllegalArgumentException,
-        InvocationTargetException,
-        Exception {
+    public static Object restoreObjectfromElement(final Element element)
+        throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, Exception {
         final String type = element.getAttributeValue(ConvertableToXML.TYPE_ATTRIBUTE);
         if (type == null) {
             // logger.error("unsupported xml element, type attribute is missing");
@@ -74,7 +66,7 @@ public class XMLObjectFactory {
         } catch (NoSuchMethodException ex) {
             // logger.debug("constructing '" + objectType.getSimpleName() + "' using empty constructor");
             final Object object = objectType.newInstance();
-            ((ConvertableToXML)object).initFromElement(element);
+            ((ConvertableToXML) object).initFromElement(element);
             return object;
         }
     }
@@ -93,12 +85,8 @@ public class XMLObjectFactory {
      * @throws  InvocationTargetException  DOCUMENT ME!
      * @throws  Exception                  DOCUMENT ME!
      */
-    public static Object restoreObjectfromXml(final String xmlString) throws ClassNotFoundException,
-        InstantiationException,
-        IllegalAccessException,
-        IllegalArgumentException,
-        InvocationTargetException,
-        Exception {
+    public static Object restoreObjectfromXml(final String xmlString)
+        throws ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, Exception {
         final SAXBuilder saxBuilder = new SAXBuilder(false);
         final StringReader stringReader = new StringReader(xmlString);
         final Document document = saxBuilder.build(stringReader);

@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
 
+import de.cismet.cismap.commons.gui.ToolbarComponentsProvider.ToolbarPositionHint;
+import javax.swing.JComponent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import javax.swing.JComponent;
-
-import de.cismet.cismap.commons.gui.ToolbarComponentsProvider.ToolbarPositionHint;
 
 /**
  * DOCUMENT ME!
@@ -42,10 +40,12 @@ public final class ToolbarComponentDescription {
      * @param  positionHint     DOCUMENT ME!
      * @param  anchorComponent  DOCUMENT ME!
      */
-    public ToolbarComponentDescription(final String toolbarID,
-            final JComponent component,
-            final ToolbarPositionHint positionHint,
-            final String anchorComponent) {
+    public ToolbarComponentDescription(
+        final String toolbarID,
+        final JComponent component,
+        final ToolbarPositionHint positionHint,
+        final String anchorComponent
+    ) {
         this(toolbarID, component, positionHint, anchorComponent, false);
     }
 }

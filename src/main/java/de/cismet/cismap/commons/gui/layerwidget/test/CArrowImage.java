@@ -1,11 +1,12 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget.test;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -15,7 +16,6 @@ import java.awt.RenderingHints;
 import java.awt.SystemColor;
 import java.awt.geom.*;
 import java.awt.image.*;
-
 import java.util.*;
 
 /**
@@ -28,7 +28,7 @@ public class CArrowImage extends BufferedImage {
 
     //~ Static fields/initializers ---------------------------------------------
 
-// Constants...
+    // Constants...
     public static final int ARROW_UP = 0;
     public static final int ARROW_DOWN = 1;
     public static final int ARROW_LEFT = 2;
@@ -36,7 +36,7 @@ public class CArrowImage extends BufferedImage {
 
     //~ Instance fields --------------------------------------------------------
 
-// Member variables...
+    // Member variables...
     private GeneralPath _pathArrow = new GeneralPath();
 
     //~ Constructors -----------------------------------------------------------
@@ -59,7 +59,6 @@ public class CArrowImage extends BufferedImage {
      */
     public CArrowImage(final int nWidth, final int nHeight, final int nArrowDirection) {
         super(nWidth, nHeight, TYPE_INT_ARGB_PRE); // Set the width, height and image type
-
         final Map map = new HashMap();
         map.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         map.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -78,137 +77,135 @@ public class CArrowImage extends BufferedImage {
         final float h23 = h * 2 / 3;
 
         switch (nArrowDirection) {
-            case ARROW_UP: {
-                _pathArrow.moveTo(w12, h12);
-                _pathArrow.lineTo(w12, 0);
-                _pathArrow.lineTo(w, h - 1);
-                _pathArrow.lineTo(0, h - 1);
-                _pathArrow.closePath();
-                g2.setPaint(new GradientPaint(
-                        w13,
-                        h13,
-                        SystemColor.controlLtHighlight,
-                        w,
-                        h
-                                - 1,
-                        SystemColor.controlShadow));
+            case ARROW_UP:
+                {
+                    _pathArrow.moveTo(w12, h12);
+                    _pathArrow.lineTo(w12, 0);
+                    _pathArrow.lineTo(w, h - 1);
+                    _pathArrow.lineTo(0, h - 1);
+                    _pathArrow.closePath();
+                    g2.setPaint(
+                        new GradientPaint(w13, h13, SystemColor.controlLtHighlight, w, h - 1, SystemColor.controlShadow)
+                    );
 
-                g2.fill(_pathArrow);
+                    g2.fill(_pathArrow);
 
-                g2.setColor(SystemColor.controlDkShadow);
-                g2.draw(new Line2D.Float(0, h - 1, w, h - 1));
-                g2.setColor(SystemColor.controlShadow);
-                g2.draw(new Line2D.Float(w12, 0, w, h - 1));
-                g2.setColor(SystemColor.controlLtHighlight);
-                g2.draw(new Line2D.Float(0, h - 1, w12, 0));
-                break;
-            }
+                    g2.setColor(SystemColor.controlDkShadow);
+                    g2.draw(new Line2D.Float(0, h - 1, w, h - 1));
+                    g2.setColor(SystemColor.controlShadow);
+                    g2.draw(new Line2D.Float(w12, 0, w, h - 1));
+                    g2.setColor(SystemColor.controlLtHighlight);
+                    g2.draw(new Line2D.Float(0, h - 1, w12, 0));
+                    break;
+                }
+            case ARROW_DOWN:
+                {
+                    _pathArrow.moveTo(w12, h12);
+                    _pathArrow.lineTo(w, 0);
+                    _pathArrow.lineTo(w12, h - 1);
+                    _pathArrow.closePath();
+                    g2.setPaint(
+                        new GradientPaint(0, 0, SystemColor.controlLtHighlight, w23, h23, SystemColor.controlShadow)
+                    );
+                    g2.fill(_pathArrow);
 
-            case ARROW_DOWN: {
-                _pathArrow.moveTo(w12, h12);
-                _pathArrow.lineTo(w, 0);
-                _pathArrow.lineTo(w12, h - 1);
-                _pathArrow.closePath();
-                g2.setPaint(new GradientPaint(
-                        0,
-                        0,
-                        SystemColor.controlLtHighlight,
-                        w23,
-                        h23,
-                        SystemColor.controlShadow));
-                g2.fill(_pathArrow);
+                    g2.setColor(SystemColor.controlDkShadow);
+                    g2.draw(new Line2D.Float(w, 0, w12, h - 1));
+                    g2.setColor(SystemColor.controlShadow);
+                    g2.draw(new Line2D.Float(w12, h - 1, 0, 0));
+                    g2.setColor(SystemColor.controlLtHighlight);
+                    g2.draw(new Line2D.Float(0, 0, w, 0));
+                    break;
+                }
+            case ARROW_LEFT:
+                {
+                    _pathArrow.moveTo(w - 1, h13);
+                    _pathArrow.lineTo(w13, h13);
+                    _pathArrow.lineTo(w13, 0);
+                    _pathArrow.lineTo(0, h12);
+                    _pathArrow.lineTo(w13, h - 1);
+                    _pathArrow.lineTo(w13, h23);
+                    _pathArrow.lineTo(w - 1, h23);
+                    _pathArrow.closePath();
+                    g2.setPaint(
+                        new GradientPaint(
+                            0,
+                            0,
+                            Color.white, // SystemColor.controlLtHighlight,
+                            0,
+                            h,
+                            SystemColor.controlShadow
+                        )
+                    );
+                    g2.fill(_pathArrow);
 
-                g2.setColor(SystemColor.controlDkShadow);
-                g2.draw(new Line2D.Float(w, 0, w12, h - 1));
-                g2.setColor(SystemColor.controlShadow);
-                g2.draw(new Line2D.Float(w12, h - 1, 0, 0));
-                g2.setColor(SystemColor.controlLtHighlight);
-                g2.draw(new Line2D.Float(0, 0, w, 0));
-                break;
-            }
+                    _pathArrow.reset();
+                    _pathArrow.moveTo(w13, 0);
+                    _pathArrow.lineTo(w13, h13);
+                    _pathArrow.moveTo(w - 1, h13);
+                    _pathArrow.lineTo(w - 1, h23);
+                    _pathArrow.lineTo(w13, h23);
+                    _pathArrow.lineTo(w13, h - 1);
+                    g2.setColor(SystemColor.controlDkShadow);
+                    g2.draw(_pathArrow);
 
-            case ARROW_LEFT: {
-                _pathArrow.moveTo(w - 1, h13);
-                _pathArrow.lineTo(w13, h13);
-                _pathArrow.lineTo(w13, 0);
-                _pathArrow.lineTo(0, h12);
-                _pathArrow.lineTo(w13, h - 1);
-                _pathArrow.lineTo(w13, h23);
-                _pathArrow.lineTo(w - 1, h23);
-                _pathArrow.closePath();
-                g2.setPaint(new GradientPaint(
-                        0,
-                        0,
-                        Color.white, // SystemColor.controlLtHighlight,
-                        0,
-                        h,
-                        SystemColor.controlShadow));
-                g2.fill(_pathArrow);
+                    g2.setColor(SystemColor.controlShadow);
+                    g2.draw(new Line2D.Float(0, h12, w13, h - 1));
 
-                _pathArrow.reset();
-                _pathArrow.moveTo(w13, 0);
-                _pathArrow.lineTo(w13, h13);
-                _pathArrow.moveTo(w - 1, h13);
-                _pathArrow.lineTo(w - 1, h23);
-                _pathArrow.lineTo(w13, h23);
-                _pathArrow.lineTo(w13, h - 1);
-                g2.setColor(SystemColor.controlDkShadow);
-                g2.draw(_pathArrow);
-
-                g2.setColor(SystemColor.controlShadow);
-                g2.draw(new Line2D.Float(0, h12, w13, h - 1));
-
-                _pathArrow.reset();
-                _pathArrow.moveTo(0, h12);
-                _pathArrow.lineTo(w13, 0);
-                _pathArrow.moveTo(w13, h13);
-                _pathArrow.lineTo(w - 1, h13);
-                g2.setColor(SystemColor.controlLtHighlight);
-                g2.draw(_pathArrow);
-                break;
-            }
-
+                    _pathArrow.reset();
+                    _pathArrow.moveTo(0, h12);
+                    _pathArrow.lineTo(w13, 0);
+                    _pathArrow.moveTo(w13, h13);
+                    _pathArrow.lineTo(w - 1, h13);
+                    g2.setColor(SystemColor.controlLtHighlight);
+                    g2.draw(_pathArrow);
+                    break;
+                }
             case ARROW_RIGHT:
-            default: {
-                _pathArrow.moveTo(0, h13);
-                _pathArrow.lineTo(w23, h13);
-                _pathArrow.lineTo(w23, 0);
-                _pathArrow.lineTo(w - 1, h12);
-                _pathArrow.lineTo(w23, h - 1);
-                _pathArrow.lineTo(w23, h23);
-                _pathArrow.lineTo(0, h23);
-                _pathArrow.closePath();
-                g2.setPaint(new GradientPaint(
-                        0,
-                        0,
-                        Color.white, // SystemColor.controlLtHighlight,
-                        0,
-                        h,
-                        SystemColor.controlShadow));
-                g2.fill(_pathArrow);
+            default:
+                {
+                    _pathArrow.moveTo(0, h13);
+                    _pathArrow.lineTo(w23, h13);
+                    _pathArrow.lineTo(w23, 0);
+                    _pathArrow.lineTo(w - 1, h12);
+                    _pathArrow.lineTo(w23, h - 1);
+                    _pathArrow.lineTo(w23, h23);
+                    _pathArrow.lineTo(0, h23);
+                    _pathArrow.closePath();
+                    g2.setPaint(
+                        new GradientPaint(
+                            0,
+                            0,
+                            Color.white, // SystemColor.controlLtHighlight,
+                            0,
+                            h,
+                            SystemColor.controlShadow
+                        )
+                    );
+                    g2.fill(_pathArrow);
 
-                _pathArrow.reset();
-                _pathArrow.moveTo(0, h23);
-                _pathArrow.lineTo(w23, h23);
-                _pathArrow.moveTo(w23, h - 1);
-                _pathArrow.lineTo(w - 1, h12);
-                g2.setColor(SystemColor.controlDkShadow);
-                g2.draw(_pathArrow);
+                    _pathArrow.reset();
+                    _pathArrow.moveTo(0, h23);
+                    _pathArrow.lineTo(w23, h23);
+                    _pathArrow.moveTo(w23, h - 1);
+                    _pathArrow.lineTo(w - 1, h12);
+                    g2.setColor(SystemColor.controlDkShadow);
+                    g2.draw(_pathArrow);
 
-                g2.setColor(SystemColor.controlShadow);
-                g2.draw(new Line2D.Float(w - 1, h12, w23, 0));
+                    g2.setColor(SystemColor.controlShadow);
+                    g2.draw(new Line2D.Float(w - 1, h12, w23, 0));
 
-                _pathArrow.reset();
-                _pathArrow.moveTo(w23, 0);
-                _pathArrow.lineTo(w23, h13);
-                _pathArrow.lineTo(0, h13);
-                _pathArrow.lineTo(0, h23);
-                _pathArrow.moveTo(w23, h23);
-                _pathArrow.lineTo(w23, h - 1);
-                g2.setColor(SystemColor.controlLtHighlight);
-                g2.draw(_pathArrow);
-                break;
-            }
+                    _pathArrow.reset();
+                    _pathArrow.moveTo(w23, 0);
+                    _pathArrow.lineTo(w23, h13);
+                    _pathArrow.lineTo(0, h13);
+                    _pathArrow.lineTo(0, h23);
+                    _pathArrow.moveTo(w23, h23);
+                    _pathArrow.lineTo(w23, h - 1);
+                    g2.setColor(SystemColor.controlLtHighlight);
+                    g2.draw(_pathArrow);
+                    break;
+                }
         }
     }
 }

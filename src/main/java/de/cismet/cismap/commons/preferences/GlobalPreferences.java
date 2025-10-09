@@ -1,18 +1,16 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.preferences;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
 
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -36,7 +34,7 @@ public class GlobalPreferences {
     private boolean panPerformanceBooster = false;
     private int errorAbolitionTime = 2000;
     private int snappingRectSize = 20;
-    private String startMode = "ZOOM";                                                    // NOI18N
+    private String startMode = "ZOOM"; // NOI18N
     private XBoundingBox initialBoundingBox = new XBoundingBox(0d, 0d, 0d, 0d, "", true); // NOI18N
 
     //~ Constructors -----------------------------------------------------------
@@ -48,9 +46,9 @@ public class GlobalPreferences {
      */
     public GlobalPreferences(final Element element) {
         try {
-            animationDuration = element.getAttribute("animationDuration").getIntValue();               // NOI18N
+            animationDuration = element.getAttribute("animationDuration").getIntValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.animationDuration  ", e);             // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.animationDuration  ", e); // NOI18N
         }
         try {
             final String snappingModeValue = element.getAttribute("snappingMode").getValue();
@@ -61,49 +59,49 @@ public class GlobalPreferences {
                 }
             }
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.snappingMode  ", e);                  // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.snappingMode  ", e); // NOI18N
         }
         if (this.snappingMode == null) {
             try {
-                snappingEnabled = element.getAttribute("snappingEnabled").getBooleanValue();           // NOI18N
+                snappingEnabled = element.getAttribute("snappingEnabled").getBooleanValue(); // NOI18N
             } catch (Exception e) {
-                log.warn("Read preferences. Error. GlobalPreferences.snappingEnabled  ", e);           // NOI18N
+                log.warn("Read preferences. Error. GlobalPreferences.snappingEnabled  ", e); // NOI18N
             }
         }
         try {
             snappingPreviewEnabled = element.getAttribute("snappingPreviewEnabled").getBooleanValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.animationDuration  ", e);             // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.animationDuration  ", e); // NOI18N
         }
         try {
-            snappingRectSize = element.getAttribute("snappingRectSize").getIntValue();                 // NOI18N
+            snappingRectSize = element.getAttribute("snappingRectSize").getIntValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.snappingPreviewEnabled  ", e);        // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.snappingPreviewEnabled  ", e); // NOI18N
         }
         try {
-            startMode = element.getAttribute("startMode").getValue();                                  // NOI18N
+            startMode = element.getAttribute("startMode").getValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.startMode  ", e);                     // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.startMode  ", e); // NOI18N
         }
         try {
-            panPerformanceBooster = element.getAttribute("panPerformanceBooster").getBooleanValue();   // NOI18N
+            panPerformanceBooster = element.getAttribute("panPerformanceBooster").getBooleanValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.panPerformanceBooster  ", e);         // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.panPerformanceBooster  ", e); // NOI18N
         }
         try {
-            errorAbolitionTime = element.getAttribute("errorAbolitionTime").getIntValue();             // NOI18N
+            errorAbolitionTime = element.getAttribute("errorAbolitionTime").getIntValue(); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.errorAbolitionTime  ", e);            // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.errorAbolitionTime  ", e); // NOI18N
         }
         try {
-            initialBoundingBox.setX1(element.getAttribute("initial_x1").getDoubleValue());             // NOI18N
-            initialBoundingBox.setY1(element.getAttribute("initial_y1").getDoubleValue());             // NOI18N
-            initialBoundingBox.setX2(element.getAttribute("initial_x2").getDoubleValue());             // NOI18N
-            initialBoundingBox.setY2(element.getAttribute("initial_y2").getDoubleValue());             // NOI18N
-            initialBoundingBox.setMetric(element.getAttribute("initial_metric").getBooleanValue());    // NOI18N
-            initialBoundingBox.setSrs(element.getAttributeValue("initial_srs"));                       // NOI18N
+            initialBoundingBox.setX1(element.getAttribute("initial_x1").getDoubleValue()); // NOI18N
+            initialBoundingBox.setY1(element.getAttribute("initial_y1").getDoubleValue()); // NOI18N
+            initialBoundingBox.setX2(element.getAttribute("initial_x2").getDoubleValue()); // NOI18N
+            initialBoundingBox.setY2(element.getAttribute("initial_y2").getDoubleValue()); // NOI18N
+            initialBoundingBox.setMetric(element.getAttribute("initial_metric").getBooleanValue()); // NOI18N
+            initialBoundingBox.setSrs(element.getAttributeValue("initial_srs")); // NOI18N
         } catch (Exception e) {
-            log.warn("Read preferences. Error. GlobalPreferences.initialBoundingBox  ", e);            // NOI18N
+            log.warn("Read preferences. Error. GlobalPreferences.initialBoundingBox  ", e); // NOI18N
         }
     }
 

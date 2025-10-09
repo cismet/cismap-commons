@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * ServicesRetrievedPanel.java
  *
@@ -24,6 +24,7 @@ public class ServicesRetrievedPanel extends javax.swing.JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblServicesRetrievedIcon;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -48,14 +49,21 @@ public class ServicesRetrievedPanel extends javax.swing.JPanel {
 
         setLayout(new java.awt.BorderLayout());
 
-        lblServicesRetrievedIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/ok.png"))); // NOI18N
-        lblServicesRetrievedIcon.setText(org.openide.util.NbBundle.getMessage(
+        lblServicesRetrievedIcon.setIcon(
+            new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/statusbar/ok.png"))
+        ); // NOI18N
+        lblServicesRetrievedIcon.setText(
+            org.openide.util.NbBundle.getMessage(
                 ServicesRetrievedPanel.class,
-                "ServicesRetrievedPanel.lblServicesRetrievedIcon.text"));                   // NOI18N
-        lblServicesRetrievedIcon.setToolTipText(org.openide.util.NbBundle.getMessage(
+                "ServicesRetrievedPanel.lblServicesRetrievedIcon.text"
+            )
+        ); // NOI18N
+        lblServicesRetrievedIcon.setToolTipText(
+            org.openide.util.NbBundle.getMessage(
                 ServicesRetrievedPanel.class,
-                "ServicesRetrievedPanel.lblServicesRetrievedIcon.toolTipText"));            // NOI18N
+                "ServicesRetrievedPanel.lblServicesRetrievedIcon.toolTipText"
+            )
+        ); // NOI18N
         add(lblServicesRetrievedIcon, java.awt.BorderLayout.CENTER);
-    }                                                                                       // </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 }

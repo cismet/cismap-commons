@@ -1,22 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 import java.awt.Stroke;
-
 import javax.swing.JLabel;
-
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * DOCUMENT ME!
@@ -56,8 +53,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
     /**
      * Creates a new instance of DefaultStyledFeature.
      */
-    public DefaultStyledFeature() {
-    }
+    public DefaultStyledFeature() {}
 
     /**
      * Creates a new DefaultStyledFeature object.
@@ -93,7 +89,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
     public Object clone() {
         final DefaultStyledFeature copy = new DefaultStyledFeature();
         if (geom != null) {
-            copy.geom = (Geometry)(geom.clone());
+            copy.geom = (Geometry) (geom.clone());
         }
         copy.fillingStyle = fillingStyle;
         copy.linePaint = linePaint;

@@ -1,22 +1,20 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
-
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
  * DOCUMENT ME!
@@ -25,7 +23,6 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
  * @version  $Revision$, $Date$
  */
 public interface AttributeTableExtendedRuleSet {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

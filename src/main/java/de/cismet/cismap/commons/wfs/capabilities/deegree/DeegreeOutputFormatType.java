@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -23,11 +23,9 @@
  */
 package de.cismet.cismap.commons.wfs.capabilities.deegree;
 
-import org.deegree.ogcwebservices.wfs.capabilities.FormatType;
-
-import java.net.URI;
-
 import de.cismet.cismap.commons.wfs.capabilities.OutputFormatType;
+import java.net.URI;
+import org.deegree.ogcwebservices.wfs.capabilities.FormatType;
 
 /**
  * DOCUMENT ME!

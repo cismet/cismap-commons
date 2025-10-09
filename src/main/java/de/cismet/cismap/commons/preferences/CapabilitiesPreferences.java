@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.preferences;
-
-import org.jdom.Attribute;
-import org.jdom.DataConversionException;
-import org.jdom.Element;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
+import org.jdom.Attribute;
+import org.jdom.DataConversionException;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -38,8 +37,8 @@ public class CapabilitiesPreferences {
     /**
      * Creates a new CapabilitiesPreferences object.
      */
-    public CapabilitiesPreferences() {
-    }
+    public CapabilitiesPreferences() {}
+
     /**
      * Creates a new instance of CapabilitiesPreferences.
      *
@@ -48,7 +47,7 @@ public class CapabilitiesPreferences {
      */
     public CapabilitiesPreferences(final Element serverParent, final Element localParent) {
         final Element serverRoot = serverParent.getChild("cismapCapabilitiesPreferences"); // NOI18N
-        final Element clientRoot = localParent.getChild("cismapCapabilitiesPreferences");  // NOI18N
+        final Element clientRoot = localParent.getChild("cismapCapabilitiesPreferences"); // NOI18N
 
         if (serverRoot != null) {
             final Attribute searchActive = serverRoot.getAttribute("searchPanelActivated");
@@ -80,24 +79,24 @@ public class CapabilitiesPreferences {
             while (it.hasNext()) {
                 try {
                     final Element elem = it.next();
-                    final String type = elem.getAttribute("type").getValue();     // NOI18N
-                    final String alias = elem.getAttributeValue("alias");         // NOI18N
+                    final String type = elem.getAttribute("type").getValue(); // NOI18N
+                    final String alias = elem.getAttributeValue("alias"); // NOI18N
                     final String link = elem.getTextTrim();
                     final String subparent = elem.getAttributeValue("subparent"); // NOI18N
                     boolean active = false;
                     try {
                         active = elem.getAttribute("active").getBooleanValue();
-                    } catch (Exception unhandled) {
-                    }                                                             // NOI18N
+                    } catch (Exception unhandled) {} // NOI18N
 
                     boolean reverseAxisOrder = false;
                     try {
                         reverseAxisOrder = elem.getAttribute("reverseAxisOrder").getBooleanValue();
-                    } catch (Exception unhandled) {
-                    } // NOI18N
+                    } catch (Exception unhandled) {} // NOI18N
 
-                    capabilities.put(new Integer(counter++),
-                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent, alias));
+                    capabilities.put(
+                        new Integer(counter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent, alias)
+                    );
                 } catch (Throwable t) {
                     log.warn("Error while reading the CapabilityPreferences.", t); // NOI18N
                 }
@@ -118,18 +117,20 @@ public class CapabilitiesPreferences {
      *
      * @return  CapabilitiesList-Knoten
      */
-    private static CapabilitiesListTreeNode createCapabilitiesListTreeNode(final String nodetitle,
-            final Element element) {
+    private static CapabilitiesListTreeNode createCapabilitiesListTreeNode(
+        final String nodetitle,
+        final Element element
+    ) {
         final CapabilitiesListTreeNode node = new CapabilitiesListTreeNode();
         int listCounter = 0;
 
         node.setTitle(nodetitle);
 
         final TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
-        for (final Element elem : (List<Element>)element.getChildren("capabilitiesList")) { // NOI18N
+        for (final Element elem : (List<Element>) element.getChildren("capabilitiesList")) { // NOI18N
             try {
-                final String type = elem.getAttribute("type").getValue();                   // NOI18N
-                final String title = elem.getAttribute("titlestring").getValue();           // NOI18N
+                final String type = elem.getAttribute("type").getValue(); // NOI18N
+                final String title = elem.getAttribute("titlestring").getValue(); // NOI18N
                 boolean reverseAxisOrder = false;
                 final Attribute reverseAxisOrderElement = elem.getAttribute("reverseAxisOrder");
 
@@ -150,9 +151,11 @@ public class CapabilitiesPreferences {
                     } else {
                         link = elem.getTextTrim();
                     }
-                    final String subparent = elem.getAttributeValue("subparent");  // NOI18N
-                    capabilitiesList.put(new Integer(listCounter++),
-                        new CapabilityLink(type, link, reverseAxisOrder, title, subparent));
+                    final String subparent = elem.getAttributeValue("subparent"); // NOI18N
+                    capabilitiesList.put(
+                        new Integer(listCounter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, title, subparent)
+                    );
                 }
             } catch (Throwable t) {
                 log.warn("Error while reading the CapabilityListPreferences.", t); // NOI18N

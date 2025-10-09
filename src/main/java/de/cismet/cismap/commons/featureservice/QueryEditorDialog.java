@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * QueryEditorDialog.java
  *
@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.featureservice;
 
 import java.awt.Frame;
-
 import javax.swing.JDialog;
 
 /**
@@ -43,6 +42,7 @@ public class QueryEditorDialog extends JDialog {
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panEditor;
     private javax.swing.JPanel panMain;
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -98,13 +98,14 @@ public class QueryEditorDialog extends JDialog {
 
         setTitle(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.title")); // NOI18N
         setMinimumSize(new java.awt.Dimension(550, 400));
-        addWindowListener(new java.awt.event.WindowAdapter() {
-
+        addWindowListener(
+            new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(final java.awt.event.WindowEvent evt) {
                     closeDialog(evt);
                 }
-            });
+            }
+        );
 
         panMain.setLayout(new java.awt.BorderLayout());
 
@@ -127,28 +128,30 @@ public class QueryEditorDialog extends JDialog {
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
-        cmdOK.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdOK.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdOKActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(cmdOK);
 
-        cmdCancel.setText(org.openide.util.NbBundle.getMessage(
-                QueryEditorDialog.class,
-                "QueryEditorDialog.cmdCancel.text")); // NOI18N
+        cmdCancel.setText(
+            org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.cmdCancel.text")
+        ); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));
-        cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-
+        cmdCancel.addActionListener(
+            new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdCancelActionPerformed(evt);
                 }
-            });
+            }
+        );
         panButtons.add(cmdCancel);
 
         getContentPane().add(panButtons, java.awt.BorderLayout.SOUTH);
@@ -163,7 +166,7 @@ public class QueryEditorDialog extends JDialog {
      */
     private void closeDialog(final java.awt.event.WindowEvent evt) { //GEN-FIRST:event_closeDialog
         doClose(RET_CANCEL);
-    }                                                                //GEN-LAST:event_closeDialog
+    } //GEN-LAST:event_closeDialog
 
     /**
      * DOCUMENT ME!
@@ -183,7 +186,7 @@ public class QueryEditorDialog extends JDialog {
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
         doClose(RET_CANCEL);
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    } //GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!

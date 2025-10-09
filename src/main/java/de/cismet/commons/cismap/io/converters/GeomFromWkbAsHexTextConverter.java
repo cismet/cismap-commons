@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
-
+import de.cismet.commons.converter.ConversionException;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
-
-import de.cismet.commons.converter.ConversionException;
 
 /**
  * Creates a geometry from a WKB that is provided in form of a hex string.
@@ -23,8 +21,9 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeomFromWkbAsHexTextConverter extends AbstractRatingConverter<String, Geometry>
-        implements TextToGeometryConverter {
+public final class GeomFromWkbAsHexTextConverter
+    extends AbstractRatingConverter<String, Geometry>
+    implements TextToGeometryConverter {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -81,8 +80,9 @@ public final class GeomFromWkbAsHexTextConverter extends AbstractRatingConverter
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                GeomFromWkbAsHexTextConverter.class,
-                "GeomFromWkbAsHexTextConverter.getFormatDisplayName().returnValue"); // NOI18N
+            GeomFromWkbAsHexTextConverter.class,
+            "GeomFromWkbAsHexTextConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -93,21 +93,24 @@ public final class GeomFromWkbAsHexTextConverter extends AbstractRatingConverter
     @Override
     public String getFormatDescription() {
         return NbBundle.getMessage(
-                GeomFromWkbAsHexTextConverter.class,
-                "GeomFromWkbAsHexTextConverter.getFormatDescription().returnValue"); // NOI18N
+            GeomFromWkbAsHexTextConverter.class,
+            "GeomFromWkbAsHexTextConverter.getFormatDescription().returnValue"
+        ); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
         return NbBundle.getMessage(
-                GeomFromWkbAsHexTextConverter.class,
-                "GeomFromWkbAsHexTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+            GeomFromWkbAsHexTextConverter.class,
+            "GeomFromWkbAsHexTextConverter.getFormatHtmlDescription().returnValue"
+        ); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                GeomFromWkbAsHexTextConverter.class,
-                "GeomFromWkbAsHexTextConverter.getFormatExample().returnValue"); // NOI18N
+            GeomFromWkbAsHexTextConverter.class,
+            "GeomFromWkbAsHexTextConverter.getFormatExample().returnValue"
+        ); // NOI18N
     }
 }

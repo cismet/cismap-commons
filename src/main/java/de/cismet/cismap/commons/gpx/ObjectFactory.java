@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 //
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a>
@@ -43,8 +43,7 @@ public class ObjectFactory {
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package:
      * de.cismet.cismap.commons.gpx
      */
-    public ObjectFactory() {
-    }
+    public ObjectFactory() {}
 
     //~ Methods ----------------------------------------------------------------
 
@@ -181,10 +180,7 @@ public class ObjectFactory {
      *
      * @return  DOCUMENT ME!
      */
-    @XmlElementDecl(
-        namespace = "http://www.topografix.com/GPX/1/1",
-        name = "gpx"
-    )
+    @XmlElementDecl(namespace = "http://www.topografix.com/GPX/1/1", name = "gpx")
     public JAXBElement<GpxType> createGpx(final GpxType value) {
         return new JAXBElement<GpxType>(_Gpx_QNAME, GpxType.class, null, value);
     }

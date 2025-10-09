@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /**
  * Copyright (C) 1998-2000 by University of Maryland, College Park, MD 20742, USA
  * All rights reserved.
@@ -14,13 +14,11 @@ package pswing;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PPickPath;
-
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
-
 import java.io.Serializable;
 
 /**
@@ -69,7 +67,8 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
      * @param  event  DOCUMENT ME!
      */
     protected PSwingMouseEvent(final int id, final MouseEvent e, final PInputEvent event) {
-        super((Component)e.getSource(),
+        super(
+            (Component) e.getSource(),
             e.getID(),
             e.getWhen(),
             e.getModifiers(),
@@ -79,7 +78,8 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
             e.getYOnScreen(),
             e.getClickCount(),
             e.isPopupTrigger(),
-            e.getButton());
+            e.getButton()
+        );
         this.id = id;
         this.event = event;
     }
@@ -97,8 +97,7 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
      * @return  DOCUMENT ME!
      */
     public static PSwingMouseEvent createMouseEvent(final int id, final MouseEvent e, final PInputEvent pEvent) {
-        if ((id == PSwingMouseEvent.MOUSE_MOVED)
-                    || (id == PSwingMouseEvent.MOUSE_DRAGGED)) {
+        if ((id == PSwingMouseEvent.MOUSE_MOVED) || (id == PSwingMouseEvent.MOUSE_DRAGGED)) {
             return new PSwingMouseMotionEvent(id, e, pEvent);
         } else {
             return new PSwingMouseEvent(id, e, pEvent);
@@ -113,8 +112,8 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
     public Point2D getLocalPoint() {
         final Point2D.Double point = new Point2D.Double();
         point.setLocation(getX(), getY());
-//        event.getPath().canvasToLocal( )
-//        grabPath.screenToLocal(point);
+        //        event.getPath().canvasToLocal( )
+        //        grabPath.screenToLocal(point);
         return point;
     }
 
@@ -219,46 +218,55 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
      */
     public void dispatchTo(final Object listener) {
         if (listener instanceof MouseListener) {
-            final MouseListener mouseListener = (MouseListener)listener;
+            final MouseListener mouseListener = (MouseListener) listener;
             switch (getID()) {
-                case PSwingMouseEvent.MOUSE_CLICKED: {
-                    mouseListener.mouseClicked(this);
-                    break;
-                }
-                case PSwingMouseEvent.MOUSE_ENTERED: {
-                    mouseListener.mouseEntered(this);
-                    break;
-                }
-                case PSwingMouseEvent.MOUSE_EXITED: {
-                    mouseListener.mouseExited(this);
-                    break;
-                }
-                case PSwingMouseEvent.MOUSE_PRESSED: {
-                    mouseListener.mousePressed(this);
-                    break;
-                }
-                case PSwingMouseEvent.MOUSE_RELEASED: {
-                    mouseListener.mouseReleased(this);
-                    break;
-                }
-                default: {
-                    throw new RuntimeException("ZMouseEvent with bad ID"); // NOI18N
-                }
+                case PSwingMouseEvent.MOUSE_CLICKED:
+                    {
+                        mouseListener.mouseClicked(this);
+                        break;
+                    }
+                case PSwingMouseEvent.MOUSE_ENTERED:
+                    {
+                        mouseListener.mouseEntered(this);
+                        break;
+                    }
+                case PSwingMouseEvent.MOUSE_EXITED:
+                    {
+                        mouseListener.mouseExited(this);
+                        break;
+                    }
+                case PSwingMouseEvent.MOUSE_PRESSED:
+                    {
+                        mouseListener.mousePressed(this);
+                        break;
+                    }
+                case PSwingMouseEvent.MOUSE_RELEASED:
+                    {
+                        mouseListener.mouseReleased(this);
+                        break;
+                    }
+                default:
+                    {
+                        throw new RuntimeException("ZMouseEvent with bad ID"); // NOI18N
+                    }
             }
         } else {
-            final MouseMotionListener mouseMotionListener = (MouseMotionListener)listener;
+            final MouseMotionListener mouseMotionListener = (MouseMotionListener) listener;
             switch (getID()) {
-                case PSwingMouseEvent.MOUSE_DRAGGED: {
-                    mouseMotionListener.mouseDragged(this);
-                    break;
-                }
-                case PSwingMouseEvent.MOUSE_MOVED: {
-                    mouseMotionListener.mouseMoved(this);
-                    break;
-                }
-                default: {
-                    throw new RuntimeException("ZMouseMotionEvent with bad ID"); // NOI18N
-                }
+                case PSwingMouseEvent.MOUSE_DRAGGED:
+                    {
+                        mouseMotionListener.mouseDragged(this);
+                        break;
+                    }
+                case PSwingMouseEvent.MOUSE_MOVED:
+                    {
+                        mouseMotionListener.mouseMoved(this);
+                        break;
+                    }
+                default:
+                    {
+                        throw new RuntimeException("ZMouseMotionEvent with bad ID"); // NOI18N
+                    }
             }
         }
     }

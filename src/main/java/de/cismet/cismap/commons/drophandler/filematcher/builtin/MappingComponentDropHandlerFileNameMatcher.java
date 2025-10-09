@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -12,13 +12,10 @@
  */
 package de.cismet.cismap.commons.drophandler.filematcher.builtin;
 
-import lombok.Getter;
-
-import java.io.File;
-
-import java.util.regex.Pattern;
-
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandlerFileMatcher;
+import java.io.File;
+import java.util.regex.Pattern;
+import lombok.Getter;
 
 /**
  * DOCUMENT ME!
@@ -30,9 +27,11 @@ public class MappingComponentDropHandlerFileNameMatcher implements MappingCompon
 
     //~ Instance fields --------------------------------------------------------
 
-    @Getter private final String matchString;
+    @Getter
+    private final String matchString;
 
-    @Getter private final boolean regex;
+    @Getter
+    private final boolean regex;
 
     //~ Constructors -----------------------------------------------------------
 

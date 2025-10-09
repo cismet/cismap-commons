@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  *  Copyright (C) 2010 therter
  *
@@ -23,27 +23,6 @@
  */
 package de.cismet.cismap.commons.wfs.deegree;
 
-import org.apache.log4j.Logger;
-
-import org.deegree.datatypes.QualifiedName;
-import org.deegree.framework.xml.XMLFragment;
-import org.deegree.framework.xml.schema.ComplexTypeDeclaration;
-import org.deegree.framework.xml.schema.ElementDeclaration;
-import org.deegree.framework.xml.schema.XMLSchema;
-import org.deegree.framework.xml.schema.XSDocument;
-
-import org.w3c.dom.Element;
-
-import org.xml.sax.SAXException;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import java.net.URI;
-
-import java.util.Arrays;
-import java.util.Vector;
-
 import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
@@ -51,6 +30,20 @@ import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.wfs.FeatureTypeDescription;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Vector;
+import org.apache.log4j.Logger;
+import org.deegree.datatypes.QualifiedName;
+import org.deegree.framework.xml.XMLFragment;
+import org.deegree.framework.xml.schema.ComplexTypeDeclaration;
+import org.deegree.framework.xml.schema.ElementDeclaration;
+import org.deegree.framework.xml.schema.XMLSchema;
+import org.deegree.framework.xml.schema.XSDocument;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * This class parses DescribeFeatureType responses.
@@ -80,7 +73,7 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
      * @throws  ParserException  DOCUMENT ME!
      */
     public DeegreeFeatureTypeDescription(final String featureTypeDescription, final FeatureType feature)
-            throws ParserException {
+        throws ParserException {
         this.feature = feature;
         try {
             final XMLFragment frag = new XMLFragment();
@@ -129,12 +122,17 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                 if ((feature.getName().getPrefix() == null) || feature.getName().getPrefix().equals("")) {
                     requestedElement = xmlSchema.getElementDeclaration(feature.getName().getLocalPart());
                 } else {
-                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
-                                feature.getName()));
+                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()));
                 }
                 if (requestedElement == null) {
-                    logger.fatal("Error requestedElement == null " + feature.getName() + " " + caps.getURL().toString()
-                                + "\n\n" + desc.toString());
+                    logger.fatal(
+                        "Error requestedElement == null " +
+                        feature.getName() +
+                        " " +
+                        caps.getURL().toString() +
+                        "\n\n" +
+                        desc.toString()
+                    );
                 }
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
                     QualifiedName typeName = requestedElement.getType().getName();
@@ -144,10 +142,16 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                     if (compTypeDec == null) {
                         typeName = requestedElement.getName();
 
-                        if (xmlSchema.getElementDeclaration(typeName).getType().getTypeDeclaration()
-                                    instanceof ComplexTypeDeclaration) {
-                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)xmlSchema.getElementDeclaration(
-                                    typeName).getType().getTypeDeclaration();
+                        if (
+                            xmlSchema
+                                .getElementDeclaration(typeName)
+                                .getType()
+                                .getTypeDeclaration() instanceof ComplexTypeDeclaration
+                        ) {
+                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration) xmlSchema
+                                .getElementDeclaration(typeName)
+                                .getType()
+                                .getTypeDeclaration();
                             elementDeclaration = type.getElements();
                         } else {
                             elementDeclaration = new ElementDeclaration[0];
@@ -158,7 +162,8 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
 
                     if (getFirstGeometryName(elementDeclaration) != null) {
                         final Vector<FeatureServiceAttribute> fsaVector = new Vector<FeatureServiceAttribute>(
-                                elementDeclaration.length);
+                            elementDeclaration.length
+                        );
 
                         for (final ElementDeclaration e : elementDeclaration) {
                             final String elementName;
@@ -166,14 +171,11 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                             if ((e.getName().getPrefix() == null) || e.getName().getPrefix().equals("")) {
                                 elementName = e.getName().getLocalName();
                             } else {
-                                elementName = e.getName().getPrefix()
-                                            + ":"
-                                            + e.getName().getLocalName();
+                                elementName = e.getName().getPrefix() + ":" + e.getName().getLocalName();
                             }
-                            fsaVector.add(new FeatureServiceAttribute(
-                                    elementName,
-                                    e.getType().getName().getPrefixedName(),
-                                    true)); // NOI18N
+                            fsaVector.add(
+                                new FeatureServiceAttribute(elementName, e.getType().getName().getPrefixedName(), true)
+                            ); // NOI18N
                         }
 
                         return fsaVector;
@@ -184,7 +186,7 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                 }
             }
         } catch (Throwable ex) {
-            logger.fatal("Error in getElementDeclarations", ex);                   // NOI18N
+            logger.fatal("Error in getElementDeclarations", ex); // NOI18N
         }
 
         return null;
@@ -215,8 +217,7 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                 if ((feature.getName().getPrefix() == null) || feature.getName().getPrefix().equals("")) {
                     requestedElement = xmlSchema.getElementDeclaration(feature.getName().getLocalPart());
                 } else {
-                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(
-                                feature.getName()));
+                    requestedElement = xmlSchema.getElementDeclaration(new QualifiedName(feature.getName()));
                 }
 
                 if ((requestedElement != null) && (requestedElement.getName().getNamespace() != null)) { // if FeatureType-name found
@@ -224,10 +225,10 @@ public class DeegreeFeatureTypeDescription implements FeatureTypeDescription {
                     final ComplexTypeDeclaration compTypeDec = xmlSchema.getComplexTypeDeclaration(typeName);
 
                     if (compTypeDec == null) {
-                        if (requestedElement.getType().getTypeDeclaration()
-                                    instanceof ComplexTypeDeclaration) {
-                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration)requestedElement
-                                        .getType().getTypeDeclaration();
+                        if (requestedElement.getType().getTypeDeclaration() instanceof ComplexTypeDeclaration) {
+                            final ComplexTypeDeclaration type = (ComplexTypeDeclaration) requestedElement
+                                .getType()
+                                .getTypeDeclaration();
                             return getFirstGeometryName(type.getElements());
                         } else {
                             return getFirstGeometryName(new ElementDeclaration[0]);

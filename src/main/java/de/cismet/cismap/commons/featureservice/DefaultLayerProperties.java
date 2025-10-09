@@ -1,21 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
-
-import org.apache.log4j.Logger;
-
-import org.jdom.Element;
-
-import java.util.Map;
 
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.XMLObjectFactory;
@@ -25,6 +19,9 @@ import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
+import java.util.Map;
+import org.apache.log4j.Logger;
+import org.jdom.Element;
 
 /**
  * Default implementation of the LayerProperties Interface.
@@ -188,18 +185,18 @@ public class DefaultLayerProperties implements LayerProperties {
         return this.queryType;
     }
 
-//  @Override
-//  public String getQueryTemplate()
-//  {
-//    return this.queryTemplate;
-//  }
-//
-//  @Override
-//  public void setQueryTemplate(String queryTemplate, int queryType)
-//  {
-//    this.queryTemplate = queryTemplate;
-//    this.queryType = queryType;
-//  }
+    //  @Override
+    //  public String getQueryTemplate()
+    //  {
+    //    return this.queryTemplate;
+    //  }
+    //
+    //  @Override
+    //  public void setQueryTemplate(String queryTemplate, int queryType)
+    //  {
+    //    this.queryTemplate = queryTemplate;
+    //    this.queryType = queryType;
+    //  }
 
     @Override
     public Element toElement() {
@@ -217,21 +214,23 @@ public class DefaultLayerProperties implements LayerProperties {
             element.setAttribute("primaryAnnotationExpression", this.getPrimaryAnnotationExpression());
             element.setAttribute(
                 "primaryAnnotationExpressionType",
-                String.valueOf(this.getPrimaryAnnotationExpressionType()));
+                String.valueOf(this.getPrimaryAnnotationExpressionType())
+            );
         }
 
         if (this.getSecondaryAnnotationExpression() != null) {
             element.setAttribute("secondaryAnnotationExpression", this.getSecondaryAnnotationExpression());
             element.setAttribute(
                 "secondaryAnnotationExpressionType",
-                String.valueOf(this.getSecondaryAnnotationExpressionType()));
+                String.valueOf(this.getSecondaryAnnotationExpressionType())
+            );
         }
 
-//    if(this.getQueryTemplate() != null)
-//    {
-//      element.setAttribute("queryTemplate", this.getQueryTemplate());
-//      element.setAttribute("queryType", String.valueOf(this.getQueryType()));
-//    }
+        //    if(this.getQueryTemplate() != null)
+        //    {
+        //      element.setAttribute("queryTemplate", this.getQueryTemplate());
+        //      element.setAttribute("queryType", String.valueOf(this.getQueryType()));
+        //    }
 
         element.setAttribute("queryType", String.valueOf(this.getQueryType()));
 
@@ -257,18 +256,27 @@ public class DefaultLayerProperties implements LayerProperties {
         }
         final Class typeClass = Class.forName(type);
         if (!typeClass.isAssignableFrom(this.getClass())) {
-            throw new ClassNotFoundException("the XML element type '" + type
-                        + "'does not match the layer properties class '" + this.getClass().getCanonicalName() + "'");
+            throw new ClassNotFoundException(
+                "the XML element type '" +
+                type +
+                "'does not match the layer properties class '" +
+                this.getClass().getCanonicalName() +
+                "'"
+            );
         }
 
         if (element.getAttribute("idExpression") != null) {
-            this.setIdExpression(element.getAttributeValue("idExpression"),
-                element.getAttribute("idExpressionType").getIntValue());
+            this.setIdExpression(
+                    element.getAttributeValue("idExpression"),
+                    element.getAttribute("idExpressionType").getIntValue()
+                );
         }
 
         if (element.getAttribute("primaryAnnotationExpression") != null) {
-            this.setPrimaryAnnotationExpression(element.getAttributeValue("primaryAnnotationExpression"),
-                element.getAttribute("primaryAnnotationExpressionType").getIntValue());
+            this.setPrimaryAnnotationExpression(
+                    element.getAttributeValue("primaryAnnotationExpression"),
+                    element.getAttribute("primaryAnnotationExpressionType").getIntValue()
+                );
         }
 
         if (element.getAttribute("idExpressionEnablesd") != null) {
@@ -276,12 +284,14 @@ public class DefaultLayerProperties implements LayerProperties {
         }
 
         if (element.getAttribute("secondaryAnnotationExpression") != null) {
-            this.setSecondaryAnnotationExpression(element.getAttributeValue("secondaryAnnotationExpression"),
-                element.getAttribute("secondaryAnnotationExpressionType").getIntValue());
+            this.setSecondaryAnnotationExpression(
+                    element.getAttributeValue("secondaryAnnotationExpression"),
+                    element.getAttribute("secondaryAnnotationExpressionType").getIntValue()
+                );
         }
 
-//    if(element.getAttribute("queryTemplate") != null)
-//      this.setQueryTemplate(element.getAttributeValue("queryTemplate"), element.getAttribute("queryType").getIntValue());
+        //    if(element.getAttribute("queryTemplate") != null)
+        //      this.setQueryTemplate(element.getAttributeValue("queryTemplate"), element.getAttribute("queryType").getIntValue());
 
         if (element.getAttribute("queryType") != null) {
             this.setQueryType(element.getAttribute("queryType").getIntValue());
@@ -296,12 +306,16 @@ public class DefaultLayerProperties implements LayerProperties {
             this.setPrimaryAnnotationExpression(this.getStyle().getLabel(), EXPRESSIONTYPE_PROPERTYNAME);
         } else if (styleElement != null) {
             try {
-                final Style restoredStyle = (Style)XMLObjectFactory.restoreObjectfromElement(styleElement);
+                final Style restoredStyle = (Style) XMLObjectFactory.restoreObjectfromElement(styleElement);
                 this.setStyle(restoredStyle);
             } catch (Throwable t) {
-                logger.error("could not restore generic style element '"
-                            + styleElement.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) + "': \n" + t.getMessage(),
-                    t);
+                logger.error(
+                    "could not restore generic style element '" +
+                    styleElement.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) +
+                    "': \n" +
+                    t.getMessage(),
+                    t
+                );
                 this.setStyle(new BasicStyle());
             }
         } else {
@@ -319,15 +333,19 @@ public class DefaultLayerProperties implements LayerProperties {
         }
 
         if (layerProperties.getPrimaryAnnotationExpression() != null) {
-            this.setPrimaryAnnotationExpression(new String(layerProperties.getPrimaryAnnotationExpression()),
-                layerProperties.getPrimaryAnnotationExpressionType());
+            this.setPrimaryAnnotationExpression(
+                    new String(layerProperties.getPrimaryAnnotationExpression()),
+                    layerProperties.getPrimaryAnnotationExpressionType()
+                );
         } else {
             this.primaryAnnotationExpressionType = EXPRESSIONTYPE_UNDEFINED;
         }
 
         if (layerProperties.getSecondaryAnnotationExpression() != null) {
-            this.setSecondaryAnnotationExpression(new String(layerProperties.getSecondaryAnnotationExpression()),
-                layerProperties.getSecondaryAnnotationExpressionType());
+            this.setSecondaryAnnotationExpression(
+                    new String(layerProperties.getSecondaryAnnotationExpression()),
+                    layerProperties.getSecondaryAnnotationExpressionType()
+                );
         } else {
             this.secondaryAnnotationExpressionType = EXPRESSIONTYPE_UNDEFINED;
         }
@@ -337,16 +355,20 @@ public class DefaultLayerProperties implements LayerProperties {
         this.setQueryType(layerProperties.getQueryType());
 
         try {
-            this.setStyle((Style)((layerProperties.getStyle() != null) ? layerProperties.getStyle().clone()
-                                                                       : new BasicStyle()));
+            this.setStyle(
+                    (Style) (
+                        (layerProperties.getStyle() != null) ? layerProperties.getStyle().clone() : new BasicStyle()
+                    )
+                );
         } catch (CloneNotSupportedException ex) {
             logger.warn(
                 "unexpected CloneNotSupportedException while cloning Style object, setting default Basic Style",
-                ex);
+                ex
+            );
             this.setStyle(new BasicStyle());
         }
 
-        this.setFeatureService((AbstractFeatureService)layerProperties.getFeatureService());
+        this.setFeatureService((AbstractFeatureService) layerProperties.getFeatureService());
     }
 
     @Override
@@ -394,7 +416,7 @@ public class DefaultLayerProperties implements LayerProperties {
             final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
             final Object o = ruleSetClass.newInstance();
             if (o instanceof DefaultAttributeTableRuleSet) {
-                attributeTableRuleSet = (DefaultAttributeTableRuleSet)o;
+                attributeTableRuleSet = (DefaultAttributeTableRuleSet) o;
 
                 return attributeTableRuleSet;
             }
@@ -469,7 +491,7 @@ public class DefaultLayerProperties implements LayerProperties {
             final Object o = ruleSetClass.newInstance();
 
             if (o instanceof FeatureSimplifier) {
-                featureSimplifier = (FeatureSimplifier)o;
+                featureSimplifier = (FeatureSimplifier) o;
 
                 return featureSimplifier;
             }

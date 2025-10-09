@@ -1,28 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.GeometryCollection;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.NbBundle;
-import org.openide.util.WeakListeners;
-
-import java.awt.EventQueue;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
@@ -31,8 +16,16 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
-
 import de.cismet.commons.concurrency.CismetConcurrency;
+import java.awt.EventQueue;
+import java.util.concurrent.TimeUnit;
+import javax.swing.JPanel;
+import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import org.apache.log4j.Logger;
+import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
@@ -55,10 +48,9 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JPanel pnlPreview = new javax.swing.JPanel();
-    private final transient de.cismet.commons.gui.progress.BusyStatusPanel pnlStatus =
-        new de.cismet.commons.gui.progress.BusyStatusPanel();
-    private final transient de.cismet.cismap.commons.gui.MappingComponent previewMap =
-        new de.cismet.cismap.commons.gui.MappingComponent();
+    private final transient de.cismet.commons.gui.progress.BusyStatusPanel pnlStatus = new de.cismet.commons.gui.progress.BusyStatusPanel();
+    private final transient de.cismet.cismap.commons.gui.MappingComponent previewMap = new de.cismet.cismap.commons.gui.MappingComponent();
+
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -76,9 +68,12 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
         modelChangeL = new ModelChangeListener();
         model.addChangeListener(WeakListeners.change(modelChangeL, model));
 
-        this.setName(NbBundle.getMessage(
-                AddGeometriesToMapPreviewVisualPanel.class,
-                "AddGeometriesToMapPreviewVisualPanel.<init>(AddGeometryToMapPreviewWizardPanel).panelName")); // NOI18N
+        this.setName(
+                NbBundle.getMessage(
+                    AddGeometriesToMapPreviewVisualPanel.class,
+                    "AddGeometriesToMapPreviewVisualPanel.<init>(AddGeometryToMapPreviewWizardPanel).panelName"
+                )
+            ); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -106,77 +101,80 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
         }
 
         // TODO: use proper executor
-        CismetConcurrency.getInstance("cismap-commons") // NOI18N
-        .getDefaultExecutor().execute(new SwingWorker<XBoundingBox, Void>() {
+        CismetConcurrency
+            .getInstance("cismap-commons") // NOI18N
+            .getDefaultExecutor()
+            .execute(
+                new SwingWorker<XBoundingBox, Void>() {
+                    @Override
+                    protected XBoundingBox doInBackground() throws Exception {
+                        Thread.currentThread().setName("AddGeometriesToMapPreviewVisualPanel initMap()");
+                        try {
+                            // home bbox for the current crs
+                            final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
+                            final CrsTransformer transformer = new CrsTransformer(model.getCurrentCrs().getCode());
 
-                @Override
-                protected XBoundingBox doInBackground() throws Exception {
-                    Thread.currentThread().setName("AddGeometriesToMapPreviewVisualPanel initMap()");
-                    try {
-                        // home bbox for the current crs
-                        final XBoundingBox box = new XBoundingBox(
-                                model.getGeometry().getEnvelope().buffer(buffer));
-                        final CrsTransformer transformer = new CrsTransformer(model.getCurrentCrs().getCode());
+                            return transformer.transformBoundingBox(box);
+                        } catch (final Exception e) {
+                            LOG.warn(
+                                "cannot create home bbox for current crs, preview most likely without background layer", // NOI18N
+                                e
+                            );
 
-                        return transformer.transformBoundingBox(box);
-                    } catch (final Exception e) {
-                        LOG.warn(
-                            "cannot create home bbox for current crs, preview most likely without background layer", // NOI18N
-                            e);
-
-                        return null;
-                    }
-                }
-
-                @Override
-                protected void done() {
-                    XBoundingBox homeBbox = null;
-                    try {
-                        homeBbox = get(300, TimeUnit.MILLISECONDS);
-                    } catch (final Exception ex) {
-                        LOG.warn("cannot retrieve home boundingbox, preview unusable", ex); // NOI18N
+                            return null;
+                        }
                     }
 
-                    final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
-                    final ActiveLayerModel mappingModel = (ActiveLayerModel)previewMap.getMappingModel();
-                    mappingModel.setSrs(model.getCurrentCrs());
-                    mappingModel.addHome(box);
-                    if (homeBbox != null) {
-                        mappingModel.addHome(homeBbox);
-                    }
+                    @Override
+                    protected void done() {
+                        XBoundingBox homeBbox = null;
+                        try {
+                            homeBbox = get(300, TimeUnit.MILLISECONDS);
+                        } catch (final Exception ex) {
+                            LOG.warn("cannot retrieve home boundingbox, preview unusable", ex); // NOI18N
+                        }
 
-                    final String previewUrl = model.getPreviewUrl();
+                        final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
+                        final ActiveLayerModel mappingModel = (ActiveLayerModel) previewMap.getMappingModel();
+                        mappingModel.setSrs(model.getCurrentCrs());
+                        mappingModel.addHome(box);
+                        if (homeBbox != null) {
+                            mappingModel.addHome(homeBbox);
+                        }
 
-                    // background map cannot be initialised without proper url
-                    if (previewUrl != null) {
-                        final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
-                        swms.setName("background"); // NOI18N
-                        mappingModel.addLayer(swms);
-                    }
+                        final String previewUrl = model.getPreviewUrl();
 
-                    previewMap.setMappingModel(mappingModel);
-                    previewMap.setAnimationDuration(0);
-                    previewMap.gotoInitialBoundingBox();
-                    previewMap.setInteractionMode(MappingComponent.ZOOM);
-                    previewMap.setInteractionMode("MUTE"); // NOI18N
-                    if (model.hasMultipleGeometries() && (model.getGeometry() instanceof GeometryCollection)) {
-                        final GeometryCollection gc = (GeometryCollection)model.getGeometry();
+                        // background map cannot be initialised without proper url
+                        if (previewUrl != null) {
+                            final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
+                            swms.setName("background"); // NOI18N
+                            mappingModel.addLayer(swms);
+                        }
 
-                        for (int i = 0; i < gc.getNumGeometries(); ++i) {
-                            final Feature dsf = new PureNewFeature(gc.getGeometryN(i));
+                        previewMap.setMappingModel(mappingModel);
+                        previewMap.setAnimationDuration(0);
+                        previewMap.gotoInitialBoundingBox();
+                        previewMap.setInteractionMode(MappingComponent.ZOOM);
+                        previewMap.setInteractionMode("MUTE"); // NOI18N
+                        if (model.hasMultipleGeometries() && (model.getGeometry() instanceof GeometryCollection)) {
+                            final GeometryCollection gc = (GeometryCollection) model.getGeometry();
+
+                            for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                                final Feature dsf = new PureNewFeature(gc.getGeometryN(i));
+                                previewMap.getFeatureCollection().addFeature(dsf);
+                            }
+                        } else {
+                            final Feature dsf = new PureNewFeature(model.getGeometry());
                             previewMap.getFeatureCollection().addFeature(dsf);
                         }
-                    } else {
-                        final Feature dsf = new PureNewFeature(model.getGeometry());
-                        previewMap.getFeatureCollection().addFeature(dsf);
-                    }
-                    previewMap.setAnimationDuration(300);
+                        previewMap.setAnimationDuration(300);
 
-                    // finally when all configurations are done the map may animate again
-                    previewMap.unlock();
-                    previewMap.zoomToFeatureCollection();
+                        // finally when all configurations are done the map may animate again
+                        previewMap.unlock();
+                        previewMap.zoomToFeatureCollection();
+                    }
                 }
-            });
+            );
     }
 
     /**
@@ -203,10 +201,14 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        pnlPreview.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        pnlPreview.setBorder(
+            javax.swing.BorderFactory.createTitledBorder(
                 NbBundle.getMessage(
                     AddGeometriesToMapPreviewVisualPanel.class,
-                    "AddGeometriesToMapPreviewVisualPanel.pnlPreview.border.title"))); // NOI18N
+                    "AddGeometriesToMapPreviewVisualPanel.pnlPreview.border.title"
+                )
+            )
+        ); // NOI18N
         pnlPreview.setOpaque(false);
         pnlPreview.setLayout(new java.awt.BorderLayout());
         pnlPreview.add(previewMap, java.awt.BorderLayout.CENTER);

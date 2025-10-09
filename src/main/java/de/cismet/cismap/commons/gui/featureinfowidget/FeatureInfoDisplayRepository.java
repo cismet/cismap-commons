@@ -1,22 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
-import org.apache.log4j.Logger;
-
-import org.openide.util.Lookup;
-
+import de.cismet.cismap.commons.LayerInfoProvider;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import de.cismet.cismap.commons.LayerInfoProvider;
+import org.apache.log4j.Logger;
+import org.openide.util.Lookup;
 
 /**
  * DOCUMENT ME!
@@ -46,8 +43,9 @@ public final class FeatureInfoDisplayRepository {
             LOG.debug("found " + instances.size() + " instances of FeatureInfoDisplay"); // NOI18N
         }
 
-        final Map<FeatureInfoDisplayKey, FeatureInfoDisplay> map =
-            new HashMap<FeatureInfoDisplayKey, FeatureInfoDisplay>(instances.size());
+        final Map<FeatureInfoDisplayKey, FeatureInfoDisplay> map = new HashMap<FeatureInfoDisplayKey, FeatureInfoDisplay>(
+            instances.size()
+        );
 
         for (final FeatureInfoDisplay display : instances) {
             if (LOG.isDebugEnabled()) {
@@ -78,15 +76,23 @@ public final class FeatureInfoDisplayRepository {
             display = repo.get(new FeatureInfoDisplayKey(layerclass, server, FeatureInfoDisplayKey.ANY_SERVER));
 
             if (display == null) {
-                display = repo.get(new FeatureInfoDisplayKey(
+                display =
+                    repo.get(
+                        new FeatureInfoDisplayKey(
                             layerclass,
                             FeatureInfoDisplayKey.ANY_SERVER,
-                            FeatureInfoDisplayKey.ANY_SERVER));
+                            FeatureInfoDisplayKey.ANY_SERVER
+                        )
+                    );
 
                 if (display == null) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("did not find any registered repo: layerclass: " + layerclass // NOI18N
-                                    + " || layerinfo: " + layerinfo); // NOI18N
+                        LOG.debug(
+                            "did not find any registered repo: layerclass: " +
+                            layerclass + // NOI18N
+                            " || layerinfo: " +
+                            layerinfo
+                        ); // NOI18N
                     }
                     // TODO return null || infoDisplay || StandardInfoDisplay
                 }
@@ -96,9 +102,12 @@ public final class FeatureInfoDisplayRepository {
         try {
             return display.getClass().newInstance();
         } catch (final Exception ex) {
-            LOG.error("Cannot instantiate the required display class: " + display.getClass().getName() // NOI18N
-                        + ". The origin object will be used.", // NOI18N
-                ex);
+            LOG.error(
+                "Cannot instantiate the required display class: " +
+                display.getClass().getName() + // NOI18N
+                ". The origin object will be used.", // NOI18N
+                ex
+            );
             return display;
         }
     }

@@ -1,19 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import javax.swing.JPanel;
-
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import javax.swing.JPanel;
 
 /**
  * DOCUMENT ME!
@@ -22,7 +21,6 @@ import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
  * @version  $Revision$, $Date$
  */
 public interface AttributeTableListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

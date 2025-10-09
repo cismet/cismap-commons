@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -12,10 +12,8 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import java.awt.EventQueue;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.JTree;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -156,14 +154,15 @@ public class ActiveLayerModelWrapperWithoutProgress implements TreeModel, TreeMo
      * DOCUMENT ME!
      */
     private void fireUpdateUI() {
-        EventQueue.invokeLater(new Runnable() {
-
+        EventQueue.invokeLater(
+            new Runnable() {
                 @Override
                 public void run() {
                     for (final JTree tree : treesToUpdate) {
                         tree.updateUI();
                     }
                 }
-            });
+            }
+        );
     }
 }

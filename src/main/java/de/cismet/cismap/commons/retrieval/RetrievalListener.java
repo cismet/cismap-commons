@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
 /**
@@ -14,7 +14,6 @@ package de.cismet.cismap.commons.retrieval;
  * @version  $Revision$, $Date$
  */
 public interface RetrievalListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**

@@ -1,20 +1,18 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-
-import java.awt.geom.Point2D;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.awt.geom.Point2D;
 
 /**
  * DOCUMENT ME!
@@ -26,7 +24,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String SPLIT_FINISHED = "SPLIT_FINISHED";       // NOI18N
+    public static final String SPLIT_FINISHED = "SPLIT_FINISHED"; // NOI18N
     public static final String SELECTION_CHANGED = "SELECTION_CHANGED"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -55,12 +53,13 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
             log.debug("mouseClicked()"); // NOI18N
         }
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
-            pFeature = (PFeature)(o);
+            pFeature = (PFeature) (o);
             if (pFeature.isSelected() == false) {
                 mc.getFeatureCollection().select(pFeature.getFeature());
             } else if (pFeature.inSplitProgress()) {
@@ -109,13 +108,13 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
         return pFeature;
     }
 
-//TODO
+    //TODO
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent event) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class }, true);
-        pFeature = (PFeature)o;
+        pFeature = (PFeature) o;
         if ((pFeature == null) && (mc.getFeatureCollection().getSelectedFeatures().size() == 1)) {
-            pFeature = (PFeature)mc.getPFeatureHM().get(mc.getFeatureCollection().getSelectedFeatures().toArray()[0]);
+            pFeature = (PFeature) mc.getPFeatureHM().get(mc.getFeatureCollection().getSelectedFeatures().toArray()[0]);
             // p=mc.getSelectedNode();
         }
         if ((pFeature != null) && pFeature.inSplitProgress()) {
@@ -167,7 +166,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
         }
         final Point2D[] pa = new Point2D[pFeature.getSplitPoints().size() + plus];
         for (int i = 0; i < pFeature.getSplitPoints().size(); ++i) {
-            pa[i] = (Point2D)(pFeature.getSplitPoints().get(i));
+            pa[i] = (Point2D) (pFeature.getSplitPoints().get(i));
         }
 
         if (movin) {

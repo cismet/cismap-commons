@@ -1,16 +1,14 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import java.awt.geom.Point2D;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,6 +94,7 @@ public class WorldToScreenTransform {
     public double getSourceX(final double x) {
         return getWorldX(x);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -106,6 +105,7 @@ public class WorldToScreenTransform {
     public double getSourceY(final double y) {
         return getWorldY(y);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -116,6 +116,7 @@ public class WorldToScreenTransform {
     public double getDestX(final double x) {
         return getScreenX(x);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -141,6 +142,7 @@ public class WorldToScreenTransform {
             return snappedXCoordinates.get(screenX);
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -155,6 +157,7 @@ public class WorldToScreenTransform {
             return snappedYCoordinates.get(screenY);
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -165,6 +168,7 @@ public class WorldToScreenTransform {
     public double getScreenX(final double worldX) {
         return worldX - xHome;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -200,9 +204,8 @@ public class WorldToScreenTransform {
         System.out.println(xyToScreen(wtst, -180, -90));
         System.out.println(xyToScreen(wtst, 180, -90));
         System.out.println(xyToScreen(wtst, 180, 90));
-
-//        System.out.println(wtst.getWorldX(wtst.getScreenX(0)));
-//        System.out.println(wtst.getWorldY(wtst.getScreenY(0)));
+        //        System.out.println(wtst.getWorldX(wtst.getScreenX(0)));
+        //        System.out.println(wtst.getWorldY(wtst.getScreenY(0)));
 
     }
 

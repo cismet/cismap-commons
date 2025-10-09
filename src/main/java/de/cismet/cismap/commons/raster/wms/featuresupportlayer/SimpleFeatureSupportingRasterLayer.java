@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.raster.wms.featuresupportlayer;
 
 import de.cismet.cismap.commons.features.FeatureCollection;
@@ -36,6 +36,7 @@ public class SimpleFeatureSupportingRasterLayer extends SimpleWMS implements Fea
         featureCollection = s.featureCollection;
         sfu = s.sfu;
     }
+
     /**
      * Creates a new instance of SimpleFeatureSupportingRasterLayer.
      *
@@ -60,8 +61,10 @@ public class SimpleFeatureSupportingRasterLayer extends SimpleWMS implements Fea
 
     @Override
     public boolean equals(final Object o) {
-        return (o instanceof SimpleFeatureSupportingRasterLayer)
-                    && ((SimpleFeatureSupportingRasterLayer)o).sfu.equals(sfu);
+        return (
+            (o instanceof SimpleFeatureSupportingRasterLayer) &&
+            ((SimpleFeatureSupportingRasterLayer) o).sfu.equals(sfu)
+        );
     }
 
     @Override

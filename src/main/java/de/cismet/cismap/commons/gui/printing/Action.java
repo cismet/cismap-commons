@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
@@ -20,8 +20,8 @@ public class Action {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String PRINTPREVIEW = "PRINTPREVIEW"; // NOI18N
-    public static final String PDF = "PDF";                   // NOI18N
-    public static final String PRINT = "PRINT";               // NOI18N
+    public static final String PDF = "PDF"; // NOI18N
+    public static final String PRINT = "PRINT"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -48,6 +48,7 @@ public class Action {
     public String toString() {
         return getTitle();
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -56,16 +57,18 @@ public class Action {
      * @return  DOCUMENT ME!
      */
     public Element getElement(final boolean selected) {
-        final Element e = new Element("action");              // NOI18N
+        final Element e = new Element("action"); // NOI18N
         e.setAttribute("selected", String.valueOf(selected)); // NOI18N
-        e.setAttribute("id", id);                             // NOI18N
+        e.setAttribute("id", id); // NOI18N
         e.setText(getTitle());
         return e;
     }
+
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Action) && ((Action)obj).id.equals(id);
+        return (obj instanceof Action) && ((Action) obj).id.equals(id);
     }
+
     /**
      * DOCUMENT ME!
      *

@@ -1,16 +1,15 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui;
-
-import java.awt.Paint;
 
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import java.awt.Paint;
 
 /**
  * Wrapper implementation of {@link StyledFeatureGroupMember}.
@@ -35,7 +34,6 @@ public class StyledFeatureGroupWrapper extends FeatureGroupWrapper implements St
      */
     public StyledFeatureGroupWrapper(final StyledFeature feature, final String groupId, final String groupName) {
         super(feature, groupId, groupName);
-
         this.feature = feature;
     }
 

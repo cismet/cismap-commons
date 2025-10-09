@@ -1,28 +1,24 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
-
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PInputEvent;
-
-import org.apache.log4j.Logger;
-
-import java.awt.Color;
-import java.awt.EventQueue;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -30,8 +26,9 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractCreateSearchGeometryListener extends CreateGeometryListener
-        implements CreateSearchGeometryListener {
+public abstract class AbstractCreateSearchGeometryListener
+    extends CreateGeometryListener
+    implements CreateSearchGeometryListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -113,17 +110,18 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
 
     @Override
     protected Color getFillingColor() {
-        return new Color(searchColor.getRed(),
-                searchColor.getGreen(),
-                searchColor.getBlue(),
-                255
-                        - (int)(255f * searchTransparency));
+        return new Color(
+            searchColor.getRed(),
+            searchColor.getGreen(),
+            searchColor.getBlue(),
+            255 - (int) (255f * searchTransparency)
+        );
     }
 
     @Override
     protected void finishGeometry(final AbstractNewFeature newFeature) {
         super.finishGeometry(newFeature);
-        final SearchFeature newSearchFeature = (SearchFeature)newFeature;
+        final SearchFeature newSearchFeature = (SearchFeature) newFeature;
         newSearchFeature.setInputListenerName(inputListenerName);
         recentlyCreatedFeature = newSearchFeature;
     }
@@ -134,7 +132,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      * @param  feature  DOCUMENT ME!
      */
     protected void cleanup(final SearchFeature feature) {
-        final PFeature pFeature = (PFeature)getMappingComponent().getPFeatureHM().get(feature);
+        final PFeature pFeature = (PFeature) getMappingComponent().getPFeatureHM().get(feature);
         if (isHoldingGeometries()) {
             pFeature.moveToFront(); // funktioniert nicht?!
             feature.setEditable(true);
@@ -145,19 +143,20 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
             // Transparenz animieren
             pFeature.animateToTransparency(0, 2500);
             // warten bis Animation zu Ende ist um Feature aus Liste zu entfernen
-            new Thread(new Runnable() {
-
+            new Thread(
+                new Runnable() {
                     @Override
                     public void run() {
                         while (pFeature.getTransparency() > 0) {
                             try {
                                 Thread.sleep(100);
-                            } catch (InterruptedException ex) {
-                            }
+                            } catch (InterruptedException ex) {}
                         }
                         getMappingComponent().getFeatureCollection().removeFeature(feature);
                     }
-                }).start();
+                }
+            )
+                .start();
         }
     }
 
@@ -380,19 +379,20 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      */
     protected void handleDoubleClickInMap(final PInputEvent pInputEvent) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                pInputEvent,
-                new Class[] { PFeature.class },
-                true);
+            pInputEvent,
+            new Class[] { PFeature.class },
+            true
+        );
 
         if (!(o instanceof PFeature)) {
             return;
         }
-        final PFeature sel = (PFeature)o;
+        final PFeature sel = (PFeature) o;
 
         if (!(sel.getFeature() instanceof SearchFeature)) {
             return;
         }
-        final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+        final SearchFeature searchFeature = (SearchFeature) sel.getFeature();
 
         if (pInputEvent.isLeftMouseButton()) {
             getMappingComponent().getHandleLayer().removeAllChildren();
@@ -443,13 +443,12 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         }
 
         final Runnable showPointerAnnotation = new Runnable() {
-
-                @Override
-                public void run() {
-                    getMappingComponent().setPointerAnnotation(pointerAnnotation);
-                    getMappingComponent().setPointerAnnotationVisibility(true);
-                }
-            };
+            @Override
+            public void run() {
+                getMappingComponent().setPointerAnnotation(pointerAnnotation);
+                getMappingComponent().setPointerAnnotationVisibility(true);
+            }
+        };
 
         if (EventQueue.isDispatchThread()) {
             showPointerAnnotation.run();

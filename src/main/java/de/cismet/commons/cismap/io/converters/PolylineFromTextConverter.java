@@ -1,21 +1,19 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
-
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter.MatchRating;
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Creates a line string geometry from the provided coordinates. At least two coordinates are expected.
@@ -30,7 +28,7 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
 
     @Override
     protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException {
+        throws ConversionException {
         if (coordinates.length < 2) {
             throw new ConversionException("cannot create linestring lnfrom empty coordinate array"); // NOI18N
         }
@@ -46,8 +44,9 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
     @Override
     public String getFormatDisplayName() {
         return NbBundle.getMessage(
-                PolylineFromTextConverter.class,
-                "PolylineFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
+            PolylineFromTextConverter.class,
+            "PolylineFromTextConverter.getFormatDisplayName().returnValue"
+        ); // NOI18N
     }
 
     @Override
@@ -58,8 +57,9 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
     @Override
     public String getFormatDescription() {
         final String desc = NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PolylineFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+            PointFromTextConverter.class,
+            "PolylineFromTextConverter.getFormatDescription().returnValue"
+        ); // NOI18N
         final String superDesc = super.getFormatDescription();
 
         return desc + "\n" + superDesc;
@@ -67,10 +67,12 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
 
     @Override
     public String getFormatHtmlDescription() {
-        final String desc = NbBundle.getMessage(
-                    PointFromTextConverter.class,
-                    "PolylineFromTextConverter.getFormatHtmlDescription().returnValue")
-                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String desc = NbBundle
+            .getMessage(
+                PointFromTextConverter.class,
+                "PolylineFromTextConverter.getFormatHtmlDescription().returnValue"
+            )
+            .replaceAll("<[/]?html>", ""); // NOI18N
         final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
 
         return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
@@ -79,9 +81,10 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PolylineFromTextConverter.getFormatExample().returnValue",
-                getDecimalSeparator()); // NOI18N
+            PointFromTextConverter.class,
+            "PolylineFromTextConverter.getFormatExample().returnValue",
+            getDecimalSeparator()
+        ); // NOI18N
     }
 
     @Override

@@ -1,18 +1,34 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.ModeLayer;
+import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.AbstractWMS;
+import de.cismet.cismap.commons.raster.wms.WMSLayer;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.util.SLDStyleUtil;
+import de.cismet.commons.wms.capabilities.Style;
+import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.gui.StaticSwingTools;
 import edu.umd.cs.piccolo.PNode;
-
-import org.openide.util.Lookup;
-import org.openide.util.Lookup.Result;
-import org.openide.util.NbBundle;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -24,13 +40,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -52,31 +65,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-
-import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.LayerInfoProvider;
-import de.cismet.cismap.commons.ModeLayer;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
-import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
-import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
-import de.cismet.cismap.commons.featureservice.style.BasicStyle;
-import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
-import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
-import de.cismet.cismap.commons.raster.wms.AbstractWMS;
-import de.cismet.cismap.commons.raster.wms.WMSLayer;
-import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.util.SLDStyleUtil;
-
-import de.cismet.commons.wms.capabilities.Style;
-
-import de.cismet.tools.CismetThreadPool;
-
-import de.cismet.tools.gui.StaticSwingTools;
+import org.openide.util.Lookup;
+import org.openide.util.Lookup.Result;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -84,9 +75,9 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class ActiveLayerTableCellEditor extends AbstractCellEditor implements TableCellEditor,
-    TreeCellEditor,
-    PropertyChangeListener {
+public class ActiveLayerTableCellEditor
+    extends AbstractCellEditor
+    implements TableCellEditor, TreeCellEditor, PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -99,54 +90,53 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
     private Object value;
     private JTable table;
     private JComboBox cbbStyleChooser;
-    private StyleDialogInterface styleDialog;                                   // = new StyleDialog(new JFrame("XXX"),
-                                                                                // true);
-    private JButton moreButton = new JButton(". .");                            // NOI18N
-    private javax.swing.ImageIcon unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png")); // NOI18N
+    private StyleDialogInterface styleDialog; // = new StyleDialog(new JFrame("XXX"),
+    // true);
+    private JButton moreButton = new JButton(". ."); // NOI18N
+    private javax.swing.ImageIcon unselectedStyleIcon = new javax.swing.ImageIcon(
+        getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png")
+    ); // NOI18N
 
     private JButton wfsStyleButton = new JButton() {
+        // paints the rectangle inside the button that creates the StyleDialog
+        @Override
+        protected void paintComponent(final Graphics g) {
+            de.cismet.cismap.commons.featureservice.style.Style style = null;
 
-            // paints the rectangle inside the button that creates the StyleDialog
-            @Override
-            protected void paintComponent(final Graphics g) {
-                de.cismet.cismap.commons.featureservice.style.Style style = null;
+            final AbstractFeatureService service = (AbstractFeatureService) value;
+            final FeatureFactory ff = service.getFeatureFactory();
+            BasicStyle basicStyle = null;
 
-                final AbstractFeatureService service = (AbstractFeatureService)value;
-                final FeatureFactory ff = service.getFeatureFactory();
-                BasicStyle basicStyle = null;
+            if (ff instanceof AbstractFeatureFactory) {
+                final AbstractFeatureFactory aff = (AbstractFeatureFactory) ff;
+                final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
 
-                if (ff instanceof AbstractFeatureFactory) {
-                    final AbstractFeatureFactory aff = (AbstractFeatureFactory)ff;
-                    final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
+                basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
+            }
 
-                    basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
-                }
-
-                if (basicStyle != null) {
-                    style = basicStyle;
-                } else {
-                    if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                        style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
-                    }
-                }
-
-                try {
-                    final Graphics2D g2d = (Graphics2D)g;
-                    if (style.isDrawFill() && (style.getFillColor() != null)) {
-                        g2d.setColor((Color)style.getFillColor());
-                        g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
-                    }
-                    if (style.isDrawLine() && (style.getLineColor() != null)) {
-                        g2d.setColor((Color)style.getLineColor());
-                        final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
-                        g2d.setStroke(new BasicStroke(width));
-                        g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
-                    }
-                } catch (Exception ex) {
+            if (basicStyle != null) {
+                style = basicStyle;
+            } else {
+                if (((AbstractFeatureService) value).getLayerProperties() != null) {
+                    style = ((AbstractFeatureService) value).getLayerProperties().getStyle();
                 }
             }
-        };
+
+            try {
+                final Graphics2D g2d = (Graphics2D) g;
+                if (style.isDrawFill() && (style.getFillColor() != null)) {
+                    g2d.setColor((Color) style.getFillColor());
+                    g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
+                }
+                if (style.isDrawLine() && (style.getLineColor() != null)) {
+                    g2d.setColor((Color) style.getLineColor());
+                    final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
+                    g2d.setStroke(new BasicStroke(width));
+                    g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
+                }
+            } catch (Exception ex) {}
+        }
+    };
 
     private JLabel customStyleLab = new JLabel();
     private DefaultCellEditor informationCellEditor;
@@ -167,32 +157,31 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         progress.setString(""); // NOI18N
         progress.setStringPainted(true);
 
-        progress.setLayout(
-            new BorderLayout(2, 2));
+        progress.setLayout(new BorderLayout(2, 2));
         visibilityLabel.setOpaque(false);
-        visibilityLabel.addMouseListener(new MouseAdapter() {
-
+        visibilityLabel.addMouseListener(
+            new MouseAdapter() {
                 // deactivate & hide layer on doubleclick or
                 // if already hidden activate, show and do a new retrieve
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     if (e.getClickCount() == 2) {
                         if (value instanceof RetrievalServiceLayer) {
-                            final RetrievalServiceLayer layer = ((RetrievalServiceLayer)value);
+                            final RetrievalServiceLayer layer = ((RetrievalServiceLayer) value);
                             final boolean flag = layer.getPNode().getVisible();
                             layer.setEnabled(!flag);
-//                        fireTreeNodesChanged(this, new Object[]{root}, null, null);
+                            //                        fireTreeNodesChanged(this, new Object[]{root}, null, null);
 
                             if (!flag) {
-//                            layer.setRefreshNeeded(true);
+                                //                            layer.setRefreshNeeded(true);
                                 layer.retrieve(true);
                             }
                             if (layer instanceof AbstractFeatureService) {
-                                ((AbstractFeatureService)layer).setVisible(!flag);
+                                ((AbstractFeatureService) layer).setVisible(!flag);
                             } else if (layer instanceof AbstractWMS) {
-                                ((AbstractWMS)layer).setVisible(!flag);
+                                ((AbstractWMS) layer).setVisible(!flag);
                             } else if (layer instanceof ModeLayer) {
-                                ((ModeLayer)layer).setVisible(!flag);
+                                ((ModeLayer) layer).setVisible(!flag);
                             }
                             layer.getPNode().setVisible(!flag);
 
@@ -203,7 +192,8 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         }
                     }
                 }
-            });
+            }
+        );
 
         informationBox = new JCheckBox();
         informationBox.setHorizontalAlignment(JCheckBox.CENTER);
@@ -213,25 +203,25 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         cbbStyleChooser.setEditable(false);
         cbbStyleChooser.setRenderer(new StyleChooserCellRenderer());
 
-        informationBox.addActionListener(new ActionListener() {
-
+        informationBox.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     try {
                         if (value instanceof LayerInfoProvider) {
-                            ((LayerInfoProvider)value).setLayerQuerySelected(informationBox.isSelected());
+                            ((LayerInfoProvider) value).setLayerQuerySelected(informationBox.isSelected());
                             final ActiveLayerEvent ale = new ActiveLayerEvent();
                             ale.setLayer(value);
                             CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
                         }
 
-//                    WMSLayer l = null;
-//                    if (value instanceof WMSLayer) {
-//                        l = ((WMSLayer) value);
-//                    } else if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
-//                        l = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
-//                    }
-//                    l.setQuerySelected(informationBox.isSelected());
+                        //                    WMSLayer l = null;
+                        //                    if (value instanceof WMSLayer) {
+                        //                        l = ((WMSLayer) value);
+                        //                    } else if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
+                        //                        l = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
+                        //                    }
+                        //                    l.setQuerySelected(informationBox.isSelected());
 
                         // A workaround for a ugly bug which denies the refresh of a cell
                         // in a treetable when it is in editing mode
@@ -241,32 +231,34 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         logger.error("Error in actionPerformed of the informationCheckBos", ex);
                     }
                 }
-            });
+            }
+        );
 
-        cbbStyleChooser.addActionListener(new ActionListener() {
-
+        cbbStyleChooser.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     try {
                         WMSLayer l = null;
                         if (value instanceof WMSLayer) {
-                            l = ((WMSLayer)value);
-                        } else if ((value instanceof WMSServiceLayer)
-                                    && (((WMSServiceLayer)value).getWMSLayers().size() == 1)) {
-                            l = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0));
+                            l = ((WMSLayer) value);
+                        } else if (
+                            (value instanceof WMSServiceLayer) && (((WMSServiceLayer) value).getWMSLayers().size() == 1)
+                        ) {
+                            l = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
                         }
-                        if ((l != null) && !(l.getSelectedStyle().equals((Style)cbbStyleChooser.getSelectedItem()))) {
+                        if ((l != null) && !(l.getSelectedStyle().equals((Style) cbbStyleChooser.getSelectedItem()))) {
                             final ActiveLayerEvent ale = new ActiveLayerEvent();
                             ale.setLayer(l.getParentServiceLayer());
                             CismapBroker.getInstance().fireLayerRemoved(ale);
-                            l.setSelectedStyle((Style)cbbStyleChooser.getSelectedItem());
-                            ((de.cismet.cismap.commons.retrieval.RetrievalService)value).retrieve(true);
+                            l.setSelectedStyle((Style) cbbStyleChooser.getSelectedItem());
+                            ((de.cismet.cismap.commons.retrieval.RetrievalService) value).retrieve(true);
                             CismapBroker.getInstance().fireLayerAdded(ale);
                         }
-                        l.setSelectedStyle((Style)cbbStyleChooser.getSelectedItem());
+                        l.setSelectedStyle((Style) cbbStyleChooser.getSelectedItem());
                         final ActiveLayerEvent ale = new ActiveLayerEvent();
                         ale.setLayer(l.getParentServiceLayer());
-                        ((de.cismet.cismap.commons.retrieval.RetrievalService)value).retrieve(true);
+                        ((de.cismet.cismap.commons.retrieval.RetrievalService) value).retrieve(true);
                         // ((RetrievalService)value).retrieve();
                         CismapBroker.getInstance().fireLayerRemoved(ale);
                         CismapBroker.getInstance().fireLayerAdded(ale);
@@ -274,12 +266,13 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         logger.error("Error while changing the style", ex); // NOI18N
                     }
                 }
-            });
+            }
+        );
 
         moreButton.setFocusPainted(false);
         moreButton.setEnabled(false);
-        moreButton.addActionListener(new ActionListener() {
-
+        moreButton.addActionListener(
+            new ActionListener() {
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     if (DEBUG) {
@@ -288,17 +281,19 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         }
                     }
                     final QueryEditorDialog dia = new QueryEditorDialog(
-                            StaticSwingTools.getParentFrame(moreButton),
-                            true,
-                            ((WebFeatureService)value).getQuery());
+                        StaticSwingTools.getParentFrame(moreButton),
+                        true,
+                        ((WebFeatureService) value).getQuery()
+                    );
 
                     StaticSwingTools.showDialog(dia);
 
                     if (dia.getReturnStatus() == QueryEditorDialog.RET_OK) {
-                        ((WebFeatureService)value).setQuery(dia.getQueryString());
+                        ((WebFeatureService) value).setQuery(dia.getQueryString());
                     }
                 }
-            });
+            }
+        );
 
         customStyleLab.addMouseListener(new StyleMouseListener());
         wfsStyleButton.setFocusPainted(false);
@@ -312,29 +307,28 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         slider.setValueIsAdjusting(true);
         slider.addChangeListener(
             new ChangeListener() {
-
                 @Override
                 public void stateChanged(final ChangeEvent e) {
-                    final JSlider slider = (JSlider)e.getSource();
+                    final JSlider slider = (JSlider) e.getSource();
 
                     if (value instanceof RetrievalServiceLayer) {
-                        final float f = (float)(slider.getValue() * 0.01);
-                        ((RetrievalServiceLayer)value).setTranslucency(f);
-                        final PNode pi = ((RetrievalServiceLayer)value).getPNode();
+                        final float f = (float) (slider.getValue() * 0.01);
+                        ((RetrievalServiceLayer) value).setTranslucency(f);
+                        final PNode pi = ((RetrievalServiceLayer) value).getPNode();
                         if (pi != null) {
                             pi.setTransparency(f);
                             pi.repaint();
                         }
                         if (!slider.getValueIsAdjusting()) {
-                            ((RetrievalServiceLayer)value).setTranslucency(f);
+                            ((RetrievalServiceLayer) value).setTranslucency(f);
                         }
                     }
                 }
-            });
+            }
+        );
         // _WTF? ....................................................................
         slider.addMouseListener(
             new MouseAdapter() {
-
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     if (DEBUG) {
@@ -349,7 +343,8 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                     // übergibt die Darstellung wieder an den Renderer
                     ActiveLayerTableCellEditor.this.stopCellEditing();
                 }
-            });
+            }
+        );
 
         slider.dispatchEvent(
             new MouseEvent(
@@ -361,7 +356,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                 2,
                 1,
                 false,
-                MouseEvent.BUTTON1));
+                MouseEvent.BUTTON1
+            )
+        );
         // _WTF? ....................................................................
     }
 
@@ -384,12 +381,14 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
      * @return  the component for editing
      */
     @Override
-    public Component getTreeCellEditorComponent(final JTree tree,
-            final Object value,
-            final boolean isSelected,
-            final boolean expanded,
-            final boolean leaf,
-            final int row) {
+    public Component getTreeCellEditorComponent(
+        final JTree tree,
+        final Object value,
+        final boolean isSelected,
+        final boolean expanded,
+        final boolean leaf,
+        final int row
+    ) {
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
                 logger.debug("TreeCellEditor requested"); // NOI18N
@@ -420,57 +419,62 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
      */
     @Override
     public Component getTableCellEditorComponent(
-            final JTable table,
-            final Object value,
-            final boolean isSelected,
-            final int row,
-            final int column) {
+        final JTable table,
+        final Object value,
+        final boolean isSelected,
+        final int row,
+        final int column
+    ) {
         final int realColumn = table.convertColumnIndexToModel(column);
         this.value = value;
         this.table = table;
         WMSLayer wmsLayer = null;
         LayerInfoProvider layer = null;
         if (value instanceof ModeLayer) {
-            return getTableCellEditorComponent(table, ((ModeLayer)value).getCurrentLayer(), isSelected, row, column);
+            return getTableCellEditorComponent(table, ((ModeLayer) value).getCurrentLayer(), isSelected, row, column);
         }
         if (value instanceof WMSLayer) {
-            wmsLayer = ((WMSLayer)value);
+            wmsLayer = ((WMSLayer) value);
         } else if (value instanceof WMSServiceLayer) {
-            wmsLayer = (WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0);
+            wmsLayer = (WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0);
         }
 
         if (value instanceof LayerInfoProvider) {
-            layer = (LayerInfoProvider)value;
+            layer = (LayerInfoProvider) value;
         }
         if (realColumn == 0) {
             final TableCellRenderer renderer = table.getCellRenderer(row, column);
             visibilityLabel.setIcon(
-                ((JLabel)renderer.getTableCellRendererComponent(table, value, isSelected, isSelected, row, column))
-                            .getIcon());
+                (
+                    (JLabel) renderer.getTableCellRendererComponent(table, value, isSelected, isSelected, row, column)
+                ).getIcon()
+            );
             return visibilityLabel;
         } else if (realColumn == 2) {
             if (DEBUG) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Editor column=" + realColumn);           // NOI18N
+                    logger.debug("Editor column=" + realColumn); // NOI18N
                 }
             }
             if (value instanceof WMSServiceLayer) {
                 try {
                     if (DEBUG) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Combo");                         // NOI18N
+                            logger.debug("Combo"); // NOI18N
                         }
                     }
-                    final DefaultComboBoxModel model = new DefaultComboBoxModel(wmsLayer.getOgcCapabilitiesLayer()
-                                    .getStyles());
+                    final DefaultComboBoxModel model = new DefaultComboBoxModel(
+                        wmsLayer.getOgcCapabilitiesLayer().getStyles()
+                    );
                     cbbStyleChooser.setModel(model);
                     cbbStyleChooser.setSelectedItem(wmsLayer.getSelectedStyle());
                     return stylesCellEditor.getTableCellEditorComponent(
-                            table,
-                            wmsLayer.getSelectedStyle(),
-                            isSelected,
-                            row,
-                            column);
+                        table,
+                        wmsLayer.getSelectedStyle(),
+                        isSelected,
+                        row,
+                        column
+                    );
                 } catch (Exception e) {
                     logger.warn("Error while setting the StyleEditor", e); // NOI18N
                     return null;
@@ -478,19 +482,24 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             } else {
                 if (DEBUG) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("StyleButton");                       // NOI18N
+                        logger.debug("StyleButton"); // NOI18N
                     }
                 }
 
-                final AbstractFeatureService service = (AbstractFeatureService)value;
+                final AbstractFeatureService service = (AbstractFeatureService) value;
 
-                if ((service.getLayerProperties() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet() != null)
-                            && (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)) {
+                if (
+                    (service.getLayerProperties() != null) &&
+                    (service.getLayerProperties().getAttributeTableRuleSet() != null) &&
+                    (service.getLayerProperties().getAttributeTableRuleSet().getFeatureClass() != null)
+                ) {
                     customStyleLab.setHorizontalAlignment(JLabel.LEFT);
-                    customStyleLab.setText(NbBundle.getMessage(
+                    customStyleLab.setText(
+                        NbBundle.getMessage(
                             ActiveLayerTableCellRenderer.class,
-                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"));
+                            "ActiveLayerTableCellRenderer.getTableCellRendererComponent().customStyle"
+                        )
+                    );
                     customStyleLab.setIcon(unselectedStyleIcon);
 
                     return customStyleLab;
@@ -500,27 +509,28 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             }
         } else if (realColumn == 3) {
             return informationCellEditor.getTableCellEditorComponent(
-                    table,
-                    layer.isLayerQuerySelected(),
-                    isSelected,
-                    row,
-                    column);
+                table,
+                layer.isLayerQuerySelected(),
+                isSelected,
+                row,
+                column
+            );
         } else if (realColumn == 4) {
             if (wmsServiceLayerThatFiresPropertyChangeEvents != null) {
                 wmsServiceLayerThatFiresPropertyChangeEvents.removePropertyChangeListener(this);
             }
 
-            ((RetrievalServiceLayer)value).addPropertyChangeListener(this);
-            wmsServiceLayerThatFiresPropertyChangeEvents = ((RetrievalServiceLayer)value);
-            slider.setValue((int)(((RetrievalServiceLayer)value).getTranslucency() * 100));
+            ((RetrievalServiceLayer) value).addPropertyChangeListener(this);
+            wmsServiceLayerThatFiresPropertyChangeEvents = ((RetrievalServiceLayer) value);
+            slider.setValue((int) (((RetrievalServiceLayer) value).getTranslucency() * 100));
             slider.requestFocus();
-            if (((RetrievalServiceLayer)value).getProgress() == -1) {
+            if (((RetrievalServiceLayer) value).getProgress() == -1) {
                 progress.setIndeterminate(true);
             } else {
                 progress.setIndeterminate(false);
             }
 
-            progress.setValue(((RetrievalServiceLayer)value).getProgress());
+            progress.setValue(((RetrievalServiceLayer) value).getProgress());
             slider.updateUI();
 
             return progress;
@@ -556,12 +566,13 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
     public void propertyChange(final PropertyChangeEvent evt) {
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Progressvalue in Editor changed");                                            // NOI18N
+                logger.debug("Progressvalue in Editor changed"); // NOI18N
             }
         }
-        if ((evt.getSource() instanceof RetrievalServiceLayer) && evt.getPropertyName().equals("progress")) // NOI18N
-        {
-            final int newValue = ((Integer)(evt.getNewValue())).intValue();
+        if (
+            (evt.getSource() instanceof RetrievalServiceLayer) && evt.getPropertyName().equals("progress")
+        ) { // NOI18N
+            final int newValue = ((Integer) (evt.getNewValue())).intValue();
             if (newValue == 0) {
                 progress.setIndeterminate(true);
             } else {
@@ -597,8 +608,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         final boolean retValue;
         try {
             retValue = super.stopCellEditing();
-        } finally {
-        }
+        } finally {}
         return retValue;
     }
 
@@ -620,7 +630,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             // FIXME: ACHTUNG alle Exceptions die in dieser Operation auftreten und
             // nicht explizit gefangen werden, werden nicht auf der Console ausgegeben?!
             if (e.getClickCount() == 2) {
-                final AbstractFeatureService selectedService = (AbstractFeatureService)value;
+                final AbstractFeatureService selectedService = (AbstractFeatureService) value;
                 /*
                  * final JumpSLDEditor editor = new JumpSLDEditor();
                  *
@@ -637,11 +647,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                 args.add("TextEditor");
                 // args.add("Begleitsymbole");
 
-                final StyleDialogStarter starter = new StyleDialogStarter(
-                        parentFrame,
-                        selectedService,
-                        args,
-                        500);
+                final StyleDialogStarter starter = new StyleDialogStarter(parentFrame, selectedService, args, 500);
                 starter.start();
             }
         }
@@ -671,14 +677,16 @@ class StyleChooserCellRenderer extends DefaultListCellRenderer {
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Component getListCellRendererComponent(final JList list,
-            final Object listValue,
-            final int index,
-            final boolean isSelected,
-            final boolean cellHasFocus) {
+    public Component getListCellRendererComponent(
+        final JList list,
+        final Object listValue,
+        final int index,
+        final boolean isSelected,
+        final boolean cellHasFocus
+    ) {
         final JLabel retValue;
-        retValue = (JLabel)super.getListCellRendererComponent(list, listValue, index, isSelected, cellHasFocus);
-        retValue.setText(((Style)listValue).getTitle());
+        retValue = (JLabel) super.getListCellRendererComponent(list, listValue, index, isSelected, cellHasFocus);
+        retValue.setText(((Style) listValue).getTitle());
         retValue.setIcon(styleIcon);
         retValue.setIconTextGap(4);
         return retValue;

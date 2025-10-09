@@ -1,10 +1,10 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 /*
  * FeatureMoveListener.java
  *
@@ -13,22 +13,6 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
-import edu.umd.cs.piccolo.PLayer;
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.util.PDimension;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-import edu.umd.cs.piccolox.util.PLocator;
-
-import java.awt.Color;
-import java.awt.event.InputEvent;
-import java.awt.geom.Point2D;
-
-import java.util.Iterator;
-import java.util.Vector;
-
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
@@ -40,6 +24,18 @@ import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.gui.piccolo.PivotPHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.util.PDimension;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.Color;
+import java.awt.event.InputEvent;
+import java.awt.geom.Point2D;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * DOCUMENT ME!
@@ -96,20 +92,24 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class }, true);
 
             if (o instanceof PFeature) {
-                pFeature = (PFeature)(o);
-                if ((pFeature.getFeature().isEditable() && pFeature.getFeature().canBeSelected())
-                            || (pFeature.getFeature() instanceof LinearReferencedLineFeature)) {
-                    pFeature = (PFeature)(o);
+                pFeature = (PFeature) (o);
+                if (
+                    (pFeature.getFeature().isEditable() && pFeature.getFeature().canBeSelected()) ||
+                    (pFeature.getFeature() instanceof LinearReferencedLineFeature)
+                ) {
+                    pFeature = (PFeature) (o);
                     pFeature.setStrokePaint(Color.red);
                     if (features.contains(pFeature)) {
-//                    features.remove(pFeature);
-//                    mc.reconsiderFeature(pFeature.getFeature());
+                        //                    features.remove(pFeature);
+                        //                    mc.reconsiderFeature(pFeature.getFeature());
                     } else {
                         features.add(pFeature);
                         pFeature.moveToFront();
                     }
-                    if ((!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1))
-                                && !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)) {
+                    if (
+                        (!pFeature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) &&
+                        !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)
+                    ) {
                         mc.getFeatureCollection().unselectAll();
                         mc.getFeatureCollection().select(pFeature.getFeature());
                         postSelectionChanged();
@@ -123,9 +123,10 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseDragged(final PInputEvent e) {
-        if ((pFeature != null)
-                    && ((handleLayer.getChildrenCount() > 0)
-                        || (pFeature.getFeature() instanceof RequestForHidingHandles))) {
+        if (
+            (pFeature != null) &&
+            ((handleLayer.getChildrenCount() > 0) || (pFeature.getFeature() instanceof RequestForHidingHandles))
+        ) {
             drag = true;
             super.mouseDragged(e);
             if (pFeature != null) {
@@ -133,22 +134,25 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                 final Feature feat = pFeature.getFeature();
                 // bestimmt selbst wie es bewegt wird?
                 if (feat instanceof SelfManipulatingFeature) {
-                    final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
+                    final SelfManipulatingFeature smFeature = (SelfManipulatingFeature) feat;
                     final Coordinate coord = new Coordinate(
-                            mc.getWtst().getSourceX(dragPoint.getX()),
-                            mc.getWtst().getSourceY(dragPoint.getY()));
+                        mc.getWtst().getSourceX(dragPoint.getX()),
+                        mc.getWtst().getSourceY(dragPoint.getY())
+                    );
                     final PDimension delta = e.getDelta();
                     smFeature.moveTo(coord, delta);
                 } else {
                     // PDimension delta = e.getDeltaRelativeTo(pressPoint);
                     final PDimension delta = e.getCanvasDelta();
-                    dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()),
-                        (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
+                    dragDim.setSize(
+                        (dragDim.getWidth() - e.getCanvasDelta().getWidth()),
+                        (dragDim.getHeight() - e.getCanvasDelta().getHeight())
+                    );
                     final Iterator it = features.iterator();
                     while (it.hasNext()) {
                         final Object o = it.next();
                         if (o instanceof PFeature) {
-                            final PFeature f = (PFeature)o;
+                            final PFeature f = (PFeature) o;
                             f.moveFeature(delta);
                         }
                     }
@@ -156,15 +160,16 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
                         final PNode child = handleLayer.getChild(i);
                         if (child instanceof PivotPHandle) {
-                            final PivotPHandle pivotHandle = (PivotPHandle)child;
+                            final PivotPHandle pivotHandle = (PivotPHandle) child;
                             final PLocator pLocator = pivotHandle.getLocator();
-                            final Point2D newMid = new Point2D.Double(pLocator.locateX() + (delta.getWidth() / scale),
-                                    pLocator.locateY()
-                                            + (delta.getHeight() / scale));
+                            final Point2D newMid = new Point2D.Double(
+                                pLocator.locateX() + (delta.getWidth() / scale),
+                                pLocator.locateY() + (delta.getHeight() / scale)
+                            );
                             pivotHandle.getMid().setLocation(newMid);
                         }
                         if (child instanceof PHandle) {
-                            final PHandle pHandle = (PHandle)child;
+                            final PHandle pHandle = (PHandle) child;
                             pHandle.relocateHandle();
                         }
                     }
@@ -183,7 +188,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
 
             final Feature feat = pFeature.getFeature();
             if (feat instanceof SelfManipulatingFeature) {
-                ((SelfManipulatingFeature)feat).moveFinished();
+                ((SelfManipulatingFeature) feat).moveFinished();
             }
 
             mc.getMemUndo().addAction(new FeatureMoveAction(mc, features, dragDim, true));
@@ -192,12 +197,14 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             while (it.hasNext()) {
                 final Object o = it.next();
                 if (o instanceof PFeature) {
-                    final PFeature f = (PFeature)o;
-                    if ((mc.getFeatureCollection() instanceof DefaultFeatureCollection)
-                                && !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)) {
+                    final PFeature f = (PFeature) o;
+                    if (
+                        (mc.getFeatureCollection() instanceof DefaultFeatureCollection) &&
+                        !(pFeature.getFeature() instanceof RequestNoAutoSelectionWhenMoving)
+                    ) {
                         final Vector v = new Vector();
                         v.add(f.getFeature());
-                        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
+                        ((DefaultFeatureCollection) mc.getFeatureCollection()).fireFeaturesChanged(v);
                         // DANGER
                         // viewer.getFeatureCollection().reconsiderFeature(getFeature());
                     } else {
@@ -247,13 +254,13 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         while (it.hasNext()) {
             final Object o = it.next();
             if (o instanceof PFeature) {
-                final PFeature f = (PFeature)o;
+                final PFeature f = (PFeature) o;
                 if (f.getFeature() instanceof AbstractNewFeature) {
                     f.setStrokePaint(Color.black);
                 }
-//                else {
-//                    mc.reconsiderFeature(f.getFeature());
-//                }
+                //                else {
+                //                    mc.reconsiderFeature(f.getFeature());
+                //                }
             }
         }
         features = new Vector();

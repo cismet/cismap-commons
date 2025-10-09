@@ -1,14 +1,13 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons.rasterservice.georeferencing;
 
 import com.vividsolutions.jts.geom.Coordinate;
-
 import java.awt.Point;
 
 /*
@@ -24,7 +23,6 @@ import java.awt.Point;
  * @version  $Revision$, $Date$
  */
 public interface RasterGeoReferencingWizardListener extends RasterGeoReferencingHandlerListener {
-
     //~ Methods ----------------------------------------------------------------
 
     /**
