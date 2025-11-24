@@ -155,28 +155,28 @@ public class LinearReferencedPointPHandle extends PHandle {
                             null);
                 }
                 // does not make sense, because there is mostly at least one line where the station is
-//                else if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
-//                            && MappingComponent.SnappingMode.LINE.equals(
-//                                CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
-//                    final Geometry g = ((LinearReferencedPointFeature)pfeature.getFeature()).getLineGeometry();
-//                    final Feature routeFeature = getFeatureFromGeom(g);
-//                    if (routeFeature != null) {
-//                        CismapBroker.getInstance()
-//                                .setSnappingVetoFeature(CismapBroker.getInstance().getMappingComponent().getPFeatureHM()
-//                                    .get(routeFeature));
-//                    }
-//                    final PFeatureTools.SnappedPoint point = PFeatureTools.getNearestPointInArea(
-//                            CismapBroker.getInstance().getMappingComponent(),
-//                            CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
-//                                (Point2D)dragPoint.clone()),
-//                            true,
-//                            null);
+// else if (CismapBroker.getInstance().getMappingComponent().isSnappingEnabled()
+// && MappingComponent.SnappingMode.LINE.equals(
+// CismapBroker.getInstance().getMappingComponent().getSnappingMode())) {
+// final Geometry g = ((LinearReferencedPointFeature)pfeature.getFeature()).getLineGeometry();
+// final Feature routeFeature = getFeatureFromGeom(g);
+// if (routeFeature != null) {
+// CismapBroker.getInstance()
+// .setSnappingVetoFeature(CismapBroker.getInstance().getMappingComponent().getPFeatureHM()
+// .get(routeFeature));
+// }
+// final PFeatureTools.SnappedPoint point = PFeatureTools.getNearestPointInArea(
+// CismapBroker.getInstance().getMappingComponent(),
+// CismapBroker.getInstance().getMappingComponent().getCamera().viewToLocal(
+// (Point2D)dragPoint.clone()),
+// true,
+// null);
 //
-//                    if ((point != null) && (point.getPoint() != null)
-//                                && point.getSnappedOn().equals(PFeatureTools.SnappedPoint.SnappedOn.LINE)) {
-//                        snapPoint = new Coordinate(point.getPoint().getX(), point.getPoint().getY());
-//                    }
-//                }
+// if ((point != null) && (point.getPoint() != null)
+// && point.getSnappedOn().equals(PFeatureTools.SnappedPoint.SnappedOn.LINE)) {
+// snapPoint = new Coordinate(point.getPoint().getX(), point.getPoint().getY());
+// }
+// }
 
                 if (snapPoint != null) {
                     linref.moveTo(snapPoint, null);
