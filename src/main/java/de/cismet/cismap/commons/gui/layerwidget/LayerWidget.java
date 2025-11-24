@@ -103,42 +103,43 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         try {
             final ResourceBundle transformkRules = ResourceBundle.getBundle("UrlDisplayTransform", Locale.getDefault());
 
-            for (final String key : transformkRules.keySet()) {
-                String transformKey = null;
-                int index = -1;
+            if (transformkRules != null) {
+                for (final String key : transformkRules.keySet()) {
+                    String transformKey = null;
+                    int index = -1;
 
-                if (key.endsWith(SEARCH_STRING)) {
-                    transformKey = key.substring(0, key.length() - SEARCH_STRING.length());
-                    index = 0;
-                } else if (key.endsWith(EXTRACTION_STRING)) {
-                    transformKey = key.substring(0, key.length() - EXTRACTION_STRING.length());
-                    index = 1;
-                } else if (key.endsWith(PREFIX_STRING)) {
-                    transformKey = key.substring(0, key.length() - PREFIX_STRING.length());
-                    index = 2;
-                } else if (key.endsWith(POSTFIX_STRING)) {
-                    transformKey = key.substring(0, key.length() - POSTFIX_STRING.length());
-                    index = 3;
-                } else if (key.endsWith(CONCAT_STRING)) {
-                    transformKey = key.substring(0, key.length() - CONCAT_STRING.length());
-                    index = 4;
-                }
-
-                if (transformKey != null) {
-                    String[] rule = URL_TRANSFORMATION_RULES.get(transformKey);
-
-                    if (rule == null) {
-                        rule = new String[5];
-
-                        URL_TRANSFORMATION_RULES.put(transformKey, rule);
-                        URL_TRANSFORMATION_RULES_ORDER.add(transformKey);
+                    if (key.endsWith(SEARCH_STRING)) {
+                        transformKey = key.substring(0, key.length() - SEARCH_STRING.length());
+                        index = 0;
+                    } else if (key.endsWith(EXTRACTION_STRING)) {
+                        transformKey = key.substring(0, key.length() - EXTRACTION_STRING.length());
+                        index = 1;
+                    } else if (key.endsWith(PREFIX_STRING)) {
+                        transformKey = key.substring(0, key.length() - PREFIX_STRING.length());
+                        index = 2;
+                    } else if (key.endsWith(POSTFIX_STRING)) {
+                        transformKey = key.substring(0, key.length() - POSTFIX_STRING.length());
+                        index = 3;
+                    } else if (key.endsWith(CONCAT_STRING)) {
+                        transformKey = key.substring(0, key.length() - CONCAT_STRING.length());
+                        index = 4;
                     }
 
-                    rule[index] = transformkRules.getString(key);
-                }
-            }
+                    if (transformKey != null) {
+                        String[] rule = URL_TRANSFORMATION_RULES.get(transformKey);
 
-            Collections.sort(URL_TRANSFORMATION_RULES_ORDER);
+                        if (rule == null) {
+                            rule = new String[5];
+
+                            URL_TRANSFORMATION_RULES.put(transformKey, rule);
+                            URL_TRANSFORMATION_RULES_ORDER.add(transformKey);
+                        }
+
+                        rule[index] = transformkRules.getString(key);
+                    }
+                }
+                Collections.sort(URL_TRANSFORMATION_RULES_ORDER);
+            }
         } catch (Exception e) {
             LOG.warn("No rules found to transform urls", e);
         }
@@ -195,7 +196,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     public void init(final MappingComponent mapC) {
         hackDragAndDropDataFlavors();
         initComponents();
-        cmdCopyToClipboard.setVisible(false);
         this.mapC = mapC;
         log.info("LayerWidget: " + activeLayerModel); // NOI18N
         final DropTarget dt = new DropTarget(this, acceptableActions, this);
@@ -214,39 +214,37 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     }
                 }
 
-//                @Override
-//                public String getToolTipText(final MouseEvent event) {
-//                    final int row = rowAtPoint(event.getPoint());
-//                    final int column = columnAtPoint(event.getPoint());
-//
-//                    if ((row == -1) || (column == -1)) {
-//                        return null;
-//                    }
-//
-//                    // Assume the tree is in the first column
-//                    if (column == 1) {
-//                        // Convert table coordinates to tree coordinates
-//                        final JTree tree = getTree();
-//
-//                        final Rectangle cellRect = getCellRect(row, column, false);
-//
-//                        final TreePath path = tree.getPathForLocation(event.getX(), event.getY());
-//                        if (path != null) {
-//                            final Object node = path.getLastPathComponent();
-//                            String url = null;
-//
-//                            url = extractUrlFromServie(node);
-//
-//                            if (url != null) {
-//                                return transformURL(url);
-//                            }
-//                        }
-//
-//                        return null;
-//                    } else {
-//                        return super.getToolTipText(event);
-//                    }
-//                }
+                @Override
+                public String getToolTipText(final MouseEvent event) {
+                    final int row = rowAtPoint(event.getPoint());
+                    final int column = columnAtPoint(event.getPoint());
+
+                    if ((row == -1) || (column == -1)) {
+                        return null;
+                    }
+
+                    // Assume the tree is in the first column
+                    if (column == 1) {
+                        // Convert table coordinates to tree coordinates
+                        final JTree tree = getTree();
+
+                        final TreePath path = tree.getPathForLocation(event.getX(), event.getY());
+                        if (path != null) {
+                            final Object node = path.getLastPathComponent();
+                            String url = null;
+
+                            url = extractUrlFromServie(node);
+
+                            if (url != null) {
+                                return transformURL(url);
+                            }
+                        }
+
+                        return null;
+                    } else {
+                        return super.getToolTipText(event);
+                    }
+                }
             };
 
         treeTable.setAutoCreateColumnsFromModel(true);
