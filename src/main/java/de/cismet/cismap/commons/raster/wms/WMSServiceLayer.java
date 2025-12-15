@@ -1319,7 +1319,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                         && ((getGetMapPrefix() == tester.getGetMapPrefix())
                             || ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix())))
                         && getLayersString().equals(tester.getLayersString())
-                        && getStylesString().equals(tester.getStylesString())) {
+                        && getStylesString().equals(tester.getStylesString())
+                        && getServerURI().equals(tester.getServerURI())) {
                 return true;
             }
         }
