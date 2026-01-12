@@ -427,15 +427,18 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
 
         if (urlBuffer != null) {
             try {
+                final URL urlWithCredentials = (URL)WebAccessManager.getUrlWithCredentials(new URL(urlBuffer));
+
                 // ToDo muss in WebAccessManger
-                final AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(new URL(urlBuffer));
+                final AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(urlWithCredentials);
                 if (handler != null) {
                     if (handler instanceof WSSAccessHandler) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("handler is wss handler --> creating wss get request"); // NOI18N
                         }
 
-                        final String wssRequest = ((WSSAccessHandler)handler).createGetRequest(urlBuffer);
+                        final String wssRequest = ((WSSAccessHandler)handler).createGetRequest(
+                                urlWithCredentials.toString());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("created wss request: " + wssRequest); // NOI18N
                         }
@@ -448,7 +451,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 } else if (LOG.isDebugEnabled()) {
                     LOG.debug("no handler available for given url default access via openURL"); // NOI18N
                 }
-                openUrlInExternalBrowser(urlBuffer);
+                openUrlInExternalBrowser(urlWithCredentials.toString());
             } catch (final Exception ex) {
                 LOG.error("Error while creating url for featureinfo", ex);               // NOI18N
             }
