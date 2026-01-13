@@ -11,14 +11,8 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
 
-import org.apache.commons.httpclient.methods.PostMethod;
-
-import org.deegree.gml.feature.GMLFeatureReader;
-import org.deegree.model.feature.DefaultFeature;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.FeatureProperty;
@@ -31,10 +25,7 @@ import org.w3c.dom.Document;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -521,21 +512,15 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @param  reader    DOCUMENT ME!
-     * @param  httppost  DOCUMENT ME!
+     * @param  reader  DOCUMENT ME!
      */
-    protected void cleanup(InputStreamReader reader, PostMethod httppost) {
+    protected void cleanup(InputStreamReader reader) {
         if (reader != null) {
             try {
                 reader.close();
             } catch (Exception silent) {
             }
             reader = null;
-        }
-
-        if (httppost != null) {
-            httppost.releaseConnection();
-            httppost = null;
         }
     }
 

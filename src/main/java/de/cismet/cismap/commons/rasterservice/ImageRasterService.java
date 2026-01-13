@@ -14,8 +14,6 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PNode;
 
-import org.apache.commons.httpclient.HttpClient;
-
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;
@@ -63,7 +61,6 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
     private ImageFileRetrieval ir;
     private PNode pNode;
     private String name = "ImageRasterService"; // NOI18N
-    private HttpClient preferredClient = null;
     private BoundingBox bb;
     private boolean enabled = true;
     private int height = 0;
@@ -285,24 +282,6 @@ public class ImageRasterService extends AbstractRetrievalService implements MapS
     @Override
     public String toString() {
         return getName();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public HttpClient getPreferredClient() {
-        return preferredClient;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  preferredClient  DOCUMENT ME!
-     */
-    public void setPreferredClient(final HttpClient preferredClient) {
-        this.preferredClient = preferredClient;
     }
 
     @Override

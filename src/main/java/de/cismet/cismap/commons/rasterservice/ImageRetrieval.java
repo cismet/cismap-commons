@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.IOUtils;
 
 import org.openide.util.Exceptions;
@@ -46,7 +45,6 @@ public class ImageRetrieval extends Thread {
     private String url;
     private RetrievalListener listener = null;
     private WMSCapabilities cap;
-    private HttpClient preferredHttpClient;
     private volatile boolean youngerCall = false;
     private String payload;
 
@@ -249,23 +247,5 @@ public class ImageRetrieval extends Thread {
      */
     public void setWMSCapabilities(final WMSCapabilities cap) {
         this.cap = cap;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public HttpClient getPreferredHttpClient() {
-        return preferredHttpClient;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  preferredHttpClient  DOCUMENT ME!
-     */
-    public void setPreferredHttpClient(final HttpClient preferredHttpClient) {
-        this.preferredHttpClient = preferredHttpClient;
     }
 }

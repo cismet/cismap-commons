@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
-import org.apache.commons.httpclient.Header;
+import org.apache.hc.core5.http.Header;
 import org.apache.log4j.Logger;
 
 import java.awt.Cursor;

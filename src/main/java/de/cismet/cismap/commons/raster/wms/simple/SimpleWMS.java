@@ -9,8 +9,6 @@ package de.cismet.cismap.commons.raster.wms.simple;
 
 import edu.umd.cs.piccolo.PNode;
 
-import org.apache.commons.httpclient.HttpClient;
-
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;
@@ -46,7 +44,6 @@ public class SimpleWMS extends AbstractWMS implements MapService,
     private ImageRetrieval ir;
     private PNode pNode;
     private String name = "SimpleWMS"; // NOI18N
-    private HttpClient preferredClient = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -200,7 +197,6 @@ public class SimpleWMS extends AbstractWMS implements MapService,
             }
 
             ir = new ImageRetrieval(this);
-            ir.setPreferredHttpClient(preferredClient);
             ir.setUrl(gmUrl.toString());
             ir.setPayload(gmUrl.createPayload());
 
@@ -259,24 +255,6 @@ public class SimpleWMS extends AbstractWMS implements MapService,
     @Override
     public String toString() {
         return getName();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public HttpClient getPreferredClient() {
-        return preferredClient;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  preferredClient  DOCUMENT ME!
-     */
-    public void setPreferredClient(final HttpClient preferredClient) {
-        this.preferredClient = preferredClient;
     }
 
     @Override

@@ -18,7 +18,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.apache.jackrabbit.commons.json.JsonParser;
 import org.apache.log4j.Logger;
 
 import org.openide.util.lookup.ServiceProvider;
