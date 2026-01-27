@@ -26,7 +26,6 @@ import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.util.SLDStyleUtil;
 import de.cismet.commons.wms.capabilities.Style;
-import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.StaticSwingTools;
 import edu.umd.cs.piccolo.PNode;
 import java.awt.BasicStroke;
@@ -52,7 +51,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JProgressBar;
@@ -65,8 +63,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-import org.openide.util.Lookup;
-import org.openide.util.Lookup.Result;
 import org.openide.util.NbBundle;
 
 /**
@@ -569,9 +565,7 @@ public class ActiveLayerTableCellEditor
                 logger.debug("Progressvalue in Editor changed"); // NOI18N
             }
         }
-        if (
-            (evt.getSource() instanceof RetrievalServiceLayer) && evt.getPropertyName().equals("progress")
-        ) { // NOI18N
+        if ((evt.getSource() instanceof RetrievalServiceLayer) && evt.getPropertyName().equals("progress")) { // NOI18N
             final int newValue = ((Integer) (evt.getNewValue())).intValue();
             if (newValue == 0) {
                 progress.setIndeterminate(true);

@@ -15,29 +15,6 @@ package de.cismet.cismap.commons.gui;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-
-import org.apache.hc.core5.http.Header;
-import org.apache.log4j.Logger;
-
-import java.awt.Cursor;
-
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.StringReader;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
-
-import java.util.Collection;
-
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JToggleButton;
-import javax.swing.ListModel;
-import javax.swing.SwingWorker;
-
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.MappingModel;
@@ -69,7 +46,7 @@ import javax.swing.JList;
 import javax.swing.JToggleButton;
 import javax.swing.ListModel;
 import javax.swing.SwingWorker;
-import org.apache.commons.httpclient.Header;
+import org.apache.hc.core5.http.Header;
 import org.apache.log4j.Logger;
 
 /**

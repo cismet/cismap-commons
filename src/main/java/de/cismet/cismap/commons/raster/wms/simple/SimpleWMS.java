@@ -7,14 +7,6 @@
  ****************************************************/
 package de.cismet.cismap.commons.raster.wms.simple;
 
-import edu.umd.cs.piccolo.PNode;
-
-import org.jdom.Attribute;
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import java.util.Vector;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
@@ -26,7 +18,6 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.commons.wms.capabilities.Layer;
 import edu.umd.cs.piccolo.PNode;
 import java.util.Vector;
-import org.apache.commons.httpclient.HttpClient;
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;

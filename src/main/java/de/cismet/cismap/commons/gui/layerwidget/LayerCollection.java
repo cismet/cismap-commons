@@ -22,12 +22,10 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
 import de.cismet.commons.wms.capabilities.WMSCapabilities;
-import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
@@ -110,24 +108,16 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
             this.setInitElement((Element) element.clone());
         }
 
-        if (
-            element.getAttributeValue("name") != null
-        ) { // NOI18N
+        if (element.getAttributeValue("name") != null) { // NOI18N
             this.setName(element.getAttributeValue("name")); // NOI18N
         }
-        if (
-            element.getAttributeValue("enabled") != null
-        ) { // NOI18N
+        if (element.getAttributeValue("enabled") != null) { // NOI18N
             this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled"))); // NOI18N
         }
-        if (
-            element.getAttributeValue("translucency") != null
-        ) { // NOI18N
+        if (element.getAttributeValue("translucency") != null) { // NOI18N
             this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (
-            element.getAttributeValue("layerPosition") != null
-        ) { // NOI18N
+        if (element.getAttributeValue("layerPosition") != null) { // NOI18N
             this.setLayerPosition(element.getAttribute("layerPosition").getIntValue()); // NOI18N
         }
 

@@ -12,40 +12,6 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Geometry;
-
-import org.deegree.model.feature.Feature;
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.feature.GMLFeatureCollectionDocument;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import org.jdom.Element;
-
-import org.w3c.dom.Document;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-
-import java.net.URL;
-
-import java.nio.charset.Charset;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.swing.SwingWorker;
-
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
@@ -61,10 +27,7 @@ import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 import de.cismet.security.WebAccessManager;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -79,9 +42,6 @@ import javax.swing.SwingWorker;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.deegree.gml.feature.GMLFeatureReader;
-import org.deegree.model.feature.DefaultFeature;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.FeatureProperty;

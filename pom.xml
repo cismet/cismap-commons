@@ -55,13 +55,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>10.0-prerelease</version>
+                <version>10.0-prerelease-1</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-commons</artifactId>
-                <version>10.0-prerelease</version>
+                <version>10.0-prerelease-1</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>
@@ -69,13 +69,13 @@
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>10.0-prerelease</version>
+                <version>10.0-prerelease-1</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>de.cismet.commons</groupId>
                 <artifactId>cismet-gui-commons</artifactId>
-                <version>10.0-prerelease</version>
+                <version>10.0-prerelease-1</version>
                 <type>test-jar</type>
                 <scope>test</scope>
             </dependency>

@@ -1,5 +1,11 @@
 package de.cismet.commons.cismap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -19,7 +25,8 @@ import org.junit.Test;
  */
 public class ImageRetrievalTest implements RetrievalListener {
 
-    final String wmsURL = "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX=-184,-90,180,90&SRS=EPSG:4326&WIDTH=1471&HEIGHT=728&LAYERS=Countries&STYLES=&FORMAT=image/png&DPI=96&MAP_RESOLUTION=96&FORMAT_OPTIONS=dpi:96&TRANSPARENT=TRUE";
+    final String wmsURL =
+        "http://www2.demis.nl/wms/wms.asp?wms=WorldMap&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX=-184,-90,180,90&SRS=EPSG:4326&WIDTH=1471&HEIGHT=728&LAYERS=Countries&STYLES=&FORMAT=image/png&DPI=96&MAP_RESOLUTION=96&FORMAT_OPTIONS=dpi:96&TRANSPARENT=TRUE";
     ImageRetrieval imageRetrieval = null;
 
     public ImageRetrievalTest() {}

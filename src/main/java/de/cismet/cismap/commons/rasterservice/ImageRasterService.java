@@ -11,18 +11,6 @@ import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
-
-import edu.umd.cs.piccolo.PNode;
-
-import org.jdom.Attribute;
-import org.jdom.CDATA;
-import org.jdom.Element;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.Collections;
-
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
@@ -36,7 +24,6 @@ import edu.umd.cs.piccolo.PNode;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import org.apache.commons.httpclient.HttpClient;
 import org.jdom.Attribute;
 import org.jdom.CDATA;
 import org.jdom.Element;

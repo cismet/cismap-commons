@@ -190,9 +190,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     removeWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        }/*else if(e.getLayer() instanceof
+        } /*else if(e.getLayer() instanceof
          * ServiceLayer) {
-         * removeLegendByName(((ServiceLayer)e.getLayer()).getName());}*/ else {
+         * removeLegendByName(((ServiceLayer)e.getLayer()).getName());}*/else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -315,7 +315,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     addWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        }/*else if (e.getLayer() instanceof
+        } /*else if (e.getLayer() instanceof
          * SLDStyledLayer) { final
          * SLDStyledLayer sldLayer =
          * (SLDStyledLayer) e.getLayer();
@@ -330,7 +330,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
          * legendImage.createGraphics());
          * addLegend(legendImage,
          * ((ServiceLayer)e.getLayer()).getName());}
-         */ else {
+         */else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }

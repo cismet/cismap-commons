@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.awt.dnd.*;
 import java.awt.event.*;
-import java.awt.font.*;
 import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.*;
@@ -54,8 +53,7 @@ public class CTree extends JTree implements DragSourceListener, DragGestureListe
     /**
      * Constructors...
      */
-    public CTree() // TreeModel built for us // Use the default JTree constructor so that we get a sample
-    {
+    public CTree() { // TreeModel built for us // Use the default JTree constructor so that we get a sample
         putClientProperty("JTree.lineStyle", "Angled"); // I like this look//NOI18N
 
         // Make this JTree a drag source

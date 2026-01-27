@@ -437,7 +437,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay
     private void cmdOpenExternalActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOpenExternalActionPerformed
         if (urlBuffer != null) {
             try {
-                final URL urlWithCredentials = (URL)WebAccessManager.getUrlWithCredentials(new URL(urlBuffer));
+                final URL urlWithCredentials = (URL) WebAccessManager.getUrlWithCredentials(new URL(urlBuffer));
 
                 // ToDo muss in WebAccessManger
                 final AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(urlWithCredentials);
@@ -447,8 +447,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay
                             LOG.debug("handler is wss handler --> creating wss get request"); // NOI18N
                         }
 
-                        final String wssRequest = ((WSSAccessHandler)handler).createGetRequest(
-                                urlWithCredentials.toString());
+                        final String wssRequest =
+                            ((WSSAccessHandler) handler).createGetRequest(urlWithCredentials.toString());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("created wss request: " + wssRequest); // NOI18N
                         }

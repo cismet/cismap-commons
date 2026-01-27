@@ -7,17 +7,17 @@
  ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
-import org.apache.commons.io.IOUtils;
-
-import org.openide.util.Exceptions;
-
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.security.WebAccessManager;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import javax.imageio.ImageIO;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.io.IOUtils;
 import org.openide.util.Exceptions;
 

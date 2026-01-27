@@ -407,9 +407,7 @@ public final class WMSServiceLayer
         final boolean addSubLayer,
         final boolean reverseSubLayerOrder
     ) {
-        if (
-            (nextLayer.getName() != null) && !nextLayer.getName().equals("")
-        ) { // NOI18N
+        if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) { // NOI18N
             if (selectedStyle == null) {
                 if (
                     (nextLayer.getStyles() != null) &&
@@ -925,15 +923,11 @@ public final class WMSServiceLayer
         String url = getGetFeatureInfoPrefix();
 
         if ((bb != null) && (url != null)) {
-            if (
-                url.indexOf("?") < 0
-            ) { // NOI18N
+            if (url.indexOf("?") < 0) { // NOI18N
                 url += "?"; // NOI18N
             }
             final String version = getWmsCapabilities().getVersion();
-            if (
-                version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")
-            ) { // NOI18N
+            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) { // NOI18N
                 url += "&WMTVER=1.0.0&REQUEST=feature_info"; // NOI18N
             } else {
                 url += "&VERSION=" + version + "&REQUEST=GetFeatureInfo"; // NOI18N
@@ -1340,13 +1334,17 @@ public final class WMSServiceLayer
     public boolean propertyEquals(final Object obj) {
         // TODO Dieses equals wird 10000 mal aufgerufen
         if (obj instanceof WMSServiceLayer) {
-            final WMSServiceLayer tester = (WMSServiceLayer)obj;
-            if (getName().equals(tester.getName())
-                        && ((getGetMapPrefix() == tester.getGetMapPrefix())
-                            || ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix())))
-                        && getLayersString().equals(tester.getLayersString())
-                        && getStylesString().equals(tester.getStylesString())
-                        && getServerURI().equals(tester.getServerURI())) {
+            final WMSServiceLayer tester = (WMSServiceLayer) obj;
+            if (
+                getName().equals(tester.getName()) &&
+                (
+                    (getGetMapPrefix() == tester.getGetMapPrefix()) ||
+                    ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix()))
+                ) &&
+                getLayersString().equals(tester.getLayersString()) &&
+                getStylesString().equals(tester.getStylesString()) &&
+                getServerURI().equals(tester.getServerURI())
+            ) {
                 return true;
             }
         }

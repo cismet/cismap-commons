@@ -13,26 +13,6 @@
 package de.cismet.cismap.commons.drophandler.builtin;
 
 import com.vividsolutions.jts.geom.Point;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-import org.apache.log4j.Logger;
-
-import org.openide.util.lookup.ServiceProvider;
-
-import java.io.File;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import javax.swing.SwingUtilities;
-
 import de.cismet.cismap.commons.drophandler.MappingComponentDropHandler;
 import de.cismet.cismap.commons.drophandler.filematcher.builtin.MappingComponentDropHandlerFileTypeMatcher;
 import de.cismet.cismap.commons.features.Feature;
@@ -51,7 +31,6 @@ import javax.swing.SwingUtilities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.jackrabbit.commons.json.JsonParser;
 import org.apache.log4j.Logger;
 import org.openide.util.lookup.ServiceProvider;
 
