@@ -388,7 +388,7 @@ public class HeadlessMapProvider {
             } else {
                 mappingModel.addLayer(layer);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             LOG.error("Cannot add layer.", e);
         }
     }
