@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.tools;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Polygon;
@@ -27,6 +28,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import java.util.List;
 
 /**
  * Contains some useful geometry processing operations.
@@ -273,5 +276,26 @@ public class GeometryUtils {
                 origFile.delete();
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geomList  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Geometry unionGeometries(final List<Geometry> geomList) {
+        if (geomList.isEmpty()) {
+            return null;
+        }
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                geomList.get(0).getSRID());
+        Geometry geom = factory.buildGeometry(geomList);
+
+        if (geom instanceof GeometryCollection) {
+            geom = ((GeometryCollection)geom).union();
+        }
+        return geom;
     }
 }
