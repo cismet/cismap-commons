@@ -761,6 +761,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
         if (((area == 0.0) && (umfang == 0.0)) || (cf.size() == 0)) {
             lblMeasurement.setText("");                                                                  // NOI18N
+        } else if (cf.size() > 1) {
+            lblMeasurement.setText(
+                org.openide.util.NbBundle.getMessage(
+                    StatusBar.class,
+                    "StatusBar.lblMeasurementCount.text",
+                    new Object[] {
+                        StaticDecimalTools.round(area),
+                        StaticDecimalTools.round(umfang),
+                        String.valueOf(cf.size())
+                    }));                                                                                 // NOI18N
         } else {
             lblMeasurement.setText(
                 org.openide.util.NbBundle.getMessage(
