@@ -109,13 +109,17 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
                                     additionalInfo += ", "; // NOI18N
                                 }
 
-                                additionalInfo += ((DefaultFeature)fpa[i].getValue())
-                                            .getProperties(
-                                                new QualifiedName(
-                                                    "app",
-                                                    "alternativeGeographicIdentifier",
-                                                    new URI("http://www.deegree.org/app")))[0].getValue()
-                                            .toString(); // NOI18N
+                                if (fpa[i].getValue() instanceof String) {
+                                    additionalInfo += fpa[i].getValue();
+                                } else if (fpa[i].getValue() != null) {
+                                    additionalInfo += ((DefaultFeature)fpa[i].getValue())
+                                                .getProperties(
+                                                    new QualifiedName(
+                                                        "app",
+                                                        "alternativeGeographicIdentifier",
+                                                        new URI("http://www.deegree.org/app")))[0].getValue()
+                                                .toString(); // NOI18N
+                                }
                             }
                         } catch (Exception ex) {
                             log.error(ex, ex);
