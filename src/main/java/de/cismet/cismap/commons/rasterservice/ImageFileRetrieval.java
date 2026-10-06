@@ -36,7 +36,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.util.Iterator;
+
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 
 import javax.swing.JOptionPane;
 
@@ -262,6 +265,12 @@ public class ImageFileRetrieval extends Thread {
                             / mapBounds.getHeight());
 
             // LOAD RAW IMAGE
+            final Iterator<ImageReader> readers = ImageIO.getImageReadersBySuffix("tif");
+
+            while (readers.hasNext()) {
+                final ImageReader reader = readers.next();
+                System.out.println(reader.getClass().getName());
+            }
             BufferedImage rawImage = ImageIO.read(imageFile);
 
             handleInterruption();
