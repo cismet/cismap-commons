@@ -743,7 +743,7 @@ public class RasterfariDocumentLoaderPanel extends javax.swing.JPanel implements
                         final Object object = ois.readObject();
                         final Header[] headers = (Header[])object;
                         for (final Header header : headers) {
-                            if ("X-Rasterfari-numOfPages".equals(header.getName())) {
+                            if ("X-Rasterfari-numOfPages".equalsIgnoreCase(header.getName())) {
                                 return Integer.parseInt(header.getValue());
                             }
                         }
