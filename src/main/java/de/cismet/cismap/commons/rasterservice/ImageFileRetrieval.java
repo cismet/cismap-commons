@@ -265,12 +265,6 @@ public class ImageFileRetrieval extends Thread {
                             / mapBounds.getHeight());
 
             // LOAD RAW IMAGE
-            final Iterator<ImageReader> readers = ImageIO.getImageReadersBySuffix("tif");
-
-            while (readers.hasNext()) {
-                final ImageReader reader = readers.next();
-                System.out.println(reader.getClass().getName());
-            }
             BufferedImage rawImage = ImageIO.read(imageFile);
 
             handleInterruption();
